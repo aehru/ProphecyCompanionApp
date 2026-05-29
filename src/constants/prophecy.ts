@@ -2,10 +2,13 @@
 // labels render with accents. `abbr` shown in tight UI to save space.
 
 export const TENDANCES = [
-  { key: 'dragon', label: 'Dragon' },
-  { key: 'fatalite', label: 'Fatalité' },
-  { key: 'homme', label: 'Homme' },
+  { key: 'dragon', label: 'Dragon', color: '#C62828', textColor: '#FFFFFF', border: '#8E1B1B' },
+  { key: 'fatalite', label: 'Fatalité', color: '#1B5E20', textColor: '#FFFFFF', border: '#0E3B12' },
+  { key: 'homme', label: 'Homme', color: '#FFFFFF', textColor: '#000000', border: '#9E9E9E' },
 ] as const;
+
+/** Number of "puces" slots shown for a tendance subnumber (0–10). */
+export const MAX_PUCES = 10;
 
 export const CARACTERISTIQUES = [
   { key: 'force', abbr: 'FOR', label: 'Force' },

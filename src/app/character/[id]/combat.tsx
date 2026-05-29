@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import {
   ActivityIndicator,
   Button,
@@ -11,45 +11,13 @@ import {
   useTheme,
 } from 'react-native-paper';
 
+import Bullets from '@/components/bullets';
+import TendancesTriangle from '@/components/tendances-triangle';
 import { RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
-import { getCharacter } from '@/repositories/characters';
+import { asNumRecord } from '@/lib/character-values';
 import { ensureActualState, updateActualState } from '@/repositories/actual-state';
-
-function Circles({
-  count,
-  filled,
-  onSet,
-  color,
-  border,
-}: {
-  count: number;
-  filled: number;
-  onSet: (n: number) => void;
-  color: string;
-  border: string;
-}) {
-  if (count <= 0) return <Text style={{ color: border }}>—</Text>;
-  return (
-    <View style={styles.circles}>
-      {Array.from({ length: count }).map((_, i) => {
-        const isFilled = i < filled;
-        // Tap fills up to this circle; tapping the topmost filled one clears it.
-        return (
-          <Pressable key={i} hitSlop={6} onPress={() => onSet(i + 1 === filled ? i : i + 1)}>
-            <View
-              style={[
-                styles.circle,
-                { borderColor: border },
-                isFilled && { backgroundColor: color, borderColor: color },
-              ]}
-            />
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
+import { getCharacter, updateCharacter } from '@/repositories/characters';
 
 export default function CombatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -88,12 +56,18 @@ export default function CombatScreen() {
     );
   }
 
-  const charRec = char as unknown as Record<string, number>;
-  const stRec = st as unknown as Record<string, number>;
+  const charRec = asNumRecord(char);
+  const stRec = asNumRecord(st);
 
   function persist(patch: Partial<ActualState>) {
     setSt((prev) => (prev ? ({ ...prev, ...patch } as ActualState) : prev));
     updateActualState(numId, patch);
+  }
+
+  // Tendance value + puces live on the character; edits here persist to it.
+  function persistChar(patch: Partial<Character>) {
+    setChar((prev) => (prev ? ({ ...prev, ...patch } as Character) : prev));
+    updateCharacter(numId, patch);
   }
 
   function setLevel(key: string, n: number) {
@@ -124,6 +98,20 @@ export default function CombatScreen() {
       <Text variant="titleLarge">{char.nom || 'Sans nom'}</Text>
 
       <Text variant="titleMedium" style={styles.section}>
+        Tendances
+      </Text>
+      <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
+        Valeur : appui +1, appui long −1
+      </Text>
+      <TendancesTriangle
+        get={(k) => ({ value: charRec[k] ?? 0, sub: charRec[`${k}Sub`] ?? 0 })}
+        onValue={(k, delta) =>
+          persistChar({ [k]: Math.max(0, (charRec[k] ?? 0) + delta) } as Partial<Character>)
+        }
+        onSub={(k, n) => persistChar({ [`${k}Sub`]: n } as Partial<Character>)}
+      />
+
+      <Text variant="titleMedium" style={styles.section}>
         Santé
       </Text>
       {WOUND_LEVELS.map((w) => {
@@ -137,12 +125,11 @@ export default function CombatScreen() {
                 {cur} / {max}
               </Text>
             </View>
-            <Circles
+            <Bullets
               count={max}
               filled={cur}
               onSet={(n) => setLevel(w.key, n)}
               color={theme.colors.error}
-              border={theme.colors.outline}
             />
             <Divider style={styles.divider} />
           </View>
@@ -214,11 +201,10 @@ const styles = StyleSheet.create({
   container: { padding: 16, gap: 12 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   section: { marginTop: 8 },
+  hint: { fontSize: 12, marginTop: -4 },
   woundBlock: { gap: 6 },
   woundHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   woundLabel: { flex: 1, fontSize: 16 },
-  circles: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  circle: { width: 26, height: 26, borderRadius: 13, borderWidth: 2 },
   divider: { marginTop: 6 },
   resourceRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   resourceCount: { minWidth: 56, textAlign: 'center', fontSize: 16 },

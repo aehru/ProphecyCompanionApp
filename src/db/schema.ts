@@ -1,4 +1,5 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import { check, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 /**
  * A Prophecy (2e) character sheet.
@@ -55,7 +56,12 @@ export const characters = sqliteTable('characters', {
   chanceMax: integer('chance_max').notNull().default(0),
 
   biographie: text('biographie').notNull().default(''),
-});
+}, (t) => [
+  // Tendance puces are always 0–10, enforced at the DB level.
+  check('dragon_sub_range', sql`${t.dragonSub} >= 0 AND ${t.dragonSub} <= 10`),
+  check('fatalite_sub_range', sql`${t.fataliteSub} >= 0 AND ${t.fataliteSub} <= 10`),
+  check('homme_sub_range', sql`${t.hommeSub} >= 0 AND ${t.hommeSub} <= 10`),
+]);
 
 /**
  * The character's live state across the whole game (1 row per character):
