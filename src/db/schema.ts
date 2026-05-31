@@ -56,11 +56,12 @@ export const characters = sqliteTable('characters', {
   chanceMax: integer('chance_max').notNull().default(0),
 
   biographie: text('biographie').notNull().default(''),
-}, (t) => [
+}, () => [
   // Tendance puces are always 0–10, enforced at the DB level.
-  check('dragon_sub_range', sql`${t.dragonSub} >= 0 AND ${t.dragonSub} <= 10`),
-  check('fatalite_sub_range', sql`${t.fataliteSub} >= 0 AND ${t.fataliteSub} <= 10`),
-  check('homme_sub_range', sql`${t.hommeSub} >= 0 AND ${t.hommeSub} <= 10`),
+  // Use raw unqualified column names — SQLite rejects table-qualified names in a CHECK.
+  check('dragon_sub_range', sql`dragon_sub >= 0 AND dragon_sub <= 10`),
+  check('fatalite_sub_range', sql`fatalite_sub >= 0 AND fatalite_sub <= 10`),
+  check('homme_sub_range', sql`homme_sub >= 0 AND homme_sub <= 10`),
 ]);
 
 /**
