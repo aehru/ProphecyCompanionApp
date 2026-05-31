@@ -29,7 +29,7 @@ export default function CharacterDetailScreen() {
     getActualState(numId).then(setState);
   }, [numId]);
 
-  // Reload on focus so wounds edited in the combat screen show up on return.
+  // Reload on focus so values edited in the status screen show up on return.
   useFocusEffect(
     useCallback(() => {
       load();
@@ -88,8 +88,8 @@ export default function CharacterDetailScreen() {
           headerRight: () => (
             <View style={styles.headerActions}>
               <IconButton
-                icon="sword-cross"
-                onPress={() => router.push(`/character/${numId}/combat` as Href)}
+                icon="heart-pulse"
+                onPress={() => router.push(`/character/${numId}/status` as Href)}
               />
               <IconButton icon="pencil" onPress={() => setEditing(true)} />
             </View>

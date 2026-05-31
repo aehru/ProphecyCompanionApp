@@ -36,7 +36,7 @@ export const WOUND_LEVELS = [
   { key: 'mort', label: 'Mort' },
 ] as const;
 
-/** Spendable resource pools: max on the character, current tracked in combat. */
+/** Spendable resource pools: max on the character, current tracked in the status. */
 export const RESOURCES = [
   { key: 'maitrise', label: 'Maîtrise' },
   { key: 'chance', label: 'Chance' },

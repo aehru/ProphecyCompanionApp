@@ -19,7 +19,7 @@ import { asNumRecord } from '@/lib/character-values';
 import { ensureActualState, updateActualState } from '@/repositories/actual-state';
 import { getCharacter, updateCharacter } from '@/repositories/characters';
 
-export default function CombatScreen() {
+export default function StatusScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const numId = Number(id);
   const theme = useTheme();
@@ -94,7 +94,7 @@ export default function CombatScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: 'Suivi de combat' }} />
+      <Stack.Screen options={{ title: 'Statut' }} />
       <Text variant="titleLarge">{char.nom || 'Sans nom'}</Text>
 
       <Text variant="titleMedium" style={styles.section}>
