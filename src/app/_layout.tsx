@@ -4,7 +4,8 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { Stack } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, useColorScheme, View } from 'react-native';
-import { MD3DarkTheme, MD3LightTheme, PaperProvider, Text } from 'react-native-paper';
+import { PaperProvider, Text } from 'react-native-paper';
+import { ProphecyDarkTheme, ProphecyLightTheme } from './prophecyTheme';
 
 import { db } from '@/db/client';
 import migrations from '../../drizzle/migrations';
@@ -18,7 +19,7 @@ const paperSettings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const theme = colorScheme === 'dark' ? ProphecyDarkTheme : ProphecyLightTheme;
   const { success, error } = useMigrations(db, migrations);
 
   if (error) {
@@ -38,8 +39,8 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider theme={isDark ? MD3DarkTheme : MD3LightTheme} settings={paperSettings}>
-      <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+    <PaperProvider theme={theme} settings={paperSettings}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ title: 'Personnages' }} />
           <Stack.Screen
