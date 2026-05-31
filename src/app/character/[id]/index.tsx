@@ -1,16 +1,17 @@
 import { type Href, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
-import { IconButton, Text, useTheme } from 'react-native-paper';
+import { IconButton, Text } from 'react-native-paper';
 
+import Bullets from '@/components/bullets';
 import CharacterForm from '@/components/character-form';
+import TendancesTriangle from '@/components/tendances-triangle';
 import InfoRow from '@/components/ui/info-row';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
-import Bullets from '@/components/bullets';
-import TendancesTriangle from '@/components/tendances-triangle';
 import { ATTRIBUTS, CARACTERISTIQUES, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num, txt } from '@/lib/character-values';
 import { getActualState } from '@/repositories/actual-state';
 import { deleteCharacter, getCharacter, updateCharacter } from '@/repositories/characters';
@@ -19,7 +20,7 @@ export default function CharacterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const numId = Number(id);
   const router = useRouter();
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   const [char, setChar] = useState<Character | null | undefined>(undefined);
   const [state, setState] = useState<ActualState | null>(null);
   const [editing, setEditing] = useState(false);

@@ -8,13 +8,13 @@ import {
   IconButton,
   Text,
   TextInput,
-  useTheme,
 } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
 import TendancesTriangle from '@/components/tendances-triangle';
 import { RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { ensureActualState, updateActualState } from '@/repositories/actual-state';
 import { getCharacter, updateCharacter } from '@/repositories/characters';
@@ -22,7 +22,7 @@ import { getCharacter, updateCharacter } from '@/repositories/characters';
 export default function StatusScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const numId = Number(id);
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   const [char, setChar] = useState<Character | null | undefined>(undefined);
   const [st, setSt] = useState<ActualState | null>(null);
 
