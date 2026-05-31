@@ -9,7 +9,7 @@ import { PaperProvider, Text } from 'react-native-paper';
 
 import { db, resetDatabase } from '@/db/client';
 import migrations from '../../drizzle/migrations';
-import { ProphecyDarkTheme, ProphecyLightTheme } from './prophecyTheme';
+import { ProphecyDarkTheme, ProphecyLightTheme } from '@/theme/prophecyTheme';
 
 const RESET_FLAG = 'db_reset_attempted';
 

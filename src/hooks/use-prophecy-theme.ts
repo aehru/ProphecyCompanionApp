@@ -1,6 +1,6 @@
 import { useTheme } from 'react-native-paper';
 
-import type { ProphecyTheme } from '@/app/prophecyTheme';
+import type { ProphecyTheme } from '@/theme/prophecyTheme';
 
 /**
  * react-native-paper's `useTheme` pre-typed with {@link ProphecyTheme}.
