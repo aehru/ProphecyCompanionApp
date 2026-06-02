@@ -84,5 +84,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
   },
-  fab: { position: 'absolute', right: 16, bottom: 16 },
+  fab: { position: 'absolute', right: 24, bottom: 24 },
 });
