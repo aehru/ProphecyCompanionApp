@@ -117,6 +117,12 @@ export default function CharacterForm({
               onChange={setField}
             />
           ))}
+          <NumberField
+            fieldKey="initiativeMax"
+            label="Initiative"
+            value={v.initiativeMax}
+            onChange={setField}
+          />
         </View>
 
         <Text variant="titleMedium" style={styles.section}>

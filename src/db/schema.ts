@@ -54,6 +54,8 @@ export const characters = sqliteTable('characters', {
   // Ressources — max fixé à la création, valeur courante varie en jeu
   maitriseMax: integer('maitrise_max').notNull().default(0),
   chanceMax: integer('chance_max').notNull().default(0),
+  // Nombre d'actions/dés d'initiative par tour
+  initiativeMax: integer('initiative_max').notNull().default(0),
 
   biographie: text('biographie').notNull().default(''),
 }, () => [
@@ -84,6 +86,12 @@ export const actualState = sqliteTable('actual_state', {
   // Ressources — valeur courante en jeu (max sur le personnage)
   maitriseCurrent: integer('maitrise_current').notNull().default(0),
   chanceCurrent: integer('chance_current').notNull().default(0),
+
+  // Valeurs d'initiative du tour courant (X = initiativeMax du personnage)
+  initiativeValues: text('initiative_values', { mode: 'json' })
+    .$type<number[]>()
+    .notNull()
+    .default(sql`'[]'`),
 
   conditions: text('conditions').notNull().default(''),
   notes: text('notes').notNull().default(''),

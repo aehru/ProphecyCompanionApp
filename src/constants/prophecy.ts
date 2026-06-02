@@ -49,4 +49,5 @@ export const NUMERIC_KEYS: string[] = [
   ...ATTRIBUTS.map((a) => a.key),
   ...WOUND_LEVELS.map((w) => `${w.key}Max`),
   ...RESOURCES.map((r) => `${r.key}Max`),
+  'initiativeMax',
 ];
