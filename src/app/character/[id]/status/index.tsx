@@ -3,12 +3,11 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
 import TendancesTriangle from '@/components/tendances-triangle';
-import type { Character } from '@/db/schema';
-import { asNumRecord } from '@/lib/character-values';
+import { asNumRecord, clamp } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
 
 export default function StatusTendances() {
-  const { char, persistChar } = useStatus();
+  const { char, setCharValue } = useStatus();
   const theme = useTheme();
   const rec = asNumRecord(char);
 
@@ -19,10 +18,8 @@ export default function StatusTendances() {
       </Text>
       <TendancesTriangle
         get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
-        onValue={(k, delta) =>
-          persistChar({ [k]: Math.max(0, (rec[k] ?? 0) + delta) } as Partial<Character>)
-        }
-        onSub={(k, n) => persistChar({ [`${k}Sub`]: n } as Partial<Character>)}
+        onValue={(k, delta) => setCharValue(k, clamp((rec[k] ?? 0) + delta, 0))}
+        onSub={(k, n) => setCharValue(`${k}Sub`, n)}
       />
     </ScrollView>
   );

@@ -1,5 +1,5 @@
-import { type Href, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { FAB, IconButton, Text } from 'react-native-paper';
 
@@ -10,32 +10,19 @@ import InfoRow from '@/components/ui/info-row';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import { ATTRIBUTS, CARACTERISTIQUES, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
-import type { ActualState, Character } from '@/db/schema';
+import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num, txt } from '@/lib/character-values';
-import { getActualState } from '@/repositories/actual-state';
-import { deleteCharacter, getCharacter, updateCharacter } from '@/repositories/characters';
+import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 
 export default function CharacterDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const numId = Number(id);
   const router = useRouter();
   const theme = useProphecyTheme();
-  const [char, setChar] = useState<Character | null | undefined>(undefined);
-  const [state, setState] = useState<ActualState | null>(null);
-  const [editing, setEditing] = useState(false);
-
-  const load = useCallback(() => {
-    getCharacter(numId).then(setChar);
-    getActualState(numId).then(setState);
-  }, [numId]);
-
   // Reload on focus so values edited in the status screen show up on return.
-  useFocusEffect(
-    useCallback(() => {
-      load();
-    }, [load]),
-  );
+  const { char, state, reload } = useCharacterState(numId, { reloadOnFocus: true });
+  const [editing, setEditing] = useState(false);
 
   if (char === undefined) {
     return (
@@ -69,7 +56,7 @@ export default function CharacterDetailScreen() {
           submitLabel="Enregistrer"
           onSubmit={async (data) => {
             await updateCharacter(numId, data);
-            load();
+            reload();
             setEditing(false);
           }}
           onDelete={async () => {

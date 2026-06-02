@@ -8,7 +8,7 @@ import { asNumRecord } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
 
 export default function StatusBlessures() {
-  const { char, state, persistState } = useStatus();
+  const { char, state, persistState, setStateValue } = useStatus();
   const theme = useTheme();
   const charRec = asNumRecord(char);
   const stRec = asNumRecord(state);
@@ -40,7 +40,7 @@ export default function StatusBlessures() {
               count={max}
               filled={cur}
               color={theme.colors.error}
-              onSet={(n) => persistState({ [`${w.key}Current`]: n } as Parameters<typeof persistState>[0])}
+              onSet={(n) => setStateValue(`${w.key}Current`, n)}
             />
             <Divider style={styles.divider} />
           </View>
@@ -48,7 +48,7 @@ export default function StatusBlessures() {
       })}
 
       <Button mode="outlined" onPress={resetWounds}>
-        Réinitialiser les blessures
+        Don de Heyra !
       </Button>
 
       <Text variant="titleMedium" style={styles.section}>

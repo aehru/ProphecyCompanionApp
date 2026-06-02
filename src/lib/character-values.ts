@@ -12,6 +12,13 @@ export function asNumRecord(obj: unknown): Record<string, number> {
 export const num = (x?: number) => (x && x > 0 ? String(x) : '—');
 export const txt = (s?: string) => (s && s.trim() ? s.trim() : '—');
 
+/** Clamp n to a lower bound, and an optional upper bound (max <= 0 means uncapped). */
+export const clamp = (n: number, min: number, max?: number) => {
+  let v = n < min ? min : n;
+  if (max != null && max > 0 && v > max) v = max;
+  return v;
+};
+
 /** Character row → editable string values for the form. */
 export function toFormValues(c?: Partial<Character> | null): FormValues {
   const src = (c ?? {}) as Record<string, unknown>;

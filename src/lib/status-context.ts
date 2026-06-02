@@ -7,6 +7,10 @@ export type StatusApi = {
   state: ActualState;
   persistState: (patch: Partial<ActualState>) => void;
   persistChar: (patch: Partial<Character>) => void;
+  /** Set one numeric actual_state column by key (centralizes the cast). */
+  setStateValue: (key: string, value: number) => void;
+  /** Set one numeric character column by key (centralizes the cast). */
+  setCharValue: (key: string, value: number) => void;
 };
 
 export const StatusContext = createContext<StatusApi | null>(null);

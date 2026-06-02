@@ -16,7 +16,7 @@ export const characters = sqliteTable('characters', {
     .notNull()
     .$defaultFn(() => new Date()),
 
-  // Identité
+  // Identity
   nom: text('nom').notNull().default(''),
   concept: text('concept').notNull().default(''),
 
@@ -28,7 +28,7 @@ export const characters = sqliteTable('characters', {
   homme: integer('homme').notNull().default(0),
   hommeSub: integer('homme_sub').notNull().default(0),
 
-  // Caractéristiques (full name stored; UI shows abbreviation)
+  // Characteristics (full name stored; UI shows abbreviation)
   force: integer('force').notNull().default(0),
   resistance: integer('resistance').notNull().default(0),
   intelligence: integer('intelligence').notNull().default(0),
@@ -44,17 +44,17 @@ export const characters = sqliteTable('characters', {
   manuel: integer('manuel').notNull().default(0),
   social: integer('social').notNull().default(0),
 
-  // Santé — max par niveau de blessure, fixé à la création
+  // Health — max boxes per wound level, set at creation
   egratinureMax: integer('egratinure_max').notNull().default(0),
   legereMax: integer('legere_max').notNull().default(0),
   graveMax: integer('grave_max').notNull().default(0),
   fataleMax: integer('fatale_max').notNull().default(0),
   mortMax: integer('mort_max').notNull().default(0),
 
-  // Ressources — max fixé à la création, valeur courante varie en jeu
+  // Resource pools — max set at creation, current value changes in play
   maitriseMax: integer('maitrise_max').notNull().default(0),
   chanceMax: integer('chance_max').notNull().default(0),
-  // Nombre d'actions/dés d'initiative par tour
+  // Number of initiative actions/dice per turn
   initiativeMax: integer('initiative_max').notNull().default(0),
 
   biographie: text('biographie').notNull().default(''),
@@ -76,18 +76,18 @@ export const actualState = sqliteTable('actual_state', {
     .notNull()
     .references(() => characters.id, { onDelete: 'cascade' }),
 
-  // Santé — niveau actuel rempli par niveau de blessure
+  // Health — current filled boxes per wound level
   egratinureCurrent: integer('egratinure_current').notNull().default(0),
   legereCurrent: integer('legere_current').notNull().default(0),
   graveCurrent: integer('grave_current').notNull().default(0),
   fataleCurrent: integer('fatale_current').notNull().default(0),
   mortCurrent: integer('mort_current').notNull().default(0),
 
-  // Ressources — valeur courante en jeu (max sur le personnage)
+  // Resource pools — current in-play value (max lives on the character)
   maitriseCurrent: integer('maitrise_current').notNull().default(0),
   chanceCurrent: integer('chance_current').notNull().default(0),
 
-  // Valeurs d'initiative du tour courant (X = initiativeMax du personnage)
+  // Current-turn initiative values (X = the character's initiativeMax)
   initiativeValues: text('initiative_values', { mode: 'json' })
     .$type<number[]>()
     .notNull()

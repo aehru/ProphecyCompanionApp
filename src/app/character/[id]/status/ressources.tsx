@@ -4,24 +4,20 @@ import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper'
 
 import NumberField from '@/components/number-field';
 import { RESOURCES } from '@/constants/prophecy';
-import { asNumRecord } from '@/lib/character-values';
+import { asNumRecord, clamp } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
 
 export default function StatusRessources() {
-  const { char, state, persistState } = useStatus();
+  const { char, state, persistState, setStateValue } = useStatus();
   const theme = useTheme();
   const charRec = asNumRecord(char);
   const stRec = asNumRecord(state);
 
-  type Patch = Parameters<typeof persistState>[0];
-
-  const adjust = (key: string, delta: number) => {
-    const max = charRec[`${key}Max`] ?? 0;
-    let next = (stRec[`${key}Current`] ?? 0) + delta;
-    if (next < 0) next = 0;
-    if (max > 0 && next > max) next = max;
-    persistState({ [`${key}Current`]: next } as Patch);
-  };
+  const adjust = (key: string, delta: number) =>
+    setStateValue(
+      `${key}Current`,
+      clamp((stRec[`${key}Current`] ?? 0) + delta, 0, charRec[`${key}Max`] ?? 0),
+    );
 
   const initiativeMax = charRec.initiativeMax ?? 0;
   const stored = state.initiativeValues ?? [];
@@ -31,9 +27,9 @@ export default function StatusRessources() {
 
   const setInitValue = (i: number, n: number) => {
     const next = Array.from({ length: initiativeMax }, (_, j) => (j === i ? n : stored[j] ?? 0));
-    persistState({ initiativeValues: next } as Patch);
+    persistState({ initiativeValues: next });
   };
-  const newTurn = () => persistState({ initiativeValues: [] } as Patch);
+  const newTurn = () => persistState({ initiativeValues: [] });
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -65,7 +61,7 @@ export default function StatusRessources() {
               <IconButton
                 icon="refresh"
                 size={18}
-                onPress={() => persistState({ [`${r.key}Current`]: max } as Patch)}
+                onPress={() => setStateValue(`${r.key}Current`, max)}
               />
             </View>
             <Divider />
