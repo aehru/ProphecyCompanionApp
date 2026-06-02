@@ -1,7 +1,7 @@
 import { type Href, Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
+import { FAB, IconButton, Text } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
 import CharacterForm from '@/components/character-form';
@@ -82,18 +82,12 @@ export default function CharacterDetailScreen() {
   }
 
   return (
-    <>
+    <View style={styles.root}>
       <Stack.Screen
         options={{
           title: char.nom || 'Personnage',
           headerRight: () => (
-            <View style={styles.headerActions}>
-              <IconButton
-                icon="heart-pulse"
-                onPress={() => router.push(`/character/${numId}/status` as Href)}
-              />
-              <IconButton icon="pencil" onPress={() => setEditing(true)} />
-            </View>
+            <IconButton icon="pencil" onPress={() => setEditing(true)} />
           ),
         }}
       />
@@ -151,14 +145,21 @@ export default function CharacterDetailScreen() {
           <Text>{txt(char.biographie)}</Text>
         </SectionCard>
       </ScrollView>
-    </>
+      <FAB
+        icon="heart-pulse"
+        label="Statut"
+        style={styles.fab}
+        onPress={() => router.push(`/character/${numId}/status` as Href)}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  container: { padding: 12, gap: 12, paddingBottom: 32 },
-  headerActions: { flexDirection: 'row' },
+  container: { padding: 12, gap: 12, paddingBottom: 96 },
+  fab: { position: 'absolute', right: 16, bottom: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   healthRow: {
     flexDirection: 'row',
