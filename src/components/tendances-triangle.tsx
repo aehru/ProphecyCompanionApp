@@ -38,7 +38,7 @@ export default function TendancesTriangle({
           count={MAX_PUCES}
           filled={sub}
           perRow={5}
-          size={12}
+          size={14}
           gap={3}
           onSet={onSub ? (n) => onSub(tKey, n) : undefined}
         />

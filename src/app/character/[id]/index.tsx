@@ -121,6 +121,7 @@ export default function CharacterDetailScreen() {
           {RESOURCES.map((r) => (
             <InfoRow key={r.key} label={r.label} value={num(rec[`${r.key}Max`])} />
           ))}
+          <InfoRow label="Initiative" value={num(rec.initiativeMax)} />
         </SectionCard>
 
         <SectionCard title="BIOGRAPHIE">
