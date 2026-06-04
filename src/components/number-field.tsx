@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, TextInput, type TextInputProps, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
+
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 /**
  * Lightweight numeric field (plain RN TextInput) — far cheaper to mount than
@@ -26,7 +28,7 @@ const NumberField = React.memo(function NumberField({
   onSubmitEditing?: () => void;
   submitBehavior?: TextInputProps['submitBehavior'];
 }) {
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   return (
     <View style={styles.field}>
       <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>

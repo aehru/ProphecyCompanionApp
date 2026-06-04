@@ -1,15 +1,16 @@
 import React, { useRef } from 'react';
 import { ScrollView, StyleSheet, type TextInput as RNTextInput, View } from 'react-native';
-import { Button, Divider, IconButton, Text, useTheme } from 'react-native-paper';
+import { Button, Divider, IconButton, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import { RESOURCES } from '@/constants/prophecy';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
 
 export default function StatusRessources() {
   const { char, state, persistState, setStateValue } = useStatus();
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   const charRec = asNumRecord(char);
   const stRec = asNumRecord(state);
 

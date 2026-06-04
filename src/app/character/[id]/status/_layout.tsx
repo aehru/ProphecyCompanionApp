@@ -2,9 +2,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Stack, Tabs, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { ActualState, Character } from '@/db/schema';
 import { StatusContext } from '@/lib/status-context';
 import { updateActualState } from '@/repositories/actual-state';
@@ -18,7 +19,7 @@ const tabIcon =
 export default function StatusLayout() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const numId = Number(id);
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   const { char, state, setChar, setState } = useCharacterState(numId, { ensure: true });
 
   if (char === undefined || !state) {

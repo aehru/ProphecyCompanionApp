@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pressable, type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
+
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 /**
  * A row of bullets (circles): `count` total, first `filled` are filled.
@@ -28,7 +30,7 @@ export default function Bullets({
   perRow?: number;
   style?: StyleProp<ViewStyle>;
 }) {
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   if (count <= 0) return <Text style={{ color: theme.colors.onSurfaceVariant }}>—</Text>;
 
   const maxWidth = perRow ? perRow * size + (perRow - 1) * gap : undefined;

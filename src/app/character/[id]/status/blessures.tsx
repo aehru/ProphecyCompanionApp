@@ -1,15 +1,16 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Divider, Text, TextInput, useTheme } from 'react-native-paper';
+import { Button, Divider, Text, TextInput } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
 import { WOUND_LEVELS } from '@/constants/prophecy';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
 
 export default function StatusBlessures() {
   const { char, state, persistState, setStateValue } = useStatus();
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   const charRec = asNumRecord(char);
   const stRec = asNumRecord(state);
 

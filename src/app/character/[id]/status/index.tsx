@@ -1,14 +1,15 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
 import TendancesTriangle from '@/components/tendances-triangle';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
 
 export default function StatusTendances() {
   const { char, setCharValue } = useStatus();
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   const rec = asNumRecord(char);
 
   return (

@@ -1,9 +1,11 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
+
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 export default function InfoRow({ label, value }: { label: string; value: string }) {
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   return (
     <View style={styles.row}>
       <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>

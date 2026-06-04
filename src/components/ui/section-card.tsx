@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { Card, Text, useTheme } from 'react-native-paper';
+import { Card, Text } from 'react-native-paper';
+
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 export default function SectionCard({
   title,
@@ -9,7 +11,7 @@ export default function SectionCard({
   title: string;
   children: React.ReactNode;
 }) {
-  const theme = useTheme();
+  const theme = useProphecyTheme();
   return (
     <Card style={styles.card} mode="contained">
       <Card.Content style={styles.content}>

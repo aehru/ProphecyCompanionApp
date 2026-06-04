@@ -10,6 +10,7 @@ import {
   TENDANCES,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { Character, NewCharacter } from '@/db/schema';
 import { type FormValues, fromFormValues, toFormValues } from '@/lib/character-values';
 
@@ -24,6 +25,7 @@ export default function CharacterForm({
   onSubmit: (data: Partial<NewCharacter>) => Promise<void> | void;
   onDelete?: () => Promise<void> | void;
 }) {
+  const theme = useProphecyTheme();
   const [v, setV] = useState<FormValues>(() => toFormValues(initial));
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -140,7 +142,7 @@ export default function CharacterForm({
         {onDelete ? (
           <Button
             mode="outlined"
-            textColor="#B3261E"
+            textColor={theme.colors.error}
             onPress={confirmDelete}
             disabled={busy}
             style={styles.section}>
