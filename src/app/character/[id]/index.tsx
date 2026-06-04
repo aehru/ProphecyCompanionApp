@@ -79,27 +79,22 @@ export default function CharacterDetailScreen() {
         }}
       />
       <ScrollView contentContainerStyle={styles.container}>
-        <SectionCard title="IDENTITÉ">
-          <InfoRow label="Nom" value={txt(char.nom)} />
-          <InfoRow label="Concept" value={txt(char.concept)} />
-        </SectionCard>
-
         <SectionCard title="TENDANCES">
           <TendancesTriangle get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })} />
-        </SectionCard>
-
-        <SectionCard title="CARACTÉRISTIQUES">
-          <View style={styles.grid}>
-            {CARACTERISTIQUES.map((c) => (
-              <StatChip key={c.key} label={c.abbr} value={num(rec[c.key])} />
-            ))}
-          </View>
         </SectionCard>
 
         <SectionCard title="ATTRIBUTS">
           <View style={styles.grid}>
             {ATTRIBUTS.map((a) => (
               <StatChip key={a.key} label={a.label} value={num(rec[a.key])} />
+            ))}
+          </View>
+        </SectionCard>
+
+        <SectionCard title="CARACTÉRISTIQUES">
+          <View style={styles.grid}>
+            {CARACTERISTIQUES.map((c) => (
+              <StatChip key={c.key} label={c.abbr} value={num(rec[c.key])} />
             ))}
           </View>
         </SectionCard>
