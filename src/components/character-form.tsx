@@ -3,6 +3,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, FAB, Snackbar, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import SkillsEditor from '@/components/skills-editor';
 import {
   ATTRIBUTS,
   CARACTERISTIQUES,
@@ -11,32 +12,57 @@ import {
   WOUND_LEVELS,
 } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import type { Character, NewCharacter } from '@/db/schema';
-import { type FormValues, fromFormValues, toFormValues } from '@/lib/character-values';
+import type { Character, NewCharacter, Skill } from '@/db/schema';
+import {
+  buildSkillRows,
+  type FormValues,
+  fromFormValues,
+  type SkillRow,
+  skillRowsToInput,
+  toFormValues,
+} from '@/lib/character-values';
+import type { SkillInput } from '@/repositories/skills';
 
 export default function CharacterForm({
   initial,
+  initialSkills,
   submitLabel,
   onSubmit,
   onDelete,
 }: {
   initial?: Partial<Character> | null;
+  initialSkills?: Skill[];
   submitLabel: string;
-  onSubmit: (data: Partial<NewCharacter>) => Promise<void> | void;
+  onSubmit: (data: Partial<NewCharacter>, skills: SkillInput[]) => Promise<void> | void;
   onDelete?: () => Promise<void> | void;
 }) {
   const theme = useProphecyTheme();
   const [v, setV] = useState<FormValues>(() => toFormValues(initial));
+  const [skills, setSkills] = useState<SkillRow[]>(() => buildSkillRows(initialSkills ?? []));
+  const [skillSearch, setSkillSearch] = useState('');
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const set = (k: string) => (t: string) => setV((prev) => ({ ...prev, [k]: t }));
   // Stable setter so memoized NumberFields don't all re-render on each keystroke.
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
 
+  const setSkillValue = useCallback((index: number, t: string) => {
+    setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, value: t } : r)));
+  }, []);
+  const setSkillAttribut = useCallback((index: number, attribut: string) => {
+    setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, attribut } : r)));
+  }, []);
+  const addCustomSkill = useCallback((name: string, attribut: string) => {
+    setSkills((prev) => [...prev, { name, attribut, value: '', isCustom: true }]);
+  }, []);
+  const removeSkill = useCallback((index: number) => {
+    setSkills((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
   async function save() {
     setBusy(true);
     try {
-      await onSubmit(fromFormValues(v));
+      await onSubmit(fromFormValues(v), skillRowsToInput(skills));
       setSaved(true);
     } finally {
       setBusy(false);
@@ -126,6 +152,19 @@ export default function CharacterForm({
             onChange={setField}
           />
         </View>
+
+        <Text variant="titleMedium" style={styles.section}>
+          Compétences
+        </Text>
+        <SkillsEditor
+          rows={skills}
+          search={skillSearch}
+          onSearch={setSkillSearch}
+          onChangeValue={setSkillValue}
+          onChangeAttribut={setSkillAttribut}
+          onAddCustom={addCustomSkill}
+          onRemove={removeSkill}
+        />
 
         <Text variant="titleMedium" style={styles.section}>
           Biographie
