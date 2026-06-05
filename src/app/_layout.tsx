@@ -75,6 +75,8 @@ export default function RootLayout() {
             name="character/new"
             options={{ title: 'Nouveau personnage', presentation: 'modal' }}
           />
+          {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
+          <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
         </Stack>
       </ThemeProvider>
     </PaperProvider>
