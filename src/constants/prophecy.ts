@@ -28,6 +28,39 @@ export const ATTRIBUTS = [
   { key: 'social', label: 'Social' },
 ] as const;
 
+/** Attribut key → display label (skills link to one attribut). */
+export const ATTRIBUT_LABEL: Record<string, string> = Object.fromEntries(
+  ATTRIBUTS.map((a) => [a.key, a.label]),
+);
+
+/**
+ * PLACEHOLDER default skill catalogue. Single global list, same for every
+ * character. Each skill links to one attribut key. Replace names/attributs
+ * with the real Prophecy 2e compétences list when available.
+ */
+export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
+  // Physique
+  { name: 'Athlétisme', attribut: 'physique' },
+  { name: 'Combat', attribut: 'physique' },
+  { name: 'Esquive', attribut: 'physique' },
+  { name: 'Endurance', attribut: 'physique' },
+  // Mental
+  { name: 'Connaissance', attribut: 'mental' },
+  { name: 'Vigilance', attribut: 'mental' },
+  { name: 'Magie', attribut: 'mental' },
+  { name: 'Survie', attribut: 'mental' },
+  // Manuel
+  { name: 'Artisanat', attribut: 'manuel' },
+  { name: 'Discrétion', attribut: 'manuel' },
+  { name: 'Tir', attribut: 'manuel' },
+  { name: 'Pilotage', attribut: 'manuel' },
+  // Social
+  { name: 'Persuasion', attribut: 'social' },
+  { name: 'Commandement', attribut: 'social' },
+  { name: 'Tromperie', attribut: 'social' },
+  { name: 'Intimidation', attribut: 'social' },
+];
+
 export const WOUND_LEVELS = [
   { key: 'egratinure', label: 'Égratinure' },
   { key: 'legere', label: 'Légère' },
