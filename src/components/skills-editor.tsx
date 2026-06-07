@@ -97,6 +97,7 @@ export default function SkillsEditor({
             fieldKey={String(index)}
             label="Valeur"
             value={row.value}
+            style={styles.valueField}
             onChange={(k, t) => onChangeValue(Number(k), t)}
           />
 
@@ -122,7 +123,8 @@ export default function SkillsEditor({
 
 const styles = StyleSheet.create({
   root: { gap: 8 },
-  row: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   nameCol: { flex: 1, gap: 2 },
+  valueField: { flexGrow: 0, flexBasis: 'auto', minWidth: 0, width: 64 },
   attrLabel: { fontSize: 12, marginHorizontal: 0 },
 });

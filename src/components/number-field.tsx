@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TextInput, type TextInputProps, View } from 'react-native';
+import { StyleSheet, TextInput, type TextInputProps, View, type ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -13,6 +13,7 @@ const NumberField = React.memo(function NumberField({
   fieldKey,
   label,
   value,
+  style,
   onChange,
   inputRef,
   returnKeyType,
@@ -22,6 +23,7 @@ const NumberField = React.memo(function NumberField({
   fieldKey: string;
   label: string;
   value: string;
+  style?: ViewStyle;
   onChange: (key: string, t: string) => void;
   inputRef?: React.Ref<TextInput>;
   returnKeyType?: TextInputProps['returnKeyType'];
@@ -30,7 +32,7 @@ const NumberField = React.memo(function NumberField({
 }) {
   const theme = useProphecyTheme();
   return (
-    <View style={styles.field}>
+    <View style={[styles.field, style]}>
       <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
       <TextInput
         ref={inputRef}
