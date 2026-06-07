@@ -35,30 +35,84 @@ export const ATTRIBUT_LABEL: Record<string, string> = Object.fromEntries(
 
 /**
  * PLACEHOLDER default skill catalogue. Single global list, same for every
- * character. Each skill links to one attribut key. Replace names/attributs
- * with the real Prophecy 2e compétences list when available.
+ * character. Each skill links to one attribut key.
  */
 export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
-  // Physique
+  // --- Physique ---
+  // Combat
+  { name: 'Armes articulées', attribut: 'physique' },
+  { name: 'Armes contondantes', attribut: 'physique' },
+  { name: 'Armes de choc', attribut: 'physique' },
+  { name: 'Armes de jet', attribut: 'physique' },
+  { name: 'Armes doubles', attribut: 'physique' },
+  { name: 'Armes d\'hast', attribut: 'physique' },
+  { name: 'Armes tranchantes', attribut: 'physique' },
+  { name: 'Bouclier', attribut: 'physique' },
+  { name: 'Corps à corps', attribut: 'physique' },
+  // Mouvement
+  { name: 'Acrobaties', attribut: 'physique' },
   { name: 'Athlétisme', attribut: 'physique' },
-  { name: 'Combat', attribut: 'physique' },
+  { name: 'Equitation', attribut: 'physique' },
+  { name: 'Escalade', attribut: 'physique' },
   { name: 'Esquive', attribut: 'physique' },
-  { name: 'Endurance', attribut: 'physique' },
-  // Mental
-  { name: 'Connaissance', attribut: 'mental' },
-  { name: 'Vigilance', attribut: 'mental' },
-  { name: 'Magie', attribut: 'mental' },
+  { name: 'Natation', attribut: 'physique' },
+  // --- Mental ---
+  // Théorie
+  { name: 'Castes', attribut: 'mental' },
+  { name: 'Connaissance de la magie', attribut: 'mental' },
+  { name: 'Connaissance des animaux', attribut: 'mental' },
+  { name: 'Connaissance des dragons', attribut: 'mental' },
+  { name: 'Géographie', attribut: 'mental' },
+  { name: 'Histoire', attribut: 'mental' },
+  { name: 'Lois', attribut: 'mental' },
+  { name: 'Orientation', attribut: 'mental' },
+  { name: 'Stratégie', attribut: 'mental' },
+  { name: 'Conception', attribut: 'mental' },
+  // Pratique
+  { name: 'Alchimie', attribut: 'mental' },
+  { name: 'Astrologie', attribut: 'mental' },
+  { name: 'Cartographie', attribut: 'mental' },
+  { name: 'Estimation', attribut: 'mental' },
+  { name: 'Herboristerie', attribut: 'mental' },
+  { name: 'Lire et écrire', attribut: 'mental' },
+  { name: 'Matières premières', attribut: 'mental' },
+  { name: 'Médecine', attribut: 'mental' },
+  { name: 'Premiers soins', attribut: 'mental' },
   { name: 'Survie', attribut: 'mental' },
-  // Manuel
+  { name: 'Vie en cité', attribut: 'mental' },
+  // --- Manuel ---
+  // Technique
+  { name: 'Armes de siège', attribut: 'manuel' },
   { name: 'Artisanat', attribut: 'manuel' },
+  { name: 'Artisanat élémentaire', attribut: 'manuel' },
+  { name: 'Contrefaçon', attribut: 'manuel' },
   { name: 'Discrétion', attribut: 'manuel' },
-  { name: 'Tir', attribut: 'manuel' },
-  { name: 'Pilotage', attribut: 'manuel' },
-  // Social
-  { name: 'Persuasion', attribut: 'social' },
+  { name: 'Pièges', attribut: 'manuel' },
+  { name: 'Pister', attribut: 'manuel' },
+  { name: 'Sabotage', attribut: 'manuel' },
+  // Manipulation
+  { name: 'Armes à projectiles', attribut: 'manuel' },
+  { name: 'Attelages', attribut: 'manuel' },
+  { name: 'Déguisement', attribut: 'manuel' },
+  { name: 'Déverrouillage', attribut: 'manuel' },
+  { name: 'Don artistique', attribut: 'manuel' },
+  { name: 'Faire les poches', attribut: 'manuel' },
+  { name: 'Jeu', attribut: 'manuel' },
+  { name: 'Jongler', attribut: 'manuel' },
+  // --- Social ---
+  // Communication
+  { name: 'Baratin', attribut: 'social' },
+  { name: 'Conte', attribut: 'social' },
+  { name: 'Eloquence', attribut: 'social' },
+  { name: 'Marchandage', attribut: 'social' },
+  { name: 'Psychologie', attribut: 'social' },
+  // Influence
+  { name: 'Art de la scène', attribut: 'social' },
   { name: 'Commandement', attribut: 'social' },
-  { name: 'Tromperie', attribut: 'social' },
+  { name: 'Diplomatie', attribut: 'social' },
+  { name: 'Dressage', attribut: 'social' },
   { name: 'Intimidation', attribut: 'social' },
+  { name: 'Séduction', attribut: 'social' },
 ];
 
 export const WOUND_LEVELS = [
