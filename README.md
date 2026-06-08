@@ -1,56 +1,59 @@
-# Welcome to your Expo app 👋
+# Prophecy Companion App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A mobile companion app for the French tabletop RPG **Prophecy (2nd edition)**. Create, store, and play your characters from your phone — keep track of the things that change at the table so you can leave the paper sheet at home.
 
-## Get started
+> The app's interface is in **French**, matching the Prophecy 2e rulebook and its terminology.
 
-1. Install dependencies
+## What it does
 
-   ```bash
-   npm install
-   ```
+Prophecy character sheets have a lot of moving parts. This app splits them in two:
 
-2. Start the app
+- **The sheet (fiche)** — the character you build: identity, *tendances*, *caractéristiques*, *attributs*, max health, resource pools, skills, biography. Changes rarely.
+- **The live status (statut)** — what changes during a session: current wounds, spent resources, initiative dice, conditions and notes. Built for quick taps mid-combat.
 
-   ```bash
-   npx expo start
-   ```
+Everything is stored **locally on your device** (SQLite). No account, no network, no cloud.
 
-In the output, you'll find options to open the app in a
+## Features
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Character roster
+- List of all your characters with name + concept.
+- Tap **+** to create one; tap a character to open it.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Character sheet (Résumé / Compétences tabs)
+- **Tendances** — Dragon, Fatalité, Homme, shown as a triangle, each with a main value and a 0–10 *puces* subnumber.
+- **Caractéristiques** — the 8 stats (Force, Résistance, Intelligence, Volonté, Coordination, Perception, Présence, Empathie).
+- **Attributs** — Physique, Mental, Manuel, Social.
+- **Santé** — max wound boxes per level (Égratinure → Mort).
+- **Ressources** — Maîtrise, Chance, and Initiative maximums.
+- **Biographie** — free text.
+- **Compétences** — your skills, each linked to an attribut. Start from the built-in Prophecy 2e skill catalogue or add your own free-text skills. Skills at value 0 aren't kept.
+- **Edit** the whole sheet inline; sheets can also be **deleted**.
 
-## Get a fresh project
+### Live status (Statut)
+Reached via the **Statut** button on the sheet. Three quick-access tabs:
 
-When you're ready, run:
+- **Tendances** — tap to nudge a value (+1 tap, −1 long-press) and set *puces* during play.
+- **Blessures** — tap wound boxes to fill/clear current damage, edit conditions & notes, and reset all wounds with one button (*"Don de Heyra !"*).
+- **Ressources** — spend/restore Maîtrise & Chance against their max, and enter per-die **Initiative** values for the current turn ("Nouveau tour" clears them).
 
-```bash
-npm run reset-project
-```
+Status edits save instantly and live-update across screens.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Platforms
 
-### Other setup steps
+Built with Expo for **iOS and Android**. (A web build exists but mobile is the primary target.)
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Installing / running
 
-## Learn more
+This is an Expo app. To try it on a device or simulator, see **[DEV.md](DEV.md)** for setup.
 
-To learn more about developing your project with Expo, look at the following resources:
+## Status
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Early development. Game content may change.
 
-## Join the community
+## License
 
-Join our community of developers creating universal apps.
+[MIT](LICENSE).
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+*Prophecy is a trademark of its respective owners. This is an unofficial fan-made companion tool and is not affiliated with or endorsed by the publisher.*
