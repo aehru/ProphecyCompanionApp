@@ -34,7 +34,7 @@ export const ATTRIBUT_LABEL: Record<string, string> = Object.fromEntries(
 );
 
 /**
- * PLACEHOLDER default skill catalogue. Single global list, same for every
+ * Default skill catalogue. Single global list, same for every
  * character. Each skill links to one attribut key.
  */
 export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
