@@ -26,10 +26,17 @@ export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
   const [fatal, setFatal] = useState<string | null>(null);
 
-  // Auto-heal a failed/stale migration: delete the DB and reload — but only once
-  // (guard flag) so a genuinely broken migration shows the error instead of looping.
+  // On a failed/stale migration:
+  //  - DEV: auto-heal by deleting the DB and reloading, but only once (guard flag)
+  //    so a genuinely broken migration shows the error instead of looping.
+  //  - PROD: NEVER auto-delete — that would silently wipe all of a user's
+  //    characters (local-only, no backup). Surface the error instead.
   useEffect(() => {
     if (!error) return;
+    if (!__DEV__) {
+      setFatal(error.message);
+      return;
+    }
     let cancelled = false;
     (async () => {
       const tried = await AsyncStorage.getItem(RESET_FLAG);
