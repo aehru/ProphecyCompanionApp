@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Prophecy crystal / eye -->
+  <path d="M256 118
+           L348 210
+           L256 394
+           L164 210 Z"
+        fill="none"
+        stroke="white"
+        stroke-width="18"
+        stroke-linejoin="round"/>
+
+  <!-- Inner rune -->
+  <path d="M256 164
+           L256 334
+           M206 214
+           L256 164
+           L306 214
+           M206 294
+           L306 294"
+        fill="none"
+        stroke="white"
+        stroke-width="18"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Companion sparkle -->
+  <circle cx="360" cy="156" r="10" fill="white"/>
+  <path d="M360 128 V184 M332 156 H388"
+        stroke="white"
+        stroke-width="10"
+        stroke-linecap="round"/>
+</svg>
