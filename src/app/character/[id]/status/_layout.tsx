@@ -1,9 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Stack, Tabs, useLocalSearchParams } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
 
+import { characterFallback } from '@/components/ui/character-gate';
+import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { ActualState, Character } from '@/db/schema';
@@ -17,25 +17,12 @@ const tabIcon =
     <MaterialCommunityIcons name={name as never} color={color} size={size} />;
 
 export default function StatusLayout() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const numId = Number(id);
+  const numId = useCharacterId();
   const theme = useProphecyTheme();
   const { char, state, setChar, setState } = useCharacterState(numId, { ensure: true });
 
-  if (char === undefined || !state) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
-  if (char === null) {
-    return (
-      <View style={styles.centered}>
-        <Text>Personnage introuvable.</Text>
-      </View>
-    );
-  }
+  const fallback = characterFallback(char, !!state);
+  if (fallback || !char || !state) return fallback;
 
   const persistState = (patch: Partial<ActualState>) => {
     setState((p) => (p ? ({ ...p, ...patch } as ActualState) : p));
@@ -77,7 +64,3 @@ export default function StatusLayout() {
     </StatusContext.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-});

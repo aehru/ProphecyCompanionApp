@@ -101,7 +101,25 @@ export const actualState = sqliteTable('actual_state', {
     .$defaultFn(() => new Date()),
 });
 
+/**
+ * A character's skills (compétences). One row per owned skill.
+ * `name` matches a DEFAULT_SKILLS entry for catalogue skills, or is free text
+ * for player-added ("free") skills. `attribut` is the linked attribut key
+ * (physique/mental/manuel/social). Skills at value 0 are not persisted.
+ */
+export const skills = sqliteTable('skills', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  attribut: text('attribut').notNull().default(''),
+  value: integer('value').notNull().default(0),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
 export type NewActualState = typeof actualState.$inferInsert;
+export type Skill = typeof skills.$inferSelect;
+export type NewSkill = typeof skills.$inferInsert;

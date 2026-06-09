@@ -1,83 +1,78 @@
-import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { type Href, useNavigation, useRouter } from 'expo-router';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { FAB, IconButton, Text } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
 import CharacterForm from '@/components/character-form';
+import { characterFallback } from '@/components/ui/character-gate';
 import TendancesTriangle from '@/components/tendances-triangle';
 import InfoRow from '@/components/ui/info-row';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import { ATTRIBUTS, CARACTERISTIQUES, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
+import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num, txt } from '@/lib/character-values';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
+import { replaceSkills, skillsQuery } from '@/repositories/skills';
 
-export default function CharacterDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const numId = Number(id);
+export default function CharacterResumeScreen() {
+  const numId = useCharacterId();
   const router = useRouter();
+  const navigation = useNavigation();
   const theme = useProphecyTheme();
   // Reload on focus so values edited in the status screen show up on return.
   const { char, state, reload } = useCharacterState(numId, { reloadOnFocus: true });
+  const { data: skills } = useLiveQuery(skillsQuery(numId));
   const [editing, setEditing] = useState(false);
 
-  if (char === undefined) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
-  if (char === null) {
-    return (
-      <View style={styles.centered}>
-        <Text>Personnage introuvable.</Text>
-      </View>
-    );
-  }
+  // Drive the tab header: character name + edit/close toggle.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: char?.nom || 'Personnage',
+      headerRight: () =>
+        editing ? (
+          <IconButton icon="close" onPress={() => setEditing(false)} />
+        ) : (
+          <IconButton icon="pencil" onPress={() => setEditing(true)} />
+        ),
+    });
+  }, [navigation, char?.nom, editing]);
+
+  // Leaving edit mode is meaningless once we navigate away; reset on blur.
+  useEffect(() => navigation.addListener('blur', () => setEditing(false)), [navigation]);
+
+  const fallback = characterFallback(char);
+  if (fallback || !char) return fallback;
 
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
 
   if (editing) {
     return (
-      <>
-        <Stack.Screen
-          options={{
-            title: char.nom || 'Personnage',
-            headerRight: () => <IconButton icon="close" onPress={() => setEditing(false)} />,
-          }}
-        />
-        <CharacterForm
-          initial={char}
-          submitLabel="Enregistrer"
-          onSubmit={async (data) => {
-            await updateCharacter(numId, data);
-            reload();
-            setEditing(false);
-          }}
-          onDelete={async () => {
-            await deleteCharacter(numId);
-            router.back();
-          }}
-        />
-      </>
+      <CharacterForm
+        initial={char}
+        initialSkills={skills ?? []}
+        submitLabel="Enregistrer"
+        onSubmit={async (data, nextSkills) => {
+          await updateCharacter(numId, data);
+          await replaceSkills(numId, nextSkills);
+          reload();
+          setEditing(false);
+        }}
+        onDelete={async () => {
+          await deleteCharacter(numId);
+          router.back();
+        }}
+      />
     );
   }
 
   return (
     <View style={styles.root}>
-      <Stack.Screen
-        options={{
-          title: char.nom || 'Personnage',
-          headerRight: () => (
-            <IconButton icon="pencil" onPress={() => setEditing(true)} />
-          ),
-        }}
-      />
       <ScrollView contentContainerStyle={styles.container}>
         <SectionCard title="TENDANCES">
           <TendancesTriangle get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })} />
@@ -140,7 +135,6 @@ export default function CharacterDetailScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
   fab: { position: 'absolute', right: 16, bottom: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -152,12 +146,4 @@ const styles = StyleSheet.create({
   },
   healthLabel: { fontSize: 15 },
   healthDots: { flexShrink: 1, justifyContent: 'flex-end' },
-  tendanceRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flexShrink: 1,
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
-  },
 });

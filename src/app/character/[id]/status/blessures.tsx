@@ -15,13 +15,9 @@ export default function StatusBlessures() {
   const stRec = asNumRecord(state);
 
   const resetWounds = () =>
-    persistState({
-      egratinureCurrent: 0,
-      legereCurrent: 0,
-      graveCurrent: 0,
-      fataleCurrent: 0,
-      mortCurrent: 0,
-    });
+    persistState(
+      Object.fromEntries(WOUND_LEVELS.map((w) => [`${w.key}Current`, 0])) as Partial<typeof state>,
+    );
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
