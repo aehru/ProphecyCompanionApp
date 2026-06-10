@@ -1,5 +1,12 @@
-import React, { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  type TextInput as RNTextInput,
+  type TextInputProps,
+  View,
+} from 'react-native';
 import { Button, FAB, SegmentedButtons, Snackbar, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -56,6 +63,31 @@ export default function CharacterForm({
   // Stable setter so memoized NumberFields don't all re-render on each keystroke.
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
 
+  // Keyboard "next" wiring: chain inputs within a tab so the return key jumps to
+  // the following field instead of dismissing the keyboard.
+  const fieldRefs = useRef<Record<string, RNTextInput | null>>({});
+  const focusNext = (order: string[], key: string) =>
+    fieldRefs.current[order[order.indexOf(key) + 1]]?.focus();
+  const chain = (order: string[], key: string) => {
+    const isLast = order.indexOf(key) === order.length - 1;
+    return {
+      inputRef: (el: RNTextInput | null) => {
+        fieldRefs.current[key] = el;
+      },
+      returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
+      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as TextInputProps['submitBehavior'],
+      onSubmitEditing: () => focusNext(order, key),
+    };
+  };
+
+  const identiteOrder = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
+  const aptitudesOrder = [...CARACTERISTIQUES.map((c) => c.key), ...ATTRIBUTS.map((a) => a.key)];
+  const combatOrder = [
+    ...WOUND_LEVELS.map((w) => `${w.key}Max`),
+    ...RESOURCES.map((r) => `${r.key}Max`),
+    'initiativeMax',
+  ];
+
   const setSkillValue = useCallback((index: number, t: string) => {
     setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, value: t } : r)));
   }, []);
@@ -104,12 +136,29 @@ export default function CharacterForm({
         {tab === 'identite' ? (
           <>
             <Text variant="titleMedium">Identité</Text>
-            <TextInput label="Nom" value={v.nom} onChangeText={set('nom')} mode="outlined" />
+            <TextInput
+              label="Nom"
+              value={v.nom}
+              onChangeText={set('nom')}
+              mode="outlined"
+              ref={(el) => {
+                fieldRefs.current.nom = el as unknown as RNTextInput | null;
+              }}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => fieldRefs.current.concept?.focus()}
+            />
             <TextInput
               label="Concept"
               value={v.concept}
               onChangeText={set('concept')}
               mode="outlined"
+              ref={(el) => {
+                fieldRefs.current.concept = el as unknown as RNTextInput | null;
+              }}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => focusNext(identiteOrder, 'concept')}
             />
 
             <Text variant="titleMedium" style={styles.section}>
@@ -117,12 +166,19 @@ export default function CharacterForm({
             </Text>
             {TENDANCES.map((t) => (
               <View key={t.key} style={styles.row}>
-                <NumberField fieldKey={t.key} label={t.label} value={v[t.key]} onChange={setField} />
+                <NumberField
+                  fieldKey={t.key}
+                  label={t.label}
+                  value={v[t.key]}
+                  onChange={setField}
+                  {...chain(identiteOrder, t.key)}
+                />
                 <NumberField
                   fieldKey={`${t.key}Sub`}
                   label={`${t.label} (puces)`}
                   value={v[`${t.key}Sub`]}
                   onChange={setField}
+                  {...chain(identiteOrder, `${t.key}Sub`)}
                 />
               </View>
             ))}
@@ -163,6 +219,7 @@ export default function CharacterForm({
                   label={c.abbr}
                   value={v[c.key]}
                   onChange={setField}
+                  {...chain(aptitudesOrder, c.key)}
                 />
               ))}
             </View>
@@ -178,6 +235,7 @@ export default function CharacterForm({
                   label={a.label}
                   value={v[a.key]}
                   onChange={setField}
+                  {...chain(aptitudesOrder, a.key)}
                 />
               ))}
             </View>
@@ -195,6 +253,7 @@ export default function CharacterForm({
                   label={w.label}
                   value={v[`${w.key}Max`]}
                   onChange={setField}
+                  {...chain(combatOrder, `${w.key}Max`)}
                 />
               ))}
             </View>
@@ -210,6 +269,7 @@ export default function CharacterForm({
                   label={r.label}
                   value={v[`${r.key}Max`]}
                   onChange={setField}
+                  {...chain(combatOrder, `${r.key}Max`)}
                 />
               ))}
               <NumberField
@@ -217,6 +277,7 @@ export default function CharacterForm({
                 label="Initiative"
                 value={v.initiativeMax}
                 onChange={setField}
+                {...chain(combatOrder, 'initiativeMax')}
               />
             </View>
           </>
