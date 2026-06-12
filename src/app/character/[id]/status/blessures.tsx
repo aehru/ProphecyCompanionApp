@@ -34,18 +34,23 @@ export default function StatusBlessures() {
           return (
             <View key={w.key} style={styles.woundBlock}>
               {i > 0 && <Divider style={styles.divider} />}
-              <View style={styles.woundHead}>
-                <Text style={styles.woundLabel}>{w.label}</Text>
-                <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                  {cur} / {max}
+              <View style={styles.woundRow}>
+                <View style={styles.woundInfo}>
+                  <Text style={styles.woundLabel}>{w.label}</Text>
+                  <Text style={{ color: theme.colors.onSurfaceVariant }}>{w.damage}</Text>
+                </View>
+                <View style={styles.woundBullets}>
+                  <Bullets
+                    count={max}
+                    filled={cur}
+                    color={theme.colors.error}
+                    onSet={(n) => setStateValue(`${w.key}Current`, n)}
+                  />
+                </View>
+                <Text style={[styles.woundMalus, { color: theme.colors.onSurfaceVariant }]}>
+                  {w.malus ?? ''}
                 </Text>
               </View>
-              <Bullets
-                count={max}
-                filled={cur}
-                color={theme.colors.error}
-                onSet={(n) => setStateValue(`${w.key}Current`, n)}
-              />
             </View>
           );
         })}
@@ -113,8 +118,11 @@ const styles = StyleSheet.create({
   armorName: { flex: 1, fontSize: 16 },
   armorBtns: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
   woundBlock: { gap: 6 },
-  woundHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  woundLabel: { flex: 1, fontSize: 16 },
+  woundRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  woundInfo: { width: 90 },
+  woundBullets: { flex: 1, alignItems: 'flex-end' },
+  woundLabel: { fontSize: 16 },
+  woundMalus: { width: 32, textAlign: 'right', fontSize: 16 },
   divider: { marginBottom: 6 },
   resetBtn: { marginTop: 8 },
 });

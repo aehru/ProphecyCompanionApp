@@ -116,11 +116,11 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
 ];
 
 export const WOUND_LEVELS = [
-  { key: 'egratignure', label: 'Égratignure' },
-  { key: 'legere', label: 'Légère' },
-  { key: 'grave', label: 'Grave' },
-  { key: 'fatale', label: 'Fatale' },
-  { key: 'mort', label: 'Mort' },
+  { key: 'egratignure', label: 'Égratignure', damage: '1-10', malus: null },
+  { key: 'legere', label: 'Légère', damage: '11-20', malus: '-1' },
+  { key: 'grave', label: 'Grave', damage: '21-30', malus: '-3' },
+  { key: 'fatale', label: 'Fatale', damage: '31-40', malus: '-5' },
+  { key: 'mort', label: 'Mort', damage: '41+', malus: null },
 ] as const;
 
 /** Spendable resource pools: max on the character, current tracked in the status. */
