@@ -116,17 +116,28 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
 ];
 
 export const WOUND_LEVELS = [
-  { key: 'egratinure', label: 'Égratinure' },
-  { key: 'legere', label: 'Légère' },
-  { key: 'grave', label: 'Grave' },
-  { key: 'fatale', label: 'Fatale' },
-  { key: 'mort', label: 'Mort' },
+  { key: 'egratignure', label: 'Égratignure', damage: '1-10', malus: null },
+  { key: 'legere', label: 'Légère', damage: '11-20', malus: '-1' },
+  { key: 'grave', label: 'Grave', damage: '21-30', malus: '-3' },
+  { key: 'fatale', label: 'Fatale', damage: '31-40', malus: '-5' },
+  { key: 'mort', label: 'Mort', damage: '41+', malus: null },
 ] as const;
 
 /** Spendable resource pools: max on the character, current tracked in the status. */
 export const RESOURCES = [
   { key: 'maitrise', label: 'Maîtrise' },
   { key: 'chance', label: 'Chance' },
+] as const;
+
+/**
+ * Money — Drac coins. Stored as separate counts on actual_state (no universal
+ * conversion). Keys match the actual_state columns. Ordered high → low value.
+ */
+export const MONEY = [
+  { key: 'dracOr', label: "Drac d'or", abbr: 'do' },
+  { key: 'dracArgent', label: "Drac d'argent", abbr: 'da' },
+  { key: 'dracBronze', label: 'Drac de bronze', abbr: 'db' },
+  { key: 'dracFer', label: 'Drac de fer', abbr: 'df' },
 ] as const;
 
 /** Every numeric character column edited by the form. */

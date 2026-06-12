@@ -45,7 +45,7 @@ export const characters = sqliteTable('characters', {
   social: integer('social').notNull().default(0),
 
   // Health — max boxes per wound level, set at creation
-  egratinureMax: integer('egratinure_max').notNull().default(0),
+  egratignureMax: integer('egratignure_max').notNull().default(0),
   legereMax: integer('legere_max').notNull().default(0),
   graveMax: integer('grave_max').notNull().default(0),
   fataleMax: integer('fatale_max').notNull().default(0),
@@ -77,7 +77,7 @@ export const actualState = sqliteTable('actual_state', {
     .references(() => characters.id, { onDelete: 'cascade' }),
 
   // Health — current filled boxes per wound level
-  egratinureCurrent: integer('egratinure_current').notNull().default(0),
+  egratignureCurrent: integer('egratignure_current').notNull().default(0),
   legereCurrent: integer('legere_current').notNull().default(0),
   graveCurrent: integer('grave_current').notNull().default(0),
   fataleCurrent: integer('fatale_current').notNull().default(0),
@@ -86,6 +86,12 @@ export const actualState = sqliteTable('actual_state', {
   // Resource pools — current in-play value (max lives on the character)
   maitriseCurrent: integer('maitrise_current').notNull().default(0),
   chanceCurrent: integer('chance_current').notNull().default(0),
+
+  // Money — count of each Drac coin. Kept separate (no universal conversion).
+  dracFer: integer('drac_fer').notNull().default(0),
+  dracBronze: integer('drac_bronze').notNull().default(0),
+  dracArgent: integer('drac_argent').notNull().default(0),
+  dracOr: integer('drac_or').notNull().default(0),
 
   // Current-turn initiative values (X = the character's initiativeMax)
   initiativeValues: text('initiative_values', { mode: 'json' })
@@ -117,9 +123,29 @@ export const skills = sqliteTable('skills', {
   value: integer('value').notNull().default(0),
 });
 
+/**
+ * A character's armor catalogue. One row per owned armor (a character can hold
+ * several and swap between them across a campaign). `equipped` marks the single
+ * active armor — enforced one-at-a-time in the repository. `defenseMax` is the
+ * armor's full protection; `defenseCurrent` drops as it absorbs hits in a fight
+ * (floored at 0 = broken, but kept until the player deletes it).
+ */
+export const armor = sqliteTable('armor', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  defenseMax: integer('defense_max').notNull().default(0),
+  defenseCurrent: integer('defense_current').notNull().default(0),
+  equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
 export type NewActualState = typeof actualState.$inferInsert;
 export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
+export type Armor = typeof armor.$inferSelect;
+export type NewArmor = typeof armor.$inferInsert;

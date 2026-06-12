@@ -30,14 +30,15 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#030f46",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
           }
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "./plugins/withReleaseSigning"
     ],
     "experiments": {
       "typedRoutes": true,

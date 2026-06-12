@@ -23,7 +23,7 @@ Everything is stored **locally on your device** (SQLite). No account, no network
 - **Tendances** — Dragon, Fatalité, Homme, shown as a triangle, each with a main value and a 0–10 *puces* subnumber.
 - **Caractéristiques** — the 8 stats (Force, Résistance, Intelligence, Volonté, Coordination, Perception, Présence, Empathie).
 - **Attributs** — Physique, Mental, Manuel, Social.
-- **Santé** — max wound boxes per level (Égratinure → Mort).
+- **Santé** — max wound boxes per level (Égratignure → Mort).
 - **Ressources** — Maîtrise, Chance, and Initiative maximums.
 - **Biographie** — free text.
 - **Compétences** — your skills, each linked to an attribut. Start from the built-in Prophecy 2e skill catalogue or add your own free-text skills. Skills at value 0 aren't kept.
