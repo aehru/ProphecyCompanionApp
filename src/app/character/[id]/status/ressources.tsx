@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, type TextInput as RNTextInput, View } from 'rea
 import { Button, Divider, IconButton, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import SectionCard from '@/components/ui/section-card';
 import { RESOURCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp } from '@/lib/character-values';
@@ -34,82 +35,83 @@ export default function StatusRessources() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text variant="titleMedium">Ressources</Text>
-      {RESOURCES.map((r) => {
-        const cur = stRec[`${r.key}Current`] ?? 0;
-        const max = charRec[`${r.key}Max`] ?? 0;
-        return (
-          <View key={r.key}>
-            <View style={styles.row}>
-              <Text style={styles.label}>{r.label}</Text>
-              <IconButton
-                icon="minus"
-                mode="contained"
-                size={18}
-                disabled={cur <= 0}
-                onPress={() => adjust(r.key, -1)}
-              />
-              <Text style={styles.count}>
-                {cur} / {max}
-              </Text>
-              <IconButton
-                icon="plus"
-                mode="contained"
-                size={18}
-                disabled={max > 0 && cur >= max}
-                onPress={() => adjust(r.key, 1)}
-              />
-              <IconButton
-                icon="refresh"
-                size={18}
-                onPress={() => setStateValue(`${r.key}Current`, max)}
-              />
+      <SectionCard title="RESSOURCES">
+        {RESOURCES.map((r, i) => {
+          const cur = stRec[`${r.key}Current`] ?? 0;
+          const max = charRec[`${r.key}Max`] ?? 0;
+          return (
+            <View key={r.key}>
+              {i > 0 && <Divider style={styles.divider} />}
+              <View style={styles.row}>
+                <Text style={styles.label}>{r.label}</Text>
+                <IconButton
+                  icon="minus"
+                  mode="contained"
+                  size={18}
+                  disabled={cur <= 0}
+                  onPress={() => adjust(r.key, -1)}
+                />
+                <Text style={styles.count}>
+                  {cur} / {max}
+                </Text>
+                <IconButton
+                  icon="plus"
+                  mode="contained"
+                  size={18}
+                  disabled={max > 0 && cur >= max}
+                  onPress={() => adjust(r.key, 1)}
+                />
+                <IconButton
+                  icon="refresh"
+                  size={18}
+                  onPress={() => setStateValue(`${r.key}Current`, max)}
+                />
+              </View>
             </View>
-            <Divider />
-          </View>
-        );
-      })}
+          );
+        })}
+      </SectionCard>
 
-      <Text variant="titleMedium" style={styles.section}>
-        Initiative
-      </Text>
-      {initiativeMax > 0 ? (
-        <>
-          <View style={styles.grid}>
-            {initValues.map((val, i) => (
-              <NumberField
-                key={i}
-                fieldKey={String(i)}
-                label={`Dé ${i + 1}`}
-                value={String(val)}
-                onChange={(key, t) => setInitValue(Number(key), parseInt(t, 10) || 0)}
-                inputRef={(el) => {
-                  initRefs.current[i] = el;
-                }}
-                returnKeyType={i < initValues.length - 1 ? 'next' : 'done'}
-                submitBehavior={i < initValues.length - 1 ? 'submit' : 'blurAndSubmit'}
-                onSubmitEditing={() => initRefs.current[i + 1]?.focus()}
-              />
-            ))}
-          </View>
-          <Button mode="outlined" onPress={newTurn}>
-            Nouveau tour
-          </Button>
-        </>
-      ) : (
-        <Text style={{ color: theme.colors.onSurfaceVariant }}>
-          Définis l’initiative (max) dans la fiche.
-        </Text>
-      )}
+      <SectionCard title="INITIATIVE">
+        {initiativeMax > 0 ? (
+          <>
+            <View style={styles.grid}>
+              {initValues.map((val, i) => (
+                <NumberField
+                  key={i}
+                  fieldKey={String(i)}
+                  label={`Dé ${i + 1}`}
+                  value={String(val)}
+                  onChange={(key, t) => setInitValue(Number(key), parseInt(t, 10) || 0)}
+                  inputRef={(el) => {
+                    initRefs.current[i] = el;
+                  }}
+                  returnKeyType={i < initValues.length - 1 ? 'next' : 'done'}
+                  submitBehavior={i < initValues.length - 1 ? 'submit' : 'blurAndSubmit'}
+                  onSubmitEditing={() => initRefs.current[i + 1]?.focus()}
+                />
+              ))}
+            </View>
+            <Button mode="outlined" onPress={newTurn} style={styles.newTurnBtn}>
+              Nouveau tour
+            </Button>
+          </>
+        ) : (
+          <Text style={{ color: theme.colors.onSurfaceVariant }}>
+            Définis l’initiative (max) dans la fiche.
+          </Text>
+        )}
+      </SectionCard>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 12 },
-  section: { marginTop: 8 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   label: { flex: 1, fontSize: 16 },
   count: { minWidth: 56, textAlign: 'center', fontSize: 16 },
+  divider: { marginBottom: 6 },
+  newTurnBtn: { marginTop: 8 },
 });

@@ -1,9 +1,9 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   Alert,
+  type TextInput as RNTextInput,
   ScrollView,
   StyleSheet,
-  type TextInput as RNTextInput,
   type TextInputProps,
   View,
 } from 'react-native';
@@ -18,8 +18,8 @@ import {
   TENDANCES,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { Character, NewCharacter, Skill } from '@/db/schema';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   buildSkillRows,
   type FormValues,
@@ -301,7 +301,8 @@ export default function CharacterForm({
         label={submitLabel}
         onPress={save}
         disabled={busy || v.nom.trim() === ''}
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        color={theme.colors.onPrimary}
       />
       <Snackbar visible={saved} onDismiss={() => setSaved(false)} duration={1500}>
         Enregistré
