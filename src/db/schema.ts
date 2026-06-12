@@ -45,7 +45,7 @@ export const characters = sqliteTable('characters', {
   social: integer('social').notNull().default(0),
 
   // Health — max boxes per wound level, set at creation
-  egratinureMax: integer('egratinure_max').notNull().default(0),
+  egratignureMax: integer('egratignure_max').notNull().default(0),
   legereMax: integer('legere_max').notNull().default(0),
   graveMax: integer('grave_max').notNull().default(0),
   fataleMax: integer('fatale_max').notNull().default(0),
@@ -77,7 +77,7 @@ export const actualState = sqliteTable('actual_state', {
     .references(() => characters.id, { onDelete: 'cascade' }),
 
   // Health — current filled boxes per wound level
-  egratinureCurrent: integer('egratinure_current').notNull().default(0),
+  egratignureCurrent: integer('egratignure_current').notNull().default(0),
   legereCurrent: integer('legere_current').notNull().default(0),
   graveCurrent: integer('grave_current').notNull().default(0),
   fataleCurrent: integer('fatale_current').notNull().default(0),

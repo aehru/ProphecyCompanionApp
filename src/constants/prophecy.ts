@@ -116,7 +116,7 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
 ];
 
 export const WOUND_LEVELS = [
-  { key: 'egratinure', label: 'Égratinure' },
+  { key: 'egratignure', label: 'Égratignure' },
   { key: 'legere', label: 'Légère' },
   { key: 'grave', label: 'Grave' },
   { key: 'fatale', label: 'Fatale' },
