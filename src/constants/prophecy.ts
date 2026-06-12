@@ -129,6 +129,17 @@ export const RESOURCES = [
   { key: 'chance', label: 'Chance' },
 ] as const;
 
+/**
+ * Money — Drac coins. Stored as separate counts on actual_state (no universal
+ * conversion). Keys match the actual_state columns. Ordered high → low value.
+ */
+export const MONEY = [
+  { key: 'dracOr', label: "Drac d'or", abbr: 'do' },
+  { key: 'dracArgent', label: "Drac d'argent", abbr: 'da' },
+  { key: 'dracBronze', label: 'Drac de bronze', abbr: 'db' },
+  { key: 'dracFer', label: 'Drac de fer', abbr: 'df' },
+] as const;
+
 /** Every numeric character column edited by the form. */
 export const NUMERIC_KEYS: string[] = [
   ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`]),

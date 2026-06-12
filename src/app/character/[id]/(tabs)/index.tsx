@@ -11,7 +11,7 @@ import TendancesTriangle from '@/components/tendances-triangle';
 import InfoRow from '@/components/ui/info-row';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
-import { ATTRIBUTS, CARACTERISTIQUES, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
+import { ATTRIBUTS, CARACTERISTIQUES, MONEY, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -138,6 +138,14 @@ export default function CharacterResumeScreen() {
             <InfoRow key={r.key} label={r.label} value={num(rec[`${r.key}Max`])} />
           ))}
           <InfoRow label="Initiative" value={num(rec.initiativeMax)} />
+        </SectionCard>
+
+        <SectionCard title="ARGENT">
+          <View style={styles.grid}>
+            {MONEY.map((m) => (
+              <StatChip key={m.key} label={m.abbr} value={String(stRec[m.key] ?? 0)} />
+            ))}
+          </View>
         </SectionCard>
 
         <SectionCard title="BIOGRAPHIE">

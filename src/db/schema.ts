@@ -87,6 +87,12 @@ export const actualState = sqliteTable('actual_state', {
   maitriseCurrent: integer('maitrise_current').notNull().default(0),
   chanceCurrent: integer('chance_current').notNull().default(0),
 
+  // Money — count of each Drac coin. Kept separate (no universal conversion).
+  dracFer: integer('drac_fer').notNull().default(0),
+  dracBronze: integer('drac_bronze').notNull().default(0),
+  dracArgent: integer('drac_argent').notNull().default(0),
+  dracOr: integer('drac_or').notNull().default(0),
+
   // Current-turn initiative values (X = the character's initiativeMax)
   initiativeValues: text('initiative_values', { mode: 'json' })
     .$type<number[]>()

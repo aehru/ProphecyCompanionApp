@@ -4,7 +4,7 @@ import { Button, Divider, IconButton, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SectionCard from '@/components/ui/section-card';
-import { RESOURCES } from '@/constants/prophecy';
+import { MONEY, RESOURCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
@@ -26,6 +26,7 @@ export default function StatusRessources() {
   const initValues = Array.from({ length: initiativeMax }, (_, i) => stored[i] ?? 0);
 
   const initRefs = useRef<(RNTextInput | null)[]>([]);
+  const moneyRefs = useRef<(RNTextInput | null)[]>([]);
 
   const setInitValue = (i: number, n: number) => {
     const next = Array.from({ length: initiativeMax }, (_, j) => (j === i ? n : stored[j] ?? 0));
@@ -72,6 +73,27 @@ export default function StatusRessources() {
         })}
       </SectionCard>
 
+      <SectionCard title="ARGENT">
+        <View style={styles.grid}>
+          {MONEY.map((m, i) => (
+            <NumberField
+              key={m.key}
+              fieldKey={m.key}
+              label={m.abbr}
+              value={String(stRec[m.key] ?? 0)}
+              onChange={(key, t) => setStateValue(key, parseInt(t, 10) || 0)}
+              style={styles.coin}
+              inputRef={(el) => {
+                moneyRefs.current[i] = el;
+              }}
+              returnKeyType={i < MONEY.length - 1 ? 'next' : 'done'}
+              submitBehavior={i < MONEY.length - 1 ? 'submit' : 'blurAndSubmit'}
+              onSubmitEditing={() => moneyRefs.current[i + 1]?.focus()}
+            />
+          ))}
+        </View>
+      </SectionCard>
+
       <SectionCard title="INITIATIVE">
         {initiativeMax > 0 ? (
           <>
@@ -112,6 +134,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   label: { flex: 1, fontSize: 16 },
   count: { minWidth: 56, textAlign: 'center', fontSize: 16 },
+  coin: { flexBasis: 64, minWidth: 64 },
   divider: { marginBottom: 6 },
   newTurnBtn: { marginTop: 8 },
 });
