@@ -16,6 +16,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num, txt } from '@/lib/character-values';
+import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 import { replaceSkills, skillsQuery } from '@/repositories/skills';
 
@@ -27,6 +28,7 @@ export default function CharacterResumeScreen() {
   // Reload on focus so values edited in the status screen show up on return.
   const { char, state, reload } = useCharacterState(numId, { reloadOnFocus: true });
   const { data: skills } = useLiveQuery(skillsQuery(numId));
+  const { data: armors } = useLiveQuery(armorQuery(numId));
   const [editing, setEditing] = useState(false);
 
   // Drive the tab header: character name + edit/close toggle.
@@ -50,6 +52,7 @@ export default function CharacterResumeScreen() {
 
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
+  const equippedArmor = (armors ?? []).find((a) => a.equipped) ?? null;
 
   if (editing) {
     return (
@@ -111,6 +114,24 @@ export default function CharacterResumeScreen() {
             </View>
           ))}
         </SectionCard>
+
+        {equippedArmor ? (
+          <SectionCard title="ARMURE">
+            <View style={styles.healthRow}>
+              <Text style={[styles.healthLabel, { color: theme.colors.onSurfaceVariant }]}>
+                {equippedArmor.name || 'Armure'}
+              </Text>
+              <Bullets
+                count={equippedArmor.defenseMax}
+                filled={equippedArmor.defenseCurrent}
+                color={theme.colors.primary}
+                size={14}
+                gap={4}
+                style={styles.healthDots}
+              />
+            </View>
+          </SectionCard>
+        ) : null}
 
         <SectionCard title="RESSOURCES (MAX)">
           {RESOURCES.map((r) => (

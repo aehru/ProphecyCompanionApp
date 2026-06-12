@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Button, FAB, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
 
+import ArmorEditor from '@/components/armor-editor';
 import NumberField from '@/components/number-field';
 import SkillsEditor from '@/components/skills-editor';
 import SectionCard from '@/components/ui/section-card';
@@ -279,6 +280,8 @@ export default function CharacterForm({
                 />
               </View>
             </SectionCard>
+
+            <ArmorEditor characterId={initial?.id} />
           </>
         ) : null}
 

@@ -117,9 +117,29 @@ export const skills = sqliteTable('skills', {
   value: integer('value').notNull().default(0),
 });
 
+/**
+ * A character's armor catalogue. One row per owned armor (a character can hold
+ * several and swap between them across a campaign). `equipped` marks the single
+ * active armor — enforced one-at-a-time in the repository. `defenseMax` is the
+ * armor's full protection; `defenseCurrent` drops as it absorbs hits in a fight
+ * (floored at 0 = broken, but kept until the player deletes it).
+ */
+export const armor = sqliteTable('armor', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  defenseMax: integer('defense_max').notNull().default(0),
+  defenseCurrent: integer('defense_current').notNull().default(0),
+  equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
 export type NewActualState = typeof actualState.$inferInsert;
 export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
+export type Armor = typeof armor.$inferSelect;
+export type NewArmor = typeof armor.$inferInsert;
