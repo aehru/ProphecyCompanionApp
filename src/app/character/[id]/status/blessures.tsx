@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, Text, TextInput } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
+import SectionCard from '@/components/ui/section-card';
 import { WOUND_LEVELS } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
@@ -21,59 +22,58 @@ export default function StatusBlessures() {
 
   return (
     <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-      <Text variant="titleMedium">Santé</Text>
-      {WOUND_LEVELS.map((w) => {
-        const cur = stRec[`${w.key}Current`] ?? 0;
-        const max = charRec[`${w.key}Max`] ?? 0;
-        return (
-          <View key={w.key} style={styles.woundBlock}>
-            <View style={styles.woundHead}>
-              <Text style={styles.woundLabel}>{w.label}</Text>
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                {cur} / {max}
-              </Text>
+      <SectionCard title="SANTÉ">
+        {WOUND_LEVELS.map((w, i) => {
+          const cur = stRec[`${w.key}Current`] ?? 0;
+          const max = charRec[`${w.key}Max`] ?? 0;
+          return (
+            <View key={w.key} style={styles.woundBlock}>
+              {i > 0 && <Divider style={styles.divider} />}
+              <View style={styles.woundHead}>
+                <Text style={styles.woundLabel}>{w.label}</Text>
+                <Text style={{ color: theme.colors.onSurfaceVariant }}>
+                  {cur} / {max}
+                </Text>
+              </View>
+              <Bullets
+                count={max}
+                filled={cur}
+                color={theme.colors.error}
+                onSet={(n) => setStateValue(`${w.key}Current`, n)}
+              />
             </View>
-            <Bullets
-              count={max}
-              filled={cur}
-              color={theme.colors.error}
-              onSet={(n) => setStateValue(`${w.key}Current`, n)}
-            />
-            <Divider style={styles.divider} />
-          </View>
-        );
-      })}
+          );
+        })}
+        <Button mode="outlined" onPress={resetWounds} style={styles.resetBtn}>
+          Don de Heyra !
+        </Button>
+      </SectionCard>
 
-      <Button mode="outlined" onPress={resetWounds}>
-        Don de Heyra !
-      </Button>
-
-      <Text variant="titleMedium" style={styles.section}>
-        États / conditions
-      </Text>
-      <TextInput
-        label="États / conditions"
-        value={state.conditions}
-        onChangeText={(t) => persistState({ conditions: t })}
-        mode="outlined"
-        multiline
-      />
-      <TextInput
-        label="Notes"
-        value={state.notes}
-        onChangeText={(t) => persistState({ notes: t })}
-        mode="outlined"
-        multiline
-      />
+      <SectionCard title="ÉTATS / CONDITIONS">
+        <TextInput
+          label="États / conditions"
+          value={state.conditions}
+          onChangeText={(t) => persistState({ conditions: t })}
+          mode="outlined"
+          multiline
+        />
+        <TextInput
+          label="Notes"
+          value={state.notes}
+          onChangeText={(t) => persistState({ notes: t })}
+          mode="outlined"
+          multiline
+        />
+      </SectionCard>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 12 },
-  section: { marginTop: 8 },
   woundBlock: { gap: 6 },
   woundHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   woundLabel: { flex: 1, fontSize: 16 },
-  divider: { marginTop: 6 },
+  divider: { marginBottom: 6 },
+  resetBtn: { marginTop: 8 },
 });

@@ -1,9 +1,17 @@
-import React, { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, FAB, SegmentedButtons, Snackbar, Text, TextInput } from 'react-native-paper';
+import React, { useCallback, useRef, useState } from 'react';
+import {
+  Alert,
+  type TextInput as RNTextInput,
+  ScrollView,
+  StyleSheet,
+  type TextInputProps,
+  View,
+} from 'react-native';
+import { Button, FAB, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SkillsEditor from '@/components/skills-editor';
+import SectionCard from '@/components/ui/section-card';
 import {
   ATTRIBUTS,
   CARACTERISTIQUES,
@@ -11,8 +19,8 @@ import {
   TENDANCES,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { Character, NewCharacter, Skill } from '@/db/schema';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   buildSkillRows,
   type FormValues,
@@ -55,6 +63,31 @@ export default function CharacterForm({
   const set = (k: string) => (t: string) => setV((prev) => ({ ...prev, [k]: t }));
   // Stable setter so memoized NumberFields don't all re-render on each keystroke.
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
+
+  // Keyboard "next" wiring: chain inputs within a tab so the return key jumps to
+  // the following field instead of dismissing the keyboard.
+  const fieldRefs = useRef<Record<string, RNTextInput | null>>({});
+  const focusNext = (order: string[], key: string) =>
+    fieldRefs.current[order[order.indexOf(key) + 1]]?.focus();
+  const chain = (order: string[], key: string) => {
+    const isLast = order.indexOf(key) === order.length - 1;
+    return {
+      inputRef: (el: RNTextInput | null) => {
+        fieldRefs.current[key] = el;
+      },
+      returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
+      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as TextInputProps['submitBehavior'],
+      onSubmitEditing: () => focusNext(order, key),
+    };
+  };
+
+  const identiteOrder = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
+  const aptitudesOrder = [...CARACTERISTIQUES.map((c) => c.key), ...ATTRIBUTS.map((a) => a.key)];
+  const combatOrder = [
+    ...WOUND_LEVELS.map((w) => `${w.key}Max`),
+    ...RESOURCES.map((r) => `${r.key}Max`),
+    'initiativeMax',
+  ];
 
   const setSkillValue = useCallback((index: number, t: string) => {
     setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, value: t } : r)));
@@ -103,49 +136,71 @@ export default function CharacterForm({
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         {tab === 'identite' ? (
           <>
-            <Text variant="titleMedium">Identité</Text>
-            <TextInput label="Nom" value={v.nom} onChangeText={set('nom')} mode="outlined" />
-            <TextInput
-              label="Concept"
-              value={v.concept}
-              onChangeText={set('concept')}
-              mode="outlined"
-            />
+            <SectionCard title="IDENTITÉ">
+              <TextInput
+                label="Nom"
+                value={v.nom}
+                onChangeText={set('nom')}
+                mode="outlined"
+                ref={(el: unknown) => {
+                  fieldRefs.current.nom = el as RNTextInput | null;
+                }}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => fieldRefs.current.concept?.focus()}
+              />
+              <TextInput
+                label="Concept"
+                value={v.concept}
+                onChangeText={set('concept')}
+                mode="outlined"
+                ref={(el: unknown) => {
+                  fieldRefs.current.concept = el as RNTextInput | null;
+                }}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => focusNext(identiteOrder, 'concept')}
+              />
+            </SectionCard>
 
-            <Text variant="titleMedium" style={styles.section}>
-              Tendances
-            </Text>
-            {TENDANCES.map((t) => (
-              <View key={t.key} style={styles.row}>
-                <NumberField fieldKey={t.key} label={t.label} value={v[t.key]} onChange={setField} />
-                <NumberField
-                  fieldKey={`${t.key}Sub`}
-                  label={`${t.label} (puces)`}
-                  value={v[`${t.key}Sub`]}
-                  onChange={setField}
-                />
-              </View>
-            ))}
+            <SectionCard title="TENDANCES">
+              {TENDANCES.map((t) => (
+                <View key={t.key} style={styles.row}>
+                  <NumberField
+                    fieldKey={t.key}
+                    label={t.label}
+                    value={v[t.key]}
+                    onChange={setField}
+                    {...chain(identiteOrder, t.key)}
+                  />
+                  <NumberField
+                    fieldKey={`${t.key}Sub`}
+                    label={`${t.label} (puces)`}
+                    value={v[`${t.key}Sub`]}
+                    onChange={setField}
+                    {...chain(identiteOrder, `${t.key}Sub`)}
+                  />
+                </View>
+              ))}
+            </SectionCard>
 
-            <Text variant="titleMedium" style={styles.section}>
-              Biographie
-            </Text>
-            <TextInput
-              label="Biographie"
-              value={v.biographie}
-              onChangeText={set('biographie')}
-              mode="outlined"
-              multiline
-              numberOfLines={4}
-            />
+            <SectionCard title="BIOGRAPHIE">
+              <TextInput
+                label="Biographie"
+                value={v.biographie}
+                onChangeText={set('biographie')}
+                mode="outlined"
+                multiline
+                numberOfLines={4}
+              />
+            </SectionCard>
 
             {onDelete ? (
               <Button
                 mode="outlined"
                 textColor={theme.colors.error}
                 onPress={confirmDelete}
-                disabled={busy}
-                style={styles.section}>
+                disabled={busy}>
                 Supprimer
               </Button>
             ) : null}
@@ -154,71 +209,76 @@ export default function CharacterForm({
 
         {tab === 'aptitudes' ? (
           <>
-            <Text variant="titleMedium">Caractéristiques</Text>
-            <View style={styles.grid}>
-              {CARACTERISTIQUES.map((c) => (
-                <NumberField
-                  key={c.key}
-                  fieldKey={c.key}
-                  label={c.abbr}
-                  value={v[c.key]}
-                  onChange={setField}
-                />
-              ))}
-            </View>
+            <SectionCard title="CARACTÉRISTIQUES">
+              <View style={styles.grid}>
+                {CARACTERISTIQUES.map((c) => (
+                  <NumberField
+                    key={c.key}
+                    fieldKey={c.key}
+                    label={c.abbr}
+                    value={v[c.key]}
+                    onChange={setField}
+                    {...chain(aptitudesOrder, c.key)}
+                  />
+                ))}
+              </View>
+            </SectionCard>
 
-            <Text variant="titleMedium" style={styles.section}>
-              Attributs
-            </Text>
-            <View style={styles.grid}>
-              {ATTRIBUTS.map((a) => (
-                <NumberField
-                  key={a.key}
-                  fieldKey={a.key}
-                  label={a.label}
-                  value={v[a.key]}
-                  onChange={setField}
-                />
-              ))}
-            </View>
+            <SectionCard title="ATTRIBUTS">
+              <View style={styles.grid}>
+                {ATTRIBUTS.map((a) => (
+                  <NumberField
+                    key={a.key}
+                    fieldKey={a.key}
+                    label={a.label}
+                    value={v[a.key]}
+                    onChange={setField}
+                    {...chain(aptitudesOrder, a.key)}
+                  />
+                ))}
+              </View>
+            </SectionCard>
           </>
         ) : null}
 
         {tab === 'combat' ? (
           <>
-            <Text variant="titleMedium">Santé (max par niveau)</Text>
-            <View style={styles.grid}>
-              {WOUND_LEVELS.map((w) => (
-                <NumberField
-                  key={w.key}
-                  fieldKey={`${w.key}Max`}
-                  label={w.label}
-                  value={v[`${w.key}Max`]}
-                  onChange={setField}
-                />
-              ))}
-            </View>
+            <SectionCard title="SANTÉ (MAX PAR NIVEAU)">
+              <View style={styles.grid}>
+                {WOUND_LEVELS.map((w) => (
+                  <NumberField
+                    key={w.key}
+                    fieldKey={`${w.key}Max`}
+                    label={w.label}
+                    value={v[`${w.key}Max`]}
+                    onChange={setField}
+                    {...chain(combatOrder, `${w.key}Max`)}
+                  />
+                ))}
+              </View>
+            </SectionCard>
 
-            <Text variant="titleMedium" style={styles.section}>
-              Ressources (max)
-            </Text>
-            <View style={styles.grid}>
-              {RESOURCES.map((r) => (
+            <SectionCard title="RESSOURCES (MAX)">
+              <View style={styles.grid}>
+                {RESOURCES.map((r) => (
+                  <NumberField
+                    key={r.key}
+                    fieldKey={`${r.key}Max`}
+                    label={r.label}
+                    value={v[`${r.key}Max`]}
+                    onChange={setField}
+                    {...chain(combatOrder, `${r.key}Max`)}
+                  />
+                ))}
                 <NumberField
-                  key={r.key}
-                  fieldKey={`${r.key}Max`}
-                  label={r.label}
-                  value={v[`${r.key}Max`]}
+                  fieldKey="initiativeMax"
+                  label="Initiative"
+                  value={v.initiativeMax}
                   onChange={setField}
+                  {...chain(combatOrder, 'initiativeMax')}
                 />
-              ))}
-              <NumberField
-                fieldKey="initiativeMax"
-                label="Initiative"
-                value={v.initiativeMax}
-                onChange={setField}
-              />
-            </View>
+              </View>
+            </SectionCard>
           </>
         ) : null}
 
@@ -240,7 +300,8 @@ export default function CharacterForm({
         label={submitLabel}
         onPress={save}
         disabled={busy || v.nom.trim() === ''}
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        color={theme.colors.onPrimary}
       />
       <Snackbar visible={saved} onDismiss={() => setSaved(false)} duration={1500}>
         Enregistré
@@ -254,7 +315,6 @@ const styles = StyleSheet.create({
   fab: { position: 'absolute', right: 16, bottom: 16 },
   tabsBar: { paddingHorizontal: 16, paddingTop: 12 },
   container: { padding: 16, gap: 12, paddingBottom: 96 },
-  section: { marginTop: 8 },
   row: { flexDirection: 'row', gap: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
 });
