@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Divider, Text } from 'react-native-paper';
 
 import SkillFilterBar from '@/components/skill-filter-bar';
+import SectionCard from '@/components/ui/section-card';
 import { ATTRIBUTS, ATTRIBUT_LABEL } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -30,6 +31,8 @@ export default function SkillsView({
     ? skills.filter((s) => s.name.toLowerCase().includes(q))
     : skills.filter((s) => s.attribut === activeAttr);
 
+  const title = searching ? 'RÉSULTATS' : (ATTRIBUT_LABEL[activeAttr] ?? 'COMPÉTENCES').toUpperCase();
+
   return (
     <View style={styles.root}>
       <SkillFilterBar
@@ -39,33 +42,38 @@ export default function SkillsView({
         onAttr={setActiveAttr}
       />
 
-      <View style={styles.legend}>
-        <Text style={[styles.legendVal, { color: theme.colors.onSurfaceVariant }]}>Val</Text>
-        <Text style={[styles.legendTot, { color: theme.colors.primary }]}>Total</Text>
-      </View>
-
-      {visible.map((s) => (
-        <View key={s.id} style={styles.row}>
-          <View style={styles.nameCol}>
-            <Text>{s.name}</Text>
-            {searching ? (
-              <Text style={[styles.attr, { color: theme.colors.onSurfaceVariant }]}>
-                {ATTRIBUT_LABEL[s.attribut] ?? '—'}
-              </Text>
-            ) : null}
-          </View>
-          <Text style={styles.value}>{s.value}</Text>
-          <Text style={[styles.total, { color: theme.colors.primary }]}>
-            {s.value + attributValue(s.attribut)}
-          </Text>
+      <SectionCard title={title}>
+        <View style={styles.legend}>
+          <Text style={[styles.legendVal, { color: theme.colors.onSurfaceVariant }]}>Val</Text>
+          <Text style={[styles.legendTot, { color: theme.colors.primary }]}>Total</Text>
         </View>
-      ))}
 
-      {visible.length === 0 ? (
-        <Text style={{ color: theme.colors.onSurfaceVariant }}>
-          {searching ? 'Aucun résultat.' : 'Aucune compétence.'}
-        </Text>
-      ) : null}
+        {visible.map((s, i) => (
+          <View key={s.id}>
+            {i > 0 && <Divider style={styles.divider} />}
+            <View style={styles.row}>
+              <View style={styles.nameCol}>
+                <Text>{s.name}</Text>
+                {searching ? (
+                  <Text style={[styles.attr, { color: theme.colors.onSurfaceVariant }]}>
+                    {ATTRIBUT_LABEL[s.attribut] ?? '—'}
+                  </Text>
+                ) : null}
+              </View>
+              <Text style={styles.value}>{s.value}</Text>
+              <Text style={[styles.total, { color: theme.colors.primary }]}>
+                {s.value + attributValue(s.attribut)}
+              </Text>
+            </View>
+          </View>
+        ))}
+
+        {visible.length === 0 ? (
+          <Text style={{ color: theme.colors.onSurfaceVariant }}>
+            {searching ? 'Aucun résultat.' : 'Aucune compétence.'}
+          </Text>
+        ) : null}
+      </SectionCard>
     </View>
   );
 }
@@ -77,6 +85,7 @@ const styles = StyleSheet.create({
   attr: { fontSize: 12 },
   value: { width: 36, textAlign: 'center', fontSize: 16 },
   total: { width: 60, textAlign: 'center', fontSize: 16, fontWeight: '700' },
+  divider: { marginVertical: 6 },
   legend: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
   legendVal: { width: 36, textAlign: 'center', fontSize: 11 },
   legendTot: { width: 60, textAlign: 'center', fontSize: 11 },
