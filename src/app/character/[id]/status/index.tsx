@@ -1,5 +1,6 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text } from 'react-native-paper';
 
 import TendancesTriangle from '@/components/tendances-triangle';
@@ -14,7 +15,7 @@ export default function StatusTendances() {
   const rec = asNumRecord(char);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
       <SectionCard title="TENDANCES">
         <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
           Valeur : appui +1, appui long −1
@@ -25,7 +26,7 @@ export default function StatusTendances() {
           onSub={(k, n) => setCharValue(`${k}Sub`, n)}
         />
       </SectionCard>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

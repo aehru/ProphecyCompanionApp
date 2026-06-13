@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, Divider, Text, TextInput } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
@@ -26,7 +27,10 @@ export default function StatusBlessures() {
     );
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+      bottomOffset={24}>
       <SectionCard title="SANTÉ">
         {WOUND_LEVELS.map((w, i) => {
           const cur = stRec[`${w.key}Current`] ?? 0;
@@ -108,7 +112,7 @@ export default function StatusBlessures() {
           multiline
         />
       </SectionCard>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
