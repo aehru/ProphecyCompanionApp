@@ -7,7 +7,11 @@ import {
   type TextInputProps,
   View,
 } from 'react-native';
-import { Button, FAB, HelperText, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { Button, HelperText, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import AppFab from '@/components/ui/app-fab';
 
 import ArmorEditor from '@/components/armor-editor';
 import NumberField from '@/components/number-field';
@@ -55,6 +59,11 @@ export default function CharacterForm({
   onDelete?: () => Promise<void> | void;
 }) {
   const theme = useProphecyTheme();
+  const insets = useSafeAreaInsets();
+  // Match AppFab: skip the safe-area inset when inside a tab navigator, where
+  // the tab bar already offsets the screen.
+  const inTabBar = React.useContext(BottomTabBarHeightContext) != null;
+  const scrollPadBottom = 96 + (inTabBar ? 0 : insets.bottom);
   const [v, setV] = useState<FormValues>(() => toFormValues(initial));
   const [skills, setSkills] = useState<SkillRow[]>(() => buildSkillRows(initialSkills ?? []));
   const [skillSearch, setSkillSearch] = useState('');
@@ -142,7 +151,9 @@ export default function CharacterForm({
         </ScrollView>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }]}
+        keyboardShouldPersistTaps="handled">
         {tab === 'identite' ? (
           <>
             <SectionCard title="IDENTITÉ">
@@ -317,14 +328,7 @@ export default function CharacterForm({
         ) : null}
       </ScrollView>
 
-      <FAB
-        icon="content-save"
-        label={submitLabel}
-        onPress={save}
-        disabled={busy}
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
-        color={theme.colors.onPrimary}
-      />
+      <AppFab icon="content-save" label={submitLabel} onPress={save} disabled={busy} />
       <Snackbar visible={saved} onDismiss={() => setSaved(false)} duration={1500}>
         Enregistré
       </Snackbar>
@@ -334,9 +338,8 @@ export default function CharacterForm({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  fab: { position: 'absolute', right: 16, bottom: 16 },
   tabsBar: { paddingHorizontal: 16, paddingTop: 12 },
-  container: { padding: 16, gap: 12, paddingBottom: 96 },
+  container: { padding: 16, gap: 12 },
   row: { flexDirection: 'row', gap: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   // 2 columns (2x2 for the 4 attributs).

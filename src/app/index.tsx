@@ -2,8 +2,9 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { FAB, List, Text } from 'react-native-paper';
+import { List, Text } from 'react-native-paper';
 
+import AppFab from '@/components/ui/app-fab';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { charactersListQuery } from '@/repositories/characters';
 
@@ -57,12 +58,7 @@ export default function CharactersListScreen() {
           )}
         />
       )}
-      <FAB
-        icon="plus"
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
-        color={theme.colors.onPrimary}
-        onPress={() => router.push('/character/new')}
-      />
+      <AppFab icon="plus" onPress={() => router.push('/character/new')} />
     </View>
   );
 }
@@ -84,5 +80,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
   },
-  fab: { position: 'absolute', right: 24, bottom: 24 },
 });
