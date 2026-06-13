@@ -7,7 +7,7 @@ import {
   type TextInputProps,
   View,
 } from 'react-native';
-import { Button, FAB, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
+import { Button, FAB, HelperText, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
 
 import ArmorEditor from '@/components/armor-editor';
 import NumberField from '@/components/number-field';
@@ -61,6 +61,8 @@ export default function CharacterForm({
   const [tab, setTab] = useState<string>('identite');
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const nameMissing = v.nom.trim() === '';
   const set = (k: string) => (t: string) => setV((prev) => ({ ...prev, [k]: t }));
   // Stable setter so memoized NumberFields don't all re-render on each keystroke.
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
@@ -104,6 +106,12 @@ export default function CharacterForm({
   }, []);
 
   async function save() {
+    if (nameMissing) {
+      // Surface the missing required field instead of silently doing nothing.
+      setNameError(true);
+      setTab('identite');
+      return;
+    }
     setBusy(true);
     try {
       await onSubmit(fromFormValues(v), skillRowsToInput(skills));
@@ -139,10 +147,14 @@ export default function CharacterForm({
           <>
             <SectionCard title="IDENTITÉ">
               <TextInput
-                label="Nom"
+                label="Nom *"
                 value={v.nom}
-                onChangeText={set('nom')}
+                onChangeText={(t) => {
+                  set('nom')(t);
+                  if (nameError && t.trim() !== '') setNameError(false);
+                }}
                 mode="outlined"
+                error={nameError && nameMissing}
                 ref={(el: unknown) => {
                   fieldRefs.current.nom = el as RNTextInput | null;
                 }}
@@ -150,6 +162,11 @@ export default function CharacterForm({
                 blurOnSubmit={false}
                 onSubmitEditing={() => fieldRefs.current.concept?.focus()}
               />
+              { nameError && nameMissing ? (
+                <HelperText type="error" visible>
+                  Le nom est obligatoire
+                </HelperText>
+              ) : null }
               <TextInput
                 label="Concept"
                 value={v.concept}
@@ -304,7 +321,7 @@ export default function CharacterForm({
         icon="content-save"
         label={submitLabel}
         onPress={save}
-        disabled={busy || v.nom.trim() === ''}
+        disabled={busy}
         style={[styles.fab, { backgroundColor: theme.colors.primary }]}
         color={theme.colors.onPrimary}
       />
