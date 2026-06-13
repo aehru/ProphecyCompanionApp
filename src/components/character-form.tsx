@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   type TextInput as RNTextInput,
@@ -46,6 +46,17 @@ const FORM_TABS = [
   { key: 'competences', label: 'Compétences' },
 ] as const;
 
+// Field order per tab for the keyboard "next" chaining. Derived purely from the
+// domain constants, so they live at module scope (stable identity) — that lets
+// the chain props below be memoized once instead of rebuilt every render.
+const IDENTITE_ORDER = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
+const APTITUDES_ORDER = [...ATTRIBUTS.map((a) => a.key), ...CARACTERISTIQUES.map((c) => c.key)];
+const COMBAT_ORDER = [
+  ...WOUND_LEVELS.map((w) => `${w.key}Max`),
+  ...RESOURCES.map((r) => `${r.key}Max`),
+  'initiativeMax',
+];
+
 export default function CharacterForm({
   initial,
   initialSkills,
@@ -82,25 +93,40 @@ export default function CharacterForm({
   const fieldRefs = useRef<Record<string, RNTextInput | null>>({});
   const focusNext = (order: string[], key: string) =>
     fieldRefs.current[order[order.indexOf(key) + 1]]?.focus();
-  const chain = (order: string[], key: string) => {
-    const isLast = order.indexOf(key) === order.length - 1;
-    return {
-      inputRef: (el: RNTextInput | null) => {
-        fieldRefs.current[key] = el;
-      },
-      returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
-      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as TextInputProps['submitBehavior'],
-      onSubmitEditing: () => focusNext(order, key),
-    };
-  };
 
-  const identiteOrder = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
-  const aptitudesOrder = [...ATTRIBUTS.map((a) => a.key), ...CARACTERISTIQUES.map((c) => c.key)];
-  const combatOrder = [
-    ...WOUND_LEVELS.map((w) => `${w.key}Max`),
-    ...RESOURCES.map((r) => `${r.key}Max`),
-    'initiativeMax',
-  ];
+  // Pre-built, stable chain props per field. Memoized once (orders are module
+  // constants) so each NumberField gets the same prop identities across renders
+  // — that's what makes their React.memo actually skip re-renders while typing.
+  type ChainProps = {
+    inputRef: (el: RNTextInput | null) => void;
+    returnKeyType: TextInputProps['returnKeyType'];
+    submitBehavior: TextInputProps['submitBehavior'];
+    onSubmitEditing: () => void;
+  };
+  const chainMaps = useMemo(() => {
+    const make = (order: string[]): Record<string, ChainProps> =>
+      Object.fromEntries(
+        order.map((key, i) => {
+          const isLast = i === order.length - 1;
+          return [
+            key,
+            {
+              inputRef: (el: RNTextInput | null) => {
+                fieldRefs.current[key] = el;
+              },
+              returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
+              submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as TextInputProps['submitBehavior'],
+              onSubmitEditing: () => fieldRefs.current[order[i + 1]]?.focus(),
+            },
+          ];
+        }),
+      );
+    return {
+      identite: make(IDENTITE_ORDER),
+      aptitudes: make(APTITUDES_ORDER),
+      combat: make(COMBAT_ORDER),
+    };
+  }, []);
 
   const setSkillValue = useCallback((index: number, t: string) => {
     setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, value: t } : r)));
@@ -190,7 +216,7 @@ export default function CharacterForm({
                 }}
                 returnKeyType="next"
                 blurOnSubmit={false}
-                onSubmitEditing={() => focusNext(identiteOrder, 'concept')}
+                onSubmitEditing={() => focusNext(IDENTITE_ORDER, 'concept')}
               />
             </SectionCard>
 
@@ -202,14 +228,14 @@ export default function CharacterForm({
                     label={t.label}
                     value={v[t.key]}
                     onChange={setField}
-                    {...chain(identiteOrder, t.key)}
+                    {...chainMaps.identite[t.key]}
                   />
                   <NumberField
                     fieldKey={`${t.key}Sub`}
                     label={`${t.label} (puces)`}
                     value={v[`${t.key}Sub`]}
                     onChange={setField}
-                    {...chain(identiteOrder, `${t.key}Sub`)}
+                    {...chainMaps.identite[`${t.key}Sub`]}
                   />
                 </View>
               ))}
@@ -222,7 +248,7 @@ export default function CharacterForm({
                 onChangeText={set('biographie')}
                 mode="outlined"
                 multiline
-                numberOfLines={4}
+                style={{ minHeight: 96, maxHeight: 288 }}
               />
             </SectionCard>
 
@@ -250,7 +276,7 @@ export default function CharacterForm({
                     value={v[a.key]}
                     onChange={setField}
                     style={styles.col2}
-                    {...chain(aptitudesOrder, a.key)}
+                    {...chainMaps.aptitudes[a.key]}
                   />
                 ))}
               </View>
@@ -266,7 +292,7 @@ export default function CharacterForm({
                     value={v[c.key]}
                     onChange={setField}
                     style={styles.col2}
-                    {...chain(aptitudesOrder, c.key)}
+                    {...chainMaps.aptitudes[c.key]}
                   />
                 ))}
               </View>
@@ -285,7 +311,7 @@ export default function CharacterForm({
                     label={w.label}
                     value={v[`${w.key}Max`]}
                     onChange={setField}
-                    {...chain(combatOrder, `${w.key}Max`)}
+                    {...chainMaps.combat[`${w.key}Max`]}
                   />
                 ))}
               </View>
@@ -300,7 +326,7 @@ export default function CharacterForm({
                     label={r.label}
                     value={v[`${r.key}Max`]}
                     onChange={setField}
-                    {...chain(combatOrder, `${r.key}Max`)}
+                    {...chainMaps.combat[`${r.key}Max`]}
                   />
                 ))}
                 <NumberField
@@ -308,7 +334,7 @@ export default function CharacterForm({
                   label="Initiative"
                   value={v.initiativeMax}
                   onChange={setField}
-                  {...chain(combatOrder, 'initiativeMax')}
+                  {...chainMaps.combat['initiativeMax']}
                 />
               </View>
             </SectionCard>

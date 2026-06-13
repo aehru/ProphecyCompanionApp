@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Divider, IconButton, Menu, Text } from 'react-native-paper';
 
@@ -35,6 +35,14 @@ export default function SkillsEditor({
   const theme = useProphecyTheme();
   const [menuFor, setMenuFor] = useState<number | null>(null);
   const [activeAttr, setActiveAttr] = useState<string>(ATTRIBUTS[0].key);
+
+  // Stable so each NumberField keeps the same onChange identity and its
+  // React.memo can skip re-rendering untouched rows. NumberField hands back its
+  // fieldKey (the row index as a string).
+  const onFieldChange = useCallback(
+    (key: string, t: string) => onChangeValue(Number(key), t),
+    [onChangeValue],
+  );
 
   const q = search.trim().toLowerCase();
   const searching = q !== '';
@@ -104,7 +112,7 @@ export default function SkillsEditor({
                 label="Valeur"
                 value={row.value}
                 style={styles.valueField}
-                onChange={(k, t) => onChangeValue(Number(k), t)}
+                onChange={onFieldChange}
               />
 
               {row.isCustom ? (

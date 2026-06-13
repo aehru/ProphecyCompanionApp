@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { StyleSheet, TextInput, type TextInputProps, View, type ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 
@@ -31,17 +31,32 @@ const NumberField = React.memo(function NumberField({
   submitBehavior?: TextInputProps['submitBehavior'];
 }) {
   const theme = useProphecyTheme();
+  // Keep our own handle to the native input (to select-all on focus) while still
+  // forwarding the caller's inputRef used for keyboard "next" chaining.
+  const innerRef = useRef<TextInput | null>(null);
+  const setRefs = useCallback(
+    (el: TextInput | null) => {
+      innerRef.current = el;
+      if (typeof inputRef === 'function') inputRef(el);
+      else if (inputRef) (inputRef as React.MutableRefObject<TextInput | null>).current = el;
+    },
+    [inputRef],
+  );
   return (
     <View style={[styles.field, style]}>
       <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
       <TextInput
-        ref={inputRef}
+        ref={setRefs}
         value={value}
         onChangeText={(t) => onChange(fieldKey, t.replace(/[^0-9]/g, ''))}
         keyboardType="number-pad"
         returnKeyType={returnKeyType}
         onSubmitEditing={onSubmitEditing}
         submitBehavior={submitBehavior}
+        // Select the whole value on entry so the next keystroke overwrites it.
+        // Deferred a frame: a synchronous setSelection in onFocus gets clobbered
+        // by the cursor-to-end that focus applies on Android.
+        onFocus={() => requestAnimationFrame(() => innerRef.current?.setSelection(0, value.length))}
         style={[styles.input, { borderColor: theme.colors.outline, color: theme.colors.onSurface }]}
       />
     </View>
