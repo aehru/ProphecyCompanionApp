@@ -222,7 +222,7 @@ export default function CharacterForm({
                 onChangeText={set('biographie')}
                 mode="outlined"
                 multiline
-                numberOfLines={4}
+                style={{ minHeight: 96, maxHeight: 288 }}
               />
             </SectionCard>
 
