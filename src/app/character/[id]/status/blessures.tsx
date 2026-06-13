@@ -7,6 +7,7 @@ import { Button, Divider, Text, TextInput } from 'react-native-paper';
 import Bullets from '@/components/bullets';
 import SectionCard from '@/components/ui/section-card';
 import { WOUND_LEVELS } from '@/constants/prophecy';
+import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
@@ -20,6 +21,12 @@ export default function StatusBlessures() {
 
   const { data: armors } = useLiveQuery(armorQuery(char.id));
   const armor = (armors ?? []).find((a) => a.equipped) ?? null;
+
+  // Free text: edit locally, persist after a pause (no DB write per keystroke).
+  const [conditions, setConditions] = useDebouncedText(state.conditions, (t) =>
+    persistState({ conditions: t }),
+  );
+  const [notes, setNotes] = useDebouncedText(state.notes, (t) => persistState({ notes: t }));
 
   const resetWounds = () =>
     persistState(
@@ -99,15 +106,15 @@ export default function StatusBlessures() {
       <SectionCard title="ÉTATS / CONDITIONS">
         <TextInput
           label="États / conditions"
-          value={state.conditions}
-          onChangeText={(t) => persistState({ conditions: t })}
+          value={conditions}
+          onChangeText={setConditions}
           mode="outlined"
           multiline
         />
         <TextInput
           label="Notes"
-          value={state.notes}
-          onChangeText={(t) => persistState({ notes: t })}
+          value={notes}
+          onChangeText={setNotes}
           mode="outlined"
           multiline
         />

@@ -5,6 +5,8 @@ import { Button, IconButton, RadioButton, Text, TextInput } from 'react-native-p
 
 import NumberField from '@/components/number-field';
 import SectionCard from '@/components/ui/section-card';
+import type { Armor } from '@/db/schema';
+import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   armorQuery,
@@ -46,36 +48,7 @@ function ArmorList({ characterId }: { characterId: number }) {
           value={equippedId != null ? String(equippedId) : ''}
           onValueChange={(v) => equipArmor(characterId, Number(v))}>
           {list.map((a) => (
-            <View key={a.id} style={styles.row}>
-              <RadioButton value={String(a.id)} />
-              <TextInput
-                style={styles.name}
-                dense
-                mode="outlined"
-                placeholder="Nom de l'armure"
-                value={a.name}
-                onChangeText={(t) => updateArmor(a.id, { name: t })}
-              />
-              <NumberField
-                fieldKey={String(a.id)}
-                label="Déf. max"
-                value={a.defenseMax ? String(a.defenseMax) : ''}
-                onChange={(_, t) => {
-                  const max = Number(t) || 0;
-                  // Keep current within the new ceiling when max is lowered.
-                  updateArmor(a.id, {
-                    defenseMax: max,
-                    defenseCurrent: Math.min(a.defenseCurrent, max),
-                  });
-                }}
-                style={styles.maxField}
-              />
-              <IconButton
-                icon="delete"
-                iconColor={theme.colors.error}
-                onPress={() => deleteArmor(a.id)}
-              />
-            </View>
+            <ArmorRow key={a.id} armor={a} />
           ))}
         </RadioButton.Group>
       )}
@@ -83,6 +56,42 @@ function ArmorList({ characterId }: { characterId: number }) {
         Ajouter une armure
       </Button>
     </SectionCard>
+  );
+}
+
+function ArmorRow({ armor: a }: { armor: Armor }) {
+  const theme = useProphecyTheme();
+  // Debounce the name so typing doesn't fire a DB write (and live-query refetch)
+  // per keystroke.
+  const [name, setName] = useDebouncedText(a.name, (t) => updateArmor(a.id, { name: t }));
+
+  return (
+    <View style={styles.row}>
+      <RadioButton value={String(a.id)} />
+      <TextInput
+        style={styles.name}
+        dense
+        mode="outlined"
+        placeholder="Nom de l'armure"
+        value={name}
+        onChangeText={setName}
+      />
+      <NumberField
+        fieldKey={String(a.id)}
+        label="Déf. max"
+        value={a.defenseMax ? String(a.defenseMax) : ''}
+        onChange={(_, t) => {
+          const max = Number(t) || 0;
+          // Keep current within the new ceiling when max is lowered.
+          updateArmor(a.id, {
+            defenseMax: max,
+            defenseCurrent: Math.min(a.defenseCurrent, max),
+          });
+        }}
+        style={styles.maxField}
+      />
+      <IconButton icon="delete" iconColor={theme.colors.error} onPress={() => deleteArmor(a.id)} />
+    </View>
   );
 }
 
