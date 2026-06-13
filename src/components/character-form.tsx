@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, HelperText, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -151,9 +152,10 @@ export default function CharacterForm({
         </ScrollView>
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }]}
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}>
         {tab === 'identite' ? (
           <>
             <SectionCard title="IDENTITÉ">
@@ -326,7 +328,7 @@ export default function CharacterForm({
             onRemove={removeSkill}
           />
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <AppFab icon="content-save" label={submitLabel} onPress={save} disabled={busy} />
       <Snackbar visible={saved} onDismiss={() => setSaved(false)} duration={1500}>
