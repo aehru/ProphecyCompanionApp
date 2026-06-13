@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { ScrollView, StyleSheet, type TextInput as RNTextInput, View } from 'react-native';
+import { StyleSheet, type TextInput as RNTextInput, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, Divider, IconButton, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -35,7 +36,7 @@ export default function StatusRessources() {
   const newTurn = () => persistState({ initiativeValues: [] });
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
       <SectionCard title="RESSOURCES">
         {RESOURCES.map((r, i) => {
           const cur = stRec[`${r.key}Current`] ?? 0;
@@ -124,7 +125,7 @@ export default function StatusRessources() {
           </Text>
         )}
       </SectionCard>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

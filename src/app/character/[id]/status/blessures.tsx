@@ -1,11 +1,13 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, Divider, Text, TextInput } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
 import SectionCard from '@/components/ui/section-card';
 import { WOUND_LEVELS } from '@/constants/prophecy';
+import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
@@ -20,13 +22,22 @@ export default function StatusBlessures() {
   const { data: armors } = useLiveQuery(armorQuery(char.id));
   const armor = (armors ?? []).find((a) => a.equipped) ?? null;
 
+  // Free text: edit locally, persist after a pause (no DB write per keystroke).
+  const [conditions, setConditions] = useDebouncedText(state.conditions, (t) =>
+    persistState({ conditions: t }),
+  );
+  const [notes, setNotes] = useDebouncedText(state.notes, (t) => persistState({ notes: t }));
+
   const resetWounds = () =>
     persistState(
       Object.fromEntries(WOUND_LEVELS.map((w) => [`${w.key}Current`, 0])) as Partial<typeof state>,
     );
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <KeyboardAwareScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+      bottomOffset={24}>
       <SectionCard title="SANTÉ">
         {WOUND_LEVELS.map((w, i) => {
           const cur = stRec[`${w.key}Current`] ?? 0;
@@ -95,20 +106,20 @@ export default function StatusBlessures() {
       <SectionCard title="ÉTATS / CONDITIONS">
         <TextInput
           label="États / conditions"
-          value={state.conditions}
-          onChangeText={(t) => persistState({ conditions: t })}
+          value={conditions}
+          onChangeText={setConditions}
           mode="outlined"
           multiline
         />
         <TextInput
           label="Notes"
-          value={state.notes}
-          onChangeText={(t) => persistState({ notes: t })}
+          value={notes}
+          onChangeText={setNotes}
           mode="outlined"
           multiline
         />
       </SectionCard>
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
