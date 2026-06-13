@@ -83,7 +83,7 @@ export default function CharacterForm({
   };
 
   const identiteOrder = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
-  const aptitudesOrder = [...CARACTERISTIQUES.map((c) => c.key), ...ATTRIBUTS.map((a) => a.key)];
+  const aptitudesOrder = [...ATTRIBUTS.map((a) => a.key), ...CARACTERISTIQUES.map((c) => c.key)];
   const combatOrder = [
     ...WOUND_LEVELS.map((w) => `${w.key}Max`),
     ...RESOURCES.map((r) => `${r.key}Max`),
@@ -210,21 +210,6 @@ export default function CharacterForm({
 
         {tab === 'aptitudes' ? (
           <>
-            <SectionCard title="CARACTÉRISTIQUES">
-              <View style={styles.grid}>
-                {CARACTERISTIQUES.map((c) => (
-                  <NumberField
-                    key={c.key}
-                    fieldKey={c.key}
-                    label={c.abbr}
-                    value={v[c.key]}
-                    onChange={setField}
-                    {...chain(aptitudesOrder, c.key)}
-                  />
-                ))}
-              </View>
-            </SectionCard>
-
             <SectionCard title="ATTRIBUTS">
               <View style={styles.grid}>
                 {ATTRIBUTS.map((a) => (
@@ -234,7 +219,24 @@ export default function CharacterForm({
                     label={a.label}
                     value={v[a.key]}
                     onChange={setField}
+                    style={styles.col2}
                     {...chain(aptitudesOrder, a.key)}
+                  />
+                ))}
+              </View>
+            </SectionCard>
+
+            <SectionCard title="CARACTÉRISTIQUES">
+              <View style={styles.grid}>
+                {CARACTERISTIQUES.map((c) => (
+                  <NumberField
+                    key={c.key}
+                    fieldKey={c.key}
+                    label={c.abbr}
+                    value={v[c.key]}
+                    onChange={setField}
+                    style={styles.col2}
+                    {...chain(aptitudesOrder, c.key)}
                   />
                 ))}
               </View>
@@ -320,4 +322,6 @@ const styles = StyleSheet.create({
   container: { padding: 16, gap: 12, paddingBottom: 96 },
   row: { flexDirection: 'row', gap: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  // 2 columns (2x2 for the 4 attributs).
+  col2: { flexBasis: '45%', minWidth: 0 },
 });
