@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { Divider, Text } from 'react-native-paper';
 
 import SkillFilterBar from '@/components/skill-filter-bar';
@@ -35,51 +36,67 @@ export default function SkillsView({
 
   return (
     <View style={styles.root}>
-      <SkillFilterBar
-        search={search}
-        onSearch={setSearch}
-        activeAttr={activeAttr}
-        onAttr={setActiveAttr}
-      />
-
-      <SectionCard title={title}>
-        <View style={styles.legend}>
-          <Text style={[styles.legendVal, { color: theme.colors.onSurfaceVariant }]}>Val</Text>
-          <Text style={[styles.legendTot, { color: theme.colors.primary }]}>Total</Text>
-        </View>
-
-        {visible.map((s, i) => (
-          <View key={s.id}>
-            {i > 0 && <Divider style={styles.divider} />}
-            <View style={styles.row}>
-              <View style={styles.nameCol}>
-                <Text>{s.name}</Text>
-                {searching ? (
-                  <Text style={[styles.attr, { color: theme.colors.onSurfaceVariant }]}>
-                    {ATTRIBUT_LABEL[s.attribut] ?? '—'}
-                  </Text>
-                ) : null}
-              </View>
-              <Text style={styles.value}>{s.value}</Text>
-              <Text style={[styles.total, { color: theme.colors.primary }]}>
-                {s.value + attributValue(s.attribut)}
-              </Text>
-            </View>
+      <ScrollView
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        keyboardShouldPersistTaps="handled">
+        <SectionCard title={title}>
+          <View style={styles.legend}>
+            <Text style={[styles.legendVal, { color: theme.colors.onSurfaceVariant }]}>Val</Text>
+            <Text style={[styles.legendTot, { color: theme.colors.primary }]}>Total</Text>
           </View>
-        ))}
 
-        {visible.length === 0 ? (
-          <Text style={{ color: theme.colors.onSurfaceVariant }}>
-            {searching ? 'Aucun résultat.' : 'Aucune compétence.'}
-          </Text>
-        ) : null}
-      </SectionCard>
+          {visible.map((s, i) => (
+            <View key={s.id}>
+              {i > 0 && <Divider style={styles.divider} />}
+              <View style={styles.row}>
+                <View style={styles.nameCol}>
+                  <Text>{s.name}</Text>
+                  {searching ? (
+                    <Text style={[styles.attr, { color: theme.colors.onSurfaceVariant }]}>
+                      {ATTRIBUT_LABEL[s.attribut] ?? '—'}
+                    </Text>
+                  ) : null}
+                </View>
+                <Text style={styles.value}>{s.value}</Text>
+                <Text style={[styles.total, { color: theme.colors.primary }]}>
+                  {s.value + attributValue(s.attribut)}
+                </Text>
+              </View>
+            </View>
+          ))}
+
+          {visible.length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              {searching ? 'Aucun résultat.' : 'Aucune compétence.'}
+            </Text>
+          ) : null}
+        </SectionCard>
+      </ScrollView>
+
+      <KeyboardStickyView>
+        <View
+          style={[
+            styles.filterBar,
+            { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.outlineVariant },
+          ]}>
+          <SkillFilterBar
+            search={search}
+            onSearch={setSearch}
+            activeAttr={activeAttr}
+            onAttr={setActiveAttr}
+          />
+        </View>
+      </KeyboardStickyView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { gap: 8 },
+  root: { flex: 1 },
+  list: { flex: 1 },
+  listContent: { padding: 12, gap: 12 },
+  filterBar: { padding: 12, gap: 8, borderTopWidth: StyleSheet.hairlineWidth },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   nameCol: { flex: 1 },
   attr: { fontSize: 12 },

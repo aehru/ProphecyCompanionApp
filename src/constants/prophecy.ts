@@ -115,6 +115,24 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
   { name: 'Séduction', attribut: 'social' },
 ];
 
+/**
+ * Default weapon catalogue. Empty placeholder for now — a future PR will fill
+ * this with the rulebook's standard weapons (and a "add from catalogue" flow).
+ * Fields mirror the `weapons` table; formula columns hold raw formula strings.
+ */
+export const DEFAULT_WEAPONS: {
+  name: string;
+  damage: string;
+  prerequisites: string;
+  creationDifficulty: number;
+  creationTime: number;
+  initMelee: number;
+  initCorpsACorps: number;
+  special: string;
+  rangeEffective: string | null;
+  rangeMax: string | null;
+}[] = [];
+
 export const WOUND_LEVELS = [
   { key: 'egratignure', label: 'Égratignure', damage: '1-10', malus: null },
   { key: 'legere', label: 'Légère', damage: '11-20', malus: '-1' },

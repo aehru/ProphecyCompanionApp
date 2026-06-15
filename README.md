@@ -19,22 +19,25 @@ Everything is stored **locally on your device** (SQLite). No account, no network
 - List of all your characters with name + concept.
 - Tap **+** to create one; tap a character to open it.
 
-### Character sheet (Résumé / Compétences tabs)
+### Character sheet (Résumé / Compétences / Armes tabs)
 - **Tendances** — Dragon, Fatalité, Homme, shown as a triangle, each with a main value and a 0–10 *puces* subnumber.
 - **Caractéristiques** — the 8 stats (Force, Résistance, Intelligence, Volonté, Coordination, Perception, Présence, Empathie).
 - **Attributs** — Physique, Mental, Manuel, Social.
 - **Santé** — max wound boxes per level (Égratignure → Mort).
 - **Ressources** — Maîtrise, Chance, and Initiative maximums.
 - **Biographie** — free text.
-- **Compétences** — your skills, each linked to an attribut. Start from the built-in Prophecy 2e skill catalogue or add your own free-text skills. Skills at value 0 aren't kept.
+- **Compétences** — your skills, each linked to an attribut. Start from the built-in Prophecy 2e skill catalogue or add your own free-text skills. Skills at value 0 aren't kept. The search + attribut tabs sit at the bottom of the screen, within thumb reach.
+- **Armes** — each character keeps a list of weapons (tap **+** to add, the pencil to edit inline, delete from the editor). A weapon carries its name, damage, prerequisites, effective & max range, two initiative modifiers (mêlée / corps à corps), creation difficulty & time, and free-text special effects.
+  - **Formulas** — damage and ranges accept caractéristique-based formulas like `FOR x2 +3 +1D10`. Each card shows the formula *and* its computed result for the character (with Force 4 → `11 + 1D10`); dice stay unrolled.
+  - **Prerequisites** like `FOR 4, COO 5` are checked against the character and flagged met/unmet.
 - **Edit** the whole sheet inline; sheets can also be **deleted**.
 
 ### Live status (Statut)
 Reached via the **Statut** button on the sheet. Three quick-access tabs:
 
 - **Tendances** — tap to nudge a value (+1 tap, −1 long-press) and set *puces* during play.
-- **Blessures** — tap wound boxes to fill/clear current damage, edit conditions & notes, and reset all wounds with one button (*"Don de Heyra !"*).
-- **Ressources** — spend/restore Maîtrise & Chance against their max, and enter per-die **Initiative** values for the current turn ("Nouveau tour" clears them).
+- **Blessures** — enter per-die **Initiative** values for the current turn ("Nouveau tour" clears them), tap wound boxes to fill/clear current damage, edit conditions & notes, and reset all wounds with one button (*"Don de Heyra !"*).
+- **Ressources** — spend/restore Maîtrise & Chance against their max.
 
 Status edits save instantly and live-update across screens.
 

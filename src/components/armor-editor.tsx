@@ -82,10 +82,13 @@ function ArmorRow({ armor: a }: { armor: Armor }) {
         value={a.defenseMax ? String(a.defenseMax) : ''}
         onChange={(_, t) => {
           const max = Number(t) || 0;
-          // Keep current within the new ceiling when max is lowered.
+          // An undamaged armor (current at its max, incl. a brand-new 0/0 one)
+          // stays full as the max changes; a damaged one just clamps to the
+          // new ceiling.
+          const full = a.defenseCurrent >= a.defenseMax;
           updateArmor(a.id, {
             defenseMax: max,
-            defenseCurrent: Math.min(a.defenseCurrent, max),
+            defenseCurrent: full ? max : Math.min(a.defenseCurrent, max),
           });
         }}
         style={styles.maxField}

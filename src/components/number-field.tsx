@@ -19,6 +19,7 @@ const NumberField = React.memo(function NumberField({
   returnKeyType,
   onSubmitEditing,
   submitBehavior,
+  signed = false,
 }: {
   fieldKey: string;
   label: string;
@@ -29,6 +30,8 @@ const NumberField = React.memo(function NumberField({
   returnKeyType?: TextInputProps['returnKeyType'];
   onSubmitEditing?: () => void;
   submitBehavior?: TextInputProps['submitBehavior'];
+  // Allow a leading minus for signed values (e.g. initiative modifiers).
+  signed?: boolean;
 }) {
   const theme = useProphecyTheme();
   // Keep our own handle to the native input (to select-all on focus) while still
@@ -48,8 +51,14 @@ const NumberField = React.memo(function NumberField({
       <TextInput
         ref={setRefs}
         value={value}
-        onChangeText={(t) => onChange(fieldKey, t.replace(/[^0-9]/g, ''))}
-        keyboardType="number-pad"
+        onChangeText={(t) =>
+          onChange(
+            fieldKey,
+            // Strip non-digits; for signed values keep a single leading minus.
+            signed ? t.replace(/[^0-9-]/g, '').replace(/(?!^)-/g, '') : t.replace(/[^0-9]/g, ''),
+          )
+        }
+        keyboardType={signed ? 'numbers-and-punctuation' : 'number-pad'}
         returnKeyType={returnKeyType}
         onSubmitEditing={onSubmitEditing}
         submitBehavior={submitBehavior}

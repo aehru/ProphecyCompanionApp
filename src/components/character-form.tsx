@@ -14,7 +14,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AppFab from '@/components/ui/app-fab';
 
-import ArmorEditor from '@/components/armor-editor';
 import NumberField from '@/components/number-field';
 import SkillsEditor from '@/components/skills-editor';
 import SectionCard from '@/components/ui/section-card';
@@ -338,8 +337,6 @@ export default function CharacterForm({
                 />
               </View>
             </SectionCard>
-
-            <ArmorEditor characterId={initial?.id} />
           </>
         ) : null}
 
