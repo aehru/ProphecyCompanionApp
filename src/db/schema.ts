@@ -141,6 +141,33 @@ export const armor = sqliteTable('armor', {
   equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
 });
 
+/**
+ * A character's weapon catalogue. One row per owned weapon (plain list — no
+ * equipped flag yet; add one later mirroring `armor` if dual-wield/equip is
+ * needed). `damage`, `prerequisites`, `rangeEffective` and `rangeMax` hold raw
+ * formula strings (e.g. `FOR x2 +3 +1D10`) parsed/computed at display by
+ * `lib/formula`; range columns are nullable (null = melee weapon, no range).
+ * The two initiative columns are plain signed ints (display-only for now).
+ * Enchantments are deferred — they'll get their own `weapon_enchants` table
+ * (FK weaponId, cascade), not a json column here.
+ */
+export const weapons = sqliteTable('weapons', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  damage: text('damage').notNull().default(''),
+  prerequisites: text('prerequisites').notNull().default(''),
+  creationDifficulty: integer('creation_difficulty').notNull().default(0),
+  creationTime: integer('creation_time').notNull().default(0),
+  initMelee: integer('init_melee').notNull().default(0),
+  initCorpsACorps: integer('init_corps_a_corps').notNull().default(0),
+  special: text('special').notNull().default(''),
+  rangeEffective: text('range_effective'),
+  rangeMax: text('range_max'),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -149,3 +176,5 @@ export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
 export type Armor = typeof armor.$inferSelect;
 export type NewArmor = typeof armor.$inferInsert;
+export type Weapon = typeof weapons.$inferSelect;
+export type NewWeapon = typeof weapons.$inferInsert;
