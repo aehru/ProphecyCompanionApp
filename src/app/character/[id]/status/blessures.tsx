@@ -1,10 +1,11 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useRef } from 'react';
+import { StyleSheet, type TextInput as RNTextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, Divider, Text, TextInput } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
+import NumberField from '@/components/number-field';
 import SectionCard from '@/components/ui/section-card';
 import { WOUND_LEVELS } from '@/constants/prophecy';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
@@ -28,6 +29,16 @@ export default function StatusBlessures() {
   );
   const [notes, setNotes] = useDebouncedText(state.notes, (t) => persistState({ notes: t }));
 
+  const initiativeMax = charRec.initiativeMax ?? 0;
+  const stored = state.initiativeValues ?? [];
+  const initValues = Array.from({ length: initiativeMax }, (_, i) => stored[i] ?? 0);
+  const initRefs = useRef<(RNTextInput | null)[]>([]);
+  const setInitValue = (i: number, n: number) => {
+    const next = Array.from({ length: initiativeMax }, (_, j) => (j === i ? n : stored[j] ?? 0));
+    persistState({ initiativeValues: next });
+  };
+  const newTurn = () => persistState({ initiativeValues: [] });
+
   const resetWounds = () =>
     persistState(
       Object.fromEntries(WOUND_LEVELS.map((w) => [`${w.key}Current`, 0])) as Partial<typeof state>,
@@ -38,6 +49,37 @@ export default function StatusBlessures() {
       contentContainerStyle={styles.container}
       keyboardShouldPersistTaps="handled"
       bottomOffset={24}>
+      <SectionCard title="INITIATIVE">
+        {initiativeMax > 0 ? (
+          <>
+            <View style={styles.grid}>
+              {initValues.map((val, i) => (
+                <NumberField
+                  key={i}
+                  fieldKey={String(i)}
+                  label={`Dé ${i + 1}`}
+                  value={String(val)}
+                  onChange={(key, t) => setInitValue(Number(key), parseInt(t, 10) || 0)}
+                  inputRef={(el) => {
+                    initRefs.current[i] = el;
+                  }}
+                  returnKeyType={i < initValues.length - 1 ? 'next' : 'done'}
+                  submitBehavior={i < initValues.length - 1 ? 'submit' : 'blurAndSubmit'}
+                  onSubmitEditing={() => initRefs.current[i + 1]?.focus()}
+                />
+              ))}
+            </View>
+            <Button mode="outlined" onPress={newTurn} style={styles.newTurnBtn}>
+              Nouveau tour
+            </Button>
+          </>
+        ) : (
+          <Text style={{ color: theme.colors.onSurfaceVariant }}>
+            Définis l’initiative (max) dans la fiche.
+          </Text>
+        )}
+      </SectionCard>
+
       <SectionCard title="SANTÉ">
         {WOUND_LEVELS.map((w, i) => {
           const cur = stRec[`${w.key}Current`] ?? 0;
@@ -125,6 +167,8 @@ export default function StatusBlessures() {
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  newTurnBtn: { marginTop: 8 },
   armorHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   armorName: { flex: 1, fontSize: 16 },
   armorBtns: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },

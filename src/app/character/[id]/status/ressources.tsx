@@ -1,18 +1,16 @@
 import React, { useRef } from 'react';
 import { StyleSheet, type TextInput as RNTextInput, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Button, Divider, IconButton, Text } from 'react-native-paper';
+import { Divider, IconButton, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SectionCard from '@/components/ui/section-card';
 import { MONEY, RESOURCES } from '@/constants/prophecy';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp } from '@/lib/character-values';
 import { useStatus } from '@/lib/status-context';
 
 export default function StatusRessources() {
-  const { char, state, persistState, setStateValue } = useStatus();
-  const theme = useProphecyTheme();
+  const { char, state, setStateValue } = useStatus();
   const charRec = asNumRecord(char);
   const stRec = asNumRecord(state);
 
@@ -22,18 +20,7 @@ export default function StatusRessources() {
       clamp((stRec[`${key}Current`] ?? 0) + delta, 0, charRec[`${key}Max`] ?? 0),
     );
 
-  const initiativeMax = charRec.initiativeMax ?? 0;
-  const stored = state.initiativeValues ?? [];
-  const initValues = Array.from({ length: initiativeMax }, (_, i) => stored[i] ?? 0);
-
-  const initRefs = useRef<(RNTextInput | null)[]>([]);
   const moneyRefs = useRef<(RNTextInput | null)[]>([]);
-
-  const setInitValue = (i: number, n: number) => {
-    const next = Array.from({ length: initiativeMax }, (_, j) => (j === i ? n : stored[j] ?? 0));
-    persistState({ initiativeValues: next });
-  };
-  const newTurn = () => persistState({ initiativeValues: [] });
 
   return (
     <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
@@ -94,37 +81,6 @@ export default function StatusRessources() {
           ))}
         </View>
       </SectionCard>
-
-      <SectionCard title="INITIATIVE">
-        {initiativeMax > 0 ? (
-          <>
-            <View style={styles.grid}>
-              {initValues.map((val, i) => (
-                <NumberField
-                  key={i}
-                  fieldKey={String(i)}
-                  label={`Dé ${i + 1}`}
-                  value={String(val)}
-                  onChange={(key, t) => setInitValue(Number(key), parseInt(t, 10) || 0)}
-                  inputRef={(el) => {
-                    initRefs.current[i] = el;
-                  }}
-                  returnKeyType={i < initValues.length - 1 ? 'next' : 'done'}
-                  submitBehavior={i < initValues.length - 1 ? 'submit' : 'blurAndSubmit'}
-                  onSubmitEditing={() => initRefs.current[i + 1]?.focus()}
-                />
-              ))}
-            </View>
-            <Button mode="outlined" onPress={newTurn} style={styles.newTurnBtn}>
-              Nouveau tour
-            </Button>
-          </>
-        ) : (
-          <Text style={{ color: theme.colors.onSurfaceVariant }}>
-            Définis l’initiative (max) dans la fiche.
-          </Text>
-        )}
-      </SectionCard>
     </KeyboardAwareScrollView>
   );
 }
@@ -137,5 +93,4 @@ const styles = StyleSheet.create({
   count: { minWidth: 56, textAlign: 'center', fontSize: 16 },
   coin: { flexBasis: 64, minWidth: 64 },
   divider: { marginBottom: 6 },
-  newTurnBtn: { marginTop: 8 },
 });
