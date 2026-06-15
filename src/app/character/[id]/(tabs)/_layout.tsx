@@ -31,6 +31,10 @@ export default function CharacterTabsLayout() {
         name="skills"
         options={{ title: 'Compétences', tabBarIcon: tabIcon('sword-cross') }}
       />
+      <Tabs.Screen
+        name="weapons"
+        options={{ title: 'Armes', tabBarIcon: tabIcon('sword') }}
+      />
     </Tabs>
   );
 }

@@ -5,6 +5,7 @@ import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, DevSettings, StyleSheet, useColorScheme, View } from 'react-native';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PaperProvider, Text } from 'react-native-paper';
 
 import { db, resetDatabase } from '@/db/client';
@@ -74,19 +75,21 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider theme={theme} settings={paperSettings}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ title: 'Personnages' }} />
-          <Stack.Screen
-            name="character/new"
-            options={{ title: 'Nouveau personnage', presentation: 'modal' }}
-          />
-          {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
-          <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
-        </Stack>
-      </ThemeProvider>
-    </PaperProvider>
+    <KeyboardProvider>
+      <PaperProvider theme={theme} settings={paperSettings}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="index" options={{ title: 'Personnages' }} />
+            <Stack.Screen
+              name="character/new"
+              options={{ title: 'Nouveau personnage', presentation: 'modal' }}
+            />
+            {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
+            <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
+          </Stack>
+        </ThemeProvider>
+      </PaperProvider>
+    </KeyboardProvider>
   );
 }
 

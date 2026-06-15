@@ -1,10 +1,12 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { FAB, IconButton, Text } from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { IconButton, Text } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
+import AppFab from '@/components/ui/app-fab';
 import CharacterForm from '@/components/character-form';
 import { characterFallback } from '@/components/ui/character-gate';
 import TendancesTriangle from '@/components/tendances-triangle';
@@ -76,7 +78,7 @@ export default function CharacterResumeScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
         <SectionCard title="TENDANCES">
           <TendancesTriangle get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })} />
         </SectionCard>
@@ -151,11 +153,10 @@ export default function CharacterResumeScreen() {
         <SectionCard title="BIOGRAPHIE">
           <Text>{txt(char.biographie)}</Text>
         </SectionCard>
-      </ScrollView>
-      <FAB
+      </KeyboardAwareScrollView>
+      <AppFab
         icon="heart-pulse"
         label="Statut"
-        style={styles.fab}
         onPress={() => router.push(`/character/${numId}/status` as Href)}
       />
     </View>
@@ -165,7 +166,6 @@ export default function CharacterResumeScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
-  fab: { position: 'absolute', right: 16, bottom: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   healthRow: {
     flexDirection: 'row',

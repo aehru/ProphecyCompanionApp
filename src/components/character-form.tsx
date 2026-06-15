@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   type TextInput as RNTextInput,
@@ -7,9 +7,13 @@ import {
   type TextInputProps,
   View,
 } from 'react-native';
-import { Button, FAB, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { Button, HelperText, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import ArmorEditor from '@/components/armor-editor';
+import AppFab from '@/components/ui/app-fab';
+
 import NumberField from '@/components/number-field';
 import SkillsEditor from '@/components/skills-editor';
 import SectionCard from '@/components/ui/section-card';
@@ -41,6 +45,17 @@ const FORM_TABS = [
   { key: 'competences', label: 'Compétences' },
 ] as const;
 
+// Field order per tab for the keyboard "next" chaining. Derived purely from the
+// domain constants, so they live at module scope (stable identity) — that lets
+// the chain props below be memoized once instead of rebuilt every render.
+const IDENTITE_ORDER = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
+const APTITUDES_ORDER = [...ATTRIBUTS.map((a) => a.key), ...CARACTERISTIQUES.map((c) => c.key)];
+const COMBAT_ORDER = [
+  ...WOUND_LEVELS.map((w) => `${w.key}Max`),
+  ...RESOURCES.map((r) => `${r.key}Max`),
+  'initiativeMax',
+];
+
 export default function CharacterForm({
   initial,
   initialSkills,
@@ -55,12 +70,19 @@ export default function CharacterForm({
   onDelete?: () => Promise<void> | void;
 }) {
   const theme = useProphecyTheme();
+  const insets = useSafeAreaInsets();
+  // Match AppFab: skip the safe-area inset when inside a tab navigator, where
+  // the tab bar already offsets the screen.
+  const inTabBar = React.useContext(BottomTabBarHeightContext) != null;
+  const scrollPadBottom = 96 + (inTabBar ? 0 : insets.bottom);
   const [v, setV] = useState<FormValues>(() => toFormValues(initial));
   const [skills, setSkills] = useState<SkillRow[]>(() => buildSkillRows(initialSkills ?? []));
   const [skillSearch, setSkillSearch] = useState('');
   const [tab, setTab] = useState<string>('identite');
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const nameMissing = v.nom.trim() === '';
   const set = (k: string) => (t: string) => setV((prev) => ({ ...prev, [k]: t }));
   // Stable setter so memoized NumberFields don't all re-render on each keystroke.
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
@@ -70,25 +92,40 @@ export default function CharacterForm({
   const fieldRefs = useRef<Record<string, RNTextInput | null>>({});
   const focusNext = (order: string[], key: string) =>
     fieldRefs.current[order[order.indexOf(key) + 1]]?.focus();
-  const chain = (order: string[], key: string) => {
-    const isLast = order.indexOf(key) === order.length - 1;
-    return {
-      inputRef: (el: RNTextInput | null) => {
-        fieldRefs.current[key] = el;
-      },
-      returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
-      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as TextInputProps['submitBehavior'],
-      onSubmitEditing: () => focusNext(order, key),
-    };
-  };
 
-  const identiteOrder = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
-  const aptitudesOrder = [...CARACTERISTIQUES.map((c) => c.key), ...ATTRIBUTS.map((a) => a.key)];
-  const combatOrder = [
-    ...WOUND_LEVELS.map((w) => `${w.key}Max`),
-    ...RESOURCES.map((r) => `${r.key}Max`),
-    'initiativeMax',
-  ];
+  // Pre-built, stable chain props per field. Memoized once (orders are module
+  // constants) so each NumberField gets the same prop identities across renders
+  // — that's what makes their React.memo actually skip re-renders while typing.
+  type ChainProps = {
+    inputRef: (el: RNTextInput | null) => void;
+    returnKeyType: TextInputProps['returnKeyType'];
+    submitBehavior: TextInputProps['submitBehavior'];
+    onSubmitEditing: () => void;
+  };
+  const chainMaps = useMemo(() => {
+    const make = (order: string[]): Record<string, ChainProps> =>
+      Object.fromEntries(
+        order.map((key, i) => {
+          const isLast = i === order.length - 1;
+          return [
+            key,
+            {
+              inputRef: (el: RNTextInput | null) => {
+                fieldRefs.current[key] = el;
+              },
+              returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
+              submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as TextInputProps['submitBehavior'],
+              onSubmitEditing: () => fieldRefs.current[order[i + 1]]?.focus(),
+            },
+          ];
+        }),
+      );
+    return {
+      identite: make(IDENTITE_ORDER),
+      aptitudes: make(APTITUDES_ORDER),
+      combat: make(COMBAT_ORDER),
+    };
+  }, []);
 
   const setSkillValue = useCallback((index: number, t: string) => {
     setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, value: t } : r)));
@@ -104,6 +141,12 @@ export default function CharacterForm({
   }, []);
 
   async function save() {
+    if (nameMissing) {
+      // Surface the missing required field instead of silently doing nothing.
+      setNameError(true);
+      setTab('identite');
+      return;
+    }
     setBusy(true);
     try {
       await onSubmit(fromFormValues(v), skillRowsToInput(skills));
@@ -134,15 +177,22 @@ export default function CharacterForm({
         </ScrollView>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <KeyboardAwareScrollView
+        contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }]}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}>
         {tab === 'identite' ? (
           <>
             <SectionCard title="IDENTITÉ">
               <TextInput
-                label="Nom"
+                label="Nom *"
                 value={v.nom}
-                onChangeText={set('nom')}
+                onChangeText={(t) => {
+                  set('nom')(t);
+                  if (nameError && t.trim() !== '') setNameError(false);
+                }}
                 mode="outlined"
+                error={nameError && nameMissing}
                 ref={(el: unknown) => {
                   fieldRefs.current.nom = el as RNTextInput | null;
                 }}
@@ -150,6 +200,11 @@ export default function CharacterForm({
                 blurOnSubmit={false}
                 onSubmitEditing={() => fieldRefs.current.concept?.focus()}
               />
+              { nameError && nameMissing ? (
+                <HelperText type="error" visible>
+                  Le nom est obligatoire
+                </HelperText>
+              ) : null }
               <TextInput
                 label="Concept"
                 value={v.concept}
@@ -160,7 +215,7 @@ export default function CharacterForm({
                 }}
                 returnKeyType="next"
                 blurOnSubmit={false}
-                onSubmitEditing={() => focusNext(identiteOrder, 'concept')}
+                onSubmitEditing={() => focusNext(IDENTITE_ORDER, 'concept')}
               />
             </SectionCard>
 
@@ -172,14 +227,14 @@ export default function CharacterForm({
                     label={t.label}
                     value={v[t.key]}
                     onChange={setField}
-                    {...chain(identiteOrder, t.key)}
+                    {...chainMaps.identite[t.key]}
                   />
                   <NumberField
                     fieldKey={`${t.key}Sub`}
                     label={`${t.label} (puces)`}
                     value={v[`${t.key}Sub`]}
                     onChange={setField}
-                    {...chain(identiteOrder, `${t.key}Sub`)}
+                    {...chainMaps.identite[`${t.key}Sub`]}
                   />
                 </View>
               ))}
@@ -192,7 +247,7 @@ export default function CharacterForm({
                 onChangeText={set('biographie')}
                 mode="outlined"
                 multiline
-                numberOfLines={4}
+                style={{ minHeight: 96, maxHeight: 288 }}
               />
             </SectionCard>
 
@@ -210,21 +265,6 @@ export default function CharacterForm({
 
         {tab === 'aptitudes' ? (
           <>
-            <SectionCard title="CARACTÉRISTIQUES">
-              <View style={styles.grid}>
-                {CARACTERISTIQUES.map((c) => (
-                  <NumberField
-                    key={c.key}
-                    fieldKey={c.key}
-                    label={c.abbr}
-                    value={v[c.key]}
-                    onChange={setField}
-                    {...chain(aptitudesOrder, c.key)}
-                  />
-                ))}
-              </View>
-            </SectionCard>
-
             <SectionCard title="ATTRIBUTS">
               <View style={styles.grid}>
                 {ATTRIBUTS.map((a) => (
@@ -234,7 +274,24 @@ export default function CharacterForm({
                     label={a.label}
                     value={v[a.key]}
                     onChange={setField}
-                    {...chain(aptitudesOrder, a.key)}
+                    style={styles.col2}
+                    {...chainMaps.aptitudes[a.key]}
+                  />
+                ))}
+              </View>
+            </SectionCard>
+
+            <SectionCard title="CARACTÉRISTIQUES">
+              <View style={styles.grid}>
+                {CARACTERISTIQUES.map((c) => (
+                  <NumberField
+                    key={c.key}
+                    fieldKey={c.key}
+                    label={c.abbr}
+                    value={v[c.key]}
+                    onChange={setField}
+                    style={styles.col2}
+                    {...chainMaps.aptitudes[c.key]}
                   />
                 ))}
               </View>
@@ -253,7 +310,7 @@ export default function CharacterForm({
                     label={w.label}
                     value={v[`${w.key}Max`]}
                     onChange={setField}
-                    {...chain(combatOrder, `${w.key}Max`)}
+                    {...chainMaps.combat[`${w.key}Max`]}
                   />
                 ))}
               </View>
@@ -268,7 +325,7 @@ export default function CharacterForm({
                     label={r.label}
                     value={v[`${r.key}Max`]}
                     onChange={setField}
-                    {...chain(combatOrder, `${r.key}Max`)}
+                    {...chainMaps.combat[`${r.key}Max`]}
                   />
                 ))}
                 <NumberField
@@ -276,12 +333,10 @@ export default function CharacterForm({
                   label="Initiative"
                   value={v.initiativeMax}
                   onChange={setField}
-                  {...chain(combatOrder, 'initiativeMax')}
+                  {...chainMaps.combat['initiativeMax']}
                 />
               </View>
             </SectionCard>
-
-            <ArmorEditor characterId={initial?.id} />
           </>
         ) : null}
 
@@ -296,16 +351,9 @@ export default function CharacterForm({
             onRemove={removeSkill}
           />
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
-      <FAB
-        icon="content-save"
-        label={submitLabel}
-        onPress={save}
-        disabled={busy || v.nom.trim() === ''}
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
-        color={theme.colors.onPrimary}
-      />
+      <AppFab icon="content-save" label={submitLabel} onPress={save} disabled={busy} />
       <Snackbar visible={saved} onDismiss={() => setSaved(false)} duration={1500}>
         Enregistré
       </Snackbar>
@@ -315,9 +363,10 @@ export default function CharacterForm({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  fab: { position: 'absolute', right: 16, bottom: 16 },
   tabsBar: { paddingHorizontal: 16, paddingTop: 12 },
-  container: { padding: 16, gap: 12, paddingBottom: 96 },
+  container: { padding: 16, gap: 12 },
   row: { flexDirection: 'row', gap: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  // 2 columns (2x2 for the 4 attributs).
+  col2: { flexBasis: '45%', minWidth: 0 },
 });

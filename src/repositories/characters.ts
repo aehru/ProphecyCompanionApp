@@ -19,8 +19,13 @@ export async function createCharacter(data: Partial<NewCharacter>) {
     .insert(characters)
     .values({ ...data, createdAt: now, updatedAt: now })
     .returning();
-  // Every character gets a matching state row.
-  await db.insert(actualState).values({ characterId: row.id });
+  // Every character gets a matching state row. Resource pools start full:
+  // current = max so a fresh character isn't created empty.
+  await db.insert(actualState).values({
+    characterId: row.id,
+    maitriseCurrent: row.maitriseMax,
+    chanceCurrent: row.chanceMax,
+  });
   return row;
 }
 
