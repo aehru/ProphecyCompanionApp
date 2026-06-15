@@ -1,7 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { StyleSheet, View } from 'react-native';
 
 import SkillsView from '@/components/skills-view';
 import { characterFallback } from '@/components/ui/character-gate';
@@ -22,15 +21,12 @@ export default function CharacterSkillsScreen() {
   const rec = asNumRecord(char);
 
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={styles.container}
-      keyboardShouldPersistTaps="handled"
-      bottomOffset={24}>
+    <View style={styles.container}>
       <SkillsView skills={skills ?? []} attributValue={(a) => rec[a] ?? 0} />
-    </KeyboardAwareScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 12, gap: 12, paddingBottom: 24 },
+  container: { flex: 1 },
 });
