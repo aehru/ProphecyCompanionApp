@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text } from 'react-native-paper';
 
+import ArmorEditor from '@/components/armor-editor';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import WeaponCard from '@/components/weapon-card';
@@ -38,6 +39,8 @@ export default function CharacterWeaponsScreen() {
             <WeaponCard key={w.id} weapon={w} caracValue={(k) => rec[k] ?? 0} />
           ))
         )}
+
+        <ArmorEditor characterId={numId} />
       </KeyboardAwareScrollView>
       <AppFab icon="plus" label="Arme" onPress={() => createWeapon(numId)} />
     </View>
