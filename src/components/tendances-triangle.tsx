@@ -36,6 +36,7 @@ function Unit({ tKey, get, onValue, onSub }: UnitProps) {
         perRow={5}
         size={14}
         gap={3}
+        color={onSub ? t.color : undefined}
         onSet={onSub ? (n) => onSub(tKey, n) : undefined}
       />
     </View>
