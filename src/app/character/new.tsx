@@ -3,17 +3,16 @@ import React from 'react';
 
 import CharacterForm from '@/components/character-form';
 import { createCharacter } from '@/repositories/characters';
-import { replaceSkills } from '@/repositories/skills';
 
 export default function NewCharacterScreen() {
   const router = useRouter();
   return (
     <CharacterForm
       submitLabel="Créer"
-      onSubmit={async (data, skills) => {
+      onSubmit={async (data) => {
         const created = await createCharacter(data);
-        await replaceSkills(created.id, skills);
-        // Land on the new character's fiche; back goes to the list.
+        // Land on the new character's fiche; back goes to the list. Skills are
+        // added afterwards via the Compétences tab's edit mode.
         router.replace(`/character/${created.id}` as Href);
       }}
     />
