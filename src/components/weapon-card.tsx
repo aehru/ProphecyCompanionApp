@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
+import { Alert, type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
 import { Button, HelperText, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -166,6 +166,12 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
   const rangeEffErr = formulaError(rangeEff);
   const rangeMaxErr = formulaError(rangeMax);
 
+  const confirmDelete = () =>
+    Alert.alert('Supprimer', 'Supprimer cette arme ?', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Supprimer', style: 'destructive', onPress: () => deleteWeapon(w.id) },
+    ]);
+
   // Keyboard "next" wiring: jump to the following field instead of dismissing.
   const refs = useRef<Record<string, RNTextInput | null>>({});
   const focusNext = (key: string) => {
@@ -309,11 +315,7 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
         style={styles.special}
       />
 
-      <Button
-        mode="outlined"
-        icon="delete"
-        textColor={theme.colors.error}
-        onPress={() => deleteWeapon(w.id)}>
+      <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>
         Supprimer
       </Button>
     </SectionCard>
