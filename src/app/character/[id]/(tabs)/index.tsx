@@ -193,7 +193,7 @@ export default function CharacterResumeScreen() {
                 <Bullets
                   count={rec[`${w.key}Max`] ?? 0}
                   filled={stRec[`${w.key}Current`] ?? 0}
-                  color={theme.colors.error}
+                  color={editing ? theme.colors.error : theme.colors.onSurfaceVariant}
                   size={14}
                   gap={4}
                   onSet={editing ? (n) => setStateValue(`${w.key}Current`, n) : undefined}
@@ -215,7 +215,7 @@ export default function CharacterResumeScreen() {
               <Bullets
                 count={equippedArmor.defenseMax}
                 filled={equippedArmor.defenseCurrent}
-                color={theme.colors.primary}
+                color={editing ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 size={14}
                 gap={4}
                 style={styles.healthDots}
