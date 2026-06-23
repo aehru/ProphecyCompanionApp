@@ -193,6 +193,7 @@ export default function CharacterResumeScreen() {
                   color={editing ? theme.colors.error : theme.colors.onSurfaceVariant}
                   size={14}
                   gap={4}
+                  perRow={5}
                   onSet={editing ? (n) => setStateValue(`${w.key}Current`, n) : undefined}
                 />
               </View>
@@ -215,6 +216,7 @@ export default function CharacterResumeScreen() {
                 color={editing ? theme.colors.primary : theme.colors.onSurfaceVariant}
                 size={14}
                 gap={4}
+                perRow={5}
                 style={styles.healthDots}
                 onSet={
                   editing ? (n) => updateArmor(equippedArmor.id, { defenseCurrent: n }) : undefined
