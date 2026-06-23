@@ -26,7 +26,7 @@ import { armorQuery, updateArmor } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 
 // Order the editable numeric fields chain through with the keyboard "next" key.
-const EDIT_ORDER = [
+const EDIT_ORDER: readonly string[] = [
   ...ATTRIBUTS.map((a) => a.key),
   ...CARACTERISTIQUES.map((c) => c.key),
   ...MONEY.map((m) => m.key),
