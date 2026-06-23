@@ -11,6 +11,7 @@ import { characterFallback } from '@/components/ui/character-gate';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { asNumRecord, buildSkillRows, type SkillRow, skillRowsToInput } from '@/lib/character-values';
 import { replaceSkills, skillsQuery } from '@/repositories/skills';
 
@@ -20,7 +21,7 @@ export default function CharacterSkillsScreen() {
   // Reload on focus so attribut values edited elsewhere keep the totals correct.
   const { char } = useCharacterState(numId, { reloadOnFocus: true });
   const { data: skills } = useLiveQuery(skillsQuery(numId));
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useEditToggle(navigation);
 
   // Toggle lives in the header (a FAB would overlap the sticky filter bar).
   useLayoutEffect(() => {
@@ -32,10 +33,7 @@ export default function CharacterSkillsScreen() {
         />
       ),
     });
-  }, [navigation, editing]);
-
-  // Drop back to the read view when leaving the tab.
-  useEffect(() => navigation.addListener('blur', () => setEditing(false)), [navigation]);
+  }, [navigation, editing, setEditing]);
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
