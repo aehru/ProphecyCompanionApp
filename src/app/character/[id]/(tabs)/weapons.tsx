@@ -9,6 +9,7 @@ import NumberField from '@/components/number-field';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import EditableSection from '@/components/ui/editable-section';
+import StatChip from '@/components/ui/stat-chip';
 import WeaponCard from '@/components/weapon-card';
 import type { ActualState } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
@@ -68,12 +69,7 @@ export default function CharacterWeaponsScreen() {
                       style={styles.initField}
                     />
                   ) : (
-                    <View key={i} style={[styles.initChip, { borderColor: theme.colors.outlineVariant }]}>
-                      <Text style={[styles.initChipLabel, { color: theme.colors.onSurfaceVariant }]}>
-                        Dé {i + 1}
-                      </Text>
-                      <Text variant="titleMedium">{val}</Text>
-                    </View>
+                    <StatChip key={i} label={`Dé ${i + 1}`} value={String(val)} />
                   ),
                 )}
               </View>
@@ -117,13 +113,4 @@ const styles = StyleSheet.create({
   heading: { fontSize: 13, fontWeight: '700', letterSpacing: 0.5, marginTop: 4 },
   initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
-  initChip: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    minWidth: 64,
-    alignItems: 'center',
-  },
-  initChipLabel: { fontSize: 11, letterSpacing: 0.5 },
 });
