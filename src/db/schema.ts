@@ -57,6 +57,24 @@ export const characters = sqliteTable('characters', {
   // Number of initiative actions/dice per turn
   initiativeMax: integer('initiative_max').notNull().default(0),
 
+  // Magic — global reserve max (prefilled = Volonté at creation, then editable
+  // in the Magie tab; current value lives on actual_state).
+  reserveMagiqueMax: integer('reserve_magique_max').notNull().default(0),
+  // Per-sphere max (0 = sphere not known). Current values live on actual_state.
+  sphereCitesMax: integer('sphere_cites_max').notNull().default(0),
+  sphereFeuMax: integer('sphere_feu_max').notNull().default(0),
+  sphereMetalMax: integer('sphere_metal_max').notNull().default(0),
+  sphereNatureMax: integer('sphere_nature_max').notNull().default(0),
+  sphereOceansMax: integer('sphere_oceans_max').notNull().default(0),
+  spherePierreMax: integer('sphere_pierre_max').notNull().default(0),
+  sphereRevesMax: integer('sphere_reves_max').notNull().default(0),
+  sphereVentsMax: integer('sphere_vents_max').notNull().default(0),
+  sphereOmbreMax: integer('sphere_ombre_max').notNull().default(0),
+  // Disciplines — plain stats like the caractéristiques.
+  magieInvocatoire: integer('magie_invocatoire').notNull().default(0),
+  magieInstinctive: integer('magie_instinctive').notNull().default(0),
+  sorcellerie: integer('sorcellerie').notNull().default(0),
+
   biographie: text('biographie').notNull().default(''),
 }, () => [
   // Tendance puces are always 0–10, enforced at the DB level.
@@ -86,6 +104,18 @@ export const actualState = sqliteTable('actual_state', {
   // Resource pools — current in-play value (max lives on the character)
   maitriseCurrent: integer('maitrise_current').notNull().default(0),
   chanceCurrent: integer('chance_current').notNull().default(0),
+
+  // Magic — current reserve + per-sphere current (maxes live on the character)
+  reserveMagiqueCurrent: integer('reserve_magique_current').notNull().default(0),
+  sphereCitesCurrent: integer('sphere_cites_current').notNull().default(0),
+  sphereFeuCurrent: integer('sphere_feu_current').notNull().default(0),
+  sphereMetalCurrent: integer('sphere_metal_current').notNull().default(0),
+  sphereNatureCurrent: integer('sphere_nature_current').notNull().default(0),
+  sphereOceansCurrent: integer('sphere_oceans_current').notNull().default(0),
+  spherePierreCurrent: integer('sphere_pierre_current').notNull().default(0),
+  sphereRevesCurrent: integer('sphere_reves_current').notNull().default(0),
+  sphereVentsCurrent: integer('sphere_vents_current').notNull().default(0),
+  sphereOmbreCurrent: integer('sphere_ombre_current').notNull().default(0),
 
   // Money — count of each Drac coin. Kept separate (no universal conversion).
   dracFer: integer('drac_fer').notNull().default(0),
