@@ -98,7 +98,6 @@ const styles = StyleSheet.create({
   editBtn: { position: 'absolute', top: 0, right: 0, margin: 2, zIndex: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   shield: { margin: 0 },
-  equipLabel: { flex: 1, fontSize: 15 },
   label: { fontSize: 14 },
   value: { fontSize: 15, fontWeight: '600' },
   maxField: { flexGrow: 0, flexBasis: 120, minWidth: 120 },

@@ -18,6 +18,7 @@ import { ATTRIBUTS, CARACTERISTIQUES, MONEY, RESOURCES, WOUND_LEVELS } from '@/c
 import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
@@ -25,7 +26,7 @@ import { armorQuery, updateArmor } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 
 // Order the editable numeric fields chain through with the keyboard "next" key.
-const EDIT_ORDER = [
+const EDIT_ORDER: readonly string[] = [
   ...ATTRIBUTS.map((a) => a.key),
   ...CARACTERISTIQUES.map((c) => c.key),
   ...MONEY.map((m) => m.key),
@@ -43,7 +44,7 @@ export default function CharacterResumeScreen() {
   });
   const { data: armors } = useLiveQuery(armorQuery(numId));
   // Tab-level live edit: one FAB flips every card between read and edit.
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).
   const [editingSheet, setEditingSheet] = useState(false);
 
@@ -59,13 +60,9 @@ export default function CharacterResumeScreen() {
     });
   }, [navigation, char?.nom, editingSheet]);
 
-  // Leaving the tab resets both edit modes.
+  // Leaving the tab also closes the full sheet form (the hook handles `editing`).
   useEffect(
-    () =>
-      navigation.addListener('blur', () => {
-        setEditingSheet(false);
-        setEditing(false);
-      }),
+    () => navigation.addListener('blur', () => setEditingSheet(false)),
     [navigation],
   );
 
@@ -308,7 +305,6 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  col2: { flexBasis: '45%', minWidth: 0 },
   col4: { flexBasis: '22%', minWidth: 0 },
   coin: { flexBasis: 64, minWidth: 64 },
   healthRow: {
