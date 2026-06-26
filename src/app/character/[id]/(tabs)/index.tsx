@@ -8,6 +8,7 @@ import { IconButton, Text } from 'react-native-paper';
 import Bullets from '@/components/bullets';
 import CharacterForm from '@/components/character-form';
 import ConditionsCard from '@/components/conditions-card';
+import EffectsCard from '@/components/effects-card';
 import NumberField from '@/components/number-field';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
@@ -21,8 +22,10 @@ import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
+import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, updateArmor } from '@/repositories/armor';
+import { effectsQuery } from '@/repositories/effects';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 
 // Order the editable numeric fields chain through with the keyboard "next" key.
@@ -43,6 +46,7 @@ export default function CharacterResumeScreen() {
     reloadOnFocus: true,
   });
   const { data: armors } = useLiveQuery(armorQuery(numId));
+  const { data: effects } = useLiveQuery(effectsQuery(numId));
   // Tab-level live edit: one FAB flips every card between read and edit.
   const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).
@@ -75,6 +79,9 @@ export default function CharacterResumeScreen() {
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
   const equippedArmor = (armors ?? []).find((a) => a.equipped) ?? null;
+  const effectList = effects ?? [];
+  // Wound malus hits every roll; folded into each stat's badge alongside effects.
+  const wound = woundMalus(stRec);
 
   // Live writers: update local state immediately, persist in the background.
   const setCharValue = (key: string, value: number) => {
@@ -153,7 +160,12 @@ export default function CharacterResumeScreen() {
                   {...chain(a.key)}
                 />
               ) : (
-                <StatChip key={a.key} label={a.label} value={num(rec[a.key])} />
+                <StatChip
+                  key={a.key}
+                  label={a.label}
+                  value={num(rec[a.key])}
+                  modifier={totalModifier(a.key, effectList, wound)}
+                />
               ),
             )}
           </View>
@@ -173,7 +185,12 @@ export default function CharacterResumeScreen() {
                   {...chain(c.key)}
                 />
               ) : (
-                <StatChip key={c.key} label={c.abbr} value={num(rec[c.key])} />
+                <StatChip
+                  key={c.key}
+                  label={c.abbr}
+                  value={num(rec[c.key])}
+                  modifier={totalModifier(c.key, effectList, wound)}
+                />
               ),
             )}
           </View>
@@ -203,6 +220,8 @@ export default function CharacterResumeScreen() {
             </View>
           ))}
         </SectionCard>
+
+        <EffectsCard characterId={numId} effects={effectList} editing={editing} />
 
         {equippedArmor ? (
           <SectionCard title="ARMURE">
