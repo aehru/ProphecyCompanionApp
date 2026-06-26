@@ -19,7 +19,9 @@ import SectionCard from '@/components/ui/section-card';
 import {
   ATTRIBUTS,
   CARACTERISTIQUES,
+  DISCIPLINES,
   RESOURCES,
+  SPHERES,
   TENDANCES,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
@@ -34,6 +36,7 @@ const FORM_TABS = [
   { key: 'identite', label: 'Identité' },
   { key: 'aptitudes', label: 'Aptitudes' },
   { key: 'combat', label: 'Combat' },
+  { key: 'magie', label: 'Magie' },
 ] as const;
 
 // Field order per tab for the keyboard "next" chaining. Derived purely from the
@@ -45,6 +48,11 @@ const COMBAT_ORDER = [
   ...WOUND_LEVELS.map((w) => `${w.key}Max`),
   ...RESOURCES.map((r) => `${r.key}Max`),
   'initiativeMax',
+];
+const MAGIE_ORDER = [
+  'reserveMagiqueMax',
+  ...SPHERES.map((s) => `${s.key}Max`),
+  ...DISCIPLINES.map((d) => d.key),
 ];
 
 export default function CharacterForm({
@@ -111,6 +119,7 @@ export default function CharacterForm({
       identite: make(IDENTITE_ORDER),
       aptitudes: make(APTITUDES_ORDER),
       combat: make(COMBAT_ORDER),
+      magie: make(MAGIE_ORDER),
     };
   }, []);
 
@@ -309,6 +318,52 @@ export default function CharacterForm({
                   onChange={setField}
                   {...chainMaps.combat['initiativeMax']}
                 />
+              </View>
+            </SectionCard>
+          </>
+        ) : null}
+
+        {tab === 'magie' ? (
+          <>
+            <SectionCard title="RÉSERVE DE MAGIE (MAX)">
+              <NumberField
+                fieldKey="reserveMagiqueMax"
+                label="Réserve max (défaut = Volonté)"
+                value={v.reserveMagiqueMax}
+                onChange={setField}
+                {...chainMaps.magie['reserveMagiqueMax']}
+              />
+            </SectionCard>
+
+            <SectionCard title="SPHÈRES (MAX)">
+              <View style={styles.grid}>
+                {SPHERES.map((s) => (
+                  <NumberField
+                    key={s.key}
+                    fieldKey={`${s.key}Max`}
+                    label={s.label}
+                    value={v[`${s.key}Max`]}
+                    onChange={setField}
+                    style={styles.col2}
+                    {...chainMaps.magie[`${s.key}Max`]}
+                  />
+                ))}
+              </View>
+            </SectionCard>
+
+            <SectionCard title="DISCIPLINES">
+              <View style={styles.grid}>
+                {DISCIPLINES.map((d) => (
+                  <NumberField
+                    key={d.key}
+                    fieldKey={d.key}
+                    label={d.label}
+                    value={v[d.key]}
+                    onChange={setField}
+                    style={styles.col2}
+                    {...chainMaps.magie[d.key]}
+                  />
+                ))}
               </View>
             </SectionCard>
           </>

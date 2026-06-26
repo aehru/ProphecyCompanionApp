@@ -1,0 +1,23 @@
+ALTER TABLE `characters` ADD `reserve_magique_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_cites_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_feu_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_metal_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_nature_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_oceans_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_pierre_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_reves_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_vents_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sphere_ombre_max` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `magie_invocatoire` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `magie_instinctive` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `characters` ADD `sorcellerie` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `reserve_magique_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_cites_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_feu_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_metal_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_nature_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_oceans_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_pierre_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_reves_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_vents_current` integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE `actual_state` ADD `sphere_ombre_current` integer DEFAULT 0 NOT NULL;

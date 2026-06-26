@@ -50,6 +50,13 @@
       "when": 1781000000000,
       "tag": "0006_add_weapons",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1781100000000,
+      "tag": "0007_add_magic",
+      "breakpoints": true
     }
   ]
 }
