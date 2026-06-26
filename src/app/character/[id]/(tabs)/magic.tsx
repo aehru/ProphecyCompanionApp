@@ -55,20 +55,6 @@ export default function CharacterMagicScreen() {
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <SectionCard
-          title="RÉSERVE"
-          helper={editing ? 'Appui pour ajuster' : undefined}>
-          <Bullets
-            count={reserveMax}
-            filled={reserveCur}
-            perRow={5}
-            color={dotColor}
-            size={16}
-            gap={6}
-            onSet={editing ? (n) => setStateValue('reserveMagiqueCurrent', n) : undefined}
-          />
-        </SectionCard>
-
         <SectionCard title="DISCIPLINES">
           <View style={styles.grid}>
             {DISCIPLINES.map((d) => (
@@ -77,30 +63,44 @@ export default function CharacterMagicScreen() {
           </View>
         </SectionCard>
 
-        <SectionCard title="SPHÈRES">
-          {knownSpheres.length === 0 ? (
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>
-              Aucune sphère connue. Définis les maximums dans la fiche.
-            </Text>
-          ) : (
-            knownSpheres.map((s) => {
-              const curKey = `${s.key}Current`;
-              return (
-                <View key={s.key} style={styles.sphereRow}>
-                  <Text style={styles.sphereLabel}>{s.label}</Text>
-                  <Bullets
-                    count={rec[`${s.key}Max`] ?? 0}
-                    filled={stRec[curKey] ?? 0}
-                    perRow={5}
-                    color={dotColor}
-                    size={16}
-                    gap={6}
-                    onSet={editing ? (n) => setStateValue(curKey, n) : undefined}
-                  />
-                </View>
-              );
-            })
-          )}
+        <SectionCard
+          title="RÉSERVE">
+          <View style={styles.sphereRow}>
+            <Text style={styles.sphereLabel}>Globale</Text>
+            <Bullets
+              count={reserveMax}
+              filled={reserveCur}
+              perRow={5}
+              color={dotColor}
+              size={16}
+              gap={6}
+              onSet={editing ? (n) => setStateValue('reserveMagiqueCurrent', n) : undefined}
+            />
+          </View>
+
+          {knownSpheres.map((s) => {
+            const curKey = `${s.key}Current`;
+            return (
+              <View
+                key={s.key}
+                style={[
+                  styles.sphereRow,
+                  styles.sphereDivider,
+                  { borderTopColor: theme.colors.outlineVariant },
+                ]}>
+                <Text style={styles.sphereLabel}>{s.label}</Text>
+                <Bullets
+                  count={rec[`${s.key}Max`] ?? 0}
+                  filled={stRec[curKey] ?? 0}
+                  perRow={5}
+                  color={dotColor}
+                  size={16}
+                  gap={6}
+                  onSet={editing ? (n) => setStateValue(curKey, n) : undefined}
+                />
+              </View>
+            );
+          })}
         </SectionCard>
       </KeyboardAwareScrollView>
 
@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  sphereRow: { gap: 6 },
-  sphereLabel: { fontSize: 15 },
+  sphereRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  sphereDivider: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
+  sphereLabel: { width: 72, fontSize: 15, lineHeight: 16 },
 });
