@@ -34,6 +34,33 @@ export const ATTRIBUT_LABEL: Record<string, string> = Object.fromEntries(
 );
 
 /**
+ * Magic spheres. `key` is the column base: max lives on the character
+ * (`${key}Max`), current value on actual_state (`${key}Current`). A sphere is
+ * "known" once its max is > 0. Fixed catalogue — no custom spheres.
+ */
+export const SPHERES = [
+  { key: 'sphereCites', label: 'Cités' },
+  { key: 'sphereFeu', label: 'Feu' },
+  { key: 'sphereMetal', label: 'Métal' },
+  { key: 'sphereNature', label: 'Nature' },
+  { key: 'sphereOceans', label: 'Océans' },
+  { key: 'spherePierre', label: 'Pierre' },
+  { key: 'sphereReves', label: 'Rêves' },
+  { key: 'sphereVents', label: 'Vents' },
+  { key: 'sphereOmbre', label: "Ombre" },
+] as const;
+
+/**
+ * Magic disciplines. Plain single-value stats like the caractéristiques — one
+ * int column per discipline on the character (no max/current pool).
+ */
+export const DISCIPLINES = [
+  { key: 'magieInvocatoire', label: 'Invocatoire' },
+  { key: 'magieInstinctive', label: 'Instinctive' },
+  { key: 'sorcellerie', label: 'Sorcellerie' },
+] as const;
+
+/**
  * Default skill catalogue. Single global list, same for every
  * character. Each skill links to one attribut key.
  */
@@ -166,4 +193,9 @@ export const NUMERIC_KEYS: string[] = [
   ...WOUND_LEVELS.map((w) => `${w.key}Max`),
   ...RESOURCES.map((r) => `${r.key}Max`),
   'initiativeMax',
+  // Magic maxes + disciplines are all form-edited (Magie tab). Per-sphere/reserve
+  // current values live on actual_state and are tracked from the sheet's Magie tab.
+  'reserveMagiqueMax',
+  ...SPHERES.map((s) => `${s.key}Max`),
+  ...DISCIPLINES.map((d) => d.key),
 ];

@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { Divider, Text } from 'react-native-paper';
 
 import SkillFilterBar from '@/components/skill-filter-bar';
 import SectionCard from '@/components/ui/section-card';
-import { ATTRIBUTS, ATTRIBUT_LABEL } from '@/constants/prophecy';
+import { ATTRIBUT_LABEL } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { useSkillFilter } from '@/hooks/use-skill-filter';
 
 /**
  * Read-only skills list. Only owned skills (value > 0) are passed in. Grouped
@@ -23,16 +24,11 @@ export default function SkillsView({
   attributValue: (attribut: string) => number;
 }) {
   const theme = useProphecyTheme();
-  const [search, setSearch] = useState('');
-  const [activeAttr, setActiveAttr] = useState<string>(ATTRIBUTS[0].key);
+  const { search, setSearch, activeAttr, setActiveAttr, q, searching, title } = useSkillFilter();
 
-  const q = search.trim().toLowerCase();
-  const searching = q !== '';
   const visible = searching
     ? skills.filter((s) => s.name.toLowerCase().includes(q))
     : skills.filter((s) => s.attribut === activeAttr);
-
-  const title = searching ? 'RÉSULTATS' : (ATTRIBUT_LABEL[activeAttr] ?? 'COMPÉTENCES').toUpperCase();
 
   return (
     <View style={styles.root}>

@@ -76,20 +76,20 @@ src/
       new.tsx                # create-character modal
       [id]/
         _layout.tsx          # per-character stack
-        (tabs)/              # Résumé + Compétences tabs
-          index.tsx          #   sheet view + inline edit
-          skills.tsx         #   skills view/edit
-        status/              # live "Statut" — Tendances / Blessures / Ressources tabs
+        (tabs)/              # Résumé + Compétences + Armes tabs
+          index.tsx          #   sheet read view + per-card live edit; header pencil → full form
+          skills.tsx         #   skills read view / live editor
+          weapons.tsx        #   weapons, armor, initiative; read view / live edit
   components/                # reusable UI (forms, chips, bullets, triangle…)
-    ui/                      # small primitives (section-card, info-row, stat-chip, character-gate)
+    ui/                      # small primitives (section-card, editable-section, stat-chip, character-gate)
   constants/
     prophecy.ts              # game domain: tendances, caracs, attributs, skills, wounds, resources
   db/
     client.ts                # opens the SQLite DB, exposes `db`, resetDatabase()
     schema.ts                # Drizzle tables: characters, actual_state, skills
   hooks/                     # use-character-id, use-character-state, use-prophecy-theme
-  lib/                       # character-values helpers, status-context
-  repositories/              # data access: characters, actual-state, skills
+  lib/                       # character-values helpers, formula
+  repositories/              # data access: characters, actual-state, skills, weapons, armor
   theme/                     # Paper/navigation themes
 drizzle/                     # generated SQL migrations + meta (committed)
 drizzle.config.ts

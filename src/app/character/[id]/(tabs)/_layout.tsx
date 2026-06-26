@@ -35,6 +35,10 @@ export default function CharacterTabsLayout() {
         name="weapons"
         options={{ title: 'Armes', tabBarIcon: tabIcon('sword') }}
       />
+      <Tabs.Screen
+        name="magic"
+        options={{ title: 'Magie', tabBarIcon: tabIcon('auto-fix') }}
+      />
     </Tabs>
   );
 }

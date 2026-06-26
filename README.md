@@ -4,6 +4,8 @@ A mobile companion app for the French tabletop RPG **Prophecy (2nd edition)**. C
 
 > The app's interface is in **French**, matching the Prophecy 2e rulebook and its terminology.
 
+![banner](assets/images/appstore_banner.png "Banner")
+
 ## What it does
 
 Prophecy character sheets have a lot of moving parts. This app splits them in two:

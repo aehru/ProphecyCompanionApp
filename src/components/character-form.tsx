@@ -1,3 +1,4 @@
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -7,7 +8,6 @@ import {
   type TextInputProps,
   View,
 } from 'react-native';
-import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, HelperText, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,34 +15,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AppFab from '@/components/ui/app-fab';
 
 import NumberField from '@/components/number-field';
-import SkillsEditor from '@/components/skills-editor';
 import SectionCard from '@/components/ui/section-card';
 import {
   ATTRIBUTS,
   CARACTERISTIQUES,
+  DISCIPLINES,
   RESOURCES,
+  SPHERES,
   TENDANCES,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
-import type { Character, NewCharacter, Skill } from '@/db/schema';
+import type { Character, NewCharacter } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import {
-  buildSkillRows,
-  type FormValues,
-  fromFormValues,
-  type SkillRow,
-  skillRowsToInput,
-  toFormValues,
-} from '@/lib/character-values';
-import type { SkillInput } from '@/repositories/skills';
+import { type FormValues, fromFormValues, toFormValues } from '@/lib/character-values';
 
 // In-page tabs to keep the long sheet from scrolling endlessly. Name stays the
 // only required field, validated globally regardless of the active tab.
+// Skills are edited post-creation in the Compétences tab's edit mode, not here.
 const FORM_TABS = [
   { key: 'identite', label: 'Identité' },
   { key: 'aptitudes', label: 'Aptitudes' },
   { key: 'combat', label: 'Combat' },
-  { key: 'competences', label: 'Compétences' },
+  { key: 'magie', label: 'Magie' },
 ] as const;
 
 // Field order per tab for the keyboard "next" chaining. Derived purely from the
@@ -55,18 +49,21 @@ const COMBAT_ORDER = [
   ...RESOURCES.map((r) => `${r.key}Max`),
   'initiativeMax',
 ];
+const MAGIE_ORDER = [
+  'reserveMagiqueMax',
+  ...SPHERES.map((s) => `${s.key}Max`),
+  ...DISCIPLINES.map((d) => d.key),
+];
 
 export default function CharacterForm({
   initial,
-  initialSkills,
   submitLabel,
   onSubmit,
   onDelete,
 }: {
   initial?: Partial<Character> | null;
-  initialSkills?: Skill[];
   submitLabel: string;
-  onSubmit: (data: Partial<NewCharacter>, skills: SkillInput[]) => Promise<void> | void;
+  onSubmit: (data: Partial<NewCharacter>) => Promise<void> | void;
   onDelete?: () => Promise<void> | void;
 }) {
   const theme = useProphecyTheme();
@@ -76,8 +73,6 @@ export default function CharacterForm({
   const inTabBar = React.useContext(BottomTabBarHeightContext) != null;
   const scrollPadBottom = 96 + (inTabBar ? 0 : insets.bottom);
   const [v, setV] = useState<FormValues>(() => toFormValues(initial));
-  const [skills, setSkills] = useState<SkillRow[]>(() => buildSkillRows(initialSkills ?? []));
-  const [skillSearch, setSkillSearch] = useState('');
   const [tab, setTab] = useState<string>('identite');
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -124,20 +119,8 @@ export default function CharacterForm({
       identite: make(IDENTITE_ORDER),
       aptitudes: make(APTITUDES_ORDER),
       combat: make(COMBAT_ORDER),
+      magie: make(MAGIE_ORDER),
     };
-  }, []);
-
-  const setSkillValue = useCallback((index: number, t: string) => {
-    setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, value: t } : r)));
-  }, []);
-  const setSkillAttribut = useCallback((index: number, attribut: string) => {
-    setSkills((prev) => prev.map((r, i) => (i === index ? { ...r, attribut } : r)));
-  }, []);
-  const addCustomSkill = useCallback((name: string, attribut: string) => {
-    setSkills((prev) => [...prev, { name, attribut, value: '', isCustom: true }]);
-  }, []);
-  const removeSkill = useCallback((index: number) => {
-    setSkills((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   async function save() {
@@ -149,7 +132,7 @@ export default function CharacterForm({
     }
     setBusy(true);
     try {
-      await onSubmit(fromFormValues(v), skillRowsToInput(skills));
+      await onSubmit(fromFormValues(v));
       setSaved(true);
     } finally {
       setBusy(false);
@@ -274,7 +257,7 @@ export default function CharacterForm({
                     label={a.label}
                     value={v[a.key]}
                     onChange={setField}
-                    style={styles.col2}
+                    style={styles.col4}
                     {...chainMaps.aptitudes[a.key]}
                   />
                 ))}
@@ -340,16 +323,50 @@ export default function CharacterForm({
           </>
         ) : null}
 
-        {tab === 'competences' ? (
-          <SkillsEditor
-            rows={skills}
-            search={skillSearch}
-            onSearch={setSkillSearch}
-            onChangeValue={setSkillValue}
-            onChangeAttribut={setSkillAttribut}
-            onAddCustom={addCustomSkill}
-            onRemove={removeSkill}
-          />
+        {tab === 'magie' ? (
+          <>
+            <SectionCard title="RÉSERVE DE MAGIE (MAX)">
+              <NumberField
+                fieldKey="reserveMagiqueMax"
+                label="Réserve max (défaut = Volonté)"
+                value={v.reserveMagiqueMax}
+                onChange={setField}
+                {...chainMaps.magie['reserveMagiqueMax']}
+              />
+            </SectionCard>
+
+            <SectionCard title="SPHÈRES (MAX)">
+              <View style={styles.grid}>
+                {SPHERES.map((s) => (
+                  <NumberField
+                    key={s.key}
+                    fieldKey={`${s.key}Max`}
+                    label={s.label}
+                    value={v[`${s.key}Max`]}
+                    onChange={setField}
+                    style={styles.col2}
+                    {...chainMaps.magie[`${s.key}Max`]}
+                  />
+                ))}
+              </View>
+            </SectionCard>
+
+            <SectionCard title="DISCIPLINES">
+              <View style={styles.grid}>
+                {DISCIPLINES.map((d) => (
+                  <NumberField
+                    key={d.key}
+                    fieldKey={d.key}
+                    label={d.label}
+                    value={v[d.key]}
+                    onChange={setField}
+                    style={styles.col2}
+                    {...chainMaps.magie[d.key]}
+                  />
+                ))}
+              </View>
+            </SectionCard>
+          </>
         ) : null}
       </KeyboardAwareScrollView>
 
@@ -367,6 +384,7 @@ const styles = StyleSheet.create({
   container: { padding: 16, gap: 12 },
   row: { flexDirection: 'row', gap: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  // 2 columns (2x2 for the 4 attributs).
   col2: { flexBasis: '45%', minWidth: 0 },
+  // 4 even columns on one row (the 4 attributs).
+  col4: { flex: 1, flexBasis: 0, minWidth: 0 },
 });

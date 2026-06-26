@@ -7,6 +7,7 @@ import SkillFilterBar from '@/components/skill-filter-bar';
 import SectionCard from '@/components/ui/section-card';
 import { ATTRIBUTS, ATTRIBUT_LABEL } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { useSkillFilter } from '@/hooks/use-skill-filter';
 import type { SkillRow } from '@/lib/character-values';
 
 /**
@@ -34,7 +35,10 @@ export default function SkillsEditor({
 }) {
   const theme = useProphecyTheme();
   const [menuFor, setMenuFor] = useState<number | null>(null);
-  const [activeAttr, setActiveAttr] = useState<string>(ATTRIBUTS[0].key);
+  const { activeAttr, setActiveAttr, q, searching, title } = useSkillFilter({
+    value: search,
+    onChange: onSearch,
+  });
 
   // Stable so each NumberField keeps the same onChange identity and its
   // React.memo can skip re-rendering untouched rows. NumberField hands back its
@@ -44,8 +48,6 @@ export default function SkillsEditor({
     [onChangeValue],
   );
 
-  const q = search.trim().toLowerCase();
-  const searching = q !== '';
   const visible = rows
     .map((row, index) => ({ row, index }))
     .filter(({ row }) =>
@@ -54,8 +56,6 @@ export default function SkillsEditor({
 
   const exactMatch = rows.some((r) => r.name.trim().toLowerCase() === q);
   const canAdd = searching && !exactMatch;
-
-  const title = searching ? 'RÉSULTATS' : (ATTRIBUT_LABEL[activeAttr] ?? 'COMPÉTENCES').toUpperCase();
 
   return (
     <View style={styles.root}>
