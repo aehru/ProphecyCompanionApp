@@ -83,13 +83,19 @@ export function parseFormula(input: string): ParseResult {
 export function computeFormula(
   formula: ParsedFormula,
   caracValue: (caracKey: string) => number,
+  // Optional per-caractéristique modifier (wound malus + temporary effects),
+  // folded into the carac value BEFORE the multiplier: e.g. FOR 5 with -1 in a
+  // `FOR x2` term gives (5-1)*2 = 8, not 5*2-1 = 9.
+  caracModifier?: (caracKey: string) => number,
 ): { staticTotal: number; dice: { count: number; sides: number }[] } {
   let staticTotal = 0;
   const dice: { count: number; sides: number }[] = [];
   for (const t of formula.terms) {
     if (t.kind === 'flat') staticTotal += t.value;
-    else if (t.kind === 'carac') staticTotal += caracValue(t.carac) * t.mult;
-    else dice.push({ count: t.count, sides: t.sides });
+    else if (t.kind === 'carac') {
+      const base = caracValue(t.carac) + (caracModifier?.(t.carac) ?? 0);
+      staticTotal += base * t.mult;
+    } else dice.push({ count: t.count, sides: t.sides });
   }
   return { staticTotal, dice };
 }
@@ -103,11 +109,12 @@ export function computeFormula(
 export function formulaResult(
   raw: string | null | undefined,
   caracValue: (caracKey: string) => number,
+  caracModifier?: (caracKey: string) => number,
 ): string | null {
   if (raw == null || raw.trim() === '') return null;
   const parsed = parseFormula(raw);
   if (!parsed.ok) return raw.trim();
-  const { staticTotal, dice } = computeFormula(parsed.formula, caracValue);
+  const { staticTotal, dice } = computeFormula(parsed.formula, caracValue, caracModifier);
   const parts: string[] = [];
   if (dice.length === 0 || staticTotal !== 0) parts.push(String(staticTotal));
   for (const d of dice) parts.push(`${d.count}D${d.sides}`);
