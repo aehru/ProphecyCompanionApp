@@ -20,6 +20,8 @@ export default function CharacterTabsLayout() {
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
         tabBarStyle: { backgroundColor: theme.colors.surface },
+        tabBarLabelStyle: { fontFamily: 'NotoSans_500Medium' },
+        headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         // No automatic back arrow at a tabs root — add one to return to the list.
         headerLeft: () => <IconButton icon="arrow-left" onPress={() => router.back()} />,
       }}>

@@ -152,7 +152,7 @@ function EffectEditor({ effect: e, onClose }: { effect: Effect; onClose: () => v
   const targetLabel = EFFECT_TARGET_LABEL[e.target] ?? e.target;
 
   return (
-    <View style={[styles.editor, { borderColor: theme.colors.outlineVariant }]}>
+    <View style={[styles.editor, { borderColor: theme.prophecy.borderSoft }]}>
       <View style={styles.editorHeader}>
         <Text style={[styles.editorTitle, { color: theme.colors.primary }]}>Effet</Text>
         <IconButton icon="check" size={18} onPress={onClose} />
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   timeBlock: { gap: 6, marginTop: 4 },
   timeLabel: { fontSize: 12 },
   timeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  editor: { borderWidth: 1, borderRadius: 8, padding: 8, gap: 8 },
+  editor: { borderWidth: 1, borderRadius: 10, padding: 8, gap: 8 },
   editorHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   editorTitle: { fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
   fieldRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' },

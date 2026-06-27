@@ -33,7 +33,10 @@ export default function TendanceBadge({
             borderColor: border,
           },
         ]}>
-        <Text style={{ color: textColor, fontWeight: 'bold', fontSize: size * 0.42 }}>{value}</Text>
+        <Text
+          style={{ color: textColor, fontFamily: 'Cinzel_600SemiBold', fontSize: size * 0.42 }}>
+          {value}
+        </Text>
       </View>
     </Pressable>
   );
