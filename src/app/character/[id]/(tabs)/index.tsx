@@ -7,6 +7,7 @@ import { IconButton, Text } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
 import CharacterForm from '@/components/character-form';
+import CharacterMedia from '@/components/character-media';
 import ConditionsCard from '@/components/conditions-card';
 import EffectsCard from '@/components/effects-card';
 import NumberField from '@/components/number-field';
@@ -137,6 +138,14 @@ export default function CharacterResumeScreen() {
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+        <CharacterMedia
+          characterId={numId}
+          avatarPath={char.avatarPath}
+          portraitPath={char.portraitPath}
+          editing={editing}
+          onChanged={reload}
+        />
+
         <SectionCard title="TENDANCES" helper={editing ? "Appui +1, maintient -1" : undefined}>
           <TendancesTriangle
             get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}

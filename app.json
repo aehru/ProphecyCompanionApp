@@ -38,6 +38,12 @@
         }
       ],
       "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Autorisez l'accès aux photos pour ajouter une illustration à vos personnages."
+        }
+      ],
       "./plugins/withReleaseSigning",
       "./plugins/withCmakeVersion"
     ],
