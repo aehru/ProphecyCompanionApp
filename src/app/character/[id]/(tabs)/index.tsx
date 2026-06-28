@@ -13,6 +13,7 @@ import NumberField from '@/components/number-field';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import { ATTRIBUTS, CARACTERISTIQUES, MONEY, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
@@ -57,9 +58,9 @@ export default function CharacterResumeScreen() {
       title: char?.nom || 'Personnage',
       headerRight: () =>
         editingSheet ? (
-          <IconButton icon="close" onPress={() => setEditingSheet(false)} />
+          <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
         ) : (
-          <IconButton icon="pencil" onPress={() => setEditingSheet(true)} />
+          <IconButton icon={dsIcon('edit')} onPress={() => setEditingSheet(true)} />
         ),
     });
   }, [navigation, char?.nom, editingSheet]);
@@ -247,7 +248,7 @@ export default function CharacterResumeScreen() {
                 {editing ? (
                   <>
                     <IconButton
-                      icon="plus"
+                      icon={dsIcon('plus')}
                       mode="contained"
                       size={16}
                       disabled={max > 0 && cur >= max}
@@ -295,7 +296,7 @@ export default function CharacterResumeScreen() {
       </KeyboardAwareScrollView>
 
       <AppFab
-        icon={editing ? 'check' : 'pencil'}
+        icon={editing ? dsIcon('check') : dsIcon('edit')}
         onPress={() => setEditing((e) => !e)}
       />
     </View>

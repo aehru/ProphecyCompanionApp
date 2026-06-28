@@ -7,6 +7,7 @@ import { IconButton } from 'react-native-paper';
 
 import SkillsEditor from '@/components/skills-editor';
 import SkillsView from '@/components/skills-view';
+import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
@@ -31,7 +32,7 @@ export default function CharacterSkillsScreen() {
     navigation.setOptions({
       headerRight: () => (
         <IconButton
-          icon={editing ? 'check' : 'pencil'}
+          icon={editing ? dsIcon('check') : dsIcon('edit')}
           onPress={() => setEditing((e) => !e)}
         />
       ),

@@ -4,6 +4,7 @@ import { Button, Divider, IconButton, Menu, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SkillFilterBar from '@/components/skill-filter-bar';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { ATTRIBUTS, ATTRIBUT_LABEL } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -68,7 +69,7 @@ export default function SkillsEditor({
 
       {canAdd ? (
         <Button
-          icon="plus"
+          icon={dsIcon('plus')}
           mode="outlined"
           onPress={() => onAddCustom(search.trim(), searching ? ATTRIBUTS[0].key : activeAttr)}>
           Ajouter « {search.trim()} »
@@ -117,7 +118,7 @@ export default function SkillsEditor({
 
               {row.isCustom ? (
                 <IconButton
-                  icon="close"
+                  icon={dsIcon('close')}
                   size={20}
                   iconColor={theme.colors.error}
                   onPress={() => onRemove(index)}

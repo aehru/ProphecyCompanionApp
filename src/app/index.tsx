@@ -5,6 +5,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { List, Text } from 'react-native-paper';
 
 import AppFab from '@/components/ui/app-fab';
+import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { charactersListQuery } from '@/repositories/characters';
 
@@ -52,13 +53,13 @@ export default function CharactersListScreen() {
               description={item.concept || undefined}
               titleStyle={{ color: theme.colors.onSurface }}
               descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-              left={(p) => <List.Icon {...p} icon="account" />}
+              left={(p) => <List.Icon {...p} icon={dsIcon('character')} />}
               onPress={() => router.push(`/character/${item.id}` as Href)}
             />
           )}
         />
       )}
-      <AppFab icon="plus" onPress={() => router.push('/character/new')} />
+      <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
     </View>
   );
 }

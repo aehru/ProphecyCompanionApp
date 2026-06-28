@@ -7,6 +7,7 @@ import { Text } from 'react-native-paper';
 import ArmorCard from '@/components/armor-card';
 import NumberField from '@/components/number-field';
 import AppFab from '@/components/ui/app-fab';
+import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
 import EditableSection from '@/components/ui/editable-section';
 import StatChip from '@/components/ui/stat-chip';
@@ -115,7 +116,7 @@ export default function CharacterWeaponsScreen() {
         onPress={() => createArmor(numId)}
         style={styles.fabTop}
       />
-      <AppFab icon="sword" onPress={() => createWeapon(numId)} />
+      <AppFab icon={dsIcon('sword')} onPress={() => createWeapon(numId)} />
     </View>
   );
 }

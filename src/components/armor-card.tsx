@@ -3,6 +3,7 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import type { Armor } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
@@ -28,7 +29,7 @@ function ArmorSummary({ armor: a, onEdit }: { armor: Armor; onEdit: () => void }
   const equipColor = a.equipped ? theme.colors.primary : theme.colors.onSurfaceVariant;
   return (
     <SectionCard title={(a.name || 'Armure').toUpperCase()}>
-      <IconButton icon="pencil" style={styles.editBtn} size={18} onPress={onEdit} />
+      <IconButton icon={dsIcon('edit')} style={styles.editBtn} size={18} onPress={onEdit} />
       <View style={styles.row}>
         <IconButton
           icon={a.equipped ? 'shield' : 'shield-outline'}
@@ -59,7 +60,7 @@ function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClose: () => void 
 
   return (
     <SectionCard title="MODIFIER">
-      <IconButton icon="check" style={styles.editBtn} size={18} onPress={onClose} />
+      <IconButton icon={dsIcon('check')} style={styles.editBtn} size={18} onPress={onClose} />
 
       <TextInput label="Nom" value={name} onChangeText={setName} mode="outlined" dense />
 

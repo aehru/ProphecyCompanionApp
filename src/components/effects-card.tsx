@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button, IconButton, Menu, SegmentedButtons, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import {
   EFFECT_TARGET_LABEL,
@@ -74,7 +75,7 @@ export default function EffectsCard({
       {editing ? (
         <Button
           mode="contained-tonal"
-          icon="plus"
+          icon={dsIcon('plus')}
           onPress={() =>
             createEffect(characterId, {
               target: 'all',
@@ -123,7 +124,7 @@ function EffectRow({ effect: e, editing }: { effect: Effect; editing: boolean })
       ) : null}
       {editing ? (
         <>
-          <IconButton icon="pencil" size={18} onPress={() => setOpen(true)} />
+          <IconButton icon={dsIcon('edit')} size={18} onPress={() => setOpen(true)} />
           <IconButton
             icon="delete"
             size={18}
@@ -155,7 +156,7 @@ function EffectEditor({ effect: e, onClose }: { effect: Effect; onClose: () => v
     <View style={[styles.editor, { borderColor: theme.prophecy.borderSoft }]}>
       <View style={styles.editorHeader}>
         <Text style={[styles.editorTitle, { color: theme.colors.primary }]}>Effet</Text>
-        <IconButton icon="check" size={18} onPress={onClose} />
+        <IconButton icon={dsIcon('check')} size={18} onPress={onClose} />
       </View>
 
       <TextInput
