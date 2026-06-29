@@ -3,6 +3,7 @@ import { desc, eq } from 'drizzle-orm';
 import { SPHERES } from '@/constants/prophecy';
 import { db } from '@/db/client';
 import { actualState, characters, type NewActualState, type NewCharacter } from '@/db/schema';
+import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
 import { updateActualState } from '@/repositories/actual-state';
 
 /** Magic pools whose current value should follow their max when the max changes. */
@@ -73,6 +74,23 @@ export async function updateCharacter(id: number, data: Partial<NewCharacter>) {
   return row;
 }
 
+/**
+ * Set (or clear, with null) a character's avatar/portrait. Deletes the file
+ * previously held in that slot so replacing an image doesn't orphan it.
+ */
+export async function setCharacterMedia(id: number, slot: MediaSlot, path: string | null) {
+  const column = slot === 'avatar' ? 'avatarPath' : 'portraitPath';
+  const prev = await getCharacter(id);
+  const oldPath = prev?.[column] ?? null;
+  await db
+    .update(characters)
+    .set({ [column]: path, updatedAt: new Date() })
+    .where(eq(characters.id, id));
+  if (oldPath && oldPath !== path) deleteMedia(oldPath);
+}
+
 export async function deleteCharacter(id: number) {
   await db.delete(characters).where(eq(characters.id, id));
+  // Cascade the row's media off-DB (FK cascade can't reach the filesystem).
+  deleteCharacterMedia(id);
 }

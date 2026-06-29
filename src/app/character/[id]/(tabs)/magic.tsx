@@ -56,7 +56,7 @@ export default function CharacterMagicScreen() {
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <SectionCard title="DISCIPLINES">
+        <SectionCard title="DISCIPLINES" icon="book">
           <View style={styles.grid}>
             {DISCIPLINES.map((d) => (
               <StatChip key={d.key} label={d.label} value={num(rec[d.key])} />
@@ -65,7 +65,8 @@ export default function CharacterMagicScreen() {
         </SectionCard>
 
         <SectionCard
-          title="RÉSERVE">
+          title="RÉSERVE"
+          icon="magic">
           <View style={styles.sphereRow}>
             <Text style={styles.sphereLabel}>Globale</Text>
             <Bullets
@@ -113,7 +114,7 @@ export default function CharacterMagicScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
   sphereRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   sphereDivider: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
   sphereLabel: { width: 72, fontSize: 15, lineHeight: 16 },
