@@ -113,7 +113,7 @@ export default function CharacterMagicScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
   sphereRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   sphereDivider: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
   sphereLabel: { width: 72, fontSize: 15, lineHeight: 16 },
