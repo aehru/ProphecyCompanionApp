@@ -10,6 +10,7 @@ import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
 import EditableSection from '@/components/ui/editable-section';
+import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import WeaponCard from '@/components/weapon-card';
 import type { ActualState } from '@/db/schema';
@@ -86,30 +87,32 @@ export default function CharacterWeaponsScreen() {
           }}
         </EditableSection>
 
-        <Text style={[styles.heading, { color: theme.colors.primary }]}>ARMES</Text>
-        {list.length === 0 ? (
-          <Text style={{ color: theme.colors.onSurfaceVariant }}>
-            Aucune arme. Ajoutez-en une avec le bouton « Arme ».
-          </Text>
-        ) : (
-          list.map((w) => (
-            <WeaponCard
-              key={w.id}
-              weapon={w}
-              caracValue={(k) => rec[k] ?? 0}
-              caracModifier={caracModifier}
-            />
-          ))
-        )}
+        <SectionCard title="ARMES" icon="sword">
+          {list.length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucune arme. Ajoutez-en une avec le bouton « Arme ».
+            </Text>
+          ) : (
+            list.map((w) => (
+              <WeaponCard
+                key={w.id}
+                weapon={w}
+                caracValue={(k) => rec[k] ?? 0}
+                caracModifier={caracModifier}
+              />
+            ))
+          )}
+        </SectionCard>
 
-        <Text style={[styles.heading, { color: theme.colors.primary }]}>ARMURES</Text>
-        {armorList.length === 0 ? (
-          <Text style={{ color: theme.colors.onSurfaceVariant }}>
-            Aucune armure. Ajoutez-en une avec le bouton « Armure ».
-          </Text>
-        ) : (
-          armorList.map((a) => <ArmorCard key={a.id} armor={a} />)
-        )}
+        <SectionCard title="ARMURES" icon="shield">
+          {armorList.length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucune armure. Ajoutez-en une avec le bouton « Armure ».
+            </Text>
+          ) : (
+            armorList.map((a) => <ArmorCard key={a.id} armor={a} />)
+          )}
+        </SectionCard>
       </KeyboardAwareScrollView>
       <AppFab
         icon="shield-plus"
@@ -126,7 +129,6 @@ const styles = StyleSheet.create({
   container: { padding: 12, gap: 12, paddingBottom: 160 },
   // Second FAB sits above the bottom one.
   fabTop: { bottom: 88 },
-  heading: { fontSize: 13, fontWeight: '700', letterSpacing: 0.5, marginTop: 4 },
   initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
 });
