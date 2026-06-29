@@ -1,6 +1,6 @@
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { FAB } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -53,5 +53,20 @@ export default function AppFab({ icon, label, onPress, disabled, style }: AppFab
 }
 
 const styles = StyleSheet.create({
-  fab: { position: 'absolute', right: 16 },
+  // DS FAB: 18px radius (not a full pill) + a soft gold-ink lift.
+  fab: {
+    position: 'absolute',
+    right: 16,
+    borderRadius: 18,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#2F241A',
+        shadowOpacity: 0.2,
+        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 4 },
+      },
+      android: { elevation: 6 },
+      default: {},
+    }),
+  },
 });

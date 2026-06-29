@@ -13,6 +13,7 @@ import NumberField from '@/components/number-field';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import { ATTRIBUTS, CARACTERISTIQUES, MONEY, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
@@ -25,8 +26,8 @@ import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, updateArmor } from '@/repositories/armor';
-import { effectsQuery } from '@/repositories/effects';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
+import { effectsQuery } from '@/repositories/effects';
 
 // Order the editable numeric fields chain through with the keyboard "next" key.
 const EDIT_ORDER: readonly string[] = [
@@ -57,9 +58,9 @@ export default function CharacterResumeScreen() {
       title: char?.nom || 'Personnage',
       headerRight: () =>
         editingSheet ? (
-          <IconButton icon="close" onPress={() => setEditingSheet(false)} />
+          <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
         ) : (
-          <IconButton icon="pencil" onPress={() => setEditingSheet(true)} />
+          <IconButton icon={dsIcon('edit')} onPress={() => setEditingSheet(true)} />
         ),
     });
   }, [navigation, char?.nom, editingSheet]);
@@ -148,23 +149,13 @@ export default function CharacterResumeScreen() {
 
         <SectionCard title="ATTRIBUTS">
           <View style={styles.grid}>
-            {ATTRIBUTS.map((a) =>
-              editing ? (
-                <NumberField
-                  key={a.key}
-                  fieldKey={a.key}
-                  label={a.label}
-                  value={String(rec[a.key] ?? 0)}
-                  onChange={(k, t) => setCharValue(k, Number(t) || 0)}
-                  style={styles.col4}
-                  {...chain(a.key)}
-                />
-              ) : (
+            {ATTRIBUTS.map((a) => (
                 <StatChip
                   key={a.key}
                   label={a.label}
                   value={num(rec[a.key])}
                   modifier={totalModifier(a.key, effectList, wound)}
+                  style={styles.col4}
                 />
               ),
             )}
@@ -173,23 +164,13 @@ export default function CharacterResumeScreen() {
 
         <SectionCard title="CARACTÉRISTIQUES">
           <View style={styles.grid}>
-            {CARACTERISTIQUES.map((c) =>
-              editing ? (
-                <NumberField
-                  key={c.key}
-                  fieldKey={c.key}
-                  label={c.abbr}
-                  value={String(rec[c.key] ?? 0)}
-                  onChange={(k, t) => setCharValue(k, Number(t) || 0)}
-                  style={styles.col4}
-                  {...chain(c.key)}
-                />
-              ) : (
+            {CARACTERISTIQUES.map((c) => (
                 <StatChip
                   key={c.key}
                   label={c.abbr}
                   value={num(rec[c.key])}
                   modifier={totalModifier(c.key, effectList, wound)}
+                  style={styles.col4}
                 />
               ),
             )}
@@ -267,7 +248,7 @@ export default function CharacterResumeScreen() {
                 {editing ? (
                   <>
                     <IconButton
-                      icon="plus"
+                      icon={dsIcon('plus')}
                       mode="contained"
                       size={16}
                       disabled={max > 0 && cur >= max}
@@ -299,7 +280,7 @@ export default function CharacterResumeScreen() {
                   {...chain(m.key)}
                 />
               ) : (
-                <StatChip key={m.key} label={m.abbr} value={String(stRec[m.key] ?? 0)} />
+                <StatChip key={m.key} label={m.abbr} value={String(stRec[m.key] ?? 0)} style={styles.coin} />
               ),
             )}
           </View>
@@ -315,7 +296,7 @@ export default function CharacterResumeScreen() {
       </KeyboardAwareScrollView>
 
       <AppFab
-        icon={editing ? 'check' : 'pencil'}
+        icon={editing ? dsIcon('check') : dsIcon('edit')}
         onPress={() => setEditing((e) => !e)}
       />
     </View>
@@ -326,8 +307,10 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  col4: { flexBasis: '22%', minWidth: 0 },
-  coin: { flexBasis: 64, minWidth: 64 },
+  // Grow to fill each row so tiles sit flush to both card edges (no trailing
+  // gap on the right). flexBasis keeps the wrap at 4 columns.
+  col4: { flexGrow: 1, flexBasis: '22%', minWidth: 0 },
+  coin: { flexGrow: 1, flexBasis: 64, minWidth: 64 },
   healthRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

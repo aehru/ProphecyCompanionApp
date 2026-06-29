@@ -7,6 +7,7 @@ import { Text } from 'react-native-paper';
 import Bullets from '@/components/bullets';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import { DISCIPLINES, SPHERES } from '@/constants/prophecy';
@@ -104,7 +105,7 @@ export default function CharacterMagicScreen() {
         </SectionCard>
       </KeyboardAwareScrollView>
 
-      <AppFab icon={editing ? 'check' : 'pencil'} onPress={() => setEditing((e) => !e)} />
+      <AppFab icon={editing ? dsIcon('check') : dsIcon('edit')} onPress={() => setEditing((e) => !e)} />
     </View>
   );
 }

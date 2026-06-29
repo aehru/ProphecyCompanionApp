@@ -3,6 +3,7 @@ import { Alert, type TextInput as RNTextInput, StyleSheet, View } from 'react-na
 import { Button, HelperText, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
@@ -125,7 +126,7 @@ function WeaponSummary({
 
   return (
     <SectionCard title={(w.name || 'Arme').toUpperCase()}>
-      <IconButton icon="pencil" style={styles.editBtn} size={18} onPress={onEdit} />
+      <IconButton icon={dsIcon('edit')} style={styles.editBtn} size={18} onPress={onEdit} />
 
       <FormulaRow label="Dégâts" raw={w.damage} caracValue={caracValue} caracModifier={caracModifier} />
 
@@ -254,7 +255,7 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
 
   return (
     <SectionCard title="MODIFIER">
-      <IconButton icon="check" style={styles.editBtn} size={18} onPress={onClose} />
+      <IconButton icon={dsIcon('check')} style={styles.editBtn} size={18} onPress={onClose} />
 
       <TextInput
         label="Nom"

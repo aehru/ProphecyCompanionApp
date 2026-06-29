@@ -1,14 +1,9 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
 import { IconButton } from 'react-native-paper';
 
+import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-
-const tabIcon =
-  (name: string) =>
-  ({ color, size }: { color: string; size: number }) =>
-    <MaterialCommunityIcons name={name as never} color={color} size={size} />;
 
 export default function CharacterTabsLayout() {
   const theme = useProphecyTheme();
@@ -20,24 +15,26 @@ export default function CharacterTabsLayout() {
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
         tabBarStyle: { backgroundColor: theme.colors.surface },
+        tabBarLabelStyle: { fontFamily: 'NotoSans_500Medium' },
+        headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         // No automatic back arrow at a tabs root — add one to return to the list.
         headerLeft: () => <IconButton icon="arrow-left" onPress={() => router.back()} />,
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: 'Résumé', tabBarIcon: tabIcon('account-details') }}
+        options={{ title: 'Résumé', tabBarIcon: dsIcon('character') }}
       />
       <Tabs.Screen
         name="skills"
-        options={{ title: 'Compétences', tabBarIcon: tabIcon('sword-cross') }}
+        options={{ title: 'Compétences', tabBarIcon: dsIcon('sword') }}
       />
       <Tabs.Screen
         name="weapons"
-        options={{ title: 'Armes', tabBarIcon: tabIcon('sword') }}
+        options={{ title: 'Armes', tabBarIcon: dsIcon('sword') }}
       />
       <Tabs.Screen
         name="magic"
-        options={{ title: 'Magie', tabBarIcon: tabIcon('auto-fix') }}
+        options={{ title: 'Magie', tabBarIcon: dsIcon('magic') }}
       />
     </Tabs>
   );

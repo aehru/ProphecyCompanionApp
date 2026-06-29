@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 
 /**
@@ -23,7 +24,7 @@ export default function EditableSection({
   return (
     <SectionCard title={title}>
       <IconButton
-        icon={editing ? 'check' : 'pencil'}
+        icon={editing ? dsIcon('check') : dsIcon('edit')}
         size={18}
         style={styles.editBtn}
         onPress={() => setEditing((e) => !e)}
