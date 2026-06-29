@@ -168,6 +168,40 @@ export const WOUND_LEVELS = [
   { key: 'mort', label: 'Mort', damage: '41+', malus: null },
 ] as const;
 
+/**
+ * Time units a temporary effect can last. Independent of each other — a "time
+ * passes" control ticks down only effects sharing the chosen unit (no
+ * conversion between actions/rounds/hours/days).
+ */
+export const EFFECT_UNITS = [
+  { key: 'action', label: 'Action', plural: 'Actions' },
+  { key: 'round', label: 'Round', plural: 'Rounds' },
+  { key: 'hour', label: 'Heure', plural: 'Heures' },
+  { key: 'day', label: 'Jour', plural: 'Jours' },
+] as const;
+
+export type EffectUnit = (typeof EFFECT_UNITS)[number]['key'];
+
+/** Unit key → singular label, for compact display (e.g. "3 Rounds"). */
+export const EFFECT_UNIT_LABEL: Record<string, string> = Object.fromEntries(
+  EFFECT_UNITS.map((u) => [u.key, u.label]),
+);
+
+/**
+ * Targets an effect can apply to: every roll (`all`), one caractéristique, or
+ * one attribut. Used to build the target picker and to label an effect's scope.
+ */
+export const EFFECT_TARGETS: { key: string; label: string }[] = [
+  { key: 'all', label: 'Tous les jets' },
+  ...CARACTERISTIQUES.map((c) => ({ key: c.key, label: c.label })),
+  ...ATTRIBUTS.map((a) => ({ key: a.key, label: a.label })),
+];
+
+/** Effect target key → display label. */
+export const EFFECT_TARGET_LABEL: Record<string, string> = Object.fromEntries(
+  EFFECT_TARGETS.map((t) => [t.key, t.label]),
+);
+
 /** Spendable resource pools: max on the character, current tracked in the status. */
 export const RESOURCES = [
   { key: 'maitrise', label: 'Maîtrise' },

@@ -8,9 +8,15 @@ import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
+import { fmtSignedMod } from '@/lib/modifiers';
 import { deleteWeapon, updateWeapon } from '@/repositories/weapons';
 
 type CaracValue = (caracKey: string) => number;
+/**
+ * Net wound + temporary-effect modifier for a caractéristique. Folded into the
+ * carac value before any multiplier in the damage formula.
+ */
+type CaracModifier = (caracKey: string) => number;
 
 /**
  * One weapon: a read-only summary that flips to an inline editor via the pencil.
@@ -20,15 +26,22 @@ type CaracValue = (caracKey: string) => number;
 export default function WeaponCard({
   weapon,
   caracValue,
+  caracModifier,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
+  caracModifier?: CaracModifier;
 }) {
   const [editing, setEditing] = useState(false);
   return editing ? (
     <WeaponEditor weapon={weapon} onClose={() => setEditing(false)} />
   ) : (
-    <WeaponSummary weapon={weapon} caracValue={caracValue} onEdit={() => setEditing(true)} />
+    <WeaponSummary
+      weapon={weapon}
+      caracValue={caracValue}
+      caracModifier={caracModifier}
+      onEdit={() => setEditing(true)}
+    />
   );
 }
 
@@ -36,34 +49,75 @@ function FormulaRow({
   label,
   raw,
   caracValue,
+  // Per-carac modifier (wound + effects), folded into carac values before the
+  // multiplier. Only the damage row passes this; ranges ignore combat maluses.
+  caracModifier,
 }: {
   label: string;
   raw: string | null;
   caracValue: CaracValue;
+  caracModifier?: CaracModifier;
 }) {
   const theme = useProphecyTheme();
   if (raw == null || raw.trim() === '') return null;
-  const result = formulaResult(raw, caracValue);
+  const result = formulaResult(raw, caracValue, caracModifier);
+  // Badge = the raw carac modifier (wound + effects), shown BEFORE any multiplier:
+  // a +2 on `FOR x2` reads "+2", not "+4".
+  const delta = formulaCaracMod(raw, caracModifier);
+  const modColor = delta > 0 ? theme.colors.primary : theme.colors.error;
   return (
     <View style={styles.row}>
       <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
       <View style={styles.formulaCol}>
         <Text>{raw.trim()}</Text>
         {result != null && result !== raw.trim() ? (
-          <Text style={[styles.result, { color: theme.colors.primary }]}>= {result}</Text>
+          <View style={styles.resultRow}>
+            <Text style={[styles.result, { color: theme.colors.primary }]}>= {result}</Text>
+            {delta !== 0 ? (
+              <>
+                <IconButton
+                  icon="alert-circle"
+                  size={14}
+                  iconColor={modColor}
+                  style={styles.modIcon}
+                />
+                <Text style={[styles.modNote, { color: modColor }]}>
+                  ({fmtSignedMod(delta)})
+                </Text>
+              </>
+            ) : null}
+          </View>
         ) : null}
       </View>
     </View>
   );
 }
 
+/**
+ * Sum of the raw carac modifiers for the distinct caractéristiques a formula
+ * uses — the value applied to each carac before its multiplier. For a single-carac
+ * formula (the common case) this is just that carac's modifier.
+ */
+function formulaCaracMod(raw: string, caracModifier?: CaracModifier): number {
+  if (!caracModifier) return 0;
+  const parsed = parseFormula(raw);
+  if (!parsed.ok) return 0;
+  const keys = new Set<string>();
+  for (const t of parsed.formula.terms) if (t.kind === 'carac') keys.add(t.carac);
+  let total = 0;
+  for (const k of keys) total += caracModifier(k);
+  return total;
+}
+
 function WeaponSummary({
   weapon: w,
   caracValue,
+  caracModifier,
   onEdit,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
+  caracModifier?: CaracModifier;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -73,7 +127,7 @@ function WeaponSummary({
     <SectionCard title={(w.name || 'Arme').toUpperCase()}>
       <IconButton icon="pencil" style={styles.editBtn} size={18} onPress={onEdit} />
 
-      <FormulaRow label="Dégâts" raw={w.damage} caracValue={caracValue} />
+      <FormulaRow label="Dégâts" raw={w.damage} caracValue={caracValue} caracModifier={caracModifier} />
 
       {prereqs.length > 0 ? (
         <View style={styles.row}>
@@ -339,7 +393,10 @@ const styles = StyleSheet.create({
   label: { width: 92, fontSize: 14 },
   value: { flex: 1, fontSize: 15 },
   formulaCol: { flex: 1 },
+  resultRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   result: { fontSize: 15, fontWeight: '700' },
+  modIcon: { margin: 0 },
+  modNote: { fontSize: 13, fontWeight: '700' },
   prereqWrap: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   prereq: { fontSize: 15, fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },

@@ -16,8 +16,10 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
+import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, createArmor } from '@/repositories/armor';
+import { effectsQuery } from '@/repositories/effects';
 import { createWeapon, weaponsQuery } from '@/repositories/weapons';
 
 export default function CharacterWeaponsScreen() {
@@ -27,6 +29,7 @@ export default function CharacterWeaponsScreen() {
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
   const { data: weapons } = useLiveQuery(weaponsQuery(numId));
   const { data: armors } = useLiveQuery(armorQuery(numId));
+  const { data: effects } = useLiveQuery(effectsQuery(numId));
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
@@ -34,6 +37,11 @@ export default function CharacterWeaponsScreen() {
   const rec = asNumRecord(char);
   const list = weapons ?? [];
   const armorList = armors ?? [];
+  // Wound malus + temporary effects, per caractéristique. Folded into each carac
+  // value before the multiplier in a weapon's damage formula.
+  const wound = woundMalus(asNumRecord(state));
+  const effectList = effects ?? [];
+  const caracModifier = (caracKey: string) => totalModifier(caracKey, effectList, wound);
   const initiativeMax = rec.initiativeMax ?? 0;
   const initStored = state?.initiativeValues ?? [];
 
@@ -83,7 +91,14 @@ export default function CharacterWeaponsScreen() {
             Aucune arme. Ajoutez-en une avec le bouton « Arme ».
           </Text>
         ) : (
-          list.map((w) => <WeaponCard key={w.id} weapon={w} caracValue={(k) => rec[k] ?? 0} />)
+          list.map((w) => (
+            <WeaponCard
+              key={w.id}
+              weapon={w}
+              caracValue={(k) => rec[k] ?? 0}
+              caracModifier={caracModifier}
+            />
+          ))
         )}
 
         <Text style={[styles.heading, { color: theme.colors.primary }]}>ARMURES</Text>
