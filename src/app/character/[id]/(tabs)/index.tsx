@@ -112,7 +112,7 @@ export default function CharacterDashboardScreen() {
       </View>
 
       {/* At-a-glance vitals (read-only; edit on the Fiche). */}
-      <SectionCard title="EN BREF">
+      <SectionCard title="EN BREF" icon="compass">
         <View style={styles.vitals}>
           <Vital label="Blessures" value={`${woundFilled}/${woundMax}`} theme={theme} />
           {RESOURCES.map((r) => (
@@ -127,7 +127,7 @@ export default function CharacterDashboardScreen() {
       </SectionCard>
 
       {/* Full portrait — collapsed by default; the avatar is set via the hero tap. */}
-      <SectionCard title="ILLUSTRATION">
+      <SectionCard title="ILLUSTRATION" icon="character">
         {portrait ? (
           <>
             <Button compact icon={dsIcon('chev')} onPress={() => setShowPortrait((s) => !s)}>

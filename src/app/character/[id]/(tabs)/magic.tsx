@@ -56,7 +56,7 @@ export default function CharacterMagicScreen() {
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <SectionCard title="DISCIPLINES">
+        <SectionCard title="DISCIPLINES" icon="book">
           <View style={styles.grid}>
             {DISCIPLINES.map((d) => (
               <StatChip key={d.key} label={d.label} value={num(rec[d.key])} />
@@ -65,7 +65,8 @@ export default function CharacterMagicScreen() {
         </SectionCard>
 
         <SectionCard
-          title="RÉSERVE">
+          title="RÉSERVE"
+          icon="magic">
           <View style={styles.sphereRow}>
             <Text style={styles.sphereLabel}>Globale</Text>
             <Bullets

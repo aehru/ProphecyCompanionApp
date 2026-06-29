@@ -143,7 +143,7 @@ export default function CharacterFicheScreen() {
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <SectionCard title="TENDANCES" helper={editing ? "Appui +1, maintient -1" : undefined}>
+        <SectionCard title="TENDANCES" icon="dragon" helper={editing ? "Appui +1, maintient -1" : undefined}>
           <TendancesTriangle
             get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
             onValue={
@@ -153,7 +153,7 @@ export default function CharacterFicheScreen() {
           />
         </SectionCard>
 
-        <SectionCard title="ATTRIBUTS">
+        <SectionCard title="ATTRIBUTS" icon="rune">
           <View style={styles.grid}>
             {ATTRIBUTS.map((a) => (
                 <StatChip
@@ -168,7 +168,7 @@ export default function CharacterFicheScreen() {
           </View>
         </SectionCard>
 
-        <SectionCard title="CARACTÉRISTIQUES">
+        <SectionCard title="CARACTÉRISTIQUES" icon="star">
           <View style={styles.grid}>
             {CARACTERISTIQUES.map((c) => (
                 <StatChip
@@ -183,7 +183,7 @@ export default function CharacterFicheScreen() {
           </View>
         </SectionCard>
 
-        <SectionCard title="SANTÉ">
+        <SectionCard title="SANTÉ" icon="heart">
           {WOUND_LEVELS.map((w) => (
             <View key={w.key} style={styles.woundRow}>
               <View style={styles.woundInfo}>
@@ -211,7 +211,7 @@ export default function CharacterFicheScreen() {
         <EffectsCard characterId={numId} effects={effectList} editing={editing} />
 
         {equippedArmor ? (
-          <SectionCard title="ARMURE">
+          <SectionCard title="ARMURE" icon="shield">
             <View style={styles.healthRow}>
               <Text style={[styles.healthLabel, { color: theme.colors.onSurfaceVariant }]}>
                 {equippedArmor.name || 'Armure'}
@@ -232,7 +232,7 @@ export default function CharacterFicheScreen() {
           </SectionCard>
         ) : null}
 
-        <SectionCard title="RESSOURCES">
+        <SectionCard title="RESSOURCES" icon="potion">
           {RESOURCES.map((r) => {
             const cur = stRec[`${r.key}Current`] ?? 0;
             const max = rec[`${r.key}Max`] ?? 0;
@@ -272,7 +272,7 @@ export default function CharacterFicheScreen() {
           })}
         </SectionCard>
 
-        <SectionCard title="ARGENT">
+        <SectionCard title="ARGENT" icon="coin">
           <View style={styles.grid}>
             {MONEY.map((m) =>
               editing ? (
@@ -296,7 +296,7 @@ export default function CharacterFicheScreen() {
           <ConditionsCard state={state} editing={editing} onPersist={persistState} />
         ) : null}
 
-        <SectionCard title="BIOGRAPHIE">
+        <SectionCard title="BIOGRAPHIE" icon="scroll">
           <Text>{txt(char.biographie)}</Text>
         </SectionCard>
       </KeyboardAwareScrollView>
