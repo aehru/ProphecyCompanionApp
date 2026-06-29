@@ -28,8 +28,10 @@ function characterDir(id: number) {
 export function mediaUri(relativePath?: string | null): string | null {
   if (!relativePath) return null;
   try {
-    const file = new File(Paths.document, ...relativePath.split('/'));
-    return file.exists ? file.uri : null;
+    // Build the file:// uri without a filesystem stat — this runs in render
+    // (character list rows, dashboard). A path is only stored right after we
+    // write the file; a missing file is a rare edge expo-image renders empty.
+    return new File(Paths.document, ...relativePath.split('/')).uri;
   } catch {
     return null;
   }
