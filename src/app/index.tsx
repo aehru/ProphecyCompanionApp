@@ -1,12 +1,14 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { Image } from 'expo-image';
 import { type Href, useRouter } from 'expo-router';
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { List, Text } from 'react-native-paper';
 
+import Icon, { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
-import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { mediaUri } from '@/lib/media';
 import { charactersListQuery } from '@/repositories/characters';
 
 export default function CharactersListScreen() {
@@ -40,23 +42,46 @@ export default function CharactersListScreen() {
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           keyExtractor={(c) => String(c.id)}
-          renderItem={({ item }) => (
-            <List.Item
-              style={[
-                styles.item,
-                {
-                  backgroundColor: theme.prophecy.surfaceContainerLow,
-                  borderColor: theme.colors.outlineVariant,
-                },
-              ]}
-              title={item.nom || 'Sans nom'}
-              description={item.concept || undefined}
-              titleStyle={{ color: theme.colors.onSurface }}
-              descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-              left={(p) => <List.Icon {...p} icon={dsIcon('character')} />}
-              onPress={() => router.push(`/character/${item.id}` as Href)}
-            />
-          )}
+          renderItem={({ item }) => {
+            const avatar = mediaUri(item.avatarPath);
+            return (
+              <List.Item
+                style={[
+                  styles.item,
+                  {
+                    backgroundColor: theme.prophecy.surfaceContainerLow,
+                    borderColor: theme.colors.outlineVariant,
+                  },
+                ]}
+                title={item.nom || 'Sans nom'}
+                description={item.concept || undefined}
+                titleStyle={{ color: theme.colors.onSurface }}
+                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                left={(p) =>
+                  avatar ? (
+                    <Image
+                      source={avatar}
+                      style={[styles.avatar, { borderColor: theme.colors.outlineVariant }]}
+                      contentFit="cover"
+                    />
+                  ) : (
+                    <View
+                      style={[
+                        styles.avatar,
+                        styles.avatarFallback,
+                        {
+                          borderColor: theme.colors.outlineVariant,
+                          backgroundColor: theme.colors.surfaceVariant,
+                        },
+                      ]}>
+                      <Icon name="character" size={22} color={theme.colors.onSurfaceVariant} />
+                    </View>
+                  )
+                }
+                onPress={() => router.push(`/character/${item.id}` as Href)}
+              />
+            );
+          }}
         />
       )}
       <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
@@ -81,4 +106,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
   },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignSelf: 'center',
+    marginLeft: 8,
+  },
+  avatarFallback: { alignItems: 'center', justifyContent: 'center' },
 });

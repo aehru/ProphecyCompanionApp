@@ -22,11 +22,15 @@ export default function CharacterTabsLayout() {
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: 'Résumé', tabBarIcon: dsIcon('character') }}
+        options={{ title: 'Accueil', tabBarIcon: dsIcon('home') }}
+      />
+      <Tabs.Screen
+        name="fiche"
+        options={{ title: 'Fiche', tabBarIcon: dsIcon('scroll') }}
       />
       <Tabs.Screen
         name="skills"
-        options={{ title: 'Compétences', tabBarIcon: dsIcon('sword') }}
+        options={{ title: 'Compétences', tabBarIcon: dsIcon('book') }}
       />
       <Tabs.Screen
         name="weapons"

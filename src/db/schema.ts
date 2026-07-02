@@ -76,6 +76,12 @@ export const characters = sqliteTable('characters', {
   sorcellerie: integer('sorcellerie').notNull().default(0),
 
   biographie: text('biographie').notNull().default(''),
+
+  // Media — relative paths under <Paths.document>/media/characters/<id>/.
+  // Relative (not absolute) so they survive the document dir changing across
+  // reinstalls; resolved to a file:// uri at read (see lib/media). Null = unset.
+  avatarPath: text('avatar_path'),
+  portraitPath: text('portrait_path'),
 }, () => [
   // Tendance puces are always 0–10, enforced at the DB level.
   // Use raw unqualified column names — SQLite rejects table-qualified names in a CHECK.

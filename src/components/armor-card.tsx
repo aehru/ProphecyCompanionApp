@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
-import { dsIcon } from '@/components/ui/icon';
+import Icon, { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import type { Armor } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
@@ -26,24 +26,38 @@ export default function ArmorCard({ armor }: { armor: Armor }) {
 
 function ArmorSummary({ armor: a, onEdit }: { armor: Armor; onEdit: () => void }) {
   const theme = useProphecyTheme();
-  const equipColor = a.equipped ? theme.colors.primary : theme.colors.onSurfaceVariant;
+  const tileColor = a.equipped ? theme.colors.primary : theme.colors.onSurfaceVariant;
   return (
-    <SectionCard title={(a.name || 'Armure').toUpperCase()}>
-      <IconButton icon={dsIcon('edit')} style={styles.editBtn} size={18} onPress={onEdit} />
-      <View style={styles.row}>
-        <IconButton
-          icon={a.equipped ? 'shield' : 'shield-outline'}
-          iconColor={equipColor}
-          size={22}
-          style={styles.shield}
+    <View style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
+      <View style={styles.itemRow}>
+        {/* Tap the shield tile to equip (one armor equipped at a time). */}
+        <Pressable
           onPress={() => equipArmor(a.characterId, a.id)}
-        />
-        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Défense</Text>
-        <Text style={styles.value}>
-          {a.defenseCurrent} / {a.defenseMax}
-        </Text>
+          style={[
+            styles.tile,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: a.equipped ? theme.colors.primary : theme.prophecy.borderSoft,
+            },
+          ]}>
+          <Icon name="shield" size={22} color={tileColor} />
+        </Pressable>
+        <View style={styles.itemMain}>
+          <Text style={styles.itemName} numberOfLines={1}>
+            {a.name || 'Armure'}
+          </Text>
+          <View style={styles.subRow}>
+            <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>
+              Défense {a.defenseCurrent}/{a.defenseMax}
+            </Text>
+            {a.equipped ? (
+              <Text style={[styles.itemSub, { color: theme.colors.primary }]}>· Équipée</Text>
+            ) : null}
+          </View>
+        </View>
+        <IconButton icon={dsIcon('edit')} size={18} onPress={onEdit} />
       </View>
-    </SectionCard>
+    </View>
   );
 }
 
@@ -97,9 +111,20 @@ function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClose: () => void 
 
 const styles = StyleSheet.create({
   editBtn: { position: 'absolute', top: 0, right: 0, margin: 2, zIndex: 1 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  shield: { margin: 0 },
-  label: { fontSize: 14 },
-  value: { fontSize: 15, fontWeight: '600' },
+  // DS inventory row.
+  item: { borderBottomWidth: 1 },
+  itemRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 8 },
+  tile: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemMain: { flex: 1, minWidth: 0 },
+  itemName: { fontSize: 14, fontWeight: '600' },
+  subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
+  itemSub: { fontSize: 12 },
   maxField: { flexGrow: 0, flexBasis: 120, minWidth: 120 },
 });

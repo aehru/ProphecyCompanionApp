@@ -41,7 +41,7 @@ export default function EffectsCard({
   );
 
   return (
-    <SectionCard title="EFFETS">
+    <SectionCard title="EFFETS" icon="fire">
       {effects.length === 0 ? (
         <Text style={{ color: theme.colors.onSurfaceVariant }}>
           {editing ? 'Aucun effet. Ajoutez-en un ci-dessous.' : 'Aucun effet temporaire.'}

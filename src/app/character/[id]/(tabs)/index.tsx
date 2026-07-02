@@ -1,330 +1,215 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { useNavigation, useRouter } from 'expo-router';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { IconButton, Text } from 'react-native-paper';
+import { Image } from 'expo-image';
+import { useNavigation } from 'expo-router';
+import React, { useLayoutEffect, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Text } from 'react-native-paper';
 
-import Bullets from '@/components/bullets';
-import CharacterForm from '@/components/character-form';
-import ConditionsCard from '@/components/conditions-card';
-import EffectsCard from '@/components/effects-card';
-import NumberField from '@/components/number-field';
-import TendancesTriangle from '@/components/tendances-triangle';
-import AppFab from '@/components/ui/app-fab';
+import TendancesCircles from '@/components/tendances-circles';
 import { characterFallback } from '@/components/ui/character-gate';
-import { dsIcon } from '@/components/ui/icon';
+import Icon, { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
-import StatChip from '@/components/ui/stat-chip';
-import { ATTRIBUTS, CARACTERISTIQUES, MONEY, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
-import type { ActualState, Character } from '@/db/schema';
+import { RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
-import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
-import { totalModifier, woundMalus } from '@/lib/modifiers';
-import { updateActualState } from '@/repositories/actual-state';
-import { armorQuery, updateArmor } from '@/repositories/armor';
-import { deleteCharacter, updateCharacter } from '@/repositories/characters';
-import { effectsQuery } from '@/repositories/effects';
+import { asNumRecord } from '@/lib/character-values';
+import { mediaUri, pickCharacterMedia } from '@/lib/media';
+import { setCharacterMedia } from '@/repositories/characters';
 
-// Order the editable numeric fields chain through with the keyboard "next" key.
-const EDIT_ORDER: readonly string[] = [
-  ...ATTRIBUTS.map((a) => a.key),
-  ...CARACTERISTIQUES.map((c) => c.key),
-  ...MONEY.map((m) => m.key),
-];
-
-export default function CharacterResumeScreen() {
+/**
+ * Character home dashboard — the glanceable, read-only landing (modelled on the
+ * DS "Home Dashboard"). Identity header + the three tendances ring gauges (in
+ * place of the DS hero card's health/magic bars), a compact vitals summary, and
+ * the portrait illustration. All editing lives on the Fiche tab; the exceptions
+ * here are the avatar (tap the hero) and the portrait (ILLUSTRATION card).
+ */
+export default function CharacterDashboardScreen() {
   const numId = useCharacterId();
-  const router = useRouter();
   const navigation = useNavigation();
   const theme = useProphecyTheme();
-  // ensure: live in-play edits write current values to actual_state.
-  const { char, state, setChar, setState, reload } = useCharacterState(numId, {
-    ensure: true,
-    reloadOnFocus: true,
-  });
-  const { data: armors } = useLiveQuery(armorQuery(numId));
-  const { data: effects } = useLiveQuery(effectsQuery(numId));
-  // Tab-level live edit: one FAB flips every card between read and edit.
-  const [editing, setEditing] = useEditToggle(navigation);
-  // The header pencil opens the full sheet form (identity + maximums).
-  const [editingSheet, setEditingSheet] = useState(false);
+  const { char, state, reload } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
+  // Full portrait is large; collapsed by default. Illustrations are the one
+  // thing editable from the otherwise read-only dashboard.
+  const [showPortrait, setShowPortrait] = useState(false);
+  const [busyPortrait, setBusyPortrait] = useState(false);
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      title: char?.nom || 'Personnage',
-      headerRight: () =>
-        editingSheet ? (
-          <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
-        ) : (
-          <IconButton icon={dsIcon('edit')} onPress={() => setEditingSheet(true)} />
-        ),
-    });
-  }, [navigation, char?.nom, editingSheet]);
-
-  // Leaving the tab also closes the full sheet form (the hook handles `editing`).
-  useEffect(
-    () => navigation.addListener('blur', () => setEditingSheet(false)),
-    [navigation],
-  );
-
-  // Keyboard "next" wiring: jump to the following editable field on return.
-  const fieldRefs = useRef<Record<string, RNTextInput | null>>({});
+    navigation.setOptions({ title: char?.nom || 'Accueil' });
+  }, [navigation, char?.nom]);
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
 
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
-  const equippedArmor = (armors ?? []).find((a) => a.equipped) ?? null;
-  const effectList = effects ?? [];
-  // Wound malus hits every roll; folded into each stat's badge alongside effects.
-  const wound = woundMalus(stRec);
+  const avatar = mediaUri(char.avatarPath);
+  const portrait = mediaUri(char.portraitPath);
 
-  // Live writers: update local state immediately, persist in the background.
-  const setCharValue = (key: string, value: number) => {
-    setChar((p) => (p ? ({ ...p, [key]: value } as Character) : p));
-    updateCharacter(numId, { [key]: value } as Partial<Character>);
-  };
-  const setStateValue = (key: string, value: number) => {
-    setState((p) => (p ? ({ ...p, [key]: value } as ActualState) : p));
-    updateActualState(numId, { [key]: value } as Partial<ActualState>);
-  };
-  const persistState = (patch: Partial<ActualState>) => {
-    setState((p) => (p ? ({ ...p, ...patch } as ActualState) : p));
-    updateActualState(numId, patch);
-  };
-  const adjustRes = (key: string, delta: number) =>
-    setStateValue(
-      `${key}Current`,
-      clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
-    );
+  // Compact vitals: total wound boxes taken vs max, and the two resource pools.
+  const woundFilled = WOUND_LEVELS.reduce((n, w) => n + (stRec[`${w.key}Current`] ?? 0), 0);
+  const woundMax = WOUND_LEVELS.reduce((n, w) => n + (rec[`${w.key}Max`] ?? 0), 0);
 
-  const chain = (key: string) => {
-    const i = EDIT_ORDER.indexOf(key);
-    const isLast = i === EDIT_ORDER.length - 1;
-    return {
-      inputRef: (el: RNTextInput | null) => {
-        fieldRefs.current[key] = el;
-      },
-      returnKeyType: (isLast ? 'done' : 'next') as 'done' | 'next',
-      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as 'blurAndSubmit' | 'submit',
-      onSubmitEditing: () => fieldRefs.current[EDIT_ORDER[i + 1]]?.focus(),
-    };
+  const pickAvatar = async () => {
+    const path = await pickCharacterMedia(numId, 'avatar');
+    if (path) {
+      await setCharacterMedia(numId, 'avatar', path);
+      reload();
+    }
   };
 
-  if (editingSheet) {
-    return (
-      <CharacterForm
-        initial={char}
-        submitLabel="Enregistrer"
-        onSubmit={async (data) => {
-          await updateCharacter(numId, data);
-          reload();
-          setEditingSheet(false);
-        }}
-        onDelete={async () => {
-          await deleteCharacter(numId);
-          router.back();
-        }}
-      />
-    );
-  }
+  const pickPortrait = async () => {
+    setBusyPortrait(true);
+    try {
+      const path = await pickCharacterMedia(numId, 'portrait');
+      if (path) {
+        await setCharacterMedia(numId, 'portrait', path);
+        reload();
+      }
+    } finally {
+      setBusyPortrait(false);
+    }
+  };
+
+  const clearPortrait = async () => {
+    await setCharacterMedia(numId, 'portrait', null);
+    reload();
+  };
 
   return (
-    <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <SectionCard title="TENDANCES" helper={editing ? "Appui +1, maintient -1" : undefined}>
-          <TendancesTriangle
-            get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
-            onValue={
-              editing ? (k, delta) => setCharValue(k, clamp((rec[k] ?? 0) + delta, 0)) : undefined
-            }
-            onSub={editing ? (k, n) => setCharValue(`${k}Sub`, n) : undefined}
-          />
-        </SectionCard>
-
-        <SectionCard title="ATTRIBUTS">
-          <View style={styles.grid}>
-            {ATTRIBUTS.map((a) => (
-                <StatChip
-                  key={a.key}
-                  label={a.label}
-                  value={num(rec[a.key])}
-                  modifier={totalModifier(a.key, effectList, wound)}
-                  style={styles.col4}
-                />
-              ),
+    <ScrollView style={styles.root} contentContainerStyle={styles.container}>
+      {/* Hero card: identity + tendances ring gauges (replacing health/magic). */}
+      <View style={[styles.hero, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border }]}>
+        <View style={styles.identity}>
+          <Pressable
+            onPress={pickAvatar}
+            style={[
+              styles.avatar,
+              { borderColor: theme.colors.primary, backgroundColor: theme.prophecy.surfaceContainer },
+            ]}>
+            {avatar ? (
+              <Image source={avatar} style={styles.avatarImg} contentFit="cover" />
+            ) : (
+              <Icon name="character" size={34} color={theme.colors.primary} />
             )}
-          </View>
-        </SectionCard>
-
-        <SectionCard title="CARACTÉRISTIQUES">
-          <View style={styles.grid}>
-            {CARACTERISTIQUES.map((c) => (
-                <StatChip
-                  key={c.key}
-                  label={c.abbr}
-                  value={num(rec[c.key])}
-                  modifier={totalModifier(c.key, effectList, wound)}
-                  style={styles.col4}
-                />
-              ),
-            )}
-          </View>
-        </SectionCard>
-
-        <SectionCard title="SANTÉ">
-          {WOUND_LEVELS.map((w) => (
-            <View key={w.key} style={styles.woundRow}>
-              <View style={styles.woundInfo}>
-                <Text style={styles.woundLabel}>{w.label}</Text>
-                <Text style={{ color: theme.colors.onSurfaceVariant }}>{w.damage}</Text>
-              </View>
-              <View style={styles.woundBullets}>
-                <Bullets
-                  count={rec[`${w.key}Max`] ?? 0}
-                  filled={stRec[`${w.key}Current`] ?? 0}
-                  color={editing ? theme.colors.error : theme.colors.onSurfaceVariant}
-                  size={14}
-                  gap={4}
-                  perRow={5}
-                  onSet={editing ? (n) => setStateValue(`${w.key}Current`, n) : undefined}
-                />
-              </View>
-              <Text style={[styles.woundMalus, { color: theme.colors.onSurfaceVariant }]}>
-                {w.malus ?? ''}
-              </Text>
-            </View>
-          ))}
-        </SectionCard>
-
-        <EffectsCard characterId={numId} effects={effectList} editing={editing} />
-
-        {equippedArmor ? (
-          <SectionCard title="ARMURE">
-            <View style={styles.healthRow}>
-              <Text style={[styles.healthLabel, { color: theme.colors.onSurfaceVariant }]}>
-                {equippedArmor.name || 'Armure'}
-              </Text>
-              <Bullets
-                count={equippedArmor.defenseMax}
-                filled={equippedArmor.defenseCurrent}
-                color={editing ? theme.colors.primary : theme.colors.onSurfaceVariant}
-                size={14}
-                gap={4}
-                perRow={5}
-                style={styles.healthDots}
-                onSet={
-                  editing ? (n) => updateArmor(equippedArmor.id, { defenseCurrent: n }) : undefined
-                }
-              />
-            </View>
-          </SectionCard>
-        ) : null}
-
-        <SectionCard title="RESSOURCES">
-          {RESOURCES.map((r) => {
-            const cur = stRec[`${r.key}Current`] ?? 0;
-            const max = rec[`${r.key}Max`] ?? 0;
-            return (
-              <View key={r.key} style={styles.resRow}>
-                <Text style={styles.resLabel}>{r.label}</Text>
-                {editing ? (
-                  <IconButton
-                    icon="minus"
-                    mode="contained"
-                    size={16}
-                    disabled={cur <= 0}
-                    onPress={() => adjustRes(r.key, -1)}
-                  />
-                ) : null}
-                <Text style={styles.resCount}>
-                  {cur} / {max}
+          </Pressable>
+          <View style={styles.identityText}>
+            <Text variant="headlineSmall" style={{ color: theme.colors.onSurface }} numberOfLines={1}>
+              {char.nom || 'Sans nom'}
+            </Text>
+            {char.concept ? (
+              <View style={[styles.conceptChip, { borderColor: theme.prophecy.border }]}>
+                <Text style={[styles.conceptText, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
+                  {char.concept}
                 </Text>
-                {editing ? (
-                  <>
-                    <IconButton
-                      icon={dsIcon('plus')}
-                      mode="contained"
-                      size={16}
-                      disabled={max > 0 && cur >= max}
-                      onPress={() => adjustRes(r.key, 1)}
-                    />
-                    <IconButton
-                      icon="refresh"
-                      size={16}
-                      onPress={() => setStateValue(`${r.key}Current`, max)}
-                    />
-                  </>
-                ) : null}
               </View>
-            );
-          })}
-        </SectionCard>
-
-        <SectionCard title="ARGENT">
-          <View style={styles.grid}>
-            {MONEY.map((m) =>
-              editing ? (
-                <NumberField
-                  key={m.key}
-                  fieldKey={m.key}
-                  label={m.abbr}
-                  value={String(stRec[m.key] ?? 0)}
-                  onChange={(k, t) => setStateValue(k, Number(t) || 0)}
-                  style={styles.coin}
-                  {...chain(m.key)}
-                />
-              ) : (
-                <StatChip key={m.key} label={m.abbr} value={String(stRec[m.key] ?? 0)} style={styles.coin} />
-              ),
-            )}
+            ) : null}
           </View>
-        </SectionCard>
+        </View>
 
-        {state ? (
-          <ConditionsCard state={state} editing={editing} onPersist={persistState} />
-        ) : null}
+        <View style={[styles.divider, { backgroundColor: theme.prophecy.borderSoft }]} />
 
-        <SectionCard title="BIOGRAPHIE">
-          <Text>{txt(char.biographie)}</Text>
-        </SectionCard>
-      </KeyboardAwareScrollView>
+        <TendancesCircles get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })} />
+      </View>
 
-      <AppFab
-        icon={editing ? dsIcon('check') : dsIcon('edit')}
-        onPress={() => setEditing((e) => !e)}
-      />
+      {/* At-a-glance vitals (read-only; edit on the Fiche). */}
+      <SectionCard title="EN BREF" icon="compass">
+        <View style={styles.vitals}>
+          <Vital label="Blessures" value={`${woundFilled}/${woundMax}`} theme={theme} />
+          {RESOURCES.map((r) => (
+            <Vital
+              key={r.key}
+              label={r.label}
+              value={`${stRec[`${r.key}Current`] ?? 0}/${rec[`${r.key}Max`] ?? 0}`}
+              theme={theme}
+            />
+          ))}
+        </View>
+      </SectionCard>
+
+      {/* Full portrait — collapsed by default; the avatar is set via the hero tap. */}
+      <SectionCard title="ILLUSTRATION" icon="character">
+        {portrait ? (
+          <>
+            <Button compact icon={dsIcon('chev')} onPress={() => setShowPortrait((s) => !s)}>
+              {showPortrait ? 'Masquer le portrait' : 'Afficher le portrait'}
+            </Button>
+            {showPortrait ? (
+              <Pressable onPress={pickPortrait}>
+                <Image
+                  source={portrait}
+                  style={[styles.portrait, { borderColor: theme.prophecy.border }]}
+                  contentFit="cover"
+                />
+              </Pressable>
+            ) : null}
+            {showPortrait ? (
+              <Button compact textColor={theme.colors.error} onPress={clearPortrait}>
+                Retirer le portrait
+              </Button>
+            ) : null}
+          </>
+        ) : (
+          <Button mode="outlined" icon={dsIcon('plus')} loading={busyPortrait} onPress={pickPortrait}>
+            Ajouter un portrait
+          </Button>
+        )}
+      </SectionCard>
+
+    </ScrollView>
+  );
+}
+
+function Vital({
+  label,
+  value,
+  theme,
+}: {
+  label: string;
+  value: string;
+  theme: ReturnType<typeof useProphecyTheme>;
+}) {
+  return (
+    <View style={styles.vital}>
+      <Text style={[styles.vitalLabel, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
+      <Text style={[styles.vitalValue, { color: theme.colors.onSurface }]}>{value}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  container: { padding: 12, gap: 12, paddingBottom: 96 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  // Grow to fill each row so tiles sit flush to both card edges (no trailing
-  // gap on the right). flexBasis keeps the wrap at 4 columns.
-  col4: { flexGrow: 1, flexBasis: '22%', minWidth: 0 },
-  coin: { flexGrow: 1, flexBasis: 64, minWidth: 64 },
-  healthRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 12,
+  container: { padding: 12, gap: 12, paddingBottom: 32 },
+  hero: {
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 16,
+    gap: 14,
   },
-  healthLabel: { fontSize: 15 },
-  healthDots: { flexShrink: 1, justifyContent: 'flex-end' },
-  woundRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  woundInfo: { width: 90 },
-  woundBullets: { flex: 1, alignItems: 'flex-end' },
-  woundLabel: { fontSize: 16 },
-  woundMalus: { width: 32, textAlign: 'right', fontSize: 16 },
-  resRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  resLabel: { flex: 1, fontSize: 16 },
-  resCount: { minWidth: 56, textAlign: 'center', fontSize: 16 },
+  identity: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1.5,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImg: { width: '100%', height: '100%' },
+  identityText: { flex: 1, gap: 6 },
+  conceptChip: {
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    maxWidth: '100%',
+  },
+  conceptText: { fontSize: 12 },
+  divider: { height: 1 },
+  portrait: { width: '100%', aspectRatio: 3 / 4, borderRadius: 12, borderWidth: 1 },
+  vitals: { flexDirection: 'row', justifyContent: 'space-around', gap: 8 },
+  vital: { alignItems: 'center', gap: 2 },
+  vitalLabel: { fontSize: 12 },
+  vitalValue: { fontFamily: 'Cinzel_600SemiBold', fontSize: 18 },
 });

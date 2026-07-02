@@ -64,6 +64,13 @@
       "when": 1781200000000,
       "tag": "0008_add_effects",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1782679302278,
+      "tag": "0009_add_character_media",
+      "breakpoints": true
     }
   ]
 }

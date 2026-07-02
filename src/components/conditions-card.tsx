@@ -29,7 +29,7 @@ export default function ConditionsCard({
   const [notes, setNotes] = useDebouncedText(state.notes, (t) => onPersist({ notes: t }));
 
   return (
-    <SectionCard title="ÉTATS / NOTES">
+    <SectionCard title="ÉTATS / NOTES" icon="journal">
       {editing ? (
         <>
           <TextInput
