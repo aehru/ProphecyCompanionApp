@@ -1,10 +1,10 @@
+import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Alert, Pressable, type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
 import { Button, HelperText, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import Icon, { dsIcon } from '@/components/ui/icon';
-import SectionCard from '@/components/ui/section-card';
 import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -20,9 +20,9 @@ type CaracValue = (caracKey: string) => number;
 type CaracModifier = (caracKey: string) => number;
 
 /**
- * One weapon: a read-only summary that flips to an inline editor via the pencil.
- * Formula fields (damage, ranges) show the raw formula plus its computed result
- * for this character; prerequisites are checked against the character's caracs.
+ * One weapon: a read-only summary. The pencil opens the editor in a modal screen
+ * (`weapon/[wid]`). Formula fields (damage, ranges) show the raw formula plus its
+ * computed result for this character; prerequisites are checked against caracs.
  */
 export default function WeaponCard({
   weapon,
@@ -33,15 +33,13 @@ export default function WeaponCard({
   caracValue: CaracValue;
   caracModifier?: CaracModifier;
 }) {
-  const [editing, setEditing] = useState(false);
-  return editing ? (
-    <WeaponEditor weapon={weapon} onClose={() => setEditing(false)} />
-  ) : (
+  const router = useRouter();
+  return (
     <WeaponSummary
       weapon={weapon}
       caracValue={caracValue}
       caracModifier={caracModifier}
-      onEdit={() => setEditing(true)}
+      onEdit={() => router.push(`/character/${weapon.characterId}/weapon/${weapon.id}`)}
     />
   );
 }
@@ -242,8 +240,11 @@ const EDIT_ORDER = [
   'creationTime',
 ] as const;
 
-/** Inline editor. Edits persist live (debounced) like the armor editor. */
-function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => void }) {
+/**
+ * Weapon editor form, rendered in the `weapon/[wid]` modal screen. Edits persist
+ * live (debounced) like the armor editor; `onClose` returns after a delete.
+ */
+export function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => void }) {
   const theme = useProphecyTheme();
   const [name, setName] = useDebouncedText(w.name, (t) => updateWeapon(w.id, { name: t }));
   const [damage, setDamage] = useDebouncedText(w.damage, (t) => updateWeapon(w.id, { damage: t }));
@@ -273,7 +274,14 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
   const confirmDelete = () =>
     Alert.alert('Supprimer', 'Supprimer cette arme ?', [
       { text: 'Annuler', style: 'cancel' },
-      { text: 'Supprimer', style: 'destructive', onPress: () => deleteWeapon(w.id) },
+      {
+        text: 'Supprimer',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteWeapon(w.id);
+          onClose();
+        },
+      },
     ]);
 
   // Keyboard "next" wiring: jump to the following field instead of dismissing.
@@ -303,9 +311,7 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
   });
 
   return (
-    <SectionCard title="MODIFIER">
-      <IconButton icon={dsIcon('check')} style={styles.editBtn} size={18} onPress={onClose} />
-
+    <>
       <TextInput
         label="Nom"
         value={name}
@@ -422,7 +428,7 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
       <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>
         Supprimer
       </Button>
-    </SectionCard>
+    </>
   );
 }
 
@@ -438,7 +444,6 @@ function formulaError(raw: string): string | null {
 }
 
 const styles = StyleSheet.create({
-  editBtn: { position: 'absolute', top: 0, right: 0, margin: 2, zIndex: 1 },
   // DS inventory row.
   item: { borderBottomWidth: 1 },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 12 },

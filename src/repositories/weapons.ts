@@ -12,6 +12,11 @@ export function weaponsQuery(characterId: number) {
     .orderBy(asc(weapons.id));
 }
 
+/** Live query for a single weapon by id (use with useLiveQuery). */
+export function weaponQuery(id: number) {
+  return db.select().from(weapons).where(eq(weapons.id, id));
+}
+
 /** Add a weapon (blank by default; fields edited inline afterwards). */
 export async function createWeapon(characterId: number, data: Partial<NewWeapon> = {}) {
   const [row] = await db
