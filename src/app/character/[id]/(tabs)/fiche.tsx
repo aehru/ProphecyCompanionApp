@@ -61,7 +61,6 @@ export default function CharacterFicheScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: char?.nom || 'Personnage',
       headerRight: () =>
         editingSheet ? (
           <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
