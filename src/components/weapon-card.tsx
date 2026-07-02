@@ -122,6 +122,8 @@ function WeaponSummary({
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
   const prereqs = parsePrerequisites(w.prerequisites);
+  // Any unmet prerequisite flags the weapon's tile with an error border.
+  const prereqUnmet = prereqs.some((p) => caracValue(p.carac) < p.min);
 
   // Collapsed-row subtitle: computed damage + initiative (mêlée / corps à corps).
   // The full breakdown (formula results, prereqs, ranges, creation) is in the
@@ -140,9 +142,13 @@ function WeaponSummary({
         <View
           style={[
             styles.tile,
-            { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: prereqUnmet ? theme.colors.error : theme.prophecy.borderSoft,
+              borderWidth: prereqUnmet ? 1.5 : 1,
+            },
           ]}>
-          <Icon name="sword" size={22} color={theme.colors.primary} />
+          <Icon name="sword" size={22} color={prereqUnmet ? theme.colors.error : theme.colors.primary} />
         </View>
         <View style={styles.itemMain}>
           <Text style={styles.itemName} numberOfLines={1}>
