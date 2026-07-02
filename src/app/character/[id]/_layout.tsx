@@ -12,6 +12,14 @@ export default function CharacterLayout() {
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
+        name="weapon/catalog"
+        options={{
+          presentation: 'modal',
+          title: "Catalogue d'armes",
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
+      <Stack.Screen
         name="weapon/[wid]"
         options={{
           presentation: 'modal',

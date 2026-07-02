@@ -178,12 +178,20 @@ export const armor = sqliteTable('armor', {
 });
 
 /**
- * A character's weapon catalogue. One row per owned weapon (plain list — no
- * equipped flag yet; add one later mirroring `armor` if dual-wield/equip is
- * needed). `damage`, `prerequisites`, `rangeEffective` and `rangeMax` hold raw
- * formula strings (e.g. `FOR x2 +3 +1D10`) parsed/computed at display by
- * `lib/formula`; range columns are nullable (null = melee weapon, no range).
- * The two initiative columns are plain signed ints (display-only for now).
+ * Which hand a weapon is currently equipped in. `null` = not equipped; `'main'`
+ * / `'off'` for a one-handed weapon (dual-wield = one in each); `'both'` for a
+ * two-handed weapon occupying both hands.
+ */
+export const EQUIPPED_HANDS = ['main', 'off', 'both'] as const;
+export type EquippedHand = (typeof EQUIPPED_HANDS)[number];
+
+/**
+ * A character's weapon catalogue. One row per owned weapon. `damage`,
+ * `prerequisites`, `rangeEffective` and `rangeMax` hold raw formula strings
+ * (e.g. `FOR x2 +3 +1D10`) parsed/computed at display by `lib/formula`; range
+ * columns are nullable (null = melee weapon, no range). The two initiative
+ * columns are plain signed ints (display-only for now). `hands` is the weapon's
+ * handedness; `equippedHand` tracks which hand it's wielded in (see enum above).
  * Enchantments are deferred — they'll get their own `weapon_enchants` table
  * (FK weaponId, cascade), not a json column here.
  */
@@ -202,6 +210,9 @@ export const weapons = sqliteTable('weapons', {
   special: text('special').notNull().default(''),
   rangeEffective: text('range_effective'),
   rangeMax: text('range_max'),
+  // Handedness as a count: 1 = one-handed, 2 = two-handed.
+  hands: integer('hands').$type<1 | 2>().notNull().default(1),
+  equippedHand: text('equipped_hand', { enum: EQUIPPED_HANDS }),
 });
 
 /**

@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { type NewWeapon, weapons } from '@/db/schema';
@@ -32,4 +32,35 @@ export async function updateWeapon(id: number, data: Partial<NewWeapon>) {
 
 export async function deleteWeapon(id: number) {
   await db.delete(weapons).where(eq(weapons.id, id));
+}
+
+/**
+ * Equip a weapon in the given hand. A two-handed weapon ignores `hand` and takes
+ * both hands, unequipping every other weapon. A one-handed weapon frees the
+ * target hand first (and any two-hander occupying `'both'`), allowing dual-wield
+ * (one weapon in `'main'`, another in `'off'`).
+ */
+export async function equipWeapon(characterId: number, id: number, hand: 'main' | 'off') {
+  const [w] = await db.select({ hands: weapons.hands }).from(weapons).where(eq(weapons.id, id));
+  if (!w) return;
+  await db.transaction(async (tx) => {
+    if (w.hands === 2) {
+      await tx
+        .update(weapons)
+        .set({ equippedHand: null })
+        .where(eq(weapons.characterId, characterId));
+      await tx.update(weapons).set({ equippedHand: 'both' }).where(eq(weapons.id, id));
+    } else {
+      await tx
+        .update(weapons)
+        .set({ equippedHand: null })
+        .where(and(eq(weapons.characterId, characterId), inArray(weapons.equippedHand, [hand, 'both'])));
+      await tx.update(weapons).set({ equippedHand: hand }).where(eq(weapons.id, id));
+    }
+  });
+}
+
+/** Unequip a weapon (clears whichever hand it occupied). */
+export async function unequipWeapon(id: number) {
+  await db.update(weapons).set({ equippedHand: null }).where(eq(weapons.id, id));
 }
