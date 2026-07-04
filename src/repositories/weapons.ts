@@ -1,7 +1,7 @@
 import { and, asc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '@/db/client';
-import { type NewWeapon, weapons } from '@/db/schema';
+import { type EquippedHand, type NewWeapon, weapons } from '@/db/schema';
 
 /** Live query for a character's weapon catalogue (use with useLiveQuery). */
 export function weaponsQuery(characterId: number) {
@@ -35,28 +35,27 @@ export async function deleteWeapon(id: number) {
 }
 
 /**
- * Equip a weapon in the given hand. A two-handed weapon ignores `hand` and takes
- * both hands, unequipping every other weapon. A one-handed weapon frees the
- * target hand first (and any two-hander occupying `'both'`), allowing dual-wield
- * (one weapon in `'main'`, another in `'off'`).
+ * Equip a weapon in the given slot. Handedness is NOT enforced — any weapon can
+ * go in any slot (game advantages allow a two-handed weapon in one hand, with a
+ * malus applied in play). Equipping frees the conflicting slots first:
+ *  - `'both'` clears every other equipped weapon (occupies both hands);
+ *  - `'main'` / `'off'` clears that hand plus any weapon holding `'both'`,
+ *    allowing dual-wield (one in `'main'`, one in `'off'`).
  */
-export async function equipWeapon(characterId: number, id: number, hand: 'main' | 'off') {
-  const [w] = await db.select({ hands: weapons.hands }).from(weapons).where(eq(weapons.id, id));
-  if (!w) return;
+export async function equipWeapon(characterId: number, id: number, hand: EquippedHand) {
   await db.transaction(async (tx) => {
-    if (w.hands === 2) {
+    if (hand === 'both') {
       await tx
         .update(weapons)
         .set({ equippedHand: null })
         .where(eq(weapons.characterId, characterId));
-      await tx.update(weapons).set({ equippedHand: 'both' }).where(eq(weapons.id, id));
     } else {
       await tx
         .update(weapons)
         .set({ equippedHand: null })
         .where(and(eq(weapons.characterId, characterId), inArray(weapons.equippedHand, [hand, 'both'])));
-      await tx.update(weapons).set({ equippedHand: hand }).where(eq(weapons.id, id));
     }
+    await tx.update(weapons).set({ equippedHand: hand }).where(eq(weapons.id, id));
   });
 }
 

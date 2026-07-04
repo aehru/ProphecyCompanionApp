@@ -10,7 +10,7 @@ import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
 import { fmtSignedMod } from '@/lib/modifiers';
-import { deleteWeapon, updateWeapon } from '@/repositories/weapons';
+import { deleteWeapon, equipWeapon, unequipWeapon, updateWeapon } from '@/repositories/weapons';
 
 type CaracValue = (caracKey: string) => number;
 /**
@@ -125,6 +125,23 @@ function WeaponSummary({
   // Any unmet prerequisite flags the weapon's tile with an error border.
   const prereqUnmet = prereqs.some((p) => caracValue(p.carac) < p.min);
 
+  // Equip state. Two-handed weapons occupy 'both'; one-handed toggle 'main'/'off'.
+  const equippedLabel =
+    w.equippedHand === 'both'
+      ? 'Deux mains'
+      : w.equippedHand === 'main'
+        ? 'Main'
+        : w.equippedHand === 'off'
+          ? 'Main sec.'
+          : null;
+  // Toggle a slot: tapping the active one unequips. Any weapon can go in any
+  // slot — handedness isn't enforced (an advantage may allow a two-handed weapon
+  // in one hand, with a malus applied in play).
+  const toggleHand = (hand: 'main' | 'off' | 'both') => {
+    if (w.equippedHand === hand) unequipWeapon(w.id);
+    else equipWeapon(w.characterId, w.id, hand);
+  };
+
   // Collapsed-row subtitle: computed damage + initiative (mêlée / corps à corps).
   // The full breakdown (formula results, prereqs, ranges, creation) is in the
   // expanded detail.
@@ -154,13 +171,20 @@ function WeaponSummary({
           <Text style={styles.itemName} numberOfLines={1}>
             {w.name || 'Arme'}
           </Text>
-          {subtitle !== '' ? (
-            <Text
-              style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}
-              numberOfLines={1}>
-              {subtitle}
-            </Text>
-          ) : null}
+          <View style={styles.subRow}>
+            {subtitle !== '' ? (
+              <Text
+                style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}
+                numberOfLines={1}>
+                {subtitle}
+              </Text>
+            ) : null}
+            {equippedLabel ? (
+              <Text style={[styles.itemSub, { color: theme.colors.primary }]}>
+                · Équipée ({equippedLabel})
+              </Text>
+            ) : null}
+          </View>
         </View>
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
@@ -218,6 +242,33 @@ function WeaponSummary({
               <Text style={styles.value}>{w.special.trim()}</Text>
             </View>
           ) : null}
+
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Équiper</Text>
+            <View style={styles.equipBtns}>
+              <Button
+                compact
+                mode={w.equippedHand === 'main' ? 'contained-tonal' : 'outlined'}
+                onPress={() => toggleHand('main')}>
+                Main
+              </Button>
+              <Button
+                compact
+                mode={w.equippedHand === 'off' ? 'contained-tonal' : 'outlined'}
+                onPress={() => toggleHand('off')}>
+                Main sec.
+              </Button>
+              {/* Two-handed only: a 1H weapon is never wielded in both hands. */}
+              {w.hands === 2 ? (
+                <Button
+                  compact
+                  mode={w.equippedHand === 'both' ? 'contained-tonal' : 'outlined'}
+                  onPress={() => toggleHand('both')}>
+                  Deux mains
+                </Button>
+              ) : null}
+            </View>
+          </View>
 
           <Button compact icon={dsIcon('edit')} onPress={onEdit} style={styles.detailEdit}>
             Modifier
@@ -463,7 +514,9 @@ const styles = StyleSheet.create({
   },
   itemMain: { flex: 1, minWidth: 0 },
   itemName: { fontSize: 14, fontWeight: '600' },
-  itemSub: { fontSize: 12, marginTop: 1 },
+  subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
+  itemSub: { fontSize: 12 },
+  equipBtns: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   detail: { gap: 8, paddingLeft: 2, paddingBottom: 12 },
   detailEdit: { alignSelf: 'flex-start', marginTop: 2 },
   row: { flexDirection: 'row', gap: 12 },
