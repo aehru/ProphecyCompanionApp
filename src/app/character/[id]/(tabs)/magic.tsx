@@ -7,6 +7,7 @@ import { Text } from 'react-native-paper';
 import Bullets from '@/components/bullets';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
+import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import { DISCIPLINES, SPHERES } from '@/constants/prophecy';
@@ -55,7 +56,7 @@ export default function CharacterMagicScreen() {
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <SectionCard title="DISCIPLINES">
+        <SectionCard title="DISCIPLINES" icon="book">
           <View style={styles.grid}>
             {DISCIPLINES.map((d) => (
               <StatChip key={d.key} label={d.label} value={num(rec[d.key])} />
@@ -64,7 +65,8 @@ export default function CharacterMagicScreen() {
         </SectionCard>
 
         <SectionCard
-          title="RÉSERVE">
+          title="RÉSERVE"
+          icon="magic">
           <View style={styles.sphereRow}>
             <Text style={styles.sphereLabel}>Globale</Text>
             <Bullets
@@ -104,7 +106,7 @@ export default function CharacterMagicScreen() {
         </SectionCard>
       </KeyboardAwareScrollView>
 
-      <AppFab icon={editing ? 'check' : 'pencil'} onPress={() => setEditing((e) => !e)} />
+      <AppFab icon={editing ? dsIcon('check') : dsIcon('edit')} onPress={() => setEditing((e) => !e)} />
     </View>
   );
 }
@@ -112,7 +114,7 @@ export default function CharacterMagicScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 96 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
   sphereRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   sphereDivider: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
   sphereLabel: { width: 72, fontSize: 15, lineHeight: 16 },

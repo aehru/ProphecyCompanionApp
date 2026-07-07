@@ -1,16 +1,23 @@
 import React, { useRef, useState } from 'react';
-import { Alert, type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
 import { Button, HelperText, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import Icon, { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
+import { fmtSignedMod } from '@/lib/modifiers';
 import { deleteWeapon, updateWeapon } from '@/repositories/weapons';
 
 type CaracValue = (caracKey: string) => number;
+/**
+ * Net wound + temporary-effect modifier for a caractéristique. Folded into the
+ * carac value before any multiplier in the damage formula.
+ */
+type CaracModifier = (caracKey: string) => number;
 
 /**
  * One weapon: a read-only summary that flips to an inline editor via the pencil.
@@ -20,15 +27,22 @@ type CaracValue = (caracKey: string) => number;
 export default function WeaponCard({
   weapon,
   caracValue,
+  caracModifier,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
+  caracModifier?: CaracModifier;
 }) {
   const [editing, setEditing] = useState(false);
   return editing ? (
     <WeaponEditor weapon={weapon} onClose={() => setEditing(false)} />
   ) : (
-    <WeaponSummary weapon={weapon} caracValue={caracValue} onEdit={() => setEditing(true)} />
+    <WeaponSummary
+      weapon={weapon}
+      caracValue={caracValue}
+      caracModifier={caracModifier}
+      onEdit={() => setEditing(true)}
+    />
   );
 }
 
@@ -36,87 +50,177 @@ function FormulaRow({
   label,
   raw,
   caracValue,
+  // Per-carac modifier (wound + effects), folded into carac values before the
+  // multiplier. Only the damage row passes this; ranges ignore combat maluses.
+  caracModifier,
 }: {
   label: string;
   raw: string | null;
   caracValue: CaracValue;
+  caracModifier?: CaracModifier;
 }) {
   const theme = useProphecyTheme();
   if (raw == null || raw.trim() === '') return null;
-  const result = formulaResult(raw, caracValue);
+  const result = formulaResult(raw, caracValue, caracModifier);
+  // Badge = the raw carac modifier (wound + effects), shown BEFORE any multiplier:
+  // a +2 on `FOR x2` reads "+2", not "+4".
+  const delta = formulaCaracMod(raw, caracModifier);
+  const modColor = delta > 0 ? theme.colors.primary : theme.colors.error;
   return (
     <View style={styles.row}>
       <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
       <View style={styles.formulaCol}>
         <Text>{raw.trim()}</Text>
         {result != null && result !== raw.trim() ? (
-          <Text style={[styles.result, { color: theme.colors.primary }]}>= {result}</Text>
+          <View style={styles.resultRow}>
+            <Text style={[styles.result, { color: theme.colors.primary }]}>= {result}</Text>
+            {delta !== 0 ? (
+              <>
+                <IconButton
+                  icon="alert-circle"
+                  size={14}
+                  iconColor={modColor}
+                  style={styles.modIcon}
+                />
+                <Text style={[styles.modNote, { color: modColor }]}>
+                  ({fmtSignedMod(delta)})
+                </Text>
+              </>
+            ) : null}
+          </View>
         ) : null}
       </View>
     </View>
   );
 }
 
+/**
+ * Sum of the raw carac modifiers for the distinct caractéristiques a formula
+ * uses — the value applied to each carac before its multiplier. For a single-carac
+ * formula (the common case) this is just that carac's modifier.
+ */
+function formulaCaracMod(raw: string, caracModifier?: CaracModifier): number {
+  if (!caracModifier) return 0;
+  const parsed = parseFormula(raw);
+  if (!parsed.ok) return 0;
+  const keys = new Set<string>();
+  for (const t of parsed.formula.terms) if (t.kind === 'carac') keys.add(t.carac);
+  let total = 0;
+  for (const k of keys) total += caracModifier(k);
+  return total;
+}
+
 function WeaponSummary({
   weapon: w,
   caracValue,
+  caracModifier,
   onEdit,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
+  caracModifier?: CaracModifier;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
+  const [expanded, setExpanded] = useState(false);
   const prereqs = parsePrerequisites(w.prerequisites);
 
+  // Collapsed-row subtitle: computed damage + initiative (mêlée / corps à corps).
+  // The full breakdown (formula results, prereqs, ranges, creation) is in the
+  // expanded detail.
+  const dmg = formulaResult(w.damage, caracValue, caracModifier);
+  const subtitle = [
+    w.damage.trim() !== '' ? `Dégâts ${dmg ?? w.damage.trim()}` : null,
+    `Init ${fmtSigned(w.initMelee)}/${fmtSigned(w.initCorpsACorps)}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
-    <SectionCard title={(w.name || 'Arme').toUpperCase()}>
-      <IconButton icon="pencil" style={styles.editBtn} size={18} onPress={onEdit} />
+    <View style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
+      <Pressable style={styles.itemRow} onPress={() => setExpanded((e) => !e)}>
+        <View
+          style={[
+            styles.tile,
+            { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
+          ]}>
+          <Icon name="sword" size={22} color={theme.colors.primary} />
+        </View>
+        <View style={styles.itemMain}>
+          <Text style={styles.itemName} numberOfLines={1}>
+            {w.name || 'Arme'}
+          </Text>
+          {subtitle !== '' ? (
+            <Text
+              style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}
+              numberOfLines={1}>
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+        <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
+      </Pressable>
 
-      <FormulaRow label="Dégâts" raw={w.damage} caracValue={caracValue} />
+      {expanded ? (
+        <View style={styles.detail}>
+          <FormulaRow
+            label="Dégâts"
+            raw={w.damage}
+            caracValue={caracValue}
+            caracModifier={caracModifier}
+          />
 
-      {prereqs.length > 0 ? (
-        <View style={styles.row}>
-          <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Prérequis</Text>
-          <View style={styles.prereqWrap}>
-            {prereqs.map((p) => {
-              const met = caracValue(p.carac) >= p.min;
-              return (
-                <Text
-                  key={p.carac}
-                  style={[styles.prereq, { color: met ? theme.colors.primary : theme.colors.error }]}>
-                  {p.abbr} {p.min}
-                </Text>
-              );
-            })}
+          {prereqs.length > 0 ? (
+            <View style={styles.row}>
+              <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Prérequis</Text>
+              <View style={styles.prereqWrap}>
+                {prereqs.map((p) => {
+                  const met = caracValue(p.carac) >= p.min;
+                  return (
+                    <Text
+                      key={p.carac}
+                      style={[
+                        styles.prereq,
+                        { color: met ? theme.colors.primary : theme.colors.error },
+                      ]}>
+                      {p.abbr} {p.min}
+                    </Text>
+                  );
+                })}
+              </View>
+            </View>
+          ) : null}
+
+          <FormulaRow label="Portée eff." raw={w.rangeEffective} caracValue={caracValue} />
+          <FormulaRow label="Portée max" raw={w.rangeMax} caracValue={caracValue} />
+
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Initiative</Text>
+            <Text style={styles.value}>
+              Mêlée {fmtSigned(w.initMelee)} · CàC {fmtSigned(w.initCorpsACorps)}
+            </Text>
           </View>
+
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Création</Text>
+            <Text style={styles.value}>
+              Diff. {w.creationDifficulty} · Temps {w.creationTime}
+            </Text>
+          </View>
+
+          {w.special.trim() !== '' ? (
+            <View style={styles.row}>
+              <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Spécial</Text>
+              <Text style={styles.value}>{w.special.trim()}</Text>
+            </View>
+          ) : null}
+
+          <Button compact icon={dsIcon('edit')} onPress={onEdit} style={styles.detailEdit}>
+            Modifier
+          </Button>
         </View>
       ) : null}
-
-      <FormulaRow label="Portée eff." raw={w.rangeEffective} caracValue={caracValue} />
-      <FormulaRow label="Portée max" raw={w.rangeMax} caracValue={caracValue} />
-
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Initiative</Text>
-        <Text style={styles.value}>
-          Mêlée {fmtSigned(w.initMelee)} · CàC {fmtSigned(w.initCorpsACorps)}
-        </Text>
-      </View>
-
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Création</Text>
-        <Text style={styles.value}>
-          Diff. {w.creationDifficulty} · Temps {w.creationTime}
-        </Text>
-      </View>
-
-      {w.special.trim() !== '' ? (
-        <View style={styles.row}>
-          <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Spécial</Text>
-          <Text style={styles.value}>{w.special.trim()}</Text>
-        </View>
-      ) : null}
-    </SectionCard>
+    </View>
   );
 }
 
@@ -200,7 +304,7 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
 
   return (
     <SectionCard title="MODIFIER">
-      <IconButton icon="check" style={styles.editBtn} size={18} onPress={onClose} />
+      <IconButton icon={dsIcon('check')} style={styles.editBtn} size={18} onPress={onClose} />
 
       <TextInput
         label="Nom"
@@ -335,11 +439,30 @@ function formulaError(raw: string): string | null {
 
 const styles = StyleSheet.create({
   editBtn: { position: 'absolute', top: 0, right: 0, margin: 2, zIndex: 1 },
+  // DS inventory row.
+  item: { borderBottomWidth: 1 },
+  itemRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 12 },
+  tile: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemMain: { flex: 1, minWidth: 0 },
+  itemName: { fontSize: 14, fontWeight: '600' },
+  itemSub: { fontSize: 12, marginTop: 1 },
+  detail: { gap: 8, paddingLeft: 2, paddingBottom: 12 },
+  detailEdit: { alignSelf: 'flex-start', marginTop: 2 },
   row: { flexDirection: 'row', gap: 12 },
   label: { width: 92, fontSize: 14 },
   value: { flex: 1, fontSize: 15 },
   formulaCol: { flex: 1 },
+  resultRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   result: { fontSize: 15, fontWeight: '700' },
+  modIcon: { margin: 0 },
+  modNote: { fontSize: 13, fontWeight: '700' },
   prereqWrap: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   prereq: { fontSize: 15, fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },

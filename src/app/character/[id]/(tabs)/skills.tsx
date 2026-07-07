@@ -7,20 +7,24 @@ import { IconButton } from 'react-native-paper';
 
 import SkillsEditor from '@/components/skills-editor';
 import SkillsView from '@/components/skills-view';
+import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { asNumRecord, buildSkillRows, type SkillRow, skillRowsToInput } from '@/lib/character-values';
+import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { effectsQuery } from '@/repositories/effects';
 import { replaceSkills, skillsQuery } from '@/repositories/skills';
 
 export default function CharacterSkillsScreen() {
   const numId = useCharacterId();
   const navigation = useNavigation();
   // Reload on focus so attribut values edited elsewhere keep the totals correct.
-  const { char } = useCharacterState(numId, { reloadOnFocus: true });
+  const { char, state } = useCharacterState(numId, { reloadOnFocus: true });
   const { data: skills } = useLiveQuery(skillsQuery(numId));
+  const { data: effects } = useLiveQuery(effectsQuery(numId));
   const [editing, setEditing] = useEditToggle(navigation);
 
   // Toggle lives in the header (a FAB would overlap the sticky filter bar).
@@ -28,7 +32,7 @@ export default function CharacterSkillsScreen() {
     navigation.setOptions({
       headerRight: () => (
         <IconButton
-          icon={editing ? 'check' : 'pencil'}
+          icon={editing ? dsIcon('check') : dsIcon('edit')}
           onPress={() => setEditing((e) => !e)}
         />
       ),
@@ -39,13 +43,20 @@ export default function CharacterSkillsScreen() {
   if (fallback || !char) return fallback;
 
   const rec = asNumRecord(char);
+  // Wound malus + temporary effects, per linked attribut, for skill totals.
+  const wound = woundMalus(asNumRecord(state));
+  const effectList = effects ?? [];
 
   return (
     <View style={styles.container}>
       {editing ? (
         <SkillsEditorLive characterId={numId} skills={skills ?? []} />
       ) : (
-        <SkillsView skills={skills ?? []} attributValue={(a) => rec[a] ?? 0} />
+        <SkillsView
+          skills={skills ?? []}
+          attributValue={(a) => rec[a] ?? 0}
+          modifier={(a) => totalModifier(a, effectList, wound)}
+        />
       )}
     </View>
   );

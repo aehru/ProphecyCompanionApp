@@ -76,6 +76,12 @@ export const characters = sqliteTable('characters', {
   sorcellerie: integer('sorcellerie').notNull().default(0),
 
   biographie: text('biographie').notNull().default(''),
+
+  // Media — relative paths under <Paths.document>/media/characters/<id>/.
+  // Relative (not absolute) so they survive the document dir changing across
+  // reinstalls; resolved to a file:// uri at read (see lib/media). Null = unset.
+  avatarPath: text('avatar_path'),
+  portraitPath: text('portrait_path'),
 }, () => [
   // Tendance puces are always 0–10, enforced at the DB level.
   // Use raw unqualified column names — SQLite rejects table-qualified names in a CHECK.
@@ -198,6 +204,37 @@ export const weapons = sqliteTable('weapons', {
   rangeMax: text('range_max'),
 });
 
+/**
+ * Temporary bonuses/maluses applied to a character during play. Each row targets
+ * one stat — a caractéristique key, an attribut key, or `'all'` (every roll) —
+ * and carries a signed `value` (positive = bonus, negative = malus). Effects last
+ * `durationRemaining` units of `durationUnit`; "time passes" controls tick a
+ * single unit down by 1. An effect at 0 flips `expired` (kept in the list so the
+ * player can renew or delete it) and stops counting toward roll modifiers.
+ *
+ * Wound maluses are NOT stored here — they derive live from `actual_state` wound
+ * boxes (see `lib/modifiers`). Effects stack additively; the wound malus is the
+ * single biggest active wound level (max, not sum).
+ */
+export const effects = sqliteTable('effects', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  label: text('label').notNull().default(''),
+  // 'all' = every roll; otherwise a caractéristique or attribut key.
+  target: text('target').notNull().default('all'),
+  // Signed: positive = bonus, negative = malus.
+  value: integer('value').notNull().default(0),
+  // One of EFFECT_UNITS: 'action' | 'round' | 'hour' | 'day'.
+  durationUnit: text('duration_unit').notNull().default('round'),
+  durationRemaining: integer('duration_remaining').notNull().default(0),
+  expired: integer('expired', { mode: 'boolean' }).notNull().default(false),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -208,3 +245,5 @@ export type Armor = typeof armor.$inferSelect;
 export type NewArmor = typeof armor.$inferInsert;
 export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
+export type Effect = typeof effects.$inferSelect;
+export type NewEffect = typeof effects.$inferInsert;

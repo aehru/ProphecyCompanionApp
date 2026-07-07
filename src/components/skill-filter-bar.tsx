@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView } from 'react-native';
 import { SegmentedButtons, TextInput } from 'react-native-paper';
 
+import { dsIcon } from '@/components/ui/icon';
 import { ATTRIBUTS } from '@/constants/prophecy';
 
 /**
@@ -29,8 +30,8 @@ export default function SkillFilterBar({
         onChangeText={onSearch}
         mode="outlined"
         dense
-        left={<TextInput.Icon icon="magnify" />}
-        right={search ? <TextInput.Icon icon="close" onPress={() => onSearch('')} /> : undefined}
+        left={<TextInput.Icon icon={dsIcon('search')} />}
+        right={search ? <TextInput.Icon icon={dsIcon('close')} onPress={() => onSearch('')} /> : undefined}
       />
       {searching ? null : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
