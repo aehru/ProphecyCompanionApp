@@ -27,6 +27,22 @@ export default function CharacterLayout() {
           headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         }}
       />
+      <Stack.Screen
+        name="spell/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Catalogue de sorts',
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
+      <Stack.Screen
+        name="spell/[sid]"
+        options={{
+          presentation: 'modal',
+          title: 'Modifier le sortilège',
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
     </Stack>
   );
 }

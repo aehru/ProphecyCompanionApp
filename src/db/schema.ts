@@ -1,6 +1,12 @@
 import { sql } from 'drizzle-orm';
 import { check, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '@/constants/prophecy';
+
+type DisciplineKey = (typeof DISCIPLINES)[number]['key'];
+type SphereKey = (typeof SPHERES)[number]['key'];
+type CastUnit = (typeof EFFECT_UNITS)[number]['key'];
+
 /**
  * A Prophecy (2e) character sheet.
  *
@@ -216,6 +222,31 @@ export const weapons = sqliteTable('weapons', {
 });
 
 /**
+ * A character's known spells. One row per learned spell (mirrors `weapons` —
+ * plain list, always "known", no prepared/active state). `discipline` and
+ * `sphere` store the corresponding `constants/prophecy` key; `castTimeUnit`
+ * reuses the effect time units. `complexity`, `cost`, `difficulty` and cast time
+ * are display-only for now (no casting/pool interaction yet). `cle` (clé) and
+ * `effect` are free text.
+ */
+export const spells = sqliteTable('spells', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  complexity: integer('complexity').notNull().default(0),
+  discipline: text('discipline').$type<DisciplineKey>().notNull().default('sorcellerie'),
+  sphere: text('sphere').$type<SphereKey>().notNull().default('sphereFeu'),
+  cost: integer('cost').notNull().default(0),
+  castTimeAmount: integer('cast_time_amount').notNull().default(1),
+  castTimeUnit: text('cast_time_unit').$type<CastUnit>().notNull().default('action'),
+  difficulty: integer('difficulty').notNull().default(0),
+  cle: text('cle').notNull().default(''),
+  effect: text('effect').notNull().default(''),
+});
+
+/**
  * Temporary bonuses/maluses applied to a character during play. Each row targets
  * one stat — a caractéristique key, an attribut key, or `'all'` (every roll) —
  * and carries a signed `value` (positive = bonus, negative = malus). Effects last
@@ -256,5 +287,7 @@ export type Armor = typeof armor.$inferSelect;
 export type NewArmor = typeof armor.$inferInsert;
 export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
+export type Spell = typeof spells.$inferSelect;
+export type NewSpell = typeof spells.$inferInsert;
 export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;

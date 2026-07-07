@@ -12,6 +12,7 @@ import m0007 from './0007_add_magic.sql';
 import m0008 from './0008_add_effects.sql';
 import m0009 from './0009_add_character_media.sql';
 import m0010 from './0010_silky_trauma.sql';
+import m0011 from './0011_flippant_callisto.sql';
 
   export default {
     journal,
@@ -26,7 +27,8 @@ m0006,
 m0007,
 m0008,
 m0009,
-m0010
+m0010,
+m0011
     }
   }
   

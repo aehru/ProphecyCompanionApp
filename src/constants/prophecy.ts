@@ -60,6 +60,14 @@ export const DISCIPLINES = [
   { key: 'sorcellerie', label: 'Sorcellerie' },
 ] as const;
 
+/** Discipline / sphere key → display label (for spell fields). */
+export const DISCIPLINE_LABEL: Record<string, string> = Object.fromEntries(
+  DISCIPLINES.map((d) => [d.key, d.label]),
+);
+export const SPHERE_LABEL: Record<string, string> = Object.fromEntries(
+  SPHERES.map((s) => [s.key, s.label]),
+);
+
 /**
  * Default skill catalogue. Single global list, same for every
  * character. Each skill links to one attribut key.
