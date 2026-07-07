@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
@@ -22,10 +23,11 @@ import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, createArmor } from '@/repositories/armor';
 import { effectsQuery } from '@/repositories/effects';
-import { createWeapon, weaponsQuery } from '@/repositories/weapons';
+import { weaponsQuery } from '@/repositories/weapons';
 
 export default function CharacterWeaponsScreen() {
   const numId = useCharacterId();
+  const router = useRouter();
   const theme = useProphecyTheme();
   // ensure: initiative current-turn values live on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
@@ -119,7 +121,10 @@ export default function CharacterWeaponsScreen() {
         onPress={() => createArmor(numId)}
         style={styles.fabTop}
       />
-      <AppFab icon={dsIcon('sword')} onPress={() => createWeapon(numId)} />
+      <AppFab
+        icon={dsIcon('sword')}
+        onPress={() => router.push(`/character/${numId}/weapon/catalog`)}
+      />
     </View>
   );
 }

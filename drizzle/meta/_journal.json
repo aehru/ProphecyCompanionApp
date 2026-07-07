@@ -71,6 +71,20 @@
       "when": 1782679302278,
       "tag": "0009_add_character_media",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1783192246403,
+      "tag": "0010_silky_trauma",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1783198037812,
+      "tag": "0011_flippant_callisto",
+      "breakpoints": true
     }
   ]
 }

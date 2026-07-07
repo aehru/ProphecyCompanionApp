@@ -4,7 +4,6 @@ import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import Icon, { dsIcon } from '@/components/ui/icon';
-import SectionCard from '@/components/ui/section-card';
 import type { Armor } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -73,7 +72,7 @@ function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClose: () => void 
     ]);
 
   return (
-    <SectionCard title="MODIFIER">
+    <>
       <IconButton icon={dsIcon('check')} style={styles.editBtn} size={18} onPress={onClose} />
 
       <TextInput label="Nom" value={name} onChangeText={setName} mode="outlined" dense />
@@ -95,17 +94,24 @@ function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClose: () => void 
         style={styles.maxField}
       />
 
-      <Button
-        mode="contained-tonal"
-        icon="hammer-wrench"
-        onPress={() => updateArmor(a.id, { defenseCurrent: a.defenseMax })}>
-        Réparer
-      </Button>
-
-      <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>
-        Supprimer
-      </Button>
-    </SectionCard>
+      <View style={styles.actions}>
+        <Button
+          mode="outlined"
+          icon="delete"
+          textColor={theme.colors.error}
+          onPress={confirmDelete}
+          style={styles.actionBtn}>
+          Supprimer
+        </Button>
+        <Button
+          mode="contained-tonal"
+          icon="hammer-wrench"
+          onPress={() => updateArmor(a.id, { defenseCurrent: a.defenseMax })}
+          style={styles.actionBtn}>
+          Réparer
+        </Button>
+      </View>
+    </>
   );
 }
 
@@ -127,4 +133,6 @@ const styles = StyleSheet.create({
   subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
   itemSub: { fontSize: 12 },
   maxField: { flexGrow: 0, flexBasis: 120, minWidth: 120 },
+  actions: { flexDirection: 'row', gap: 8 },
+  actionBtn: { flex: 1 },
 });

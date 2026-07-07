@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useNavigation } from 'expo-router';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
@@ -32,10 +32,6 @@ export default function CharacterDashboardScreen() {
   // thing editable from the otherwise read-only dashboard.
   const [showPortrait, setShowPortrait] = useState(false);
   const [busyPortrait, setBusyPortrait] = useState(false);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({ title: char?.nom || 'Accueil' });
-  }, [navigation, char?.nom]);
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
