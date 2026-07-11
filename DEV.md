@@ -80,6 +80,16 @@ Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](s
 
 **Not yet covered:** anything importing `@/db/client` pulls in expo-sqlite, which can't run under Node. Repository + migration tests need the db decoupled from the singleton (inject it) and a `better-sqlite3` harness replaying the portable `drizzle/*.sql` migrations — see [ROADMAP.md](ROADMAP.md) (data safety).
 
+## Export / import
+
+Characters export to a versioned JSON envelope (`format` + `schemaVersion` + `characters[]`) and import back as **new** characters (fresh ids — import never overwrites). Three layers:
+
+- **[src/lib/character-transfer.ts](src/lib/character-transfer.ts)** — pure: builds the envelope, `serializeExport`, and `parseImport` (zod-validated, returns a French error string instead of throwing). Column key lists are derived from the zod shapes (`CHARACTER_FIELDS`, …) so the repo picks exactly the exportable columns. **Unit-tested.**
+- **[src/repositories/transfer.ts](src/repositories/transfer.ts)** — gathers DB rows into bundles (strips id / FK / timestamps / media) and re-inserts them in a transaction.
+- **[src/lib/character-transfer-io.ts](src/lib/character-transfer-io.ts)** — device glue (`expo-file-system` + `expo-sharing` + `expo-document-picker`). Native modules → **needs a dev-client rebuild** (`bun run android` / `ios`) after pulling these deps.
+
+Bump `SCHEMA_VERSION` on any breaking change to the bundle shape; add a migration path in `parseImport` if you need to accept older files.
+
 ## Project layout
 
 ```
