@@ -6,7 +6,9 @@ import * as schema from './schema';
 export const DATABASE_NAME = 'prophecy.db';
 
 // enableChangeListener powers Drizzle's useLiveQuery reactivity.
-const expoDb = openDatabaseSync(DATABASE_NAME, { enableChangeListener: true });
+// Exported for the backup helpers (db/backup), which need the raw handle to run
+// `VACUUM INTO` / close the connection before a restore.
+export const expoDb = openDatabaseSync(DATABASE_NAME, { enableChangeListener: true });
 
 export const db = drizzle(expoDb, { schema });
 

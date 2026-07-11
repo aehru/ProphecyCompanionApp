@@ -65,6 +65,33 @@ The first `run:android` / `run:ios` compiles a native dev client — slow once, 
 bun run lint          # expo lint
 ```
 
+### Test
+
+Pure logic is unit-tested with [Vitest](https://vitest.dev/) in a **Node** environment (no React Native / expo-sqlite runtime).
+
+```bash
+bun run test          # vitest run (once, for CI)
+bun run test:watch    # vitest (watch mode)
+```
+
+Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](src/lib/formula.test.ts)). The `@/` alias is mirrored in [vitest.config.ts](vitest.config.ts) so imports match the app.
+
+**Covered today:**
+- Pure logic — `lib/formula` (weapon formula parse/compute), `lib/modifiers` (wound malus + effect stacking), `lib/character-transfer` (export/import serialize + validate). Keep new pure logic covered here.
+- **Forward migrations** — [src/db/migrations.test.ts](src/db/migrations.test.ts) replays the bundled `drizzle/*.sql` against **better-sqlite3** (same SQLite engine; expo-sqlite can't run under Node but the SQL is portable). It seeds a DB at every prior schema version and runs the remaining migrations, catching NOT-NULL-without-default, tightened CHECKs against existing rows, and journal/`.sql` drift. Run this after every `drizzle-kit generate`.
+
+**Not yet covered:** repository logic — anything importing `@/db/client` pulls in expo-sqlite. Repository tests need the db decoupled from the singleton (inject it) so a better-sqlite3 instance can stand in — see [ROADMAP.md](ROADMAP.md).
+
+## Export / import
+
+Characters export to a versioned JSON envelope (`format` + `schemaVersion` + `characters[]`) and import back as **new** characters (fresh ids — import never overwrites). Three layers:
+
+- **[src/lib/character-transfer.ts](src/lib/character-transfer.ts)** — pure: builds the envelope, `serializeExport`, and `parseImport` (zod-validated, returns a French error string instead of throwing). Column key lists are derived from the zod shapes (`CHARACTER_FIELDS`, …) so the repo picks exactly the exportable columns. **Unit-tested.**
+- **[src/repositories/transfer.ts](src/repositories/transfer.ts)** — gathers DB rows into bundles (strips id / FK / timestamps / media) and re-inserts them in a transaction.
+- **[src/lib/character-transfer-io.ts](src/lib/character-transfer-io.ts)** — device glue (`expo-file-system` + `expo-sharing` + `expo-document-picker`). Native modules → **needs a dev-client rebuild** (`bun run android` / `ios`) after pulling these deps.
+
+Bump `SCHEMA_VERSION` on any breaking change to the bundle shape; add a migration path in `parseImport` if you need to accept older files.
+
 ## Project layout
 
 ```
@@ -123,7 +150,11 @@ bunx drizzle-kit generate
 
 Commit the generated `drizzle/*.sql` and `drizzle/meta/*` files.
 
-**Auto-heal (DEV only):** on a failed/stale migration the root layout deletes the DB and reloads **once** (guarded by an AsyncStorage flag) — convenient in dev, but it wipes local data. It is gated behind `__DEV__`; in production the error is surfaced instead of destroying user data. `resetDatabase()` in [src/db/client.ts](src/db/client.ts) is the manual escape hatch. See [ROADMAP.md](ROADMAP.md) for planned backup/restore hardening.
+**Pre-migration backup.** Before migrations run, the root layout snapshots the DB to a `prophecy.db.bak` sibling via `VACUUM INTO` (a lazy `useState` initializer, so it runs during render — before `useMigrations`' effect). On success the snapshot is dropped; on failure it can be restored. See [src/db/backup.ts](src/db/backup.ts) (`backupDatabase` / `restoreDatabase` / `clearBackup`). `VACUUM INTO` gives a WAL-consistent single-file copy — no `-wal`/`-shm` juggling.
+
+**On migration failure:**
+- **PROD** — restore the pre-migration snapshot so a broken/half-migrated schema doesn't wipe or strand the user's data, then surface the error. Data survives for the next launch (a richer retry/restore/export screen is [ROADMAP.md](ROADMAP.md) item 3).
+- **DEV** — auto-heal: delete the DB and reload **once** (guarded by an AsyncStorage flag) to get unblocked on a schema still in flux. Wipes local dev data by design. `resetDatabase()` in [src/db/client.ts](src/db/client.ts) is the manual escape hatch.
 
 ## Conventions
 
