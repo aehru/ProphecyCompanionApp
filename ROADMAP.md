@@ -18,5 +18,5 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 
 ## Game content
 
-- [ ] **Manage spells**
-- [ ] **Money**
+- [x] **Manage spells** — spellbook with catalogue + editor, disciplines, reserve & spheres.
+- [x] **Money** — the four Drac coins tracked on the sheet.
