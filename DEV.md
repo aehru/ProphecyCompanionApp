@@ -148,7 +148,11 @@ bunx drizzle-kit generate
 
 Commit the generated `drizzle/*.sql` and `drizzle/meta/*` files.
 
-**Auto-heal (DEV only):** on a failed/stale migration the root layout deletes the DB and reloads **once** (guarded by an AsyncStorage flag) — convenient in dev, but it wipes local data. It is gated behind `__DEV__`; in production the error is surfaced instead of destroying user data. `resetDatabase()` in [src/db/client.ts](src/db/client.ts) is the manual escape hatch. See [ROADMAP.md](ROADMAP.md) for planned backup/restore hardening.
+**Pre-migration backup.** Before migrations run, the root layout snapshots the DB to a `prophecy.db.bak` sibling via `VACUUM INTO` (a lazy `useState` initializer, so it runs during render — before `useMigrations`' effect). On success the snapshot is dropped; on failure it can be restored. See [src/db/backup.ts](src/db/backup.ts) (`backupDatabase` / `restoreDatabase` / `clearBackup`). `VACUUM INTO` gives a WAL-consistent single-file copy — no `-wal`/`-shm` juggling.
+
+**On migration failure:**
+- **PROD** — restore the pre-migration snapshot so a broken/half-migrated schema doesn't wipe or strand the user's data, then surface the error. Data survives for the next launch (a richer retry/restore/export screen is [ROADMAP.md](ROADMAP.md) item 3).
+- **DEV** — auto-heal: delete the DB and reload **once** (guarded by an AsyncStorage flag) to get unblocked on a schema still in flux. Wipes local dev data by design. `resetDatabase()` in [src/db/client.ts](src/db/client.ts) is the manual escape hatch.
 
 ## Conventions
 
