@@ -65,6 +65,21 @@ The first `run:android` / `run:ios` compiles a native dev client — slow once, 
 bun run lint          # expo lint
 ```
 
+### Test
+
+Pure logic is unit-tested with [Vitest](https://vitest.dev/) in a **Node** environment (no React Native / expo-sqlite runtime).
+
+```bash
+bun run test          # vitest run (once, for CI)
+bun run test:watch    # vitest (watch mode)
+```
+
+Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](src/lib/formula.test.ts)). The `@/` alias is mirrored in [vitest.config.ts](vitest.config.ts) so imports match the app.
+
+**Scope today:** pure functions only — `lib/formula` (weapon formula parse/compute) and `lib/modifiers` (wound malus + effect stacking). Keep new pure logic covered here.
+
+**Not yet covered:** anything importing `@/db/client` pulls in expo-sqlite, which can't run under Node. Repository + migration tests need the db decoupled from the singleton (inject it) and a `better-sqlite3` harness replaying the portable `drizzle/*.sql` migrations — see [ROADMAP.md](ROADMAP.md) (data safety).
+
 ## Project layout
 
 ```
