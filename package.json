@@ -58,6 +58,8 @@
     "babel-plugin-inline-import": "^3.0.0",
     "better-sqlite3": "^12.11.1",
     "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.4",
+    "eslint-config-expo": "^10.0.0",
     "typescript": "~5.9.2",
     "vitest": "^4.1.10"
   },
