@@ -12,7 +12,7 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 
 ## Migration process
 
-- [ ] **Forward-migration tests.** Seed a DB at each prior schema version, run the new migration, assert success. Catches conflict cases (NOT NULL without default, CHECK violations against existing rows, journal/snapshot mismatch) before release.
+- [x] **Forward-migration tests.** Seeds a DB at each prior schema version and replays the remaining `drizzle/*.sql` against better-sqlite3, asserting success. Catches NOT-NULL-without-default, CHECK violations against existing rows, and journal/`.sql` drift. See [src/db/migrations.test.ts](src/db/migrations.test.ts).
 - [ ] **Migration authoring guidelines.** Document the safe-change rules in DEV.md: additive columns with defaults, avoid tightening constraints on existing columns, never hand-edit `drizzle/` artifacts.
 - [ ] **Add a `db:generate` script** to `package.json` wrapping `drizzle-kit generate` (currently a bare `bunx` command).
 

@@ -76,9 +76,11 @@ bun run test:watch    # vitest (watch mode)
 
 Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](src/lib/formula.test.ts)). The `@/` alias is mirrored in [vitest.config.ts](vitest.config.ts) so imports match the app.
 
-**Scope today:** pure functions only — `lib/formula` (weapon formula parse/compute) and `lib/modifiers` (wound malus + effect stacking). Keep new pure logic covered here.
+**Covered today:**
+- Pure logic — `lib/formula` (weapon formula parse/compute), `lib/modifiers` (wound malus + effect stacking), `lib/character-transfer` (export/import serialize + validate). Keep new pure logic covered here.
+- **Forward migrations** — [src/db/migrations.test.ts](src/db/migrations.test.ts) replays the bundled `drizzle/*.sql` against **better-sqlite3** (same SQLite engine; expo-sqlite can't run under Node but the SQL is portable). It seeds a DB at every prior schema version and runs the remaining migrations, catching NOT-NULL-without-default, tightened CHECKs against existing rows, and journal/`.sql` drift. Run this after every `drizzle-kit generate`.
 
-**Not yet covered:** anything importing `@/db/client` pulls in expo-sqlite, which can't run under Node. Repository + migration tests need the db decoupled from the singleton (inject it) and a `better-sqlite3` harness replaying the portable `drizzle/*.sql` migrations — see [ROADMAP.md](ROADMAP.md) (data safety).
+**Not yet covered:** repository logic — anything importing `@/db/client` pulls in expo-sqlite. Repository tests need the db decoupled from the singleton (inject it) so a better-sqlite3 instance can stand in — see [ROADMAP.md](ROADMAP.md).
 
 ## Export / import
 
