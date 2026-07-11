@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
@@ -25,7 +24,6 @@ import { setCharacterMedia } from '@/repositories/characters';
  */
 export default function CharacterDashboardScreen() {
   const numId = useCharacterId();
-  const navigation = useNavigation();
   const theme = useProphecyTheme();
   const { char, state, reload } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
   // Full portrait is large; collapsed by default. Illustrations are the one

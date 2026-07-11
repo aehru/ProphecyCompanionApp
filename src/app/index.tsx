@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Image } from 'expo-image';
 import { type Href, useNavigation, useRouter } from 'expo-router';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { IconButton, List, Menu, Text } from 'react-native-paper';
 
@@ -25,7 +25,7 @@ export default function CharactersListScreen() {
   const isEmpty = !data || data.length === 0;
 
   // Export every character to a shareable JSON file (full backup).
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     setMenuOpen(false);
     if (isEmpty) {
       Alert.alert('Rien à exporter', 'Créez au moins un personnage.');
@@ -39,10 +39,10 @@ export default function CharactersListScreen() {
     } finally {
       setBusy(false);
     }
-  };
+  }, [isEmpty]);
 
   // Pick a JSON export and add its characters (as new entries — never overwrites).
-  const handleImport = async () => {
+  const handleImport = useCallback(async () => {
     setMenuOpen(false);
     setBusy(true);
     try {
@@ -60,7 +60,7 @@ export default function CharactersListScreen() {
     } finally {
       setBusy(false);
     }
-  };
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -80,7 +80,7 @@ export default function CharactersListScreen() {
         </Menu>
       ),
     });
-  }, [navigation, menuOpen, busy, isEmpty]);
+  }, [navigation, menuOpen, busy, handleExport, handleImport]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
