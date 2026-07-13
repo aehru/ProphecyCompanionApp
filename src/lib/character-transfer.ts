@@ -66,6 +66,10 @@ const skillSchema = z.object({
   name: str,
   attribut: str,
   value: int,
+  // Specialization link. Optional + nullable so pre-specialization exports (which
+  // lack these keys) still import as plain base skills. null = base skill.
+  parentName: str.nullable().optional(),
+  specLabel: str.nullable().optional(),
 });
 
 const armorSchema = z.object({

@@ -53,7 +53,9 @@ export function buildSkillRows(dbSkills: Skill[]): SkillRow[] {
   });
   const defaultNames = new Set(DEFAULT_SKILLS.map((d) => d.name));
   for (const s of dbSkills) {
-    if (!defaultNames.has(s.name)) {
+    // Specializations (parentName set) are managed live, not through this
+    // wholesale base editor — skip them here.
+    if (s.parentName == null && !defaultNames.has(s.name)) {
       rows.push({ name: s.name, attribut: s.attribut, value: String(s.value), isCustom: true });
     }
   }
