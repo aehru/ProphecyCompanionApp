@@ -14,7 +14,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { asNumRecord, buildSkillRows, type SkillRow, skillRowsToInput } from '@/lib/character-values';
-import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { skillModifier, woundMalus } from '@/lib/modifiers';
 import { effectsQuery } from '@/repositories/effects';
 import { replaceSkills, skillsQuery } from '@/repositories/skills';
 
@@ -55,7 +55,7 @@ export default function CharacterSkillsScreen() {
         <SkillsView
           skills={skills ?? []}
           attributValue={(a) => rec[a] ?? 0}
-          modifier={(a) => totalModifier(a, effectList, wound)}
+          modifier={(s) => skillModifier(s.attribut, s.name, effectList, wound)}
         />
       )}
     </View>
