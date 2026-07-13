@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Text } from 'react-native-paper';
+import { IconButton, Text } from 'react-native-paper';
 
 import ArmorCard from '@/components/armor-card';
 import NumberField from '@/components/number-field';
@@ -19,6 +19,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
+import { rollInitiative } from '@/lib/dice';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, createArmor } from '@/repositories/armor';
@@ -55,10 +56,29 @@ export default function CharacterWeaponsScreen() {
     updateActualState(numId, { initiativeValues: next });
   };
 
+  // Roll all initiative dice at once: initiativeMax plain D10, stored descending.
+  const rollInit = () => {
+    const next = rollInitiative(initiativeMax);
+    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
+    updateActualState(numId, { initiativeValues: next });
+  };
+
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <EditableSection title="INITIATIVE">
+        <EditableSection
+          title="INITIATIVE"
+          action={() =>
+            initiativeMax > 0 ? (
+              <IconButton
+                icon={dsIcon('dice')}
+                size={18}
+                onPress={rollInit}
+                accessibilityLabel="Lancer l’initiative"
+                style={styles.initRoll}
+              />
+            ) : null
+          }>
           {(editing) => {
             if (initiativeMax <= 0) {
               return (
@@ -134,6 +154,7 @@ const styles = StyleSheet.create({
   container: { padding: 12, gap: 12, paddingBottom: 160 },
   // Second FAB sits above the bottom one.
   fabTop: { bottom: 88 },
+  initRoll: { margin: 0 },
   initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
 });
