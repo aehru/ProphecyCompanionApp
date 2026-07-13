@@ -25,9 +25,10 @@ export default function SkillsView({
 }: {
   skills: Skill[];
   attributValue: (attribut: string) => number;
-  // Net wound + effect modifier for a skill's linked attribut. Folded into the
-  // total; a non-zero value also shows a signed badge.
-  modifier?: (attribut: string) => number;
+  // Net roll modifier for a skill: wound + effects on its attribut/'all' + any
+  // effect targeting this skill by name. Folded into the total; a non-zero value
+  // also shows a signed badge.
+  modifier?: (skill: Skill) => number;
 }) {
   const theme = useProphecyTheme();
   const { search, setSearch, activeAttr, setActiveAttr, q, searching, title } = useSkillFilter();
@@ -49,7 +50,7 @@ export default function SkillsView({
           </View>
 
           {visible.map((s, i) => {
-            const mod = modifier?.(s.attribut) ?? 0;
+            const mod = modifier?.(s) ?? 0;
             return (
               <View key={s.id}>
                 {i > 0 && <Divider style={styles.divider} />}

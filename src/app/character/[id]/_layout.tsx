@@ -43,6 +43,14 @@ export default function CharacterLayout() {
           headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         }}
       />
+      <Stack.Screen
+        name="effect/[eid]"
+        options={{
+          presentation: 'modal',
+          title: "Modifier l'effet",
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
     </Stack>
   );
 }

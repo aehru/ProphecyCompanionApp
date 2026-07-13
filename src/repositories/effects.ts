@@ -12,6 +12,11 @@ export function effectsQuery(characterId: number) {
     .orderBy(asc(effects.createdAt));
 }
 
+/** Live query for a single effect by id (use with useLiveQuery in the editor). */
+export function effectQuery(id: number) {
+  return db.select().from(effects).where(eq(effects.id, id));
+}
+
 /** Add an effect. New effects start un-expired. */
 export async function createEffect(characterId: number, data: Partial<NewEffect> = {}) {
   const [row] = await db
