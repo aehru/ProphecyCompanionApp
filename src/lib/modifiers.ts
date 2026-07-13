@@ -8,9 +8,31 @@
 //
 // A roll's total modifier for a given stat = woundMalus + Σ(effects on that stat
 // or on 'all'). Expired effects are ignored.
+//
+// A skill roll can ALSO carry an effect targeting that one skill. Skills have no
+// stable key (replaceSkills re-inserts rows, so ids churn), so a skill effect
+// stores its target as `skill:<name>` — see the `skill*` helpers below.
 
 import { WOUND_LEVELS } from '@/constants/prophecy';
 import type { Effect } from '@/db/schema';
+
+/** Prefix marking an effect target as a single named skill (vs a stat key). */
+export const SKILL_TARGET_PREFIX = 'skill:';
+
+/** Build the effect target for a named skill. */
+export function skillTarget(name: string): string {
+  return `${SKILL_TARGET_PREFIX}${name}`;
+}
+
+/** True when an effect target points at a named skill rather than a stat. */
+export function isSkillTarget(target: string): boolean {
+  return target.startsWith(SKILL_TARGET_PREFIX);
+}
+
+/** The skill name behind a `skill:<name>` target (unchanged if not a skill target). */
+export function skillTargetName(target: string): string {
+  return isSkillTarget(target) ? target.slice(SKILL_TARGET_PREFIX.length) : target;
+}
 
 /**
  * Biggest active wound malus for a character, as a non-positive number (0 = no
@@ -53,6 +75,27 @@ export function effectsSum(targetKey: string, effects: Effect[]): number {
  */
 export function totalModifier(targetKey: string, effects: Effect[], wound: number): number {
   return wound + effectsSum(targetKey, effects);
+}
+
+/**
+ * Net modifier for a skill roll: the modifier on its linked attribut (wound +
+ * effects on that attribut or 'all') plus any effect targeting this skill by
+ * name. This is the badge shown next to a skill's total.
+ */
+export function skillModifier(
+  attribut: string,
+  skillName: string,
+  effects: Effect[],
+  wound: number,
+): number {
+  // Only the effects targeting this exact skill — the 'all' + attribut effects
+  // are already covered by totalModifier, so don't count them twice.
+  const target = skillTarget(skillName);
+  let skillOnly = 0;
+  for (const e of effects) {
+    if (!e.expired && e.target === target) skillOnly += e.value;
+  }
+  return totalModifier(attribut, effects, wound) + skillOnly;
 }
 
 /** Format a signed modifier for display, e.g. 1 → "+1", -5 → "-5". */

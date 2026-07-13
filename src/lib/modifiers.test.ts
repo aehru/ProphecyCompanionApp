@@ -6,6 +6,10 @@ import {
   activeEffects,
   effectsSum,
   fmtSignedMod,
+  isSkillTarget,
+  skillModifier,
+  skillTarget,
+  skillTargetName,
   totalModifier,
   woundMalus,
 } from './modifiers';
@@ -96,6 +100,44 @@ describe('totalModifier', () => {
 
   it('equals just the wound malus when no effects match', () => {
     expect(totalModifier('force', [], -3)).toBe(-3);
+  });
+});
+
+describe('skill targets', () => {
+  it('round-trips a skill name through the skill: prefix', () => {
+    const t = skillTarget('Discrétion');
+    expect(t).toBe('skill:Discrétion');
+    expect(isSkillTarget(t)).toBe(true);
+    expect(skillTargetName(t)).toBe('Discrétion');
+  });
+
+  it('does not treat a stat key as a skill target', () => {
+    expect(isSkillTarget('force')).toBe(false);
+    // skillTargetName leaves a non-skill target unchanged.
+    expect(skillTargetName('force')).toBe('force');
+  });
+});
+
+describe('skillModifier', () => {
+  it('adds a skill-specific effect on top of the attribut modifier', () => {
+    const list = [
+      makeEffect({ target: 'all', value: 1 }),
+      makeEffect({ target: 'physique', value: 2 }),
+      makeEffect({ target: skillTarget('Discrétion'), value: 3 }),
+    ];
+    // wound 0 + all(+1) + physique(+2) + skill(+3) = 6.
+    expect(skillModifier('physique', 'Discrétion', list, 0)).toBe(6);
+  });
+
+  it('ignores an effect targeting a different skill', () => {
+    const list = [makeEffect({ target: skillTarget('Escalade'), value: 3 })];
+    expect(skillModifier('physique', 'Discrétion', list, 0)).toBe(0);
+  });
+
+  it('folds in the wound malus like a stat roll', () => {
+    const list = [makeEffect({ target: skillTarget('Discrétion'), value: 2 })];
+    // wound -5 + skill(+2) = -3.
+    expect(skillModifier('physique', 'Discrétion', list, -5)).toBe(-3);
   });
 });
 
