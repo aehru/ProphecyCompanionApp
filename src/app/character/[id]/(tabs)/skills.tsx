@@ -16,7 +16,15 @@ import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { asNumRecord, buildSkillRows, type SkillRow, skillRowsToInput } from '@/lib/character-values';
 import { skillModifier, woundMalus } from '@/lib/modifiers';
 import { effectsQuery } from '@/repositories/effects';
-import { replaceSkills, skillsQuery } from '@/repositories/skills';
+import type { SpecMother } from '@/components/skills-editor';
+import {
+  createSpecialization,
+  deleteSpecialization,
+  renameSpecialization,
+  replaceSkills,
+  skillsQuery,
+  updateSkillValue,
+} from '@/repositories/skills';
 
 export default function CharacterSkillsScreen() {
   const numId = useCharacterId();
@@ -71,6 +79,8 @@ export default function CharacterSkillsScreen() {
 function SkillsEditorLive({ characterId, skills }: { characterId: number; skills: Skill[] }) {
   const [rows, setRows] = useState<SkillRow[]>(() => buildSkillRows(skills));
   const [search, setSearch] = useState('');
+  // Specializations are managed live (not through the wholesale base flush).
+  const specs = skills.filter((s) => s.parentName != null);
 
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
@@ -123,6 +133,21 @@ function SkillsEditorLive({ characterId, skills }: { characterId: number; skills
     [scheduleSave],
   );
 
+  // Specialization CRUD writes live (own table partition; base flush never
+  // touches these rows). Label rename recomputes the composite name + rewrites
+  // any effect targeting it, in the repository.
+  const onAddSpec = useCallback(
+    (mother: SpecMother) => {
+      // Flush pending base edits first so the mother is persisted with its value.
+      flush();
+      createSpecialization(characterId, mother);
+    },
+    [characterId, flush],
+  );
+  const onSpecLabel = useCallback((spec: Skill, label: string) => renameSpecialization(spec, label), []);
+  const onSpecValue = useCallback((spec: Skill, value: number) => updateSkillValue(spec.id, value), []);
+  const onSpecRemove = useCallback((spec: Skill) => deleteSpecialization(spec), []);
+
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={styles.editContent}
@@ -130,12 +155,17 @@ function SkillsEditorLive({ characterId, skills }: { characterId: number; skills
       bottomOffset={24}>
       <SkillsEditor
         rows={rows}
+        specs={specs}
         search={search}
         onSearch={setSearch}
         onChangeValue={onChangeValue}
         onChangeAttribut={onChangeAttribut}
         onAddCustom={onAddCustom}
         onRemove={onRemove}
+        onAddSpec={onAddSpec}
+        onSpecLabel={onSpecLabel}
+        onSpecValue={onSpecValue}
+        onSpecRemove={onSpecRemove}
       />
     </KeyboardAwareScrollView>
   );

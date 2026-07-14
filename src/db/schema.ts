@@ -163,6 +163,15 @@ export const skills = sqliteTable('skills', {
   name: text('name').notNull().default(''),
   attribut: text('attribut').notNull().default(''),
   value: integer('value').notNull().default(0),
+  // Specialization link (name-keyed). A base skill has both null. A
+  // specialization ("Herboristerie (Curative)") derives from a mother skill:
+  // `parentName` is the mother's `name`, `specLabel` the short label ("Curative"),
+  // and `name` stays the canonical composite so effect targeting (`skill:<name>`)
+  // stays unique. It's seeded from the mother's value at creation, then evolves
+  // on its own and shares the mother's `attribut`. Cascade (mother gone → specs
+  // dropped) is enforced in the repository, not by a FK.
+  parentName: text('parent_name'),
+  specLabel: text('spec_label'),
 });
 
 /**
