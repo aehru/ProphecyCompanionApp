@@ -1,10 +1,12 @@
-import { useNavigation } from 'expo-router';
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useNavigation, useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
+import SpellCard from '@/components/spell-card';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import { dsIcon } from '@/components/ui/icon';
@@ -18,6 +20,7 @@ import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
+import { spellsQuery } from '@/repositories/spells';
 
 /**
  * Magie tab — live in-play tracking only. Reserve and spheres are pools whose
@@ -28,12 +31,14 @@ import { updateActualState } from '@/repositories/actual-state';
 export default function CharacterMagicScreen() {
   const numId = useCharacterId();
   const navigation = useNavigation();
+  const router = useRouter();
   const theme = useProphecyTheme();
   // ensure: current magic values live on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, {
     ensure: true,
     reloadOnFocus: true,
   });
+  const { data: spells } = useLiveQuery(spellsQuery(numId));
   const [editing, setEditing] = useEditToggle(navigation);
 
   const fallback = characterFallback(char);
@@ -104,8 +109,23 @@ export default function CharacterMagicScreen() {
             );
           })}
         </SectionCard>
+
+        <SectionCard title="SORTILÈGES" icon="magic">
+          {(spells ?? []).length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucun sortilège. Ajoutez-en un avec le bouton « Sort ».
+            </Text>
+          ) : (
+            (spells ?? []).map((sp) => <SpellCard key={sp.id} spell={sp} />)
+          )}
+        </SectionCard>
       </KeyboardAwareScrollView>
 
+      <AppFab
+        icon={dsIcon('magic')}
+        onPress={() => router.push(`/character/${numId}/spell/catalog`)}
+        style={styles.fabTop}
+      />
       <AppFab icon={editing ? dsIcon('check') : dsIcon('edit')} onPress={() => setEditing((e) => !e)} />
     </View>
   );
@@ -113,7 +133,9 @@ export default function CharacterMagicScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  container: { padding: 12, gap: 12, paddingBottom: 96 },
+  container: { padding: 12, gap: 12, paddingBottom: 160 },
+  // Second FAB sits above the bottom one.
+  fabTop: { bottom: 88 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
   sphereRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   sphereDivider: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8 },

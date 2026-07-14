@@ -1,8 +1,9 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Text } from 'react-native-paper';
+import { IconButton, Text } from 'react-native-paper';
 
 import ArmorCard from '@/components/armor-card';
 import NumberField from '@/components/number-field';
@@ -18,14 +19,16 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
+import { rollInitiative } from '@/lib/dice';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, createArmor } from '@/repositories/armor';
 import { effectsQuery } from '@/repositories/effects';
-import { createWeapon, weaponsQuery } from '@/repositories/weapons';
+import { weaponsQuery } from '@/repositories/weapons';
 
 export default function CharacterWeaponsScreen() {
   const numId = useCharacterId();
+  const router = useRouter();
   const theme = useProphecyTheme();
   // ensure: initiative current-turn values live on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
@@ -53,10 +56,29 @@ export default function CharacterWeaponsScreen() {
     updateActualState(numId, { initiativeValues: next });
   };
 
+  // Roll all initiative dice at once: initiativeMax plain D10, stored descending.
+  const rollInit = () => {
+    const next = rollInitiative(initiativeMax);
+    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
+    updateActualState(numId, { initiativeValues: next });
+  };
+
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <EditableSection title="INITIATIVE">
+        <EditableSection
+          title="INITIATIVE"
+          action={() =>
+            initiativeMax > 0 ? (
+              <IconButton
+                icon={dsIcon('dice')}
+                size={18}
+                onPress={rollInit}
+                accessibilityLabel="Lancer l’initiative"
+                style={styles.initRoll}
+              />
+            ) : null
+          }>
           {(editing) => {
             if (initiativeMax <= 0) {
               return (
@@ -119,7 +141,10 @@ export default function CharacterWeaponsScreen() {
         onPress={() => createArmor(numId)}
         style={styles.fabTop}
       />
-      <AppFab icon={dsIcon('sword')} onPress={() => createWeapon(numId)} />
+      <AppFab
+        icon={dsIcon('sword')}
+        onPress={() => router.push(`/character/${numId}/weapon/catalog`)}
+      />
     </View>
   );
 }
@@ -129,6 +154,7 @@ const styles = StyleSheet.create({
   container: { padding: 12, gap: 12, paddingBottom: 160 },
   // Second FAB sits above the bottom one.
   fabTop: { bottom: 88 },
+  initRoll: { margin: 0 },
   initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
 });

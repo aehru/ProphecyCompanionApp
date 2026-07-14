@@ -1,22 +1,86 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Image } from 'expo-image';
-import { type Href, useRouter } from 'expo-router';
-import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
-import { List, Text } from 'react-native-paper';
+import { type Href, useNavigation, useRouter } from 'expo-router';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { IconButton, List, Menu, Text } from 'react-native-paper';
 
 import Icon, { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { parseImport } from '@/lib/character-transfer';
+import { pickImportText, shareExport } from '@/lib/character-transfer-io';
 import { mediaUri } from '@/lib/media';
 import { charactersListQuery } from '@/repositories/characters';
+import { exportCharacters, importCharacters } from '@/repositories/transfer';
 
 export default function CharactersListScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const theme = useProphecyTheme();
   const { data } = useLiveQuery(charactersListQuery());
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const isEmpty = !data || data.length === 0;
+
+  // Export every character to a shareable JSON file (full backup).
+  const handleExport = useCallback(async () => {
+    setMenuOpen(false);
+    if (isEmpty) {
+      Alert.alert('Rien à exporter', 'Créez au moins un personnage.');
+      return;
+    }
+    setBusy(true);
+    try {
+      await shareExport(await exportCharacters());
+    } catch (e) {
+      Alert.alert('Export impossible', e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }, [isEmpty]);
+
+  // Pick a JSON export and add its characters (as new entries — never overwrites).
+  const handleImport = useCallback(async () => {
+    setMenuOpen(false);
+    setBusy(true);
+    try {
+      const raw = await pickImportText();
+      if (raw == null) return; // cancelled
+      const parsed = parseImport(raw);
+      if (!parsed.ok) {
+        Alert.alert('Import impossible', parsed.error);
+        return;
+      }
+      const n = await importCharacters(parsed.data);
+      Alert.alert('Import réussi', `${n} personnage${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}.`);
+    } catch (e) {
+      Alert.alert('Import impossible', e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Menu
+          visible={menuOpen}
+          onDismiss={() => setMenuOpen(false)}
+          anchor={
+            <IconButton
+              icon="dots-vertical"
+              disabled={busy}
+              onPress={() => setMenuOpen(true)}
+            />
+          }>
+          <Menu.Item leadingIcon="export" onPress={handleExport} title="Exporter tout" />
+          <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
+        </Menu>
+      ),
+    });
+  }, [navigation, menuOpen, busy, handleExport, handleImport]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

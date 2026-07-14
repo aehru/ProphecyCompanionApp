@@ -1,9 +1,9 @@
 import { Image } from 'expo-image';
-import { useNavigation } from 'expo-router';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
+import DiceRollerFab from '@/components/dice-roller-fab';
 import TendancesCircles from '@/components/tendances-circles';
 import { characterFallback } from '@/components/ui/character-gate';
 import Icon, { dsIcon } from '@/components/ui/icon';
@@ -25,17 +25,12 @@ import { setCharacterMedia } from '@/repositories/characters';
  */
 export default function CharacterDashboardScreen() {
   const numId = useCharacterId();
-  const navigation = useNavigation();
   const theme = useProphecyTheme();
   const { char, state, reload } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
   // Full portrait is large; collapsed by default. Illustrations are the one
   // thing editable from the otherwise read-only dashboard.
   const [showPortrait, setShowPortrait] = useState(false);
   const [busyPortrait, setBusyPortrait] = useState(false);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({ title: char?.nom || 'Accueil' });
-  }, [navigation, char?.nom]);
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
@@ -76,6 +71,7 @@ export default function CharacterDashboardScreen() {
   };
 
   return (
+    <View style={styles.root}>
     <ScrollView style={styles.root} contentContainerStyle={styles.container}>
       {/* Hero card: identity + tendances ring gauges (replacing health/magic). */}
       <View style={[styles.hero, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border }]}>
@@ -156,6 +152,8 @@ export default function CharacterDashboardScreen() {
       </SectionCard>
 
     </ScrollView>
+      <DiceRollerFab />
+    </View>
   );
 }
 

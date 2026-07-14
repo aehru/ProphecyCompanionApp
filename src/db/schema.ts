@@ -1,6 +1,12 @@
 import { sql } from 'drizzle-orm';
 import { check, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
+import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '@/constants/prophecy';
+
+type DisciplineKey = (typeof DISCIPLINES)[number]['key'];
+type SphereKey = (typeof SPHERES)[number]['key'];
+type CastUnit = (typeof EFFECT_UNITS)[number]['key'];
+
 /**
  * A Prophecy (2e) character sheet.
  *
@@ -157,6 +163,15 @@ export const skills = sqliteTable('skills', {
   name: text('name').notNull().default(''),
   attribut: text('attribut').notNull().default(''),
   value: integer('value').notNull().default(0),
+  // Specialization link (name-keyed). A base skill has both null. A
+  // specialization ("Herboristerie (Curative)") derives from a mother skill:
+  // `parentName` is the mother's `name`, `specLabel` the short label ("Curative"),
+  // and `name` stays the canonical composite so effect targeting (`skill:<name>`)
+  // stays unique. It's seeded from the mother's value at creation, then evolves
+  // on its own and shares the mother's `attribut`. Cascade (mother gone → specs
+  // dropped) is enforced in the repository, not by a FK.
+  parentName: text('parent_name'),
+  specLabel: text('spec_label'),
 });
 
 /**
@@ -178,12 +193,20 @@ export const armor = sqliteTable('armor', {
 });
 
 /**
- * A character's weapon catalogue. One row per owned weapon (plain list — no
- * equipped flag yet; add one later mirroring `armor` if dual-wield/equip is
- * needed). `damage`, `prerequisites`, `rangeEffective` and `rangeMax` hold raw
- * formula strings (e.g. `FOR x2 +3 +1D10`) parsed/computed at display by
- * `lib/formula`; range columns are nullable (null = melee weapon, no range).
- * The two initiative columns are plain signed ints (display-only for now).
+ * Which hand a weapon is currently equipped in. `null` = not equipped; `'main'`
+ * / `'off'` for a one-handed weapon (dual-wield = one in each); `'both'` for a
+ * two-handed weapon occupying both hands.
+ */
+export const EQUIPPED_HANDS = ['main', 'off', 'both'] as const;
+export type EquippedHand = (typeof EQUIPPED_HANDS)[number];
+
+/**
+ * A character's weapon catalogue. One row per owned weapon. `damage`,
+ * `prerequisites`, `rangeEffective` and `rangeMax` hold raw formula strings
+ * (e.g. `FOR x2 +3 +1D10`) parsed/computed at display by `lib/formula`; range
+ * columns are nullable (null = melee weapon, no range). The two initiative
+ * columns are plain signed ints (display-only for now). `hands` is the weapon's
+ * handedness; `equippedHand` tracks which hand it's wielded in (see enum above).
  * Enchantments are deferred — they'll get their own `weapon_enchants` table
  * (FK weaponId, cascade), not a json column here.
  */
@@ -202,6 +225,34 @@ export const weapons = sqliteTable('weapons', {
   special: text('special').notNull().default(''),
   rangeEffective: text('range_effective'),
   rangeMax: text('range_max'),
+  // Handedness as a count: 1 = one-handed, 2 = two-handed.
+  hands: integer('hands').$type<1 | 2>().notNull().default(1),
+  equippedHand: text('equipped_hand', { enum: EQUIPPED_HANDS }),
+});
+
+/**
+ * A character's known spells. One row per learned spell (mirrors `weapons` —
+ * plain list, always "known", no prepared/active state). `discipline` and
+ * `sphere` store the corresponding `constants/prophecy` key; `castTimeUnit`
+ * reuses the effect time units. `complexity`, `cost`, `difficulty` and cast time
+ * are display-only for now (no casting/pool interaction yet). `cle` (clé) and
+ * `effect` are free text.
+ */
+export const spells = sqliteTable('spells', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  complexity: integer('complexity').notNull().default(0),
+  discipline: text('discipline').$type<DisciplineKey>().notNull().default('sorcellerie'),
+  sphere: text('sphere').$type<SphereKey>().notNull().default('sphereFeu'),
+  cost: integer('cost').notNull().default(0),
+  castTimeAmount: integer('cast_time_amount').notNull().default(1),
+  castTimeUnit: text('cast_time_unit').$type<CastUnit>().notNull().default('action'),
+  difficulty: integer('difficulty').notNull().default(0),
+  cle: text('cle').notNull().default(''),
+  effect: text('effect').notNull().default(''),
 });
 
 /**
@@ -245,5 +296,7 @@ export type Armor = typeof armor.$inferSelect;
 export type NewArmor = typeof armor.$inferInsert;
 export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
+export type Spell = typeof spells.$inferSelect;
+export type NewSpell = typeof spells.$inferInsert;
 export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;

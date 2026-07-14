@@ -25,16 +25,62 @@ export default function SkillsView({
 }: {
   skills: Skill[];
   attributValue: (attribut: string) => number;
-  // Net wound + effect modifier for a skill's linked attribut. Folded into the
-  // total; a non-zero value also shows a signed badge.
-  modifier?: (attribut: string) => number;
+  // Net roll modifier for a skill: wound + effects on its attribut/'all' + any
+  // effect targeting this skill by name. Folded into the total; a non-zero value
+  // also shows a signed badge.
+  modifier?: (skill: Skill) => number;
 }) {
   const theme = useProphecyTheme();
   const { search, setSearch, activeAttr, setActiveAttr, q, searching, title } = useSkillFilter();
 
-  const visible = searching
-    ? skills.filter((s) => s.name.toLowerCase().includes(q))
-    : skills.filter((s) => s.attribut === activeAttr);
+  // Base skills carry the group; specializations render indented under their
+  // mother. A specialization whose mother isn't owned gets a greyed "non acquise"
+  // ghost header (the GM may allow a spec without the base skill). When searching,
+  // a matching mother shows all its specs; otherwise only matching specs show.
+  const specsByMother = new Map<string, Skill[]>();
+  for (const s of skills) {
+    if (s.parentName) {
+      const list = specsByMother.get(s.parentName) ?? [];
+      list.push(s);
+      specsByMother.set(s.parentName, list);
+    }
+  }
+  const bases = skills.filter((s) => !s.parentName);
+  const baseNames = new Set(bases.map((b) => b.name));
+
+  type Item = { kind: 'base' | 'spec'; skill: Skill } | { kind: 'ghost'; mother: string };
+  const items: Item[] = [];
+  for (const b of bases) {
+    const specs = specsByMother.get(b.name) ?? [];
+    if (searching) {
+      const bMatch = b.name.toLowerCase().includes(q);
+      const matchSpecs = specs.filter((sp) => bMatch || sp.name.toLowerCase().includes(q));
+      if (!bMatch && matchSpecs.length === 0) continue;
+      items.push({ kind: 'base', skill: b });
+      matchSpecs.forEach((sp) => items.push({ kind: 'spec', skill: sp }));
+    } else {
+      if (b.attribut !== activeAttr) continue;
+      items.push({ kind: 'base', skill: b });
+      specs.forEach((sp) => items.push({ kind: 'spec', skill: sp }));
+    }
+  }
+
+  // Mother-less specializations → ghost group (mother header + indented specs).
+  const orphanByMother = new Map<string, Skill[]>();
+  for (const s of skills) {
+    if (!s.parentName || baseNames.has(s.parentName)) continue;
+    const inTab = searching
+      ? s.parentName.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+      : s.attribut === activeAttr;
+    if (!inTab) continue;
+    const list = orphanByMother.get(s.parentName) ?? [];
+    list.push(s);
+    orphanByMother.set(s.parentName, list);
+  }
+  for (const [mother, mspecs] of orphanByMother) {
+    items.push({ kind: 'ghost', mother });
+    mspecs.forEach((sp) => items.push({ kind: 'spec', skill: sp }));
+  }
 
   return (
     <View style={styles.root}>
@@ -48,14 +94,30 @@ export default function SkillsView({
             <Text style={[styles.legendTot, { color: theme.colors.primary }]}>Total</Text>
           </View>
 
-          {visible.map((s, i) => {
-            const mod = modifier?.(s.attribut) ?? 0;
+          {items.map((item, i) => {
+            if (item.kind === 'ghost') {
+              return (
+                <View key={`ghost-${item.mother}`}>
+                  {i > 0 && <Divider style={styles.divider} />}
+                  <Text style={[styles.ghostHeader, { color: theme.colors.onSurfaceVariant }]}>
+                    {item.mother} · non acquise
+                  </Text>
+                </View>
+              );
+            }
+            const s = item.skill;
+            const spec = item.kind === 'spec';
+            const mod = modifier?.(s) ?? 0;
+            // Specializations show their short label, indented under the mother.
+            const displayName = spec ? s.specLabel?.trim() || '(spécialisation)' : s.name;
             return (
               <View key={s.id}>
-                {i > 0 && <Divider style={styles.divider} />}
+                {i > 0 && !spec && <Divider style={styles.divider} />}
                 <View style={styles.row}>
-                  <View style={styles.nameCol}>
-                    <Text>{s.name}</Text>
+                  <View style={[styles.nameCol, spec && styles.specName]}>
+                    <Text style={spec ? { color: theme.colors.onSurfaceVariant } : undefined}>
+                      {spec ? `↳ ${displayName}` : displayName}
+                    </Text>
                     {searching ? (
                       <Text style={[styles.attr, { color: theme.colors.onSurfaceVariant }]}>
                         {ATTRIBUT_LABEL[s.attribut] ?? '—'}
@@ -82,7 +144,7 @@ export default function SkillsView({
             );
           })}
 
-          {visible.length === 0 ? (
+          {items.length === 0 ? (
             <Text style={{ color: theme.colors.onSurfaceVariant }}>
               {searching ? 'Aucun résultat.' : 'Aucune compétence.'}
             </Text>
@@ -115,6 +177,8 @@ const styles = StyleSheet.create({
   filterBar: { padding: 12, gap: 8, borderTopWidth: StyleSheet.hairlineWidth },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   nameCol: { flex: 1 },
+  specName: { paddingLeft: 12 },
+  ghostHeader: { fontSize: 15, fontStyle: 'italic' },
   attr: { fontSize: 12 },
   value: { width: 36, textAlign: 'center', fontSize: 16 },
   totalCol: { width: 60, flexDirection: 'row', justifyContent: 'center', alignItems: 'baseline', gap: 3 },

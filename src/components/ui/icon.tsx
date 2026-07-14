@@ -64,5 +64,6 @@ export default function Icon({
  */
 export const dsIcon =
   (name: IconName) =>
-  ({ size, color }: { size: number; color: string }) =>
-    <Icon name={name} size={size} color={color} />;
+  function DsIcon({ size, color }: { size: number; color: string }) {
+    return <Icon name={name} size={size} color={color} />;
+  };

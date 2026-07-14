@@ -17,6 +17,7 @@ import { ActivityIndicator, DevSettings, StyleSheet, useColorScheme, View } from
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PaperProvider, Text } from 'react-native-paper';
 
+import { backupDatabase, clearBackup, restoreDatabase } from '@/db/backup';
 import { db, resetDatabase } from '@/db/client';
 import migrations from '../../drizzle/migrations';
 import {
@@ -38,6 +39,10 @@ const paperSettings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? ProphecyDarkTheme : ProphecyLightTheme;
+  // Snapshot the DB before migrations touch it. This lazy state initializer runs
+  // during render — i.e. before useMigrations' effect fires — so the backup is
+  // always taken against the pre-migration file. Best-effort; never blocks.
+  useState(backupDatabase);
   const { success, error } = useMigrations(db, migrations);
   const [fontsLoaded] = useFonts({
     Cinzel_500Medium,
@@ -48,13 +53,17 @@ export default function RootLayout() {
   const [fatal, setFatal] = useState<string | null>(null);
 
   // On a failed/stale migration:
+  //  - PROD: NEVER wipe — restore the pre-migration snapshot (preserving the
+  //    user's characters) and surface the error.
   //  - DEV: auto-heal by deleting the DB and reloading, but only once (guard flag)
   //    so a genuinely broken migration shows the error instead of looping.
-  //  - PROD: NEVER auto-delete — that would silently wipe all of a user's
-  //    characters (local-only, no backup). Surface the error instead.
   useEffect(() => {
     if (!error) return;
     if (!__DEV__) {
+      // Recover the pre-migration snapshot so a failed prod migration doesn't
+      // leave a broken/half-migrated DB. The user's data is preserved for the
+      // next launch (or a future retry/export flow) instead of being wiped.
+      restoreDatabase();
       setFatal(error.message);
       return;
     }
@@ -75,7 +84,11 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (success) AsyncStorage.removeItem(RESET_FLAG);
+    if (success) {
+      // Migration went through — the pre-migration snapshot is no longer needed.
+      clearBackup();
+      AsyncStorage.removeItem(RESET_FLAG);
+    }
   }, [success]);
 
   if (fatal) {

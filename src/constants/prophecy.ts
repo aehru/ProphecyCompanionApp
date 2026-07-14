@@ -60,6 +60,14 @@ export const DISCIPLINES = [
   { key: 'sorcellerie', label: 'Sorcellerie' },
 ] as const;
 
+/** Discipline / sphere key → display label (for spell fields). */
+export const DISCIPLINE_LABEL: Record<string, string> = Object.fromEntries(
+  DISCIPLINES.map((d) => [d.key, d.label]),
+);
+export const SPHERE_LABEL: Record<string, string> = Object.fromEntries(
+  SPHERES.map((s) => [s.key, s.label]),
+);
+
 /**
  * Default skill catalogue. Single global list, same for every
  * character. Each skill links to one attribut key.
@@ -182,10 +190,19 @@ export const EFFECT_UNITS = [
 
 export type EffectUnit = (typeof EFFECT_UNITS)[number]['key'];
 
+/**
+ * Sentinel duration for an effect that never ticks down and never expires
+ * (always-on bonus/malus). Stored in `effects.durationUnit`; NOT a member of
+ * EFFECT_UNITS (which stays the ticking-time set shared with spell cast times),
+ * so it never leaks into "temps écoulé" controls or spell pickers.
+ */
+export const PERMANENT_UNIT = 'permanent';
+
 /** Unit key → singular label, for compact display (e.g. "3 Rounds"). */
-export const EFFECT_UNIT_LABEL: Record<string, string> = Object.fromEntries(
-  EFFECT_UNITS.map((u) => [u.key, u.label]),
-);
+export const EFFECT_UNIT_LABEL: Record<string, string> = {
+  ...Object.fromEntries(EFFECT_UNITS.map((u) => [u.key, u.label])),
+  [PERMANENT_UNIT]: 'Permanent',
+};
 
 /**
  * Targets an effect can apply to: every roll (`all`), one caractéristique, or

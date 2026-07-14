@@ -1,16 +1,16 @@
+import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Alert, Pressable, type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
 import { Button, HelperText, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import Icon, { dsIcon } from '@/components/ui/icon';
-import SectionCard from '@/components/ui/section-card';
 import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
 import { fmtSignedMod } from '@/lib/modifiers';
-import { deleteWeapon, updateWeapon } from '@/repositories/weapons';
+import { deleteWeapon, equipWeapon, unequipWeapon, updateWeapon } from '@/repositories/weapons';
 
 type CaracValue = (caracKey: string) => number;
 /**
@@ -20,9 +20,9 @@ type CaracValue = (caracKey: string) => number;
 type CaracModifier = (caracKey: string) => number;
 
 /**
- * One weapon: a read-only summary that flips to an inline editor via the pencil.
- * Formula fields (damage, ranges) show the raw formula plus its computed result
- * for this character; prerequisites are checked against the character's caracs.
+ * One weapon: a read-only summary. The pencil opens the editor in a modal screen
+ * (`weapon/[wid]`). Formula fields (damage, ranges) show the raw formula plus its
+ * computed result for this character; prerequisites are checked against caracs.
  */
 export default function WeaponCard({
   weapon,
@@ -33,15 +33,13 @@ export default function WeaponCard({
   caracValue: CaracValue;
   caracModifier?: CaracModifier;
 }) {
-  const [editing, setEditing] = useState(false);
-  return editing ? (
-    <WeaponEditor weapon={weapon} onClose={() => setEditing(false)} />
-  ) : (
+  const router = useRouter();
+  return (
     <WeaponSummary
       weapon={weapon}
       caracValue={caracValue}
       caracModifier={caracModifier}
-      onEdit={() => setEditing(true)}
+      onEdit={() => router.push(`/character/${weapon.characterId}/weapon/${weapon.id}`)}
     />
   );
 }
@@ -124,6 +122,25 @@ function WeaponSummary({
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
   const prereqs = parsePrerequisites(w.prerequisites);
+  // Any unmet prerequisite flags the weapon's tile with an error border.
+  const prereqUnmet = prereqs.some((p) => caracValue(p.carac) < p.min);
+
+  // Equip state. Two-handed weapons occupy 'both'; one-handed toggle 'main'/'off'.
+  const equippedLabel =
+    w.equippedHand === 'both'
+      ? 'Deux mains'
+      : w.equippedHand === 'main'
+        ? 'Main'
+        : w.equippedHand === 'off'
+          ? 'Main sec.'
+          : null;
+  // Toggle a slot: tapping the active one unequips. Any weapon can go in any
+  // slot — handedness isn't enforced (an advantage may allow a two-handed weapon
+  // in one hand, with a malus applied in play).
+  const toggleHand = (hand: 'main' | 'off' | 'both') => {
+    if (w.equippedHand === hand) unequipWeapon(w.id);
+    else equipWeapon(w.characterId, w.id, hand);
+  };
 
   // Collapsed-row subtitle: computed damage + initiative (mêlée / corps à corps).
   // The full breakdown (formula results, prereqs, ranges, creation) is in the
@@ -142,21 +159,32 @@ function WeaponSummary({
         <View
           style={[
             styles.tile,
-            { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: prereqUnmet ? theme.colors.error : theme.prophecy.borderSoft,
+              borderWidth: prereqUnmet ? 1.5 : 1,
+            },
           ]}>
-          <Icon name="sword" size={22} color={theme.colors.primary} />
+          <Icon name="sword" size={22} color={prereqUnmet ? theme.colors.error : theme.colors.primary} />
         </View>
         <View style={styles.itemMain}>
           <Text style={styles.itemName} numberOfLines={1}>
             {w.name || 'Arme'}
           </Text>
-          {subtitle !== '' ? (
-            <Text
-              style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}
-              numberOfLines={1}>
-              {subtitle}
-            </Text>
-          ) : null}
+          <View style={styles.subRow}>
+            {subtitle !== '' ? (
+              <Text
+                style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}
+                numberOfLines={1}>
+                {subtitle}
+              </Text>
+            ) : null}
+            {equippedLabel ? (
+              <Text style={[styles.itemSub, { color: theme.colors.primary }]}>
+                · Équipée ({equippedLabel})
+              </Text>
+            ) : null}
+          </View>
         </View>
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
@@ -215,6 +243,33 @@ function WeaponSummary({
             </View>
           ) : null}
 
+          <View style={styles.row}>
+            <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Équiper</Text>
+            <View style={styles.equipBtns}>
+              <Button
+                compact
+                mode={w.equippedHand === 'main' ? 'contained-tonal' : 'outlined'}
+                onPress={() => toggleHand('main')}>
+                Main
+              </Button>
+              <Button
+                compact
+                mode={w.equippedHand === 'off' ? 'contained-tonal' : 'outlined'}
+                onPress={() => toggleHand('off')}>
+                Main sec.
+              </Button>
+              {/* Two-handed only: a 1H weapon is never wielded in both hands. */}
+              {w.hands === 2 ? (
+                <Button
+                  compact
+                  mode={w.equippedHand === 'both' ? 'contained-tonal' : 'outlined'}
+                  onPress={() => toggleHand('both')}>
+                  Deux mains
+                </Button>
+              ) : null}
+            </View>
+          </View>
+
           <Button compact icon={dsIcon('edit')} onPress={onEdit} style={styles.detailEdit}>
             Modifier
           </Button>
@@ -242,8 +297,11 @@ const EDIT_ORDER = [
   'creationTime',
 ] as const;
 
-/** Inline editor. Edits persist live (debounced) like the armor editor. */
-function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => void }) {
+/**
+ * Weapon editor form, rendered in the `weapon/[wid]` modal screen. Edits persist
+ * live (debounced) like the armor editor; `onClose` returns after a delete.
+ */
+export function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => void }) {
   const theme = useProphecyTheme();
   const [name, setName] = useDebouncedText(w.name, (t) => updateWeapon(w.id, { name: t }));
   const [damage, setDamage] = useDebouncedText(w.damage, (t) => updateWeapon(w.id, { damage: t }));
@@ -273,7 +331,14 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
   const confirmDelete = () =>
     Alert.alert('Supprimer', 'Supprimer cette arme ?', [
       { text: 'Annuler', style: 'cancel' },
-      { text: 'Supprimer', style: 'destructive', onPress: () => deleteWeapon(w.id) },
+      {
+        text: 'Supprimer',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteWeapon(w.id);
+          onClose();
+        },
+      },
     ]);
 
   // Keyboard "next" wiring: jump to the following field instead of dismissing.
@@ -303,9 +368,7 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
   });
 
   return (
-    <SectionCard title="MODIFIER">
-      <IconButton icon={dsIcon('check')} style={styles.editBtn} size={18} onPress={onClose} />
-
+    <>
       <TextInput
         label="Nom"
         value={name}
@@ -422,7 +485,7 @@ function WeaponEditor({ weapon: w, onClose }: { weapon: Weapon; onClose: () => v
       <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>
         Supprimer
       </Button>
-    </SectionCard>
+    </>
   );
 }
 
@@ -438,7 +501,6 @@ function formulaError(raw: string): string | null {
 }
 
 const styles = StyleSheet.create({
-  editBtn: { position: 'absolute', top: 0, right: 0, margin: 2, zIndex: 1 },
   // DS inventory row.
   item: { borderBottomWidth: 1 },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 12 },
@@ -452,7 +514,9 @@ const styles = StyleSheet.create({
   },
   itemMain: { flex: 1, minWidth: 0 },
   itemName: { fontSize: 14, fontWeight: '600' },
-  itemSub: { fontSize: 12, marginTop: 1 },
+  subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
+  itemSub: { fontSize: 12 },
+  equipBtns: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   detail: { gap: 8, paddingLeft: 2, paddingBottom: 12 },
   detailEdit: { alignSelf: 'flex-start', marginTop: 2 },
   row: { flexDirection: 'row', gap: 12 },

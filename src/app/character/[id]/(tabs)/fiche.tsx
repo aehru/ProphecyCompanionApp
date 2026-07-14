@@ -27,7 +27,8 @@ import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, updateArmor } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
-import { effectsQuery } from '@/repositories/effects';
+import { createEffect, effectsQuery } from '@/repositories/effects';
+import { skillsQuery } from '@/repositories/skills';
 
 // Order the editable numeric fields chain through with the keyboard "next" key.
 const EDIT_ORDER: readonly string[] = [
@@ -54,6 +55,7 @@ export default function CharacterFicheScreen() {
   });
   const { data: armors } = useLiveQuery(armorQuery(numId));
   const { data: effects } = useLiveQuery(effectsQuery(numId));
+  const { data: skills } = useLiveQuery(skillsQuery(numId));
   // Tab-level live edit: one FAB flips every card between read and edit.
   const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).
@@ -61,7 +63,6 @@ export default function CharacterFicheScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: char?.nom || 'Personnage',
       headerRight: () =>
         editingSheet ? (
           <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
@@ -108,6 +109,17 @@ export default function CharacterFicheScreen() {
       `${key}Current`,
       clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
     );
+
+  // New effect starts as a blank +0 on every roll; the editor screen fills it in.
+  const addEffect = async () => {
+    const row = await createEffect(numId, {
+      target: 'all',
+      value: 0,
+      durationUnit: 'round',
+      durationRemaining: 1,
+    });
+    router.push(`/character/${numId}/effect/${row.id}`);
+  };
 
   const chain = (key: string) => {
     const i = EDIT_ORDER.indexOf(key);
@@ -208,7 +220,7 @@ export default function CharacterFicheScreen() {
           ))}
         </SectionCard>
 
-        <EffectsCard characterId={numId} effects={effectList} editing={editing} />
+        <EffectsCard effects={effectList} skills={skills ?? []} editing={editing} />
 
         {equippedArmor ? (
           <SectionCard title="ARMURE" icon="shield">
@@ -301,6 +313,7 @@ export default function CharacterFicheScreen() {
         </SectionCard>
       </KeyboardAwareScrollView>
 
+      <AppFab icon="fire" onPress={addEffect} style={styles.fabTop} />
       <AppFab
         icon={editing ? dsIcon('check') : dsIcon('edit')}
         onPress={() => setEditing((e) => !e)}
@@ -311,7 +324,9 @@ export default function CharacterFicheScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  container: { padding: 12, gap: 12, paddingBottom: 96 },
+  container: { padding: 12, gap: 12, paddingBottom: 160 },
+  // Second FAB (add effect) sits above the edit toggle.
+  fabTop: { bottom: 88 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   // Grow to fill each row so tiles sit flush to both card edges (no trailing
   // gap on the right). flexBasis keeps the wrap at 4 columns.
