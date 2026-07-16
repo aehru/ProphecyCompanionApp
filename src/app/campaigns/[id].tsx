@@ -2,25 +2,16 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import {
-  ActivityIndicator,
-  Button,
-  Card,
-  Chip,
-  Dialog,
-  List,
-  Portal,
-  RadioButton,
-  Text,
-  TextInput,
-} from 'react-native-paper';
+import { ActivityIndicator, Card, Chip, List, RadioButton, Text } from 'react-native-paper';
 
+import GmCharacterSheet from '@/components/gm-character-sheet';
 import { WOUND_LEVELS } from '@/constants/prophecy';
 import type { Campaign } from '@/db/schema';
 import { useGmRoster } from '@/hooks/use-gm-roster';
 import { usePlayerCampaignSync } from '@/hooks/use-player-campaign-sync';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { SocketStatus } from '@/lib/campaign-client';
+import type { RosterEntry } from '@/lib/campaign-protocol';
 import { charactersListQuery } from '@/repositories/characters';
 import {
   campaignQuery,
@@ -163,17 +154,10 @@ function GmView({ campaign }: { campaign: Campaign }) {
   const { status, serverError, roster } = useGmRoster(campaign);
   const { data: notes } = useLiveQuery(gmNotesQuery(campaign.id), [campaign.id]);
   const noteByUuid = new Map((notes ?? []).map((n) => [n.charUuid, n.body]));
-  const [editing, setEditing] = useState<{ charUuid: string; nom: string } | null>(null);
-  const [draft, setDraft] = useState('');
-
-  const openNote = (charUuid: string, nom: string) => {
-    setDraft(noteByUuid.get(charUuid) ?? '');
-    setEditing({ charUuid, nom });
-  };
-  const saveNote = async () => {
-    if (editing) await upsertGmNote(campaign.id, editing.charUuid, draft);
-    setEditing(null);
-  };
+  // The character whose full detail sheet is open (null = closed).
+  const [selected, setSelected] = useState<RosterEntry | null>(null);
+  // Keep the open sheet's data live as updates stream in.
+  const openEntry = selected ? (roster.find((e) => e.charId === selected.charId) ?? null) : null;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -213,7 +197,7 @@ function GmView({ campaign }: { campaign: Campaign }) {
             const conditions = String(item.character.conditions ?? '');
             const note = noteByUuid.get(item.charId);
             return (
-              <Card mode="outlined" onPress={() => openNote(item.charId, nom)}>
+              <Card mode="outlined" onPress={() => setSelected(item)}>
                 <Card.Title
                   title={nom}
                   subtitle={item.online ? 'En ligne' : 'Hors ligne'}
@@ -255,29 +239,12 @@ function GmView({ campaign }: { campaign: Campaign }) {
         />
       )}
 
-      <Portal>
-        <Dialog
-          visible={editing !== null}
-          onDismiss={() => setEditing(null)}
-          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
-          <Dialog.Title>Notes — {editing?.nom}</Dialog.Title>
-          <Dialog.Content style={styles.dialogContent}>
-            <TextInput
-              value={draft}
-              onChangeText={setDraft}
-              multiline
-              numberOfLines={6}
-              placeholder="Vos notes privées (jamais envoyées au serveur ni au joueur)."
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setEditing(null)}>Annuler</Button>
-            <Button mode="contained" icon="content-save" onPress={saveNote}>
-              Enregistrer
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <GmCharacterSheet
+        entry={openEntry}
+        note={openEntry ? (noteByUuid.get(openEntry.charId) ?? '') : ''}
+        onSaveNote={(charUuid, body) => upsertGmNote(campaign.id, charUuid, body)}
+        onDismiss={() => setSelected(null)}
+      />
     </View>
   );
 }
@@ -285,9 +252,6 @@ function GmView({ campaign }: { campaign: Campaign }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  // Match the DS card surface used by the dice-roller / create-campaign dialogs.
-  dialog: { borderRadius: 18, borderWidth: 1 },
-  dialogContent: { gap: 16 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
