@@ -144,7 +144,10 @@ export default function CampaignsScreen() {
       )}
 
       <Portal>
-        <Dialog visible={dialog !== null} onDismiss={cancel}>
+        <Dialog
+          visible={dialog !== null}
+          onDismiss={cancel}
+          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
           <Dialog.Title>
             {dialog === 'create' ? 'Nouvelle campagne' : 'Rejoindre une campagne'}
           </Dialog.Title>
@@ -179,7 +182,12 @@ export default function CampaignsScreen() {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={cancel}>Annuler</Button>
-            <Button onPress={submit} disabled={!canSubmit || busy} loading={busy}>
+            <Button
+              mode="contained"
+              icon={dialog === 'create' ? 'plus' : 'location-enter'}
+              onPress={submit}
+              disabled={!canSubmit || busy}
+              loading={busy}>
               {dialog === 'create' ? 'Créer' : 'Rejoindre'}
             </Button>
           </Dialog.Actions>
@@ -202,5 +210,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  dialogContent: { gap: 12 },
+  // Match the DS card surface used by the dice-roller dialog: tighter radius +
+  // a 1px gold hairline (Paper's default Dialog corner balloons and has no border).
+  dialog: { borderRadius: 18, borderWidth: 1 },
+  dialogContent: { gap: 16 },
 });

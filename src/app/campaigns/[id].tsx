@@ -256,9 +256,12 @@ function GmView({ campaign }: { campaign: Campaign }) {
       )}
 
       <Portal>
-        <Dialog visible={editing !== null} onDismiss={() => setEditing(null)}>
+        <Dialog
+          visible={editing !== null}
+          onDismiss={() => setEditing(null)}
+          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
           <Dialog.Title>Notes — {editing?.nom}</Dialog.Title>
-          <Dialog.Content>
+          <Dialog.Content style={styles.dialogContent}>
             <TextInput
               value={draft}
               onChangeText={setDraft}
@@ -269,7 +272,9 @@ function GmView({ campaign }: { campaign: Campaign }) {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setEditing(null)}>Annuler</Button>
-            <Button onPress={saveNote}>Enregistrer</Button>
+            <Button mode="contained" icon="content-save" onPress={saveNote}>
+              Enregistrer
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -280,6 +285,9 @@ function GmView({ campaign }: { campaign: Campaign }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  // Match the DS card surface used by the dice-roller / create-campaign dialogs.
+  dialog: { borderRadius: 18, borderWidth: 1 },
+  dialogContent: { gap: 16 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
