@@ -4,6 +4,7 @@ import {
   gmHello,
   httpUrl,
   normalizeJoinCode,
+  normalizeServerHost,
   parseServerMessage,
   playerHello,
   shareMsg,
@@ -82,13 +83,24 @@ describe('normalizeJoinCode', () => {
 });
 
 describe('url builders', () => {
-  it('derives ws and http endpoints from any user-entered form', () => {
-    expect(wsUrl('https://play.example.org')).toBe('wss://play.example.org/ws');
-    expect(wsUrl('http://192.168.1.10:8000/')).toBe('ws://192.168.1.10:8000/ws');
+  it('the user types a bare host — public domains get TLS', () => {
+    expect(httpUrl('app.fr')).toBe('https://app.fr');
+    expect(httpUrl('www.app.fr')).toBe('https://www.app.fr');
     expect(wsUrl('play.example.org')).toBe('wss://play.example.org/ws');
-    expect(wsUrl('wss://play.example.org')).toBe('wss://play.example.org/ws');
+  });
+
+  it('LAN hosts get plain http/ws (self-host at the table)', () => {
+    expect(httpUrl('192.168.1.10:8000')).toBe('http://192.168.1.10:8000');
+    expect(wsUrl('192.168.1.10:8000')).toBe('ws://192.168.1.10:8000/ws');
+    expect(httpUrl('localhost:8000')).toBe('http://localhost:8000');
+    expect(wsUrl('gamepi.local:8000')).toBe('ws://gamepi.local:8000/ws');
+  });
+
+  it('pasted schemes and trailing slashes are discarded — we pick the scheme', () => {
+    expect(normalizeServerHost('  https://app.fr/ ')).toBe('app.fr');
+    expect(wsUrl('https://play.example.org')).toBe('wss://play.example.org/ws');
     expect(httpUrl('wss://play.example.org/')).toBe('https://play.example.org');
-    expect(httpUrl('play.example.org')).toBe('https://play.example.org');
     expect(httpUrl('http://192.168.1.10:8000')).toBe('http://192.168.1.10:8000');
+    expect(wsUrl('http://192.168.1.10:8000/')).toBe('ws://192.168.1.10:8000/ws');
   });
 });

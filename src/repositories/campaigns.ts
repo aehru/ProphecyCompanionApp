@@ -3,7 +3,13 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { campaigns, campaignShares, characters, gmNotes, type Campaign } from '@/db/schema';
 import { CampaignSocket } from '@/lib/campaign-client';
-import { httpUrl, normalizeJoinCode, playerHello, unshareMsg } from '@/lib/campaign-protocol';
+import {
+  httpUrl,
+  normalizeJoinCode,
+  normalizeServerHost,
+  playerHello,
+  unshareMsg,
+} from '@/lib/campaign-protocol';
 import { newUuid } from '@/lib/uuid';
 
 /** Live query for the campaign list, for useLiveQuery. */
@@ -21,24 +27,56 @@ export async function getCampaign(id: number): Promise<Campaign | null> {
   return rows[0] ?? null;
 }
 
+/** How long a create call may take before we give up with a clear error. */
+const CREATE_TIMEOUT_MS = 10_000;
+
 /**
  * Create a campaign ON THE SERVER (the server mints the join code), then store
  * the local GM row. The portable gmToken is generated here and only its hash
  * ever reaches the server — the raw token stays in this row (and the user's
  * backups) as proof of ownership.
+ *
+ * `signal` lets the UI cancel in flight (the dialog's "Annuler"); an internal
+ * 10s timeout turns an unreachable server into a fast, explicit failure instead
+ * of hanging on the OS connect timeout. Both surface as an abort — the caller
+ * tells them apart via its own cancelled flag.
  */
-export async function createCampaign(name: string, serverUrl: string): Promise<Campaign> {
+export async function createCampaign(
+  name: string,
+  serverUrl: string,
+  signal?: AbortSignal,
+): Promise<Campaign> {
   const gmToken = newUuid();
-  const res = await fetch(`${httpUrl(serverUrl)}/campaigns`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name, gmToken }),
-  });
+  const host = normalizeServerHost(serverUrl);
+  // AbortSignal.any/timeout aren't available on Hermes — combine by hand.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
+  const forward = () => controller.abort();
+  signal?.addEventListener('abort', forward);
+  let res: Response;
+  try {
+    res = await fetch(`${httpUrl(host)}/campaigns`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, gmToken }),
+      signal: controller.signal,
+    });
+  } catch (e) {
+    if (controller.signal.aborted && !signal?.aborted) {
+      throw new Error(
+        'Serveur injoignable (délai dépassé). Vérifiez l’adresse, que le serveur tourne, et le pare-feu.',
+      );
+    }
+    throw e; // user cancel (AbortError) or a real network error
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', forward);
+  }
   if (!res.ok) throw new Error(`Le serveur a refusé la création (${res.status}).`);
   const body = (await res.json()) as { code: string };
   const [row] = await db
     .insert(campaigns)
-    .values({ code: body.code, name, role: 'gm', gmToken, serverUrl, createdAt: new Date() })
+    .values({ code: body.code, name, role: 'gm', gmToken, serverUrl: host, createdAt: new Date() })
     .returning();
   return row;
 }
@@ -56,7 +94,7 @@ export async function joinCampaign(code: string, serverUrl: string): Promise<Cam
       code: normalized,
       name: normalized,
       role: 'player',
-      serverUrl,
+      serverUrl: normalizeServerHost(serverUrl),
       createdAt: new Date(),
     })
     .returning();

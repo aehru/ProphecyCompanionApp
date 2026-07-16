@@ -111,20 +111,34 @@ export function normalizeJoinCode(input: string): string {
 }
 
 /**
- * Build the WS endpoint from a user-entered server URL. Accepts http(s)/ws(s),
- * with or without trailing slash; anything schemeless gets wss.
+ * The scheme is OUR job, never the user's: they type a host (`app.fr`,
+ * `192.168.1.10:8000`) or paste a full URL, and we strip whatever scheme came
+ * along. `wsUrl`/`httpUrl` then pick the right protocols.
  */
-export function wsUrl(serverUrl: string): string {
-  let base = serverUrl.trim().replace(/\/+$/, '');
-  if (/^http(s?):\/\//i.test(base)) base = base.replace(/^http/i, 'ws');
-  else if (!/^ws(s?):\/\//i.test(base)) base = `wss://${base}`;
-  return `${base}/ws`;
+export function normalizeServerHost(input: string): string {
+  return input.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/+$/, '');
 }
 
-/** REST base from the same user-entered URL (campaign create/delete). */
+/**
+ * A host that is clearly a LAN/self-host target (bare IPv4, localhost, mDNS
+ * .local). These get PLAIN http/ws — a TLS handshake against a plain-HTTP LAN
+ * server hangs until the OS timeout, which looks like "the app can't reach the
+ * server". Anything else (public domains) gets https/wss: iOS ATS would block
+ * cleartext there anyway, and a real deployment sits behind a TLS proxy.
+ */
+function isLanHost(host: string): boolean {
+  const bare = host.split('/')[0].split(':')[0];
+  return bare === 'localhost' || bare.endsWith('.local') || /^\d{1,3}(\.\d{1,3}){3}$/.test(bare);
+}
+
+/** WS endpoint for a user-entered server (any pasted scheme is discarded). */
+export function wsUrl(serverUrl: string): string {
+  const host = normalizeServerHost(serverUrl);
+  return `${isLanHost(host) ? 'ws' : 'wss'}://${host}/ws`;
+}
+
+/** REST base for the same user-entered server (campaign create/delete). */
 export function httpUrl(serverUrl: string): string {
-  let base = serverUrl.trim().replace(/\/+$/, '');
-  if (/^ws(s?):\/\//i.test(base)) base = base.replace(/^ws/i, 'http');
-  else if (!/^http(s?):\/\//i.test(base)) base = `https://${base}`;
-  return base;
+  const host = normalizeServerHost(serverUrl);
+  return `${isLanHost(host) ? 'http' : 'https'}://${host}`;
 }

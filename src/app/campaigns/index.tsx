@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { Button, Dialog, IconButton, List, Portal, Text, TextInput } from 'react-native-paper';
 
@@ -25,26 +25,41 @@ export default function CampaignsScreen() {
   const [busy, setBusy] = useState(false);
 
   const campaigns = data ?? [];
+  // Abort handle for the in-flight create; "Annuler" cancels the request too.
+  const abortRef = useRef<AbortController | null>(null);
   // Prefill the server field with the last one used — groups stick to one server.
   const openDialog = (kind: DialogKind) => {
     if (!serverUrl && campaigns.length > 0) setServerUrl(campaigns[campaigns.length - 1].serverUrl);
     setDialog(kind);
   };
 
+  const cancel = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setDialog(null);
+    setBusy(false);
+  };
+
   const submit = async () => {
     setBusy(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
       const row =
         dialog === 'create'
-          ? await createCampaign(name.trim(), serverUrl.trim())
+          ? await createCampaign(name.trim(), serverUrl.trim(), controller.signal)
           : await joinCampaign(code, serverUrl.trim());
       setDialog(null);
       setName('');
       setCode('');
       router.push(`/campaigns/${row.id}` as Href);
     } catch (e) {
-      Alert.alert('Erreur', e instanceof Error ? e.message : 'Connexion au serveur impossible.');
+      // User pressed Annuler: the dialog is already closed — stay silent.
+      if (!controller.signal.aborted) {
+        Alert.alert('Erreur', e instanceof Error ? e.message : 'Connexion au serveur impossible.');
+      }
     } finally {
+      abortRef.current = null;
       setBusy(false);
     }
   };
@@ -129,7 +144,7 @@ export default function CampaignsScreen() {
       )}
 
       <Portal>
-        <Dialog visible={dialog !== null} onDismiss={() => setDialog(null)}>
+        <Dialog visible={dialog !== null} onDismiss={cancel}>
           <Dialog.Title>
             {dialog === 'create' ? 'Nouvelle campagne' : 'Rejoindre une campagne'}
           </Dialog.Title>
@@ -149,7 +164,7 @@ export default function CampaignsScreen() {
               label="Serveur"
               value={serverUrl}
               onChangeText={setServerUrl}
-              placeholder="wss://exemple.org ou 192.168.1.10:8000"
+              placeholder="exemple.fr ou 192.168.1.10:8000"
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
@@ -163,7 +178,7 @@ export default function CampaignsScreen() {
             ) : null}
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDialog(null)}>Annuler</Button>
+            <Button onPress={cancel}>Annuler</Button>
             <Button onPress={submit} disabled={!canSubmit || busy} loading={busy}>
               {dialog === 'create' ? 'Créer' : 'Rejoindre'}
             </Button>
