@@ -17,8 +17,10 @@ import { ActivityIndicator, DevSettings, StyleSheet, useColorScheme, View } from
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PaperProvider, Text } from 'react-native-paper';
 
+import CampaignLiveIndicator from '@/components/campaign-live-indicator';
 import { backupDatabase, clearBackup, restoreDatabase } from '@/db/backup';
 import { db, resetDatabase } from '@/db/client';
+import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
 import { backfillCharacterUuids } from '@/repositories/characters';
 import migrations from '../../drizzle/migrations';
 import {
@@ -116,17 +118,23 @@ export default function RootLayout() {
       <PaperProvider theme={theme} settings={paperSettings}>
         <ThemeProvider
           value={colorScheme === 'dark' ? ProphecyNavigationDarkTheme : ProphecyNavigationLightTheme}>
-          <Stack screenOptions={{ headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' } }}>
-            <Stack.Screen name="index" options={{ title: 'Personnages' }} />
-            <Stack.Screen
-              name="character/new"
-              options={{ title: 'Nouveau personnage', presentation: 'modal' }}
-            />
-            {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
-            <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
-            <Stack.Screen name="campaigns/[id]" options={{ title: 'Campagne' }} />
-          </Stack>
+          <CampaignLiveProvider>
+            <View style={styles.root}>
+              <Stack screenOptions={{ headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' } }}>
+                <Stack.Screen name="index" options={{ title: 'Personnages' }} />
+                <Stack.Screen
+                  name="character/new"
+                  options={{ title: 'Nouveau personnage', presentation: 'modal' }}
+                />
+                {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
+                <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
+                <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
+                <Stack.Screen name="campaigns/[id]" options={{ title: 'Campagne' }} />
+              </Stack>
+              {/* Floating overlay — shows on every screen while a campaign is live. */}
+              <CampaignLiveIndicator />
+            </View>
+          </CampaignLiveProvider>
         </ThemeProvider>
       </PaperProvider>
     </KeyboardProvider>
@@ -135,4 +143,5 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  root: { flex: 1 },
 });

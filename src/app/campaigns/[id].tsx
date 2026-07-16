@@ -2,13 +2,13 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Card, Chip, List, RadioButton, Text } from 'react-native-paper';
+import { ActivityIndicator, Button, Card, Chip, List, RadioButton, Text } from 'react-native-paper';
 
 import GmCharacterSheet from '@/components/gm-character-sheet';
 import { WOUND_LEVELS } from '@/constants/prophecy';
 import type { Campaign } from '@/db/schema';
+import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { useGmRoster } from '@/hooks/use-gm-roster';
-import { usePlayerCampaignSync } from '@/hooks/use-player-campaign-sync';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { SocketStatus } from '@/lib/campaign-client';
 import type { RosterEntry } from '@/lib/campaign-protocol';
@@ -69,33 +69,62 @@ function PlayerView({ campaign }: { campaign: Campaign }) {
   const theme = useProphecyTheme();
   const { data: characters } = useLiveQuery(charactersListQuery());
   const { data: shares } = useLiveQuery(sharesQuery(campaign.id), [campaign.id]);
-  // v1: one shared character per campaign (the schema allows more; the sync
-  // hook is single-character, so the UI enforces one for now).
+  // v1: one shared character per campaign.
   const sharedCharacterId = shares?.[0]?.characterId ?? null;
-  const { status, serverError, unshare } = usePlayerCampaignSync(campaign, sharedCharacterId);
+  const { liveCampaignId, status, serverError, start, stop } = useCampaignLive();
+  const isLiveHere = liveCampaignId === campaign.id;
 
+  // Choosing which character to broadcast (independent of going live).
   const select = async (characterId: number | null) => {
     if (sharedCharacterId != null && sharedCharacterId !== characterId) {
-      unshare(); // withdraw the previous character from the server first
       await setShared(campaign.id, sharedCharacterId, false);
     }
     if (characterId != null) await setShared(campaign.id, characterId, true);
   };
 
+  const toggleLive = () => {
+    if (isLiveHere) stop();
+    else start(campaign.id); // one-at-a-time: replaces any other live campaign
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.header}>
-        <StatusChip status={status} />
-        {serverError ? (
+        {isLiveHere ? (
+          <StatusChip status={status} />
+        ) : (
+          <Chip compact icon="pause-circle-outline">
+            Diffusion en pause
+          </Chip>
+        )}
+        {isLiveHere && serverError ? (
           <Text variant="bodySmall" style={{ color: theme.colors.error }}>
             Erreur serveur : {serverError}
           </Text>
         ) : null}
       </View>
+
+      <View style={styles.liveControl}>
+        <Button
+          mode={isLiveHere ? 'outlined' : 'contained'}
+          icon={isLiveHere ? 'stop-circle-outline' : 'broadcast'}
+          disabled={sharedCharacterId == null}
+          onPress={toggleLive}>
+          {isLiveHere ? 'Arrêter la diffusion' : 'Démarrer la diffusion'}
+        </Button>
+        {liveCampaignId != null && !isLiveHere ? (
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Une autre campagne diffuse déjà ; démarrer ici l’arrêtera.
+          </Text>
+        ) : null}
+      </View>
+
       <Text variant="bodySmall" style={[styles.consent, { color: theme.colors.onSurfaceVariant }]}>
-        Partagé avec le MJ : nom, état de combat, caractéristiques et tendances. Jamais partagés :
-        biographie, notes, argent, magie. Désélectionnez pour effacer du serveur.
+        Une fois la diffusion démarrée, le MJ voit en direct : nom, état de combat, caractéristiques
+        et tendances. Jamais partagés : biographie, notes, argent, magie. Arrêter met en pause ;
+        quittez la campagne pour tout effacer du serveur.
       </Text>
+
       <FlatList
         data={(characters ?? []).filter((c) => c.uuid != null)}
         contentContainerStyle={styles.listContent}
@@ -260,6 +289,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   consent: { paddingHorizontal: 16, paddingVertical: 8 },
+  liveControl: { paddingHorizontal: 16, paddingTop: 4, gap: 6 },
   listContent: { padding: 16 },
   codeCard: { marginHorizontal: 16, marginTop: 12 },
   codeContent: { alignItems: 'center', gap: 4 },
