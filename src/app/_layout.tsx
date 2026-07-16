@@ -124,6 +124,8 @@ export default function RootLayout() {
             />
             {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
             <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
+            <Stack.Screen name="campaigns/[id]" options={{ title: 'Campagne' }} />
           </Stack>
         </ThemeProvider>
       </PaperProvider>

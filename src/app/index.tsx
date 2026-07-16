@@ -65,22 +65,25 @@ export default function CharactersListScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Menu
-          visible={menuOpen}
-          onDismiss={() => setMenuOpen(false)}
-          anchor={
-            <IconButton
-              icon="dots-vertical"
-              disabled={busy}
-              onPress={() => setMenuOpen(true)}
-            />
-          }>
-          <Menu.Item leadingIcon="export" onPress={handleExport} title="Exporter tout" />
-          <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
-        </Menu>
+        <View style={{ flexDirection: 'row' }}>
+          <IconButton icon="account-group" onPress={() => router.push('/campaigns' as Href)} />
+          <Menu
+            visible={menuOpen}
+            onDismiss={() => setMenuOpen(false)}
+            anchor={
+              <IconButton
+                icon="dots-vertical"
+                disabled={busy}
+                onPress={() => setMenuOpen(true)}
+              />
+            }>
+            <Menu.Item leadingIcon="export" onPress={handleExport} title="Exporter tout" />
+            <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
+          </Menu>
+        </View>
       ),
     });
-  }, [navigation, menuOpen, busy, handleExport, handleImport]);
+  }, [navigation, router, menuOpen, busy, handleExport, handleImport]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
