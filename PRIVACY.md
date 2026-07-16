@@ -2,45 +2,96 @@
 
 **App:** Prophecy Companion App
 **Package:** `fr.aehru.prophecyapp`
-**Last updated:** 2026-06-10
+**Last updated:** 2026-07-16
 
 ## Summary
 
-Prophecy Companion App is an offline character-sheet manager for the *Prophecy*
-tabletop role-playing game. **The app does not collect, transmit, sell, or share
-any personal data.** Everything you enter stays on your device.
+Prophecy Companion App is a character-sheet manager for the *Prophecy* tabletop
+role-playing game. By default it is **fully offline**: everything you enter
+stays on your device, and the app requires no account, login, or sign-up.
 
-## Data we collect
+The optional **campaign mode** lets a group play together. If — and only if —
+you join a campaign and explicitly choose to share a character, a **minimized
+extract** of that character is sent to the campaign server your group uses.
+Everything else in this policy exists to describe exactly what that means.
 
-**None.** We do not collect, request, or have access to any personal or
-sensitive user information.
-
-## Data stored on your device
+## Data stored on your device (always)
 
 All data you create in the app — character sheets, statistics, skills, wounds,
-resources, notes, and in-play state — is stored **locally on your device** in a
-private SQLite database. This data:
+resources, notes, in-play state, campaign memberships, and (for Game Masters)
+private campaign notes — is stored **locally on your device** in a private
+SQLite database. This data:
 
-- never leaves your device;
-- is not uploaded to any server (we operate no servers);
 - is not accessible to us or to any third party;
 - is removed when you delete the app or clear its data.
 
-The app does not require an account, login, or sign-up.
+If you never use campaign mode, **no data ever leaves your device.**
+
+## Campaign mode (optional, opt-in)
+
+### What is shared
+
+When you share a character into a campaign, only this extract is transmitted
+and stored on the campaign server, so the Game Master can see it during play:
+
+- character name;
+- combat state: wound levels, resource pools (maîtrise, chance), initiative,
+  active conditions;
+- core statistics: caractéristiques, attributs, tendances.
+
+**Never shared, under any circumstances:** biography, concept, personal notes,
+money, magic (spheres, disciplines, reserve), images, or the Game Master's
+private notes (those never leave the GM's device).
+
+### Where it is stored, and who is responsible
+
+A campaign lives on the **server your group chooses** when creating or joining
+it. That server may be:
+
+- the community instance operated by the developer (hosted in the **European
+  Union**); or
+- a server **self-hosted** by your Game Master or another member of your group
+  (the server software is open source).
+
+The shared extract is stored **under the responsibility of whoever hosts that
+server**. The app shows this notice when you join a campaign. If your group
+self-hosts, the developer has no access to that server or its data.
+
+### Identifiers
+
+Campaign mode still requires **no account**. It uses only:
+
+- a random identifier generated for each character (no personal meaning);
+- the campaign's join code;
+- for Game Masters, a random token proving campaign ownership — the server
+  stores only a cryptographic hash of it.
+
+No name, e-mail address, phone number, or device identifier is collected.
+
+### Retention and erasure
+
+- The server keeps **only the latest** shared state of each character — no
+  history.
+- **Stopping the share** or **leaving the campaign** deletes your character's
+  data from the server immediately.
+- A Game Master **deleting the campaign** deletes all of its shared data from
+  the server immediately.
 
 ## Network access
 
-The app functions fully offline. It makes no analytics, advertising, or
-tracking network requests. The only outbound network activity is optional: if
-you tap an external link, your device's web browser opens it — the app itself
-sends no data.
+Outside campaign mode, the app functions fully offline and makes **no network
+requests**. It contains no analytics, advertising, crash-reporting, or tracking
+of any kind — including in campaign mode, where the only network traffic is the
+campaign data described above, exchanged with the server your group chose. If
+you tap an external link, your device's web browser opens it; the app itself
+sends nothing.
 
 ## Permissions
 
 The app requests no sensitive runtime permissions (no location, camera,
-microphone, contacts, storage of personal files, etc.). It may read basic,
-non-identifying device information (e.g. OS version, device model) on-device for
-compatibility purposes only; this information is **not** transmitted or stored.
+microphone, contacts, etc.). It may read basic, non-identifying device
+information (e.g. OS version) on-device for compatibility purposes only; this
+information is not transmitted or stored.
 
 ## Third-party services
 
@@ -49,14 +100,19 @@ or tracking SDKs.
 
 ## Children's privacy
 
-The app collects no data from anyone, including children. It contains no ads and
-no in-app purchases.
+The app contains no ads and no in-app purchases, and collects no personal data
+beyond the campaign extract described above, which is shared only through an
+explicit, revocable action. Groups that include minors should prefer a
+self-hosted server run by someone they trust.
 
 ## Data deletion
 
-Because all data is stored only on your device, you can delete it at any time by
-deleting the app or clearing its data from your device's system settings. There
-is nothing for us to delete on our side, as we hold no data.
+- **Local data:** delete the app or clear its data from your device's system
+  settings.
+- **Campaign data:** stop sharing the character, leave the campaign, or (as
+  Game Master) delete the campaign — the server erases the corresponding data
+  immediately. For anything else concerning the community instance, contact
+  the developer below.
 
 ## Changes to this policy
 
@@ -72,5 +128,5 @@ For any question about this privacy policy, contact the developer:
 
 ---
 
-*This policy reflects the app at version 0.1.0. The app is open source; its data
-handling can be independently verified in the source code.*
+*The app and the campaign server are open source; their data handling can be
+independently verified in the source code.*
