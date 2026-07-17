@@ -15,7 +15,7 @@ Prophecy character sheets have a lot of moving parts. The app keeps two kinds of
 
 Both live in the same screens: each tab has a **read mode** and a **live edit mode** (the floating pencil). Flip to edit to nudge values mid-combat; flip back to a clean glance. Edits save instantly and live-update across every screen. There's no separate "statut" screen anymore.
 
-Everything is stored **locally on your device** (SQLite). No account, no network, no cloud.
+Everything is stored **locally on your device** (SQLite). No account, no cloud. The app works fully offline — the one exception is the optional **campaign mode** (see below), which sends a minimized, read-only extract of a character to a server your group chooses, and only when you explicitly share.
 
 ## Features
 
@@ -62,6 +62,13 @@ Your skills, each linked to an attribut. Start from the built-in Prophecy 2e ski
 
 ### Backup & transfer
 From the roster's **⋮** menu: **Exporter tout** writes every character to a JSON file (shared via the OS share sheet — save to Files, send to another device), and **Importer…** reads one back, adding its characters as new entries (never overwriting). Your safety net against device loss, and how you move a character between phones. *(Character illustrations aren't included in the export yet.)*
+
+### Campagnes — live GM/player mode (optional)
+Play together at a table (or remotely). From the roster header's **group** icon, open **Campagnes**:
+- **The GM** creates a campaign on a **server** (a shared community instance or one your group self-hosts) and gets a **join code** + **QR code** to share. The GM sees a live **roster**: tap a player to open a full read-only sheet (combat state, caractéristiques, tendances, initiative) and jot **private notes** that never leave the GM's phone.
+- **A player** joins with the code (type it, or scan the GM's QR), picks which character to share, and taps **Diffuser**. From then on, changes to the character's *in-play* values (wounds, Maîtrise/Chance, tendances, conditions, initiative) stream to the GM in near real-time. A floating indicator shows you're broadcasting; **Arrêter** pauses it.
+
+**Privacy by design.** Only a minimized extract is sent — **name, combat state, caractéristiques, attributs, tendances**. Never your biography, notes, money, or magic. The data lives on the chosen server under its host's responsibility (community instance or self-hosted); stopping the share or leaving the campaign erases it. See [PRIVACY.md](PRIVACY.md). The server is open source — run your own from the [ProphecyCompanionServer](https://github.com/aehru/ProphecyCompanionServer) repo (`docker compose up` on your LAN).
 
 ## Platforms
 

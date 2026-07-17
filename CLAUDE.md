@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 @AGENTS.md
 
-Mobile companion app (Expo, iOS/Android) for the French tabletop RPG **Prophecy 2e**. Local-only: SQLite on device, no account, no network. UI is in **French**. See [README.md](README.md) for the feature tour, [DEV.md](DEV.md) for the contributor guide.
+Mobile companion app (Expo, iOS/Android) for the French tabletop RPG **Prophecy 2e**. **Solo use is local-only** (SQLite on device, no account, no network); the **optional campaign mode** is the one exception — see the Campaign mode section below. UI is in **French**. See [README.md](README.md) for the feature tour, [DEV.md](DEV.md) for the contributor guide.
 
 ## Commands
 
@@ -45,7 +45,20 @@ There is **no separate "status" screen**. Each character tab (`src/app/character
 
 **Theming.** All colors flow through `useProphecyTheme()` — never hardcode. [src/theme/prophecyTheme.tsx](src/theme/prophecyTheme.tsx) maps ~11 design-system tokens (parchment & gold; Cinzel display + Noto Sans body, loaded in `_layout.tsx`) onto MD3 roles; the remaining ~20 roles are derived by tinting and tagged `DS` vs `derived` inline. Intentionally **not** re-themed: the Prophecy tendance trio (Dragon/Fatalité/Homme) in `constants/prophecy.ts` and the per-character dragon-accent palettes in [src/theme/dragonsTheme.tsx](src/theme/dragonsTheme.tsx).
 
-**Pure engines (unit-tested, no DB).** [src/lib/formula.ts](src/lib/formula.ts) parses/computes weapon formulas like `FOR x2 +3 +1D10` (dice stay symbolic). [src/lib/modifiers.ts](src/lib/modifiers.ts) stacks roll modifiers: temporary `effects` add up, the **wound malus is the single worst active level (max, not sum)**, and modifiers fold into a caractéristique *before* a formula's multiplier. [src/lib/character-transfer.ts](src/lib/character-transfer.ts) is the zod-validated export/import envelope.
+**Pure engines (unit-tested, no DB).** [src/lib/formula.ts](src/lib/formula.ts) parses/computes weapon formulas like `FOR x2 +3 +1D10` (dice stay symbolic). [src/lib/modifiers.ts](src/lib/modifiers.ts) stacks roll modifiers: temporary `effects` add up, the **wound malus is the single worst active level (max, not sum)**, and modifiers fold into a caractéristique *before* a formula's multiplier. [src/lib/character-transfer.ts](src/lib/character-transfer.ts) is the zod-validated export/import envelope (carries an optional portable character `uuid` — see below).
+
+**Portable character `uuid`.** `characters.uuid` (nullable at the DB level; backfilled on launch by `repositories/characters.backfillCharacterUuids`, minted for new rows via `$defaultFn` using [src/lib/uuid.ts](src/lib/uuid.ts) — a dependency-free RFC-4122 v4 so `schema.ts` stays Node-loadable by drizzle-kit/vitest). It's the stable id that survives export/import and device changes; the export preserves it on **restore** and mints a fresh one on **copy/clone** (`planImport` in `character-transfer.ts`).
+
+## Campaign mode (optional, networked)
+
+A GM + players "campaign": players broadcast a **minimized, read-only projection** of their character to a self-hostable relay **server** ([separate repo](https://github.com/aehru/ProphecyCompanionServer): FastAPI + WebSocket + SQLite; deploy behind Caddy for TLS). The full wire contract is [docs/campaign-protocol.md](docs/campaign-protocol.md). Solo use is untouched — only an opted-in character's projection ever leaves the device.
+
+- **The projection is the privacy boundary.** [src/lib/character-share.ts](src/lib/character-share.ts) `toSharedCharacter` emits ONLY: `nom`, caractéristiques, attributs, tendances, wounds, resources (maîtrise/chance), initiative, conditions. **Excluded on purpose:** concept, biographie, notes, money, magic. A **data-minimization test** fails if the wire ever widens — don't defeat it.
+- **Wire layer is pure + tested.** [src/lib/campaign-protocol.ts](src/lib/campaign-protocol.ts) (message builders, tolerant zod parser, URL/scheme + join-link helpers) and [src/lib/campaign-client.ts](src/lib/campaign-client.ts) (reconnecting `CampaignSocket`, injectable WS). Mirror any wire change into the server's pydantic `app/schemas.py` — the two languages are hand-synced.
+- **Live broadcast is app-level, not screen-scoped.** [src/hooks/use-campaign-live.tsx](src/hooks/use-campaign-live.tsx) provider (mounted in `_layout.tsx` above the Stack) keeps ONE campaign broadcasting on any screen while foregrounded; global floating indicator ([src/components/campaign-live-indicator.tsx](src/components/campaign-live-indicator.tsx)). Pushes only when an **in-play** value changed ([src/lib/campaign-live.ts](src/lib/campaign-live.ts) `inPlaySignature` = wounds/resources/tendances+bullets/conditions/initiative; caractéristiques+attributs frozen at activation), on a 5s debounce. Stop = pause (last state stays on server); auto-resumes across restart (AsyncStorage). GM identity = portable `gmToken` (server stores only its hash), NOT a device id.
+- **Tables** ([schema.ts](src/db/schema.ts)): `campaigns` (code, role, `gm_token`, `server_url`), `campaign_shares`, `gm_notes` (GM device only, keyed by `charUuid`). Repo: [src/repositories/campaigns.ts](src/repositories/campaigns.ts).
+- **GDPR/consent:** persistent disclaimer on the campaign list (covers the GM), a contextual line in the join dialog (QR/deep-link joins land there directly), and [PRIVACY.md](PRIVACY.md) distinguishes solo (local) from campaign (opt-in projection under the host's responsibility). Leave/stop purges the server row.
+- **Known bug** (documented in [ROADMAP.md](ROADMAP.md)): switching the shared character *while live* leaves the old projection on the server (ghost roster entry) until leave.
 
 ## Testing
 
