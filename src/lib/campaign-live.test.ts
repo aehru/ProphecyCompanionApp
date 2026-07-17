@@ -13,6 +13,8 @@ function projection(over: Partial<SharedCharacter> = {}): SharedCharacter {
     resources: { maitrise: { current: 2, max: 6 }, chance: { current: 4, max: 4 } },
     initiative: { max: 3, values: [12, 7] },
     conditions: '',
+    skills: [],
+    effects: [],
     ...over,
   } as SharedCharacter;
 }
@@ -50,5 +52,30 @@ describe('inPlaySignature', () => {
     expect(inPlaySignature(projection({ tendances: { dragon: 5, dragonSub: 7 } }))).not.toBe(base);
     // Only the bullet (sub) moved.
     expect(inPlaySignature(projection({ tendances: { dragon: 2, dragonSub: 3 } }))).not.toBe(base);
+  });
+
+  it('changes when an active bonus/malus effect changes (in-play)', () => {
+    const base = inPlaySignature(projection());
+    const eff = {
+      label: 'Bénédiction',
+      target: 'coordination',
+      value: 2,
+      durationUnit: 'round',
+      durationRemaining: 3,
+    };
+    expect(inPlaySignature(projection({ effects: [eff] }))).not.toBe(base);
+    // Duration tick-down is an in-play change too.
+    expect(inPlaySignature(projection({ effects: [{ ...eff, durationRemaining: 2 }] }))).not.toBe(
+      inPlaySignature(projection({ effects: [eff] })),
+    );
+  });
+
+  it('does NOT change when only the skills list changes (frozen sheet data)', () => {
+    const base = inPlaySignature(projection());
+    expect(
+      inPlaySignature(
+        projection({ skills: [{ name: 'Épée', attribut: 'physique', value: 3, parentName: null, specLabel: null }] }),
+      ),
+    ).toBe(base);
   });
 });

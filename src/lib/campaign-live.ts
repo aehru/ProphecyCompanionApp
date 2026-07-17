@@ -6,9 +6,11 @@
 //
 // In-play = what shifts during a session: current wound boxes, current resource
 // pools (maîtrise, chance), the tendances and their bullets (which move in play),
-// conditions, and the current-turn initiative dice.
-// NOT in-play (frozen at activation for now): caractéristiques, attributs, and
-// all MAX values.
+// conditions, the current-turn initiative dice, and the active bonus/malus
+// effects (they come and go during a fight).
+// NOT in-play (frozen at activation for now): caractéristiques, attributs, all
+// MAX values, and the skills list (sheet data — a training change is rare and
+// rides along on the next in-play push).
 
 import { RESOURCES, TENDANCES, WOUND_LEVELS } from '@/constants/prophecy';
 import type { SharedCharacter } from '@/lib/character-share';
@@ -29,5 +31,7 @@ export function inPlaySignature(shared: SharedCharacter): string {
     t: TENDANCES.flatMap((t) => [shared.tendances[t.key] ?? 0, shared.tendances[`${t.key}Sub`] ?? 0]),
     c: shared.conditions,
     i: shared.initiative.values,
+    // Active bonus/malus: a change (new, tick-down, or expiry-drop) is in-play.
+    e: shared.effects.map((ef) => [ef.target, ef.value, ef.durationUnit, ef.durationRemaining]),
   });
 }

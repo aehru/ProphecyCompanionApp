@@ -25,7 +25,7 @@ import React, {
 } from 'react';
 
 import { db } from '@/db/client';
-import { actualState, characters } from '@/db/schema';
+import { actualState, characters, effects, skills } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
 import { inPlaySignature, LIVE_DEBOUNCE_MS } from '@/lib/campaign-live';
 import { playerHello, shareMsg } from '@/lib/campaign-protocol';
@@ -79,6 +79,14 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
     db.select().from(actualState).where(eq(actualState.characterId, characterId ?? -1)),
     [characterId],
   );
+  const { data: skillRows } = useLiveQuery(
+    db.select().from(skills).where(eq(skills.characterId, characterId ?? -1)),
+    [characterId],
+  );
+  const { data: effectRows } = useLiveQuery(
+    db.select().from(effects).where(eq(effects.characterId, characterId ?? -1)),
+    [characterId],
+  );
   const character = charRows?.[0];
   const state = stateRows?.[0];
   const charUuid = character?.uuid ?? null;
@@ -127,7 +135,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
   // Debounced in-play push.
   useEffect(() => {
     if (!character || !state || !charUuid || !onlineRef.current) return;
-    const projection = toSharedCharacter(character, state);
+    const projection = toSharedCharacter(character, state, skillRows ?? [], effectRows ?? []);
     const sig = inPlaySignature(projection);
     if (sig === lastSigRef.current) return;
     const send = () => {
@@ -141,7 +149,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(send, LIVE_DEBOUNCE_MS);
     }
-  }, [character, state, charUuid, status]);
+  }, [character, state, skillRows, effectRows, charUuid, status]);
 
   const start = useCallback((campaignId: number) => {
     setLiveId(campaignId);
