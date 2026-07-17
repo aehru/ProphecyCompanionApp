@@ -117,9 +117,7 @@ function PlayerView({ campaign }: { campaign: Campaign }) {
       </Text>
 
       <Text variant="bodySmall" style={[styles.consent, { color: theme.colors.onSurfaceVariant }]}>
-        Une fois la diffusion démarrée, le MJ voit en direct : nom, état de combat, caractéristiques
-        et tendances. Jamais partagés : biographie, notes, argent, magie. Arrêter met en pause ;
-        quittez la campagne pour envoyer une demande d'effacement au serveur.
+        Le personnage sélectionné est diffusé en direct au MJ. Arrêter met en pause.
       </Text>
 
       <FlatList

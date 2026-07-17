@@ -102,6 +102,24 @@ export default function CampaignsScreen() {
         </Button>
       </View>
 
+      {/* One notice for everyone (GM included). The join dialog repeats a short
+          version, since a QR/deep-link join opens straight onto it. */}
+      <View
+        style={[
+          styles.disclaimer,
+          {
+            backgroundColor: theme.prophecy.surfaceContainerLow,
+            borderColor: theme.colors.outlineVariant,
+          },
+        ]}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          Mode campagne. Lorsqu’un joueur partage un personnage, un extrait (nom, état de combat,
+          caractéristiques) est envoyé au serveur choisi et conservé sous la responsabilité de son
+          hébergeur — instance communautaire ou auto-hébergée. En tant que MJ, c’est vous qui
+          choisissez ce serveur. Arrêter le partage ou quitter la campagne en demande l’effacement.
+        </Text>
+      </View>
+
       {campaigns.length === 0 ? (
         <View
           style={[
@@ -186,7 +204,8 @@ export default function CampaignsScreen() {
               <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
                 Les données que vous choisirez de partager ensuite (nom, état de combat,
                 caractéristiques) seront stockées sur ce serveur, sous la responsabilité de la
-                personne qui l’héberge. Cessez le partage ou quittez la campagne pour les effacer.
+                personne qui l’héberge. Cessez le partage ou quittez la campagne pour en demander
+                l’effacement.
               </Text>
             ) : null}
           </Dialog.Content>
@@ -212,6 +231,13 @@ export default function CampaignsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   actions: { flexDirection: 'row', gap: 8, padding: 16, flexWrap: 'wrap' },
+  disclaimer: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   listContent: { paddingHorizontal: 16, paddingBottom: 24 },
   item: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
   empty: {
