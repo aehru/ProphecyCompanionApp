@@ -3,6 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Card, Chip, List, RadioButton, Text } from 'react-native-paper';
+import QRCode from 'react-native-qrcode-svg';
 
 import GmCharacterSheet from '@/components/gm-character-sheet';
 import { WOUND_LEVELS } from '@/constants/prophecy';
@@ -11,7 +12,7 @@ import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { useGmRoster } from '@/hooks/use-gm-roster';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { SocketStatus } from '@/lib/campaign-client';
-import type { RosterEntry } from '@/lib/campaign-protocol';
+import { joinLink, type RosterEntry } from '@/lib/campaign-protocol';
 import { charactersListQuery } from '@/repositories/characters';
 import {
   campaignQuery,
@@ -208,6 +209,18 @@ function GmView({ campaign }: { campaign: Campaign }) {
           <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, letterSpacing: 4 }}>
             {campaign.code}
           </Text>
+          {/* Scan with the phone camera -> opens the app, join dialog prefilled. */}
+          <View style={styles.qr}>
+            <QRCode
+              value={joinLink(campaign.code, campaign.serverUrl)}
+              size={132}
+              backgroundColor="transparent"
+              color={theme.colors.onSurface}
+            />
+          </View>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Scannez avec l’appareil photo pour rejoindre
+          </Text>
         </Card.Content>
       </Card>
 
@@ -293,6 +306,7 @@ const styles = StyleSheet.create({
   listContent: { padding: 16 },
   codeCard: { marginHorizontal: 16, marginTop: 12 },
   codeContent: { alignItems: 'center', gap: 4 },
+  qr: { paddingVertical: 8 },
   cardBody: { gap: 4 },
   presenceDot: {
     width: 14,

@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { type Href, useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { Button, Dialog, IconButton, List, Portal, Text, TextInput } from 'react-native-paper';
 
@@ -27,6 +27,17 @@ export default function CampaignsScreen() {
   const campaigns = data ?? [];
   // Abort handle for the in-flight create; "Annuler" cancels the request too.
   const abortRef = useRef<AbortController | null>(null);
+
+  // Deep link from the GM's QR code (prophecyapp://campaigns?code=..&server=..):
+  // prefill and open the join dialog. Runs once per param arrival.
+  const params = useLocalSearchParams<{ code?: string; server?: string }>();
+  useEffect(() => {
+    if (params.code && params.server) {
+      setCode(params.code);
+      setServerUrl(params.server);
+      setDialog('join');
+    }
+  }, [params.code, params.server]);
   // Prefill the server field with the last one used — groups stick to one server.
   const openDialog = (kind: DialogKind) => {
     if (!serverUrl && campaigns.length > 0) setServerUrl(campaigns[campaigns.length - 1].serverUrl);

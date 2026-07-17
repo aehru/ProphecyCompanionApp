@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   gmHello,
   httpUrl,
+  joinLink,
   normalizeJoinCode,
   normalizeServerHost,
   parseServerMessage,
@@ -72,6 +73,17 @@ describe('parseServerMessage', () => {
     expect(parseServerMessage('42').type).toBe('unknown');
     expect(parseServerMessage(JSON.stringify({ type: 'v2-fancy' })).type).toBe('unknown');
     expect(parseServerMessage(JSON.stringify({ type: 'update' })).type).toBe('unknown');
+  });
+});
+
+describe('joinLink', () => {
+  it('builds the deep link with a normalized server host', () => {
+    expect(joinLink('ABCD2345', 'https://play.example.org/')).toBe(
+      'prophecyapp://campaigns?code=ABCD2345&server=play.example.org',
+    );
+    expect(joinLink('ABCD2345', '192.168.1.10:8000')).toBe(
+      'prophecyapp://campaigns?code=ABCD2345&server=192.168.1.10%3A8000',
+    );
   });
 });
 

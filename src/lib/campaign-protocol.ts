@@ -142,3 +142,16 @@ export function httpUrl(serverUrl: string): string {
   const host = normalizeServerHost(serverUrl);
   return `${isLanHost(host) ? 'http' : 'https'}://${host}`;
 }
+
+/** The app's deep-link scheme (app.json `scheme`). */
+export const APP_SCHEME = 'prophecyapp';
+
+/**
+ * Deep link encoded in the GM's QR code. Scanning it with the OS camera opens
+ * the app on the campaigns screen with the join dialog prefilled — no in-app
+ * scanner (and no camera permission) needed.
+ */
+export function joinLink(code: string, serverUrl: string): string {
+  const host = normalizeServerHost(serverUrl);
+  return `${APP_SCHEME}://campaigns?code=${encodeURIComponent(code)}&server=${encodeURIComponent(host)}`;
+}
