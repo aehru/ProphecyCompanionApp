@@ -1,11 +1,13 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Button, Card, Chip, List, RadioButton, Text } from 'react-native-paper';
+import { ActivityIndicator, Card, Chip, List, RadioButton, Text } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
 
 import GmCharacterSheet from '@/components/gm-character-sheet';
+import AppFab from '@/components/ui/app-fab';
 import { WOUND_LEVELS } from '@/constants/prophecy';
 import type { Campaign } from '@/db/schema';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
@@ -13,7 +15,6 @@ import { useGmRoster } from '@/hooks/use-gm-roster';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { SocketStatus } from '@/lib/campaign-client';
 import { joinLink, type RosterEntry } from '@/lib/campaign-protocol';
-import { charactersListQuery } from '@/repositories/characters';
 import {
   campaignQuery,
   gmNotesQuery,
@@ -21,6 +22,7 @@ import {
   sharesQuery,
   upsertGmNote,
 } from '@/repositories/campaigns';
+import { charactersListQuery } from '@/repositories/characters';
 
 export default function CampaignDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -103,16 +105,6 @@ function PlayerView({ campaign }: { campaign: Campaign }) {
             Erreur serveur : {serverError}
           </Text>
         ) : null}
-      </View>
-
-      <View style={styles.liveControl}>
-        <Button
-          mode={isLiveHere ? 'outlined' : 'contained'}
-          icon={isLiveHere ? 'stop-circle-outline' : 'broadcast'}
-          disabled={sharedCharacterId == null}
-          onPress={toggleLive}>
-          {isLiveHere ? 'Arrêter la diffusion' : 'Démarrer la diffusion'}
-        </Button>
         {liveCampaignId != null && !isLiveHere ? (
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             Une autre campagne diffuse déjà ; démarrer ici l’arrêtera.
@@ -121,9 +113,13 @@ function PlayerView({ campaign }: { campaign: Campaign }) {
       </View>
 
       <Text variant="bodySmall" style={[styles.consent, { color: theme.colors.onSurfaceVariant }]}>
+        Serveur : <Text style={{ color: theme.colors.onSurface }}>{campaign.serverUrl}</Text>
+      </Text>
+
+      <Text variant="bodySmall" style={[styles.consent, { color: theme.colors.onSurfaceVariant }]}>
         Une fois la diffusion démarrée, le MJ voit en direct : nom, état de combat, caractéristiques
         et tendances. Jamais partagés : biographie, notes, argent, magie. Arrêter met en pause ;
-        quittez la campagne pour tout effacer du serveur.
+        quittez la campagne pour envoyer une demande d'effacement au serveur.
       </Text>
 
       <FlatList
@@ -158,6 +154,13 @@ function PlayerView({ campaign }: { campaign: Campaign }) {
           />
         )}
       />
+
+      <AppFab
+        icon={isLiveHere ? 'stop-circle-outline' : 'broadcast'}
+        label={isLiveHere ? 'Arrêter' : 'Diffuser'}
+        disabled={!isLiveHere && sharedCharacterId == null}
+        onPress={toggleLive}
+      />
     </View>
   );
 }
@@ -188,6 +191,10 @@ function GmView({ campaign }: { campaign: Campaign }) {
   const [selected, setSelected] = useState<RosterEntry | null>(null);
   // Keep the open sheet's data live as updates stream in.
   const openEntry = selected ? (roster.find((e) => e.charId === selected.charId) ?? null) : null;
+  // Code + QR collapse (default open on empty roster so a new GM sees how to
+  // invite; auto-tucks away once players have joined). Toggle overrides.
+  const [codeOpen, setCodeOpen] = useState<boolean | null>(null);
+  const showCode = codeOpen ?? roster.length === 0;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -201,26 +208,44 @@ function GmView({ campaign }: { campaign: Campaign }) {
       </View>
       <Card
         mode="outlined"
+        onPress={() => setCodeOpen(!showCode)}
         style={[styles.codeCard, { backgroundColor: theme.prophecy.surfaceContainerLow }]}>
         <Card.Content style={styles.codeContent}>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            Code de la campagne — à partager avec vos joueurs
-          </Text>
-          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, letterSpacing: 4 }}>
-            {campaign.code}
-          </Text>
-          {/* Scan with the phone camera -> opens the app, join dialog prefilled. */}
-          <View style={styles.qr}>
-            <QRCode
-              value={joinLink(campaign.code, campaign.serverUrl)}
-              size={132}
-              backgroundColor="transparent"
-              color={theme.colors.onSurface}
+          <View style={styles.codeHeaderRow}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              Code {showCode ? '— à partager avec vos joueurs' : `· ${campaign.code}`}
+            </Text>
+            <MaterialCommunityIcons
+              name={showCode ? 'chevron-up' : 'chevron-down'}
+              size={22}
+              color={theme.colors.onSurfaceVariant}
             />
           </View>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            Scannez avec l’appareil photo pour rejoindre
-          </Text>
+          {showCode ? (
+            <>
+              <Text
+                variant="headlineMedium"
+                style={{ color: theme.colors.onSurface, letterSpacing: 4 }}>
+                {campaign.code}
+              </Text>
+              {/* Server address, so a player joining by hand knows where to point. */}
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                Serveur : <Text style={{ color: theme.colors.onSurface }}>{campaign.serverUrl}</Text>
+              </Text>
+              {/* Scan with the phone camera -> opens the app, join dialog prefilled. */}
+              <View style={styles.qr}>
+                <QRCode
+                  value={joinLink(campaign.code, campaign.serverUrl)}
+                  size={132}
+                  backgroundColor="transparent"
+                  color={theme.colors.onSurface}
+                />
+              </View>
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                Scannez avec l’appareil photo pour rejoindre
+              </Text>
+            </>
+          ) : null}
         </Card.Content>
       </Card>
 
@@ -302,10 +327,16 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   consent: { paddingHorizontal: 16, paddingVertical: 8 },
-  liveControl: { paddingHorizontal: 16, paddingTop: 4, gap: 6 },
   listContent: { padding: 16 },
   codeCard: { marginHorizontal: 16, marginTop: 12 },
   codeContent: { alignItems: 'center', gap: 4 },
+  codeHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 8,
+  },
   qr: { paddingVertical: 8 },
   cardBody: { gap: 4 },
   presenceDot: {

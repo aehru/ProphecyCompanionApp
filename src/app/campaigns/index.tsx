@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { Button, Dialog, IconButton, List, Portal, Text, TextInput } from 'react-native-paper';
 
+import AppFab from '@/components/ui/app-fab';
+import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   campaignsListQuery,
@@ -95,9 +97,6 @@ export default function CampaignsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.actions}>
-        <Button mode="contained" icon="plus" onPress={() => openDialog('create')}>
-          Créer une campagne
-        </Button>
         <Button mode="outlined" icon="location-enter" onPress={() => openDialog('join')}>
           Rejoindre avec un code
         </Button>
@@ -204,6 +203,8 @@ export default function CampaignsScreen() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+
+      <AppFab icon={dsIcon('plus')} label="Créer" onPress={() => openDialog('create')} />
     </View>
   );
 }
