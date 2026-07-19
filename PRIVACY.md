@@ -37,11 +37,14 @@ and stored on the campaign server, so the Game Master can see it during play:
 - character name;
 - combat state: wound levels, resource pools (maîtrise, chance), initiative,
   active conditions;
-- core statistics: caractéristiques, attributs, tendances.
+- core statistics: caractéristiques, attributs, tendances;
+- the skills you have actually trained (value above zero), with the attribut
+  each is linked to and any specialization;
+- the temporary bonuses and maluses currently active on you.
 
 **Never shared, under any circumstances:** biography, concept, personal notes,
-money, magic (spheres, disciplines, reserve), images, or the Game Master's
-private notes (those never leave the GM's device).
+money, magic (spheres, disciplines, reserve), images, untrained skills, expired
+effects, or the Game Master's private notes (those never leave the GM's device).
 
 ### Where it is stored, and who is responsible
 
