@@ -26,6 +26,12 @@ import { campaignQuery, gmNotesQuery, upsertGmNote } from '@/repositories/campai
 
 const TABS = ['Attributs', 'Compétences', 'Tendances'] as const;
 
+// Module-level so FlatList sees the same component type on every render (an
+// inline arrow remounts every separator whenever this screen re-renders — and
+// with a live roster it re-renders on every player push).
+const CardSeparator = () => <View style={styles.separator} />;
+const keyExtractor = (e: RosterEntry) => e.charId;
+
 export default function CompagnieScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data } = useLiveQuery(campaignQuery(Number(id)), [id]);
@@ -51,6 +57,8 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   const [tab, setTab] = useState(0);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<RosterEntry | null>(null);
+  // Everything outside `roster` that changes what a row renders.
+  const rowState = useMemo(() => ({ tab, query, notes }), [tab, query, notes]);
   // Keep the open sheet live as updates stream in.
   const openEntry = selected ? (roster.find((e) => e.charId === selected.charId) ?? null) : null;
 
@@ -115,9 +123,18 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
       ) : (
         <FlatList
           data={roster}
-          keyExtractor={(e) => e.charId}
+          keyExtractor={keyExtractor}
           contentContainerStyle={styles.list}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          ItemSeparatorComponent={CardSeparator}
+          // Cards are tall (rings / skill groups): render a screenful, not the
+          // whole table, and drop off-screen rows on Android.
+          initialNumToRender={4}
+          maxToRenderPerBatch={4}
+          windowSize={5}
+          removeClippedSubviews
+          // A roster push leaves `roster` a new array, but switching tab or typing
+          // in the search box does not — tell the list those affect every row.
+          extraData={rowState}
           renderItem={({ item }) => (
             <CompanyCard
               entry={item}
@@ -159,25 +176,8 @@ function CompanyCard({
   onPress: () => void;
 }) {
   const theme = useProphecyTheme();
-  const attrColors = useAttrColors();
-  const tendColors = useTendColors();
   const c = entry.character;
   const nom = String(c.nom ?? 'Sans nom');
-  const attr = nums(c.attributs);
-  const carac = nums(c.caracteristiques);
-  const tend = nums(c.tendances);
-  const skills = useMemo(
-    () => (Array.isArray(c.skills) ? (c.skills as Parameters<typeof groupSkills>[0]) : []),
-    [c.skills],
-  );
-  const effects = useMemo(
-    () => (Array.isArray(c.effects) ? (c.effects as Parameters<typeof groupSkills>[4]) : []),
-    [c.effects],
-  );
-  const groups = useMemo(
-    () => groupSkills(skills, attr, attrColors, query, effects),
-    [skills, attr, attrColors, query, effects],
-  );
 
   return (
     <Pressable
@@ -192,56 +192,92 @@ function CompanyCard({
         <StatusPill online={entry.online} />
       </View>
 
-      {tab === 0 ? (
-        <View style={{ gap: 10 }}>
-          <View style={styles.tileRow}>
-            {ATTRIBUTS.map((a) => (
-              <AttrTile key={a.key} label={a.label} value={attr[a.key] ?? 0} color={attrColors[a.key]} />
-            ))}
-          </View>
-          <View style={styles.dividerRow}>
-            <Text style={{ fontSize: 9, fontWeight: '700', letterSpacing: 1, color: theme.colors.onSurfaceVariant }}>
-              CARACTÉRISTIQUES
-            </Text>
-            <View style={{ flex: 1 }}>
-              <Divider style={{ backgroundColor: theme.prophecy.borderSoft }} />
-            </View>
-          </View>
-          <View style={styles.tileRow}>
-            {CARACTERISTIQUES.slice(0, 4).map((k) => (
-              <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
-            ))}
-          </View>
-          <View style={styles.tileRow}>
-            {CARACTERISTIQUES.slice(4).map((k) => (
-              <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
-            ))}
-          </View>
-        </View>
-      ) : null}
-
-      {tab === 1 ? (
-        <SkillGroupsView groups={groups} emptyLabel="Aucune correspondance." compact />
-      ) : null}
-
-      {tab === 2 ? (
-        <View style={styles.tendRow}>
-          {TENDANCES.map((t) => (
-            <View key={t.key} style={{ alignItems: 'center', gap: 7 }}>
-              <TendanceRing
-                value={tend[t.key] ?? 0}
-                fill={tend[`${t.key}Sub`] ?? 0}
-                color={tendColors[t.key]}
-                size={84}
-              />
-              <Text style={{ fontSize: 11, fontWeight: '600', color: theme.colors.onSurface }}>
-                {t.label}
-              </Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
+      {/* One body per tab, each its own component: the hidden two cost nothing,
+          and grouping the skills (the expensive part) only happens on its tab. */}
+      {tab === 0 ? <StatsBody character={c} /> : null}
+      {tab === 1 ? <SkillsBody character={c} query={query} /> : null}
+      {tab === 2 ? <TendancesBody character={c} /> : null}
     </Pressable>
+  );
+}
+
+type SharedCharacter = RosterEntry['character'];
+
+/** Attributs + caractéristiques tiles. */
+function StatsBody({ character }: { character: SharedCharacter }) {
+  const theme = useProphecyTheme();
+  const attrColors = useAttrColors();
+  const attr = nums(character.attributs);
+  const carac = nums(character.caracteristiques);
+  return (
+    <View style={styles.statsBody}>
+      <View style={styles.tileRow}>
+        {ATTRIBUTS.map((a) => (
+          <AttrTile key={a.key} label={a.label} value={attr[a.key] ?? 0} color={attrColors[a.key]} />
+        ))}
+      </View>
+      <View style={styles.dividerRow}>
+        <Text style={{ fontSize: 9, fontWeight: '700', letterSpacing: 1, color: theme.colors.onSurfaceVariant }}>
+          CARACTÉRISTIQUES
+        </Text>
+        <View style={{ flex: 1 }}>
+          <Divider style={{ backgroundColor: theme.prophecy.borderSoft }} />
+        </View>
+      </View>
+      <View style={styles.tileRow}>
+        {CARACTERISTIQUES.slice(0, 4).map((k) => (
+          <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
+        ))}
+      </View>
+      <View style={styles.tileRow}>
+        {CARACTERISTIQUES.slice(4).map((k) => (
+          <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/** Trained skills grouped by attribut, filtered by the shared search box. */
+function SkillsBody({ character, query }: { character: SharedCharacter; query: string }) {
+  const attrColors = useAttrColors();
+  const skills = useMemo(
+    () => (Array.isArray(character.skills) ? (character.skills as Parameters<typeof groupSkills>[0]) : []),
+    [character.skills],
+  );
+  const effects = useMemo(
+    () => (Array.isArray(character.effects) ? (character.effects as Parameters<typeof groupSkills>[4]) : []),
+    [character.effects],
+  );
+  const attr = nums(character.attributs);
+  const groups = useMemo(
+    () => groupSkills(skills, attr, attrColors, query, effects),
+    [skills, attr, attrColors, query, effects],
+  );
+  return <SkillGroupsView groups={groups} emptyLabel="Aucune correspondance." compact />;
+}
+
+/** The three tendance dials. */
+function TendancesBody({ character }: { character: SharedCharacter }) {
+  const theme = useProphecyTheme();
+  const tendColors = useTendColors();
+  const tend = nums(character.tendances);
+  return (
+    <View style={styles.tendRow}>
+      {TENDANCES.map((t) => (
+        <View key={t.key} style={styles.tendCell}>
+          <TendanceRing
+            value={tend[t.key] ?? 0}
+            fill={tend[`${t.key}Sub`] ?? 0}
+            color={tendColors[t.key]}
+            size={84}
+          />
+          <Text style={{ fontSize: 11, fontWeight: '600', color: theme.colors.onSurface }}>
+            {t.label}
+          </Text>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -254,9 +290,12 @@ const styles = StyleSheet.create({
   tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
   searchWrap: { paddingHorizontal: 16, paddingTop: 12 },
   list: { padding: 16 },
+  separator: { height: 12 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 13 },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   tileRow: { flexDirection: 'row', gap: 6 },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   tendRow: { flexDirection: 'row', justifyContent: 'space-around', gap: 6, paddingTop: 4 },
+  tendCell: { alignItems: 'center', gap: 7 },
+  statsBody: { gap: 10 },
 });
