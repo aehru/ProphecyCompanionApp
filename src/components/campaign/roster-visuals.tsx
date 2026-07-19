@@ -46,19 +46,46 @@ export function ServerStatusChip({ status }: { status: SocketStatus }) {
  * attribut column key. The MD3 scale only carries secondary + tertiary, so the
  * dragon-brick and nature-green are literal here, split by scheme to stay
  * legible on both parchment and charcoal. Mirrors the design's ATTR_COLOR map.
+ *
+ * Module-level constants on purpose: the hooks below must return a STABLE
+ * reference per scheme, because callers pass the map into useMemo deps (the
+ * `groupSkills` memos in Compagnie / the GM sheet). A fresh object literal per
+ * render would invalidate those memos on every render.
  */
+const ATTR_COLORS_LIGHT: Record<string, string> = {
+  physique: '#6C3A2C',
+  mental: '#4F6475',
+  manuel: '#A37B3F',
+  social: '#5B7251',
+};
+const ATTR_COLORS_DARK: Record<string, string> = {
+  physique: '#8C3E30',
+  mental: '#6D8CA4',
+  manuel: '#E1C37A',
+  social: '#6E8C65',
+};
+
+// Reuse the attribut accents so the two screens read as one palette.
+const TEND_COLORS_LIGHT: Record<string, string> = {
+  dragon: ATTR_COLORS_LIGHT.physique,
+  fatalite: ATTR_COLORS_LIGHT.mental,
+  homme: ATTR_COLORS_LIGHT.social,
+};
+const TEND_COLORS_DARK: Record<string, string> = {
+  dragon: ATTR_COLORS_DARK.physique,
+  fatalite: ATTR_COLORS_DARK.mental,
+  homme: ATTR_COLORS_DARK.social,
+};
+
 export function useAttrColors(): Record<string, string> {
   const theme = useProphecyTheme();
-  return theme.dark
-    ? { physique: '#8C3E30', mental: '#6D8CA4', manuel: '#E1C37A', social: '#6E8C65' }
-    : { physique: '#6C3A2C', mental: '#4F6475', manuel: '#A37B3F', social: '#5B7251' };
+  return theme.dark ? ATTR_COLORS_DARK : ATTR_COLORS_LIGHT;
 }
 
 /** Tendance ring accents: Dragon → brick, Fatalité → slate, Homme → green. */
 export function useTendColors(): Record<string, string> {
-  const attr = useAttrColors();
-  // Reuse the attribut accents so the two screens read as one palette.
-  return { dragon: attr.physique, fatalite: attr.mental, homme: attr.social };
+  const theme = useProphecyTheme();
+  return theme.dark ? TEND_COLORS_DARK : TEND_COLORS_LIGHT;
 }
 
 // A small, fixed avatar palette (design assigns one accent per player). Picked
