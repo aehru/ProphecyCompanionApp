@@ -3,7 +3,7 @@
 // stream into it. Purely in-memory — the durable copy lives on the server
 // (docs/campaign-protocol.md §2), so closing the screen loses nothing.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { Campaign } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
@@ -15,6 +15,12 @@ export function useGmRoster(campaign: Campaign) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [entries, setEntries] = useState<RosterEntry[]>([]);
 
+  // The `welcome` handler backfills the local name, which changes `campaign` and
+  // would tear the socket down mid-session. Read the name through a ref so it
+  // stays out of the effect's deps: only the connection identity reconnects.
+  const nameRef = useRef(campaign.name);
+  nameRef.current = campaign.name;
+
   useEffect(() => {
     if (!campaign.gmToken) return;
     const socket = new CampaignSocket({
@@ -25,7 +31,7 @@ export function useGmRoster(campaign: Campaign) {
         switch (msg.type) {
           case 'welcome':
             setServerError(null);
-            if (msg.campaign.name && msg.campaign.name !== campaign.name) {
+            if (msg.campaign.name && msg.campaign.name !== nameRef.current) {
               updateCampaignName(campaign.id, msg.campaign.name).catch(() => {});
             }
             break;
@@ -66,7 +72,7 @@ export function useGmRoster(campaign: Campaign) {
     });
     socket.connect();
     return () => socket.close();
-  }, [campaign.id, campaign.code, campaign.serverUrl, campaign.gmToken, campaign.name]);
+  }, [campaign.id, campaign.code, campaign.serverUrl, campaign.gmToken]);
 
   const roster = [...entries].sort((a, b) =>
     String(a.character.nom ?? '').localeCompare(String(b.character.nom ?? '')),

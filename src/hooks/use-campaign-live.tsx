@@ -91,6 +91,12 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
   const state = stateRows?.[0];
   const charUuid = character?.uuid ?? null;
 
+  // `welcome` backfills the local campaign name, which would otherwise change the
+  // socket effect's deps and reconnect mid-broadcast. Ref-read keeps the name out
+  // of the deps: only the connection identity (campaign/character) reconnects.
+  const nameRef = useRef(campaign?.name);
+  nameRef.current = campaign?.name;
+
   const socketRef = useRef<CampaignSocket | null>(null);
   const onlineRef = useRef(false);
   const lastSigRef = useRef<string | null>(null);
@@ -114,7 +120,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
       onMessage: (msg) => {
         if (msg.type === 'welcome') {
           setServerError(null);
-          if (msg.campaign.name && msg.campaign.name !== campaign.name) {
+          if (msg.campaign.name && msg.campaign.name !== nameRef.current) {
             updateCampaignName(campaign.id, msg.campaign.name).catch(() => {});
           }
         } else if (msg.type === 'error') {
@@ -130,7 +136,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
       onlineRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [campaign?.id, campaign?.code, campaign?.serverUrl, campaign?.name, charUuid]);
+  }, [campaign?.id, campaign?.code, campaign?.serverUrl, charUuid]);
 
   // Debounced in-play push.
   useEffect(() => {
