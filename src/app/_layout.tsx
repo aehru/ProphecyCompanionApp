@@ -129,7 +129,8 @@ export default function RootLayout() {
                 {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
                 <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
                 <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
-                <Stack.Screen name="campaigns/[id]" options={{ title: 'Campagne' }} />
+                {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
+                <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
               </Stack>
               {/* Floating overlay — shows on every screen while a campaign is live. */}
               <CampaignLiveIndicator />
