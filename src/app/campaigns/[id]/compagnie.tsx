@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useDeferredValue, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Divider, Text, TextInput } from 'react-native-paper';
 
@@ -57,8 +57,17 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   const [tab, setTab] = useState(0);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<RosterEntry | null>(null);
+  // The search box drives `groupSkills` for EVERY roster card, so filtering a
+  // full table is far more work than one keystroke should block on. The input
+  // itself stays on `query` (immediate); the cards read the deferred copy, which
+  // React re-renders at low priority and abandons when the next key lands.
+  const deferredQuery = useDeferredValue(query);
+  const stale = query !== deferredQuery;
   // Everything outside `roster` that changes what a row renders.
-  const rowState = useMemo(() => ({ tab, query, notes }), [tab, query, notes]);
+  const rowState = useMemo(
+    () => ({ tab, query: deferredQuery, notes }),
+    [tab, deferredQuery, notes],
+  );
   // Keep the open sheet live as updates stream in.
   const openEntry = selected ? (roster.find((e) => e.charId === selected.charId) ?? null) : null;
 
@@ -124,6 +133,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         <FlatList
           data={roster}
           keyExtractor={keyExtractor}
+          style={stale ? styles.listStale : undefined}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={CardSeparator}
           // Cards are tall (rings / skill groups): render a screenful, not the
@@ -139,7 +149,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
             <CompanyCard
               entry={item}
               tab={tab}
-              query={query}
+              query={deferredQuery}
               hasNote={noteByUuid.has(item.charId)}
               onPress={() => setSelected(item)}
             />
@@ -289,6 +299,9 @@ const styles = StyleSheet.create({
   tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8 },
   tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
   searchWrap: { paddingHorizontal: 16, paddingTop: 12 },
+  // Cards still showing results for an older query — dim them slightly rather
+  // than blanking the list while the deferred re-filter catches up.
+  listStale: { opacity: 0.6 },
   list: { padding: 16 },
   separator: { height: 12 },
   card: { borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 13 },
