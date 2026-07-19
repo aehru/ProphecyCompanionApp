@@ -7,6 +7,7 @@
 import {
   type HelloMsg,
   parseServerMessage,
+  pingMsg,
   type ServerMessage,
   wsUrl,
 } from '@/lib/campaign-protocol';
@@ -32,10 +33,20 @@ export interface CampaignSocketOptions {
   makeSocket?: (url: string) => WebSocketLike;
   /** Injectable for tests; defaults to setTimeout. */
   schedule?: (fn: () => void, ms: number) => unknown;
+  /**
+   * Keepalive period in ms. Defaults to HEARTBEAT_MS; pass 0 to disable.
+   * Both roles need it: a player only sends on an in-play change and the GM
+   * never sends at all, so without a ping the connection can sit silent for
+   * minutes and the server's presence tracking marks a live client offline.
+   */
+  heartbeatMs?: number;
 }
 
 const BACKOFF_START_MS = 1000;
 const BACKOFF_MAX_MS = 15_000;
+
+/** Default keepalive period — one ping every 30s while connected. */
+export const HEARTBEAT_MS = 30_000;
 
 export class CampaignSocket {
   private readonly opts: CampaignSocketOptions;
@@ -60,6 +71,7 @@ export class CampaignSocket {
       this.backoffMs = BACKOFF_START_MS; // healthy again — reset the backoff
       ws.send(JSON.stringify(this.opts.hello));
       this.setStatus('online');
+      this.startHeartbeat(ws);
     };
     ws.onmessage = (event) => {
       if (typeof event.data === 'string') this.opts.onMessage(parseServerMessage(event.data));
@@ -92,6 +104,24 @@ export class CampaignSocket {
     this.ws?.close();
     this.ws = null;
     this.setStatus('offline');
+  }
+
+  /**
+   * Self-rescheduling keepalive for one connection. It carries no timer handle:
+   * each tick simply stops once `ws` is no longer the live socket (closed, or
+   * replaced by a reconnect), so a dropped connection can never leave a ping
+   * loop running against a stale socket.
+   */
+  private startHeartbeat(ws: WebSocketLike): void {
+    const ms = this.opts.heartbeatMs ?? HEARTBEAT_MS;
+    if (ms <= 0) return;
+    const schedule = this.opts.schedule ?? setTimeout;
+    const tick = () => {
+      if (this.closed || this.ws !== ws) return;
+      this.send(pingMsg());
+      schedule(tick, ms);
+    };
+    schedule(tick, ms);
   }
 
   private setStatus(status: SocketStatus): void {

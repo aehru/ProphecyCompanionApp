@@ -35,11 +35,16 @@ export function useGmRoster(campaign: Campaign) {
           case 'update':
             setEntries((prev) => {
               const next = prev.filter((e) => e.charId !== msg.charId);
-              const online = prev.find((e) => e.charId === msg.charId)?.online ?? true;
+              // An update is proof of presence: the server only accepts a share
+              // from the live socket that joined as that charId, so mark the
+              // player online rather than carrying a previous value. Without
+              // this, a stale `presence:false` (broadcast by a dead socket's
+              // cleanup after the player already reconnected) would stick
+              // forever even while their updates keep streaming in.
               next.push({
                 charId: msg.charId,
                 character: msg.character,
-                online,
+                online: true,
                 updatedAt: msg.updatedAt,
               });
               return next;

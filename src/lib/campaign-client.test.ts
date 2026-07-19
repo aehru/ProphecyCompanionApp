@@ -20,7 +20,9 @@ class FakeWS implements WebSocketLike {
   }
 }
 
-function harness() {
+// `heartbeatMs: 0` by default so the reconnect/backoff assertions below see only
+// the reconnect timers; the heartbeat has its own test that opts back in.
+function harness(heartbeatMs = 0) {
   const sockets: FakeWS[] = [];
   const scheduled: { fn: () => void; ms: number }[] = [];
   const messages: ServerMessage[] = [];
@@ -31,6 +33,7 @@ function harness() {
     hello: playerHello('ABCD2345', 'char-1'),
     onMessage: (m) => messages.push(m),
     onStatus: (s) => statuses.push(s),
+    heartbeatMs,
     makeSocket: (url) => {
       urls.push(url);
       const ws = new FakeWS();
@@ -91,6 +94,37 @@ describe('CampaignSocket', () => {
     expect(h.scheduled).toEqual([]); // no reconnect scheduled
     h.client.connect(); // and connect() after close is a no-op
     expect(h.sockets).toHaveLength(1);
+  });
+
+  it('pings on an interval while connected, and stops once the socket drops', () => {
+    const h = harness(30_000);
+    h.client.connect();
+    h.sockets[0].onopen?.();
+    // Hello only so far; the first ping is scheduled, not sent.
+    expect(h.sockets[0].sent).toHaveLength(1);
+    expect(h.scheduled.map((s) => s.ms)).toEqual([30_000]);
+
+    h.scheduled[0].fn(); // tick #1
+    expect(JSON.parse(h.sockets[0].sent[1])).toEqual({ v: 1, type: 'ping' });
+    h.scheduled[1].fn(); // tick #2 — the loop keeps re-arming itself
+    expect(JSON.parse(h.sockets[0].sent[2])).toEqual({ v: 1, type: 'ping' });
+    expect(h.scheduled.map((s) => s.ms)).toEqual([30_000, 30_000, 30_000]);
+
+    // Connection drops: the pending tick must not ping a stale socket.
+    h.sockets[0].onclose?.();
+    const before = h.sockets[0].sent.length;
+    h.scheduled[2].fn();
+    expect(h.sockets[0].sent).toHaveLength(before);
+  });
+
+  it('stops pinging after close()', () => {
+    const h = harness(30_000);
+    h.client.connect();
+    h.sockets[0].onopen?.();
+    h.client.close();
+    const before = h.sockets[0].sent.length;
+    h.scheduled[0].fn();
+    expect(h.sockets[0].sent).toHaveLength(before);
   });
 
   it('send() while offline is a silent drop, not a crash', () => {
