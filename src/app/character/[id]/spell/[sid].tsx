@@ -21,7 +21,7 @@ export default function SpellEditModal() {
   const { sid } = useLocalSearchParams<{ id: string; sid: string }>();
   const router = useRouter();
   const theme = useProphecyTheme();
-  const { data } = useLiveQuery(spellQuery(Number(sid)));
+  const { data } = useLiveQuery(spellQuery(Number(sid)), [sid]);
   const spell = data?.[0];
 
   return (

@@ -53,9 +53,9 @@ export default function CharacterFicheScreen() {
     ensure: true,
     reloadOnFocus: true,
   });
-  const { data: armors } = useLiveQuery(armorQuery(numId));
-  const { data: effects } = useLiveQuery(effectsQuery(numId));
-  const { data: skills } = useLiveQuery(skillsQuery(numId));
+  const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
+  const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
+  const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
   // Tab-level live edit: one FAB flips every card between read and edit.
   const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).

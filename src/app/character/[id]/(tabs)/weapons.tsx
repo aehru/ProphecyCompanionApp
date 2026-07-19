@@ -32,9 +32,9 @@ export default function CharacterWeaponsScreen() {
   const theme = useProphecyTheme();
   // ensure: initiative current-turn values live on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
-  const { data: weapons } = useLiveQuery(weaponsQuery(numId));
-  const { data: armors } = useLiveQuery(armorQuery(numId));
-  const { data: effects } = useLiveQuery(effectsQuery(numId));
+  const { data: weapons } = useLiveQuery(weaponsQuery(numId), [numId]);
+  const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
+  const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;

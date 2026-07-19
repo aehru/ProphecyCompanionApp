@@ -38,7 +38,7 @@ export default function CharacterMagicScreen() {
     ensure: true,
     reloadOnFocus: true,
   });
-  const { data: spells } = useLiveQuery(spellsQuery(numId));
+  const { data: spells } = useLiveQuery(spellsQuery(numId), [numId]);
   const [editing, setEditing] = useEditToggle(navigation);
 
   const fallback = characterFallback(char);
