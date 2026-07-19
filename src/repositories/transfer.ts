@@ -23,12 +23,15 @@ import {
   CHARACTER_FIELDS,
   type CharacterBundle,
   EFFECT_FIELDS,
+  type ImportMode,
+  planImport,
   type ProphecyExport,
   SKILL_FIELDS,
   SPELL_FIELDS,
   STATE_FIELDS,
   WEAPON_FIELDS,
 } from '@/lib/character-transfer';
+import { newUuid } from '@/lib/uuid';
 
 /** Copy only the listed keys off a DB row (drops id / FK / timestamps / media). */
 function pick(row: Record<string, unknown>, fields: string[]): Record<string, unknown> {
@@ -74,27 +77,72 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
 }
 
 /**
- * Insert every bundle as a BRAND-NEW character (fresh ids) — import never
- * overwrites an existing character, so re-importing simply duplicates. Returns
- * the number of characters created. Wrapped in a transaction so a bad bundle
- * can't leave a half-written character behind.
+ * Import bundles into the local DB. `mode` decides identity handling (see
+ * `planImport` / docs/campaign-protocol.md §3):
+ *   - `'copy'`    (default) — every bundle becomes a BRAND-NEW character with a
+ *     freshly minted uuid. Matches the historical "re-import duplicates" and the
+ *     "share with another player" intent.
+ *   - `'restore'` — preserve each character's uuid so it re-links to its campaign
+ *     roster slot. A uuid this device already holds is REPLACED in place
+ *     (idempotent re-import); an unknown uuid is inserted as-is.
+ * Returns the number of characters written. Wrapped in a transaction so a bad
+ * bundle can't leave a half-written character behind.
  *
  * The expo-sqlite driver runs transactions synchronously (it commits as soon as
  * the callback returns), so the body MUST use the sync query methods
- * (`.run()` / `.returning().get()`) — an async callback would commit before the
- * awaited writes ran. Hence this function is synchronous.
+ * (`.run()` / `.returning().get()` / `.all()`) — an async callback would commit
+ * before the awaited writes ran. Hence this function is synchronous.
  */
-export function importCharacters(data: ProphecyExport): number {
-  let created = 0;
+export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): number {
+  let written = 0;
   db.transaction((tx) => {
+    // Seed the live uuid set once, then keep it current as we write, so two
+    // bundles carrying the same uuid in one file don't both try to insert it.
+    const existing = new Set(
+      tx
+        .select({ uuid: characters.uuid })
+        .from(characters)
+        .all()
+        .map((r) => r.uuid)
+        .filter((u): u is string => u != null),
+    );
+
     for (const b of data.characters) {
       const now = new Date();
-      const row = tx
-        .insert(characters)
-        .values({ ...(b.character as Partial<NewCharacter>), createdAt: now, updatedAt: now })
-        .returning()
-        .get();
-      const characterId = row.id;
+      const incoming = (b.character as { uuid?: string }).uuid;
+      const plan = planImport(incoming, existing, mode, newUuid);
+      // The bundle's own uuid never wins directly — the plan decides it.
+      const sheet = { ...(b.character as Partial<NewCharacter>), uuid: plan.uuid };
+
+      let characterId: number;
+      if (plan.action === 'replace') {
+        const target = tx
+          .select({ id: characters.id })
+          .from(characters)
+          .where(eq(characters.uuid, plan.uuid))
+          .get();
+        // Fall back to insert if the row vanished between planning and now.
+        if (!target) {
+          characterId = tx
+            .insert(characters)
+            .values({ ...sheet, createdAt: now, updatedAt: now })
+            .returning()
+            .get().id;
+        } else {
+          characterId = target.id;
+          // Overwrite the sheet (keep original createdAt) and rebuild children.
+          tx.update(characters).set({ ...sheet, updatedAt: now }).where(eq(characters.id, characterId)).run();
+          for (const t of [actualState, skills, armor, weapons, spells, effects]) {
+            tx.delete(t).where(eq(t.characterId, characterId)).run();
+          }
+        }
+      } else {
+        characterId = tx
+          .insert(characters)
+          .values({ ...sheet, createdAt: now, updatedAt: now })
+          .returning()
+          .get().id;
+      }
 
       tx.insert(actualState)
         .values({ ...(b.state as Partial<NewActualState>), characterId })
@@ -109,8 +157,9 @@ export function importCharacters(data: ProphecyExport): number {
       if (b.spells.length) tx.insert(spells).values(link(b.spells) as NewSpell[]).run();
       if (b.effects.length) tx.insert(effects).values(link(b.effects) as NewEffect[]).run();
 
-      created += 1;
+      existing.add(plan.uuid);
+      written += 1;
     }
   });
-  return created;
+  return written;
 }

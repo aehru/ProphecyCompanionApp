@@ -1,10 +1,23 @@
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, isNull } from 'drizzle-orm';
 
 import { SPHERES } from '@/constants/prophecy';
 import { db } from '@/db/client';
 import { actualState, characters, type NewActualState, type NewCharacter } from '@/db/schema';
 import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
+import { newUuid } from '@/lib/uuid';
 import { updateActualState } from '@/repositories/actual-state';
+
+/**
+ * Give a portable uuid to any character that predates the `uuid` column (the
+ * migration adds it nullable; see schema.ts). Idempotent — only touches NULL
+ * rows — so it's safe to run on every launch after migrations succeed.
+ */
+export async function backfillCharacterUuids(): Promise<void> {
+  const rows = await db.select({ id: characters.id }).from(characters).where(isNull(characters.uuid));
+  for (const r of rows) {
+    await db.update(characters).set({ uuid: newUuid() }).where(eq(characters.id, r.id));
+  }
+}
 
 /** Magic pools whose current value should follow their max when the max changes. */
 const MAGIC_MAX_TO_CURRENT: [string, string][] = [
