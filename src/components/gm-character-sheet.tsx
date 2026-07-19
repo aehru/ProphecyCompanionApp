@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, Modal, Portal, Text, TextInput } from 'react-native-paper';
 
@@ -54,9 +54,10 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
   const theme = useProphecyTheme();
   const attrColors = useAttrColors();
   const tendColors = useTendColors();
-  const [draft, setDraft] = useState(note);
-  // Reseed the note when a different character is opened.
-  useEffect(() => setDraft(note), [entry?.charId, note]);
+  // The note draft lives in <GmNotes> so typing re-renders one TextInput instead
+  // of the whole sheet (three rings + every skill row). It hands the text back
+  // through a ref, read only when Enregistrer is pressed.
+  const draftRef = useRef(note);
 
   const c = entry?.character;
   const attr = nums(c?.attributs);
@@ -81,7 +82,7 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
   const effects = Array.isArray(c.effects) ? (c.effects as SharedEffect[]) : [];
 
   const save = () => {
-    onSaveNote(entry.charId, draft);
+    onSaveNote(entry.charId, draftRef.current);
     onDismiss();
   };
 
@@ -219,13 +220,8 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
 
           {/* GM private notes */}
           <Section title="Notes privées (MJ)" theme={theme}>
-            <TextInput
-              value={draft}
-              onChangeText={setDraft}
-              multiline
-              numberOfLines={4}
-              placeholder="Jamais envoyées au serveur ni au joueur."
-            />
+            {/* keyed by character so opening another one reseeds the draft */}
+            <GmNotes key={entry.charId} note={note} draftRef={draftRef} />
           </Section>
         </ScrollView>
 
@@ -237,6 +233,31 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
         </View>
       </Modal>
     </Portal>
+  );
+}
+
+/**
+ * The GM's private note field. Owns the draft so keystrokes stay local; the
+ * parent reads the latest text off `draftRef` when saving. Never leaves the
+ * device — it isn't part of the shared projection.
+ */
+function GmNotes({
+  note,
+  draftRef,
+}: {
+  note: string;
+  draftRef: React.MutableRefObject<string>;
+}) {
+  const [draft, setDraft] = useState(note);
+  draftRef.current = draft;
+  return (
+    <TextInput
+      value={draft}
+      onChangeText={setDraft}
+      multiline
+      numberOfLines={4}
+      placeholder="Jamais envoyées au serveur ni au joueur."
+    />
   );
 }
 

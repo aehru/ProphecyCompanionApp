@@ -7,7 +7,7 @@ import { Text } from 'react-native-paper';
 
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
-import { WeaponEditor } from '@/components/weapon-card';
+import WeaponEditor from '@/components/weapon-editor';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { weaponQuery } from '@/repositories/weapons';
 
