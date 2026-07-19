@@ -1,13 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, Modal, Portal, Text, TextInput } from 'react-native-paper';
 
 import {
+  AttrTile,
+  CaracTile,
+  groupSkills,
+  PlayerAvatar,
+  SkillGroupsView,
+  TendanceRing,
+  useAttrColors,
+  useTendColors,
+} from '@/components/campaign/roster-visuals';
+import {
   ATTRIBUTS,
   CARACTERISTIQUES,
+  EFFECT_TARGET_LABEL,
+  EFFECT_UNIT_LABEL,
   RESOURCES,
   TENDANCES,
-  WOUND_LEVELS,
 } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
@@ -15,6 +26,13 @@ import type { RosterEntry } from '@/lib/campaign-protocol';
 // The projection arrives as opaque JSON (tolerant reader); read it defensively.
 type NumRecord = Record<string, number>;
 type PoolRecord = Record<string, { current?: number; max?: number }>;
+type SharedEffect = {
+  label?: string;
+  target?: string;
+  value?: number;
+  durationUnit?: string;
+  durationRemaining?: number;
+};
 const nums = (v: unknown): NumRecord => (v ?? {}) as NumRecord;
 const pools = (v: unknown): PoolRecord => (v ?? {}) as PoolRecord;
 
@@ -26,34 +44,46 @@ interface Props {
 }
 
 /**
- * GM-only bottom sheet showing the full shared projection of one roster
- * character (docs/campaign-protocol.md §4 — combat state + core stats) plus the
- * GM's private notes. Read-only for the sheet; the notes are the only editable
- * part and never leave this device.
+ * GM-only bottom sheet: the full shared projection of one roster character plus
+ * the GM's private notes. Read-only except the notes, which never leave this
+ * device. Wounds and conditions are intentionally not surfaced here (design
+ * decision); the tactical focus is resources, tendances, stats, trained skills
+ * (with specializations), active effects, and initiative.
  */
 export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }: Props) {
   const theme = useProphecyTheme();
+  const attrColors = useAttrColors();
+  const tendColors = useTendColors();
   const [draft, setDraft] = useState(note);
   // Reseed the note when a different character is opened.
   useEffect(() => setDraft(note), [entry?.charId, note]);
 
-  if (!entry) return null;
-  const c = entry.character;
+  const c = entry?.character;
+  const attr = nums(c?.attributs);
+  const skills = useMemo(
+    () => (Array.isArray(c?.skills) ? (c?.skills as Parameters<typeof groupSkills>[0]) : []),
+    [c?.skills],
+  );
+  const effectRows = useMemo(
+    () => (Array.isArray(c?.effects) ? (c?.effects as Parameters<typeof groupSkills>[4]) : []),
+    [c?.effects],
+  );
+  const groups = useMemo(
+    () => groupSkills(skills, attr, attrColors, '', effectRows),
+    [skills, attr, attrColors, effectRows],
+  );
+
+  if (!entry || !c) return null;
   const carac = nums(c.caracteristiques);
-  const attr = nums(c.attributs);
   const tend = nums(c.tendances);
-  const wounds = pools(c.wounds);
   const resources = pools(c.resources);
   const initiative = (c.initiative ?? {}) as { max?: number; values?: number[] };
-  const conditions = String(c.conditions ?? '');
+  const effects = Array.isArray(c.effects) ? (c.effects as SharedEffect[]) : [];
 
   const save = () => {
     onSaveNote(entry.charId, draft);
     onDismiss();
   };
-
-  const label = { color: theme.colors.onSurfaceVariant };
-  const value = { color: theme.colors.onSurface };
 
   return (
     <Portal>
@@ -67,20 +97,60 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
         ]}>
         <View style={styles.handle} />
         <View style={styles.titleRow}>
-          <Text variant="headlineSmall" style={value}>
-            {String(c.nom ?? 'Sans nom')}
-          </Text>
-          <Text variant="labelMedium" style={label}>
-            {entry.online ? 'En ligne' : 'Hors ligne'}
-          </Text>
+          <PlayerAvatar nom={String(c.nom ?? 'Sans nom')} online={entry.online} size={48} />
+          <View style={{ flex: 1 }}>
+            <Text variant="headlineSmall" style={{ color: theme.colors.onSurface }}>
+              {String(c.nom ?? 'Sans nom')}
+            </Text>
+            <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+              {entry.online ? 'En ligne' : 'Hors ligne'}
+            </Text>
+          </View>
         </View>
 
         <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-          {/* Caractéristiques */}
-          <Section title="Caractéristiques" theme={theme}>
+          {/* Ressources (replaces the design's "Vie" tile) */}
+          <Section title="Ressources" theme={theme}>
             <View style={styles.grid}>
-              {CARACTERISTIQUES.map((k) => (
-                <Stat key={k.key} label={k.abbr} v={carac[k.key] ?? 0} theme={theme} />
+              {RESOURCES.map((r) => {
+                const pool = resources[r.key];
+                return (
+                  <View
+                    key={r.key}
+                    style={[
+                      styles.poolTile,
+                      { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.prophecy.borderSoft },
+                    ]}>
+                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                      {r.label}
+                    </Text>
+                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
+                      {pool?.current ?? 0} / {pool?.max ?? 0}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          </Section>
+
+          {/* Tendances — rings (0–10 sub) with the main value below */}
+          <Section title="Tendances" theme={theme}>
+            <View style={styles.tendRow}>
+              {TENDANCES.map((t) => (
+                <View key={t.key} style={{ alignItems: 'center', gap: 6 }}>
+                  <TendanceRing
+                    value={tend[t.key] ?? 0}
+                    fill={tend[`${t.key}Sub`] ?? 0}
+                    color={tendColors[t.key]}
+                    size={82}
+                  />
+                  <Text style={{ fontSize: 12, fontWeight: '600', color: theme.colors.onSurface }}>
+                    {t.label}
+                  </Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    {tend[`${t.key}Sub`] ?? 0}/10
+                  </Text>
+                </View>
               ))}
             </View>
           </Section>
@@ -88,64 +158,64 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
           {/* Attributs */}
           <Section title="Attributs" theme={theme}>
             <View style={styles.grid}>
-              {ATTRIBUTS.map((k) => (
-                <Stat key={k.key} label={k.label} v={attr[k.key] ?? 0} theme={theme} />
+              {ATTRIBUTS.map((a) => (
+                <AttrTile key={a.key} label={a.label} value={attr[a.key] ?? 0} color={attrColors[a.key]} />
               ))}
             </View>
           </Section>
 
-          {/* Tendances */}
-          <Section title="Tendances" theme={theme}>
+          {/* Caractéristiques */}
+          <Section title="Caractéristiques" theme={theme}>
             <View style={styles.grid}>
-              {TENDANCES.map((t) => (
-                <Stat
-                  key={t.key}
-                  label={t.label}
-                  v={tend[t.key] ?? 0}
-                  sub={tend[`${t.key}Sub`] ?? 0}
-                  theme={theme}
-                />
+              {CARACTERISTIQUES.map((k) => (
+                <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
               ))}
             </View>
           </Section>
 
-          {/* Blessures */}
-          <Section title="Blessures" theme={theme}>
-            {WOUND_LEVELS.map((w) => {
-              const pool = wounds[w.key];
-              if (!pool?.max) return null;
-              return (
-                <Row key={w.key} label={w.label} theme={theme}>
-                  {`${pool.current ?? 0} / ${pool.max}`}
-                </Row>
-              );
-            })}
+          {/* Compétences (trained, with specializations) */}
+          <Section title="Compétences" theme={theme}>
+            <SkillGroupsView groups={groups} emptyLabel="Aucune compétence apprise." />
           </Section>
 
-          {/* Ressources + initiative */}
-          <Section title="Ressources" theme={theme}>
-            {RESOURCES.map((r) => {
-              const pool = resources[r.key];
-              return (
-                <Row key={r.key} label={r.label} theme={theme}>
-                  {`${pool?.current ?? 0} / ${pool?.max ?? 0}`}
-                </Row>
-              );
-            })}
-            <Row label="Initiative" theme={theme}>
+          {/* Effets actifs (bonus/malus) */}
+          {effects.length > 0 ? (
+            <Section title="Effets actifs" theme={theme}>
+              <View style={{ gap: 6 }}>
+                {effects.map((e, i) => {
+                  const v = e.value ?? 0;
+                  const target = EFFECT_TARGET_LABEL[e.target ?? 'all'] ?? e.target ?? 'Tous les jets';
+                  const unit = EFFECT_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
+                  return (
+                    <View key={`${e.label}-${i}`} style={styles.effectRow}>
+                      <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>
+                        {e.label || 'Effet'} · {target}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: 'Cinzel_600SemiBold',
+                          color: v < 0 ? theme.colors.error : theme.colors.primary,
+                        }}>
+                        {v > 0 ? `+${v}` : v}
+                      </Text>
+                      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, minWidth: 64, textAlign: 'right' }}>
+                        {e.durationUnit === 'permanent' ? unit : `${e.durationRemaining ?? 0} ${unit}`}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </Section>
+          ) : null}
+
+          {/* Initiative */}
+          <Section title="Initiative" theme={theme}>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
               {initiative.values?.length
                 ? initiative.values.join(', ')
                 : `${initiative.max ?? 0} dé(s)`}
-            </Row>
+            </Text>
           </Section>
-
-          {conditions ? (
-            <Section title="Conditions" theme={theme}>
-              <Text variant="bodyMedium" style={value}>
-                {conditions}
-              </Text>
-            </Section>
-          ) : null}
 
           {/* GM private notes */}
           <Section title="Notes privées (MJ)" theme={theme}>
@@ -192,45 +262,6 @@ function Section({
   );
 }
 
-function Stat({ label, v, sub, theme }: { label: string; v: number; sub?: number; theme: ThemeT }) {
-  return (
-    <View
-      style={[
-        styles.stat,
-        { backgroundColor: theme.prophecy.surfaceContainerLow, borderColor: theme.colors.outlineVariant },
-      ]}>
-      <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {label}
-      </Text>
-      <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
-        {v}
-        {sub ? <Text variant="bodySmall">{` ·${sub}`}</Text> : null}
-      </Text>
-    </View>
-  );
-}
-
-function Row({
-  label,
-  theme,
-  children,
-}: {
-  label: string;
-  theme: ThemeT;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={styles.row}>
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-        {label}
-      </Text>
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   wrapper: { justifyContent: 'flex-end', margin: 0 },
   sheet: {
@@ -250,20 +281,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#8888',
     marginBottom: 8,
   },
-  titleRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   body: { gap: 18, paddingVertical: 12 },
   section: { gap: 8 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  stat: {
-    minWidth: 64,
+  poolTile: {
     flexGrow: 1,
-    flexBasis: 64,
+    flexBasis: 100,
     alignItems: 'center',
     gap: 2,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 10,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 },
+  tendRow: { flexDirection: 'row', justifyContent: 'space-around', gap: 6 },
+  effectRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, paddingTop: 8 },
 });
