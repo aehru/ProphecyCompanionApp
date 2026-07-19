@@ -19,6 +19,7 @@ import { PaperProvider, Text } from 'react-native-paper';
 
 import { backupDatabase, clearBackup, restoreDatabase } from '@/db/backup';
 import { db, resetDatabase } from '@/db/client';
+import { backfillCharacterUuids } from '@/repositories/characters';
 import migrations from '../../drizzle/migrations';
 import {
   ProphecyDarkTheme,
@@ -88,6 +89,9 @@ export default function RootLayout() {
       // Migration went through — the pre-migration snapshot is no longer needed.
       clearBackup();
       AsyncStorage.removeItem(RESET_FLAG);
+      // Fill portable uuids on characters that predate the column. Best-effort:
+      // idempotent (NULL-only) and never blocks the UI.
+      backfillCharacterUuids().catch(() => {});
     }
   }, [success]);
 

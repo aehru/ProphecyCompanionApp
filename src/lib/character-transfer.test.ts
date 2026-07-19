@@ -7,6 +7,7 @@ import {
   type CharacterBundle,
   EXPORT_FORMAT,
   parseImport,
+  planImport,
   SCHEMA_VERSION,
   serializeExport,
 } from './character-transfer';
@@ -178,5 +179,54 @@ describe('parseImport validation', () => {
   it('accepts a valid, complete export', () => {
     const r = parseImport(serializeExport(buildExport([makeBundle()])));
     expect(r.ok).toBe(true);
+  });
+
+  it('accepts a legacy export whose characters have no uuid', () => {
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: { character: Record<string, unknown> }[];
+    };
+    // Simulate a v1 file: strip the optional uuid entirely.
+    delete exp.characters[0].character.uuid;
+    const r = parseImport(JSON.stringify(exp));
+    expect(r.ok).toBe(true);
+  });
+
+  it('carries an explicit uuid through parse', () => {
+    const exp = buildExport([makeBundle({ character: { ...makeBundle().character, uuid: 'abc-123' } })]);
+    const r = parseImport(serializeExport(exp));
+    expect(r.ok && r.data.characters[0].character.uuid).toBe('abc-123');
+  });
+});
+
+describe('planImport', () => {
+  const mint = () => 'MINTED';
+
+  it('copy always mints a fresh id and inserts, ignoring the incoming uuid', () => {
+    expect(planImport('u1', new Set(), 'copy', mint)).toEqual({ uuid: 'MINTED', action: 'insert' });
+    expect(planImport('u1', new Set(['u1']), 'copy', mint)).toEqual({
+      uuid: 'MINTED',
+      action: 'insert',
+    });
+  });
+
+  it('restore preserves an unknown incoming uuid as an insert', () => {
+    expect(planImport('u1', new Set(['other']), 'restore', mint)).toEqual({
+      uuid: 'u1',
+      action: 'insert',
+    });
+  });
+
+  it('restore replaces in place when the device already holds the uuid', () => {
+    expect(planImport('u1', new Set(['u1']), 'restore', mint)).toEqual({
+      uuid: 'u1',
+      action: 'replace',
+    });
+  });
+
+  it('mints a new id when the bundle has no uuid, even in restore mode', () => {
+    expect(planImport(undefined, new Set(), 'restore', mint)).toEqual({
+      uuid: 'MINTED',
+      action: 'insert',
+    });
   });
 });

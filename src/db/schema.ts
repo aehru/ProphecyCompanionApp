@@ -1,7 +1,8 @@
 import { sql } from 'drizzle-orm';
-import { check, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { check, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '@/constants/prophecy';
+import { newUuid } from '@/lib/uuid';
 
 type DisciplineKey = (typeof DISCIPLINES)[number]['key'];
 type SphereKey = (typeof SPHERES)[number]['key'];
@@ -21,6 +22,15 @@ export const characters = sqliteTable('characters', {
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
+
+  // Portable, stable id that survives export/import and device changes — used to
+  // re-link a character to its campaign roster slot (see docs/campaign-protocol).
+  // NULLABLE at the DB level on purpose: SQLite can't ADD a NOT NULL column
+  // without a constant default, and a UUID can't have one. New rows get a value
+  // via $defaultFn; existing rows are filled by a startup backfill
+  // (repositories/characters.backfillCharacterUuids). Uniqueness is a separate
+  // index below (SQLite treats each NULL as distinct, so pre-backfill rows are OK).
+  uuid: text('uuid').$defaultFn(() => newUuid()),
 
   // Identity
   nom: text('nom').notNull().default(''),
@@ -88,12 +98,14 @@ export const characters = sqliteTable('characters', {
   // reinstalls; resolved to a file:// uri at read (see lib/media). Null = unset.
   avatarPath: text('avatar_path'),
   portraitPath: text('portrait_path'),
-}, () => [
+}, (table) => [
   // Tendance puces are always 0–10, enforced at the DB level.
   // Use raw unqualified column names — SQLite rejects table-qualified names in a CHECK.
   check('dragon_sub_range', sql`dragon_sub >= 0 AND dragon_sub <= 10`),
   check('fatalite_sub_range', sql`fatalite_sub >= 0 AND fatalite_sub <= 10`),
   check('homme_sub_range', sql`homme_sub >= 0 AND homme_sub <= 10`),
+  // Portable character id is unique when set (NULLs allowed pre-backfill).
+  uniqueIndex('characters_uuid_unique').on(table.uuid),
 ]);
 
 /**

@@ -38,6 +38,11 @@ const shapeFrom = (keys: readonly string[], schema: z.ZodTypeAny) =>
 // Numeric columns are derived from NUMERIC_KEYS so this stays in sync with the
 // schema instead of re-listing ~45 columns by hand.
 const characterSchema = z.object({
+  // Portable character id. OPTIONAL (not a version bump): older v1 exports have
+  // no uuid and still import — a missing uuid is treated as a clone (new id) at
+  // import time. New exports always carry it so a restore re-links the character
+  // to its campaign roster slot. See `planImport` and docs/campaign-protocol.md.
+  uuid: str.optional(),
   nom: str,
   concept: str,
   biographie: str,
@@ -202,4 +207,37 @@ export function parseImport(raw: string): ImportResult {
     return { ok: false, error: 'Fichier d’export corrompu ou incomplet.' };
   }
   return { ok: true, data: parsed.data };
+}
+
+// --- Import intent: restore vs clone (see docs/campaign-protocol.md §3) ---------
+//
+// The same file can be imported with two opposite intents:
+//   - restore  → keep the character's identity (uuid) so it re-links to its
+//                campaign roster slot and GM notes. Same phone that already holds
+//                it ⇒ replace in place (idempotent); a fresh phone ⇒ insert as-is.
+//   - copy     → a new lineage (freshly minted uuid), so giving a character to
+//                another player never hijacks the original's roster slot.
+// A legacy export with no uuid is always a copy.
+
+export type ImportMode = 'restore' | 'copy';
+export type ImportAction = 'insert' | 'replace';
+export interface ImportPlan {
+  uuid: string;
+  action: ImportAction;
+}
+
+/**
+ * Decide the uuid + write action for one incoming character. Pure — `mintUuid`
+ * is injected so the caller (and tests) control id generation.
+ */
+export function planImport(
+  incomingUuid: string | undefined,
+  existingUuids: ReadonlySet<string>,
+  mode: ImportMode,
+  mintUuid: () => string,
+): ImportPlan {
+  if (mode === 'copy' || !incomingUuid) return { uuid: mintUuid(), action: 'insert' };
+  return existingUuids.has(incomingUuid)
+    ? { uuid: incomingUuid, action: 'replace' }
+    : { uuid: incomingUuid, action: 'insert' };
 }
