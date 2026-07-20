@@ -4,6 +4,7 @@ import React from 'react';
 import { ScrollView, Share, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Card, RadioButton, Text } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGmRosterCtx } from '@/components/campaign/gm-roster-provider';
 import {
@@ -38,6 +39,7 @@ export default function CampaignSalonScreen() {
 function GmSalon({ campaign }: { campaign: Campaign }) {
   const theme = useProphecyTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { status, serverError, roster } = useGmRosterCtx();
   const onlineCount = roster.filter((e) => e.online).length;
 
@@ -151,7 +153,14 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
       <View
         style={[
           styles.bottomBar,
-          { backgroundColor: theme.colors.surface, borderTopColor: theme.prophecy.borderSoft },
+          {
+            backgroundColor: theme.colors.surface,
+            borderTopColor: theme.prophecy.borderSoft,
+            // The bar is the last thing on screen, so it has to clear the
+            // gesture area / on-screen nav bar itself — AppFab does the same on
+            // the screens that use one instead of a bar.
+            paddingBottom: 16 + insets.bottom,
+          },
         ]}>
         <Button
           mode="contained"
