@@ -124,7 +124,7 @@ export default function CharacterMagicScreen() {
       <AppFab
         icon={dsIcon('magic')}
         onPress={() => router.push(`/character/${numId}/spell/catalog`)}
-        style={styles.fabTop}
+        offset={72}
       />
       <AppFab icon={editing ? dsIcon('check') : dsIcon('edit')} onPress={() => setEditing((e) => !e)} />
     </View>
@@ -134,8 +134,6 @@ export default function CharacterMagicScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
-  // Second FAB sits above the bottom one.
-  fabTop: { bottom: 88 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
   sphereRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   sphereDivider: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8 },

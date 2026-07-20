@@ -220,7 +220,7 @@ export default function CharacterFicheScreen() {
         </SectionCard>
       </KeyboardAwareScrollView>
 
-      <AppFab icon="fire" onPress={addEffect} style={styles.fabTop} />
+      <AppFab icon="fire" onPress={addEffect} offset={72} />
       <AppFab
         icon={editing ? dsIcon('check') : dsIcon('edit')}
         onPress={() => setEditing((e) => !e)}
@@ -232,6 +232,4 @@ export default function CharacterFicheScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
-  // Second FAB (add effect) sits above the edit toggle.
-  fabTop: { bottom: 88 },
 });
