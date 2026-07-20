@@ -147,11 +147,38 @@ export function httpUrl(serverUrl: string): string {
 export const APP_SCHEME = 'prophecyapp';
 
 /**
- * Deep link encoded in the GM's QR code. Scanning it with the OS camera opens
- * the app on the campaigns screen with the join dialog prefilled — no in-app
- * scanner (and no camera permission) needed.
+ * Deep link encoded in the GM's QR code. The in-app scanner (join dialog) reads
+ * it via `parseJoinLink`; scanning with the OS camera also works where the
+ * scanner app agrees to open custom-scheme URLs (many refuse — hence the
+ * in-app scanner).
  */
 export function joinLink(code: string, serverUrl: string): string {
   const host = normalizeServerHost(serverUrl);
   return `${APP_SCHEME}://campaigns?code=${encodeURIComponent(code)}&server=${encodeURIComponent(host)}`;
+}
+
+/**
+ * Inverse of `joinLink`, for the in-app QR scanner. Deliberately looser than
+ * the exact link we emit: any scheme/path is accepted as long as `code` and
+ * `server` query params are present, so a future https landing-page link (or a
+ * hand-forwarded variant) still scans. Not parsed with `new URL()` — React
+ * Native's built-in URL lacks `searchParams`. Returns null for foreign QR
+ * content (the scanner keeps looking).
+ */
+export function parseJoinLink(text: string): { code: string; server: string } | null {
+  const query = text.trim().split('?')[1];
+  if (!query) return null;
+  const params: Record<string, string> = {};
+  for (const part of query.split('&')) {
+    const eq = part.indexOf('=');
+    if (eq > 0) {
+      try {
+        params[part.slice(0, eq)] = decodeURIComponent(part.slice(eq + 1));
+      } catch {
+        return null; // malformed percent-encoding — not our link
+      }
+    }
+  }
+  if (!params.code || !params.server) return null;
+  return { code: normalizeJoinCode(params.code), server: normalizeServerHost(params.server) };
 }

@@ -136,11 +136,7 @@ export default function CharacterWeaponsScreen() {
           )}
         </SectionCard>
       </KeyboardAwareScrollView>
-      <AppFab
-        icon="shield-plus"
-        onPress={() => createArmor(numId)}
-        style={styles.fabTop}
-      />
+      <AppFab icon="shield-plus" onPress={() => createArmor(numId)} offset={72} />
       <AppFab
         icon={dsIcon('sword')}
         onPress={() => router.push(`/character/${numId}/weapon/catalog`)}
@@ -152,8 +148,6 @@ export default function CharacterWeaponsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
-  // Second FAB sits above the bottom one.
-  fabTop: { bottom: 88 },
   initRoll: { margin: 0 },
   initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
