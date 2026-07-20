@@ -31,8 +31,8 @@ export default function CharacterSkillsScreen() {
   const navigation = useNavigation();
   // Reload on focus so attribut values edited elsewhere keep the totals correct.
   const { char, state } = useCharacterState(numId, { reloadOnFocus: true });
-  const { data: skills } = useLiveQuery(skillsQuery(numId));
-  const { data: effects } = useLiveQuery(effectsQuery(numId));
+  const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
+  const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
   const [editing, setEditing] = useEditToggle(navigation);
 
   // Toggle lives in the header (a FAB would overlap the sticky filter bar).

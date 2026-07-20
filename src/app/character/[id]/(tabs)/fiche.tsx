@@ -5,27 +5,28 @@ import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { IconButton, Text } from 'react-native-paper';
 
-import Bullets from '@/components/bullets';
 import CharacterForm from '@/components/character-form';
 import ConditionsCard from '@/components/conditions-card';
 import EffectsCard from '@/components/effects-card';
-import NumberField from '@/components/number-field';
+import ArmorSection from '@/components/fiche/armor-section';
+import HealthSection from '@/components/fiche/health-section';
+import MoneySection from '@/components/fiche/money-section';
+import ResourcesSection from '@/components/fiche/resources-section';
+import StatGrid from '@/components/fiche/stat-grid';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
-import StatChip from '@/components/ui/stat-chip';
-import { ATTRIBUTS, CARACTERISTIQUES, MONEY, RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
+import { ATTRIBUTS, CARACTERISTIQUES, MONEY } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
-import { armorQuery, updateArmor } from '@/repositories/armor';
+import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 import { createEffect, effectsQuery } from '@/repositories/effects';
 import { skillsQuery } from '@/repositories/skills';
@@ -37,6 +38,10 @@ const EDIT_ORDER: readonly string[] = [
   ...MONEY.map((m) => m.key),
 ];
 
+// Caractéristique tiles are labelled by their abbreviation, not their full name.
+// Built once at module load: the catalogue is static.
+const CARAC_TILES = CARACTERISTIQUES.map((c) => ({ key: c.key, label: c.abbr }));
+
 /**
  * The full character sheet ("Fiche") — every stat, editable. The dashboard
  * (index) is the glanceable read-only landing; all detailed view + edit lives
@@ -47,15 +52,14 @@ export default function CharacterFicheScreen() {
   const numId = useCharacterId();
   const router = useRouter();
   const navigation = useNavigation();
-  const theme = useProphecyTheme();
   // ensure: live in-play edits write current values to actual_state.
   const { char, state, setChar, setState, reload } = useCharacterState(numId, {
     ensure: true,
     reloadOnFocus: true,
   });
-  const { data: armors } = useLiveQuery(armorQuery(numId));
-  const { data: effects } = useLiveQuery(effectsQuery(numId));
-  const { data: skills } = useLiveQuery(skillsQuery(numId));
+  const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
+  const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
+  const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
   // Tab-level live edit: one FAB flips every card between read and edit.
   const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).
@@ -165,144 +169,47 @@ export default function CharacterFicheScreen() {
           />
         </SectionCard>
 
-        <SectionCard title="ATTRIBUTS" icon="rune">
-          <View style={styles.grid}>
-            {ATTRIBUTS.map((a) => (
-                <StatChip
-                  key={a.key}
-                  label={a.label}
-                  value={num(rec[a.key])}
-                  modifier={totalModifier(a.key, effectList, wound)}
-                  style={styles.col4}
-                />
-              ),
-            )}
-          </View>
-        </SectionCard>
+        <StatGrid
+          title="ATTRIBUTS"
+          icon="rune"
+          stats={ATTRIBUTS}
+          valueOf={(k) => num(rec[k])}
+          modifierOf={(k) => totalModifier(k, effectList, wound)}
+        />
 
-        <SectionCard title="CARACTÉRISTIQUES" icon="star">
-          <View style={styles.grid}>
-            {CARACTERISTIQUES.map((c) => (
-                <StatChip
-                  key={c.key}
-                  label={c.abbr}
-                  value={num(rec[c.key])}
-                  modifier={totalModifier(c.key, effectList, wound)}
-                  style={styles.col4}
-                />
-              ),
-            )}
-          </View>
-        </SectionCard>
+        <StatGrid
+          title="CARACTÉRISTIQUES"
+          icon="star"
+          stats={CARAC_TILES}
+          valueOf={(k) => num(rec[k])}
+          modifierOf={(k) => totalModifier(k, effectList, wound)}
+        />
 
-        <SectionCard title="SANTÉ" icon="heart">
-          {WOUND_LEVELS.map((w) => (
-            <View key={w.key} style={styles.woundRow}>
-              <View style={styles.woundInfo}>
-                <Text style={styles.woundLabel}>{w.label}</Text>
-                <Text style={{ color: theme.colors.onSurfaceVariant }}>{w.damage}</Text>
-              </View>
-              <View style={styles.woundBullets}>
-                <Bullets
-                  count={rec[`${w.key}Max`] ?? 0}
-                  filled={stRec[`${w.key}Current`] ?? 0}
-                  color={editing ? theme.colors.error : theme.colors.onSurfaceVariant}
-                  size={14}
-                  gap={4}
-                  perRow={5}
-                  onSet={editing ? (n) => setStateValue(`${w.key}Current`, n) : undefined}
-                />
-              </View>
-              <Text style={[styles.woundMalus, { color: theme.colors.onSurfaceVariant }]}>
-                {w.malus ?? ''}
-              </Text>
-            </View>
-          ))}
-        </SectionCard>
+        <HealthSection
+          maxOf={(k) => rec[k] ?? 0}
+          currentOf={(k) => stRec[k] ?? 0}
+          onSet={setStateValue}
+          editing={editing}
+        />
 
         <EffectsCard effects={effectList} skills={skills ?? []} editing={editing} />
 
-        {equippedArmor ? (
-          <SectionCard title="ARMURE" icon="shield">
-            <View style={styles.healthRow}>
-              <Text style={[styles.healthLabel, { color: theme.colors.onSurfaceVariant }]}>
-                {equippedArmor.name || 'Armure'}
-              </Text>
-              <Bullets
-                count={equippedArmor.defenseMax}
-                filled={equippedArmor.defenseCurrent}
-                color={editing ? theme.colors.primary : theme.colors.onSurfaceVariant}
-                size={14}
-                gap={4}
-                perRow={5}
-                style={styles.healthDots}
-                onSet={
-                  editing ? (n) => updateArmor(equippedArmor.id, { defenseCurrent: n }) : undefined
-                }
-              />
-            </View>
-          </SectionCard>
-        ) : null}
+        {equippedArmor ? <ArmorSection armor={equippedArmor} editing={editing} /> : null}
 
-        <SectionCard title="RESSOURCES" icon="potion">
-          {RESOURCES.map((r) => {
-            const cur = stRec[`${r.key}Current`] ?? 0;
-            const max = rec[`${r.key}Max`] ?? 0;
-            return (
-              <View key={r.key} style={styles.resRow}>
-                <Text style={styles.resLabel}>{r.label}</Text>
-                {editing ? (
-                  <IconButton
-                    icon="minus"
-                    mode="contained"
-                    size={16}
-                    disabled={cur <= 0}
-                    onPress={() => adjustRes(r.key, -1)}
-                  />
-                ) : null}
-                <Text style={styles.resCount}>
-                  {cur} / {max}
-                </Text>
-                {editing ? (
-                  <>
-                    <IconButton
-                      icon={dsIcon('plus')}
-                      mode="contained"
-                      size={16}
-                      disabled={max > 0 && cur >= max}
-                      onPress={() => adjustRes(r.key, 1)}
-                    />
-                    <IconButton
-                      icon="refresh"
-                      size={16}
-                      onPress={() => setStateValue(`${r.key}Current`, max)}
-                    />
-                  </>
-                ) : null}
-              </View>
-            );
-          })}
-        </SectionCard>
+        <ResourcesSection
+          currentOf={(k) => stRec[k] ?? 0}
+          maxOf={(k) => rec[k] ?? 0}
+          adjust={adjustRes}
+          onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
+          editing={editing}
+        />
 
-        <SectionCard title="ARGENT" icon="coin">
-          <View style={styles.grid}>
-            {MONEY.map((m) =>
-              editing ? (
-                <NumberField
-                  key={m.key}
-                  fieldKey={m.key}
-                  label={m.abbr}
-                  value={String(stRec[m.key] ?? 0)}
-                  onChange={(k, t) => setStateValue(k, Number(t) || 0)}
-                  style={styles.coin}
-                  {...chain(m.key)}
-                />
-              ) : (
-                <StatChip key={m.key} label={m.abbr} value={String(stRec[m.key] ?? 0)} style={styles.coin} />
-              ),
-            )}
-          </View>
-        </SectionCard>
+        <MoneySection
+          valueOf={(k) => String(stRec[k] ?? 0)}
+          onChange={(k, t) => setStateValue(k, Number(t) || 0)}
+          chain={chain}
+          editing={editing}
+        />
 
         {state ? (
           <ConditionsCard state={state} editing={editing} onPersist={persistState} />
@@ -327,25 +234,4 @@ const styles = StyleSheet.create({
   container: { padding: 12, gap: 12, paddingBottom: 160 },
   // Second FAB (add effect) sits above the edit toggle.
   fabTop: { bottom: 88 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  // Grow to fill each row so tiles sit flush to both card edges (no trailing
-  // gap on the right). flexBasis keeps the wrap at 4 columns.
-  col4: { flexGrow: 1, flexBasis: '22%', minWidth: 0 },
-  coin: { flexGrow: 1, flexBasis: 64, minWidth: 64 },
-  healthRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  healthLabel: { fontSize: 15 },
-  healthDots: { flexShrink: 1, justifyContent: 'flex-end' },
-  woundRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  woundInfo: { width: 90 },
-  woundBullets: { flex: 1, alignItems: 'flex-end' },
-  woundLabel: { fontSize: 16 },
-  woundMalus: { width: 32, textAlign: 'right', fontSize: 16 },
-  resRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  resLabel: { flex: 1, fontSize: 16 },
-  resCount: { minWidth: 56, textAlign: 'center', fontSize: 16 },
 });

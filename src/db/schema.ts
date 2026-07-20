@@ -298,6 +298,63 @@ export const effects = sqliteTable('effects', {
     .$defaultFn(() => new Date()),
 });
 
+/**
+ * A campaign this device participates in (docs/campaign-protocol.md §5). One row
+ * per joined/created campaign. `role` fixes what the row means: `gm` rows carry
+ * the portable `gmToken` (proof of ownership — travels in backups so a GM who
+ * changes phones keeps the campaign); `player` rows leave it null. `serverUrl`
+ * is stored per campaign so different groups can use different servers
+ * (community default or self-hosted).
+ */
+export const campaigns = sqliteTable('campaigns', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  code: text('code').notNull(),
+  name: text('name').notNull().default(''),
+  role: text('role', { enum: ['gm', 'player'] }).notNull(),
+  gmToken: text('gm_token'),
+  serverUrl: text('server_url').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+}, (table) => [
+  // One local row per campaign — re-joining the same code updates, not duplicates.
+  uniqueIndex('campaigns_code_unique').on(table.code),
+]);
+
+/**
+ * Which local character is shared into which campaign (player side). The share
+ * toggle writes here; the sync layer publishes projections for shared rows only.
+ */
+export const campaignShares = sqliteTable('campaign_shares', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  campaignId: integer('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+});
+
+/**
+ * The GM's private notes about a roster character. GM device only — never sent
+ * to the server or the player (docs/campaign-protocol.md §2). Keyed by the
+ * character's portable uuid (`charUuid`), NOT a local FK: the subject character
+ * lives on the player's phone, and the uuid survives the player changing devices.
+ */
+export const gmNotes = sqliteTable('gm_notes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  campaignId: integer('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  charUuid: text('char_uuid').notNull(),
+  body: text('body').notNull().default(''),
+  updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+}, (table) => [
+  uniqueIndex('gm_notes_campaign_char_unique').on(table.campaignId, table.charUuid),
+]);
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -312,3 +369,7 @@ export type Spell = typeof spells.$inferSelect;
 export type NewSpell = typeof spells.$inferInsert;
 export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;
+export type Campaign = typeof campaigns.$inferSelect;
+export type NewCampaign = typeof campaigns.$inferInsert;
+export type CampaignShare = typeof campaignShares.$inferSelect;
+export type GmNote = typeof gmNotes.$inferSelect;

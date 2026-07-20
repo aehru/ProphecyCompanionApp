@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { NUMERIC_KEYS, RESOURCES, SPHERES, WOUND_LEVELS } from '@/constants/prophecy';
-import type { ActualState, Character } from '@/db/schema';
+import type { ActualState, Character, Effect, Skill } from '@/db/schema';
 
 import { sharedCharacterSchema, toSharedCharacter } from './character-share';
 
@@ -40,6 +40,34 @@ function makeState(over: Record<string, unknown> = {}): ActualState {
   for (const r of RESOURCES) base[`${r.key}Current`] = 0;
   for (const s of SPHERES) base[`${s.key}Current`] = 0;
   return { ...base, ...over } as unknown as ActualState;
+}
+
+function makeSkill(over: Partial<Skill> = {}): Skill {
+  return {
+    id: 1,
+    characterId: 1,
+    name: '',
+    attribut: '',
+    value: 0,
+    parentName: null,
+    specLabel: null,
+    ...over,
+  } as Skill;
+}
+
+function makeEffect(over: Partial<Effect> = {}): Effect {
+  return {
+    id: 1,
+    characterId: 1,
+    label: '',
+    target: 'all',
+    value: 0,
+    durationUnit: 'round',
+    durationRemaining: 0,
+    expired: false,
+    createdAt: new Date(),
+    ...over,
+  } as Effect;
 }
 
 describe('toSharedCharacter', () => {
@@ -114,13 +142,61 @@ describe('toSharedCharacter', () => {
         'attributs',
         'caracteristiques',
         'conditions',
+        'effects',
         'initiative',
         'nom',
         'resources',
+        'skills',
         'tendances',
         'wounds',
       ].sort(),
     );
+  });
+
+  it('shares only trained skills (value > 0), with attribut + spec link', () => {
+    const shared = toSharedCharacter(makeCharacter(), makeState(), [
+      makeSkill({ name: 'Épée', attribut: 'physique', value: 3 }),
+      makeSkill({ name: 'Nage', attribut: 'physique', value: 0 }),
+      makeSkill({
+        name: 'Herboristerie (Curative)',
+        attribut: 'manuel',
+        value: 2,
+        parentName: 'Herboristerie',
+        specLabel: 'Curative',
+      }),
+    ]);
+    expect(shared.skills).toEqual([
+      { name: 'Épée', attribut: 'physique', value: 3, parentName: null, specLabel: null },
+      {
+        name: 'Herboristerie (Curative)',
+        attribut: 'manuel',
+        value: 2,
+        parentName: 'Herboristerie',
+        specLabel: 'Curative',
+      },
+    ]);
+  });
+
+  it('shares only active (non-expired) effects, full detail', () => {
+    const shared = toSharedCharacter(makeCharacter(), makeState(), [], [
+      makeEffect({ label: 'Bénédiction', target: 'coordination', value: 2, durationRemaining: 3 }),
+      makeEffect({ label: 'Poison', target: 'all', value: -1, expired: true }),
+    ]);
+    expect(shared.effects).toEqual([
+      {
+        label: 'Bénédiction',
+        target: 'coordination',
+        value: 2,
+        durationUnit: 'round',
+        durationRemaining: 3,
+      },
+    ]);
+  });
+
+  it('defaults skills and effects to empty when no child rows are given', () => {
+    const shared = toSharedCharacter(makeCharacter(), makeState());
+    expect(shared.skills).toEqual([]);
+    expect(shared.effects).toEqual([]);
   });
 
   it('leaks no minimised data (backstory, notes, money, magic)', () => {

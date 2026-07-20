@@ -14,6 +14,11 @@ import { mediaUri } from '@/lib/media';
 import { charactersListQuery } from '@/repositories/characters';
 import { exportCharacters, importCharacters } from '@/repositories/transfer';
 
+// Module-level: an inline arrow is a new component type on every render, which
+// remounts every separator instead of reusing it.
+const RowSeparator = () => <View style={styles.separator} />;
+const keyExtractor = (c: { id: number }) => String(c.id);
+
 export default function CharactersListScreen() {
   const router = useRouter();
   const navigation = useNavigation();
@@ -65,22 +70,25 @@ export default function CharactersListScreen() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Menu
-          visible={menuOpen}
-          onDismiss={() => setMenuOpen(false)}
-          anchor={
-            <IconButton
-              icon="dots-vertical"
-              disabled={busy}
-              onPress={() => setMenuOpen(true)}
-            />
-          }>
-          <Menu.Item leadingIcon="export" onPress={handleExport} title="Exporter tout" />
-          <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
-        </Menu>
+        <View style={{ flexDirection: 'row' }}>
+          <IconButton icon="account-group" onPress={() => router.push('/campaigns' as Href)} />
+          <Menu
+            visible={menuOpen}
+            onDismiss={() => setMenuOpen(false)}
+            anchor={
+              <IconButton
+                icon="dots-vertical"
+                disabled={busy}
+                onPress={() => setMenuOpen(true)}
+              />
+            }>
+            <Menu.Item leadingIcon="export" onPress={handleExport} title="Exporter tout" />
+            <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
+          </Menu>
+        </View>
       ),
     });
-  }, [navigation, menuOpen, busy, handleExport, handleImport]);
+  }, [navigation, router, menuOpen, busy, handleExport, handleImport]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -104,8 +112,8 @@ export default function CharactersListScreen() {
         <FlatList
           data={data}
           contentContainerStyle={styles.listContent}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          keyExtractor={(c) => String(c.id)}
+          ItemSeparatorComponent={RowSeparator}
+          keyExtractor={keyExtractor}
           renderItem={({ item }) => {
             const avatar = mediaUri(item.avatarPath);
             return (
@@ -156,6 +164,7 @@ export default function CharactersListScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listContent: { padding: 12, paddingBottom: 96 },
+  separator: { height: 8 },
   empty: {
     flex: 1,
     alignItems: 'center',
