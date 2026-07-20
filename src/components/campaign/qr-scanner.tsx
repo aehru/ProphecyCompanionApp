@@ -51,7 +51,7 @@ export function QrScannerModal({ visible, onClose, onScan }: Props) {
             <Text
               variant="bodyMedium"
               style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-              L'accès à la caméra est nécessaire pour scanner le QR code affiché par le MJ.
+              L’accès à la caméra est nécessaire pour scanner le QR code affiché par le MJ.
             </Text>
             {permission && !permission.canAskAgain ? (
               <Button mode="contained" onPress={() => Linking.openSettings()}>
