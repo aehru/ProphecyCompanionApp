@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { Button, Dialog, IconButton, List, Portal, Text, TextInput } from 'react-native-paper';
 
+import { QrScannerModal } from '@/components/campaign/qr-scanner';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -25,6 +26,7 @@ export default function CampaignsScreen() {
   const [code, setCode] = useState('');
   const [serverUrl, setServerUrl] = useState('');
   const [busy, setBusy] = useState(false);
+  const [scanning, setScanning] = useState(false);
 
   const campaigns = data ?? [];
   // Abort handle for the in-flight create; "Annuler" cancels the request too.
@@ -223,6 +225,20 @@ export default function CampaignsScreen() {
         </Dialog>
       </Portal>
 
+      {/* Same landing as the OS-camera deep link: prefill + open the join
+          dialog so the consent line is always seen before joining. */}
+      <QrScannerModal
+        visible={scanning}
+        onClose={() => setScanning(false)}
+        onScan={({ code: scannedCode, server }) => {
+          setScanning(false);
+          setCode(scannedCode);
+          setServerUrl(server);
+          setDialog('join');
+        }}
+      />
+
+      <AppFab icon="qrcode-scan" onPress={() => setScanning(true)} offset={72} />
       <AppFab icon={dsIcon('plus')} label="Créer" onPress={() => openDialog('create')} />
     </View>
   );
@@ -238,7 +254,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
   },
-  listContent: { paddingHorizontal: 16, paddingBottom: 24 },
+  // Clears the stacked FABs (scan sits above "Créer") so the last campaign row
+  // stays tappable.
+  listContent: { paddingHorizontal: 16, paddingBottom: 160 },
   item: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
   empty: {
     margin: 16,

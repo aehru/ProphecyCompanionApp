@@ -6,6 +6,7 @@ import {
   joinLink,
   normalizeJoinCode,
   normalizeServerHost,
+  parseJoinLink,
   parseServerMessage,
   playerHello,
   shareMsg,
@@ -84,6 +85,39 @@ describe('joinLink', () => {
     expect(joinLink('ABCD2345', '192.168.1.10:8000')).toBe(
       'prophecyapp://campaigns?code=ABCD2345&server=192.168.1.10%3A8000',
     );
+  });
+});
+
+describe('parseJoinLink', () => {
+  it('round-trips what joinLink emits', () => {
+    expect(parseJoinLink(joinLink('ABCD2345', '192.168.1.10:8000'))).toEqual({
+      code: 'ABCD2345',
+      server: '192.168.1.10:8000',
+    });
+    expect(parseJoinLink(joinLink('ABCD2345', 'https://play.example.org/'))).toEqual({
+      code: 'ABCD2345',
+      server: 'play.example.org',
+    });
+  });
+
+  it('accepts foreign schemes/paths as long as code+server params exist', () => {
+    expect(parseJoinLink('https://relay.example.org/join?code=abcd2345&server=relay.example.org')).toEqual(
+      { code: 'ABCD2345', server: 'relay.example.org' },
+    );
+  });
+
+  it('normalizes the scanned code and server like hand-typed input', () => {
+    expect(parseJoinLink('prophecyapp://campaigns?code=il0o&server=https%3A%2F%2Fapp.fr%2F')).toEqual(
+      { code: '1100', server: 'app.fr' },
+    );
+  });
+
+  it('returns null on foreign QR content', () => {
+    expect(parseJoinLink('https://example.org/menu.pdf')).toBeNull();
+    expect(parseJoinLink('WIFI:S:mynet;T:WPA;P:secret;;')).toBeNull();
+    expect(parseJoinLink('prophecyapp://campaigns?code=ABCD2345')).toBeNull();
+    expect(parseJoinLink('prophecyapp://campaigns?code=%E0%A4%A&server=x')).toBeNull();
+    expect(parseJoinLink('')).toBeNull();
   });
 });
 
