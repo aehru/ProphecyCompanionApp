@@ -51,7 +51,15 @@
         }
       ],
       "./plugins/withReleaseSigning",
-      "./plugins/withCmakeVersion"
+      "./plugins/withCmakeVersion",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
