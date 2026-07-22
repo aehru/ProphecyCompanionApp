@@ -195,36 +195,37 @@ export default function SkillsEditor({
             <View key={`${row.name}-${index}`}>
               {i > 0 && <Divider style={styles.divider} />}
               <View style={styles.row}>
-                <View style={styles.nameCol}>
-                  <Text numberOfLines={1}>{row.name}</Text>
-                  <Menu
-                    visible={menuFor === index}
-                    onDismiss={() => setMenuFor(null)}
-                    anchor={
-                      <Button
-                        compact
-                        mode="text"
-                        onPress={() => setMenuFor(index)}
-                        labelStyle={styles.attrLabel}>
-                        {ATTRIBUT_LABEL[row.attribut] ?? '—'}
-                      </Button>
-                    }>
-                    {ATTRIBUTS.map((a) => (
-                      <Menu.Item
-                        key={a.key}
-                        title={a.label}
-                        onPress={() => {
-                          onChangeAttribut(index, a.key);
-                          setMenuFor(null);
-                        }}
-                      />
-                    ))}
-                  </Menu>
-                </View>
+                {/* Leading 3-letter attribut chip = the re-link menu (compact rows). */}
+                <Menu
+                  visible={menuFor === index}
+                  onDismiss={() => setMenuFor(null)}
+                  anchor={
+                    <Button
+                      compact
+                      mode="text"
+                      onPress={() => setMenuFor(index)}
+                      labelStyle={styles.attrLabel}>
+                      {(ATTRIBUT_LABEL[row.attribut] ?? '—').slice(0, 3)}
+                    </Button>
+                  }>
+                  {ATTRIBUTS.map((a) => (
+                    <Menu.Item
+                      key={a.key}
+                      title={a.label}
+                      onPress={() => {
+                        onChangeAttribut(index, a.key);
+                        setMenuFor(null);
+                      }}
+                    />
+                  ))}
+                </Menu>
+
+                <Text numberOfLines={1} style={styles.nameCol}>
+                  {row.name}
+                </Text>
 
                 <NumberField
                   fieldKey={String(index)}
-                  label="Valeur"
                   value={row.value}
                   style={styles.valueField}
                   onChange={onFieldChange}
@@ -269,7 +270,7 @@ export default function SkillsEditor({
                 }
                 style={styles.addSpec}
                 labelStyle={styles.addSpecLabel}>
-                Spécialisation
+                Spé
               </Button>
             </View>
           );
@@ -371,7 +372,6 @@ function SpecRow({
       />
       <NumberField
         fieldKey={`spec-${spec.id}`}
-        label="Valeur"
         value={value}
         style={styles.valueField}
         onChange={(_, t) => setValue(t)}
@@ -396,8 +396,9 @@ const styles = StyleSheet.create({
   bar: { position: 'absolute', top: 0, left: 0, right: 0, padding: 12, paddingBottom: 8, gap: 8 },
   cardWrap: { paddingHorizontal: 12, paddingTop: 4 },
   divider: { marginVertical: 6 },
-  row: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  nameCol: { flex: 1, gap: 2 },
+  // Single line now (attr chip · name · value): center instead of flex-start.
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  nameCol: { flex: 1 },
   valueField: { flexGrow: 0, flexBasis: 'auto', minWidth: 0, width: 64 },
   attrLabel: { fontSize: 12, marginHorizontal: 0 },
   specRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 12, marginTop: 6 },
