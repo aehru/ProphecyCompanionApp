@@ -1,13 +1,25 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, Share, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Button, Card, RadioButton, Text } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  Dialog,
+  IconButton,
+  Portal,
+  Text,
+} from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import CharacterPickList, {
+  type PickableCharacter,
+} from '@/components/campaign/character-pick-list';
 import { useGmRosterCtx } from '@/components/campaign/gm-roster-provider';
 import {
+  OwnerBadge,
   PlayerAvatar,
   ServerStatusChip,
   StatusPill,
@@ -16,9 +28,32 @@ import AppFab from '@/components/ui/app-fab';
 import type { Campaign } from '@/db/schema';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { joinLink } from '@/lib/campaign-protocol';
-import { campaignQuery, setShared, sharesQuery } from '@/repositories/campaigns';
+import { joinLink, type RosterEntry } from '@/lib/campaign-protocol';
+import {
+  campaignQuery,
+  setShared,
+  sharesQuery,
+  unshareFromServer,
+} from '@/repositories/campaigns';
 import { charactersListQuery } from '@/repositories/characters';
+
+/**
+ * Shared toggle handler for both salons: persist the share row, and when
+ * UNsharing while the campaign is not broadcasting, purge the projection from
+ * the server best-effort (the ghost-roster fix — while live, the broadcaster
+ * sends the `unshare` on the live socket instead).
+ */
+async function toggleShare(
+  campaign: Campaign,
+  character: PickableCharacter,
+  next: boolean,
+  isLiveHere: boolean,
+) {
+  await setShared(campaign.id, character.id, next);
+  if (!next && !isLiveHere && character.uuid) {
+    unshareFromServer(campaign, character.uuid).catch(() => {});
+  }
+}
 
 export default function CampaignSalonScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -40,8 +75,26 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
   const theme = useProphecyTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { status, serverError, roster } = useGmRosterCtx();
+  const { status, serverError, roster, kick } = useGmRosterCtx();
   const onlineCount = roster.filter((e) => e.online).length;
+
+  // GM PNJ sharing: the GM's own characters, shared/broadcast exactly like a
+  // player's (one role-aware socket in use-campaign-live).
+  const { data: myCharacters } = useLiveQuery(charactersListQuery());
+  const { data: shares } = useLiveQuery(sharesQuery(campaign.id), [campaign.id]);
+  const sharedIds = (shares ?? []).map((s) => s.characterId);
+  const { liveCampaignId, start, stop } = useCampaignLive();
+  const isLiveHere = liveCampaignId === campaign.id;
+  const [kickTarget, setKickTarget] = useState<RosterEntry | null>(null);
+
+  const confirmKick = (entry: RosterEntry) => {
+    kick(entry.charId);
+    // A GM kicking their own live PNJ: also drop the local share row, or the
+    // broadcaster would re-share it on its next push.
+    const mine = (myCharacters ?? []).find((c) => c.uuid === entry.charId);
+    if (mine) setShared(campaign.id, mine.id, false).catch(() => {});
+    setKickTarget(null);
+  };
 
   const shareInvite = () =>
     Share.share({
@@ -141,13 +194,56 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
                   <Text style={{ flex: 1, fontFamily: 'Cinzel_600SemiBold', color: theme.colors.onSurface }}>
                     {nom}
                   </Text>
+                  {entry.owner === 'gm' ? <OwnerBadge /> : null}
                   <StatusPill online={entry.online} />
+                  <IconButton
+                    icon="account-remove-outline"
+                    size={18}
+                    style={{ margin: 0 }}
+                    accessibilityLabel={`Retirer ${nom}`}
+                    onPress={() => setKickTarget(entry)}
+                  />
                 </View>
               );
             })}
           </View>
         )}
+
+        {/* GM PNJ sharing — the GM's own characters, broadcast like a player's. */}
+        <View style={styles.rosterHeader}>
+          <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
+            Mes PNJ
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            {sharedIds.length === 0 ? 'aucun partagé' : `${sharedIds.length} partagé${sharedIds.length > 1 ? 's' : ''}`}
+          </Text>
+        </View>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          Les personnages cochés rejoignent la Compagnie comme PNJ pendant la diffusion.
+        </Text>
+        <CharacterPickList
+          characters={myCharacters ?? []}
+          sharedIds={sharedIds}
+          onToggle={(c, next) => toggleShare(campaign, c, next, isLiveHere)}
+        />
       </ScrollView>
+
+      {/* Kick confirmation — purge only: the player's next share re-adds it. */}
+      <Portal>
+        <Dialog visible={kickTarget != null} onDismiss={() => setKickTarget(null)}>
+          <Dialog.Title>Retirer de la Compagnie ?</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              « {String(kickTarget?.character.nom ?? 'Sans nom')} » sera retiré du serveur. Si son
+              joueur diffuse encore, il réapparaîtra à sa prochaine mise à jour.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setKickTarget(null)}>Annuler</Button>
+            <Button onPress={() => kickTarget && confirmKick(kickTarget)}>Retirer</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
       {/* Primary action: open the full company overview (GM roster with tabs). */}
       <View
@@ -162,13 +258,24 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
             paddingBottom: 16 + insets.bottom,
           },
         ]}>
-        <Button
-          mode="contained"
-          icon="account-group"
-          disabled={roster.length === 0}
-          onPress={() => router.push(`/campaigns/${campaign.id}/compagnie` as Href)}>
-          Ouvrir la Compagnie
-        </Button>
+        <View style={styles.bottomBarRow}>
+          <Button
+            mode="outlined"
+            style={{ flex: 1 }}
+            icon={isLiveHere ? 'stop-circle-outline' : 'broadcast'}
+            disabled={!isLiveHere && sharedIds.length === 0}
+            onPress={() => (isLiveHere ? stop() : start(campaign.id))}>
+            {isLiveHere ? 'Arrêter' : 'Diffuser'}
+          </Button>
+          <Button
+            mode="contained"
+            style={{ flex: 1 }}
+            icon="account-group"
+            disabled={roster.length === 0}
+            onPress={() => router.push(`/campaigns/${campaign.id}/compagnie` as Href)}>
+            Compagnie
+          </Button>
+        </View>
       </View>
     </View>
   );
@@ -193,24 +300,14 @@ function PlayerSalon({ campaign }: { campaign: Campaign }) {
   const theme = useProphecyTheme();
   const { data: characters } = useLiveQuery(charactersListQuery());
   const { data: shares } = useLiveQuery(sharesQuery(campaign.id), [campaign.id]);
-  // v1: one shared character per campaign.
-  const sharedCharacterId = shares?.[0]?.characterId ?? null;
+  const sharedIds = (shares ?? []).map((s) => s.characterId);
   const { liveCampaignId, status, serverError, start, stop } = useCampaignLive();
   const isLiveHere = liveCampaignId === campaign.id;
-
-  const select = async (characterId: number | null) => {
-    if (sharedCharacterId != null && sharedCharacterId !== characterId) {
-      await setShared(campaign.id, sharedCharacterId, false);
-    }
-    if (characterId != null) await setShared(campaign.id, characterId, true);
-  };
 
   const toggleLive = () => {
     if (isLiveHere) stop();
     else start(campaign.id); // one-at-a-time: replaces any other live campaign
   };
-
-  const shareable = (characters ?? []).filter((c) => c.uuid != null);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -239,70 +336,23 @@ function PlayerSalon({ campaign }: { campaign: Campaign }) {
         <Text variant="bodySmall" style={[styles.consent, { color: theme.colors.onSurfaceVariant }]}>
           {liveCampaignId != null && !isLiveHere
             ? 'Une autre campagne diffuse déjà ; démarrer ici l’arrêtera.'
-            : 'Le personnage sélectionné est diffusé en direct au MJ. Arrêter met en pause.'}
+            : 'Les personnages cochés sont diffusés en direct au MJ. Arrêter met en pause.'}
         </Text>
 
-        <View style={{ gap: 9, marginTop: 8 }}>
-          <PickRow
-            label="Ne rien partager"
-            checked={sharedCharacterId == null}
-            onPress={() => select(null)}
+        <View style={{ marginTop: 8 }}>
+          <CharacterPickList
+            characters={characters ?? []}
+            sharedIds={sharedIds}
+            onToggle={(c, next) => toggleShare(campaign, c, next, isLiveHere)}
           />
-          {shareable.map((c) => (
-            <PickRow
-              key={c.id}
-              label={c.nom || 'Sans nom'}
-              nom={c.nom || 'Sans nom'}
-              checked={sharedCharacterId === c.id}
-              onPress={() => select(c.id)}
-            />
-          ))}
         </View>
       </ScrollView>
 
       <AppFab
         icon={isLiveHere ? 'stop-circle-outline' : 'broadcast'}
         label={isLiveHere ? 'Arrêter' : 'Diffuser'}
-        disabled={!isLiveHere && sharedCharacterId == null}
+        disabled={!isLiveHere && sharedIds.length === 0}
         onPress={toggleLive}
-      />
-    </View>
-  );
-}
-
-function PickRow({
-  label,
-  nom,
-  checked,
-  onPress,
-}: {
-  label: string;
-  nom?: string;
-  checked: boolean;
-  onPress: () => void;
-}) {
-  const theme = useProphecyTheme();
-  return (
-    <View
-      style={[
-        styles.playerRow,
-        {
-          backgroundColor: theme.colors.surface,
-          borderColor: checked ? theme.colors.primary : theme.prophecy.borderSoft,
-        },
-      ]}>
-      {nom ? (
-        <PlayerAvatar nom={nom} online={checked} size={38} />
-      ) : (
-        <View style={{ width: 38 }} />
-      )}
-      <Text style={{ flex: 1, fontFamily: 'Cinzel_600SemiBold', color: theme.colors.onSurface }}>
-        {label}
-      </Text>
-      <RadioButton
-        value={label}
-        status={checked ? 'checked' : 'unchecked'}
-        onPress={onPress}
       />
     </View>
   );
@@ -327,6 +377,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   bottomBar: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
+  bottomBarRow: { flexDirection: 'row', gap: 10 },
   consent: {},
   pausePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
 });

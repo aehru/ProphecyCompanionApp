@@ -1,13 +1,17 @@
 // App-level live-broadcast service. Unlike the old screen hook, this lives ABOVE
-// navigation: once a player goes live, the socket keeps pushing while the app is
+// navigation: once a member goes live, the socket keeps pushing while the app is
 // foregrounded on ANY screen, and (auto-resume) even across app restarts. Only
 // ONE campaign is live at a time.
 //
 // Behaviour (all decided with the user):
-//  - push only when an IN-PLAY value changes (inPlaySignature), 5s debounced;
-//    sheet stats are captured in the first push and otherwise frozen;
-//  - the first push after each (re)connect is immediate, so the GM gets the full
-//    projection right away;
+//  - v2: ALL characters shared into the campaign broadcast on one socket; a push
+//    fires only when a character's IN-PLAY values change (inPlaySignature), on a
+//    shared 5s debounce; sheet stats are captured in the first push and frozen;
+//  - the first push after each (re)connect is immediate (per character), so the
+//    GM gets the full projection right away;
+//  - unchecking a character while live sends `unshare` immediately (the ghost-
+//    roster fix) — the paused path is handled by the salons via unshareFromServer;
+//  - works for BOTH roles: a GM broadcaster shares their PNJs (gmToken hello);
 //  - STOP = pause: the socket closes, the last state stays on the server (the
 //    GM still sees it); erasure is the separate "leave campaign" flow;
 //  - background/lock drops the socket; it auto-reconnects on return.
@@ -17,7 +21,7 @@
 // while a campaign is actually live. Solo users therefore pay nothing.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { eq } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React, {
   createContext,
@@ -31,12 +35,23 @@ import React, {
 import { db } from '@/db/client';
 import { actualState, characters, effects, skills } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
-import { inPlaySignature, LIVE_DEBOUNCE_MS } from '@/lib/campaign-live';
-import { playerHello, shareMsg } from '@/lib/campaign-protocol';
+import { diffShares, inPlaySignature, LIVE_DEBOUNCE_MS } from '@/lib/campaign-live';
+import { gmHello, playerHello, unshareMsg, shareMsg } from '@/lib/campaign-protocol';
 import { toSharedCharacter } from '@/lib/character-share';
 import { campaignQuery, sharesQuery, updateCampaignName } from '@/repositories/campaigns';
 
 const STORAGE_KEY = 'campaign.live.id';
+
+function groupBy<T>(rows: T[], key: (row: T) => number): Map<number, T[]> {
+  const map = new Map<number, T[]>();
+  for (const row of rows) {
+    const k = key(row);
+    const list = map.get(k);
+    if (list) list.push(row);
+    else map.set(k, [row]);
+  }
+  return map;
+}
 
 interface LiveContext {
   /** The campaign currently broadcasting, or null. */
@@ -44,7 +59,9 @@ interface LiveContext {
   status: SocketStatus;
   serverError: string | null;
   campaignName: string;
-  /** Go live for a campaign (must already have a shared character). */
+  /** How many characters the live campaign currently broadcasts. */
+  sharedCount: number;
+  /** Go live for a campaign (must already have at least one shared character). */
   start: (campaignId: number) => void;
   /** Pause: stop pushing, leave the last state on the server. */
   stop: () => void;
@@ -63,6 +80,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
   const [status, setStatus] = useState<SocketStatus>('offline');
   const [serverError, setServerError] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState('');
+  const [sharedCount, setSharedCount] = useState(0);
 
   // Auto-resume: restore the last live campaign on launch.
   useEffect(() => {
@@ -81,12 +99,21 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
     setStatus('offline');
     setServerError(null);
     setCampaignName('');
+    setSharedCount(0);
     AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
   }, []);
 
   return (
     <Ctx.Provider
-      value={{ liveCampaignId: liveId, status, serverError, campaignName, start, stop }}>
+      value={{
+        liveCampaignId: liveId,
+        status,
+        serverError,
+        campaignName,
+        sharedCount,
+        start,
+        stop,
+      }}>
       {/* The live queries + socket live in a child mounted ONLY while broadcasting.
           Hooks can't be conditional, so keeping them here would subscribe every
           solo user to characters/actual_state/skills/effects for nothing — drizzle
@@ -98,6 +125,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
           onStatus={setStatus}
           onServerError={setServerError}
           onCampaignName={setCampaignName}
+          onSharedCount={setSharedCount}
         />
       ) : null}
       {children}
@@ -107,8 +135,9 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
 
 /**
  * The broadcast engine: mounted only while a campaign is live. Resolves the live
- * campaign -> its shared character -> that character's rows, holds the socket,
- * and pushes the debounced in-play projection. Reports status/error/name up to
+ * campaign -> ALL of its shared characters -> their rows, holds the ONE socket
+ * (v2: the hello identifies the session, share/unshare frames carry the charId),
+ * and pushes the debounced in-play projections. Reports status/error/name up to
  * the provider; unmounting (stop, or the campaign row vanishing) closes the
  * socket through the effect cleanup.
  */
@@ -117,11 +146,13 @@ function LiveBroadcaster({
   onStatus,
   onServerError,
   onCampaignName,
+  onSharedCount,
 }: {
   campaignId: number;
   onStatus: (s: SocketStatus) => void;
   onServerError: (e: string | null) => void;
   onCampaignName: (n: string) => void;
+  onSharedCount: (n: number) => void;
 }) {
   // Local mirror of the status: the debounced push effect keys off it to fire the
   // first full projection as soon as the socket reports online.
@@ -130,58 +161,68 @@ function LiveBroadcaster({
   const { data: campRows } = useLiveQuery(campaignQuery(campaignId), [campaignId]);
   const campaign = campRows?.[0];
   const { data: shareRows } = useLiveQuery(sharesQuery(campaignId), [campaignId]);
-  const characterId = shareRows?.[0]?.characterId ?? null;
+  // Sorted ids joined into a string: a stable dep for the row queries (the array
+  // identity changes on every refetch; the KEY only when the share set does).
+  const sharedIds = (shareRows ?? []).map((s) => s.characterId).sort((a, b) => a - b);
+  const sharedKey = sharedIds.join(',');
+  // `inArray` with an empty list is invalid SQL — [-1] matches nothing instead.
+  const queryIds = sharedIds.length > 0 ? sharedIds : [-1];
   const { data: charRows } = useLiveQuery(
-    db.select().from(characters).where(eq(characters.id, characterId ?? -1)),
-    [characterId],
+    db.select().from(characters).where(inArray(characters.id, queryIds)),
+    [sharedKey],
   );
   const { data: stateRows } = useLiveQuery(
-    db.select().from(actualState).where(eq(actualState.characterId, characterId ?? -1)),
-    [characterId],
+    db.select().from(actualState).where(inArray(actualState.characterId, queryIds)),
+    [sharedKey],
   );
   const { data: skillRows } = useLiveQuery(
-    db.select().from(skills).where(eq(skills.characterId, characterId ?? -1)),
-    [characterId],
+    db.select().from(skills).where(inArray(skills.characterId, queryIds)),
+    [sharedKey],
   );
   const { data: effectRows } = useLiveQuery(
-    db.select().from(effects).where(eq(effects.characterId, characterId ?? -1)),
-    [characterId],
+    db.select().from(effects).where(inArray(effects.characterId, queryIds)),
+    [sharedKey],
   );
-  const character = charRows?.[0];
-  const state = stateRows?.[0];
-  const charUuid = character?.uuid ?? null;
 
   // `welcome` backfills the local campaign name, which would otherwise change the
   // socket effect's deps and reconnect mid-broadcast. Ref-read keeps the name out
-  // of the deps: only the connection identity (campaign/character) reconnects.
+  // of the deps: only the connection identity reconnects.
   const nameRef = useRef(campaign?.name);
   nameRef.current = campaign?.name;
 
   const socketRef = useRef<CampaignSocket | null>(null);
   const onlineRef = useRef(false);
-  const lastSigRef = useRef<string | null>(null);
+  /** Last pushed in-play signature per character uuid. */
+  const lastSigsRef = useRef<Map<string, string>>(new Map());
+  /** Uuids pushed by the previous run — diffed to emit live `unshare`s. */
+  const prevUuidsRef = useRef<string[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Destructured so the effect closes over the three scalars that actually define
-  // the connection, not the row object (whose identity changes on every refetch).
+  // Destructured so the effect closes over the scalars that actually define the
+  // connection, not the row object (whose identity changes on every refetch).
   const campaignRowId = campaign?.id;
   const code = campaign?.code;
   const serverUrl = campaign?.serverUrl;
+  const role = campaign?.role;
+  const gmToken = campaign?.gmToken;
 
-  // Socket lifecycle: one per (campaign, character-uuid) while live.
+  // Socket lifecycle: ONE per campaign while live — v2 hellos carry no charId,
+  // so the shared set can change freely without a reconnect.
   useEffect(() => {
-    if (campaignRowId == null || code == null || serverUrl == null || !charUuid) {
+    if (campaignRowId == null || code == null || serverUrl == null || role == null) {
       setStatus('offline');
       onStatus('offline');
       return;
     }
-    lastSigRef.current = null;
+    lastSigsRef.current.clear();
+    prevUuidsRef.current = [];
     const socket = new CampaignSocket({
       serverUrl,
-      hello: playerHello(code, charUuid),
+      hello: role === 'gm' && gmToken ? gmHello(code, gmToken) : playerHello(code),
       onStatus: (s) => {
         onlineRef.current = s === 'online';
-        if (s === 'online') lastSigRef.current = null; // force a full push on (re)connect
+        // Force a full push of every character on (re)connect.
+        if (s === 'online') lastSigsRef.current.clear();
         setStatus(s);
         onStatus(s);
       },
@@ -194,6 +235,8 @@ function LiveBroadcaster({
         } else if (msg.type === 'error') {
           onServerError(msg.code);
         }
+        // A GM broadcaster also receives roster/update frames — ignored here,
+        // the roster UI has its own socket (see ROADMAP: merge them one day).
       },
     });
     socketRef.current = socket;
@@ -204,31 +247,82 @@ function LiveBroadcaster({
       onlineRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [campaignRowId, code, serverUrl, charUuid, onStatus, onServerError]);
+  }, [campaignRowId, code, serverUrl, role, gmToken, onStatus, onServerError]);
 
   // Surface the resolved campaign name (the indicator shows it while live).
   useEffect(() => {
     onCampaignName(campaign?.name ?? '');
   }, [campaign?.name, onCampaignName]);
 
-  // Debounced in-play push.
   useEffect(() => {
-    if (!character || !state || !charUuid || !onlineRef.current) return;
-    const projection = toSharedCharacter(character, state, skillRows ?? [], effectRows ?? []);
-    const sig = inPlaySignature(projection);
-    if (sig === lastSigRef.current) return;
-    const send = () => {
-      lastSigRef.current = sig;
-      socketRef.current?.send(shareMsg(charUuid, projection));
-    };
-    // First push after a (re)connect is immediate; later in-play changes debounce.
-    if (lastSigRef.current === null) {
-      send();
-    } else {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(send, LIVE_DEBOUNCE_MS);
+    onSharedCount(sharedIds.length);
+    // sharedKey IS the value carrier for sharedIds — same reasoning as the row
+    // queries above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharedKey, onSharedCount]);
+
+  // Debounced in-play push, one socket for N characters. Gated on `online` so
+  // prevUuidsRef only advances while the unshare diff can actually be sent — a
+  // character removed while offline still gets its `unshare` on reconnect.
+  useEffect(() => {
+    if (!onlineRef.current) return;
+
+    // Assemble the current projections (only characters with a uuid + state).
+    const stateByChar = new Map((stateRows ?? []).map((s) => [s.characterId, s]));
+    const skillsByChar = groupBy(skillRows ?? [], (s) => s.characterId);
+    const effectsByChar = groupBy(effectRows ?? [], (e) => e.characterId);
+    const projections: { uuid: string; sig: string; msg: object }[] = [];
+    for (const character of charRows ?? []) {
+      const state = stateByChar.get(character.id);
+      if (!character.uuid || !state) continue;
+      const projection = toSharedCharacter(
+        character,
+        state,
+        skillsByChar.get(character.id) ?? [],
+        effectsByChar.get(character.id) ?? [],
+      );
+      projections.push({
+        uuid: character.uuid,
+        sig: inPlaySignature(projection),
+        msg: shareMsg(character.uuid, projection),
+      });
     }
-  }, [character, state, skillRows, effectRows, charUuid, status]);
+
+    // Live unshare for characters that left the shared set (ghost-roster fix).
+    const uuids = projections.map((p) => p.uuid).sort();
+    const { removed } = diffShares(prevUuidsRef.current, uuids);
+    for (const uuid of removed) {
+      socketRef.current?.send(unshareMsg(uuid));
+      lastSigsRef.current.delete(uuid);
+    }
+    prevUuidsRef.current = uuids;
+
+    // New characters (no signature yet — first frame after connect or a fresh
+    // share) push immediately; changed ones ride the shared debounce.
+    let debounced = false;
+    for (const p of projections) {
+      const last = lastSigsRef.current.get(p.uuid);
+      if (last === undefined) {
+        lastSigsRef.current.set(p.uuid, p.sig);
+        socketRef.current?.send(p.msg);
+      } else if (last !== p.sig) {
+        debounced = true;
+      }
+    }
+    if (debounced) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        // Send whatever still differs, from THIS run's snapshot (the newest —
+        // any later change re-ran the effect and replaced this timer).
+        for (const p of projections) {
+          if (lastSigsRef.current.get(p.uuid) !== p.sig) {
+            lastSigsRef.current.set(p.uuid, p.sig);
+            socketRef.current?.send(p.msg);
+          }
+        }
+      }, LIVE_DEBOUNCE_MS);
+    }
+  }, [charRows, stateRows, skillRows, effectRows, status]);
 
   // Engine only — the UI reads everything through the context.
   return null;

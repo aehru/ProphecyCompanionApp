@@ -23,6 +23,24 @@ export const LIVE_DEBOUNCE_MS = 5000;
  * in caractéristiques/attributs (or a wound/resource MAX) produce the SAME
  * signature — those are frozen at activation and don't push.
  */
+/**
+ * Set difference between two share lists (character uuids). The broadcaster
+ * diffs the previous shared set against the current one on every change:
+ * `removed` uuids get an immediate `unshare` on the live socket (the ghost-
+ * roster fix), `added` ones simply start pushing.
+ */
+export function diffShares(
+  prev: string[],
+  next: string[],
+): { added: string[]; removed: string[] } {
+  const prevSet = new Set(prev);
+  const nextSet = new Set(next);
+  return {
+    added: next.filter((id) => !prevSet.has(id)),
+    removed: prev.filter((id) => !nextSet.has(id)),
+  };
+}
+
 export function inPlaySignature(shared: SharedCharacter): string {
   return JSON.stringify({
     w: WOUND_LEVELS.map((w) => shared.wounds[w.key]?.current ?? 0),

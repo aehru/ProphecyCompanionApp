@@ -9,6 +9,7 @@ import {
   AttrTile,
   CaracTile,
   groupSkills,
+  OwnerBadge,
   PlayerAvatar,
   ServerStatusChip,
   SkillGroupsView,
@@ -199,6 +200,7 @@ function CompanyCard({
           {nom}
         </Text>
         {hasNote ? <Text style={{ fontSize: 13 }}>📝</Text> : null}
+        {entry.owner === 'gm' ? <OwnerBadge /> : null}
         <StatusPill online={entry.online} />
       </View>
 

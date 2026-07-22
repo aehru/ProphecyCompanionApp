@@ -28,22 +28,20 @@ Live GM/player campaigns via a self-hostable relay server (see
 wire protocol + socket client, app-level live-broadcast provider, GM roster +
 character detail sheet, join disclaimer, privacy policy.
 
-- [ ] **Ghost roster entry when a player switches shared character while live.**
-  The live broadcaster ([src/hooks/use-campaign-live.tsx](src/hooks/use-campaign-live.tsx))
-  keys its socket on the shared character's `charUuid`. Changing the shared
-  character in [src/app/campaigns/[id].tsx](src/app/campaigns/[id].tsx) (the
-  radio picker → `setShared`) makes the provider's live queries resolve a new
-  `characterId`/`charUuid`, so the socket effect tears down and reconnects for
-  the new character. But **stop = pause**: the old socket closes WITHOUT sending
-  `unshare`, so the previous character's projection stays on the server and the
-  GM keeps seeing it as a stale roster card — a "ghost" — until the player
-  leaves the campaign (which purges) or the server's idle-retention reaps it.
-  _Fix:_ when the shared `charUuid` changes while live (not on a normal stop),
-  send `unshare` for the OUTGOING uuid before switching. Distinguish
-  "switching character" from "pausing/leaving" in the provider's socket-cleanup
-  path — e.g. track the previous uuid in a ref and, if the campaign is still
-  live but the uuid changed, fire `unshareMsg(previousUuid)` on the still-open
-  (old) socket before it closes. Add a test once the repo layer is DI-testable.
+- [x] **Ghost roster entry when a player switches shared character while live.**
+  Fixed by protocol v2 (multi-share): the broadcaster
+  ([src/hooks/use-campaign-live.tsx](src/hooks/use-campaign-live.tsx)) diffs the
+  shared set on every run (`diffShares`) and sends `unshare` for removed uuids
+  on the live socket; unchecking while paused purges via
+  `unshareFromServer` ([src/repositories/campaigns.ts](src/repositories/campaigns.ts)).
+- [ ] **GM device holds two sockets while broadcasting PNJs.** The screen-scoped
+  roster socket ([src/hooks/use-gm-roster.ts](src/hooks/use-gm-roster.ts), via
+  `GmRosterProvider`) and the app-level live-broadcast socket
+  ([src/hooks/use-campaign-live.tsx](src/hooks/use-campaign-live.tsx)) both
+  connect with the gmToken, so the server fans every roster/update frame out to
+  both — harmless duplicate traffic on a private server, but wasteful. _Fix
+  later:_ merge them (one GM socket serving both the roster UI and the PNJ
+  broadcast), or teach the broadcaster to feed the roster context.
 - [ ] **Auto-resume broadcasts on launch** (current behaviour, by choice): the
   app reconnects and pushes on startup if it was live. Revisit if a "start
   paused, confirm to resume" step is wanted for privacy.

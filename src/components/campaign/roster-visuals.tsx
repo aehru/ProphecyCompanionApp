@@ -179,6 +179,22 @@ export function StatusPill({ online }: { online: boolean }) {
   );
 }
 
+/** Ownership badge — marks entries the GM shared themselves (their PNJ). */
+export function OwnerBadge() {
+  const theme = useProphecyTheme();
+  return (
+    <View
+      style={{
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 999,
+        backgroundColor: `${theme.colors.secondary}22`,
+      }}>
+      <Text style={{ fontSize: 10, fontWeight: '700', color: theme.colors.secondary }}>PNJ</Text>
+    </View>
+  );
+}
+
 // --- stat tiles ----------------------------------------------------------------
 
 /** Attribut tile: value over label with a coloured top edge. */

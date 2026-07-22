@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { inPlaySignature } from './campaign-live';
+import { diffShares, inPlaySignature } from './campaign-live';
 import type { SharedCharacter } from './character-share';
 
 function projection(over: Partial<SharedCharacter> = {}): SharedCharacter {
@@ -77,5 +77,21 @@ describe('inPlaySignature', () => {
         projection({ skills: [{ name: 'Épée', attribut: 'physique', value: 3, parentName: null, specLabel: null }] }),
       ),
     ).toBe(base);
+  });
+});
+
+describe('diffShares', () => {
+  it('reports added and removed uuids', () => {
+    expect(diffShares(['a', 'b'], ['b', 'c'])).toEqual({ added: ['c'], removed: ['a'] });
+  });
+
+  it('is empty on identical sets (order-insensitive)', () => {
+    expect(diffShares(['a', 'b'], ['b', 'a'])).toEqual({ added: [], removed: [] });
+  });
+
+  it('handles empty-to-shared and shared-to-empty transitions', () => {
+    expect(diffShares([], ['a'])).toEqual({ added: ['a'], removed: [] });
+    expect(diffShares(['a', 'b'], [])).toEqual({ added: [], removed: ['a', 'b'] });
+    expect(diffShares([], [])).toEqual({ added: [], removed: [] });
   });
 });
