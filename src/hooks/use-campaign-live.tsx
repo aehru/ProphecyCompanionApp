@@ -5,8 +5,9 @@
 //
 // Behaviour (all decided with the user):
 //  - v2: ALL characters shared into the campaign broadcast on one socket; a push
-//    fires only when a character's IN-PLAY values change (inPlaySignature), on a
-//    shared 5s debounce; sheet stats are captured in the first push and frozen;
+//    fires whenever a character's projection changes (projectionSignature) —
+//    in-play values AND sheet edits — on a shared 5s debounce, so finishing a
+//    character edit syncs to the GM without any extra action;
 //  - the first push after each (re)connect is immediate (per character), so the
 //    GM gets the full projection right away;
 //  - unchecking a character while live sends `unshare` immediately (the ghost-
@@ -35,7 +36,7 @@ import React, {
 import { db } from '@/db/client';
 import { actualState, characters, effects, skills } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
-import { diffShares, inPlaySignature, LIVE_DEBOUNCE_MS } from '@/lib/campaign-live';
+import { diffShares, LIVE_DEBOUNCE_MS, projectionSignature } from '@/lib/campaign-live';
 import { gmHello, playerHello, unshareMsg, shareMsg } from '@/lib/campaign-protocol';
 import { toSharedCharacter } from '@/lib/character-share';
 import { campaignQuery, sharesQuery, updateCampaignName } from '@/repositories/campaigns';
@@ -192,7 +193,7 @@ function LiveBroadcaster({
 
   const socketRef = useRef<CampaignSocket | null>(null);
   const onlineRef = useRef(false);
-  /** Last pushed in-play signature per character uuid. */
+  /** Last pushed projection signature per character uuid. */
   const lastSigsRef = useRef<Map<string, string>>(new Map());
   /** Uuids pushed by the previous run — diffed to emit live `unshare`s. */
   const prevUuidsRef = useRef<string[]>([]);
@@ -261,7 +262,7 @@ function LiveBroadcaster({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sharedKey, onSharedCount]);
 
-  // Debounced in-play push, one socket for N characters. Gated on `online` so
+  // Debounced projection push, one socket for N characters. Gated on `online` so
   // prevUuidsRef only advances while the unshare diff can actually be sent — a
   // character removed while offline still gets its `unshare` on reconnect.
   useEffect(() => {
@@ -283,7 +284,7 @@ function LiveBroadcaster({
       );
       projections.push({
         uuid: character.uuid,
-        sig: inPlaySignature(projection),
+        sig: projectionSignature(projection),
         msg: shareMsg(character.uuid, projection),
       });
     }

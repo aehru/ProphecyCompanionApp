@@ -1,28 +1,19 @@
-// Live-broadcast policy helpers (pure, unit-tested). The player-side sync pushes
-// the whole SharedCharacter, but only a change to the IN-PLAY values should
-// trigger a push. `inPlaySignature` reduces a projection to just those live
-// values, so the sync layer can compare signatures and skip no-op / sheet-only
-// changes.
+// Live-broadcast policy helpers (pure, unit-tested). The sync pushes the whole
+// SharedCharacter; `projectionSignature` lets the sync layer compare snapshots
+// and skip no-op refetches (drizzle live queries re-fire on ANY write to a
+// watched table, most of which don't touch the projection at all).
 //
-// In-play = what shifts during a session: current wound boxes, current resource
-// pools (maîtrise, chance), the tendances and their bullets (which move in play),
-// conditions, the current-turn initiative dice, and the active bonus/malus
-// effects (they come and go during a fight).
-// NOT in-play (frozen at activation for now): caractéristiques, attributs, all
-// MAX values, and the skills list (sheet data — a training change is rare and
-// rides along on the next in-play push).
+// ANY visible change pushes — in-play values (wounds, resources, tendances,
+// conditions, initiative, active effects) AND sheet edits (caractéristiques,
+// attributs, maxes, skills): a player finishing a character edit syncs to the
+// GM within one debounce, no "edit finished" event needed. The 5s debounce
+// absorbs typing bursts while the edit FAB is open.
 
-import { RESOURCES, TENDANCES, WOUND_LEVELS } from '@/constants/prophecy';
 import type { SharedCharacter } from '@/lib/character-share';
 
-/** Debounce between the last in-play change and the push to the server. */
+/** Debounce between the last projection change and the push to the server. */
 export const LIVE_DEBOUNCE_MS = 5000;
 
-/**
- * A stable string of only the in-play values. Two projections that differ just
- * in caractéristiques/attributs (or a wound/resource MAX) produce the SAME
- * signature — those are frozen at activation and don't push.
- */
 /**
  * Set difference between two share lists (character uuids). The broadcaster
  * diffs the previous shared set against the current one on every change:
@@ -41,15 +32,11 @@ export function diffShares(
   };
 }
 
-export function inPlaySignature(shared: SharedCharacter): string {
-  return JSON.stringify({
-    w: WOUND_LEVELS.map((w) => shared.wounds[w.key]?.current ?? 0),
-    r: RESOURCES.map((r) => shared.resources[r.key]?.current ?? 0),
-    // Tendance main number + its 0–10 bullets, both mutable in play.
-    t: TENDANCES.flatMap((t) => [shared.tendances[t.key] ?? 0, shared.tendances[`${t.key}Sub`] ?? 0]),
-    c: shared.conditions,
-    i: shared.initiative.values,
-    // Active bonus/malus: a change (new, tick-down, or expiry-drop) is in-play.
-    e: shared.effects.map((ef) => [ef.target, ef.value, ef.durationUnit, ef.durationRemaining]),
-  });
+/**
+ * A stable string of the whole projection. `toSharedCharacter` builds its
+ * object with a fixed key order, so identical projections stringify
+ * identically — two snapshots differ iff something the GM can see changed.
+ */
+export function projectionSignature(shared: SharedCharacter): string {
+  return JSON.stringify(shared);
 }

@@ -114,7 +114,8 @@ SESSION (device), not a character** — one socket may share N characters.
 ## 8. Lifecycle summaries
 
 - **Player multi-share (app side):** `campaign_shares` rows drive one
-  role-aware socket (use-campaign-live.tsx). Per-character in-play signature,
+  role-aware socket (use-campaign-live.tsx). Per-character projection signature
+  (in-play values AND sheet edits — finishing a character edit syncs to the GM),
   shared 5 s debounce; first frame per character after (re)connect immediate.
   Unchecking while live sends `unshare` on the live socket; unchecking while
   paused fires a short-lived purge socket (`unshareFromServer`). **Stop = pause**
