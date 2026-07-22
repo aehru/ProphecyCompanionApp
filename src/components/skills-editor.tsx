@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, type TextInput as RNTextInput, View } from 'react-native';
 import { Button, Divider, IconButton, Menu, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -57,6 +57,19 @@ export default function SkillsEditor({
     onChange: onSearch,
   });
 
+  // A just-added custom skill: its value field grabs focus when its row mounts
+  // (the add clears the search, so the row appears in the active tab), letting
+  // the user type the value right away (#50).
+  const [pendingFocus, setPendingFocus] = useState<string | null>(null);
+  const focusNewSkill = useCallback((el: RNTextInput | null) => {
+    if (el) {
+      // Deferred a frame: focusing during the mount commit can be swallowed
+      // while the keyboard is re-anchoring from the search field on Android.
+      requestAnimationFrame(() => el.focus());
+      setPendingFocus(null);
+    }
+  }, []);
+
   const specsByMother = new Map<string, Skill[]>();
   for (const s of specs) {
     if (s.parentName) {
@@ -113,7 +126,13 @@ export default function SkillsEditor({
         <Button
           icon={dsIcon('plus')}
           mode="outlined"
-          onPress={() => onAddCustom(search.trim(), searching ? ATTRIBUTS[0].key : activeAttr)}>
+          onPress={() => {
+            const name = search.trim();
+            // The active tab, not ATTRIBUTS[0]: the new skill lands where the
+            // user is working (they can still re-link it via the row menu, #50).
+            onAddCustom(name, activeAttr);
+            setPendingFocus(name);
+          }}>
           Ajouter « {search.trim()} »
         </Button>
       ) : null}
@@ -158,6 +177,9 @@ export default function SkillsEditor({
                   value={row.value}
                   style={styles.valueField}
                   onChange={onFieldChange}
+                  // Only the freshly-added row gets a ref — an inline ref on
+                  // every row would defeat NumberField's memo.
+                  inputRef={pendingFocus === row.name ? focusNewSkill : undefined}
                 />
 
                 {row.isCustom ? (
