@@ -3,6 +3,7 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 import React, { useDeferredValue, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Divider, Text, TextInput } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGmRosterCtx } from '@/components/campaign/gm-roster-provider';
 import {
@@ -51,6 +52,7 @@ export default function CompagnieScreen() {
 
 function Compagnie({ campaign }: { campaign: Campaign }) {
   const theme = useProphecyTheme();
+  const insets = useSafeAreaInsets();
   const { status, serverError, roster } = useGmRosterCtx();
   const { data: notes } = useLiveQuery(gmNotesQuery(campaign.id), [campaign.id]);
   const noteByUuid = new Map((notes ?? []).map((n) => [n.charUuid, n.body]));
@@ -134,8 +136,10 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         <FlatList
           data={roster}
           keyExtractor={keyExtractor}
-          style={stale ? styles.listStale : undefined}
-          contentContainerStyle={styles.list}
+          // flex: 1 claims the remaining height (like the salon's ScrollView);
+          // the bottom inset keeps the last card clear of the gesture area.
+          style={[styles.listFill, stale ? styles.listStale : null]}
+          contentContainerStyle={[styles.list, { paddingBottom: 16 + insets.bottom }]}
           ItemSeparatorComponent={CardSeparator}
           // Cards are tall (rings / skill groups): render a screenful, not the
           // whole table, and drop off-screen rows on Android.
@@ -301,6 +305,7 @@ const styles = StyleSheet.create({
   tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8 },
   tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
   searchWrap: { paddingHorizontal: 16, paddingTop: 12 },
+  listFill: { flex: 1 },
   // Cards still showing results for an older query — dim them slightly rather
   // than blanking the list while the deferred re-filter catches up.
   listStale: { opacity: 0.6 },

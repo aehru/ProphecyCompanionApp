@@ -230,7 +230,10 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
 
       {/* Kick confirmation — purge only: the player's next share re-adds it. */}
       <Portal>
-        <Dialog visible={kickTarget != null} onDismiss={() => setKickTarget(null)}>
+        <Dialog
+          visible={kickTarget != null}
+          onDismiss={() => setKickTarget(null)}
+          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
           <Dialog.Title>Retirer de la Compagnie ?</Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium">
@@ -240,7 +243,12 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setKickTarget(null)}>Annuler</Button>
-            <Button onPress={() => kickTarget && confirmKick(kickTarget)}>Retirer</Button>
+            <Button
+              mode="contained"
+              icon="account-remove-outline"
+              onPress={() => kickTarget && confirmKick(kickTarget)}>
+              Retirer
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -378,6 +386,9 @@ const styles = StyleSheet.create({
   },
   bottomBar: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
   bottomBarRow: { flexDirection: 'row', gap: 10 },
+  // DS dialog surface (same as campaigns list / dice roller): tighter radius +
+  // a 1px gold hairline (Paper's default Dialog corner balloons and has no border).
+  dialog: { borderRadius: 18, borderWidth: 1 },
   consent: {},
   pausePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
 });
