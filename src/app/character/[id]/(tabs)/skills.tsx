@@ -2,7 +2,6 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useNavigation } from 'expo-router';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { IconButton } from 'react-native-paper';
 
 import SkillsEditor from '@/components/skills-editor';
@@ -149,29 +148,25 @@ function SkillsEditorLive({ characterId, skills }: { characterId: number; skills
   const onSpecRemove = useCallback((spec: Skill) => deleteSpecialization(spec), []);
 
   return (
-    <KeyboardAwareScrollView
-      contentContainerStyle={styles.editContent}
-      keyboardShouldPersistTaps="handled"
-      bottomOffset={24}>
-      <SkillsEditor
-        rows={rows}
-        specs={specs}
-        search={search}
-        onSearch={setSearch}
-        onChangeValue={onChangeValue}
-        onChangeAttribut={onChangeAttribut}
-        onAddCustom={onAddCustom}
-        onRemove={onRemove}
-        onAddSpec={onAddSpec}
-        onSpecLabel={onSpecLabel}
-        onSpecValue={onSpecValue}
-        onSpecRemove={onSpecRemove}
-      />
-    </KeyboardAwareScrollView>
+    // The editor owns its scroll (sticky filter-bar header needs to be a direct
+    // ScrollView child).
+    <SkillsEditor
+      rows={rows}
+      specs={specs}
+      search={search}
+      onSearch={setSearch}
+      onChangeValue={onChangeValue}
+      onChangeAttribut={onChangeAttribut}
+      onAddCustom={onAddCustom}
+      onRemove={onRemove}
+      onAddSpec={onAddSpec}
+      onSpecLabel={onSpecLabel}
+      onSpecValue={onSpecValue}
+      onSpecRemove={onSpecRemove}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  editContent: { padding: 12, gap: 12, paddingBottom: 96 },
 });

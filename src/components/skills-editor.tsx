@@ -1,5 +1,14 @@
-import React, { useCallback, useState } from 'react';
-import { StyleSheet, type TextInput as RNTextInput, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  type LayoutChangeEvent,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  StyleSheet,
+  type TextInput as RNTextInput,
+  View,
+} from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, Divider, IconButton, Menu, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -21,6 +30,11 @@ export type SpecMother = { name: string; attribut: string; value: number };
  * avoid a long scroll; the search bar filters across ALL attributs (global) and
  * overrides the active tab. No match → add a free (custom) skill. Skills left at
  * 0 are not saved.
+ *
+ * Owns its scroll so the filter bar (+ add button) can float over the top and
+ * reveal on scroll-UP (Chrome-bar pattern): scrolling down tucks it away (full
+ * viewport for the rows), the first scroll back brings it out — no trip to the
+ * top, and no bottom-dock fight with the keyboard avoidance.
  */
 export default function SkillsEditor({
   rows,
@@ -56,6 +70,58 @@ export default function SkillsEditor({
     value: search,
     onChange: onSearch,
   });
+
+  // --- reveal-on-scroll-up filter bar -------------------------------------
+  // The bar floats over the list (absolute, top). Scrolling down slides it out
+  // of the way; any scroll back up (or being near the top) slides it back in.
+  const [barH, setBarH] = useState(BAR_HEIGHT_GUESS);
+  const barHRef = useRef(BAR_HEIGHT_GUESS);
+  const barShown = useRef(true);
+  const barY = useRef(new Animated.Value(0)).current;
+  const lastScrollY = useRef(0);
+
+  const setBarVisible = useCallback(
+    (show: boolean) => {
+      if (barShown.current === show) return;
+      barShown.current = show;
+      Animated.timing(barY, {
+        toValue: show ? 0 : -barHRef.current,
+        duration: 180,
+        useNativeDriver: true,
+      }).start();
+    },
+    [barY],
+  );
+
+  const onBarLayout = useCallback(
+    (e: LayoutChangeEvent) => {
+      const h = e.nativeEvent.layout.height;
+      barHRef.current = h;
+      setBarH(h);
+      // Height changed while hidden (add button appeared/left): re-tuck fully.
+      if (!barShown.current) barY.setValue(-h);
+    },
+    [barY],
+  );
+
+  const onScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const y = e.nativeEvent.contentOffset.y;
+      const dy = y - lastScrollY.current;
+      lastScrollY.current = y;
+      // While searching the bar holds the active input — never tuck it away.
+      if (searching || y <= 8) setBarVisible(true);
+      else if (dy > 6) setBarVisible(false);
+      else if (dy < -6) setBarVisible(true);
+    },
+    [searching, setBarVisible],
+  );
+
+  // Typing can start while the bar is mid-hide (e.g. via a hardware keyboard):
+  // a live search always pins the bar.
+  useEffect(() => {
+    if (searching) setBarVisible(true);
+  }, [searching, setBarVisible]);
 
   // A just-added custom skill: its value field grabs focus when its row mounts
   // (the add clears the search, so the row appears in the active tab), letting
@@ -115,29 +181,14 @@ export default function SkillsEditor({
 
   return (
     <View style={styles.root}>
-      <SkillFilterBar
-        search={search}
-        onSearch={onSearch}
-        activeAttr={activeAttr}
-        onAttr={setActiveAttr}
-      />
-
-      {canAdd ? (
-        <Button
-          icon={dsIcon('plus')}
-          mode="outlined"
-          onPress={() => {
-            const name = search.trim();
-            // The active tab, not ATTRIBUTS[0]: the new skill lands where the
-            // user is working (they can still re-link it via the row menu, #50).
-            onAddCustom(name, activeAttr);
-            setPendingFocus(name);
-          }}>
-          Ajouter « {search.trim()} »
-        </Button>
-      ) : null}
-
-      <SectionCard title={title}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={[styles.listContent, { paddingTop: barH }]}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={24}>
+        <View style={styles.cardWrap}>
+          <SectionCard title={title}>
         {visible.map(({ row, index }, i) => {
           const rowSpecs = specsByMother.get(row.name) ?? [];
           return (
@@ -247,7 +298,39 @@ export default function SkillsEditor({
             {searching ? 'Aucun résultat.' : 'Aucune compétence.'}
           </Text>
         ) : null}
-      </SectionCard>
+          </SectionCard>
+        </View>
+      </KeyboardAwareScrollView>
+
+      {/* Floating filter bar — opaque, slides out on scroll-down. */}
+      <Animated.View
+        onLayout={onBarLayout}
+        style={[
+          styles.bar,
+          { backgroundColor: theme.colors.background, transform: [{ translateY: barY }] },
+        ]}>
+        <SkillFilterBar
+          search={search}
+          onSearch={onSearch}
+          activeAttr={activeAttr}
+          onAttr={setActiveAttr}
+        />
+
+        {canAdd ? (
+          <Button
+            icon={dsIcon('plus')}
+            mode="outlined"
+            onPress={() => {
+              const name = search.trim();
+              // The active tab, not ATTRIBUTS[0]: the new skill lands where the
+              // user is working (they can still re-link it via the row menu, #50).
+              onAddCustom(name, activeAttr);
+              setPendingFocus(name);
+            }}>
+            Ajouter « {search.trim()} »
+          </Button>
+        ) : null}
+      </Animated.View>
     </View>
   );
 }
@@ -303,8 +386,15 @@ function SpecRow({
   );
 }
 
+/** Pre-layout estimate of the bar height, refined by onLayout on first paint. */
+const BAR_HEIGHT_GUESS = 112;
+
 const styles = StyleSheet.create({
-  root: { gap: 8 },
+  root: { flex: 1 },
+  // Top padding comes from the measured bar height (the bar floats above).
+  listContent: { paddingBottom: 96 },
+  bar: { position: 'absolute', top: 0, left: 0, right: 0, padding: 12, paddingBottom: 8, gap: 8 },
+  cardWrap: { paddingHorizontal: 12, paddingTop: 4 },
   divider: { marginVertical: 6 },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   nameCol: { flex: 1, gap: 2 },
