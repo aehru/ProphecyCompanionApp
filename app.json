@@ -2,7 +2,7 @@
   "expo": {
     "name": "Prophecy Companion App",
     "slug": "prophecy-app",
-    "version": "0.7.1",
+    "version": "0.8.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "prophecyapp",
@@ -11,7 +11,7 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "versionCode": 9,
+      "versionCode": 12,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -30,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#030f46",
+          "backgroundColor": "#1E1F22",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76
@@ -39,13 +39,27 @@
       ],
       "expo-sqlite",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Autorisez l'accès à la caméra pour scanner le QR code d'une campagne."
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "Autorisez l'accès aux photos pour ajouter une illustration à vos personnages."
         }
       ],
       "./plugins/withReleaseSigning",
-      "./plugins/withCmakeVersion"
+      "./plugins/withCmakeVersion",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

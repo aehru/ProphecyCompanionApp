@@ -21,8 +21,8 @@ export default function EffectEditModal() {
   const { id, eid } = useLocalSearchParams<{ id: string; eid: string }>();
   const router = useRouter();
   const theme = useProphecyTheme();
-  const { data } = useLiveQuery(effectQuery(Number(eid)));
-  const { data: skills } = useLiveQuery(skillsQuery(Number(id)));
+  const { data } = useLiveQuery(effectQuery(Number(eid)), [eid]);
+  const { data: skills } = useLiveQuery(skillsQuery(Number(id)), [id]);
   const effect = data?.[0];
 
   return (

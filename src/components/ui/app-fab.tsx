@@ -13,6 +13,13 @@ type AppFabProps = {
   label?: string;
   onPress: () => void;
   disabled?: boolean;
+  /**
+   * Extra height for a secondary FAB stacked above the primary one (72 clears a
+   * standard FAB + gap). Additive on purpose: a flat `bottom` would drop the
+   * safe-area inset and collide with the primary FAB on screens outside the tab
+   * navigator, where that inset is applied.
+   */
+  offset?: number;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -21,14 +28,14 @@ type AppFabProps = {
  * safe-area handling so every screen's FAB lines up and clears the onscreen
  * navigation bar / gesture area.
  */
-export default function AppFab({ icon, label, onPress, disabled, style }: AppFabProps) {
+export default function AppFab({ icon, label, onPress, disabled, offset = 0, style }: AppFabProps) {
   const theme = useProphecyTheme();
   const insets = useSafeAreaInsets();
   // Inside a bottom-tab navigator the tab bar already sits above the safe area,
   // so the FAB anchors to the screen above it — adding insets.bottom would
   // double-count and float it too high. Only apply the inset off-tabs.
   const inTabBar = React.useContext(BottomTabBarHeightContext) != null;
-  const bottom = 16 + (inTabBar ? 0 : insets.bottom);
+  const bottom = 16 + offset + (inTabBar ? 0 : insets.bottom);
   // Paper's FAB props are a union — label-present and label-absent are distinct
   // variants, so branch with inline props instead of passing `label={undefined}`.
   const fabStyle = [styles.fab, { bottom, backgroundColor: theme.colors.primary }, style];

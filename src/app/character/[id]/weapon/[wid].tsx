@@ -7,7 +7,7 @@ import { Text } from 'react-native-paper';
 
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
-import { WeaponEditor } from '@/components/weapon-card';
+import WeaponEditor from '@/components/weapon-editor';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { weaponQuery } from '@/repositories/weapons';
 
@@ -20,7 +20,7 @@ export default function WeaponEditModal() {
   const { wid } = useLocalSearchParams<{ id: string; wid: string }>();
   const router = useRouter();
   const theme = useProphecyTheme();
-  const { data } = useLiveQuery(weaponQuery(Number(wid)));
+  const { data } = useLiveQuery(weaponQuery(Number(wid)), [wid]);
   const weapon = data?.[0];
 
   return (
