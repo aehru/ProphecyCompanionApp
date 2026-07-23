@@ -5,11 +5,11 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   StyleSheet,
-  type TextInput as RNTextInput,
+  TextInput as RNTextInput,
   View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Button, Divider, IconButton, Menu, Text, TextInput } from 'react-native-paper';
+import { Button, Divider, IconButton, Menu, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SkillFilterBar from '@/components/skill-filter-bar';
@@ -362,13 +362,17 @@ function SpecRow({
   return (
     <View style={styles.specRow}>
       <Text style={[styles.specArrow, { color: theme.colors.onSurfaceVariant }]}>↳</Text>
-      <TextInput
-        label="Spécialisation"
+      {/* Plain input matching NumberField's box — Paper's outlined field is far
+          taller and carries a floating label the compact rows don't need. */}
+      <RNTextInput
         value={label}
         onChangeText={setLabel}
-        mode="outlined"
-        dense
-        style={styles.specLabelField}
+        placeholder="Spécialisation"
+        placeholderTextColor={theme.colors.onSurfaceVariant}
+        style={[
+          styles.specInput,
+          { borderColor: theme.colors.outline, color: theme.colors.onSurface },
+        ]}
       />
       <NumberField
         fieldKey={`spec-${spec.id}`}
@@ -403,7 +407,15 @@ const styles = StyleSheet.create({
   attrLabel: { fontSize: 12, marginHorizontal: 0 },
   specRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 12, marginTop: 6 },
   specArrow: { fontSize: 16 },
-  specLabelField: { flex: 1 },
+  // Mirror of number-field's input box so the two fields sit flush on the row.
+  specInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 16,
+  },
   ghostHeader: { fontSize: 14, fontStyle: 'italic', marginTop: 4 },
   addSpec: { alignSelf: 'flex-start', marginTop: 2 },
   addSpecLabel: { fontSize: 12, marginHorizontal: 4 },
