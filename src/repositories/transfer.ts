@@ -31,6 +31,7 @@ import {
   STATE_FIELDS,
   WEAPON_FIELDS,
 } from '@/lib/character-transfer';
+import { copyMedia } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
 
 /** Copy only the listed keys off a DB row (drops id / FK / timestamps / media). */
@@ -85,16 +86,17 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
  *   - `'restore'` — preserve each character's uuid so it re-links to its campaign
  *     roster slot. A uuid this device already holds is REPLACED in place
  *     (idempotent re-import); an unknown uuid is inserted as-is.
- * Returns the number of characters written. Wrapped in a transaction so a bad
- * bundle can't leave a half-written character behind.
+ * Returns the row ids of the characters written (inserted or replaced), in
+ * bundle order. Wrapped in a transaction so a bad bundle can't leave a
+ * half-written character behind.
  *
  * The expo-sqlite driver runs transactions synchronously (it commits as soon as
  * the callback returns), so the body MUST use the sync query methods
  * (`.run()` / `.returning().get()` / `.all()`) — an async callback would commit
  * before the awaited writes ran. Hence this function is synchronous.
  */
-export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): number {
-  let written = 0;
+export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): number[] {
+  const written: number[] = [];
   db.transaction((tx) => {
     // Seed the live uuid set once, then keep it current as we write, so two
     // bundles carrying the same uuid in one file don't both try to insert it.
@@ -158,8 +160,46 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
       if (b.effects.length) tx.insert(effects).values(link(b.effects) as NewEffect[]).run();
 
       existing.add(plan.uuid);
-      written += 1;
+      written.push(characterId);
     }
   });
   return written;
+}
+
+/**
+ * Duplicate one character locally (issue #59): a full deep copy — sheet, live
+ * state (wounds included), skills, armor, weapons, spells, effects — under a
+ * freshly minted uuid, so the copy is a new lineage that never collides with the
+ * original in a campaign roster. Rides the export→import pipeline in `'copy'`
+ * mode instead of re-walking the tables by hand; the transfer field lists drop
+ * media paths, so avatar/portrait files are then copied on disk into the new
+ * character's folder. Returns the new character's row id, or null if `id`
+ * doesn't exist.
+ */
+export async function duplicateCharacter(id: number): Promise<number | null> {
+  const exp = await exportCharacters([id]);
+  const bundle = exp.characters[0];
+  if (!bundle) return null;
+
+  // Suffix the name so the two rows are tellable apart in the list.
+  const sheet = bundle.character as { nom?: string };
+  sheet.nom = `${sheet.nom || 'Sans nom'} (copie)`;
+
+  const [newId] = importCharacters(exp, 'copy');
+
+  // Media: copy the files (not just the paths — each character owns its folder,
+  // and deleting one character removes its whole media dir).
+  const src = await db
+    .select({ avatarPath: characters.avatarPath, portraitPath: characters.portraitPath })
+    .from(characters)
+    .where(eq(characters.id, id));
+  const media = {
+    avatarPath: copyMedia(src[0]?.avatarPath, newId),
+    portraitPath: copyMedia(src[0]?.portraitPath, newId),
+  };
+  if (media.avatarPath || media.portraitPath) {
+    await db.update(characters).set(media).where(eq(characters.id, newId));
+  }
+
+  return newId;
 }
