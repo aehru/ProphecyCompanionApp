@@ -20,8 +20,10 @@ import {
   RESOURCES,
   TENDANCES,
 } from '@/constants/prophecy';
+import StatChip from '@/components/ui/stat-chip';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
+import { woundMalus } from '@/lib/modifiers';
 
 // The projection arrives as opaque JSON (tolerant reader); read it defensively.
 type NumRecord = Record<string, number>;
@@ -80,6 +82,14 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
   const resources = pools(c.resources);
   const initiative = (c.initiative ?? {}) as { max?: number; values?: number[] };
   const effects = Array.isArray(c.effects) ? (c.effects as SharedEffect[]) : [];
+  // Wound boxes aren't surfaced as a section, but the wound malus still applies
+  // to initiative. The projection ships wounds as {key: {current, max}}; flatten
+  // to the `${key}Current` shape woundMalus expects.
+  const wound = woundMalus(
+    Object.fromEntries(
+      Object.entries(pools(c.wounds)).map(([k, p]) => [`${k}Current`, p?.current ?? 0]),
+    ),
+  );
 
   const save = () => {
     onSaveNote(entry.charId, draftRef.current);
@@ -209,13 +219,34 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
             </Section>
           ) : null}
 
-          {/* Initiative */}
+          {/* Initiative — same reading as the player's weapons screen: wound
+              malus badge on each die, error border when a rolled die is driven
+              to 0 or below (unusable). */}
           <Section title="Initiative" theme={theme}>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-              {initiative.values?.length
-                ? initiative.values.join(', ')
-                : `${initiative.max ?? 0} dé(s)`}
-            </Text>
+            {initiative.values?.length ? (
+              <View style={styles.grid}>
+                {initiative.values.map((val, i) => {
+                  const unusable = val > 0 && val + wound <= 0;
+                  return (
+                    <StatChip
+                      key={i}
+                      label={`Dé ${i + 1}`}
+                      value={String(val)}
+                      modifier={wound}
+                      style={
+                        unusable
+                          ? { borderColor: theme.colors.error, borderWidth: 1.5 }
+                          : undefined
+                      }
+                    />
+                  );
+                })}
+              </View>
+            ) : (
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+                {`${initiative.max ?? 0} dé(s)`}
+              </Text>
+            )}
           </Section>
 
           {/* GM private notes */}
