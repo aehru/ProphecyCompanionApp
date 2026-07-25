@@ -90,20 +90,37 @@ export default function CharacterWeaponsScreen() {
             const vals = Array.from({ length: initiativeMax }, (_, i) => initStored[i] ?? 0);
             return (
               <View style={styles.initGrid}>
-                {vals.map((val, i) =>
-                  editing ? (
-                    <NumberField
+                {vals.map((val, i) => {
+                  if (editing) {
+                    return (
+                      <NumberField
+                        key={i}
+                        fieldKey={String(i)}
+                        label={`Dé ${i + 1}`}
+                        value={String(val)}
+                        onChange={(k, t) => setInit(Number(k), parseInt(t, 10) || 0)}
+                        style={styles.initField}
+                      />
+                    );
+                  }
+                  // Wound malus applies to initiative like any roll. A rolled die
+                  // driven to 0 or below is unusable → error border, like a weapon
+                  // with unmet prerequisites.
+                  const unusable = val > 0 && val + wound <= 0;
+                  return (
+                    <StatChip
                       key={i}
-                      fieldKey={String(i)}
                       label={`Dé ${i + 1}`}
                       value={String(val)}
-                      onChange={(k, t) => setInit(Number(k), parseInt(t, 10) || 0)}
-                      style={styles.initField}
+                      modifier={wound}
+                      style={
+                        unusable
+                          ? { borderColor: theme.colors.error, borderWidth: 1.5 }
+                          : undefined
+                      }
                     />
-                  ) : (
-                    <StatChip key={i} label={`Dé ${i + 1}`} value={String(val)} />
-                  ),
-                )}
+                  );
+                })}
               </View>
             );
           }}
