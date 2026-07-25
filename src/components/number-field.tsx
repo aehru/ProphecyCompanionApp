@@ -22,7 +22,8 @@ const NumberField = React.memo(function NumberField({
   signed = false,
 }: {
   fieldKey: string;
-  label: string;
+  /** Omit for a compact, label-less field (dense list rows). */
+  label?: string;
   value: string;
   style?: ViewStyle;
   onChange: (key: string, t: string) => void;
@@ -47,7 +48,9 @@ const NumberField = React.memo(function NumberField({
   );
   return (
     <View style={[styles.field, style]}>
-      <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
+      {label ? (
+        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
+      ) : null}
       <TextInput
         ref={setRefs}
         value={value}
