@@ -30,7 +30,7 @@ function harness(heartbeatMs = 0) {
   const urls: string[] = [];
   const client = new CampaignSocket({
     serverUrl: 'https://play.example.org',
-    hello: playerHello('ABCD2345', 'char-1'),
+    hello: playerHello('ABCD2345'),
     onMessage: (m) => messages.push(m),
     onStatus: (s) => statuses.push(s),
     heartbeatMs,
@@ -52,11 +52,10 @@ describe('CampaignSocket', () => {
     expect(h.urls).toEqual(['wss://play.example.org/ws']);
     h.sockets[0].onopen?.();
     expect(JSON.parse(h.sockets[0].sent[0])).toEqual({
-      v: 1,
+      v: 2,
       type: 'hello',
       role: 'player',
       code: 'ABCD2345',
-      charId: 'char-1',
     });
     expect(h.statuses).toEqual(['connecting', 'online']);
   });
@@ -65,7 +64,7 @@ describe('CampaignSocket', () => {
     const h = harness();
     h.client.connect();
     h.sockets[0].onopen?.();
-    h.sockets[0].onmessage?.({ data: JSON.stringify({ v: 1, type: 'pong' }) });
+    h.sockets[0].onmessage?.({ data: JSON.stringify({ v: 2, type: 'pong' }) });
     h.sockets[0].onmessage?.({ data: 'garbage' });
     expect(h.messages.map((m) => m.type)).toEqual(['pong', 'unknown']);
   });
@@ -105,9 +104,9 @@ describe('CampaignSocket', () => {
     expect(h.scheduled.map((s) => s.ms)).toEqual([30_000]);
 
     h.scheduled[0].fn(); // tick #1
-    expect(JSON.parse(h.sockets[0].sent[1])).toEqual({ v: 1, type: 'ping' });
+    expect(JSON.parse(h.sockets[0].sent[1])).toEqual({ v: 2, type: 'ping' });
     h.scheduled[1].fn(); // tick #2 — the loop keeps re-arming itself
-    expect(JSON.parse(h.sockets[0].sent[2])).toEqual({ v: 1, type: 'ping' });
+    expect(JSON.parse(h.sockets[0].sent[2])).toEqual({ v: 2, type: 'ping' });
     expect(h.scheduled.map((s) => s.ms)).toEqual([30_000, 30_000, 30_000]);
 
     // Connection drops: the pending tick must not ping a stale socket.
@@ -129,6 +128,6 @@ describe('CampaignSocket', () => {
 
   it('send() while offline is a silent drop, not a crash', () => {
     const h = harness();
-    expect(() => h.client.send({ v: 1, type: 'ping' })).not.toThrow();
+    expect(() => h.client.send({ v: 2, type: 'ping' })).not.toThrow();
   });
 });

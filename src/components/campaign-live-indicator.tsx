@@ -22,7 +22,7 @@ const STATUS_LABEL = {
  * avoid the bottom-right FAB stack. Renders nothing when not live.
  */
 export default function CampaignLiveIndicator() {
-  const { liveCampaignId, status, campaignName, stop } = useCampaignLive();
+  const { liveCampaignId, status, campaignName, sharedCount, stop } = useCampaignLive();
   const theme = useProphecyTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -77,6 +77,9 @@ export default function CampaignLiveIndicator() {
           </Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {STATUS_LABEL[status]}
+            {sharedCount > 0
+              ? ` · ${sharedCount} personnage${sharedCount > 1 ? 's' : ''}`
+              : ''}
           </Text>
         </View>
         <Divider />
