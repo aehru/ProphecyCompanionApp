@@ -67,6 +67,26 @@ export async function pickCharacterMedia(id: number, slot: MediaSlot): Promise<s
   return [...MEDIA_ROOT, String(id), dest.name].join('/');
 }
 
+/**
+ * Copy a media file into another character's folder (used by duplication).
+ * Returns the new relative path, or null if the source is missing/unset —
+ * media loss is never fatal to a duplicate.
+ */
+export function copyMedia(relativePath: string | null | undefined, toId: number): string | null {
+  if (!relativePath) return null;
+  try {
+    const src = new File(Paths.document, ...relativePath.split('/'));
+    if (!src.exists) return null;
+    const dir = characterDir(toId);
+    dir.create({ intermediates: true, idempotent: true });
+    const dest = new File(dir, src.name);
+    src.copy(dest);
+    return [...MEDIA_ROOT, String(toId), dest.name].join('/');
+  } catch {
+    return null;
+  }
+}
+
 /** Delete a single media file by its stored relative path. No-op if missing. */
 export function deleteMedia(relativePath?: string | null) {
   if (!relativePath) return;
