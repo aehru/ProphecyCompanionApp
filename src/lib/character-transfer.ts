@@ -89,7 +89,9 @@ const weaponSchema = z.object({
   damage: str,
   prerequisites: str,
   creationDifficulty: int,
-  creationTime: int,
+  // Fractional: some weapons take half a day to craft. Accepts the whole numbers
+  // older exports carry, so no version bump.
+  creationTime: z.number(),
   initMelee: int,
   initCorpsACorps: int,
   special: str,

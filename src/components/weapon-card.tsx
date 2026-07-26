@@ -6,6 +6,7 @@ import { Button, IconButton, Text } from 'react-native-paper';
 import Icon, { dsIcon } from '@/components/ui/icon';
 import type { Weapon } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { formatDecimal } from '@/lib/character-values';
 import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
 import { fmtSignedMod } from '@/lib/modifiers';
 import { equipWeapon, unequipWeapon } from '@/repositories/weapons';
@@ -230,7 +231,7 @@ function WeaponSummary({
           <View style={styles.row}>
             <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Création</Text>
             <Text style={styles.value}>
-              Diff. {w.creationDifficulty} · Temps {w.creationTime}
+              Diff. {w.creationDifficulty} · Temps {formatDecimal(w.creationTime)}
             </Text>
           </View>
 

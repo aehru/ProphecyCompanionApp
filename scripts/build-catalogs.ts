@@ -113,6 +113,19 @@ function readInt(rec: Record<string, string>, col: string, errors: RowErrors): n
   return Number(raw);
 }
 
+/**
+ * A number that may be fractional (only `tempsCreation` so far — half a day).
+ * French Excel writes decimals with a COMMA, so both separators are accepted.
+ */
+function readNumber(rec: Record<string, string>, col: string, errors: RowErrors): number {
+  const raw = (rec[col] ?? '').trim();
+  if (!/^-?\d+([.,]\d+)?$/.test(raw)) {
+    errors.push(`${col} : nombre attendu (ex : 4 ou 0,5), reçu « ${raw} »`);
+    return 0;
+  }
+  return Number(raw.replace(',', '.'));
+}
+
 function readFormula(
   rec: Record<string, string>,
   col: string,
@@ -227,7 +240,7 @@ function buildWeapons(failures: Failure[]): WeaponPreset[] {
         initMelee: readInt(rec, 'initMelee', errors),
         initCorpsACorps: readInt(rec, 'initCaC', errors),
         creationDifficulty: readInt(rec, 'diffCreation', errors),
-        creationTime: readInt(rec, 'tempsCreation', errors),
+        creationTime: readNumber(rec, 'tempsCreation', errors),
         special: (rec.special ?? '').trim(),
         rangeEffective: readFormula(rec, 'porteeEff', errors),
         rangeMax: readFormula(rec, 'porteeMax', errors),
