@@ -246,9 +246,10 @@ export const weapons = sqliteTable('weapons', {
  * A character's known spells. One row per learned spell (mirrors `weapons` —
  * plain list, always "known", no prepared/active state). `discipline` and
  * `sphere` store the corresponding `constants/prophecy` key; `castTimeUnit`
- * reuses the effect time units. `complexity`, `cost`, `difficulty` and cast time
- * are display-only for now (no casting/pool interaction yet). `cle` (clé) and
- * `effect` are free text; `cleParfaite` marks a crafted perfect key (+5 to cast).
+ * reuses the effect time units. `level` (niveau), `complexity`, `cost`,
+ * `difficulty` and cast time are display-only for now (no casting/pool
+ * interaction yet). `cle` (clé) and `effect` are free text; `cleParfaite` marks
+ * a crafted perfect key (+5 to cast).
  */
 export const spells = sqliteTable('spells', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -256,6 +257,8 @@ export const spells = sqliteTable('spells', {
     .notNull()
     .references(() => characters.id, { onDelete: 'cascade' }),
   name: text('name').notNull().default(''),
+  /** Niveau du sortilège (1 = le plus bas). */
+  level: integer('level').notNull().default(1),
   complexity: integer('complexity').notNull().default(0),
   discipline: text('discipline').$type<DisciplineKey>().notNull().default('sorcellerie'),
   sphere: text('sphere').$type<SphereKey>().notNull().default('sphereFeu'),

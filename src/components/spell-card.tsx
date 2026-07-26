@@ -38,7 +38,7 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
 
-  const subtitle = [DISCIPLINE_LABEL[s.discipline], SPHERE_LABEL[s.sphere]]
+  const subtitle = [`Niv. ${s.level}`, DISCIPLINE_LABEL[s.discipline], SPHERE_LABEL[s.sphere]]
     .filter(Boolean)
     .join(' · ');
 
@@ -84,6 +84,7 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
 
       {expanded ? (
         <View style={styles.detail}>
+          <DetailRow label="Niveau" value={String(s.level)} />
           <DetailRow label="Complexité" value={String(s.complexity)} />
           <DetailRow label="Sphère" value={SPHERE_LABEL[s.sphere] ?? s.sphere} />
           <DetailRow label="Coût" value={String(s.cost)} />
@@ -157,6 +158,13 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
       />
 
       <View style={styles.grid}>
+        <NumberField
+          fieldKey="level"
+          label="Niveau"
+          value={s.level ? String(s.level) : ''}
+          onChange={(_, t) => updateSpell(s.id, { level: Number(t) || 0 })}
+          style={styles.numCol}
+        />
         <NumberField
           fieldKey="complexity"
           label="Complexité"

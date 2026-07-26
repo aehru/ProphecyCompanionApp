@@ -102,6 +102,10 @@ const weaponSchema = z.object({
 const CAST_UNITS = EFFECT_UNITS.map((u) => u.key) as [string, ...string[]];
 const spellSchema = z.object({
   name: str,
+  // Niveau. OPTIONAL (not a version bump, like `cleParfaite`): exports made
+  // before the column existed have no such field and still import — missing
+  // falls back to the column default (1).
+  level: int.optional(),
   complexity: int,
   discipline: str,
   sphere: str,

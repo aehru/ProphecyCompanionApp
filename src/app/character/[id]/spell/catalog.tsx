@@ -89,7 +89,11 @@ export default function SpellCatalogModal() {
                   <Text
                     style={[styles.sub, { color: theme.colors.onSurfaceVariant }]}
                     numberOfLines={1}>
-                    {[p.data.sphere ? SPHERE_LABEL[p.data.sphere] : null, `Diff. ${p.data.difficulty}`]
+                    {[
+                      p.data.level ? `Niv. ${p.data.level}` : null,
+                      p.data.sphere ? SPHERE_LABEL[p.data.sphere] : null,
+                      `Diff. ${p.data.difficulty}`,
+                    ]
                       .filter(Boolean)
                       .join(' · ')}
                   </Text>

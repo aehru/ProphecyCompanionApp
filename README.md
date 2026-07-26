@@ -58,7 +58,7 @@ Your skills, each linked to an attribut. Start from the built-in Prophecy 2e ski
 ### Magie
 - **Disciplines** — Invocatoire, Instinctive, Sorcellerie (plain stats, edited on the Fiche form).
 - **Réserve** — the global magic reserve plus each known **sphère** (Cités, Feu, Métal, Nature, Océans, Pierre, Rêves, Vents, Ombre), tracked as bullet pools; a sphere appears once its max > 0.
-- **Sortilèges** — add spells from the catalogue (the magic FAB) or your own. Each spell carries complexité, discipline, sphère, coût, incantation (temps + unité), difficulté, clé, and effet, editable in a modal.
+- **Sortilèges** — add spells from the catalogue (the magic FAB) or your own. Each spell carries niveau, complexité, discipline, sphère, coût, incantation (temps + unité), difficulté, clé, and effet, editable in a modal.
 
 ### Backup & transfer
 From the roster's **⋮** menu: **Exporter tout** writes every character to a JSON file (shared via the OS share sheet — save to Files, send to another device), and **Importer…** reads one back, adding its characters as new entries (never overwriting). Your safety net against device loss, and how you move a character between phones. *(Character illustrations aren't included in the export yet.)*
