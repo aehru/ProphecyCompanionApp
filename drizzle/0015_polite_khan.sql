@@ -1,0 +1,1 @@
+ALTER TABLE `spells` ADD `cle_parfaite` integer DEFAULT false NOT NULL;

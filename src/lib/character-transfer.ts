@@ -110,6 +110,10 @@ const spellSchema = z.object({
   castTimeUnit: z.enum(CAST_UNITS),
   difficulty: int,
   cle: str,
+  // Perfect key. OPTIONAL (not a version bump, like `uuid`): exports made before
+  // the column existed have no such field and still import — missing falls back
+  // to the column default (false).
+  cleParfaite: z.boolean().optional(),
   effect: str,
 });
 

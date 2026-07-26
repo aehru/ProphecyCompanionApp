@@ -248,7 +248,7 @@ export const weapons = sqliteTable('weapons', {
  * `sphere` store the corresponding `constants/prophecy` key; `castTimeUnit`
  * reuses the effect time units. `complexity`, `cost`, `difficulty` and cast time
  * are display-only for now (no casting/pool interaction yet). `cle` (clé) and
- * `effect` are free text.
+ * `effect` are free text; `cleParfaite` marks a crafted perfect key (+5 to cast).
  */
 export const spells = sqliteTable('spells', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -264,6 +264,12 @@ export const spells = sqliteTable('spells', {
   castTimeUnit: text('cast_time_unit').$type<CastUnit>().notNull().default('action'),
   difficulty: integer('difficulty').notNull().default(0),
   cle: text('cle').notNull().default(''),
+  /**
+   * The mage crafted a "clé parfaite" for this spell: casting it gets
+   * `CLE_PARFAITE_BONUS` (+5), rendered as a difficulty lowered by that much.
+   * Toggled in play (crafted / used up), so it flips from the spell editor.
+   */
+  cleParfaite: integer('cle_parfaite', { mode: 'boolean' }).notNull().default(false),
   effect: text('effect').notNull().default(''),
 });
 
