@@ -60,6 +60,13 @@ export const DISCIPLINES = [
   { key: 'sorcellerie', label: 'Sorcellerie' },
 ] as const;
 
+/**
+ * Bonus granted by a "clé parfaite" — a perfect casting key a mage can craft for
+ * one of their spells. It makes the spell easier to cast: the roll gets +5,
+ * shown in the UI as a difficulty lowered by the same amount.
+ */
+export const CLE_PARFAITE_BONUS = 5;
+
 /** Discipline / sphere key → display label (for spell fields). */
 export const DISCIPLINE_LABEL: Record<string, string> = Object.fromEntries(
   DISCIPLINES.map((d) => [d.key, d.label]),
