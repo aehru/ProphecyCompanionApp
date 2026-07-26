@@ -1,0 +1,3 @@
+id;nom;niveau;complexite;discipline;sphere;cout;tempsIncantation;uniteIncantation;difficulte;cle;effet
+bouclier-carmin;Bouclier carmin;1;15;Instinctive;Feu;3;2;Action;15;Morceau de charbon, chant du feu;Pare une attaque. Disparait après (1 + NR) heures si non dissipé.
+file-vent;File vent;1;20;Instinctive;Vents;5;1;Action;15;Rune de vitesse, mouvements très vifs et saccadés;-5 jets d'esquive et +10 difficulté des attaques adverses. Pendant (1 + NR) tours.

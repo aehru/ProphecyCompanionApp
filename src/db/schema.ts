@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { check, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { check, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '@/constants/prophecy';
 import { newUuid } from '@/lib/uuid';
@@ -231,7 +231,8 @@ export const weapons = sqliteTable('weapons', {
   damage: text('damage').notNull().default(''),
   prerequisites: text('prerequisites').notNull().default(''),
   creationDifficulty: integer('creation_difficulty').notNull().default(0),
-  creationTime: integer('creation_time').notNull().default(0),
+  // REAL, not integer: a few rulebook weapons take half a day to craft (0.5).
+  creationTime: real('creation_time').notNull().default(0),
   initMelee: integer('init_melee').notNull().default(0),
   initCorpsACorps: integer('init_corps_a_corps').notNull().default(0),
   special: text('special').notNull().default(''),

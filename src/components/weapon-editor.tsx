@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Alert, type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
@@ -6,6 +6,7 @@ import NumberField from '@/components/number-field';
 import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { formatDecimal, parseDecimal } from '@/lib/character-values';
 import { parseFormula } from '@/lib/formula';
 import { deleteWeapon, updateWeapon } from '@/repositories/weapons';
 
@@ -57,6 +58,13 @@ export default function WeaponEditor({
   );
   const [initCac, setInitCac] = useDebouncedText(String(w.initCorpsACorps), (t) =>
     updateWeapon(w.id, { initCorpsACorps: parseSigned(t) }),
+  );
+  // Creation time is the one fractional field (0,5 jour). Its text is kept local
+  // instead of read back off the row: `0,` parses to 0 and would render back as
+  // "0", eating the separator the user just typed. Nothing else writes the row
+  // while this modal is open, so a one-way field is safe.
+  const [creationTime, setCreationTime] = useState(
+    w.creationTime ? formatDecimal(w.creationTime) : '',
   );
 
   const damageErr = formulaError(damage);
@@ -201,8 +209,12 @@ export default function WeaponEditor({
         <NumberField
           fieldKey="creationTime"
           label="Temps création"
-          value={w.creationTime ? String(w.creationTime) : ''}
-          onChange={(_, t) => updateWeapon(w.id, { creationTime: Number(t) || 0 })}
+          value={creationTime}
+          onChange={(_, t) => {
+            setCreationTime(t);
+            updateWeapon(w.id, { creationTime: parseDecimal(t) });
+          }}
+          decimal
           style={styles.numCol}
           {...numChain('creationTime', true)}
         />

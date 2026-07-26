@@ -203,6 +203,13 @@ describe('parseImport validation', () => {
     expect(r.ok && r.data.characters[0].spells[0].cleParfaite).toBe(true);
   });
 
+  it('carries a fractional weapon creation time through parse', () => {
+    const b = makeBundle();
+    const exp = buildExport([{ ...b, weapons: [{ ...b.weapons[0], creationTime: 0.5 }] }]);
+    const r = parseImport(serializeExport(exp));
+    expect(r.ok && r.data.characters[0].weapons[0].creationTime).toBe(0.5);
+  });
+
   it('accepts a spell without level (export predating the column)', () => {
     const r = parseImport(serializeExport(buildExport([makeBundle()])));
     expect(r.ok && r.data.characters[0].spells[0].level).toBeUndefined();
