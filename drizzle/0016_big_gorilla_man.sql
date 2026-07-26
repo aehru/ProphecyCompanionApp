@@ -1,0 +1,1 @@
+ALTER TABLE `spells` ADD `level` integer DEFAULT 1 NOT NULL;
