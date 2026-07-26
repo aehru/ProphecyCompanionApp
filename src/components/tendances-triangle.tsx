@@ -8,9 +8,17 @@ import { MAX_PUCES, TENDANCES } from '@/constants/prophecy';
 type TendanceKey = (typeof TENDANCES)[number]['key'];
 
 // Where a unit's puces sit relative to its disc, so the three discs stay in a
-// tight triangle and the bullets fan outward (Dragon above, Fatalité left,
+// tight triangle and the bullets fan outward (Dragon right, Fatalité left,
 // Homme right) instead of pushing the discs apart.
 type Placement = 'top' | 'left' | 'right';
+
+// Puce geometry, shared so the Dragon row can reserve a spacer exactly as wide
+// as its bullets block and keep the top disc centred over the two below.
+const PUCE_SIZE = 16;
+const PUCE_GAP = 3;
+const PUCE_PER_ROW = 5;
+const BULLETS_WIDTH = PUCE_PER_ROW * PUCE_SIZE + (PUCE_PER_ROW - 1) * PUCE_GAP;
+const UNIT_GAP = 6;
 
 type UnitProps = {
   tKey: TendanceKey;
@@ -41,17 +49,25 @@ function Unit({ tKey, placement, get, onValue, onSub }: UnitProps) {
     <Bullets
       count={MAX_PUCES}
       filled={sub}
-      perRow={5}
-      size={14}
-      gap={3}
+      perRow={PUCE_PER_ROW}
+      size={PUCE_SIZE}
+      gap={PUCE_GAP}
       color={onSub ? t.color : undefined}
       onSet={onSub ? (n) => onSub(tKey, n) : undefined}
     />
   );
 
-  // Dragon (top): puces stacked directly above the disc.
+  // Dragon (top): puces to the right of the disc (saves vertical space). The
+  // left spacer mirrors the bullets block so the disc stays centred on the
+  // triangle's apex instead of being pushed left by them.
   if (placement === 'top') {
-    return <View style={styles.unitTop}>{bullets}{badge}</View>;
+    return (
+      <View style={styles.unitTop}>
+        <View style={styles.topSpacer} />
+        {badge}
+        {bullets}
+      </View>
+    );
   }
   // Fatalité (left): bullets on the outer (left) side via row-reverse; Homme
   // (right): bullets on the outer (right) side — disc stays toward the centre.
@@ -64,7 +80,7 @@ function Unit({ tKey, placement, get, onValue, onSub }: UnitProps) {
 }
 
 /**
- * The three tendances as a tight triangle: Dragon on top (puces above),
+ * The three tendances as a tight triangle: Dragon on top (puces right),
  * Fatalité bottom-left (puces left), Homme bottom-right (puces right).
  * Pass onValue/onSub to make it editable (badge tap ±1, puces tappable).
  */
@@ -101,7 +117,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 8,
   },
-  unitTop: { alignItems: 'center', gap: 2 },
-  unitRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  unitTop: { flexDirection: 'row', alignItems: 'center', gap: UNIT_GAP },
+  topSpacer: { width: BULLETS_WIDTH },
+  unitRow: { flexDirection: 'row', alignItems: 'center', gap: UNIT_GAP },
   rowReverse: { flexDirection: 'row-reverse' },
 });
