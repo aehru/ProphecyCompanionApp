@@ -79,7 +79,7 @@ export default function CharacterMagicScreen() {
               filled={reserveCur}
               perRow={5}
               color={dotColor}
-              size={16}
+              size={18}
               gap={6}
               onSet={editing ? (n) => setStateValue('reserveMagiqueCurrent', n) : undefined}
             />
@@ -101,7 +101,7 @@ export default function CharacterMagicScreen() {
                   filled={stRec[curKey] ?? 0}
                   perRow={5}
                   color={dotColor}
-                  size={16}
+                  size={18}
                   gap={6}
                   onSet={editing ? (n) => setStateValue(curKey, n) : undefined}
                 />

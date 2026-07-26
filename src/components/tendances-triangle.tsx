@@ -42,7 +42,7 @@ function Unit({ tKey, placement, get, onValue, onSub }: UnitProps) {
       count={MAX_PUCES}
       filled={sub}
       perRow={5}
-      size={14}
+      size={16}
       gap={3}
       color={onSub ? t.color : undefined}
       onSet={onSub ? (n) => onSub(tKey, n) : undefined}
