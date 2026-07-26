@@ -3,6 +3,7 @@ import { StyleSheet, TextInput, type TextInputProps, View, type ViewStyle } from
 import { Text } from 'react-native-paper';
 
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { sanitizeNumericInput } from '@/lib/character-values';
 
 /**
  * Lightweight numeric field (plain RN TextInput) — far cheaper to mount than
@@ -20,9 +21,11 @@ const NumberField = React.memo(function NumberField({
   onSubmitEditing,
   submitBehavior,
   signed = false,
+  decimal = false,
 }: {
   fieldKey: string;
-  label: string;
+  /** Omit for a compact, label-less field (dense list rows). */
+  label?: string;
   value: string;
   style?: ViewStyle;
   onChange: (key: string, t: string) => void;
@@ -32,6 +35,9 @@ const NumberField = React.memo(function NumberField({
   submitBehavior?: TextInputProps['submitBehavior'];
   // Allow a leading minus for signed values (e.g. initiative modifiers).
   signed?: boolean;
+  // Allow one decimal separator (e.g. a creation time of 0,5 jour). The comma is
+  // what a French keyboard offers, so both `,` and `.` are accepted on input.
+  decimal?: boolean;
 }) {
   const theme = useProphecyTheme();
   // Keep our own handle to the native input (to select-all on focus) while still
@@ -47,18 +53,16 @@ const NumberField = React.memo(function NumberField({
   );
   return (
     <View style={[styles.field, style]}>
-      <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
+      {label ? (
+        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
+      ) : null}
       <TextInput
         ref={setRefs}
         value={value}
-        onChangeText={(t) =>
-          onChange(
-            fieldKey,
-            // Strip non-digits; for signed values keep a single leading minus.
-            signed ? t.replace(/[^0-9-]/g, '').replace(/(?!^)-/g, '') : t.replace(/[^0-9]/g, ''),
-          )
+        onChangeText={(t) => onChange(fieldKey, sanitizeNumericInput(t, { signed, decimal }))}
+        keyboardType={
+          signed ? 'numbers-and-punctuation' : decimal ? 'decimal-pad' : 'number-pad'
         }
-        keyboardType={signed ? 'numbers-and-punctuation' : 'number-pad'}
         returnKeyType={returnKeyType}
         onSubmitEditing={onSubmitEditing}
         submitBehavior={submitBehavior}

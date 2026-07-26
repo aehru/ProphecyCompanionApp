@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { check, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { check, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '@/constants/prophecy';
 import { newUuid } from '@/lib/uuid';
@@ -231,7 +231,8 @@ export const weapons = sqliteTable('weapons', {
   damage: text('damage').notNull().default(''),
   prerequisites: text('prerequisites').notNull().default(''),
   creationDifficulty: integer('creation_difficulty').notNull().default(0),
-  creationTime: integer('creation_time').notNull().default(0),
+  // REAL, not integer: a few rulebook weapons take half a day to craft (0.5).
+  creationTime: real('creation_time').notNull().default(0),
   initMelee: integer('init_melee').notNull().default(0),
   initCorpsACorps: integer('init_corps_a_corps').notNull().default(0),
   special: text('special').notNull().default(''),
@@ -246,9 +247,10 @@ export const weapons = sqliteTable('weapons', {
  * A character's known spells. One row per learned spell (mirrors `weapons` —
  * plain list, always "known", no prepared/active state). `discipline` and
  * `sphere` store the corresponding `constants/prophecy` key; `castTimeUnit`
- * reuses the effect time units. `complexity`, `cost`, `difficulty` and cast time
- * are display-only for now (no casting/pool interaction yet). `cle` (clé) and
- * `effect` are free text.
+ * reuses the effect time units. `level` (niveau), `complexity`, `cost`,
+ * `difficulty` and cast time are display-only for now (no casting/pool
+ * interaction yet). `cle` (clé) and `effect` are free text; `cleParfaite` marks
+ * a crafted perfect key (+5 to cast).
  */
 export const spells = sqliteTable('spells', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -256,6 +258,8 @@ export const spells = sqliteTable('spells', {
     .notNull()
     .references(() => characters.id, { onDelete: 'cascade' }),
   name: text('name').notNull().default(''),
+  /** Niveau du sortilège (1 = le plus bas). */
+  level: integer('level').notNull().default(1),
   complexity: integer('complexity').notNull().default(0),
   discipline: text('discipline').$type<DisciplineKey>().notNull().default('sorcellerie'),
   sphere: text('sphere').$type<SphereKey>().notNull().default('sphereFeu'),
@@ -264,7 +268,38 @@ export const spells = sqliteTable('spells', {
   castTimeUnit: text('cast_time_unit').$type<CastUnit>().notNull().default('action'),
   difficulty: integer('difficulty').notNull().default(0),
   cle: text('cle').notNull().default(''),
+  /**
+   * The mage crafted a "clé parfaite" for this spell: casting it gets
+   * `CLE_PARFAITE_BONUS` (+5), rendered as a difficulty lowered by that much.
+   * Toggled in play (crafted / used up), so it flips from the spell editor.
+   */
+  cleParfaite: integer('cle_parfaite', { mode: 'boolean' }).notNull().default(false),
   effect: text('effect').notNull().default(''),
+});
+
+/**
+ * Magic reserve objects (issue #51): items a mage crafts or carries that hold
+ * their own pool of magic puces — a gem, a staff, a talisman. Each row is an
+ * INDEPENDENT pool: `max` puces total, `current` filled, spent on its own. The
+ * character's global reserve (`characters.reserveMagiqueMax` /
+ * `actual_state.reserveMagiqueCurrent`) is untouched, so the player always knows
+ * which dots came from which object.
+ *
+ * Both the max and the current live here (unlike the sheet/state split used for
+ * the character's own pools): an object is gear, it comes and goes with play,
+ * and splitting one row across two tables would buy nothing.
+ */
+export const magicReserves = sqliteTable('magic_reserves', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  nom: text('nom').notNull().default(''),
+  max: integer('max').notNull().default(0),
+  current: integer('current').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 /**
@@ -367,6 +402,8 @@ export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
 export type Spell = typeof spells.$inferSelect;
 export type NewSpell = typeof spells.$inferInsert;
+export type MagicReserve = typeof magicReserves.$inferSelect;
+export type NewMagicReserve = typeof magicReserves.$inferInsert;
 export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;
 export type Campaign = typeof campaigns.$inferSelect;

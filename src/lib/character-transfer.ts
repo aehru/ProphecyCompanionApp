@@ -1,6 +1,7 @@
 // Character export / import: a self-contained, versioned JSON envelope that
 // carries one or more whole characters (sheet + live state + skills + armor +
-// weapons + spells + effects) between devices, or as a user backup.
+// weapons + spells + magic reserve objects + effects) between devices, or as a
+// user backup.
 //
 // This module is PURE — no DB, no filesystem. The repository layer
 // (`repositories/transfer`) gathers rows into bundles and re-inserts them; the
@@ -89,7 +90,9 @@ const weaponSchema = z.object({
   damage: str,
   prerequisites: str,
   creationDifficulty: int,
-  creationTime: int,
+  // Fractional: some weapons take half a day to craft. Accepts the whole numbers
+  // older exports carry, so no version bump.
+  creationTime: z.number(),
   initMelee: int,
   initCorpsACorps: int,
   special: str,
@@ -102,6 +105,10 @@ const weaponSchema = z.object({
 const CAST_UNITS = EFFECT_UNITS.map((u) => u.key) as [string, ...string[]];
 const spellSchema = z.object({
   name: str,
+  // Niveau. OPTIONAL (not a version bump, like `cleParfaite`): exports made
+  // before the column existed have no such field and still import — missing
+  // falls back to the column default (1).
+  level: int.optional(),
   complexity: int,
   discipline: str,
   sphere: str,
@@ -110,7 +117,19 @@ const spellSchema = z.object({
   castTimeUnit: z.enum(CAST_UNITS),
   difficulty: int,
   cle: str,
+  // Perfect key. OPTIONAL (not a version bump, like `uuid`): exports made before
+  // the column existed have no such field and still import — missing falls back
+  // to the column default (false).
+  cleParfaite: z.boolean().optional(),
   effect: str,
+});
+
+// Magic reserve objects. OPTIONAL with a `[]` default (not a version bump, like
+// the spell `level`): exports made before the table existed simply carry none.
+const magicReserveSchema = z.object({
+  nom: str,
+  max: int,
+  current: int,
 });
 
 const effectSchema = z.object({
@@ -129,6 +148,7 @@ const characterBundleSchema = z.object({
   armor: z.array(armorSchema),
   weapons: z.array(weaponSchema),
   spells: z.array(spellSchema),
+  magicReserves: z.array(magicReserveSchema).default([]),
   effects: z.array(effectSchema),
 });
 
@@ -150,6 +170,7 @@ export const SKILL_FIELDS = Object.keys(skillSchema.shape);
 export const ARMOR_FIELDS = Object.keys(armorSchema.shape);
 export const WEAPON_FIELDS = Object.keys(weaponSchema.shape);
 export const SPELL_FIELDS = Object.keys(spellSchema.shape);
+export const MAGIC_RESERVE_FIELDS = Object.keys(magicReserveSchema.shape);
 export const EFFECT_FIELDS = Object.keys(effectSchema.shape);
 
 export type ImportResult =
@@ -240,4 +261,18 @@ export function planImport(
   return existingUuids.has(incomingUuid)
     ? { uuid: incomingUuid, action: 'replace' }
     : { uuid: incomingUuid, action: 'insert' };
+}
+
+/**
+ * Magic reserve objects on import. A `restore` is the same character coming
+ * back, so its objects keep the puces they had spent. A `copy` is a NEW
+ * character (duplicate, or a sheet handed to another player), so each object
+ * comes back fully charged — same rule as a freshly created one — instead of
+ * inheriting a mid-session drain that belongs to the original's play.
+ */
+export function planMagicReserves<T extends { max: number; current: number }>(
+  rows: readonly T[],
+  mode: ImportMode,
+): T[] {
+  return mode === 'copy' ? rows.map((r) => ({ ...r, current: r.max })) : [...rows];
 }

@@ -11,44 +11,46 @@ import { z } from 'zod';
 
 import type { SharedCharacter } from '@/lib/character-share';
 
-export const PROTOCOL_VERSION = 1;
+// v2: the hello identifies the SESSION, not a character — one socket may share
+// N characters (share/unshare carry the charId). Hard break: a v1 hello gets an
+// `unsupported_version` error from the server.
+export const PROTOCOL_VERSION = 2;
 
 // --- outgoing (client -> server) ----------------------------------------------
 
 export type HelloMsg =
-  | { v: 1; type: 'hello'; role: 'gm'; code: string; gmToken: string }
-  | { v: 1; type: 'hello'; role: 'player'; code: string; charId: string };
+  | { v: 2; type: 'hello'; role: 'gm'; code: string; gmToken: string }
+  | { v: 2; type: 'hello'; role: 'player'; code: string };
 
 export const gmHello = (code: string, gmToken: string): HelloMsg => ({
-  v: 1,
+  v: 2,
   type: 'hello',
   role: 'gm',
   code,
   gmToken,
 });
 
-export const playerHello = (code: string, charId: string): HelloMsg => ({
-  v: 1,
+export const playerHello = (code: string): HelloMsg => ({
+  v: 2,
   type: 'hello',
   role: 'player',
   code,
-  charId,
 });
 
 export const shareMsg = (charId: string, character: SharedCharacter) => ({
-  v: 1 as const,
+  v: 2 as const,
   type: 'share' as const,
   charId,
   character,
 });
 
 export const unshareMsg = (charId: string) => ({
-  v: 1 as const,
+  v: 2 as const,
   type: 'unshare' as const,
   charId,
 });
 
-export const pingMsg = () => ({ v: 1 as const, type: 'ping' as const });
+export const pingMsg = () => ({ v: 2 as const, type: 'ping' as const });
 
 // --- incoming (server -> client) -----------------------------------------------
 // Tolerant reader (§4): `character` payloads pass through as opaque records so a
@@ -57,11 +59,17 @@ export const pingMsg = () => ({ v: 1 as const, type: 'ping' as const });
 
 const opaqueCharacter = z.record(z.string(), z.unknown());
 
+/** Who shared a roster entry — lets the GM UI badge their own PNJs. */
+const ownerSchema = z.enum(['gm', 'player']).catch('player');
+
+export type SharedOwner = z.infer<typeof ownerSchema>;
+
 const rosterEntrySchema = z.object({
   charId: z.string(),
   character: opaqueCharacter,
   online: z.boolean(),
   updatedAt: z.number(),
+  owner: ownerSchema,
 });
 
 export type RosterEntry = z.infer<typeof rosterEntrySchema>;
@@ -78,6 +86,7 @@ const serverMessageSchema = z.discriminatedUnion('type', [
     charId: z.string(),
     character: opaqueCharacter,
     updatedAt: z.number(),
+    owner: ownerSchema,
   }),
   z.object({ type: z.literal('remove'), charId: z.string() }),
   z.object({ type: z.literal('presence'), charId: z.string(), online: z.boolean() }),

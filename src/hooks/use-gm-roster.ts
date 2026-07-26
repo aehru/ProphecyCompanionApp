@@ -3,17 +3,18 @@
 // stream into it. Purely in-memory — the durable copy lives on the server
 // (docs/campaign-protocol.md §2), so closing the screen loses nothing.
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { Campaign } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
-import { gmHello, type RosterEntry } from '@/lib/campaign-protocol';
+import { gmHello, unshareMsg, type RosterEntry } from '@/lib/campaign-protocol';
 import { updateCampaignName } from '@/repositories/campaigns';
 
 export function useGmRoster(campaign: Campaign) {
   const [status, setStatus] = useState<SocketStatus>('offline');
   const [serverError, setServerError] = useState<string | null>(null);
   const [entries, setEntries] = useState<RosterEntry[]>([]);
+  const socketRef = useRef<CampaignSocket | null>(null);
 
   // The `welcome` handler backfills the local name, which changes `campaign` and
   // would tear the socket down mid-session. Read the name through a ref so it
@@ -52,6 +53,7 @@ export function useGmRoster(campaign: Campaign) {
                 character: msg.character,
                 online: true,
                 updatedAt: msg.updatedAt,
+                owner: msg.owner,
               });
               return next;
             });
@@ -70,12 +72,27 @@ export function useGmRoster(campaign: Campaign) {
         }
       },
     });
+    socketRef.current = socket;
     socket.connect();
-    return () => socket.close();
+    return () => {
+      socket.close();
+      socketRef.current = null;
+    };
   }, [campaign.id, campaign.code, campaign.serverUrl, campaign.gmToken]);
+
+  /**
+   * Kick: purge one roster entry from the server (v2 `unshare` is unrestricted
+   * for room members — docs §security). Purge only, no ban: the owner's next
+   * share re-adds it. The optimistic local removal is confirmed by the server's
+   * `remove` broadcast.
+   */
+  const kick = useCallback((charId: string) => {
+    socketRef.current?.send(unshareMsg(charId));
+    setEntries((prev) => prev.filter((e) => e.charId !== charId));
+  }, []);
 
   const roster = [...entries].sort((a, b) =>
     String(a.character.nom ?? '').localeCompare(String(b.character.nom ?? '')),
   );
-  return { status, serverError, roster };
+  return { status, serverError, roster, kick };
 }

@@ -110,8 +110,12 @@ export async function updateCampaignName(id: number, name: string): Promise<void
  * Best-effort purge of one character's projection from the campaign server: a
  * short-lived socket that says hello, unshares, and closes. Resolves once sent
  * (there is no ack for unshare) or after a short timeout when unreachable.
+ * Used when the campaign is NOT currently broadcasting (unchecking a character
+ * while live rides the live socket instead — use-campaign-live's diff). A v2
+ * player hello works for GM-role rows too: unshare is unrestricted for room
+ * members, and a charId-less hello has no presence side effect.
  */
-function purgeShareFromServer(campaign: Campaign, charUuid: string): Promise<void> {
+export function unshareFromServer(campaign: Campaign, charUuid: string): Promise<void> {
   return new Promise((resolve) => {
     const finish = (socket: CampaignSocket) => {
       socket.close();
@@ -119,7 +123,7 @@ function purgeShareFromServer(campaign: Campaign, charUuid: string): Promise<voi
     };
     const socket: CampaignSocket = new CampaignSocket({
       serverUrl: campaign.serverUrl,
-      hello: playerHello(campaign.code, charUuid),
+      hello: playerHello(campaign.code),
       onMessage: (msg) => {
         // welcome = the hello was accepted; the unshare right behind it will be
         // processed in order — safe to close.
@@ -170,7 +174,7 @@ export async function deleteCampaign(id: number): Promise<void> {
         .from(characters)
         .where(inArray(characters.id, shares.map((s) => s.characterId)));
       for (const r of rows) {
-        if (r.uuid) await purgeShareFromServer(campaign, r.uuid);
+        if (r.uuid) await unshareFromServer(campaign, r.uuid);
       }
     }
   }

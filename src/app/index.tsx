@@ -12,7 +12,7 @@ import { parseImport } from '@/lib/character-transfer';
 import { pickImportText, shareExport } from '@/lib/character-transfer-io';
 import { mediaUri } from '@/lib/media';
 import { charactersListQuery } from '@/repositories/characters';
-import { exportCharacters, importCharacters } from '@/repositories/transfer';
+import { duplicateCharacter, exportCharacters, importCharacters } from '@/repositories/transfer';
 
 // Module-level: an inline arrow is a new component type on every render, which
 // remounts every separator instead of reusing it.
@@ -46,6 +46,24 @@ export default function CharactersListScreen() {
     }
   }, [isEmpty]);
 
+  // Long-press a row → full deep copy (new uuid) after confirmation. The live
+  // query refreshes the list; no navigation.
+  const handleDuplicate = useCallback((id: number, nom: string) => {
+    Alert.alert('Dupliquer', `Dupliquer « ${nom || 'Sans nom'} » ?`, [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Dupliquer',
+        onPress: async () => {
+          try {
+            await duplicateCharacter(id);
+          } catch (e) {
+            Alert.alert('Duplication impossible', e instanceof Error ? e.message : String(e));
+          }
+        },
+      },
+    ]);
+  }, []);
+
   // Pick a JSON export and add its characters (as new entries — never overwrites).
   const handleImport = useCallback(async () => {
     setMenuOpen(false);
@@ -58,7 +76,7 @@ export default function CharactersListScreen() {
         Alert.alert('Import impossible', parsed.error);
         return;
       }
-      const n = await importCharacters(parsed.data);
+      const n = importCharacters(parsed.data).length;
       Alert.alert('Import réussi', `${n} personnage${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}.`);
     } catch (e) {
       Alert.alert('Import impossible', e instanceof Error ? e.message : String(e));
@@ -151,6 +169,7 @@ export default function CharactersListScreen() {
                   )
                 }
                 onPress={() => router.push(`/character/${item.id}` as Href)}
+                onLongPress={() => handleDuplicate(item.id, item.nom ?? '')}
               />
             );
           }}

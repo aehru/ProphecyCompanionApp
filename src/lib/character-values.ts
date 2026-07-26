@@ -13,6 +13,43 @@ export function asNumRecord(obj: unknown): Record<string, number> {
 export const num = (x?: number) => (x && x > 0 ? String(x) : '—');
 export const txt = (s?: string) => (s && s.trim() ? s.trim() : '—');
 
+/**
+ * Fractional values (only weapon creation time so far — some weapons take half a
+ * day to craft). French writes them with a COMMA, so the UI both renders and
+ * accepts `0,5`; the DB always stores a plain number.
+ */
+export const formatDecimal = (x?: number | null) =>
+  x == null ? '' : String(x).replace('.', ',');
+
+/** Text (either separator) → number. Junk / blank → 0, so a field never goes NaN. */
+export const parseDecimal = (t: string) => {
+  const n = Number(t.replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+};
+
+/**
+ * Keystroke filter for numeric inputs: drop anything that can't be typed in the
+ * value. `signed` keeps a single leading minus, `decimal` keeps at most one
+ * separator (normalized to the French comma). Intermediate states like `0,` are
+ * preserved — the user is mid-typing.
+ */
+export function sanitizeNumericInput(
+  t: string,
+  { signed = false, decimal = false }: { signed?: boolean; decimal?: boolean } = {},
+) {
+  let out = t.replace(decimal ? /[^0-9.,-]/g : /[^0-9-]/g, '');
+  out = signed ? out.replace(/(?!^)-/g, '') : out.replace(/-/g, '');
+  if (decimal) {
+    let seen = false;
+    out = out.replace(/[.,]/g, () => {
+      if (seen) return '';
+      seen = true;
+      return ',';
+    });
+  }
+  return out;
+}
+
 /** Clamp n to a lower bound, and an optional upper bound (max <= 0 means uncapped). */
 export const clamp = (n: number, min: number, max?: number) => {
   let v = n < min ? min : n;

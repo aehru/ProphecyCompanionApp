@@ -16,54 +16,80 @@ import {
 import type { SharedCharacter } from './character-share';
 
 describe('outgoing messages', () => {
-  it('builds the two hello variants the server expects', () => {
+  it('builds the two hello variants the server expects (v2: no charId)', () => {
     expect(gmHello('ABCD2345', 'tok')).toEqual({
-      v: 1,
+      v: 2,
       type: 'hello',
       role: 'gm',
       code: 'ABCD2345',
       gmToken: 'tok',
     });
-    expect(playerHello('ABCD2345', 'char-1')).toEqual({
-      v: 1,
+    // v2: the hello identifies the session — characters arrive via share.
+    expect(playerHello('ABCD2345')).toEqual({
+      v: 2,
       type: 'hello',
       role: 'player',
       code: 'ABCD2345',
-      charId: 'char-1',
     });
   });
 
   it('builds share/unshare keyed by charId', () => {
     const character = { nom: 'Kael' } as unknown as SharedCharacter;
     expect(shareMsg('c1', character)).toMatchObject({ type: 'share', charId: 'c1', character });
-    expect(unshareMsg('c1')).toEqual({ v: 1, type: 'unshare', charId: 'c1' });
+    expect(unshareMsg('c1')).toEqual({ v: 2, type: 'unshare', charId: 'c1' });
   });
 });
 
 describe('parseServerMessage', () => {
   it('parses every server message type', () => {
     const frames = [
-      { v: 1, type: 'welcome', campaign: { code: 'C', name: 'N' }, role: 'gm' },
-      { v: 1, type: 'roster', characters: [] },
-      { v: 1, type: 'update', charId: 'c1', character: { nom: 'K' }, updatedAt: 12 },
-      { v: 1, type: 'remove', charId: 'c1' },
-      { v: 1, type: 'presence', charId: 'c1', online: true },
-      { v: 1, type: 'pong' },
-      { v: 1, type: 'error', code: 'forbidden', message: 'nope' },
+      { v: 2, type: 'welcome', campaign: { code: 'C', name: 'N' }, role: 'gm' },
+      { v: 2, type: 'roster', characters: [] },
+      { v: 2, type: 'update', charId: 'c1', character: { nom: 'K' }, updatedAt: 12, owner: 'gm' },
+      { v: 2, type: 'remove', charId: 'c1' },
+      { v: 2, type: 'presence', charId: 'c1', online: true },
+      { v: 2, type: 'pong' },
+      { v: 2, type: 'error', code: 'forbidden', message: 'nope' },
     ];
     for (const f of frames) {
       expect(parseServerMessage(JSON.stringify(f)).type).toBe(f.type);
     }
   });
 
+  it('parses owner on roster entries and updates, defaulting to player', () => {
+    const roster = parseServerMessage(
+      JSON.stringify({
+        v: 2,
+        type: 'roster',
+        characters: [
+          { charId: 'c1', character: { nom: 'K' }, online: true, updatedAt: 1, owner: 'gm' },
+          // Missing / garbage owner tolerated (defaults to player).
+          { charId: 'c2', character: { nom: 'L' }, online: false, updatedAt: 2 },
+          { charId: 'c3', character: { nom: 'M' }, online: false, updatedAt: 3, owner: 'alien' },
+        ],
+      }),
+    );
+    expect(roster.type === 'roster' && roster.characters.map((c) => c.owner)).toEqual([
+      'gm',
+      'player',
+      'player',
+    ]);
+
+    const update = parseServerMessage(
+      JSON.stringify({ v: 2, type: 'update', charId: 'c1', character: {}, updatedAt: 1 }),
+    );
+    expect(update.type === 'update' && update.owner).toBe('player');
+  });
+
   it('passes unknown character fields through (tolerant reader)', () => {
     const msg = parseServerMessage(
       JSON.stringify({
-        v: 1,
+        v: 2,
         type: 'update',
         charId: 'c1',
         character: { nom: 'K', futureField: { deep: true } },
         updatedAt: 1,
+        owner: 'player',
       }),
     );
     expect(msg.type === 'update' && msg.character.futureField).toEqual({ deep: true });

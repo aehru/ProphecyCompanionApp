@@ -6,6 +6,7 @@ import {
   armor,
   characters,
   effects,
+  magicReserves,
   skills,
   spells,
   weapons,
@@ -13,6 +14,7 @@ import {
   type NewArmor,
   type NewCharacter,
   type NewEffect,
+  type NewMagicReserve,
   type NewSkill,
   type NewSpell,
   type NewWeapon,
@@ -24,13 +26,16 @@ import {
   type CharacterBundle,
   EFFECT_FIELDS,
   type ImportMode,
+  MAGIC_RESERVE_FIELDS,
   planImport,
+  planMagicReserves,
   type ProphecyExport,
   SKILL_FIELDS,
   SPELL_FIELDS,
   STATE_FIELDS,
   WEAPON_FIELDS,
 } from '@/lib/character-transfer';
+import { copyMedia } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
 
 /** Copy only the listed keys off a DB row (drops id / FK / timestamps / media). */
@@ -53,11 +58,12 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {
     const [st] = await db.select().from(actualState).where(eq(actualState.characterId, c.id));
-    const [sk, ar, wp, sp, ef] = await Promise.all([
+    const [sk, ar, wp, sp, mr, ef] = await Promise.all([
       db.select().from(skills).where(eq(skills.characterId, c.id)),
       db.select().from(armor).where(eq(armor.characterId, c.id)),
       db.select().from(weapons).where(eq(weapons.characterId, c.id)),
       db.select().from(spells).where(eq(spells.characterId, c.id)),
+      db.select().from(magicReserves).where(eq(magicReserves.characterId, c.id)),
       db.select().from(effects).where(eq(effects.characterId, c.id)),
     ]);
 
@@ -69,6 +75,7 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
       armor: ar.map((r) => pick(r, ARMOR_FIELDS)),
       weapons: wp.map((r) => pick(r, WEAPON_FIELDS)),
       spells: sp.map((r) => pick(r, SPELL_FIELDS)),
+      magicReserves: mr.map((r) => pick(r, MAGIC_RESERVE_FIELDS)),
       effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
     } as CharacterBundle);
   }
@@ -85,16 +92,17 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
  *   - `'restore'` — preserve each character's uuid so it re-links to its campaign
  *     roster slot. A uuid this device already holds is REPLACED in place
  *     (idempotent re-import); an unknown uuid is inserted as-is.
- * Returns the number of characters written. Wrapped in a transaction so a bad
- * bundle can't leave a half-written character behind.
+ * Returns the row ids of the characters written (inserted or replaced), in
+ * bundle order. Wrapped in a transaction so a bad bundle can't leave a
+ * half-written character behind.
  *
  * The expo-sqlite driver runs transactions synchronously (it commits as soon as
  * the callback returns), so the body MUST use the sync query methods
  * (`.run()` / `.returning().get()` / `.all()`) — an async callback would commit
  * before the awaited writes ran. Hence this function is synchronous.
  */
-export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): number {
-  let written = 0;
+export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): number[] {
+  const written: number[] = [];
   db.transaction((tx) => {
     // Seed the live uuid set once, then keep it current as we write, so two
     // bundles carrying the same uuid in one file don't both try to insert it.
@@ -132,7 +140,7 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
           characterId = target.id;
           // Overwrite the sheet (keep original createdAt) and rebuild children.
           tx.update(characters).set({ ...sheet, updatedAt: now }).where(eq(characters.id, characterId)).run();
-          for (const t of [actualState, skills, armor, weapons, spells, effects]) {
+          for (const t of [actualState, skills, armor, weapons, spells, magicReserves, effects]) {
             tx.delete(t).where(eq(t.characterId, characterId)).run();
           }
         }
@@ -155,11 +163,55 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
       if (b.armor.length) tx.insert(armor).values(link(b.armor) as NewArmor[]).run();
       if (b.weapons.length) tx.insert(weapons).values(link(b.weapons) as NewWeapon[]).run();
       if (b.spells.length) tx.insert(spells).values(link(b.spells) as NewSpell[]).run();
+      // Reserve objects are recharged on a copy, kept as-is on a restore.
+      const reserves = planMagicReserves(b.magicReserves ?? [], mode);
+      if (reserves.length) {
+        tx.insert(magicReserves).values(link(reserves) as NewMagicReserve[]).run();
+      }
       if (b.effects.length) tx.insert(effects).values(link(b.effects) as NewEffect[]).run();
 
       existing.add(plan.uuid);
-      written += 1;
+      written.push(characterId);
     }
   });
   return written;
+}
+
+/**
+ * Duplicate one character locally (issue #59): a full deep copy — sheet, live
+ * state (wounds included), skills, armor, weapons, spells, magic reserve objects
+ * (recharged full, see `planMagicReserves`), effects — under a
+ * freshly minted uuid, so the copy is a new lineage that never collides with the
+ * original in a campaign roster. Rides the export→import pipeline in `'copy'`
+ * mode instead of re-walking the tables by hand; the transfer field lists drop
+ * media paths, so avatar/portrait files are then copied on disk into the new
+ * character's folder. Returns the new character's row id, or null if `id`
+ * doesn't exist.
+ */
+export async function duplicateCharacter(id: number): Promise<number | null> {
+  const exp = await exportCharacters([id]);
+  const bundle = exp.characters[0];
+  if (!bundle) return null;
+
+  // Suffix the name so the two rows are tellable apart in the list.
+  const sheet = bundle.character as { nom?: string };
+  sheet.nom = `${sheet.nom || 'Sans nom'} (copie)`;
+
+  const [newId] = importCharacters(exp, 'copy');
+
+  // Media: copy the files (not just the paths — each character owns its folder,
+  // and deleting one character removes its whole media dir).
+  const src = await db
+    .select({ avatarPath: characters.avatarPath, portraitPath: characters.portraitPath })
+    .from(characters)
+    .where(eq(characters.id, id));
+  const media = {
+    avatarPath: copyMedia(src[0]?.avatarPath, newId),
+    portraitPath: copyMedia(src[0]?.portraitPath, newId),
+  };
+  if (media.avatarPath || media.portraitPath) {
+    await db.update(characters).set(media).where(eq(characters.id, newId));
+  }
+
+  return newId;
 }

@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { Button, Text, TextInput } from 'react-native-paper';
+import { Button, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import ChipSelect from '@/components/ui/chip-select';
 import Icon, { dsIcon } from '@/components/ui/icon';
 import {
+  CLE_PARFAITE_BONUS,
   DISCIPLINE_LABEL,
   DISCIPLINES,
   EFFECT_UNIT_LABEL,
@@ -37,9 +38,15 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
 
-  const subtitle = [DISCIPLINE_LABEL[s.discipline], SPHERE_LABEL[s.sphere]]
+  const subtitle = [`Niv. ${s.level}`, DISCIPLINE_LABEL[s.discipline], SPHERE_LABEL[s.sphere]]
     .filter(Boolean)
     .join(' · ');
+
+  // A crafted clé parfaite makes the spell easier to cast: the roll gains
+  // CLE_PARFAITE_BONUS, which reads on the sheet as that much off the difficulty.
+  const difficulty = s.cleParfaite
+    ? `${s.difficulty - CLE_PARFAITE_BONUS} (base ${s.difficulty})`
+    : String(s.difficulty);
 
   return (
     <View style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
@@ -52,9 +59,18 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
           <Icon name="magic" size={22} color={theme.colors.primary} />
         </View>
         <View style={styles.itemMain}>
-          <Text style={styles.itemName} numberOfLines={1}>
-            {s.name || 'Sortilège'}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.itemName} numberOfLines={1}>
+              {s.name || 'Sortilège'}
+            </Text>
+            {s.cleParfaite ? (
+              <View
+                accessibilityLabel={`Clé parfaite, +${CLE_PARFAITE_BONUS} à l'incantation`}
+                style={styles.keyBadge}>
+                <Icon name="key" size={16} color={theme.colors.primary} />
+              </View>
+            ) : null}
+          </View>
           {subtitle !== '' ? (
             <Text
               style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}
@@ -68,6 +84,7 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
 
       {expanded ? (
         <View style={styles.detail}>
+          <DetailRow label="Niveau" value={String(s.level)} />
           <DetailRow label="Complexité" value={String(s.complexity)} />
           <DetailRow label="Sphère" value={SPHERE_LABEL[s.sphere] ?? s.sphere} />
           <DetailRow label="Coût" value={String(s.cost)} />
@@ -75,7 +92,7 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
             label="Incantation"
             value={`${s.castTimeAmount} ${EFFECT_UNIT_LABEL[s.castTimeUnit] ?? s.castTimeUnit}`}
           />
-          <DetailRow label="Difficulté" value={String(s.difficulty)} />
+          <DetailRow label="Difficulté" value={difficulty} />
           {s.cle.trim() !== '' ? <DetailRow label="Clé" value={s.cle.trim()} /> : null}
           {s.effect.trim() !== '' ? <DetailRow label="Effet" value={s.effect.trim()} /> : null}
 
@@ -142,6 +159,13 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
 
       <View style={styles.grid}>
         <NumberField
+          fieldKey="level"
+          label="Niveau"
+          value={s.level ? String(s.level) : ''}
+          onChange={(_, t) => updateSpell(s.id, { level: Number(t) || 0 })}
+          style={styles.numCol}
+        />
+        <NumberField
           fieldKey="complexity"
           label="Complexité"
           value={s.complexity ? String(s.complexity) : ''}
@@ -180,6 +204,20 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
 
       <TextInput label="Clé" value={cle} onChangeText={setCle} mode="outlined" dense />
 
+      {/* Crafted / used up — flipped in play, so it writes immediately. */}
+      <View style={styles.switchRow}>
+        <View style={styles.switchMain}>
+          <Text style={styles.switchLabel}>Clé parfaite</Text>
+          <Text style={[styles.switchHint, { color: theme.colors.onSurfaceVariant }]}>
+            {`+${CLE_PARFAITE_BONUS} à l'incantation (difficulté −${CLE_PARFAITE_BONUS})`}
+          </Text>
+        </View>
+        <Switch
+          value={s.cleParfaite}
+          onValueChange={(v) => updateSpell(s.id, { cleParfaite: v })}
+        />
+      </View>
+
       <TextInput
         label="Effet"
         value={effect}
@@ -209,7 +247,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   itemMain: { flex: 1, minWidth: 0 },
-  itemName: { fontSize: 14, fontWeight: '600' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  keyBadge: { alignItems: 'center', justifyContent: 'center' },
   itemSub: { fontSize: 12, marginTop: 1 },
   detail: { gap: 8, paddingLeft: 2, paddingBottom: 12 },
   detailEdit: { alignSelf: 'flex-start', marginTop: 2 },
@@ -219,4 +259,8 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   numCol: { flexGrow: 1, flexBasis: 120, minWidth: 120 },
   effect: { minHeight: 72 },
+  switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  switchMain: { flex: 1, minWidth: 0 },
+  switchLabel: { fontSize: 15 },
+  switchHint: { fontSize: 12, marginTop: 1 },
 });

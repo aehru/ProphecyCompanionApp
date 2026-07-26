@@ -150,7 +150,9 @@ export default function CharacterFicheScreen() {
         }}
         onDelete={async () => {
           await deleteCharacter(numId);
-          router.back();
+          // Straight back to the character list — back() would land on whatever
+          // screen came before (possibly another page of the deleted character).
+          router.dismissTo('/');
         }}
       />
     );

@@ -38,7 +38,7 @@ export default function HealthSection({
               count={maxOf(`${w.key}Max`)}
               filled={currentOf(`${w.key}Current`)}
               color={editing ? theme.colors.error : theme.colors.onSurfaceVariant}
-              size={14}
+              size={20}
               gap={4}
               perRow={5}
               onSet={editing ? (n) => onSet(`${w.key}Current`, n) : undefined}

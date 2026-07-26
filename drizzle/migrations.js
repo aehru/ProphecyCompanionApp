@@ -16,6 +16,10 @@ import m0011 from './0011_flippant_callisto.sql';
 import m0012 from './0012_third_marvel_boy.sql';
 import m0013 from './0013_unknown_patriot.sql';
 import m0014 from './0014_famous_korvac.sql';
+import m0015 from './0015_polite_khan.sql';
+import m0016 from './0016_big_gorilla_man.sql';
+import m0017 from './0017_quiet_menace.sql';
+import m0018 from './0018_groovy_rogue.sql';
 
   export default {
     journal,
@@ -34,7 +38,11 @@ m0010,
 m0011,
 m0012,
 m0013,
-m0014
+m0014,
+m0015,
+m0016,
+m0017,
+m0018
     }
   }
   
