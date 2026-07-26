@@ -27,3 +27,53 @@ masse-pointes;Armes contondantes;Une main;Masse à pointes;(FOR * 2) + 8 + 1D10;
 massue-ferree;Armes contondantes;Deux mains;Massue ferrée;(FOR * 3) + 5 + 1D10;FOR 5;0;0;15;1;;;
 masse-deux-mains;Armes contondantes;Deux mains;Masse à deux mains;(FOR * 3) + 7 + 1D10;FOR 6, COO 6;-1;0;15;6;;;
 marteau-deux-mains;Armes contondantes;Deux mains;Marteau à deux mains;(FOR * 3) + 9 + 1D10;FOR 7;-3;0;15;4;Permet de renverser en mêlée;;
+fouet;Armes articulées;Une main;Fouet;FOR;COO 7;3;0;15;6;Ne peut parer ou être parée. Attaque d'entravement;;
+chaine;Armes articulées;Une main;Chaîne;FOR + 2D10;FOR 4, COO 7;1;0;15;5;Ne peut parer ou être parée. Attaque d'entravement;;
+fleau-leger;Armes articulées;Une main;Fléau léger;(FOR*2) + 1+ 1D10;FOR 4, COO 6;1;0;20;6;-5 à la parade de l'adversaire;;
+fleau-triple;Armes articulées;Une main;Fléau Triple;(FOR*2) + 3 + 1D10;FOR 6, COO 7;1;0;20;8;-8 à la parade de l'adversaire;;
+fleau-lourd;Armes articulées;Une main;Fléau lourd;(FOR*2) + 5 + 1D10;FOR 6, COO 6;0;0;20;10;-5 à la parade de l'adversaire;;
+fleau-paysan;Armes articulées;Deux mains;Fléau paysan;(FOR*2) + 2 + 1D10;FOR 5, COO 5;0;0;10;2;-3 à la parade de l'adversaire et +5 pour assomer;;
+fleau-a-deux-mains;Armes articulées;Deux mains;Fléau à deux mains;(FOR*3) + 5 + 1D10;FOR 6, COO 6;-1;0;20;10;-5 à la parade de l'adversaire;;
+poing-de-brorne;Armes articulées;Deux mains;Poing de Brorne;(FOR*3) + 2D10;FOR 7,COO 7;-2;0;25;12;-5 à la parade de l'adversaire et permet de renverser en mêlée;;
+double-epee;Armes doubles;Une main;Double épée;FOR + 10 + 1D10;FOR 6, COO 7;2;-2;20;7;Enchainement;;
+lance-sabre;Armes doubles;Deux mains;Lance-sabre;FOR + 11 + 1D10;FOR 5, COO 6;2;0;15;3;2 mains uniquement;;
+baton-de-combat;Armes doubles;Deux mains;Bâton de combat;(FOR*2) + 1D10;COO 3;1;0;5;1;+5 pour assomer, 2 mains uniquement;;
+shaadukt;Armes doubles;Deux mains;Shaaduk't;(FOR*2) + 4 + 1D10;FOR 5, COO 6;2;0;20;8;+5 pour assomer, +5 pour déséquilibrer, 2 mains uniquement';;
+nirgak-zul;Armes doubles;Deux mains;Nirga'k Zûl;(FOR*2) + 6 + 1D10;FOR 5, COO 6;0;0;15;4;Enchainement, 2 mains uniquement;;
+croc-a-chaine;Armes doubles;Deux mains;Croc à chaîne;FOR + 11 + 1D10;FOR 5, COO 7;1;0;20;8;-3 à la parade de l'adversaire, attaque d'entravement, 2 mains uniquement;;
+double-chaine;Armes doubles;Deux mains;Double chaîne;(FOR*2) + 2D10;FOR 5, COO 8;2;0;20;9;-8 à la parade de l'adversaire, 0 dégats sur armure lourde, 2 mains uniquement;;
+double-fleau-fleau-harmonie;Armes doubles;Deux mains;Double fléau Fléau d'harmonie;(FOR*3) + 4 + 1D10;FOR 6, COO 7;1;0;20;8;-5 à la parade de l'adversaire, 2 mains uniquement;;
+poing;Armes de corps à corps;Une main;Poing;FOR + 1D10;;0;2;0;0;+3 pour assomer;;
+pieds;Armes de corps à corps;Une main;Pieds;FOR + 2 + 1D10;;0;1;0;0;+3 pour assomer;;
+gant-cloute;Armes de corps à corps;Une main;Gant clouté;FOR + 1 + 1D11;;0;1;10;3;+3 pour assomer;;
+gant-de-metal;Armes de corps à corps;Une main;Gant de métal;FOR + 2 + 1D10;;0;1;15;6;+3 pour assomer;;
+cestus;Armes de corps à corps;Une main;Cestus;FOR + 4 + 1D10;;0;2;10;2;;;
+serpe;Armes de corps à corps;Une main;Serpe;FOR + 5 + 1D10;;-1;-1;10;3;;;
+couteau;Armes de corps à corps;Une main;Couteau;FOR + 3 + 1D10;;0;1;10;1;;;
+dague;Armes de corps à corps;Une main;Dague;FOR + 6 + 1D10;;0;1;10;2;;;
+dague-main-gauche;Armes de corps à corps;Une main;Dague main gauche;FOR + 5 + 1D10;;0;0;15;4;+3 parade contre armes tranchantes à une main;;
+katar;Armes de corps à corps;Une main;Katar;FOR + 5 + 1D10;;-1;2;15;6;armures légères divisées par 2;;
+lance-courte;Armes d'hast;Deux mains;Lance courte;FOR + 8 + 1D10;FOR 3 , COO 3;3;0;15;2;+3 maintien à distance;;
+lance;Armes d'hast;Deux mains;Lance;FOR + 10 + 1D10;FOR 4 , COO 5;5;0;15;2;+5 maintien à distance, contre-charge;;
+epieu;Armes d'hast;Deux mains;Epieu;FOR + 12 + 1D10;FOR 5 , COO 4;1;0;15;2;+3 maintien à distance, contre-charge;;
+vouge;Armes d'hast;Deux mains;Vouge;FOR + 11 + 1D10;FOR 5 , COO 4;3;0;15;3;+5 maintien à distance,contre-charge;;
+hallebarde;Armes d'hast;Deux mains;Hallebarde;FOR + 11 + 1D10;FOR 5, COO 6;3;0;15;4;+4 maintien à distance,permet de déséquilibrer en mêlée;;
+trident;Armes d'hast;Deux mains;Trident;FOR + 14 + 1D10;FOR 5 , COO 4;1;0;15;4;+3 maintien à distance,;;
+pique;Armes d'hast;Deux mains;Pique;FOR + 10 + 1D10;FOR 6 , COO 5;10;0;15;3;+1 maintien à distance, contre-charge;;
+bolas;Armes de jet;Une main;Bolas;0;PER 3, COO 6;0;0;10;1;Ne peut pas se parer, attaque d'entravement;(FOR*2);(FOR*4)
+pierre;Armes de jet;Une main;Pierre;FOR + 1D10;;3;0;0;0;Ne peut pas se parer sauf bouclier;FOR;(FOR*2)
+dards;Armes de jet;Une main;Dards;FOR + 1D10;PER 3, COO 4;4;0;10;0,5;Ne peut ni se parer ni s'esquiver;(FOR*2);(FOR*3)
+poignards-de-lancer;Armes de jet;Une main;Poignards de lancer;FOR + 2 + 1D10;PER 4, COO 4;3;0;15;1;Ne peut ni se parer ni s'esquiver;(FOR*2);(FOR*3)
+couteau-etoile-zul;Armes de jet;Une main;Couteau étoile Zûl;(FOR*2) + 5 + 1D10;PER 4, COO 6;2;0;20;8;Ne peut pas se parer sauf bouclier;(FOR*3);(FOR*5)
+hachette-jet;Armes de jet;Une main;Hachette;(FOR*2) + 1D10;PER 5, COO 4;1;0;10;2;Ne peut pas se parer sauf bouclier;(FOR*2);(FOR*3)
+javelot;Armes de jet;Une main;Javelot;(FOR*2) + 2 + 1D10;PER 6, COO 4;0;0;10;1;Ne peut pas se parer sauf bouclier;(FOR*5);(FOR*10)
+arc-commun;Armes à projectile;Deux mains;Arc commun;FOR + 6 + 1D10;FOR 3 , PER 4;0;0;15;10;Attaque éclair, approvisionnement;40;100
+arc-composite;Armes à projectile;Deux mains;Arc composite;FOR + 10 + 1D10;FOR 6 , PER 4;0;0;25;15;Attaque éclair, approvisionnement;60;200
+arc-long;Armes à projectile;Deux mains;Arc long;FOR + 8 + 1D10;FOR 5 , PER 4;0;0;25;18;Attaque éclair, approvisionnement;80;300
+fronde;Armes à projectile;Une main;Fronde;10;PER 4, COO 6;-1;0;15;4;Attaque éclair, approvisionnement;20;100
+sarbacane;Armes à projectile;Deux mains;Sarbacane;1;;3;0;10;1;Attaque éclair, pas de dommage si armure;20;20
+atlat;Armes à projectile;Deux mains;Atlat;(FOR*2) + 1D10;PER 5, COO 5;0;0;10;1;Attaque éclair, approvisionnement;(FOR*4);(FOR*6)
+arbalete-legere;Armes mécaniques;Deux mains;Arbalète légère;FOR + 6 + 1D10;FOR 4;3;0;25;10;Attaque éclair, armure divisée par 2, réarmement 2;40;140
+arbalete-moyenne;Armes mécaniques;Deux mains;Arbalète moyenne;FOR + 8 + 1D10;FOR 5;3;0;25;12;Attaque éclair, armure divisée par 2, réarmement 3;50;200
+arbalete-lourde;Armes mécaniques;Deux mains;Arbalète lourde;FOR + 10 + 1D10;FOR 6;3;0;25;15;Attaque éclair, armure divisée par 2, réarmement 4;80;380
+lance-harpon;Armes mécaniques;Deux mains;Lance-harpon;25;FOR 6;4;0;25;15;Attaque éclair, armure divisée par 2, réarmement 3
