@@ -8,6 +8,7 @@ import {
   EXPORT_FORMAT,
   parseImport,
   planImport,
+  planMagicReserves,
   SCHEMA_VERSION,
   serializeExport,
 } from './character-transfer';
@@ -77,6 +78,7 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
         effect: 'Pare une attaque.',
       },
     ],
+    magicReserves: [{ nom: 'Gemme de vent', max: 5, current: 2 }],
     effects: [
       {
         label: 'Bénédiction',
@@ -222,6 +224,23 @@ describe('parseImport validation', () => {
     expect(r.ok && r.data.characters[0].spells[0].level).toBe(3);
   });
 
+  it('carries magic reserve objects through parse', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.characters[0].magicReserves).toEqual([
+      { nom: 'Gemme de vent', max: 5, current: 2 },
+    ]);
+  });
+
+  it('accepts an export predating the magic reserve table (defaults to none)', () => {
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: Record<string, unknown>[];
+    };
+    delete exp.characters[0].magicReserves;
+    const r = parseImport(JSON.stringify(exp));
+    expect(r.ok && r.data.characters[0].magicReserves).toEqual([]);
+  });
+
   it('carries an explicit uuid through parse', () => {
     const exp = buildExport([makeBundle({ character: { ...makeBundle().character, uuid: 'abc-123' } })]);
     const r = parseImport(serializeExport(exp));
@@ -259,5 +278,28 @@ describe('planImport', () => {
       uuid: 'MINTED',
       action: 'insert',
     });
+  });
+});
+
+describe('planMagicReserves', () => {
+  const rows = [
+    { nom: 'Gemme', max: 5, current: 2 },
+    { nom: 'Bâton', max: 3, current: 0 },
+  ];
+
+  it('restore keeps the spent puces', () => {
+    expect(planMagicReserves(rows, 'restore')).toEqual(rows);
+  });
+
+  it('copy recharges every object to full', () => {
+    expect(planMagicReserves(rows, 'copy')).toEqual([
+      { nom: 'Gemme', max: 5, current: 5 },
+      { nom: 'Bâton', max: 3, current: 3 },
+    ]);
+  });
+
+  it('never mutates the input rows', () => {
+    planMagicReserves(rows, 'copy');
+    expect(rows[0].current).toBe(2);
   });
 });
