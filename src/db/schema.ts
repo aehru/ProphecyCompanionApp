@@ -278,6 +278,31 @@ export const spells = sqliteTable('spells', {
 });
 
 /**
+ * Magic reserve objects (issue #51): items a mage crafts or carries that hold
+ * their own pool of magic puces — a gem, a staff, a talisman. Each row is an
+ * INDEPENDENT pool: `max` puces total, `current` filled, spent on its own. The
+ * character's global reserve (`characters.reserveMagiqueMax` /
+ * `actual_state.reserveMagiqueCurrent`) is untouched, so the player always knows
+ * which dots came from which object.
+ *
+ * Both the max and the current live here (unlike the sheet/state split used for
+ * the character's own pools): an object is gear, it comes and goes with play,
+ * and splitting one row across two tables would buy nothing.
+ */
+export const magicReserves = sqliteTable('magic_reserves', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  nom: text('nom').notNull().default(''),
+  max: integer('max').notNull().default(0),
+  current: integer('current').notNull().default(0),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+/**
  * Temporary bonuses/maluses applied to a character during play. Each row targets
  * one stat — a caractéristique key, an attribut key, or `'all'` (every roll) —
  * and carries a signed `value` (positive = bonus, negative = malus). Effects last
@@ -377,6 +402,8 @@ export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
 export type Spell = typeof spells.$inferSelect;
 export type NewSpell = typeof spells.$inferInsert;
+export type MagicReserve = typeof magicReserves.$inferSelect;
+export type NewMagicReserve = typeof magicReserves.$inferInsert;
 export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;
 export type Campaign = typeof campaigns.$inferSelect;
