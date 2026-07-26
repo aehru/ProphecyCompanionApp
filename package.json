@@ -9,6 +9,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "build:catalogs": "bun scripts/build-catalogs.ts",
+    "check:catalogs": "bun scripts/build-catalogs.ts --check",
     "test": "vitest run",
     "test:watch": "vitest"
   },

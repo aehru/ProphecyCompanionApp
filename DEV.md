@@ -82,6 +82,29 @@ Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](s
 
 **Not yet covered:** repository logic — anything importing `@/db/client` pulls in expo-sqlite. Repository tests need the db decoupled from the singleton (inject it) so a better-sqlite3 instance can stand in — see [ROADMAP.md](ROADMAP.md).
 
+## Catalogues (armes / sortilèges)
+
+The rulebook catalogues the pickers offer are **authored as spreadsheets**, not hand-written TS. Edit the CSV in Excel (or LibreOffice), then regenerate:
+
+```bash
+bun run build:catalogs   # data-src/*.csv → src/data/*-catalog.gen.ts
+bun run check:catalogs   # verify the .gen files match the CSV (no write)
+```
+
+- **Source of truth:** [data-src/weapons.csv](data-src/weapons.csv), [data-src/spells.csv](data-src/spells.csv) — **séparateur `;`**, the French Excel default ("CSV UTF-8"). The UTF-8 BOM Excel prepends is stripped, CRLF is fine, and a quoted cell may contain `;`, `""` and newlines (Alt+Entrée), so multi-line effect text round-trips.
+- **Generated:** `src/data/weapon-catalog.gen.ts` / `spell-catalog.gen.ts` — **committed** so the app builds without running the script. Never edit them by hand.
+- **Types + taxonomy:** [src/data/weapon-catalog.ts](src/data/weapon-catalog.ts) / [spell-catalog.ts](src/data/spell-catalog.ts) hold the `*Preset` types and re-export the generated array. Weapon categories / handedness live one file over in [src/data/weapon-constants.ts](src/data/weapon-constants.ts) because the build script imports them as values — it must never load a file it generates, or a deleted `.gen` would make the build unrecoverable.
+- **Adding a column:** add it to the CSV header, to the matching `*_COLUMNS` list in [scripts/build-catalogs.ts](scripts/build-catalogs.ts), and to the row builder. A column present in one and not the other is a build error.
+
+[scripts/build-catalogs.ts](scripts/build-catalogs.ts) validates strictly and writes nothing when anything fails — errors are collected and printed with their CSV line:
+
+- header must match the expected columns **exactly** (a misspelled optional column would otherwise silently drop its data); duplicate header names and unclosed quotes are rejected too
+- `degats` / `porteeEff` / `porteeMax` must parse through `lib/formula`, `prerequis` through `parsePrerequisites` (every comma segment — the app parser is lenient, the build is not)
+- catégories, mains, disciplines, sphères and unités d'incantation are matched **loosely** against the app's constants (case- and accent-insensitive, key **or** label — `feu`, `Feu` and `sphereFeu` all work) then normalized to the canonical key
+- `id` must be a unique kebab-case slug
+
+[src/data/catalog.test.ts](src/data/catalog.test.ts) re-runs the generator during `bun run test` and diffs it against the committed files, so **editing a CSV and forgetting to regenerate fails the test suite** instead of silently shipping a stale catalogue.
+
 ## Export / import
 
 Characters export to a versioned JSON envelope (`format` + `schemaVersion` + `characters[]`) and import back as **new** characters (fresh ids — import never overwrites). Three layers:
@@ -115,9 +138,13 @@ src/
     client.ts                # opens the SQLite DB, exposes `db`, resetDatabase()
     schema.ts                # Drizzle tables: characters, actual_state, skills
   hooks/                     # use-character-id, use-character-state, use-prophecy-theme
-  lib/                       # character-values helpers, formula
+  data/                      # rulebook catalogues: *-catalog.ts (types) + *.gen.ts (generated)
+  lib/                       # character-values helpers, formula, csv
   repositories/              # data access: characters, actual-state, skills, weapons, armor
   theme/                     # Paper/navigation themes
+data-src/                    # catalogue spreadsheets (CSV `;`) — source of truth, see Catalogues
+scripts/
+  build-catalogs.ts          # data-src/*.csv → src/data/*-catalog.gen.ts
 drizzle/                     # generated SQL migrations + meta (committed)
 drizzle.config.ts
 ```
