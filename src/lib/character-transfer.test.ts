@@ -203,6 +203,18 @@ describe('parseImport validation', () => {
     expect(r.ok && r.data.characters[0].spells[0].cleParfaite).toBe(true);
   });
 
+  it('accepts a spell without level (export predating the column)', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    expect(r.ok && r.data.characters[0].spells[0].level).toBeUndefined();
+  });
+
+  it('carries a spell level through parse', () => {
+    const b = makeBundle();
+    const exp = buildExport([{ ...b, spells: [{ ...b.spells[0], level: 3 }] }]);
+    const r = parseImport(serializeExport(exp));
+    expect(r.ok && r.data.characters[0].spells[0].level).toBe(3);
+  });
+
   it('carries an explicit uuid through parse', () => {
     const exp = buildExport([makeBundle({ character: { ...makeBundle().character, uuid: 'abc-123' } })]);
     const r = parseImport(serializeExport(exp));
