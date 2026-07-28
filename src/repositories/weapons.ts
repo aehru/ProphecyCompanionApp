@@ -2,6 +2,7 @@ import { and, asc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { type EquippedHand, type NewWeapon, weapons } from '@/db/schema';
+import { deleteEnchantsFor } from '@/repositories/enchants';
 
 /** Live query for a character's weapon catalogue (use with useLiveQuery). */
 export function weaponsQuery(characterId: number) {
@@ -31,6 +32,7 @@ export async function updateWeapon(id: number, data: Partial<NewWeapon>) {
 }
 
 export async function deleteWeapon(id: number) {
+  await deleteEnchantsFor('weapon', id);
   await db.delete(weapons).where(eq(weapons.id, id));
 }
 

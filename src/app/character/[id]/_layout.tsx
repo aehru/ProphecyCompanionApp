@@ -51,6 +51,14 @@ export default function CharacterLayout() {
           headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         }}
       />
+      <Stack.Screen
+        name="enchant/[eid]"
+        options={{
+          presentation: 'modal',
+          title: "Modifier l'enchantement",
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
     </Stack>
   );
 }

@@ -2,6 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { items, type NewItem } from '@/db/schema';
+import { deleteEnchantsFor } from '@/repositories/enchants';
 
 /** Live query for a character's inventory (use with useLiveQuery). */
 export function itemsQuery(characterId: number) {
@@ -18,5 +19,6 @@ export async function updateItem(id: number, data: Partial<NewItem>) {
 }
 
 export async function deleteItem(id: number) {
+  await deleteEnchantsFor('item', id);
   await db.delete(items).where(eq(items.id, id));
 }
