@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useNavigation, useRouter } from 'expo-router';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { IconButton, Text } from 'react-native-paper';
 
@@ -10,21 +10,25 @@ import ConditionsCard from '@/components/conditions-card';
 import EffectsCard from '@/components/effects-card';
 import ArmorSection from '@/components/fiche/armor-section';
 import HealthSection from '@/components/fiche/health-section';
-import MoneySection from '@/components/fiche/money-section';
 import ResourcesSection from '@/components/fiche/resources-section';
 import ShieldSection from '@/components/fiche/shield-section';
 import StatGrid from '@/components/fiche/stat-grid';
+import NumberField from '@/components/number-field';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
+import EditableSection from '@/components/ui/editable-section';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
-import { ATTRIBUTS, CARACTERISTIQUES, MONEY } from '@/constants/prophecy';
+import StatChip from '@/components/ui/stat-chip';
+import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
+import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
+import { rollInitiative } from '@/lib/dice';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
@@ -32,13 +36,6 @@ import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 import { createEffect, effectsQuery } from '@/repositories/effects';
 import { shieldsQuery } from '@/repositories/shields';
 import { skillsQuery } from '@/repositories/skills';
-
-// Order the editable numeric fields chain through with the keyboard "next" key.
-const EDIT_ORDER: readonly string[] = [
-  ...ATTRIBUTS.map((a) => a.key),
-  ...CARACTERISTIQUES.map((c) => c.key),
-  ...MONEY.map((m) => m.key),
-];
 
 // Caractéristique tiles are labelled by their abbreviation, not their full name.
 // Built once at module load: the catalogue is static.
@@ -54,6 +51,7 @@ export default function CharacterFicheScreen() {
   const numId = useCharacterId();
   const router = useRouter();
   const navigation = useNavigation();
+  const theme = useProphecyTheme();
   // ensure: live in-play edits write current values to actual_state.
   const { char, state, setChar, setState, reload } = useCharacterState(numId, {
     ensure: true,
@@ -85,9 +83,6 @@ export default function CharacterFicheScreen() {
     [navigation],
   );
 
-  // Keyboard "next" wiring: jump to the following editable field on return.
-  const fieldRefs = useRef<Record<string, RNTextInput | null>>({});
-
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
 
@@ -98,6 +93,8 @@ export default function CharacterFicheScreen() {
   const effectList = effects ?? [];
   // Wound malus hits every roll; folded into each stat's badge alongside effects.
   const wound = woundMalus(stRec);
+  const initiativeMax = rec.initiativeMax ?? 0;
+  const initStored = state?.initiativeValues ?? [];
 
   // Live writers: update local state immediately, persist in the background.
   const setCharValue = (key: string, value: number) => {
@@ -118,6 +115,19 @@ export default function CharacterFicheScreen() {
       clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
     );
 
+  const setInit = (i: number, n: number) => {
+    const next = Array.from({ length: initiativeMax }, (_, j) => (j === i ? n : initStored[j] ?? 0));
+    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
+    updateActualState(numId, { initiativeValues: next });
+  };
+
+  // Roll all initiative dice at once: initiativeMax plain D10, stored descending.
+  const rollInit = () => {
+    const next = rollInitiative(initiativeMax);
+    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
+    updateActualState(numId, { initiativeValues: next });
+  };
+
   // New effect starts as a blank +0 on every roll; the editor screen fills it in.
   const addEffect = async () => {
     const row = await createEffect(numId, {
@@ -127,19 +137,6 @@ export default function CharacterFicheScreen() {
       durationRemaining: 1,
     });
     router.push(`/character/${numId}/effect/${row.id}`);
-  };
-
-  const chain = (key: string) => {
-    const i = EDIT_ORDER.indexOf(key);
-    const isLast = i === EDIT_ORDER.length - 1;
-    return {
-      inputRef: (el: RNTextInput | null) => {
-        fieldRefs.current[key] = el;
-      },
-      returnKeyType: (isLast ? 'done' : 'next') as 'done' | 'next',
-      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as 'blurAndSubmit' | 'submit',
-      onSubmitEditing: () => fieldRefs.current[EDIT_ORDER[i + 1]]?.focus(),
-    };
   };
 
   if (editingSheet) {
@@ -191,6 +188,65 @@ export default function CharacterFicheScreen() {
           modifierOf={(k) => totalModifier(k, effectList, wound)}
         />
 
+        <EditableSection
+          title="INITIATIVE"
+          action={() =>
+            initiativeMax > 0 ? (
+              <IconButton
+                icon={dsIcon('dice')}
+                size={18}
+                onPress={rollInit}
+                accessibilityLabel="Lancer l’initiative"
+                style={styles.initRoll}
+              />
+            ) : null
+          }>
+          {(initEditing) => {
+            if (initiativeMax <= 0) {
+              return (
+                <Text style={{ color: theme.colors.onSurfaceVariant }}>
+                  Définis l’initiative (max) avec le crayon en haut.
+                </Text>
+              );
+            }
+            const vals = Array.from({ length: initiativeMax }, (_, i) => initStored[i] ?? 0);
+            return (
+              <View style={styles.initGrid}>
+                {vals.map((val, i) => {
+                  if (initEditing) {
+                    return (
+                      <NumberField
+                        key={i}
+                        fieldKey={String(i)}
+                        label={`Dé ${i + 1}`}
+                        value={String(val)}
+                        onChange={(k, t) => setInit(Number(k), parseInt(t, 10) || 0)}
+                        style={styles.initField}
+                      />
+                    );
+                  }
+                  // Wound malus applies to initiative like any roll. A rolled die
+                  // driven to 0 or below is unusable → error border.
+                  const unusable = val > 0 && val + wound <= 0;
+                  return (
+                    <StatChip
+                      key={i}
+                      label={`Dé ${i + 1}`}
+                      value={String(val)}
+                      modifier={wound}
+                      style={
+                        unusable
+                          ? { borderColor: theme.colors.error, borderWidth: 1.5 }
+                          : undefined
+                      }
+                    />
+                  );
+                })}
+              </View>
+            );
+          }}
+        </EditableSection>
+
         <HealthSection
           maxOf={(k) => rec[k] ?? 0}
           currentOf={(k) => stRec[k] ?? 0}
@@ -208,13 +264,6 @@ export default function CharacterFicheScreen() {
           maxOf={(k) => rec[k] ?? 0}
           adjust={adjustRes}
           onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
-          editing={editing}
-        />
-
-        <MoneySection
-          valueOf={(k) => String(stRec[k] ?? 0)}
-          onChange={(k, t) => setStateValue(k, Number(t) || 0)}
-          chain={chain}
           editing={editing}
         />
 
@@ -239,4 +288,7 @@ export default function CharacterFicheScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
+  initRoll: { margin: 0 },
+  initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
 });

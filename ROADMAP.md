@@ -20,6 +20,8 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 
 - [x] **Manage spells** — spellbook with catalogue + editor, disciplines, reserve & spheres.
 - [x] **Money** — the four Drac coins tracked on the sheet.
+- [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
+- [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
 
 ## Campaign mode
 
