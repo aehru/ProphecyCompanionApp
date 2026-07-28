@@ -38,7 +38,10 @@ import { fileURLToPath } from 'node:url';
 import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '../src/constants/prophecy';
 import { parseCsvTable } from '../src/lib/csv';
 import { parseFormula, parsePrerequisites } from '../src/lib/formula';
+import { ARMOR_CATEGORIES } from '../src/data/armor-constants';
 import { HAND_VALUE, WEAPON_CATEGORIES, WEAPON_HANDS } from '../src/data/weapon-constants';
+import type { ArmorPreset } from '../src/data/armor-catalog';
+import type { ShieldPreset } from '../src/data/shield-catalog';
 import type { WeaponPreset } from '../src/data/weapon-catalog';
 import type { SpellPreset } from '../src/data/spell-catalog';
 
@@ -54,6 +57,14 @@ const WEAPON_COLUMNS = [
 const SPELL_COLUMNS = [
   'id', 'nom', 'niveau', 'complexite', 'discipline', 'sphere', 'cout',
   'tempsIncantation', 'uniteIncantation', 'difficulte', 'cle', 'effet',
+];
+const ARMOR_COLUMNS = [
+  'id', 'categorie', 'nom', 'defenseMax', 'prerequis', 'diffCreation',
+  'tempsCreation', 'encombrement', 'special',
+];
+const SHIELD_COLUMNS = [
+  'id', 'nom', 'degats', 'prerequis', 'diffCreation',
+  'tempsCreation', 'defenseMax', 'encombrement', 'special',
 ];
 
 // --- loose matching ---------------------------------------------------------
@@ -74,6 +85,7 @@ function matcher(entries: [accepted: string, canonical: string][]) {
 }
 
 const matchCategory = matcher(WEAPON_CATEGORIES.map((c) => [c, c]));
+const matchArmorCategory = matcher(ARMOR_CATEGORIES.map((c) => [c, c]));
 const matchHands = matcher([
   ...WEAPON_HANDS.map((h): [string, string] => [h, h]),
   ...WEAPON_HANDS.map((h): [string, string] => [String(HAND_VALUE[h]), h]),
@@ -288,6 +300,66 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
   return out;
 }
 
+function buildArmor(failures: Failure[]): ArmorPreset[] {
+  const records = readTable('armor.csv', ARMOR_COLUMNS, failures);
+  const seen = new Set<string>();
+  const out: ArmorPreset[] = [];
+
+  records.forEach((rec, i) => {
+    const errors: RowErrors = [];
+    const id = readSlug(rec, seen, errors);
+    const nom = (rec.nom ?? '').trim();
+    if (nom === '') errors.push('nom : requis');
+
+    const preset: ArmorPreset = {
+      id,
+      category: readEnum(rec, 'categorie', matchArmorCategory, ARMOR_CATEGORIES, errors) as ArmorPreset['category'],
+      data: {
+        name: nom,
+        defenseMax: readInt(rec, 'defenseMax', errors),
+        prerequisites: readPrerequisites(rec, errors),
+        creationDifficulty: readInt(rec, 'diffCreation', errors),
+        creationTime: readNumber(rec, 'tempsCreation', errors),
+        encombrementMalus: readInt(rec, 'encombrement', errors),
+        special: (rec.special ?? '').trim(),
+      },
+    };
+    if (errors.length) failures.push({ file: 'armor.csv', record: i + 2, name: nom || id, errors });
+    else out.push(preset);
+  });
+  return out;
+}
+
+function buildShields(failures: Failure[]): ShieldPreset[] {
+  const records = readTable('shield.csv', SHIELD_COLUMNS, failures);
+  const seen = new Set<string>();
+  const out: ShieldPreset[] = [];
+
+  records.forEach((rec, i) => {
+    const errors: RowErrors = [];
+    const id = readSlug(rec, seen, errors);
+    const nom = (rec.nom ?? '').trim();
+    if (nom === '') errors.push('nom : requis');
+
+    const preset: ShieldPreset = {
+      id,
+      data: {
+        name: nom,
+        damage: readFormula(rec, 'degats', errors, { required: true }) ?? '',
+        prerequisites: readPrerequisites(rec, errors),
+        creationDifficulty: readInt(rec, 'diffCreation', errors),
+        creationTime: readNumber(rec, 'tempsCreation', errors),
+        defenseMax: readInt(rec, 'defenseMax', errors),
+        encombrementMalus: readInt(rec, 'encombrement', errors),
+        special: (rec.special ?? '').trim(),
+      },
+    };
+    if (errors.length) failures.push({ file: 'shield.csv', record: i + 2, name: nom || id, errors });
+    else out.push(preset);
+  });
+  return out;
+}
+
 // --- codegen ----------------------------------------------------------------
 
 function render(sourceCsv: string, typeName: string, typeImport: string, constName: string, data: unknown[]) {
@@ -309,14 +381,16 @@ export type GeneratedFile = { file: string; content: string };
 export function generateCatalogs(): {
   failures: Failure[];
   files: GeneratedFile[];
-  counts: { weapons: number; spells: number };
+  counts: { weapons: number; spells: number; armor: number; shields: number };
 } {
   const failures: Failure[] = [];
   const weapons = buildWeapons(failures);
   const spells = buildSpells(failures);
+  const armor = buildArmor(failures);
+  const shields = buildShields(failures);
   return {
     failures,
-    counts: { weapons: weapons.length, spells: spells.length },
+    counts: { weapons: weapons.length, spells: spells.length, armor: armor.length, shields: shields.length },
     files: [
       {
         file: 'weapon-catalog.gen.ts',
@@ -325,6 +399,14 @@ export function generateCatalogs(): {
       {
         file: 'spell-catalog.gen.ts',
         content: render('spells.csv', 'SpellPreset', './spell-catalog', 'SPELL_CATALOG_DATA', spells),
+      },
+      {
+        file: 'armor-catalog.gen.ts',
+        content: render('armor.csv', 'ArmorPreset', './armor-catalog', 'ARMOR_CATALOG_DATA', armor),
+      },
+      {
+        file: 'shield-catalog.gen.ts',
+        content: render('shield.csv', 'ShieldPreset', './shield-catalog', 'SHIELD_CATALOG_DATA', shields),
       },
     ],
   };
@@ -386,7 +468,9 @@ function main() {
   }
 
   for (const f of files) writeFileSync(generatedPath(f.file), f.content, 'utf8');
-  console.log(`OK : ${counts.weapons} armes, ${counts.spells} sortilèges.`);
+  console.log(
+    `OK : ${counts.weapons} armes, ${counts.spells} sortilèges, ${counts.armor} armures, ${counts.shields} boucliers.`,
+  );
 }
 
 // Only run as a script — importing this module (tests) must have no side effect.

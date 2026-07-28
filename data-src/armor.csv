@@ -1,0 +1,17 @@
+id;categorie;nom;defenseMax;prerequis;diffCreation;tempsCreation;encombrement;special
+vetements-epais;Armures légères;Vêtements épais;2;;10;4;0;
+fourrures;Armures légères;Fourrures;5;;10;5;0;
+cuir-souple;Armures légères;Cuir souple;4;;15;8;0;
+cuir-cloute;Armures légères;Cuir clouté;6;;15;10;0;
+cuir-bouilli;Armures légères;Cuir bouilli;8;;20;12;-2;
+armure-os-corne;Armures moyennes;Armure d'os et de corne;12;FOR 4;20;20;-2;
+cotte-legere;Armures moyennes;Cotte légère;10;FOR 4;15;15;0;
+cotte-mailles;Armures moyennes;Cotte de mailles;15;FOR 4, RES 6;20;25;-2;
+armure-anneaux;Armures moyennes;Armure d'anneaux;16;FOR 4, RES 5;15;30;-4;
+brigandine;Armures moyennes;Brigandine;17;FOR 5, RES 5;20;20;-5;
+armure-ecaille;Armures lourdes;Armure d'écailles;20;FOR 6, RES 6;20;30;-5;
+armure-bois;Armures lourdes;Armure de bois;15;FOR 4, RES 3;20;15;-6;
+armure-demi-plaques;Armures lourdes;Armure de demi-plaques;18;FOR 4, RES 5;20;25;-6;
+armure-lamelles;Armures lourdes;Armure de lamelles;22;FOR 5, RES 5;20;30;-8;
+armure-plaques;Armures lourdes;Armure de plaques;25;FOR 6, RES 7;25;40;-10;
+armure-draconique;Armures lourdes;Armure draconique;27;FOR 7, RES 7;25;10;-10;
