@@ -20,6 +20,7 @@ import m0015 from './0015_polite_khan.sql';
 import m0016 from './0016_big_gorilla_man.sql';
 import m0017 from './0017_quiet_menace.sql';
 import m0018 from './0018_groovy_rogue.sql';
+import m0019 from './0019_brainy_gambit.sql';
 
   export default {
     journal,
@@ -42,7 +43,8 @@ m0014,
 m0015,
 m0016,
 m0017,
-m0018
+m0018,
+m0019
     }
   }
   

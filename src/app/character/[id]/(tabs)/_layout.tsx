@@ -44,7 +44,7 @@ export default function CharacterTabsLayout() {
       />
       <Tabs.Screen
         name="weapons"
-        options={{ title: 'Armes', tabBarIcon: dsIcon('sword') }}
+        options={{ title: 'Inventaire', tabBarIcon: dsIcon('backpack') }}
       />
       <Tabs.Screen
         name="magic"

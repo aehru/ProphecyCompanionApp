@@ -205,6 +205,28 @@ export const armor = sqliteTable('armor', {
 });
 
 /**
+ * A character's generic inventory: loot that isn't a weapon/armor/spell (a
+ * rune, a potion, a trinket, coils of rope...). Free text, no catalogue link —
+ * `name` + `description` are whatever the player types. `quantity` stacks
+ * identical pickups on one row instead of one row per item. `equipped` is
+ * multi-slot (unlike `armor.equipped`, which is exclusive): several items can
+ * be worn/held at once, so toggling one never touches the others.
+ */
+export const items = sqliteTable('items', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  description: text('description').notNull().default(''),
+  quantity: integer('quantity').notNull().default(1),
+  equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+/**
  * Which hand a weapon is currently equipped in. `null` = not equipped; `'main'`
  * / `'off'` for a one-handed weapon (dual-wield = one in each); `'both'` for a
  * two-handed weapon occupying both hands.
@@ -398,6 +420,8 @@ export type Skill = typeof skills.$inferSelect;
 export type NewSkill = typeof skills.$inferInsert;
 export type Armor = typeof armor.$inferSelect;
 export type NewArmor = typeof armor.$inferInsert;
+export type Item = typeof items.$inferSelect;
+export type NewItem = typeof items.$inferInsert;
 export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
 export type Spell = typeof spells.$inferSelect;
