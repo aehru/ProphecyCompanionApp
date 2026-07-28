@@ -37,7 +37,7 @@ function applyMigration(db: Database.Database, tag: string): void {
 // Every table a character owns. Child tables carry a NOT NULL `character_id`
 // with no default; the `characters`/`actual_state`/`effects` timestamp columns
 // use a drizzle `$defaultFn` (no SQL default) so they must be supplied too.
-const CHILD_TABLES = ['actual_state', 'skills', 'armor', 'weapons', 'spells', 'effects'];
+const CHILD_TABLES = ['actual_state', 'skills', 'armor', 'weapons', 'shields', 'spells', 'effects'];
 
 type ColumnInfo = { name: string; type: string; notnull: number; dflt_value: unknown; pk: number };
 
@@ -95,7 +95,7 @@ function tableNames(db: Database.Database): string[] {
 }
 
 const ENTRIES = loadJournal();
-const EXPECTED_TABLES = ['characters', 'actual_state', 'skills', 'armor', 'weapons', 'spells', 'effects'];
+const EXPECTED_TABLES = ['characters', 'actual_state', 'skills', 'armor', 'weapons', 'shields', 'spells', 'effects'];
 
 describe('drizzle journal integrity', () => {
   it('has a .sql file for every journal entry', () => {

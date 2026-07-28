@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import { check, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '@/constants/prophecy';
+import type { ArmorCategory } from '@/data/armor-constants';
 import { newUuid } from '@/lib/uuid';
 
 type DisciplineKey = (typeof DISCIPLINES)[number]['key'];
@@ -191,7 +192,10 @@ export const skills = sqliteTable('skills', {
  * several and swap between them across a campaign). `equipped` marks the single
  * active armor — enforced one-at-a-time in the repository. `defenseMax` is the
  * armor's full protection; `defenseCurrent` drops as it absorbs hits in a fight
- * (floored at 0 = broken, but kept until the player deletes it).
+ * (floored at 0 = broken, but kept until the player deletes it). `category`,
+ * `prerequisites`, `creationDifficulty`/`creationTime` and `special` mirror the
+ * matching `weapons` columns. `encombrementMalus` (pénalité d'encombrement) is
+ * display-only for now — not folded into `lib/modifiers` roll computation yet.
  */
 export const armor = sqliteTable('armor', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -199,9 +203,15 @@ export const armor = sqliteTable('armor', {
     .notNull()
     .references(() => characters.id, { onDelete: 'cascade' }),
   name: text('name').notNull().default(''),
+  category: text('category').$type<ArmorCategory>().notNull().default('Armures légères'),
   defenseMax: integer('defense_max').notNull().default(0),
   defenseCurrent: integer('defense_current').notNull().default(0),
   equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+  prerequisites: text('prerequisites').notNull().default(''),
+  creationDifficulty: integer('creation_difficulty').notNull().default(0),
+  creationTime: real('creation_time').notNull().default(0),
+  special: text('special').notNull().default(''),
+  encombrementMalus: integer('encombrement_malus').notNull().default(0),
 });
 
 /**
@@ -299,19 +309,48 @@ export const spells = sqliteTable('spells', {
   effect: text('effect').notNull().default(''),
 });
 
+/**
+ * A character's shields. One row per owned shield — a hybrid of `weapons`
+ * (damage formula, prerequisites, creation, special — a shield can bash) and
+ * `armor` (defenseMax/defenseCurrent, exclusive `equipped`). No category:
+ * unlike armor's three weight classes, shields are one kind. No initiative
+ * columns — unlike a weapon, a shield doesn't change turn order. Equip is
+ * independent of both `armor.equipped` and any weapon's `equippedHand` — a
+ * character can equip one armor + one shield + weapons simultaneously, with
+ * no enforced interaction (see the "separate tables" note on `enchants`
+ * below for why this isn't folded into `armor`).
+ */
+export const shields = sqliteTable('shields', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  name: text('name').notNull().default(''),
+  damage: text('damage').notNull().default(''),
+  prerequisites: text('prerequisites').notNull().default(''),
+  creationDifficulty: integer('creation_difficulty').notNull().default(0),
+  creationTime: real('creation_time').notNull().default(0),
+  special: text('special').notNull().default(''),
+  defenseMax: integer('defense_max').notNull().default(0),
+  defenseCurrent: integer('defense_current').notNull().default(0),
+  encombrementMalus: integer('encombrement_malus').notNull().default(0),
+  equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+});
+
 /** Which kind of gear an enchant is bound to (see `enchants` below). */
-export const ENCHANT_TARGETS = ['weapon', 'armor', 'item'] as const;
+export const ENCHANT_TARGETS = ['weapon', 'armor', 'item', 'shield'] as const;
 export type EnchantTarget = (typeof ENCHANT_TARGETS)[number];
 
 /**
- * An enchantment bound to one weapon/armor/item — a character can stack
- * several on the same object (`targetType` + `targetId` is not unique).
- * Weapons/armor/items are deliberately separate tables (very different column
- * shapes), so there's no single "equipment" table to FK against: the target is
- * a polymorphic pointer instead of a real FK. SQLite can't cascade across
- * three possible parent tables, so `deleteWeapon`/`deleteArmor`/`deleteItem`
- * each explicitly purge matching rows here (repositories/enchants.ts
- * `deleteEnchantsFor`) before deleting the object itself.
+ * An enchantment bound to one weapon/armor/item/shield — a character can
+ * stack several on the same object (`targetType` + `targetId` is not
+ * unique). Weapons/armor/items/shields are deliberately separate tables (very
+ * different column shapes), so there's no single "equipment" table to FK
+ * against: the target is a polymorphic pointer instead of a real FK. SQLite
+ * can't cascade across four possible parent tables, so
+ * `deleteWeapon`/`deleteArmor`/`deleteItem`/`deleteShield` each explicitly
+ * purge matching rows here (repositories/enchants.ts `deleteEnchantsFor`)
+ * before deleting the object itself.
  *
  * `sourceSpellName` is a display-only snapshot, frozen at creation — the
  * enchant may have been cast into the object by someone else's spell, so
@@ -466,6 +505,8 @@ export type Item = typeof items.$inferSelect;
 export type NewItem = typeof items.$inferInsert;
 export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
+export type Shield = typeof shields.$inferSelect;
+export type NewShield = typeof shields.$inferInsert;
 export type Spell = typeof spells.$inferSelect;
 export type NewSpell = typeof spells.$inferInsert;
 export type Enchant = typeof enchants.$inferSelect;

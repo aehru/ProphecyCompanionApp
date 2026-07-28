@@ -39,10 +39,11 @@ export async function deleteEnchant(id: number) {
 }
 
 /**
- * Purge every enchant bound to one weapon/armor/item. `targetType`+`targetId`
- * is a polymorphic pointer (no real FK across the three gear tables), so each
- * of `deleteWeapon`/`deleteArmor`/`deleteItem` must call this itself before
- * deleting the object — there's no DB-level cascade to rely on.
+ * Purge every enchant bound to one weapon/armor/item/shield. `targetType`+
+ * `targetId` is a polymorphic pointer (no real FK across the four gear
+ * tables), so each of `deleteWeapon`/`deleteArmor`/`deleteItem`/`deleteShield`
+ * must call this itself before deleting the object — there's no DB-level
+ * cascade to rely on.
  */
 export async function deleteEnchantsFor(targetType: EnchantTarget, targetId: number) {
   await db
