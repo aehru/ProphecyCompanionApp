@@ -6,7 +6,7 @@ import NumberField from '@/components/number-field';
 import SpellDetail from '@/components/spell-detail';
 import ChipSelect from '@/components/ui/chip-select';
 import { dsIcon } from '@/components/ui/icon';
-import type { Armor, Enchant, EnchantTarget, Item, Spell, Weapon } from '@/db/schema';
+import type { Armor, Enchant, EnchantTarget, Item, Shield, Spell, Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { deleteEnchant, updateEnchant } from '@/repositories/enchants';
@@ -14,6 +14,7 @@ import { deleteEnchant, updateEnchant } from '@/repositories/enchants';
 const TARGET_KIND_OPTIONS = [
   { key: 'weapon', label: 'Arme' },
   { key: 'armor', label: 'Armure' },
+  { key: 'shield', label: 'Bouclier' },
   { key: 'item', label: 'Objet' },
 ] as const;
 
@@ -28,6 +29,7 @@ export default function EnchantEditor({
   enchant: e,
   weapons,
   armor,
+  shields,
   items,
   spells,
   onClose,
@@ -35,6 +37,7 @@ export default function EnchantEditor({
   enchant: Enchant;
   weapons: Weapon[];
   armor: Armor[];
+  shields: Shield[];
   items: Item[];
   spells: Spell[];
   onClose: () => void;
@@ -49,7 +52,7 @@ export default function EnchantEditor({
   });
 
   const targetListFor = (kind: EnchantTarget) =>
-    kind === 'weapon' ? weapons : kind === 'armor' ? armor : items;
+    kind === 'weapon' ? weapons : kind === 'armor' ? armor : kind === 'shield' ? shields : items;
   const targetOptions = targetListFor(e.targetType).map((o) => ({
     key: String(o.id),
     label: o.name.trim() || '?',

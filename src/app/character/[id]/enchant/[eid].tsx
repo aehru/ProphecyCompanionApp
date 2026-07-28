@@ -12,6 +12,7 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { armorQuery } from '@/repositories/armor';
 import { enchantQuery } from '@/repositories/enchants';
 import { itemsQuery } from '@/repositories/items';
+import { shieldsQuery } from '@/repositories/shields';
 import { spellsQuery } from '@/repositories/spells';
 import { weaponsQuery } from '@/repositories/weapons';
 
@@ -28,6 +29,7 @@ export default function EnchantEditModal() {
   const { data } = useLiveQuery(enchantQuery(Number(eid)), [eid]);
   const { data: weapons } = useLiveQuery(weaponsQuery(Number(id)), [id]);
   const { data: armor } = useLiveQuery(armorQuery(Number(id)), [id]);
+  const { data: shields } = useLiveQuery(shieldsQuery(Number(id)), [id]);
   const { data: items } = useLiveQuery(itemsQuery(Number(id)), [id]);
   const { data: spells } = useLiveQuery(spellsQuery(Number(id)), [id]);
   const enchant = data?.[0];
@@ -41,6 +43,7 @@ export default function EnchantEditModal() {
               enchant={enchant}
               weapons={weapons ?? []}
               armor={armor ?? []}
+              shields={shields ?? []}
               items={items ?? []}
               spells={spells ?? []}
               onClose={() => router.back()}

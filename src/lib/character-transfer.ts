@@ -1,7 +1,7 @@
 // Character export / import: a self-contained, versioned JSON envelope that
 // carries one or more whole characters (sheet + live state + skills + armor +
-// weapons + spells + magic reserve objects + effects) between devices, or as a
-// user backup.
+// weapons + shields + spells + magic reserve objects + effects) between
+// devices, or as a user backup.
 //
 // This module is PURE — no DB, no filesystem. The repository layer
 // (`repositories/transfer`) gathers rows into bundles and re-inserts them; the
@@ -83,6 +83,30 @@ const armorSchema = z.object({
   defenseMax: int,
   defenseCurrent: int,
   equipped: z.boolean(),
+  // Category/prerequisites/creation/special/encombrement. OPTIONAL (not a
+  // version bump, like `cleParfaite`): exports made before these columns
+  // existed have no such fields and still import — each falls back to its
+  // column default (see repositories/transfer.ts, which omits absent keys
+  // from the insert so SQLite's own default applies).
+  category: str.optional(),
+  prerequisites: str.optional(),
+  creationDifficulty: int.optional(),
+  creationTime: z.number().optional(),
+  special: str.optional(),
+  encombrementMalus: int.optional(),
+});
+
+const shieldSchema = z.object({
+  name: str,
+  damage: str,
+  prerequisites: str,
+  creationDifficulty: int,
+  creationTime: z.number(),
+  special: str,
+  defenseMax: int,
+  defenseCurrent: int,
+  encombrementMalus: int,
+  equipped: z.boolean(),
 });
 
 const weaponSchema = z.object({
@@ -147,6 +171,9 @@ const characterBundleSchema = z.object({
   skills: z.array(skillSchema),
   armor: z.array(armorSchema),
   weapons: z.array(weaponSchema),
+  // OPTIONAL with a `[]` default (not a version bump, like `magicReserves`):
+  // exports made before the table existed simply carry none.
+  shields: z.array(shieldSchema).default([]),
   spells: z.array(spellSchema),
   magicReserves: z.array(magicReserveSchema).default([]),
   effects: z.array(effectSchema),
@@ -169,6 +196,7 @@ export const STATE_FIELDS = Object.keys(stateSchema.shape);
 export const SKILL_FIELDS = Object.keys(skillSchema.shape);
 export const ARMOR_FIELDS = Object.keys(armorSchema.shape);
 export const WEAPON_FIELDS = Object.keys(weaponSchema.shape);
+export const SHIELD_FIELDS = Object.keys(shieldSchema.shape);
 export const SPELL_FIELDS = Object.keys(spellSchema.shape);
 export const MAGIC_RESERVE_FIELDS = Object.keys(magicReserveSchema.shape);
 export const EFFECT_FIELDS = Object.keys(effectSchema.shape);

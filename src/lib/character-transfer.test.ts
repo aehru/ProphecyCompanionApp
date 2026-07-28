@@ -47,7 +47,34 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
     character,
     state,
     skills: [{ name: 'Esquive', attribut: 'physique', value: 3 }],
-    armor: [{ name: 'Cuir clouté', defenseMax: 4, defenseCurrent: 2, equipped: true }],
+    armor: [
+      {
+        name: 'Cuir clouté',
+        defenseMax: 4,
+        defenseCurrent: 2,
+        equipped: true,
+        category: 'Armures légères',
+        prerequisites: '',
+        creationDifficulty: 10,
+        creationTime: 2,
+        special: '',
+        encombrementMalus: 0,
+      },
+    ],
+    shields: [
+      {
+        name: 'Écu de fer',
+        damage: 'FOR + 2',
+        prerequisites: '',
+        creationDifficulty: 10,
+        creationTime: 2,
+        special: '',
+        defenseMax: 2,
+        defenseCurrent: 2,
+        encombrementMalus: 0,
+        equipped: true,
+      },
+    ],
     weapons: [
       {
         name: 'Épée longue',
@@ -239,6 +266,35 @@ describe('parseImport validation', () => {
     delete exp.characters[0].magicReserves;
     const r = parseImport(JSON.stringify(exp));
     expect(r.ok && r.data.characters[0].magicReserves).toEqual([]);
+  });
+
+  it('accepts an export predating the shields table (defaults to none)', () => {
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: Record<string, unknown>[];
+    };
+    delete exp.characters[0].shields;
+    const r = parseImport(JSON.stringify(exp));
+    expect(r.ok && r.data.characters[0].shields).toEqual([]);
+  });
+
+  it('carries a shield through parse', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    expect(r.ok && r.data.characters[0].shields[0].damage).toBe('FOR + 2');
+  });
+
+  it('accepts armor predating category/prerequisites/creation/encombrement (export from before those columns existed)', () => {
+    const b = makeBundle();
+    const legacyArmor = { name: 'Cuir clouté', defenseMax: 4, defenseCurrent: 2, equipped: true };
+    const exp = buildExport([{ ...b, armor: [legacyArmor] as never }]);
+    const r = parseImport(serializeExport(exp));
+    expect(r.ok).toBe(true);
+    expect(r.ok && r.data.characters[0].armor[0].category).toBeUndefined();
+  });
+
+  it('carries the new armor fields through parse', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    expect(r.ok && r.data.characters[0].armor[0].category).toBe('Armures légères');
+    expect(r.ok && r.data.characters[0].armor[0].encombrementMalus).toBe(0);
   });
 
   it('carries an explicit uuid through parse', () => {

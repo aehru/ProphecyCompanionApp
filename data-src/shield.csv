@@ -1,0 +1,6 @@
+id;nom;degats;prerequis;diffCreation;tempsCreation;defenseMax;encombrement;special
+petit-bouclier;Petit bouclier;FOR + 1D10;FOR 3;15;2;2;0;
+bouclier-renforce;Bouclier renforcé;FOR + 2 + 1D10;FOR 4, RES 4;15;4;4;-2;
+grand-bouclier;Grand bouclier;FOR + 4 + 1D10;FOR 5, RES 5;20;6;6;-4;
+bouclier-dragon;Bouclier dragon;FOR + 5 + 1D10;FOR 5, RES 6;20;5;7;-5;
+bouclier-draconique;Bouclier draconique;FOR + 5 + 1D10;FOR 6, RES 7;25;2;8;-5;

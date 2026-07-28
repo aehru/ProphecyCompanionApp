@@ -22,6 +22,7 @@ import m0017 from './0017_quiet_menace.sql';
 import m0018 from './0018_groovy_rogue.sql';
 import m0019 from './0019_brainy_gambit.sql';
 import m0020 from './0020_striped_dexter_bennett.sql';
+import m0021 from './0021_daffy_miek.sql';
 
   export default {
     journal,
@@ -46,7 +47,8 @@ m0016,
 m0017,
 m0018,
 m0019,
-m0020
+m0020,
+m0021
     }
   }
   

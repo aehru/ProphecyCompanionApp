@@ -22,6 +22,7 @@ import type {
   EnchantTarget,
   Item,
   MagicReserve,
+  Shield,
   Spell,
   Weapon,
 } from '@/db/schema';
@@ -40,6 +41,7 @@ import {
   magicReservesQuery,
   updateMagicReserve,
 } from '@/repositories/magic-reserves';
+import { shieldsQuery } from '@/repositories/shields';
 import { spellsQuery } from '@/repositories/spells';
 import { weaponsQuery } from '@/repositories/weapons';
 
@@ -48,6 +50,7 @@ const TABS = ['Réserve', 'Sortilèges', 'Enchant.'] as const;
 const TARGET_KIND_LABEL: Record<EnchantTarget, string> = {
   weapon: 'Arme',
   armor: 'Armure',
+  shield: 'Bouclier',
   item: 'Objet',
 };
 
@@ -71,6 +74,7 @@ export default function CharacterMagicScreen() {
   const { data: reserves } = useLiveQuery(magicReservesQuery(numId), [numId]);
   const { data: weapons } = useLiveQuery(weaponsQuery(numId), [numId]);
   const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
+  const { data: shieldRows } = useLiveQuery(shieldsQuery(numId), [numId]);
   const { data: items } = useLiveQuery(itemsQuery(numId), [numId]);
   const { data: enchantList } = useLiveQuery(enchantsQuery(numId), [numId]);
   const [tab, setTab] = React.useState(0);
@@ -102,17 +106,18 @@ export default function CharacterMagicScreen() {
   const objects: MagicReserve[] = reserves ?? [];
   const weaponList: Weapon[] = weapons ?? [];
   const armorList: Armor[] = armors ?? [];
+  const shieldList: Shield[] = shieldRows ?? [];
   const itemList: Item[] = items ?? [];
   const enchants: Enchant[] = enchantList ?? [];
   const spellList = spells ?? [];
 
   const targetListFor = (kind: EnchantTarget) =>
-    kind === 'weapon' ? weaponList : kind === 'armor' ? armorList : itemList;
+    kind === 'weapon' ? weaponList : kind === 'armor' ? armorList : kind === 'shield' ? shieldList : itemList;
 
   const targetOf = (e: Enchant) => targetListFor(e.targetType).find((o) => o.id === e.targetId);
 
-  const isEquipped = (kind: EnchantTarget, o: Weapon | Armor | Item) =>
-    kind === 'weapon' ? (o as Weapon).equippedHand != null : (o as Armor | Item).equipped;
+  const isEquipped = (kind: EnchantTarget, o: Weapon | Armor | Shield | Item) =>
+    kind === 'weapon' ? (o as Weapon).equippedHand != null : (o as Armor | Shield | Item).equipped;
 
   // Reserve objects: each is its own pool, so saving only writes nom/max —
   // `current` is driven by the bullets (and clamped by the repository).
@@ -138,9 +143,11 @@ export default function CharacterMagicScreen() {
     ? { type: 'weapon', id: weaponList[0].id }
     : armorList[0]
       ? { type: 'armor', id: armorList[0].id }
-      : itemList[0]
-        ? { type: 'item', id: itemList[0].id }
-        : null;
+      : shieldList[0]
+        ? { type: 'shield', id: shieldList[0].id }
+        : itemList[0]
+          ? { type: 'item', id: itemList[0].id }
+          : null;
 
   const addEnchant = async () => {
     if (!firstTarget) return;
@@ -313,7 +320,7 @@ export default function CharacterMagicScreen() {
                 Aucun enchantement.{' '}
                 {firstTarget
                   ? 'Ajoutez-en un avec le bouton « Enchantement ».'
-                  : 'Ajoutez d’abord une arme, une armure ou un objet à enchanter.'}
+                  : 'Ajoutez d’abord une arme, une armure, un bouclier ou un objet à enchanter.'}
               </Text>
             ) : (
               enchants.map((e) => {
@@ -401,7 +408,7 @@ function EnchantRow({
   onOpen,
 }: {
   enchant: Enchant;
-  target: Weapon | Armor | Item | undefined;
+  target: Weapon | Armor | Shield | Item | undefined;
   equipped: boolean;
   editing: boolean;
   spells: Spell[];

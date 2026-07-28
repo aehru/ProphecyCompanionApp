@@ -28,6 +28,38 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
+        name="armor/catalog"
+        options={{
+          presentation: 'modal',
+          title: "Catalogue d'armures",
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
+      <Stack.Screen
+        name="armor/[aid]"
+        options={{
+          presentation: 'modal',
+          title: "Modifier l'armure",
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
+      <Stack.Screen
+        name="shield/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Catalogue de boucliers',
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
+      <Stack.Screen
+        name="shield/[sid]"
+        options={{
+          presentation: 'modal',
+          title: 'Modifier le bouclier',
+          headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        }}
+      />
+      <Stack.Screen
         name="spell/catalog"
         options={{
           presentation: 'modal',
