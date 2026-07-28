@@ -8,6 +8,7 @@ import { IconButton, Text, TextInput } from 'react-native-paper';
 import ArmorCard from '@/components/armor-card';
 import ItemCard from '@/components/item-card';
 import NumberField from '@/components/number-field';
+import ShieldCard from '@/components/shield-card';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
@@ -22,13 +23,14 @@ import { asNumRecord } from '@/lib/character-values';
 import { rollInitiative } from '@/lib/dice';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
-import { armorQuery, createArmor } from '@/repositories/armor';
+import { armorQuery } from '@/repositories/armor';
 import { enchantsQuery } from '@/repositories/enchants';
 import { effectsQuery } from '@/repositories/effects';
 import { createItem, itemsQuery } from '@/repositories/items';
+import { shieldsQuery } from '@/repositories/shields';
 import { weaponsQuery } from '@/repositories/weapons';
 
-const TABS = ['Armes', 'Armures', 'Objets'] as const;
+const TABS = ['Armes', 'Armures', 'Boucliers', 'Objets'] as const;
 
 export default function CharacterWeaponsScreen() {
   const numId = useCharacterId();
@@ -40,6 +42,7 @@ export default function CharacterWeaponsScreen() {
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
   const { data: weapons } = useLiveQuery(weaponsQuery(numId), [numId]);
   const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
+  const { data: shields } = useLiveQuery(shieldsQuery(numId), [numId]);
   const { data: items } = useLiveQuery(itemsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
   const { data: enchants } = useLiveQuery(enchantsQuery(numId), [numId]);
@@ -50,6 +53,7 @@ export default function CharacterWeaponsScreen() {
   const rec = asNumRecord(char);
   const list = weapons ?? [];
   const armorList = armors ?? [];
+  const shieldList = shields ?? [];
   const itemList = items ?? [];
   const filteredItems = itemQuery.trim()
     ? itemList.filter((it) => {
@@ -57,10 +61,11 @@ export default function CharacterWeaponsScreen() {
         return it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q);
       })
     : itemList;
-  // Which weapons/armor/items carry at least one enchant — drives the small
-  // "enchantée" badge on each card (full detail lives in the Magie tab).
+  // Which weapons/armor/shields/items carry at least one enchant — drives the
+  // small "enchantée" badge on each card (full detail lives in the Magie tab).
   const enchantedKeys = new Set((enchants ?? []).map((e) => `${e.targetType}:${e.targetId}`));
-  const isEnchanted = (kind: 'weapon' | 'armor' | 'item', id: number) => enchantedKeys.has(`${kind}:${id}`);
+  const isEnchanted = (kind: 'weapon' | 'armor' | 'shield' | 'item', id: number) =>
+    enchantedKeys.has(`${kind}:${id}`);
   // Wound malus + temporary effects, per caractéristique. Folded into each carac
   // value before the multiplier in a weapon's damage formula.
   const wound = woundMalus(asNumRecord(state));
@@ -199,13 +204,38 @@ export default function CharacterWeaponsScreen() {
               </Text>
             ) : (
               armorList.map((a) => (
-                <ArmorCard key={a.id} armor={a} enchanted={isEnchanted('armor', a.id)} />
+                <ArmorCard
+                  key={a.id}
+                  armor={a}
+                  caracValue={(k) => rec[k] ?? 0}
+                  enchanted={isEnchanted('armor', a.id)}
+                />
               ))
             )}
           </View>
         ) : null}
 
         {tab === 2 ? (
+          <View style={styles.tabContent}>
+            {shieldList.length === 0 ? (
+              <Text style={{ color: theme.colors.onSurfaceVariant }}>
+                Aucun bouclier. Ajoutez-en un avec le bouton « Bouclier ».
+              </Text>
+            ) : (
+              shieldList.map((s) => (
+                <ShieldCard
+                  key={s.id}
+                  shield={s}
+                  caracValue={(k) => rec[k] ?? 0}
+                  caracModifier={caracModifier}
+                  enchanted={isEnchanted('shield', s.id)}
+                />
+              ))
+            )}
+          </View>
+        ) : null}
+
+        {tab === 3 ? (
           <View style={styles.tabContent}>
             {itemList.length > 0 ? (
               <TextInput
@@ -245,8 +275,19 @@ export default function CharacterWeaponsScreen() {
           onPress={() => router.push(`/character/${numId}/weapon/catalog`)}
         />
       ) : null}
-      {tab === 1 ? <AppFab icon="shield-plus" onPress={() => createArmor(numId)} /> : null}
-      {tab === 2 ? <AppFab icon={dsIcon('backpack')} onPress={() => createItem(numId)} /> : null}
+      {tab === 1 ? (
+        <AppFab
+          icon="shield-plus"
+          onPress={() => router.push(`/character/${numId}/armor/catalog`)}
+        />
+      ) : null}
+      {tab === 2 ? (
+        <AppFab
+          icon="shield-sword"
+          onPress={() => router.push(`/character/${numId}/shield/catalog`)}
+        />
+      ) : null}
+      {tab === 3 ? <AppFab icon={dsIcon('backpack')} onPress={() => createItem(numId)} /> : null}
     </View>
   );
 }

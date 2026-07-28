@@ -12,6 +12,7 @@ import ArmorSection from '@/components/fiche/armor-section';
 import HealthSection from '@/components/fiche/health-section';
 import MoneySection from '@/components/fiche/money-section';
 import ResourcesSection from '@/components/fiche/resources-section';
+import ShieldSection from '@/components/fiche/shield-section';
 import StatGrid from '@/components/fiche/stat-grid';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
@@ -29,6 +30,7 @@ import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 import { createEffect, effectsQuery } from '@/repositories/effects';
+import { shieldsQuery } from '@/repositories/shields';
 import { skillsQuery } from '@/repositories/skills';
 
 // Order the editable numeric fields chain through with the keyboard "next" key.
@@ -58,6 +60,7 @@ export default function CharacterFicheScreen() {
     reloadOnFocus: true,
   });
   const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
+  const { data: shieldRows } = useLiveQuery(shieldsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
   const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
   // Tab-level live edit: one FAB flips every card between read and edit.
@@ -91,6 +94,7 @@ export default function CharacterFicheScreen() {
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
   const equippedArmor = (armors ?? []).find((a) => a.equipped) ?? null;
+  const equippedShield = (shieldRows ?? []).find((s) => s.equipped) ?? null;
   const effectList = effects ?? [];
   // Wound malus hits every roll; folded into each stat's badge alongside effects.
   const wound = woundMalus(stRec);
@@ -197,6 +201,7 @@ export default function CharacterFicheScreen() {
         <EffectsCard effects={effectList} skills={skills ?? []} editing={editing} />
 
         {equippedArmor ? <ArmorSection armor={equippedArmor} editing={editing} /> : null}
+        {equippedShield ? <ShieldSection shield={equippedShield} editing={editing} /> : null}
 
         <ResourcesSection
           currentOf={(k) => stRec[k] ?? 0}
