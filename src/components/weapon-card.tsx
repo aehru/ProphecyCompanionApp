@@ -27,10 +27,13 @@ export default function WeaponCard({
   weapon,
   caracValue,
   caracModifier,
+  enchanted,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
   caracModifier?: CaracModifier;
+  /** This weapon has at least one enchant bound to it (see the Magie tab). */
+  enchanted?: boolean;
 }) {
   const router = useRouter();
   return (
@@ -38,6 +41,7 @@ export default function WeaponCard({
       weapon={weapon}
       caracValue={caracValue}
       caracModifier={caracModifier}
+      enchanted={enchanted}
       onEdit={() => router.push(`/character/${weapon.characterId}/weapon/${weapon.id}`)}
     />
   );
@@ -111,11 +115,13 @@ function WeaponSummary({
   weapon: w,
   caracValue,
   caracModifier,
+  enchanted,
   onEdit,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
   caracModifier?: CaracModifier;
+  enchanted?: boolean;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -167,9 +173,16 @@ function WeaponSummary({
           <Icon name="sword" size={22} color={prereqUnmet ? theme.colors.error : theme.colors.primary} />
         </View>
         <View style={styles.itemMain}>
-          <Text style={styles.itemName} numberOfLines={1}>
-            {w.name || 'Arme'}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.itemName} numberOfLines={1}>
+              {w.name || 'Arme'}
+            </Text>
+            {enchanted ? (
+              <View accessibilityLabel="Enchantée" style={styles.enchantBadge}>
+                <Icon name="magic" size={14} color={theme.colors.primary} />
+              </View>
+            ) : null}
+          </View>
           <View style={styles.subRow}>
             {subtitle !== '' ? (
               <Text
@@ -295,7 +308,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   itemMain: { flex: 1, minWidth: 0 },
-  itemName: { fontSize: 14, fontWeight: '600' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  enchantBadge: { alignItems: 'center', justifyContent: 'center' },
   subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
   itemSub: { fontSize: 12 },
   equipBtns: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

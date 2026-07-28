@@ -23,6 +23,7 @@ import { rollInitiative } from '@/lib/dice';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery, createArmor } from '@/repositories/armor';
+import { enchantsQuery } from '@/repositories/enchants';
 import { effectsQuery } from '@/repositories/effects';
 import { createItem, itemsQuery } from '@/repositories/items';
 import { weaponsQuery } from '@/repositories/weapons';
@@ -41,6 +42,7 @@ export default function CharacterWeaponsScreen() {
   const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
   const { data: items } = useLiveQuery(itemsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
+  const { data: enchants } = useLiveQuery(enchantsQuery(numId), [numId]);
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
@@ -55,6 +57,10 @@ export default function CharacterWeaponsScreen() {
         return it.name.toLowerCase().includes(q) || it.description.toLowerCase().includes(q);
       })
     : itemList;
+  // Which weapons/armor/items carry at least one enchant — drives the small
+  // "enchantée" badge on each card (full detail lives in the Magie tab).
+  const enchantedKeys = new Set((enchants ?? []).map((e) => `${e.targetType}:${e.targetId}`));
+  const isEnchanted = (kind: 'weapon' | 'armor' | 'item', id: number) => enchantedKeys.has(`${kind}:${id}`);
   // Wound malus + temporary effects, per caractéristique. Folded into each carac
   // value before the multiplier in a weapon's damage formula.
   const wound = woundMalus(asNumRecord(state));
@@ -178,6 +184,7 @@ export default function CharacterWeaponsScreen() {
                   weapon={w}
                   caracValue={(k) => rec[k] ?? 0}
                   caracModifier={caracModifier}
+                  enchanted={isEnchanted('weapon', w.id)}
                 />
               ))
             )}
@@ -191,7 +198,9 @@ export default function CharacterWeaponsScreen() {
                 Aucune armure. Ajoutez-en une avec le bouton « Armure ».
               </Text>
             ) : (
-              armorList.map((a) => <ArmorCard key={a.id} armor={a} />)
+              armorList.map((a) => (
+                <ArmorCard key={a.id} armor={a} enchanted={isEnchanted('armor', a.id)} />
+              ))
             )}
           </View>
         ) : null}
@@ -222,7 +231,9 @@ export default function CharacterWeaponsScreen() {
                 Aucun objet ne correspond à « {itemQuery} ».
               </Text>
             ) : (
-              filteredItems.map((it) => <ItemCard key={it.id} item={it} />)
+              filteredItems.map((it) => (
+                <ItemCard key={it.id} item={it} enchanted={isEnchanted('item', it.id)} />
+              ))
             )}
           </View>
         ) : null}
