@@ -299,6 +299,48 @@ export const spells = sqliteTable('spells', {
   effect: text('effect').notNull().default(''),
 });
 
+/** Which kind of gear an enchant is bound to (see `enchants` below). */
+export const ENCHANT_TARGETS = ['weapon', 'armor', 'item'] as const;
+export type EnchantTarget = (typeof ENCHANT_TARGETS)[number];
+
+/**
+ * An enchantment bound to one weapon/armor/item — a character can stack
+ * several on the same object (`targetType` + `targetId` is not unique).
+ * Weapons/armor/items are deliberately separate tables (very different column
+ * shapes), so there's no single "equipment" table to FK against: the target is
+ * a polymorphic pointer instead of a real FK. SQLite can't cascade across
+ * three possible parent tables, so `deleteWeapon`/`deleteArmor`/`deleteItem`
+ * each explicitly purge matching rows here (repositories/enchants.ts
+ * `deleteEnchantsFor`) before deleting the object itself.
+ *
+ * `sourceSpellName` is a display-only snapshot, frozen at creation — the
+ * enchant may have been cast into the object by someone else's spell, so
+ * `effect` is copied in (or typed directly for a from-scratch enchant) and
+ * never re-reads the live spell. `sourceSpellId` is a *soft* link kept
+ * alongside it purely so the UI can offer "view this spell" — `onDelete:
+ * 'set null'` clears it if the source spell is later deleted, while
+ * `sourceSpellName`/`effect` stay put as history. Using an enchant never
+ * touches the magic reserve — `usesCurrent`/`usesMax` is its own independent
+ * charge pool, ticked by hand like `magic_reserves`.
+ */
+export const enchants = sqliteTable('enchants', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  targetType: text('target_type', { enum: ENCHANT_TARGETS }).notNull(),
+  targetId: integer('target_id').notNull(),
+  name: text('name').notNull().default(''),
+  sourceSpellName: text('source_spell_name'),
+  sourceSpellId: integer('source_spell_id').references(() => spells.id, { onDelete: 'set null' }),
+  effect: text('effect').notNull().default(''),
+  usesMax: integer('uses_max').notNull().default(1),
+  usesCurrent: integer('uses_current').notNull().default(1),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 /**
  * Magic reserve objects (issue #51): items a mage crafts or carries that hold
  * their own pool of magic puces — a gem, a staff, a talisman. Each row is an
@@ -426,6 +468,8 @@ export type Weapon = typeof weapons.$inferSelect;
 export type NewWeapon = typeof weapons.$inferInsert;
 export type Spell = typeof spells.$inferSelect;
 export type NewSpell = typeof spells.$inferInsert;
+export type Enchant = typeof enchants.$inferSelect;
+export type NewEnchant = typeof enchants.$inferInsert;
 export type MagicReserve = typeof magicReserves.$inferSelect;
 export type NewMagicReserve = typeof magicReserves.$inferInsert;
 export type Effect = typeof effects.$inferSelect;
