@@ -14,16 +14,31 @@ import { deleteItem, updateItem } from '@/repositories/items';
  * the pencil, mirroring ArmorCard. Unlike armor, `equipped` is multi-slot —
  * tapping the tile toggles this item only, no other item is unequipped.
  */
-export default function ItemCard({ item }: { item: Item }) {
+export default function ItemCard({
+  item,
+  enchanted,
+}: {
+  item: Item;
+  /** This item has at least one enchant bound to it (see the Magie tab). */
+  enchanted?: boolean;
+}) {
   const [editing, setEditing] = useState(false);
   return editing ? (
     <ItemEditor item={item} onClose={() => setEditing(false)} />
   ) : (
-    <ItemSummary item={item} onEdit={() => setEditing(true)} />
+    <ItemSummary item={item} enchanted={enchanted} onEdit={() => setEditing(true)} />
   );
 }
 
-function ItemSummary({ item: it, onEdit }: { item: Item; onEdit: () => void }) {
+function ItemSummary({
+  item: it,
+  enchanted,
+  onEdit,
+}: {
+  item: Item;
+  enchanted?: boolean;
+  onEdit: () => void;
+}) {
   const theme = useProphecyTheme();
   const tileColor = it.equipped ? theme.colors.primary : theme.colors.onSurfaceVariant;
   return (
@@ -41,9 +56,16 @@ function ItemSummary({ item: it, onEdit }: { item: Item; onEdit: () => void }) {
           <Icon name="backpack" size={22} color={tileColor} />
         </Pressable>
         <View style={styles.itemMain}>
-          <Text style={styles.itemName} numberOfLines={1}>
-            {it.name || 'Objet'}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.itemName} numberOfLines={1}>
+              {it.name || 'Objet'}
+            </Text>
+            {enchanted ? (
+              <View accessibilityLabel="Enchanté" style={styles.enchantBadge}>
+                <Icon name="magic" size={14} color={theme.colors.primary} />
+              </View>
+            ) : null}
+          </View>
           <View style={styles.subRow}>
             {it.quantity !== 1 ? (
               <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>
@@ -133,7 +155,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   itemMain: { flex: 1, minWidth: 0 },
-  itemName: { fontSize: 14, fontWeight: '600' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  enchantBadge: { alignItems: 'center', justifyContent: 'center' },
   subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
   itemSub: { fontSize: 12 },
   qtyField: { flexGrow: 0, flexBasis: 120, minWidth: 120 },

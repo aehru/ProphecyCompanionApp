@@ -14,16 +14,31 @@ import { deleteArmor, equipArmor, updateArmor } from '@/repositories/armor';
  * mirroring WeaponCard. The shield button equips it (one armor equipped at a
  * time); current defense is tracked live on the Résumé tab.
  */
-export default function ArmorCard({ armor }: { armor: Armor }) {
+export default function ArmorCard({
+  armor,
+  enchanted,
+}: {
+  armor: Armor;
+  /** This armor has at least one enchant bound to it (see the Magie tab). */
+  enchanted?: boolean;
+}) {
   const [editing, setEditing] = useState(false);
   return editing ? (
     <ArmorEditor armor={armor} onClose={() => setEditing(false)} />
   ) : (
-    <ArmorSummary armor={armor} onEdit={() => setEditing(true)} />
+    <ArmorSummary armor={armor} enchanted={enchanted} onEdit={() => setEditing(true)} />
   );
 }
 
-function ArmorSummary({ armor: a, onEdit }: { armor: Armor; onEdit: () => void }) {
+function ArmorSummary({
+  armor: a,
+  enchanted,
+  onEdit,
+}: {
+  armor: Armor;
+  enchanted?: boolean;
+  onEdit: () => void;
+}) {
   const theme = useProphecyTheme();
   const tileColor = a.equipped ? theme.colors.primary : theme.colors.onSurfaceVariant;
   return (
@@ -42,9 +57,16 @@ function ArmorSummary({ armor: a, onEdit }: { armor: Armor; onEdit: () => void }
           <Icon name="shield" size={22} color={tileColor} />
         </Pressable>
         <View style={styles.itemMain}>
-          <Text style={styles.itemName} numberOfLines={1}>
-            {a.name || 'Armure'}
-          </Text>
+          <View style={styles.nameRow}>
+            <Text style={styles.itemName} numberOfLines={1}>
+              {a.name || 'Armure'}
+            </Text>
+            {enchanted ? (
+              <View accessibilityLabel="Enchantée" style={styles.enchantBadge}>
+                <Icon name="magic" size={14} color={theme.colors.primary} />
+              </View>
+            ) : null}
+          </View>
           <View style={styles.subRow}>
             <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>
               Défense {a.defenseCurrent}/{a.defenseMax}
@@ -129,7 +151,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   itemMain: { flex: 1, minWidth: 0 },
-  itemName: { fontSize: 14, fontWeight: '600' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  enchantBadge: { alignItems: 'center', justifyContent: 'center' },
   subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
   itemSub: { fontSize: 12 },
   maxField: { flexGrow: 0, flexBasis: 120, minWidth: 120 },
