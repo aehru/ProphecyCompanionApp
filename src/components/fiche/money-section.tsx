@@ -2,11 +2,10 @@ import React from 'react';
 import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
 
 import NumberField from '@/components/number-field';
-import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import { MONEY } from '@/constants/prophecy';
 
-/** Keyboard "next" wiring the fiche hands down for each editable field. */
+/** Keyboard "next" wiring the caller hands down for each editable field. */
 export type FieldChain = (key: string) => {
   inputRef: (el: RNTextInput | null) => void;
   returnKeyType: 'done' | 'next';
@@ -16,8 +15,9 @@ export type FieldChain = (key: string) => {
 
 /**
  * ARGENT: the four Drac coin counts. Read mode shows tiles; edit mode swaps in
- * numeric fields chained to each other by the keyboard's "next" key (the fiche
- * owns the chain because the order spans several sections).
+ * numeric fields chained to each other by the keyboard's "next" key. No own
+ * SectionCard — the caller supplies the title/icon/edit-toggle chrome (see
+ * the Inventaire tab's ARGENT section, wrapped in EditableSection).
  */
 export default function MoneySection({
   valueOf,
@@ -31,25 +31,23 @@ export default function MoneySection({
   editing: boolean;
 }) {
   return (
-    <SectionCard title="ARGENT" icon="coin">
-      <View style={styles.grid}>
-        {MONEY.map((m) =>
-          editing ? (
-            <NumberField
-              key={m.key}
-              fieldKey={m.key}
-              label={m.abbr}
-              value={valueOf(m.key)}
-              onChange={onChange}
-              style={styles.coin}
-              {...chain(m.key)}
-            />
-          ) : (
-            <StatChip key={m.key} label={m.abbr} value={valueOf(m.key)} style={styles.coin} />
-          ),
-        )}
-      </View>
-    </SectionCard>
+    <View style={styles.grid}>
+      {MONEY.map((m) =>
+        editing ? (
+          <NumberField
+            key={m.key}
+            fieldKey={m.key}
+            label={m.abbr}
+            value={valueOf(m.key)}
+            onChange={onChange}
+            style={styles.coin}
+            {...chain(m.key)}
+          />
+        ) : (
+          <StatChip key={m.key} label={m.abbr} value={valueOf(m.key)} style={styles.coin} />
+        ),
+      )}
+    </View>
   );
 }
 

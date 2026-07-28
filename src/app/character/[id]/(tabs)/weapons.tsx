@@ -1,26 +1,25 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Pressable, StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { IconButton, Text, TextInput } from 'react-native-paper';
+import { Text, TextInput } from 'react-native-paper';
 
 import ArmorCard from '@/components/armor-card';
 import ItemCard from '@/components/item-card';
-import NumberField from '@/components/number-field';
+import MoneySection from '@/components/fiche/money-section';
 import ShieldCard from '@/components/shield-card';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
 import EditableSection from '@/components/ui/editable-section';
-import StatChip from '@/components/ui/stat-chip';
 import WeaponCard from '@/components/weapon-card';
+import { MONEY } from '@/constants/prophecy';
 import type { ActualState } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
-import { rollInitiative } from '@/lib/dice';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
@@ -38,7 +37,10 @@ export default function CharacterWeaponsScreen() {
   const theme = useProphecyTheme();
   const [tab, setTab] = useState(0);
   const [itemQuery, setItemQuery] = useState('');
-  // ensure: initiative current-turn values live on actual_state, edited here.
+  // Keyboard "next" wiring for the ARGENT fields (self-contained here — money
+  // is the only chained field group left on this screen).
+  const moneyRefs = useRef<Record<string, RNTextInput | null>>({});
+  // ensure: money (dracs) lives on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
   const { data: weapons } = useLiveQuery(weaponsQuery(numId), [numId]);
   const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
@@ -66,88 +68,44 @@ export default function CharacterWeaponsScreen() {
   const enchantedKeys = new Set((enchants ?? []).map((e) => `${e.targetType}:${e.targetId}`));
   const isEnchanted = (kind: 'weapon' | 'armor' | 'shield' | 'item', id: number) =>
     enchantedKeys.has(`${kind}:${id}`);
+  const stRec = asNumRecord(state);
   // Wound malus + temporary effects, per caractéristique. Folded into each carac
   // value before the multiplier in a weapon's damage formula.
-  const wound = woundMalus(asNumRecord(state));
+  const wound = woundMalus(stRec);
   const effectList = effects ?? [];
   const caracModifier = (caracKey: string) => totalModifier(caracKey, effectList, wound);
-  const initiativeMax = rec.initiativeMax ?? 0;
-  const initStored = state?.initiativeValues ?? [];
 
-  const setInit = (i: number, n: number) => {
-    const next = Array.from({ length: initiativeMax }, (_, j) => (j === i ? n : initStored[j] ?? 0));
-    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
-    updateActualState(numId, { initiativeValues: next });
+  const setStateValue = (key: string, value: number) => {
+    setState((p) => (p ? ({ ...p, [key]: value } as ActualState) : p));
+    updateActualState(numId, { [key]: value } as Partial<ActualState>);
   };
 
-  // Roll all initiative dice at once: initiativeMax plain D10, stored descending.
-  const rollInit = () => {
-    const next = rollInitiative(initiativeMax);
-    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
-    updateActualState(numId, { initiativeValues: next });
+  const moneyKeys: string[] = MONEY.map((m) => m.key);
+  const moneyChain = (key: string) => {
+    const i = moneyKeys.indexOf(key);
+    const isLast = i === moneyKeys.length - 1;
+    return {
+      inputRef: (el: RNTextInput | null) => {
+        moneyRefs.current[key] = el;
+      },
+      returnKeyType: (isLast ? 'done' : 'next') as 'done' | 'next',
+      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as 'blurAndSubmit' | 'submit',
+      onSubmitEditing: () => moneyRefs.current[moneyKeys[i + 1]]?.focus(),
+    };
   };
 
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
-        <EditableSection
-          title="INITIATIVE"
-          action={() =>
-            initiativeMax > 0 ? (
-              <IconButton
-                icon={dsIcon('dice')}
-                size={18}
-                onPress={rollInit}
-                accessibilityLabel="Lancer l’initiative"
-                style={styles.initRoll}
-              />
-            ) : null
-          }>
-          {(editing) => {
-            if (initiativeMax <= 0) {
-              return (
-                <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                  Définis l’initiative (max) dans la fiche.
-                </Text>
-              );
-            }
-            const vals = Array.from({ length: initiativeMax }, (_, i) => initStored[i] ?? 0);
-            return (
-              <View style={styles.initGrid}>
-                {vals.map((val, i) => {
-                  if (editing) {
-                    return (
-                      <NumberField
-                        key={i}
-                        fieldKey={String(i)}
-                        label={`Dé ${i + 1}`}
-                        value={String(val)}
-                        onChange={(k, t) => setInit(Number(k), parseInt(t, 10) || 0)}
-                        style={styles.initField}
-                      />
-                    );
-                  }
-                  // Wound malus applies to initiative like any roll. A rolled die
-                  // driven to 0 or below is unusable → error border, like a weapon
-                  // with unmet prerequisites.
-                  const unusable = val > 0 && val + wound <= 0;
-                  return (
-                    <StatChip
-                      key={i}
-                      label={`Dé ${i + 1}`}
-                      value={String(val)}
-                      modifier={wound}
-                      style={
-                        unusable
-                          ? { borderColor: theme.colors.error, borderWidth: 1.5 }
-                          : undefined
-                      }
-                    />
-                  );
-                })}
-              </View>
-            );
-          }}
+        <EditableSection title="ARGENT" icon="coin">
+          {(editing) => (
+            <MoneySection
+              valueOf={(k) => String(stRec[k] ?? 0)}
+              onChange={(k, t) => setStateValue(k, Number(t) || 0)}
+              chain={moneyChain}
+              editing={editing}
+            />
+          )}
         </EditableSection>
 
         {/* Sub-tabs drive which category is shown (mirrors the campaign
@@ -295,9 +253,6 @@ export default function CharacterWeaponsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
-  initRoll: { margin: 0 },
-  initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
   tabs: { flexDirection: 'row', borderBottomWidth: StyleSheet.hairlineWidth },
   tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8 },
   tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
