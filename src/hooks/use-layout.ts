@@ -23,6 +23,10 @@ const SHORT_HEIGHT = 500;
 
 /** Reading width for a single text/form column. Past this, lines get unreadable. */
 export const CONTENT_MAX_WIDTH = 720;
+/** Cap for a screen showing two columns of sections side by side. */
+export const SPLIT_MAX_WIDTH = 1160;
+/** MD3 dialog max width. Paper's Dialog has none — it stretches edge to edge. */
+export const DIALOG_MAX_WIDTH = 560;
 
 export type NavMode = 'bar' | 'rail';
 
@@ -40,11 +44,26 @@ export function useLayout() {
   };
 }
 
+const widths = StyleSheet.create({
+  reading: { width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' },
+  split: { width: '100%', maxWidth: SPLIT_MAX_WIDTH, alignSelf: 'center' },
+  dialog: { width: '100%', maxWidth: DIALOG_MAX_WIDTH, alignSelf: 'center' },
+});
+
 /**
  * Caps and centers a scroll view's content instead of stretching it edge to
  * edge on a tablet. Spread into `contentContainerStyle`; it is a no-op below
  * {@link CONTENT_MAX_WIDTH}, so it is safe to apply unconditionally.
  */
-export const contentWidth = StyleSheet.create({
-  content: { width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' },
-}).content;
+export const contentWidth = widths.reading;
+
+/**
+ * Same, for a screen that lays its sections out with `<Columns>`: two columns
+ * need more room than one, so the cap widens only once the split kicks in.
+ */
+export function useSplitWidth() {
+  return useLayout().columns > 1 ? widths.split : widths.reading;
+}
+
+/** Appended to a dialog's `style` array so it stops stretching on a tablet. */
+export const dialogWidth = widths.dialog;
