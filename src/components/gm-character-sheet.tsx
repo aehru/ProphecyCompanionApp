@@ -105,6 +105,7 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
         style={styles.wrapper}
         contentContainerStyle={[
           styles.sheet,
+          contentWidth,
           { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border },
         ]}>
         <View style={styles.handle} />

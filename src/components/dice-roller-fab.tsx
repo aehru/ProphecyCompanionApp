@@ -5,6 +5,7 @@ import { Button, Dialog, Menu, Portal, Text } from 'react-native-paper';
 import NumberField from '@/components/number-field';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
+import { dialogWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { rollDice } from '@/lib/dice';
 
@@ -48,7 +49,7 @@ export default function DiceRollerFab() {
         <Dialog
           visible={open}
           onDismiss={() => setOpen(false)}
-          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
+          style={[styles.dialog, dialogWidth, { borderColor: theme.prophecy.border }]}>
           <Dialog.Title>Lancer les dés</Dialog.Title>
           <Dialog.Content style={styles.content}>
             <View style={styles.countRow}>
