@@ -220,20 +220,22 @@ export async function setShared(
  * shows up on the roster once the campaign is broadcasting — sharing while
  * paused stays local until you resume, like every other change.
  */
-export async function spawnNpc(campaignId: number, charUuid: string): Promise<number | null> {
+export async function spawnNpc(
+  campaignId: number,
+  charUuid: string,
+): Promise<{ id: number; nom: string } | null> {
   const rows = await db.select().from(characters).where(eq(characters.uuid, charUuid)).limit(1);
   const source = rows[0];
   if (!source) return null;
   // Read the names before duplicating, so the copy's own "(copie)" name can't
   // confuse the numbering.
   const taken = await db.select({ nom: characters.nom }).from(characters);
-  const newId = await duplicateCharacter(source.id);
-  if (newId == null) return null;
-  await updateCharacter(newId, {
-    nom: nextNpcName(source.nom, taken.map((r) => r.nom)),
-  });
-  await setShared(campaignId, newId, true);
-  return newId;
+  const id = await duplicateCharacter(source.id);
+  if (id == null) return null;
+  const nom = nextNpcName(source.nom, taken.map((r) => r.nom));
+  await updateCharacter(id, { nom });
+  await setShared(campaignId, id, true);
+  return { id, nom };
 }
 
 /** Live query: the GM's private notes for one campaign. */
