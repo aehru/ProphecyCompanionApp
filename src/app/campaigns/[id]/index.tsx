@@ -6,9 +6,7 @@ import {
   ActivityIndicator,
   Button,
   Card,
-  Dialog,
   IconButton,
-  Portal,
   Text,
 } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
@@ -25,9 +23,10 @@ import {
   StatusPill,
 } from '@/components/campaign/roster-visuals';
 import AppFab from '@/components/ui/app-fab';
+import DsDialog from '@/components/ui/ds-dialog';
 import type { Campaign } from '@/db/schema';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
-import { contentWidth, dialogWidth } from '@/hooks/use-layout';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { joinLink, type RosterEntry } from '@/lib/campaign-protocol';
 import {
@@ -230,19 +229,12 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
       </ScrollView>
 
       {/* Kick confirmation — purge only: the player's next share re-adds it. */}
-      <Portal>
-        <Dialog
-          visible={kickTarget != null}
-          onDismiss={() => setKickTarget(null)}
-          style={[styles.dialog, dialogWidth, { borderColor: theme.prophecy.border }]}>
-          <Dialog.Title>Retirer de la Compagnie ?</Dialog.Title>
-          <Dialog.Content>
-            <Text variant="bodyMedium">
-              « {String(kickTarget?.character.nom ?? 'Sans nom')} » sera retiré du serveur. Si son
-              joueur diffuse encore, il réapparaîtra à sa prochaine mise à jour.
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions>
+      <DsDialog
+        visible={kickTarget != null}
+        onDismiss={() => setKickTarget(null)}
+        title="Retirer de la Compagnie ?"
+        actions={
+          <>
             <Button onPress={() => setKickTarget(null)}>Annuler</Button>
             <Button
               mode="contained"
@@ -250,9 +242,13 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
               onPress={() => kickTarget && confirmKick(kickTarget)}>
               Retirer
             </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+          </>
+        }>
+        <Text variant="bodyMedium">
+          « {String(kickTarget?.character.nom ?? 'Sans nom')} » sera retiré du serveur. Si son
+          joueur diffuse encore, il réapparaîtra à sa prochaine mise à jour.
+        </Text>
+      </DsDialog>
 
       {/* Primary action: open the full company overview (GM roster with tabs). */}
       <View
@@ -387,9 +383,6 @@ const styles = StyleSheet.create({
   },
   bottomBar: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
   bottomBarRow: { flexDirection: 'row', gap: 10 },
-  // DS dialog surface (same as campaigns list / dice roller): tighter radius +
-  // a 1px gold hairline (Paper's default Dialog corner balloons and has no border).
-  dialog: { borderRadius: 18, borderWidth: 1 },
   consent: {},
   pausePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
 });

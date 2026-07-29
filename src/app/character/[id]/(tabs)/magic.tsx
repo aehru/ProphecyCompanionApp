@@ -3,7 +3,7 @@ import { useNavigation, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Button, Dialog, Icon, IconButton, Portal, Text, TextInput } from 'react-native-paper';
+import { Button, Icon, IconButton, Text, TextInput } from 'react-native-paper';
 
 import Bullets from '@/components/bullets';
 import NumberField from '@/components/number-field';
@@ -12,6 +12,7 @@ import SpellDetail from '@/components/spell-detail';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
+import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
@@ -30,7 +31,7 @@ import type {
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
-import { dialogWidth, useSplitWidth } from '@/hooks/use-layout';
+import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
@@ -365,27 +366,12 @@ export default function CharacterMagicScreen() {
         <AppFab icon={editing ? dsIcon('check') : dsIcon('edit')} onPress={() => setEditing((e) => !e)} />
       )}
 
-      <Portal>
-        <Dialog
-          visible={draft !== null}
-          onDismiss={() => setDraft(null)}
-          style={[styles.dialog, dialogWidth, { borderColor: theme.prophecy.border }]}>
-          <Dialog.Title>{draft?.id == null ? 'Nouvel objet' : 'Modifier l’objet'}</Dialog.Title>
-          <Dialog.Content style={styles.dialogContent}>
-            <TextInput
-              label="Nom de l’objet"
-              value={draft?.nom ?? ''}
-              onChangeText={(t) => setDraft((d) => (d ? { ...d, nom: t } : d))}
-            />
-            <NumberField
-              fieldKey="max"
-              label="Puces de magie"
-              value={draft?.max ?? ''}
-              onChange={(_, t) => setDraft((d) => (d ? { ...d, max: t } : d))}
-              style={styles.maxField}
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
+      <DsDialog
+        visible={draft !== null}
+        onDismiss={() => setDraft(null)}
+        title={draft?.id == null ? 'Nouvel objet' : 'Modifier l’objet'}
+        actions={
+          <>
             <Button onPress={() => setDraft(null)}>Annuler</Button>
             <Button
               mode="contained"
@@ -394,9 +380,21 @@ export default function CharacterMagicScreen() {
               disabled={!draft?.nom.trim()}>
               {draft?.id == null ? 'Ajouter' : 'Enregistrer'}
             </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+          </>
+        }>
+        <TextInput
+          label="Nom de l’objet"
+          value={draft?.nom ?? ''}
+          onChangeText={(t) => setDraft((d) => (d ? { ...d, nom: t } : d))}
+        />
+        <NumberField
+          fieldKey="max"
+          label="Puces de magie"
+          value={draft?.max ?? ''}
+          onChange={(_, t) => setDraft((d) => (d ? { ...d, max: t } : d))}
+          style={styles.maxField}
+        />
+      </DsDialog>
     </View>
   );
 }
@@ -515,10 +513,5 @@ const styles = StyleSheet.create({
   tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8 },
   tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
   tabContent: { gap: 10 },
-  // DS dialog surface (same as the campaigns dialogs / dice roller): tighter
-  // radius + a 1px gold hairline (Paper's default Dialog corner balloons and
-  // has no border).
-  dialog: { borderRadius: 18, borderWidth: 1 },
-  dialogContent: { gap: 16 },
   maxField: { flexGrow: 0, flexBasis: 110 },
 });
