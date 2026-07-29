@@ -7,7 +7,7 @@ import { IconButton, List, Menu, Text } from 'react-native-paper';
 
 import Icon, { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
-import { contentWidth } from '@/hooks/use-layout';
+import { useLayout, useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { parseImport } from '@/lib/character-transfer';
 import { pickImportText, shareExport } from '@/lib/character-transfer-io';
@@ -27,6 +27,8 @@ export default function CharactersListScreen() {
   const { data } = useLiveQuery(charactersListQuery());
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { columns } = useLayout();
+  const splitWidth = useSplitWidth();
 
   const isEmpty = !data || data.length === 0;
 
@@ -129,8 +131,12 @@ export default function CharactersListScreen() {
         </View>
       ) : (
         <FlatList
+          // FlatList refuses to change numColumns in place — remount on rotation.
+          key={columns}
+          numColumns={columns}
+          columnWrapperStyle={columns > 1 ? styles.column : undefined}
           data={data}
-          contentContainerStyle={[styles.listContent, contentWidth]}
+          contentContainerStyle={[styles.listContent, splitWidth]}
           ItemSeparatorComponent={RowSeparator}
           keyExtractor={keyExtractor}
           renderItem={({ item }) => {
@@ -139,6 +145,7 @@ export default function CharactersListScreen() {
               <List.Item
                 style={[
                   styles.item,
+                  columns > 1 && styles.itemInGrid,
                   {
                     backgroundColor: theme.prophecy.surfaceContainerLow,
                     borderColor: theme.colors.outlineVariant,
@@ -199,6 +206,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
   },
+  // Grid mode: each row is a wrapper, so cells must share it and gap themselves.
+  column: { gap: 8 },
+  // maxWidth only binds a lone item on the last row — without it, it stretches
+  // across both columns. flex:1 still wins for a full row (gap makes it < 50%).
+  itemInGrid: { flex: 1, maxWidth: '50%' },
   avatar: {
     width: 44,
     height: 44,
