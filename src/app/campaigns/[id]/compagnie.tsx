@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import React, { useDeferredValue, useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Divider, Snackbar, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -21,6 +21,8 @@ import {
   useTendColors,
 } from '@/components/campaign/roster-visuals';
 import GmCharacterSheet from '@/components/gm-character-sheet';
+import AppFab from '@/components/ui/app-fab';
+import { dsIcon } from '@/components/ui/icon';
 import { ATTRIBUTS, CARACTERISTIQUES, TENDANCES } from '@/constants/prophecy';
 import type { Campaign } from '@/db/schema';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
@@ -28,6 +30,7 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
+import { rollInitiativeFor } from '@/repositories/characters';
 
 const TABS = ['Attributs', 'Compétences', 'Tendances', 'Initiative'] as const;
 // The first three tabs swap each card's body; Initiative replaces the whole
@@ -69,9 +72,11 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   // Opening from the turn order goes straight to editing (that's the point of
   // tapping a PNJ mid-fight); opening from a card starts read-only.
   const [editOnOpen, setEditOnOpen] = useState(false);
-  const [spawned, setSpawned] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const { liveCampaignId } = useCampaignLive();
   const broadcasting = liveCampaignId === campaign.id;
+  // Only the GM's own PNJs are theirs to roll; players roll their own.
+  const npcs = roster.filter((e) => e.owner === 'gm');
 
   const openEditing = (entry: RosterEntry) => {
     setEditOnOpen(true);
@@ -84,7 +89,40 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
 
   const duplicate = async (charUuid: string) => {
     const created = await spawnNpc(campaign.id, charUuid);
-    if (created) setSpawned(created.nom);
+    if (!created) return;
+    // A spawn only reaches the roster through the server, so while broadcast is
+    // paused the new PNJ is real but invisible here — say so.
+    setToast(
+      broadcasting
+        ? `« ${created.nom} » ajouté à la Compagnie.`
+        : `« ${created.nom} » ajouté — visible à la reprise de la diffusion.`,
+    );
+  };
+
+  // Open a fight in one tap. Re-rolling mid-combat scrambles an order the table
+  // is already playing from and can't be undone, so confirm — but only when
+  // there is something to lose.
+  const rollNpcInitiative = () => {
+    const run = async () => {
+      const n = await rollInitiativeFor(npcs.map((e) => e.charId));
+      setToast(
+        n > 0
+          ? `Initiative lancée pour ${n} PNJ.`
+          : 'Aucun PNJ n’a de dés d’initiative.',
+      );
+    };
+    const alreadyRolled = npcs.some((e) => {
+      const init = e.character.initiative as { values?: number[] } | undefined;
+      return (init?.values?.length ?? 0) > 0;
+    });
+    if (!alreadyRolled) {
+      run();
+      return;
+    }
+    Alert.alert('Relancer l’initiative ?', 'L’initiative actuelle des PNJ sera remplacée.', [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Relancer', onPress: run },
+    ]);
   };
   // The search box drives `groupSkills` for EVERY roster card, so filtering a
   // full table is far more work than one keystroke should block on. The input
@@ -137,7 +175,8 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
       </View>
 
       {tab === INITIATIVE_TAB ? (
-        <InitiativeList roster={roster} bottomInset={insets.bottom} onSelect={openEditing} />
+        // The extra inset clears the roll FAB below.
+        <InitiativeList roster={roster} bottomInset={insets.bottom + 72} onSelect={openEditing} />
       ) : null}
 
       {tab === 1 ? (
@@ -201,12 +240,17 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         onDismiss={() => setSelected(null)}
       />
 
-      {/* A spawn only reaches the roster through the server, so while broadcast
-          is paused the new PNJ is real but invisible here — say so. */}
-      <Snackbar visible={spawned !== null} onDismiss={() => setSpawned(null)} duration={2500}>
-        {broadcasting
-          ? `« ${spawned} » ajouté à la Compagnie.`
-          : `« ${spawned} » ajouté — visible à la reprise de la diffusion.`}
+      {tab === INITIATIVE_TAB ? (
+        <AppFab
+          icon={dsIcon('dice')}
+          label="Lancer les PNJ"
+          disabled={npcs.length === 0}
+          onPress={rollNpcInitiative}
+        />
+      ) : null}
+
+      <Snackbar visible={toast !== null} onDismiss={() => setToast(null)} duration={2500}>
+        {toast ?? ''}
       </Snackbar>
     </View>
   );
