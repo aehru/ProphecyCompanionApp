@@ -2,10 +2,11 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import React, { useDeferredValue, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Divider, Text, TextInput } from 'react-native-paper';
+import { ActivityIndicator, Divider, Snackbar, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useGmRosterCtx } from '@/components/campaign/gm-roster-provider';
+import InitiativeList from '@/components/campaign/initiative-list';
 import {
   AttrTile,
   CaracTile,
@@ -22,12 +23,16 @@ import {
 import GmCharacterSheet from '@/components/gm-character-sheet';
 import { ATTRIBUTS, CARACTERISTIQUES, TENDANCES } from '@/constants/prophecy';
 import type { Campaign } from '@/db/schema';
+import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
 
-const TABS = ['Attributs', 'Compétences', 'Tendances'] as const;
+const TABS = ['Attributs', 'Compétences', 'Tendances', 'Initiative'] as const;
+// The first three tabs swap each card's body; Initiative replaces the whole
+// list with the table-wide turn order (one row per die, not per character).
+const INITIATIVE_TAB = 3;
 
 // Module-level so FlatList sees the same component type on every render (an
 // inline arrow remounts every separator whenever this screen re-renders — and
@@ -61,6 +66,26 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   const [tab, setTab] = useState(0);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<RosterEntry | null>(null);
+  // Opening from the turn order goes straight to editing (that's the point of
+  // tapping a PNJ mid-fight); opening from a card starts read-only.
+  const [editOnOpen, setEditOnOpen] = useState(false);
+  const [spawned, setSpawned] = useState<string | null>(null);
+  const { liveCampaignId } = useCampaignLive();
+  const broadcasting = liveCampaignId === campaign.id;
+
+  const openEditing = (entry: RosterEntry) => {
+    setEditOnOpen(true);
+    setSelected(entry);
+  };
+  const openReading = (entry: RosterEntry) => {
+    setEditOnOpen(false);
+    setSelected(entry);
+  };
+
+  const duplicate = async (charUuid: string) => {
+    const created = await spawnNpc(campaign.id, charUuid);
+    if (created) setSpawned(created.nom);
+  };
   // The search box drives `groupSkills` for EVERY roster card, so filtering a
   // full table is far more work than one keystroke should block on. The input
   // itself stays on `query` (immediate); the cards read the deferred copy, which
@@ -111,6 +136,10 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         })}
       </View>
 
+      {tab === INITIATIVE_TAB ? (
+        <InitiativeList roster={roster} bottomInset={insets.bottom} onSelect={openEditing} />
+      ) : null}
+
       {tab === 1 ? (
         <View style={styles.searchWrap}>
           <TextInput
@@ -127,7 +156,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         </View>
       ) : null}
 
-      {roster.length === 0 ? (
+      {tab === INITIATIVE_TAB ? null : roster.length === 0 ? (
         <View style={styles.centered}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', paddingHorizontal: 32 }}>
             Aucun personnage partagé pour l’instant.
@@ -157,7 +186,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
               tab={tab}
               query={deferredQuery}
               hasNote={noteByUuid.has(item.charId)}
-              onPress={() => setSelected(item)}
+              onPress={() => openReading(item)}
             />
           )}
         />
@@ -167,9 +196,18 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         entry={openEntry}
         note={openEntry ? (noteByUuid.get(openEntry.charId) ?? '') : ''}
         onSaveNote={(charUuid, body) => upsertGmNote(campaign.id, charUuid, body)}
-        onDuplicate={(charUuid) => spawnNpc(campaign.id, charUuid)}
+        onDuplicate={duplicate}
+        startEditing={editOnOpen}
         onDismiss={() => setSelected(null)}
       />
+
+      {/* A spawn only reaches the roster through the server, so while broadcast
+          is paused the new PNJ is real but invisible here — say so. */}
+      <Snackbar visible={spawned !== null} onDismiss={() => setSpawned(null)} duration={2500}>
+        {broadcasting
+          ? `« ${spawned} » ajouté à la Compagnie.`
+          : `« ${spawned} » ajouté — visible à la reprise de la diffusion.`}
+      </Snackbar>
     </View>
   );
 }

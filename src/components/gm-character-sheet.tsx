@@ -47,6 +47,8 @@ interface Props {
   onSaveNote: (charUuid: string, body: string) => void;
   /** Spawn another of this PNJ (GM-owned entries only). Omit to hide the action. */
   onDuplicate?: (charUuid: string) => void;
+  /** Open a GM-owned entry straight in edit mode (the initiative order does). */
+  startEditing?: boolean;
   onDismiss: () => void;
 }
 
@@ -65,6 +67,7 @@ export default function GmCharacterSheet({
   note,
   onSaveNote,
   onDuplicate,
+  startEditing = false,
   onDismiss,
 }: Props) {
   const theme = useProphecyTheme();
@@ -74,10 +77,13 @@ export default function GmCharacterSheet({
   // of the whole sheet (three rings + every skill row). It hands the text back
   // through a ref, read only when Enregistrer is pressed.
   const draftRef = useRef(note);
-  // GM's own PNJs only; opening a different character always lands in read mode.
+  // GM's own PNJs only. Opening a different character re-derives the mode, so a
+  // manual toggle sticks for as long as that character stays open.
   const [editing, setEditing] = useState(false);
   const canEdit = entry?.owner === 'gm';
-  useEffect(() => setEditing(false), [entry?.charId]);
+  useEffect(() => {
+    setEditing(canEdit && startEditing);
+  }, [entry?.charId, canEdit, startEditing]);
 
   const c = entry?.character;
   const attr = nums(c?.attributs);
