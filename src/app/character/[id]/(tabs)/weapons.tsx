@@ -12,13 +12,14 @@ import ShieldCard from '@/components/shield-card';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
+import Columns from '@/components/ui/columns';
 import EditableSection from '@/components/ui/editable-section';
 import WeaponCard from '@/components/weapon-card';
 import { MONEY } from '@/constants/prophecy';
 import type { ActualState } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
-import { contentWidth } from '@/hooks/use-layout';
+import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
@@ -38,6 +39,7 @@ export default function CharacterWeaponsScreen() {
   const theme = useProphecyTheme();
   const [tab, setTab] = useState(0);
   const [itemQuery, setItemQuery] = useState('');
+  const splitWidth = useSplitWidth();
   // Keyboard "next" wiring for the ARGENT fields (self-contained here — money
   // is the only chained field group left on this screen).
   const moneyRefs = useRef<Record<string, RNTextInput | null>>({});
@@ -97,7 +99,7 @@ export default function CharacterWeaponsScreen() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
+      <KeyboardAwareScrollView contentContainerStyle={[styles.container, splitWidth]} bottomOffset={24}>
         <EditableSection title="ARGENT" icon="coin">
           {(editing) => (
             <MoneySection
@@ -142,15 +144,17 @@ export default function CharacterWeaponsScreen() {
                 Aucune arme. Ajoutez-en une avec le bouton « Arme ».
               </Text>
             ) : (
-              list.map((w) => (
-                <WeaponCard
-                  key={w.id}
-                  weapon={w}
-                  caracValue={(k) => rec[k] ?? 0}
-                  caracModifier={caracModifier}
-                  enchanted={isEnchanted('weapon', w.id)}
-                />
-              ))
+              <Columns gap={10}>
+                {list.map((w) => (
+                  <WeaponCard
+                    key={w.id}
+                    weapon={w}
+                    caracValue={(k) => rec[k] ?? 0}
+                    caracModifier={caracModifier}
+                    enchanted={isEnchanted('weapon', w.id)}
+                  />
+                ))}
+              </Columns>
             )}
           </View>
         ) : null}
@@ -162,14 +166,16 @@ export default function CharacterWeaponsScreen() {
                 Aucune armure. Ajoutez-en une avec le bouton « Armure ».
               </Text>
             ) : (
-              armorList.map((a) => (
-                <ArmorCard
-                  key={a.id}
-                  armor={a}
-                  caracValue={(k) => rec[k] ?? 0}
-                  enchanted={isEnchanted('armor', a.id)}
-                />
-              ))
+              <Columns gap={10}>
+                {armorList.map((a) => (
+                  <ArmorCard
+                    key={a.id}
+                    armor={a}
+                    caracValue={(k) => rec[k] ?? 0}
+                    enchanted={isEnchanted('armor', a.id)}
+                  />
+                ))}
+              </Columns>
             )}
           </View>
         ) : null}
@@ -181,15 +187,17 @@ export default function CharacterWeaponsScreen() {
                 Aucun bouclier. Ajoutez-en un avec le bouton « Bouclier ».
               </Text>
             ) : (
-              shieldList.map((s) => (
-                <ShieldCard
-                  key={s.id}
-                  shield={s}
-                  caracValue={(k) => rec[k] ?? 0}
-                  caracModifier={caracModifier}
-                  enchanted={isEnchanted('shield', s.id)}
-                />
-              ))
+              <Columns gap={10}>
+                {shieldList.map((s) => (
+                  <ShieldCard
+                    key={s.id}
+                    shield={s}
+                    caracValue={(k) => rec[k] ?? 0}
+                    caracModifier={caracModifier}
+                    enchanted={isEnchanted('shield', s.id)}
+                  />
+                ))}
+              </Columns>
             )}
           </View>
         ) : null}
@@ -220,9 +228,11 @@ export default function CharacterWeaponsScreen() {
                 Aucun objet ne correspond à « {itemQuery} ».
               </Text>
             ) : (
-              filteredItems.map((it) => (
-                <ItemCard key={it.id} item={it} enchanted={isEnchanted('item', it.id)} />
-              ))
+              <Columns gap={10}>
+                {filteredItems.map((it) => (
+                  <ItemCard key={it.id} item={it} enchanted={isEnchanted('item', it.id)} />
+                ))}
+              </Columns>
             )}
           </View>
         ) : null}

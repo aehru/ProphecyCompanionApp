@@ -11,6 +11,7 @@ import SpellCard from '@/components/spell-card';
 import SpellDetail from '@/components/spell-detail';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
+import Columns from '@/components/ui/columns';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
@@ -29,7 +30,7 @@ import type {
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
-import { contentWidth } from '@/hooks/use-layout';
+import { dialogWidth, useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
@@ -82,6 +83,7 @@ export default function CharacterMagicScreen() {
   // Shared by the Réserve and Enchantements tabs: unlocks bullet-tapping plus
   // the reserve-object add/delete controls, same convention across this screen.
   const [editing, setEditing] = useEditToggle(navigation);
+  const splitWidth = useSplitWidth();
   // Add/edit dialog for reserve objects (short form — a dialog still fits).
   // `id: null` = creating a new one.
   const [draft, setDraft] = React.useState<{ id: number | null; nom: string; max: string } | null>(
@@ -163,7 +165,7 @@ export default function CharacterMagicScreen() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
+      <KeyboardAwareScrollView contentContainerStyle={[styles.container, splitWidth]} bottomOffset={24}>
         {/* Sub-tabs (mirrors the Armes/Armures/Objets tabs on the Inventaire
             screen). */}
         <View style={[styles.tabs, { borderBottomColor: theme.prophecy.borderSoft }]}>
@@ -191,7 +193,7 @@ export default function CharacterMagicScreen() {
         </View>
 
         {tab === 0 ? (
-          <>
+          <Columns>
             <SectionCard title="DISCIPLINES" icon="book">
               <View style={styles.grid}>
                 {DISCIPLINES.map((d) => (
@@ -299,7 +301,7 @@ export default function CharacterMagicScreen() {
                 ) : null}
               </SectionCard>
             )}
-          </>
+          </Columns>
         ) : null}
 
         {tab === 1 ? (
@@ -309,7 +311,11 @@ export default function CharacterMagicScreen() {
                 Aucun sortilège. Ajoutez-en un avec le bouton « Sort ».
               </Text>
             ) : (
-              spellList.map((sp) => <SpellCard key={sp.id} spell={sp} />)
+              <Columns gap={10}>
+                {spellList.map((sp) => (
+                  <SpellCard key={sp.id} spell={sp} />
+                ))}
+              </Columns>
             )}
           </View>
         ) : null}
@@ -324,20 +330,22 @@ export default function CharacterMagicScreen() {
                   : 'Ajoutez d’abord une arme, une armure, un bouclier ou un objet à enchanter.'}
               </Text>
             ) : (
-              enchants.map((e) => {
-                const target = targetOf(e);
-                return (
-                  <EnchantRow
-                    key={e.id}
-                    enchant={e}
-                    target={target}
-                    equipped={target ? isEquipped(e.targetType, target) : false}
-                    editing={editing}
-                    spells={spellList}
-                    onOpen={() => router.push(`/character/${numId}/enchant/${e.id}`)}
-                  />
-                );
-              })
+              <Columns gap={10}>
+                {enchants.map((e) => {
+                  const target = targetOf(e);
+                  return (
+                    <EnchantRow
+                      key={e.id}
+                      enchant={e}
+                      target={target}
+                      equipped={target ? isEquipped(e.targetType, target) : false}
+                      editing={editing}
+                      spells={spellList}
+                      onOpen={() => router.push(`/character/${numId}/enchant/${e.id}`)}
+                    />
+                  );
+                })}
+              </Columns>
             )}
           </View>
         ) : null}
@@ -361,7 +369,7 @@ export default function CharacterMagicScreen() {
         <Dialog
           visible={draft !== null}
           onDismiss={() => setDraft(null)}
-          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
+          style={[styles.dialog, dialogWidth, { borderColor: theme.prophecy.border }]}>
           <Dialog.Title>{draft?.id == null ? 'Nouvel objet' : 'Modifier l’objet'}</Dialog.Title>
           <Dialog.Content style={styles.dialogContent}>
             <TextInput

@@ -17,6 +17,7 @@ import NumberField from '@/components/number-field';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
+import Columns from '@/components/ui/columns';
 import EditableSection from '@/components/ui/editable-section';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
@@ -26,7 +27,7 @@ import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
-import { contentWidth } from '@/hooks/use-layout';
+import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { rollInitiative } from '@/lib/dice';
@@ -66,6 +67,7 @@ export default function CharacterFicheScreen() {
   const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).
   const [editingSheet, setEditingSheet] = useState(false);
+  const splitWidth = useSplitWidth();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -162,119 +164,121 @@ export default function CharacterFicheScreen() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
-        <SectionCard title="TENDANCES" icon="dragon" helper={editing ? "Appui +1, maintient -1" : undefined}>
-          <TendancesTriangle
-            get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
-            onValue={
-              editing ? (k, delta) => setCharValue(k, clamp((rec[k] ?? 0) + delta, 0)) : undefined
-            }
-            onSub={editing ? (k, n) => setCharValue(`${k}Sub`, n) : undefined}
+      <KeyboardAwareScrollView contentContainerStyle={[styles.container, splitWidth]} bottomOffset={24}>
+        <Columns>
+          <SectionCard title="TENDANCES" icon="dragon" helper={editing ? "Appui +1, maintient -1" : undefined}>
+            <TendancesTriangle
+              get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
+              onValue={
+                editing ? (k, delta) => setCharValue(k, clamp((rec[k] ?? 0) + delta, 0)) : undefined
+              }
+              onSub={editing ? (k, n) => setCharValue(`${k}Sub`, n) : undefined}
+            />
+          </SectionCard>
+
+          <StatGrid
+            title="ATTRIBUTS"
+            icon="rune"
+            stats={ATTRIBUTS}
+            valueOf={(k) => num(rec[k])}
+            modifierOf={(k) => totalModifier(k, effectList, wound)}
           />
-        </SectionCard>
 
-        <StatGrid
-          title="ATTRIBUTS"
-          icon="rune"
-          stats={ATTRIBUTS}
-          valueOf={(k) => num(rec[k])}
-          modifierOf={(k) => totalModifier(k, effectList, wound)}
-        />
+          <StatGrid
+            title="CARACTÉRISTIQUES"
+            icon="star"
+            stats={CARAC_TILES}
+            valueOf={(k) => num(rec[k])}
+            modifierOf={(k) => totalModifier(k, effectList, wound)}
+          />
 
-        <StatGrid
-          title="CARACTÉRISTIQUES"
-          icon="star"
-          stats={CARAC_TILES}
-          valueOf={(k) => num(rec[k])}
-          modifierOf={(k) => totalModifier(k, effectList, wound)}
-        />
-
-        <EditableSection
-          title="INITIATIVE"
-          action={() =>
-            initiativeMax > 0 ? (
-              <IconButton
-                icon={dsIcon('dice')}
-                size={18}
-                onPress={rollInit}
-                accessibilityLabel="Lancer l’initiative"
-                style={styles.initRoll}
-              />
-            ) : null
-          }>
-          {(initEditing) => {
-            if (initiativeMax <= 0) {
+          <EditableSection
+            title="INITIATIVE"
+            action={() =>
+              initiativeMax > 0 ? (
+                <IconButton
+                  icon={dsIcon('dice')}
+                  size={18}
+                  onPress={rollInit}
+                  accessibilityLabel="Lancer l’initiative"
+                  style={styles.initRoll}
+                />
+              ) : null
+            }>
+            {(initEditing) => {
+              if (initiativeMax <= 0) {
+                return (
+                  <Text style={{ color: theme.colors.onSurfaceVariant }}>
+                    Définis l’initiative (max) avec le crayon en haut.
+                  </Text>
+                );
+              }
+              const vals = Array.from({ length: initiativeMax }, (_, i) => initStored[i] ?? 0);
               return (
-                <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                  Définis l’initiative (max) avec le crayon en haut.
-                </Text>
-              );
-            }
-            const vals = Array.from({ length: initiativeMax }, (_, i) => initStored[i] ?? 0);
-            return (
-              <View style={styles.initGrid}>
-                {vals.map((val, i) => {
-                  if (initEditing) {
+                <View style={styles.initGrid}>
+                  {vals.map((val, i) => {
+                    if (initEditing) {
+                      return (
+                        <NumberField
+                          key={i}
+                          fieldKey={String(i)}
+                          label={`Dé ${i + 1}`}
+                          value={String(val)}
+                          onChange={(k, t) => setInit(Number(k), parseInt(t, 10) || 0)}
+                          style={styles.initField}
+                        />
+                      );
+                    }
+                    // Wound malus applies to initiative like any roll. A rolled die
+                    // driven to 0 or below is unusable → error border.
+                    const unusable = val > 0 && val + wound <= 0;
                     return (
-                      <NumberField
+                      <StatChip
                         key={i}
-                        fieldKey={String(i)}
                         label={`Dé ${i + 1}`}
                         value={String(val)}
-                        onChange={(k, t) => setInit(Number(k), parseInt(t, 10) || 0)}
-                        style={styles.initField}
+                        modifier={wound}
+                        style={
+                          unusable
+                            ? { borderColor: theme.colors.error, borderWidth: 1.5 }
+                            : undefined
+                        }
                       />
                     );
-                  }
-                  // Wound malus applies to initiative like any roll. A rolled die
-                  // driven to 0 or below is unusable → error border.
-                  const unusable = val > 0 && val + wound <= 0;
-                  return (
-                    <StatChip
-                      key={i}
-                      label={`Dé ${i + 1}`}
-                      value={String(val)}
-                      modifier={wound}
-                      style={
-                        unusable
-                          ? { borderColor: theme.colors.error, borderWidth: 1.5 }
-                          : undefined
-                      }
-                    />
-                  );
-                })}
-              </View>
-            );
-          }}
-        </EditableSection>
+                  })}
+                </View>
+              );
+            }}
+          </EditableSection>
 
-        <HealthSection
-          maxOf={(k) => rec[k] ?? 0}
-          currentOf={(k) => stRec[k] ?? 0}
-          onSet={setStateValue}
-          editing={editing}
-        />
+          <HealthSection
+            maxOf={(k) => rec[k] ?? 0}
+            currentOf={(k) => stRec[k] ?? 0}
+            onSet={setStateValue}
+            editing={editing}
+          />
 
-        <EffectsCard effects={effectList} skills={skills ?? []} editing={editing} />
+          <EffectsCard effects={effectList} skills={skills ?? []} editing={editing} />
 
-        {equippedArmor ? <ArmorSection armor={equippedArmor} editing={editing} /> : null}
-        {equippedShield ? <ShieldSection shield={equippedShield} editing={editing} /> : null}
+          {equippedArmor ? <ArmorSection armor={equippedArmor} editing={editing} /> : null}
+          {equippedShield ? <ShieldSection shield={equippedShield} editing={editing} /> : null}
 
-        <ResourcesSection
-          currentOf={(k) => stRec[k] ?? 0}
-          maxOf={(k) => rec[k] ?? 0}
-          adjust={adjustRes}
-          onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
-          editing={editing}
-        />
+          <ResourcesSection
+            currentOf={(k) => stRec[k] ?? 0}
+            maxOf={(k) => rec[k] ?? 0}
+            adjust={adjustRes}
+            onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
+            editing={editing}
+          />
 
-        {state ? (
-          <ConditionsCard state={state} editing={editing} onPersist={persistState} />
-        ) : null}
+          {state ? (
+            <ConditionsCard state={state} editing={editing} onPersist={persistState} />
+          ) : null}
 
-        <SectionCard title="BIOGRAPHIE" icon="scroll">
-          <Text>{txt(char.biographie)}</Text>
-        </SectionCard>
+          <SectionCard title="BIOGRAPHIE" icon="scroll">
+            <Text>{txt(char.biographie)}</Text>
+          </SectionCard>
+        </Columns>
       </KeyboardAwareScrollView>
 
       <AppFab icon="fire" onPress={addEffect} offset={72} />
