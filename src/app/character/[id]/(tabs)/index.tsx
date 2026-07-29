@@ -11,6 +11,7 @@ import SectionCard from '@/components/ui/section-card';
 import { RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { mediaUri, pickCharacterMedia } from '@/lib/media';
@@ -72,7 +73,7 @@ export default function CharacterDashboardScreen() {
 
   return (
     <View style={styles.root}>
-    <ScrollView style={styles.root} contentContainerStyle={styles.container}>
+    <ScrollView style={styles.root} contentContainerStyle={[styles.container, contentWidth]}>
       {/* Hero card: identity + tendances ring gauges (replacing health/magic). */}
       <View style={[styles.hero, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border }]}>
         <View style={styles.identity}>

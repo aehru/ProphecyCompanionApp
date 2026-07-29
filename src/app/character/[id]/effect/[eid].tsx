@@ -8,6 +8,7 @@ import { Text } from 'react-native-paper';
 import { EffectEditor } from '@/components/effects-card';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { effectQuery } from '@/repositories/effects';
 import { skillsQuery } from '@/repositories/skills';
@@ -29,7 +30,7 @@ export default function EffectEditModal() {
     <View style={styles.root}>
       {effect ? (
         <>
-          <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+          <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
             <EffectEditor effect={effect} skills={skills ?? []} onClose={() => router.back()} />
           </KeyboardAwareScrollView>
           <AppFab icon={dsIcon('check')} onPress={() => router.back()} />

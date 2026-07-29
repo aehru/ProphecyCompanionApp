@@ -7,6 +7,7 @@ import { Button, Dialog, IconButton, List, Portal, Text, TextInput } from 'react
 import { QrScannerModal } from '@/components/campaign/qr-scanner';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   campaignsListQuery,
@@ -141,7 +142,7 @@ export default function CampaignsScreen() {
       ) : (
         <FlatList
           data={campaigns}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, contentWidth]}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           keyExtractor={(c) => String(c.id)}
           renderItem={({ item }) => (

@@ -26,6 +26,7 @@ import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { rollInitiative } from '@/lib/dice';
@@ -161,7 +162,7 @@ export default function CharacterFicheScreen() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+      <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
         <SectionCard title="TENDANCES" icon="dragon" helper={editing ? "Appui +1, maintient -1" : undefined}>
           <TendancesTriangle
             get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}

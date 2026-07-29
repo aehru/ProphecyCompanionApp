@@ -27,6 +27,7 @@ import {
 import AppFab from '@/components/ui/app-fab';
 import type { Campaign } from '@/db/schema';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { joinLink, type RosterEntry } from '@/lib/campaign-protocol';
 import {
@@ -108,7 +109,7 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Stack.Screen options={{ title: campaign.name }} />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scroll, contentWidth]} showsVerticalScrollIndicator={false}>
         <View style={styles.statusRow}>
           <ServerStatusChip status={status} />
           {serverError ? (
@@ -320,7 +321,7 @@ function PlayerSalon({ campaign }: { campaign: Campaign }) {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Stack.Screen options={{ title: campaign.name }} />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scroll, contentWidth]} showsVerticalScrollIndicator={false}>
         <View style={styles.statusRow}>
           {isLiveHere ? (
             <ServerStatusChip status={status} />

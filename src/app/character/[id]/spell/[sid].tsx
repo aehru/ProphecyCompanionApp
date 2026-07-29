@@ -8,6 +8,7 @@ import { Text } from 'react-native-paper';
 import { SpellEditor } from '@/components/spell-card';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { spellQuery } from '@/repositories/spells';
 
@@ -28,7 +29,7 @@ export default function SpellEditModal() {
     <View style={styles.root}>
       {spell ? (
         <>
-          <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+          <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
             <SpellEditor spell={spell} onClose={() => router.back()} />
           </KeyboardAwareScrollView>
           <AppFab icon={dsIcon('check')} onPress={() => router.back()} />

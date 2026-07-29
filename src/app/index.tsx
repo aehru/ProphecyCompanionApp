@@ -7,6 +7,7 @@ import { IconButton, List, Menu, Text } from 'react-native-paper';
 
 import Icon, { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { parseImport } from '@/lib/character-transfer';
 import { pickImportText, shareExport } from '@/lib/character-transfer-io';
@@ -129,7 +130,7 @@ export default function CharactersListScreen() {
       ) : (
         <FlatList
           data={data}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, contentWidth]}
           ItemSeparatorComponent={RowSeparator}
           keyExtractor={keyExtractor}
           renderItem={({ item }) => {

@@ -21,6 +21,7 @@ import {
   TENDANCES,
 } from '@/constants/prophecy';
 import StatChip from '@/components/ui/stat-chip';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { woundMalus } from '@/lib/modifiers';
@@ -119,7 +120,7 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
           </View>
         </View>
 
-        <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={[styles.body, contentWidth]} showsVerticalScrollIndicator={false}>
           {/* Ressources (replaces the design's "Vie" tile) */}
           <Section title="Ressources" theme={theme}>
             <View style={styles.grid}>

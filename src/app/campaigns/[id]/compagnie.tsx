@@ -22,6 +22,7 @@ import {
 import GmCharacterSheet from '@/components/gm-character-sheet';
 import { ATTRIBUTS, CARACTERISTIQUES, TENDANCES } from '@/constants/prophecy';
 import type { Campaign } from '@/db/schema';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { campaignQuery, gmNotesQuery, upsertGmNote } from '@/repositories/campaigns';
@@ -139,7 +140,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
           // flex: 1 claims the remaining height (like the salon's ScrollView);
           // the bottom inset keeps the last card clear of the gesture area.
           style={[styles.listFill, stale ? styles.listStale : null]}
-          contentContainerStyle={[styles.list, { paddingBottom: 16 + insets.bottom }]}
+          contentContainerStyle={[styles.list, { paddingBottom: 16 + insets.bottom }, contentWidth]}
           ItemSeparatorComponent={CardSeparator}
           // Cards are tall (rings / skill groups): render a screenful, not the
           // whole table, and drop off-screen rows on Android.

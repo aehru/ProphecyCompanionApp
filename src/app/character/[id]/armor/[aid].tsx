@@ -8,6 +8,7 @@ import { Text } from 'react-native-paper';
 import ArmorEditor from '@/components/armor-editor';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { armorItemQuery } from '@/repositories/armor';
 
@@ -26,7 +27,7 @@ export default function ArmorEditModal() {
     <View style={styles.root}>
       {armor ? (
         <>
-          <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+          <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
             <ArmorEditor armor={armor} onClose={() => router.back()} />
           </KeyboardAwareScrollView>
           <AppFab icon={dsIcon('check')} onPress={() => router.back()} />

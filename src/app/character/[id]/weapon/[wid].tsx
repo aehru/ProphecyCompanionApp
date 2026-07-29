@@ -8,6 +8,7 @@ import { Text } from 'react-native-paper';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import WeaponEditor from '@/components/weapon-editor';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { weaponQuery } from '@/repositories/weapons';
 
@@ -27,7 +28,7 @@ export default function WeaponEditModal() {
     <View style={styles.root}>
       {weapon ? (
         <>
-          <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+          <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
             <WeaponEditor weapon={weapon} onClose={() => router.back()} />
           </KeyboardAwareScrollView>
           <AppFab icon={dsIcon('check')} onPress={() => router.back()} />

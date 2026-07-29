@@ -18,6 +18,7 @@ import { MONEY } from '@/constants/prophecy';
 import type { ActualState } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
@@ -96,7 +97,7 @@ export default function CharacterWeaponsScreen() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+      <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
         <EditableSection title="ARGENT" icon="coin">
           {(editing) => (
             <MoneySection

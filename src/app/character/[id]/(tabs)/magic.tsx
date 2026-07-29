@@ -29,6 +29,7 @@ import type {
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, num } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
@@ -162,7 +163,7 @@ export default function CharacterMagicScreen() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+      <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
         {/* Sub-tabs (mirrors the Armes/Armures/Objets tabs on the Inventaire
             screen). */}
         <View style={[styles.tabs, { borderBottomColor: theme.prophecy.borderSoft }]}>

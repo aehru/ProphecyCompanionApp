@@ -26,6 +26,7 @@ import {
   WOUND_LEVELS,
 } from '@/constants/prophecy';
 import type { Character, NewCharacter } from '@/db/schema';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { type FormValues, fromFormValues, toFormValues } from '@/lib/character-values';
 
@@ -161,7 +162,7 @@ export default function CharacterForm({
       </View>
 
       <KeyboardAwareScrollView
-        contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }]}
+        contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }, contentWidth]}
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}>
         {tab === 'identite' ? (

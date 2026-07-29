@@ -7,6 +7,7 @@ import { Searchbar, Text } from 'react-native-paper';
 import Icon from '@/components/ui/icon';
 import { SHIELD_CATALOG, type ShieldPreset } from '@/data/shield-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { createShield } from '@/repositories/shields';
 
@@ -37,7 +38,7 @@ export default function ShieldCatalogModal() {
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+    <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
       <Searchbar
         placeholder="Rechercher un bouclier"
         value={query}
