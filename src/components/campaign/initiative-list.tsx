@@ -130,14 +130,18 @@ function OrderRow({
         <Text style={{ fontFamily: 'Cinzel_600SemiBold', color: theme.colors.onSurface }} numberOfLines={1}>
           {row.nom}
         </Text>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {row.unusable ? `Dé ${row.dieIndex + 1} · inutilisable` : `Dé ${row.dieIndex + 1}`}
-        </Text>
+        {row.unusable ? (
+          <Text variant="bodySmall" style={{ color: theme.colors.error }}>
+            Inutilisable
+          </Text>
+        ) : null}
       </View>
       {row.owner === 'gm' ? <OwnerBadge /> : null}
       <StatusPill online={row.online} />
+      {/* Same reading as every other initiative display: the roll is the value,
+          the wound malus is the badge. The rank column already conveys order. */}
       <StatChip
-        label={`= ${row.effective}`}
+        label={`Dé ${row.dieIndex + 1}`}
         value={String(row.raw)}
         modifier={row.malus}
         style={row.unusable ? { borderColor: theme.colors.error, borderWidth: 1.5 } : undefined}
