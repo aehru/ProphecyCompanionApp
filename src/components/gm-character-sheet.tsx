@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Divider, IconButton, Modal, Portal, Text, TextInput } from 'react-native-paper';
 
@@ -82,13 +82,11 @@ export function GmSheetBody({
   // of the whole sheet (three rings + every skill row). It hands the text back
   // through a ref, read only when Enregistrer is pressed.
   const draftRef = useRef(note);
-  // GM's own PNJs only. Opening a different character re-derives the mode, so a
-  // manual toggle sticks for as long as that character stays open.
-  const [editing, setEditing] = useState(false);
+  // GM's own PNJs only. Callers key this component by charId, so opening
+  // another character remounts it and the initial mode is simply the initial
+  // state — no effect syncing props into state after the fact.
   const canEdit = entry?.owner === 'gm';
-  useEffect(() => {
-    setEditing(canEdit && startEditing);
-  }, [entry?.charId, canEdit, startEditing]);
+  const [editing, setEditing] = useState(canEdit && startEditing);
 
   const c = entry?.character;
   const attr = nums(c?.attributs);
@@ -117,7 +115,9 @@ export function GmSheetBody({
 
   const save = () => {
     onSaveNote(entry.charId, draftRef.current);
-    onDismiss();
+    // Closing IS the confirmation for a bottom sheet. A side pane is meant to
+    // stay put, so saving a note there leaves the character open.
+    if (!embedded) onDismiss();
   };
 
   return (
@@ -153,49 +153,12 @@ export function GmSheetBody({
             <PnjInPlayEditor charUuid={entry.charId} />
           ) : (
             <Section title="Ressources" theme={theme}>
-              <View style={styles.grid}>
-                {RESOURCES.map((r) => {
-                  const pool = resources[r.key];
-                  return (
-                    <View
-                      key={r.key}
-                      style={[
-                        styles.poolTile,
-                        { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.prophecy.borderSoft },
-                      ]}>
-                      <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                        {r.label}
-                      </Text>
-                      <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
-                        {pool?.current ?? 0} / {pool?.max ?? 0}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
+              <ResourceTiles resources={resources} />
             </Section>
           )}
 
-          {/* Tendances — rings (0–10 sub) with the main value below */}
           <Section title="Tendances" theme={theme}>
-            <View style={styles.tendRow}>
-              {TENDANCES.map((t) => (
-                <View key={t.key} style={{ alignItems: 'center', gap: 6 }}>
-                  <TendanceRing
-                    value={tend[t.key] ?? 0}
-                    fill={tend[`${t.key}Sub`] ?? 0}
-                    color={tendColors[t.key]}
-                    size={82}
-                  />
-                  <Text style={{ fontSize: 12, fontWeight: '600', color: theme.colors.onSurface }}>
-                    {t.label}
-                  </Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    {tend[`${t.key}Sub`] ?? 0}/10
-                  </Text>
-                </View>
-              ))}
-            </View>
+            <TendanceRings tend={tend} colors={tendColors} />
           </Section>
 
           {/* Attributs */}
@@ -221,70 +184,18 @@ export function GmSheetBody({
             <SkillGroupsView groups={groups} emptyLabel="Aucune compétence apprise." />
           </Section>
 
-          {/* Effets actifs (bonus/malus) */}
           {effects.length > 0 ? (
             <Section title="Effets actifs" theme={theme}>
-              <View style={{ gap: 6 }}>
-                {effects.map((e, i) => {
-                  const v = e.value ?? 0;
-                  const target = EFFECT_TARGET_LABEL[e.target ?? 'all'] ?? e.target ?? 'Tous les jets';
-                  const unit = EFFECT_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
-                  return (
-                    <View key={`${e.label}-${i}`} style={styles.effectRow}>
-                      <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>
-                        {e.label || 'Effet'} · {target}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: 'Cinzel_600SemiBold',
-                          color: v < 0 ? theme.colors.error : theme.colors.primary,
-                        }}>
-                        {v > 0 ? `+${v}` : v}
-                      </Text>
-                      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, minWidth: 64, textAlign: 'right' }}>
-                        {e.durationUnit === 'permanent' ? unit : `${e.durationRemaining ?? 0} ${unit}`}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
+              <EffectsList effects={effects} />
             </Section>
           ) : null}
 
-          {/* Initiative — same reading as the player's weapons screen: wound
-              malus badge on each die, error border when a rolled die is driven
-              to 0 or below (unusable). */}
           <Section title="Initiative" theme={theme}>
-            {initiative.values?.length ? (
-              <View style={styles.grid}>
-                {initiative.values.map((val, i) => {
-                  const unusable = val > 0 && val + wound <= 0;
-                  return (
-                    <StatChip
-                      key={i}
-                      label={`Dé ${i + 1}`}
-                      value={String(val)}
-                      modifier={wound}
-                      style={
-                        unusable
-                          ? { borderColor: theme.colors.error, borderWidth: 1.5 }
-                          : undefined
-                      }
-                    />
-                  );
-                })}
-              </View>
-            ) : (
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                {`${initiative.max ?? 0} dé(s)`}
-              </Text>
-            )}
+            <InitiativeChips values={initiative.values ?? []} max={initiative.max ?? 0} wound={wound} />
           </Section>
 
-          {/* GM private notes */}
           <Section title="Notes privées (MJ)" theme={theme}>
-            {/* keyed by character so opening another one reseeds the draft */}
-            <GmNotes key={entry.charId} note={note} draftRef={draftRef} />
+            <GmNotes note={note} draftRef={draftRef} />
           </Section>
         </ScrollView>
 
@@ -325,9 +236,141 @@ export default function GmCharacterSheet(props: Props) {
           contentWidth,
           { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border },
         ]}>
-        <GmSheetBody {...props} />
+        {/* Keyed so switching character resets edit mode and the note draft. */}
+        <GmSheetBody key={props.entry.charId} {...props} />
       </Modal>
     </Portal>
+  );
+}
+
+/** Maîtrise / Chance pools, read-only (the editor covers them when editing). */
+function ResourceTiles({ resources }: { resources: PoolRecord }) {
+  const theme = useProphecyTheme();
+  return (
+    <View style={styles.grid}>
+      {RESOURCES.map((r) => {
+        const pool = resources[r.key];
+        return (
+          <View
+            key={r.key}
+            style={[
+              styles.poolTile,
+              { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.prophecy.borderSoft },
+            ]}>
+            <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {r.label}
+            </Text>
+            <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
+              {pool?.current ?? 0} / {pool?.max ?? 0}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+/** The three tendance rings: 0–10 sub-level filled, main value under it. */
+function TendanceRings({
+  tend,
+  colors,
+}: {
+  tend: NumRecord;
+  colors: Record<string, string>;
+}) {
+  const theme = useProphecyTheme();
+  return (
+    <View style={styles.tendRow}>
+      {TENDANCES.map((t) => (
+        <View key={t.key} style={styles.tendCell}>
+          <TendanceRing
+            value={tend[t.key] ?? 0}
+            fill={tend[`${t.key}Sub`] ?? 0}
+            color={colors[t.key]}
+            size={82}
+          />
+          <Text style={{ fontSize: 12, fontWeight: '600', color: theme.colors.onSurface }}>
+            {t.label}
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            {tend[`${t.key}Sub`] ?? 0}/10
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** Active bonus/malus, with the remaining duration in its own unit. */
+function EffectsList({ effects }: { effects: SharedEffect[] }) {
+  const theme = useProphecyTheme();
+  return (
+    <View style={styles.effectList}>
+      {effects.map((e, i) => {
+        const v = e.value ?? 0;
+        const target = EFFECT_TARGET_LABEL[e.target ?? 'all'] ?? e.target ?? 'Tous les jets';
+        const unit = EFFECT_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
+        return (
+          <View key={`${e.label}-${i}`} style={styles.effectRow}>
+            <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>
+              {e.label || 'Effet'} · {target}
+            </Text>
+            <Text
+              style={{
+                fontFamily: 'Cinzel_600SemiBold',
+                color: v < 0 ? theme.colors.error : theme.colors.primary,
+              }}>
+              {v > 0 ? `+${v}` : v}
+            </Text>
+            <Text
+              variant="bodySmall"
+              style={[styles.effectDuration, { color: theme.colors.onSurfaceVariant }]}>
+              {e.durationUnit === 'permanent' ? unit : `${e.durationRemaining ?? 0} ${unit}`}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+/**
+ * Rolled dice, read like the player's own sheet: wound malus badged on each,
+ * error border once a die is driven to 0 or below (the action is lost).
+ */
+function InitiativeChips({
+  values,
+  max,
+  wound,
+}: {
+  values: number[];
+  max: number;
+  wound: number;
+}) {
+  const theme = useProphecyTheme();
+  if (values.length === 0) {
+    return (
+      <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+        {`${max} dé(s)`}
+      </Text>
+    );
+  }
+  return (
+    <View style={styles.grid}>
+      {values.map((val, i) => (
+        <StatChip
+          key={i}
+          label={`Dé ${i + 1}`}
+          value={String(val)}
+          modifier={wound}
+          style={
+            val > 0 && val + wound <= 0
+              ? { borderColor: theme.colors.error, borderWidth: 1.5 }
+              : undefined
+          }
+        />
+      ))}
+    </View>
   );
 }
 
@@ -413,7 +456,10 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   tendRow: { flexDirection: 'row', justifyContent: 'space-around', gap: 6 },
+  tendCell: { alignItems: 'center', gap: 6 },
+  effectList: { gap: 6 },
   effectRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  effectDuration: { minWidth: 64, textAlign: 'right' },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, paddingTop: 8 },
   // Pushes Fermer/Enregistrer to the right, keeping the spawn action apart.
   spawn: { marginRight: 'auto' },

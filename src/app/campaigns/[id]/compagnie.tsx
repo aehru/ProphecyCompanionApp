@@ -255,6 +255,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
             ]}>
             {openEntry ? (
               <GmSheetBody
+                key={openEntry.charId}
                 embedded
                 entry={openEntry}
                 note={noteByUuid.get(openEntry.charId) ?? ''}
