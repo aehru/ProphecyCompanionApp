@@ -3,12 +3,13 @@
     "name": "Prophecy Companion App",
     "slug": "prophecy-app",
     "version": "0.10.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "prophecyapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "supportsTablet": true
     },
     "android": {
       "versionCode": 14,
