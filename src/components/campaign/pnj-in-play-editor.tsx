@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { ActivityIndicator, Text } from 'react-native-paper';
 
 import ConditionsCard from '@/components/conditions-card';
 import EffectsCard from '@/components/effects-card';
@@ -33,14 +33,27 @@ import { skillsQuery } from '@/repositories/skills';
  */
 export default function PnjInPlayEditor({ charUuid }: { charUuid: string }) {
   const theme = useProphecyTheme();
-  const { data: charRows } = useLiveQuery(characterByUuidQuery(charUuid), [charUuid]);
+  // `updatedAt` is undefined until a query has actually run. useLiveQuery seeds
+  // `data` with [] and fetches in an effect, so without this an empty result is
+  // indistinguishable from "not loaded yet" — and the not-found message below
+  // would flash on every open.
+  const { data: charRows, updatedAt: charLoaded } = useLiveQuery(
+    characterByUuidQuery(charUuid),
+    [charUuid],
+  );
   const char = charRows?.[0] ?? null;
   // 0 matches nothing — keeps the hook order stable while the character loads.
   const localId = char?.id ?? 0;
-  const { data: stateRows } = useLiveQuery(actualStateQuery(localId), [localId]);
+  const { data: stateRows, updatedAt: stateLoaded } = useLiveQuery(actualStateQuery(localId), [
+    localId,
+  ]);
   const { data: effects } = useLiveQuery(effectsQuery(localId), [localId]);
   const { data: skills } = useLiveQuery(skillsQuery(localId), [localId]);
   const state = stateRows?.[0] ?? null;
+
+  if (!charLoaded || (char && !stateLoaded)) {
+    return <ActivityIndicator style={styles.loading} />;
+  }
 
   // The PNJ is shared from another device: the projection is all we have.
   if (!char || !state) {
@@ -86,4 +99,5 @@ export default function PnjInPlayEditor({ charUuid }: { charUuid: string }) {
 
 const styles = StyleSheet.create({
   root: { gap: 18 },
+  loading: { paddingVertical: 24 },
 });
