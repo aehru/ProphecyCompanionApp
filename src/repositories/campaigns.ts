@@ -10,7 +10,10 @@ import {
   playerHello,
   unshareMsg,
 } from '@/lib/campaign-protocol';
+import { nextNpcName } from '@/lib/npc-name';
 import { newUuid } from '@/lib/uuid';
+import { updateCharacter } from '@/repositories/characters';
+import { duplicateCharacter } from '@/repositories/transfer';
 
 /** Live query for the campaign list, for useLiveQuery. */
 export function campaignsListQuery() {
@@ -204,6 +207,33 @@ export async function setShared(
   if (existing.length === 0) {
     await db.insert(campaignShares).values({ campaignId, characterId });
   }
+}
+
+/**
+ * Spawn another copy of one of the GM's PNJs — the "three identical gardes,
+ * three separate wound tracks" case. The copy is a full character row of its
+ * own (fresh uuid, own `actual_state`), numbered into the source's series
+ * rather than suffixed "(copie)", and shared into the campaign straight away
+ * so it lands on the roster without a second trip.
+ *
+ * Keyed by uuid because the caller holds a roster entry, not a local id. It
+ * shows up on the roster once the campaign is broadcasting — sharing while
+ * paused stays local until you resume, like every other change.
+ */
+export async function spawnNpc(campaignId: number, charUuid: string): Promise<number | null> {
+  const rows = await db.select().from(characters).where(eq(characters.uuid, charUuid)).limit(1);
+  const source = rows[0];
+  if (!source) return null;
+  // Read the names before duplicating, so the copy's own "(copie)" name can't
+  // confuse the numbering.
+  const taken = await db.select({ nom: characters.nom }).from(characters);
+  const newId = await duplicateCharacter(source.id);
+  if (newId == null) return null;
+  await updateCharacter(newId, {
+    nom: nextNpcName(source.nom, taken.map((r) => r.nom)),
+  });
+  await setShared(campaignId, newId, true);
+  return newId;
 }
 
 /** Live query: the GM's private notes for one campaign. */
