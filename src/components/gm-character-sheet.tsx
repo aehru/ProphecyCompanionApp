@@ -26,7 +26,7 @@ import StatChip from '@/components/ui/stat-chip';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
-import { woundMalus } from '@/lib/modifiers';
+import { sharedWoundMalus } from '@/lib/initiative-order';
 
 // The projection arrives as opaque JSON (tolerant reader); read it defensively.
 type NumRecord = Record<string, number>;
@@ -62,14 +62,19 @@ interface Props {
  * <PnjInPlayEditor> — that one reaches past the projection to the local row and
  * edits the in-play values. Everything below it stays readable while you edit.
  */
-export default function GmCharacterSheet({
+export function GmSheetBody({
   entry,
   note,
   onSaveNote,
   onDuplicate,
   startEditing = false,
   onDismiss,
-}: Props) {
+  embedded = false,
+}: Props & {
+  /** Rendered as a side pane rather than a bottom sheet: no drag handle, and
+   *  the scroll area claims the pane's height instead of hugging its content. */
+  embedded?: boolean;
+}) {
   const theme = useProphecyTheme();
   const attrColors = useAttrColors();
   const tendColors = useTendColors();
@@ -107,13 +112,8 @@ export default function GmCharacterSheet({
   const initiative = (c.initiative ?? {}) as { max?: number; values?: number[] };
   const effects = Array.isArray(c.effects) ? (c.effects as SharedEffect[]) : [];
   // Wound boxes aren't surfaced as a section, but the wound malus still applies
-  // to initiative. The projection ships wounds as {key: {current, max}}; flatten
-  // to the `${key}Current` shape woundMalus expects.
-  const wound = woundMalus(
-    Object.fromEntries(
-      Object.entries(pools(c.wounds)).map(([k, p]) => [`${k}Current`, p?.current ?? 0]),
-    ),
-  );
+  // to initiative — same reading the turn order uses.
+  const wound = sharedWoundMalus(pools(c.wounds));
 
   const save = () => {
     onSaveNote(entry.charId, draftRef.current);
@@ -121,17 +121,8 @@ export default function GmCharacterSheet({
   };
 
   return (
-    <Portal>
-      <Modal
-        visible
-        onDismiss={onDismiss}
-        style={styles.wrapper}
-        contentContainerStyle={[
-          styles.sheet,
-          contentWidth,
-          { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border },
-        ]}>
-        <View style={styles.handle} />
+    <>
+        {embedded ? null : <View style={styles.handle} />}
         <View style={styles.titleRow}>
           <PlayerAvatar nom={String(c.nom ?? 'Sans nom')} online={entry.online} size={48} />
           <View style={{ flex: 1 }}>
@@ -151,7 +142,10 @@ export default function GmCharacterSheet({
           ) : null}
         </View>
 
-        <ScrollView contentContainerStyle={[styles.body, contentWidth]} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={embedded ? styles.bodyFill : undefined}
+          contentContainerStyle={[styles.body, contentWidth]}
+          showsVerticalScrollIndicator={false}>
           {/* In play: the editor covers blessures/ressources/conditions/effets,
               so it stands in for the read-only Ressources tile rather than
               doubling it. The reference sections below stay visible. */}
@@ -308,6 +302,30 @@ export default function GmCharacterSheet({
             Enregistrer
           </Button>
         </View>
+    </>
+  );
+}
+
+/**
+ * Phone presentation: the body in a bottom sheet. On a large screen the
+ * Compagnie hosts <GmSheetBody embedded> in a side pane instead, so the roster
+ * stays visible while you work on one character.
+ */
+export default function GmCharacterSheet(props: Props) {
+  const theme = useProphecyTheme();
+  if (!props.entry) return null;
+  return (
+    <Portal>
+      <Modal
+        visible
+        onDismiss={props.onDismiss}
+        style={styles.wrapper}
+        contentContainerStyle={[
+          styles.sheet,
+          contentWidth,
+          { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border },
+        ]}>
+        <GmSheetBody {...props} />
       </Modal>
     </Portal>
   );
@@ -381,6 +399,8 @@ const styles = StyleSheet.create({
   },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   body: { gap: 18, paddingVertical: 12 },
+  // In a pane the sheet has a real height to fill; in the modal it hugs.
+  bodyFill: { flex: 1 },
   section: { gap: 8 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   poolTile: {
