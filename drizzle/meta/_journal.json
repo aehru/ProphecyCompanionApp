@@ -134,6 +134,27 @@
       "when": 1785082509291,
       "tag": "0018_groovy_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1785253314359,
+      "tag": "0019_brainy_gambit",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1785255094993,
+      "tag": "0020_striped_dexter_bennett",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1785262357706,
+      "tag": "0021_daffy_miek",
+      "breakpoints": true
     }
   ]
 }

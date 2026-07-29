@@ -7,6 +7,7 @@ import {
   characters,
   effects,
   magicReserves,
+  shields,
   skills,
   spells,
   weapons,
@@ -15,6 +16,7 @@ import {
   type NewCharacter,
   type NewEffect,
   type NewMagicReserve,
+  type NewShield,
   type NewSkill,
   type NewSpell,
   type NewWeapon,
@@ -30,6 +32,7 @@ import {
   planImport,
   planMagicReserves,
   type ProphecyExport,
+  SHIELD_FIELDS,
   SKILL_FIELDS,
   SPELL_FIELDS,
   STATE_FIELDS,
@@ -58,10 +61,11 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {
     const [st] = await db.select().from(actualState).where(eq(actualState.characterId, c.id));
-    const [sk, ar, wp, sp, mr, ef] = await Promise.all([
+    const [sk, ar, wp, sh, sp, mr, ef] = await Promise.all([
       db.select().from(skills).where(eq(skills.characterId, c.id)),
       db.select().from(armor).where(eq(armor.characterId, c.id)),
       db.select().from(weapons).where(eq(weapons.characterId, c.id)),
+      db.select().from(shields).where(eq(shields.characterId, c.id)),
       db.select().from(spells).where(eq(spells.characterId, c.id)),
       db.select().from(magicReserves).where(eq(magicReserves.characterId, c.id)),
       db.select().from(effects).where(eq(effects.characterId, c.id)),
@@ -74,6 +78,7 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
       skills: sk.map((r) => pick(r, SKILL_FIELDS)),
       armor: ar.map((r) => pick(r, ARMOR_FIELDS)),
       weapons: wp.map((r) => pick(r, WEAPON_FIELDS)),
+      shields: sh.map((r) => pick(r, SHIELD_FIELDS)),
       spells: sp.map((r) => pick(r, SPELL_FIELDS)),
       magicReserves: mr.map((r) => pick(r, MAGIC_RESERVE_FIELDS)),
       effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
@@ -140,7 +145,7 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
           characterId = target.id;
           // Overwrite the sheet (keep original createdAt) and rebuild children.
           tx.update(characters).set({ ...sheet, updatedAt: now }).where(eq(characters.id, characterId)).run();
-          for (const t of [actualState, skills, armor, weapons, spells, magicReserves, effects]) {
+          for (const t of [actualState, skills, armor, weapons, shields, spells, magicReserves, effects]) {
             tx.delete(t).where(eq(t.characterId, characterId)).run();
           }
         }
@@ -162,6 +167,8 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
       if (b.skills.length) tx.insert(skills).values(link(b.skills) as NewSkill[]).run();
       if (b.armor.length) tx.insert(armor).values(link(b.armor) as NewArmor[]).run();
       if (b.weapons.length) tx.insert(weapons).values(link(b.weapons) as NewWeapon[]).run();
+      const shieldRows = b.shields ?? [];
+      if (shieldRows.length) tx.insert(shields).values(link(shieldRows) as NewShield[]).run();
       if (b.spells.length) tx.insert(spells).values(link(b.spells) as NewSpell[]).run();
       // Reserve objects are recharged on a copy, kept as-is on a restore.
       const reserves = planMagicReserves(b.magicReserves ?? [], mode);
@@ -179,8 +186,8 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
 
 /**
  * Duplicate one character locally (issue #59): a full deep copy — sheet, live
- * state (wounds included), skills, armor, weapons, spells, magic reserve objects
- * (recharged full, see `planMagicReserves`), effects — under a
+ * state (wounds included), skills, armor, weapons, shields, spells, magic
+ * reserve objects (recharged full, see `planMagicReserves`), effects — under a
  * freshly minted uuid, so the copy is a new lineage that never collides with the
  * original in a campaign roster. Rides the export→import pipeline in `'copy'`
  * mode instead of re-walking the tables by hand; the transfer field lists drop

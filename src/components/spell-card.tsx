@@ -4,13 +4,13 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Button, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import SpellDetail from '@/components/spell-detail';
 import ChipSelect from '@/components/ui/chip-select';
-import Icon, { dsIcon } from '@/components/ui/icon';
+import Icon from '@/components/ui/icon';
 import {
   CLE_PARFAITE_BONUS,
   DISCIPLINE_LABEL,
   DISCIPLINES,
-  EFFECT_UNIT_LABEL,
   EFFECT_UNITS,
   SPHERE_LABEL,
   SPHERES,
@@ -41,12 +41,6 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
   const subtitle = [`Niv. ${s.level}`, DISCIPLINE_LABEL[s.discipline], SPHERE_LABEL[s.sphere]]
     .filter(Boolean)
     .join(' · ');
-
-  // A crafted clé parfaite makes the spell easier to cast: the roll gains
-  // CLE_PARFAITE_BONUS, which reads on the sheet as that much off the difficulty.
-  const difficulty = s.cleParfaite
-    ? `${s.difficulty - CLE_PARFAITE_BONUS} (base ${s.difficulty})`
-    : String(s.difficulty);
 
   return (
     <View style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
@@ -82,35 +76,7 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
 
-      {expanded ? (
-        <View style={styles.detail}>
-          <DetailRow label="Niveau" value={String(s.level)} />
-          <DetailRow label="Complexité" value={String(s.complexity)} />
-          <DetailRow label="Sphère" value={SPHERE_LABEL[s.sphere] ?? s.sphere} />
-          <DetailRow label="Coût" value={String(s.cost)} />
-          <DetailRow
-            label="Incantation"
-            value={`${s.castTimeAmount} ${EFFECT_UNIT_LABEL[s.castTimeUnit] ?? s.castTimeUnit}`}
-          />
-          <DetailRow label="Difficulté" value={difficulty} />
-          {s.cle.trim() !== '' ? <DetailRow label="Clé" value={s.cle.trim()} /> : null}
-          {s.effect.trim() !== '' ? <DetailRow label="Effet" value={s.effect.trim()} /> : null}
-
-          <Button compact icon={dsIcon('edit')} onPress={onEdit} style={styles.detailEdit}>
-            Modifier
-          </Button>
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  const theme = useProphecyTheme();
-  return (
-    <View style={styles.row}>
-      <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
-      <Text style={styles.value}>{value}</Text>
+      {expanded ? <SpellDetail spell={s} onEdit={onEdit} /> : null}
     </View>
   );
 }
@@ -251,11 +217,6 @@ const styles = StyleSheet.create({
   itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
   keyBadge: { alignItems: 'center', justifyContent: 'center' },
   itemSub: { fontSize: 12, marginTop: 1 },
-  detail: { gap: 8, paddingLeft: 2, paddingBottom: 12 },
-  detailEdit: { alignSelf: 'flex-start', marginTop: 2 },
-  row: { flexDirection: 'row', gap: 12 },
-  label: { width: 92, fontSize: 14 },
-  value: { flex: 1, fontSize: 15 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   numCol: { flexGrow: 1, flexBasis: 120, minWidth: 120 },
   effect: { minHeight: 72 },

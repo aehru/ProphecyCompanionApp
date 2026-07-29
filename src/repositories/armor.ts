@@ -2,14 +2,24 @@ import { asc, eq } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { armor, type NewArmor } from '@/db/schema';
+import { deleteEnchantsFor } from '@/repositories/enchants';
 
 /** Live query for a character's armor catalogue (use with useLiveQuery). */
 export function armorQuery(characterId: number) {
   return db.select().from(armor).where(eq(armor.characterId, characterId)).orderBy(asc(armor.id));
 }
 
-/** Add an armor. The character's first armor is auto-equipped. */
-export async function createArmor(characterId: number, name = '') {
+/** Live query for a single armor by id (use with useLiveQuery). */
+export function armorItemQuery(id: number) {
+  return db.select().from(armor).where(eq(armor.id, id));
+}
+
+/**
+ * Add an armor (blank or from a catalogue preset). The character's first
+ * armor is auto-equipped. `defenseCurrent` defaults to the preset's max (an
+ * undamaged piece), unless explicitly supplied.
+ */
+export async function createArmor(characterId: number, data: Partial<NewArmor> = {}) {
   const existing = await db
     .select({ id: armor.id })
     .from(armor)
@@ -17,7 +27,12 @@ export async function createArmor(characterId: number, name = '') {
     .limit(1);
   const [row] = await db
     .insert(armor)
-    .values({ characterId, name, equipped: existing.length === 0 })
+    .values({
+      characterId,
+      defenseCurrent: data.defenseMax ?? 0,
+      ...data,
+      equipped: existing.length === 0,
+    })
     .returning();
   return row;
 }
@@ -27,6 +42,7 @@ export async function updateArmor(id: number, data: Partial<NewArmor>) {
 }
 
 export async function deleteArmor(id: number) {
+  await deleteEnchantsFor('armor', id);
   await db.delete(armor).where(eq(armor.id, id));
 }
 

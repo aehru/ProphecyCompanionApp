@@ -4,6 +4,7 @@ import { IconButton } from 'react-native-paper';
 
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
+import type { IconName } from '@/components/ui/icon';
 
 /**
  * A SectionCard that flips between a read view and a live-edit view via a
@@ -15,10 +16,12 @@ import SectionCard from '@/components/ui/section-card';
  */
 export default function EditableSection({
   title,
+  icon,
   action,
   children,
 }: {
   title: string;
+  icon?: IconName;
   // Optional control pinned to the header, left of the edit toggle (e.g. a roll
   // button). Receives the current `editing` flag.
   action?: (editing: boolean) => React.ReactNode;
@@ -26,7 +29,7 @@ export default function EditableSection({
 }) {
   const [editing, setEditing] = useState(false);
   return (
-    <SectionCard title={title}>
+    <SectionCard title={title} icon={icon}>
       <View style={styles.actions}>
         {action ? action(editing) : null}
         <IconButton

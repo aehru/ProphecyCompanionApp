@@ -82,7 +82,7 @@ Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](s
 
 **Not yet covered:** repository logic — anything importing `@/db/client` pulls in expo-sqlite. Repository tests need the db decoupled from the singleton (inject it) so a better-sqlite3 instance can stand in — see [ROADMAP.md](ROADMAP.md).
 
-## Catalogues (armes / sortilèges)
+## Catalogues (armes / armures / boucliers / sortilèges)
 
 The rulebook catalogues the pickers offer are **authored as spreadsheets**, not hand-written TS. Edit the CSV in Excel (or LibreOffice), then regenerate:
 
@@ -91,9 +91,9 @@ bun run build:catalogs   # data-src/*.csv → src/data/*-catalog.gen.ts
 bun run check:catalogs   # verify the .gen files match the CSV (no write)
 ```
 
-- **Source of truth:** [data-src/weapons.csv](data-src/weapons.csv), [data-src/spells.csv](data-src/spells.csv) — **séparateur `;`**, the French Excel default ("CSV UTF-8"). The UTF-8 BOM Excel prepends is stripped, CRLF is fine, and a quoted cell may contain `;`, `""` and newlines (Alt+Entrée), so multi-line effect text round-trips.
-- **Generated:** `src/data/weapon-catalog.gen.ts` / `spell-catalog.gen.ts` — **committed** so the app builds without running the script. Never edit them by hand.
-- **Types + taxonomy:** [src/data/weapon-catalog.ts](src/data/weapon-catalog.ts) / [spell-catalog.ts](src/data/spell-catalog.ts) hold the `*Preset` types and re-export the generated array. Weapon categories / handedness live one file over in [src/data/weapon-constants.ts](src/data/weapon-constants.ts) because the build script imports them as values — it must never load a file it generates, or a deleted `.gen` would make the build unrecoverable.
+- **Source of truth:** [data-src/weapons.csv](data-src/weapons.csv), [data-src/armor.csv](data-src/armor.csv), [data-src/shield.csv](data-src/shield.csv), [data-src/spells.csv](data-src/spells.csv) — **séparateur `;`**, the French Excel default ("CSV UTF-8"). The UTF-8 BOM Excel prepends is stripped, CRLF is fine, and a quoted cell may contain `;`, `""` and newlines (Alt+Entrée), so multi-line effect text round-trips.
+- **Generated:** `src/data/weapon-catalog.gen.ts` / `armor-catalog.gen.ts` / `shield-catalog.gen.ts` / `spell-catalog.gen.ts` — **committed** so the app builds without running the script. Never edit them by hand.
+- **Types + taxonomy:** `*-catalog.ts` (e.g. [src/data/weapon-catalog.ts](src/data/weapon-catalog.ts)) holds each `*Preset` type and re-exports the generated array. Weapon categories/handedness and armor categories live in their own `*-constants.ts` files ([weapon-constants.ts](src/data/weapon-constants.ts), [armor-constants.ts](src/data/armor-constants.ts)) because the build script imports them as values — it must never load a file it generates, or a deleted `.gen` would make the build unrecoverable. Shields have no category, so no `shield-constants.ts`.
 - **Adding a column:** add it to the CSV header, to the matching `*_COLUMNS` list in [scripts/build-catalogs.ts](scripts/build-catalogs.ts), and to the row builder. A column present in one and not the other is a build error.
 
 [scripts/build-catalogs.ts](scripts/build-catalogs.ts) validates strictly and writes nothing when anything fails — errors are collected and printed with their CSV line:
@@ -125,22 +125,30 @@ src/
     character/
       new.tsx                # create-character modal
       [id]/
-        _layout.tsx          # per-character stack
-        (tabs)/              # Résumé + Compétences + Armes tabs
+        _layout.tsx          # per-character stack: weapon/armor/shield/spell/effect/enchant modals
+        weapon/               #   catalog picker + full-screen editor (modal routes)
+        armor/                #   catalog picker + full-screen editor (modal routes)
+        shield/                #   catalog picker + full-screen editor (modal routes)
+        (tabs)/              # Résumé + Compétences + Inventaire + Magie tabs
           index.tsx          #   sheet read view + per-card live edit; header pencil → full form
+          fiche.tsx           #   full sheet: caracs, initiative, santé, effets, armure/bouclier, ressources…
           skills.tsx         #   skills read view / live editor
-          weapons.tsx        #   weapons, armor, initiative; read view / live edit
+          weapons.tsx        #   Inventaire: argent + Armes/Armures/Boucliers/Objets sub-tabs
+          magic.tsx           #   Réserve/Sortilèges/Enchantements sub-tabs
   components/                # reusable UI (forms, chips, bullets, triangle…)
+    weapon-card.tsx / weapon-editor.tsx      # read summary / full editor (mirrored by armor-*, shield-*)
+    fiche/                    # per-section fiche cards (health, armor, shield, money, resources…)
     ui/                      # small primitives (section-card, editable-section, stat-chip, character-gate)
   constants/
     prophecy.ts              # game domain: tendances, caracs, attributs, skills, wounds, resources
   db/
     client.ts                # opens the SQLite DB, exposes `db`, resetDatabase()
-    schema.ts                # Drizzle tables: characters, actual_state, skills
+    schema.ts                # Drizzle tables: characters, actual_state, skills, weapons, armor, shields…
   hooks/                     # use-character-id, use-character-state, use-prophecy-theme
-  data/                      # rulebook catalogues: *-catalog.ts (types) + *.gen.ts (generated)
-  lib/                       # character-values helpers, formula, csv
-  repositories/              # data access: characters, actual-state, skills, weapons, armor
+  data/                      # rulebook catalogues: *-catalog.ts (types) + *.gen.ts (generated) per gear type
+    weapon-constants.ts / armor-constants.ts  # taxonomy (categories/handedness), kept out of the .gen import graph
+  lib/                       # character-values helpers, formula, csv, character-transfer
+  repositories/              # data access: characters, actual-state, skills, weapons, armor, shields, items, enchants, transfer
   theme/                     # Paper/navigation themes
 data-src/                    # catalogue spreadsheets (CSV `;`) — source of truth, see Catalogues
 scripts/
@@ -151,11 +159,13 @@ drizzle.config.ts
 
 ## Data model
 
-Three SQLite tables (see [src/db/schema.ts](src/db/schema.ts)):
+The core split (see [src/db/schema.ts](src/db/schema.ts), which has the full, current table list — this section only calls out the ones worth knowing about before you touch them):
 
 - **`characters`** — the sheet. Lots of integer stat columns, all defaulting to 0. `*Max` columns hold ceilings (wounds, resources, initiative). DB-level CHECK constraints keep tendance *sub* values in 0–10.
 - **`actual_state`** — one row per character; the live in-play state (`*Current` wound/resource columns, `initiative_values` JSON, conditions, notes). Cascades on character delete.
 - **`skills`** — one row per owned skill (`name`, `attribut`, `value`). Skills at value 0 are not persisted (see `replaceSkills`).
+- **`weapons`** / **`armor`** / **`shields`** — one row per owned item, FK cascade on character delete. `armor` and `shields` share most columns (category — armor only —, prerequisites, creation difficulty/time, special, `encombrementMalus`); kept as separate tables rather than one polymorphic table because their column shapes genuinely differ (a shield also has a `damage` formula, armor doesn't). `weapons.equippedHand` is a nullable enum (multi-slot, hand-aware); `armor.equipped` / `shields.equipped` are plain exclusive booleans (one of each equipped at a time, independent of each other and of weapon hands).
+- **`enchants`** — polymorphic: `targetType` (`weapon`/`armor`/`shield`/`item`) + `targetId` point at one of the gear tables above. No real FK (SQLite can't cascade across four possible parents), so each gear repo's delete function purges matching enchants itself via `deleteEnchantsFor`.
 
 ### Naming convention (important)
 

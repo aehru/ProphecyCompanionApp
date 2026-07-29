@@ -33,7 +33,7 @@ Native modules (`expo-sqlite`, etc.) mean **Expo Go won't work** — a dev build
 **The data split (central idea).** A character is stored across two 1:1 tables plus child tables ([src/db/schema.ts](src/db/schema.ts)):
 - `characters` — the *sheet*: identity, stats, maximums, magic disciplines/sphere maxes. Changes rarely.
 - `actual_state` — the *live in-play values*: current wounds, spent resources, magic reserve currents, money, initiative dice, conditions/notes. One row per character.
-- `skills`, `armor`, `weapons`, `spells`, `magic_reserves`, `effects` — N rows per character, FK cascade on delete. `magic_reserves` (issue #51) are reserve *objects*: each row is an independent pool (`max` + `current` both on the row, unlike the sheet/state split) and never touches the global réserve.
+- `skills`, `armor`, `weapons`, `shields`, `items`, `spells`, `magic_reserves`, `effects` — N rows per character, FK cascade on delete. `magic_reserves` (issue #51) are reserve *objects*: each row is an independent pool (`max` + `current` both on the row, unlike the sheet/state split) and never touches the global réserve. `armor`/`shields` share most columns (prerequisites, creation, encombrement) but stay separate tables — see the `enchants` doc comment in schema.ts for why.
 
 There is **no separate "status" screen**. Each character tab (`src/app/character/[id]/(tabs)/`) has a read mode and a live **edit toggle** (a FAB); edits write straight to `characters` or `actual_state` through `src/repositories/`, and screens refresh reactively via Drizzle's `useLiveQuery` (the DB is opened with `enableChangeListener`).
 
