@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Divider, Modal, Portal, Text, TextInput } from 'react-native-paper';
+import { Button, Divider, IconButton, Modal, Portal, Text, TextInput } from 'react-native-paper';
 
 import {
   AttrTile,
@@ -20,6 +20,8 @@ import {
   RESOURCES,
   TENDANCES,
 } from '@/constants/prophecy';
+import PnjInPlayEditor from '@/components/campaign/pnj-in-play-editor';
+import { dsIcon } from '@/components/ui/icon';
 import StatChip from '@/components/ui/stat-chip';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -43,17 +45,28 @@ interface Props {
   entry: RosterEntry | null;
   note: string;
   onSaveNote: (charUuid: string, body: string) => void;
+  /** Spawn another of this PNJ (GM-owned entries only). Omit to hide the action. */
+  onDuplicate?: (charUuid: string) => void;
   onDismiss: () => void;
 }
 
 /**
  * GM-only bottom sheet: the full shared projection of one roster character plus
- * the GM's private notes. Read-only except the notes, which never leave this
- * device. Wounds and conditions are intentionally not surfaced here (design
- * decision); the tactical focus is resources, tendances, stats, trained skills
- * (with specializations), active effects, and initiative.
+ * the GM's private notes, which never leave this device.
+ *
+ * A player's character is read-only — the protocol is one-way and the
+ * projection is the privacy boundary. The GM's OWN PNJs (`owner === 'gm'`) get
+ * an edit toggle instead, which swaps the read-only Ressources block for
+ * <PnjInPlayEditor> — that one reaches past the projection to the local row and
+ * edits the in-play values. Everything below it stays readable while you edit.
  */
-export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }: Props) {
+export default function GmCharacterSheet({
+  entry,
+  note,
+  onSaveNote,
+  onDuplicate,
+  onDismiss,
+}: Props) {
   const theme = useProphecyTheme();
   const attrColors = useAttrColors();
   const tendColors = useTendColors();
@@ -61,6 +74,10 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
   // of the whole sheet (three rings + every skill row). It hands the text back
   // through a ref, read only when Enregistrer is pressed.
   const draftRef = useRef(note);
+  // GM's own PNJs only; opening a different character always lands in read mode.
+  const [editing, setEditing] = useState(false);
+  const canEdit = entry?.owner === 'gm';
+  useEffect(() => setEditing(false), [entry?.charId]);
 
   const c = entry?.character;
   const attr = nums(c?.attributs);
@@ -119,32 +136,45 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
               {entry.online ? 'En ligne' : 'Hors ligne'}
             </Text>
           </View>
+          {canEdit ? (
+            <IconButton
+              icon={editing ? dsIcon('check') : dsIcon('edit')}
+              onPress={() => setEditing((e) => !e)}
+              accessibilityLabel={editing ? 'Terminer' : 'Modifier le PNJ'}
+            />
+          ) : null}
         </View>
 
         <ScrollView contentContainerStyle={[styles.body, contentWidth]} showsVerticalScrollIndicator={false}>
-          {/* Ressources (replaces the design's "Vie" tile) */}
-          <Section title="Ressources" theme={theme}>
-            <View style={styles.grid}>
-              {RESOURCES.map((r) => {
-                const pool = resources[r.key];
-                return (
-                  <View
-                    key={r.key}
-                    style={[
-                      styles.poolTile,
-                      { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.prophecy.borderSoft },
-                    ]}>
-                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                      {r.label}
-                    </Text>
-                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
-                      {pool?.current ?? 0} / {pool?.max ?? 0}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          </Section>
+          {/* In play: the editor covers blessures/ressources/conditions/effets,
+              so it stands in for the read-only Ressources tile rather than
+              doubling it. The reference sections below stay visible. */}
+          {editing ? (
+            <PnjInPlayEditor charUuid={entry.charId} />
+          ) : (
+            <Section title="Ressources" theme={theme}>
+              <View style={styles.grid}>
+                {RESOURCES.map((r) => {
+                  const pool = resources[r.key];
+                  return (
+                    <View
+                      key={r.key}
+                      style={[
+                        styles.poolTile,
+                        { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.prophecy.borderSoft },
+                      ]}>
+                      <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                        {r.label}
+                      </Text>
+                      <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
+                        {pool?.current ?? 0} / {pool?.max ?? 0}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </Section>
+          )}
 
           {/* Tendances — rings (0–10 sub) with the main value below */}
           <Section title="Tendances" theme={theme}>
@@ -259,6 +289,14 @@ export default function GmCharacterSheet({ entry, note, onSaveNote, onDismiss }:
         </ScrollView>
 
         <View style={styles.actions}>
+          {canEdit && onDuplicate ? (
+            <Button
+              style={styles.spawn}
+              icon="content-duplicate"
+              onPress={() => onDuplicate(entry.charId)}>
+              Dupliquer
+            </Button>
+          ) : null}
           <Button onPress={onDismiss}>Fermer</Button>
           <Button mode="contained" icon="content-save" onPress={save}>
             Enregistrer
@@ -351,4 +389,6 @@ const styles = StyleSheet.create({
   tendRow: { flexDirection: 'row', justifyContent: 'space-around', gap: 6 },
   effectRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, paddingTop: 8 },
+  // Pushes Fermer/Enregistrer to the right, keeping the spawn action apart.
+  spawn: { marginRight: 'auto' },
 });

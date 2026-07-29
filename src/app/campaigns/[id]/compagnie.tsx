@@ -25,7 +25,7 @@ import type { Campaign } from '@/db/schema';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
-import { campaignQuery, gmNotesQuery, upsertGmNote } from '@/repositories/campaigns';
+import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
 
 const TABS = ['Attributs', 'Compétences', 'Tendances'] as const;
 
@@ -167,6 +167,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         entry={openEntry}
         note={openEntry ? (noteByUuid.get(openEntry.charId) ?? '') : ''}
         onSaveNote={(charUuid, body) => upsertGmNote(campaign.id, charUuid, body)}
+        onDuplicate={(charUuid) => spawnNpc(campaign.id, charUuid)}
         onDismiss={() => setSelected(null)}
       />
     </View>
