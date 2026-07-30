@@ -42,9 +42,11 @@ merge, character detail sheet, join disclaimer, privacy policy.
   stay projection-limited by protocol.
 - [ ] **Phase 3 — co-GM.** `share_npcs` publishes the NPCs already; a second GM
   seat needs server-side work (a second gmToken, ownership rules).
-- [ ] **Phase 4 — docs.** `docs/campaign-protocol.md` still describes the roster
-  as server-sourced; PRIVACY.md should say a GM table with no server attached is
-  fully local.
+- [x] **Phase 4 — docs.** `docs/campaign-protocol.md` gained a Scope section (the
+  relay is optional, the roster is a local-first merge, NPCs are opt-in);
+  PRIVACY.md and README describe the serverless table. PRIVACY's permissions
+  section was also wrong — it claimed none were requested, while the QR scanner
+  uses the camera and the avatar picker the media library.
 
 - [x] **Ghost roster entry when a player switches shared character while live.**
   Fixed by protocol v2 (multi-share): the broadcaster
