@@ -1,29 +1,16 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, View } from 'react-native';
-import {
-  ActivityIndicator,
-  Button,
-  Card,
-  Divider,
-  IconButton,
-  Switch,
-  Text,
-  TextInput,
-} from 'react-native-paper';
-import QRCode from 'react-native-qrcode-svg';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Button, Divider, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CharacterPickList, {
   type PickableCharacter,
 } from '@/components/campaign/character-pick-list';
-import {
-  OwnerBadge,
-  PlayerAvatar,
-  ServerStatusChip,
-  StatusPill,
-} from '@/components/campaign/roster-visuals';
+import { ServerStatusChip } from '@/components/campaign/roster-visuals';
+import TableNpcSection from '@/components/campaign/table-npc-section';
+import TableServerSection from '@/components/campaign/table-server-section';
 import { useTableRosterCtx } from '@/components/campaign/table-roster-provider';
 import AppFab from '@/components/ui/app-fab';
 import DsDialog from '@/components/ui/ds-dialog';
@@ -32,7 +19,7 @@ import type { Campaign } from '@/db/schema';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { joinLink, type RosterEntry } from '@/lib/campaign-protocol';
+import type { RosterEntry } from '@/lib/campaign-protocol';
 import {
   attachServer,
   campaignQuery,
@@ -83,10 +70,9 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { status, serverError, roster, kick, connected } = useTableRosterCtx();
-  // Local NPCs vs the players' characters: two different sections, two different
-  // stories (the first exists offline, the second needs the relay).
+  // Local NPCs vs the players' characters: two sections, two different stories
+  // (the first exists offline, the second needs the relay).
   const players = roster.filter((e) => e.owner === 'player');
-  const onlinePlayers = players.filter((e) => e.online).length;
 
   const { data: myCharacters } = useLiveQuery(charactersListQuery());
   const { data: members } = useLiveQuery(membersQuery(campaign.id), [campaign.id]);
@@ -97,11 +83,6 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
   const [npcName, setNpcName] = useState<string | null>(null);
   const [attachUrl, setAttachUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-
-  const confirmKick = (entry: RosterEntry) => {
-    kick(entry.charId);
-    setKickTarget(null);
-  };
 
   // Create the NPC, then land on its sheet: only the name is required, the rest
   // is filled in the character form like any other character.
@@ -131,17 +112,6 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
     else if (isLiveHere) stop();
   };
 
-  const shareInvite = () => {
-    if (!campaign.code || !campaign.serverUrl) return;
-    Share.share({
-      message:
-        `Rejoins ma campagne Prophecy « ${campaign.name} ».\n` +
-        `Code : ${campaign.code}\n` +
-        `Serveur : ${campaign.serverUrl}\n` +
-        joinLink(campaign.code, campaign.serverUrl),
-    }).catch(() => {});
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Stack.Screen options={{ title: campaign.name }} />
@@ -163,28 +133,11 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
           ) : null}
         </View>
 
-        {/* The table itself: the NPCs the GM runs. Works with no server at all,
-            so it comes first. */}
-        <View style={styles.rosterHeader}>
-          <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
-            Mes PNJ
-          </Text>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {memberIds.length === 0
-              ? 'aucun à la table'
-              : `${memberIds.length} à la table`}
-          </Text>
-        </View>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Les personnages cochés composent la Compagnie : fiches, blessures et initiative, sur cet
-          appareil.
-        </Text>
-        <Button mode="outlined" icon={dsIcon('plus')} onPress={() => setNpcName('')}>
-          Nouveau PNJ
-        </Button>
-        <CharacterPickList
+        {/* The table itself works with no server at all, so it comes first. */}
+        <TableNpcSection
           characters={myCharacters ?? []}
-          sharedIds={memberIds}
+          memberIds={memberIds}
+          onCreate={() => setNpcName('')}
           onToggle={(c, next) => toggleMember(campaign, c, next, isLiveHere)}
         />
 
@@ -194,130 +147,13 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
         <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
           Serveur
         </Text>
-
-        {connected && campaign.code && campaign.serverUrl ? (
-          <>
-            {/* Invite card — ornate corner brackets, big code, server, QR, share. */}
-            <Card
-              mode="outlined"
-              style={[styles.codeCard, { backgroundColor: theme.colors.surfaceVariant }]}>
-              <Card.Content style={styles.codeContent}>
-                <CornerBrackets color={theme.colors.secondary} />
-                <Text variant="labelSmall" style={{ letterSpacing: 2, color: theme.colors.onSurfaceVariant }}>
-                  CODE DE LA TABLE
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: 'Cinzel_600SemiBold',
-                    fontSize: 32,
-                    letterSpacing: 6,
-                    color: theme.colors.primary,
-                    marginVertical: 6,
-                  }}>
-                  {campaign.code}
-                </Text>
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Serveur : <Text style={{ color: theme.colors.onSurface }}>{campaign.serverUrl}</Text>
-                </Text>
-                <View style={styles.qr}>
-                  <QRCode
-                    value={joinLink(campaign.code, campaign.serverUrl)}
-                    size={132}
-                    backgroundColor="transparent"
-                    color={theme.colors.onSurface}
-                  />
-                </View>
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 12 }}>
-                  Scannez avec l’appareil photo pour rejoindre
-                </Text>
-                <Button mode="outlined" icon="share-variant" onPress={shareInvite}>
-                  Partager l’invitation
-                </Button>
-              </Card.Content>
-            </Card>
-
-            <View style={styles.rosterHeader}>
-              <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
-                Joueurs
-              </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                {players.length === 0
-                  ? 'aucun pour l’instant'
-                  : `${onlinePlayers} / ${players.length} en ligne`}
-              </Text>
-            </View>
-
-            {players.length === 0 ? (
-              <View
-                style={[
-                  styles.empty,
-                  { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.outlineVariant },
-                ]}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-                  Partagez le code ci-dessus. Les personnages des joueurs apparaîtront ici dès
-                  qu’ils diffusent.
-                </Text>
-              </View>
-            ) : (
-              <View style={{ gap: 9 }}>
-                {players.map((entry) => {
-                  const nom = String(entry.character.nom ?? 'Sans nom');
-                  return (
-                    <View
-                      key={entry.charId}
-                      style={[
-                        styles.playerRow,
-                        { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
-                      ]}>
-                      <PlayerAvatar nom={nom} online={entry.online} size={38} />
-                      <Text style={{ flex: 1, fontFamily: 'Cinzel_600SemiBold', color: theme.colors.onSurface }}>
-                        {nom}
-                      </Text>
-                      {entry.owner === 'gm' ? <OwnerBadge /> : null}
-                      <StatusPill online={entry.online} />
-                      <IconButton
-                        icon="account-remove-outline"
-                        size={18}
-                        style={{ margin: 0 }}
-                        accessibilityLabel={`Retirer ${nom}`}
-                        onPress={() => setKickTarget(entry)}
-                      />
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-
-            {/* Off by default: the NPCs are read locally, so publishing them is
-                only useful to a second GM device. */}
-            <View style={styles.switchRow}>
-              <View style={{ flex: 1 }}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                  Publier mes PNJ
-                </Text>
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Envoie vos PNJ au serveur (utile pour un co-MJ). Désactivé, ils ne quittent pas
-                  cet appareil.
-                </Text>
-              </View>
-              <Switch value={campaign.shareNpcs} onValueChange={toggleShareNpcs} />
-            </View>
-          </>
-        ) : (
-          <View
-            style={[
-              styles.empty,
-              { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.outlineVariant, gap: 12 },
-            ]}>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-              Aucun serveur connecté. Connectez-en un pour voir les personnages de vos joueurs en
-              direct — le reste de la table fonctionne sans.
-            </Text>
-            <Button mode="outlined" icon="server-network" onPress={() => setAttachUrl('')}>
-              Connecter un serveur
-            </Button>
-          </View>
-        )}
+        <TableServerSection
+          campaign={campaign}
+          players={players}
+          onKick={setKickTarget}
+          onAttach={() => setAttachUrl('')}
+          onToggleShareNpcs={toggleShareNpcs}
+        />
       </ScrollView>
 
       {/* Kick confirmation — purge only: the player's next share re-adds it. */}
@@ -331,7 +167,10 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
             <Button
               mode="contained"
               icon="account-remove-outline"
-              onPress={() => kickTarget && confirmKick(kickTarget)}>
+              onPress={() => {
+                if (kickTarget) kick(kickTarget.charId);
+                setKickTarget(null);
+              }}>
               Retirer
             </Button>
           </>
@@ -417,20 +256,7 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
   );
 }
 
-/** Four L-shaped brackets framing the code card (design flourish). */
-function CornerBrackets({ color }: { color: string }) {
-  const base = { position: 'absolute' as const, width: 18, height: 18, borderColor: color };
-  return (
-    <>
-      <View style={[base, { top: 8, left: 8, borderTopWidth: 1.5, borderLeftWidth: 1.5, borderTopLeftRadius: 4 }]} />
-      <View style={[base, { top: 8, right: 8, borderTopWidth: 1.5, borderRightWidth: 1.5, borderTopRightRadius: 4 }]} />
-      <View style={[base, { bottom: 8, left: 8, borderBottomWidth: 1.5, borderLeftWidth: 1.5, borderBottomLeftRadius: 4 }]} />
-      <View style={[base, { bottom: 8, right: 8, borderBottomWidth: 1.5, borderRightWidth: 1.5, borderBottomRightRadius: 4 }]} />
-    </>
-  );
-}
-
-// --- player broadcast (restyled) -------------------------------------------------
+// --- player broadcast -------------------------------------------------------------
 
 function PlayerSalon({ campaign }: { campaign: Campaign }) {
   const theme = useProphecyTheme();
@@ -466,10 +292,10 @@ function PlayerSalon({ campaign }: { campaign: Campaign }) {
           ) : null}
         </View>
 
-        <Text variant="bodySmall" style={[styles.consent, { color: theme.colors.onSurfaceVariant }]}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           Serveur : <Text style={{ color: theme.colors.onSurface }}>{campaign.serverUrl}</Text>
         </Text>
-        <Text variant="bodySmall" style={[styles.consent, { color: theme.colors.onSurfaceVariant }]}>
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           {liveCampaignId != null && !isLiveHere
             ? 'Une autre campagne diffuse déjà ; démarrer ici l’arrêtera.'
             : 'Les personnages cochés sont diffusés en direct au MJ. Arrêter met en pause.'}
@@ -499,21 +325,6 @@ const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { padding: 16, paddingBottom: 96, gap: 14 },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
-  codeCard: { borderRadius: 16 },
-  codeContent: { alignItems: 'center', gap: 2, paddingVertical: 20 },
-  qr: { paddingVertical: 12 },
-  rosterHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  empty: { padding: 20, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
-  playerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 11,
-    borderRadius: 13,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
   bottomBar: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
-  switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  consent: {},
   pausePill: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
 });
