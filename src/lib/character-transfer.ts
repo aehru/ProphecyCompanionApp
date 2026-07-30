@@ -47,6 +47,10 @@ const characterSchema = z.object({
   nom: str,
   concept: str,
   biographie: str,
+  // PC vs NPC. OPTIONAL (not a version bump): exports made before the column
+  // existed have no such field and import as a player character, the column
+  // default. Carried so duplicating/restoring an NPC keeps it an NPC.
+  kind: z.enum(['pc', 'npc']).optional(),
   ...shapeFrom(NUMERIC_KEYS, int),
 });
 
