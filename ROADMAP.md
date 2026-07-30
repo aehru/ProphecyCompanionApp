@@ -25,10 +25,26 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 
 ## Campaign mode
 
-Live GM/player campaigns via a self-hostable relay server (see
-[docs/campaign-protocol.md](docs/campaign-protocol.md)). Shipped: DB tables,
-wire protocol + socket client, app-level live-broadcast provider, GM roster +
-character detail sheet, join disclaimer, privacy policy.
+A GM's table is local-first (NPCs, sheets, initiative — no network); the relay
+server (see [docs/campaign-protocol.md](docs/campaign-protocol.md)) is the
+optional bonus that adds the players' characters. Shipped: DB tables, wire
+protocol + socket client, app-level live-broadcast provider, local+remote roster
+merge, character detail sheet, join disclaimer, privacy policy.
+
+- [x] **Local-first table (phase 1).** `createLocalTable` (no server, no code),
+  `attachServer` later; roster = `mergeRoster(local, remote)` with the local
+  entry winning; `characters.kind` PC/NPC + "Nouveau PNJ" straight from the
+  salon; GM NPCs no longer round-trip through the server (`campaigns.share_npcs`,
+  off by default).
+- [ ] **Phase 2 — full local NPC sheet.** The GM sheet still renders the wire
+  *projection* for its own NPCs (no weapons, no damage formula, no spells).
+  Local entries should render the real character rows instead; remote players
+  stay projection-limited by protocol.
+- [ ] **Phase 3 — co-GM.** `share_npcs` publishes the NPCs already; a second GM
+  seat needs server-side work (a second gmToken, ownership rules).
+- [ ] **Phase 4 — docs.** `docs/campaign-protocol.md` still describes the roster
+  as server-sourced; PRIVACY.md should say a GM table with no server attached is
+  fully local.
 
 - [x] **Ghost roster entry when a player switches shared character while live.**
   Fixed by protocol v2 (multi-share): the broadcaster
