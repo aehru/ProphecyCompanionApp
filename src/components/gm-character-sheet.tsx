@@ -20,7 +20,7 @@ import {
   RESOURCES,
   TENDANCES,
 } from '@/constants/prophecy';
-import PnjInPlayEditor from '@/components/campaign/pnj-in-play-editor';
+import NpcInPlayEditor from '@/components/campaign/npc-in-play-editor';
 import { dsIcon } from '@/components/ui/icon';
 import StatChip from '@/components/ui/stat-chip';
 import { contentWidth } from '@/hooks/use-layout';
@@ -57,9 +57,9 @@ interface Props {
  * the GM's private notes, which never leave this device.
  *
  * A player's character is read-only — the protocol is one-way and the
- * projection is the privacy boundary. The GM's OWN PNJs (`owner === 'gm'`) get
+ * projection is the privacy boundary. The GM's OWN NPCs (`owner === 'gm'`) get
  * an edit toggle instead, which swaps the read-only Ressources block for
- * <PnjInPlayEditor> — that one reaches past the projection to the local row and
+ * <NpcInPlayEditor> — that one reaches past the projection to the local row and
  * edits the in-play values. Everything below it stays readable while you edit.
  */
 export function GmSheetBody({
@@ -82,7 +82,7 @@ export function GmSheetBody({
   // of the whole sheet (three rings + every skill row). It hands the text back
   // through a ref, read only when Enregistrer is pressed.
   const draftRef = useRef(note);
-  // GM's own PNJs only. Callers key this component by charId, so opening
+  // GM's own NPCs only. Callers key this component by charId, so opening
   // another character remounts it and the initial mode is simply the initial
   // state — no effect syncing props into state after the fact.
   const canEdit = entry?.owner === 'gm';
@@ -130,7 +130,8 @@ export function GmSheetBody({
               {String(c.nom ?? 'Sans nom')}
             </Text>
             <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              {entry.online ? 'En ligne' : 'Hors ligne'}
+              {/* Presence is a player thing: an NPC is held by the GM reading this. */}
+              {canEdit ? 'PNJ' : entry.online ? 'En ligne' : 'Hors ligne'}
             </Text>
           </View>
           {canEdit ? (
@@ -150,7 +151,7 @@ export function GmSheetBody({
               so it stands in for the read-only Ressources tile rather than
               doubling it. The reference sections below stay visible. */}
           {editing ? (
-            <PnjInPlayEditor charUuid={entry.charId} />
+            <NpcInPlayEditor charUuid={entry.charId} />
           ) : (
             <Section title="Ressources" theme={theme}>
               <ResourceTiles resources={resources} />

@@ -5,7 +5,6 @@ import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Divider, Snackbar, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useGmRosterCtx } from '@/components/campaign/gm-roster-provider';
 import InitiativeList from '@/components/campaign/initiative-list';
 import {
   AttrTile,
@@ -20,15 +19,16 @@ import {
   useAttrColors,
   useTendColors,
 } from '@/components/campaign/roster-visuals';
+import { useTableRosterCtx } from '@/components/campaign/table-roster-provider';
 import GmCharacterSheet, { GmSheetBody } from '@/components/gm-character-sheet';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import { ATTRIBUTS, CARACTERISTIQUES, TENDANCES } from '@/constants/prophecy';
 import type { Campaign } from '@/db/schema';
-import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { contentWidth, useLayout } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
+import type { TableRosterEntry } from '@/lib/roster-merge';
 import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
 import { rollInitiativeFor } from '@/repositories/characters';
 
@@ -62,7 +62,7 @@ export default function CompagnieScreen() {
 function Compagnie({ campaign }: { campaign: Campaign }) {
   const theme = useProphecyTheme();
   const insets = useSafeAreaInsets();
-  const { status, serverError, roster } = useGmRosterCtx();
+  const { status, serverError, roster, connected } = useTableRosterCtx();
   const { data: notes } = useLiveQuery(gmNotesQuery(campaign.id), [campaign.id]);
   const noteByUuid = new Map((notes ?? []).map((n) => [n.charUuid, n.body]));
 
@@ -73,9 +73,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   // tapping a PNJ mid-fight); opening from a card starts read-only.
   const [editOnOpen, setEditOnOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const { liveCampaignId } = useCampaignLive();
-  const broadcasting = liveCampaignId === campaign.id;
-  // Only the GM's own PNJs are theirs to roll; players roll their own.
+  // Only the GM's own NPCs are theirs to roll; players roll their own.
   const npcs = roster.filter((e) => e.owner === 'gm');
   const split = useLayout().columns > 1;
 
@@ -91,13 +89,8 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   const duplicate = async (charUuid: string) => {
     const created = await spawnNpc(campaign.id, charUuid);
     if (!created) return;
-    // A spawn only reaches the roster through the server, so while broadcast is
-    // paused the new PNJ is real but invisible here — say so.
-    setToast(
-      broadcasting
-        ? `« ${created.nom} » ajouté à la Compagnie.`
-        : `« ${created.nom} » ajouté — visible à la reprise de la diffusion.`,
-    );
+    // The roster is local, so the copy is on screen before this toast is read.
+    setToast(`« ${created.nom} » ajouté à la Compagnie.`);
   };
 
   // Open a fight in one tap. Re-rolling mid-combat scrambles an order the table
@@ -141,9 +134,11 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* A local table has no server to report on — the chip would just say
+          "hors ligne" forever and read as a fault. */}
       <View style={styles.statusRow}>
-        <ServerStatusChip status={status} />
-        {serverError ? (
+        {connected ? <ServerStatusChip status={status} /> : null}
+        {connected && serverError ? (
           <Text variant="bodySmall" style={{ color: theme.colors.error }}>
             Erreur serveur : {serverError}
           </Text>
@@ -203,7 +198,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
           {tab === INITIATIVE_TAB ? null : roster.length === 0 ? (
             <View style={styles.centered}>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', paddingHorizontal: 32 }}>
-                Aucun personnage partagé pour l’instant.
+                Aucun personnage à la table. Ajoutez des PNJ depuis le salon.
               </Text>
             </View>
           ) : (
@@ -305,7 +300,7 @@ function CompanyCard({
   hasNote,
   onPress,
 }: {
-  entry: RosterEntry;
+  entry: TableRosterEntry;
   tab: number;
   query: string;
   hasNote: boolean;
@@ -326,7 +321,8 @@ function CompanyCard({
         </Text>
         {hasNote ? <Text style={{ fontSize: 13 }}>📝</Text> : null}
         {entry.owner === 'gm' ? <OwnerBadge /> : null}
-        <StatusPill online={entry.online} />
+        {/* Presence only means something for a character held by someone else. */}
+        {entry.source === 'remote' ? <StatusPill online={entry.online} /> : null}
       </View>
 
       {/* One body per tab, each its own component: the hidden two cost nothing,

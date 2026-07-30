@@ -12,7 +12,7 @@ import {
 } from '@/lib/campaign-protocol';
 import { nextNpcName } from '@/lib/npc-name';
 import { newUuid } from '@/lib/uuid';
-import { updateCharacter } from '@/repositories/characters';
+import { createCharacter, updateCharacter } from '@/repositories/characters';
 import { duplicateCharacter } from '@/repositories/transfer';
 
 /** Live query for the campaign list, for useLiveQuery. */
@@ -30,25 +30,41 @@ export async function getCampaign(id: number): Promise<Campaign | null> {
   return rows[0] ?? null;
 }
 
+/**
+ * Create a table. LOCAL ONLY — no server, no code, no network: the GM can run
+ * their NPCs, roll initiative and read sheets offline forever. Attaching a relay
+ * later (`attachServer`) is what adds the players' characters on top.
+ */
+export async function createLocalTable(name: string): Promise<Campaign> {
+  const [row] = await db
+    .insert(campaigns)
+    .values({ name, role: 'gm', createdAt: new Date() })
+    .returning();
+  return row;
+}
+
 /** How long a create call may take before we give up with a clear error. */
 const CREATE_TIMEOUT_MS = 10_000;
 
 /**
- * Create a campaign ON THE SERVER (the server mints the join code), then store
- * the local GM row. The portable gmToken is generated here and only its hash
- * ever reaches the server — the raw token stays in this row (and the user's
- * backups) as proof of ownership.
+ * Attach a relay server to an existing local table: the server mints the join
+ * code, and the local row gains code + gmToken + serverUrl. The portable gmToken
+ * is generated here and only its hash ever reaches the server — the raw token
+ * stays in this row (and the user's backups) as proof of ownership.
  *
  * `signal` lets the UI cancel in flight (the dialog's "Annuler"); an internal
  * 10s timeout turns an unreachable server into a fast, explicit failure instead
  * of hanging on the OS connect timeout. Both surface as an abort — the caller
  * tells them apart via its own cancelled flag.
  */
-export async function createCampaign(
-  name: string,
+export async function attachServer(
+  campaignId: number,
   serverUrl: string,
   signal?: AbortSignal,
 ): Promise<Campaign> {
+  const existing = await getCampaign(campaignId);
+  if (!existing) throw new Error('Table introuvable.');
+  const name = existing.name;
   const gmToken = newUuid();
   const host = normalizeServerHost(serverUrl);
   // AbortSignal.any/timeout aren't available on Hermes — combine by hand.
@@ -78,10 +94,31 @@ export async function createCampaign(
   if (!res.ok) throw new Error(`Le serveur a refusé la création (${res.status}).`);
   const body = (await res.json()) as { code: string };
   const [row] = await db
-    .insert(campaigns)
-    .values({ code: body.code, name, role: 'gm', gmToken, serverUrl: host, createdAt: new Date() })
+    .update(campaigns)
+    .set({ code: body.code, gmToken, serverUrl: host })
+    .where(eq(campaigns.id, campaignId))
     .returning();
   return row;
+}
+
+/**
+ * Publish the GM's NPCs to the relay (off by default — they are rendered from
+ * the local DB and have no reason to leave the device). Turning it OFF purges
+ * whatever is already up there, best-effort.
+ */
+export async function setShareNpcs(campaignId: number, share: boolean): Promise<void> {
+  await db.update(campaigns).set({ shareNpcs: share }).where(eq(campaigns.id, campaignId));
+  if (share) return;
+  const campaign = await getCampaign(campaignId);
+  if (!campaign?.serverUrl || !campaign.code) return;
+  const rows = await db
+    .select({ uuid: characters.uuid })
+    .from(characters)
+    .innerJoin(campaignShares, eq(campaignShares.characterId, characters.id))
+    .where(eq(campaignShares.campaignId, campaignId));
+  for (const r of rows) {
+    if (r.uuid) unshareFromServer(campaign, r.uuid).catch(() => {});
+  }
 }
 
 /**
@@ -119,14 +156,17 @@ export async function updateCampaignName(id: number, name: string): Promise<void
  * members, and a charId-less hello has no presence side effect.
  */
 export function unshareFromServer(campaign: Campaign, charUuid: string): Promise<void> {
+  // A table with no relay attached has nothing to purge.
+  const { serverUrl, code } = campaign;
+  if (!serverUrl || !code) return Promise.resolve();
   return new Promise((resolve) => {
     const finish = (socket: CampaignSocket) => {
       socket.close();
       resolve();
     };
     const socket: CampaignSocket = new CampaignSocket({
-      serverUrl: campaign.serverUrl,
-      hello: playerHello(campaign.code),
+      serverUrl,
+      hello: playerHello(code),
       onMessage: (msg) => {
         // welcome = the hello was accepted; the unshare right behind it will be
         // processed in order — safe to close.
@@ -149,13 +189,15 @@ export function unshareFromServer(campaign: Campaign, charUuid: string): Promise
  *  - GM: DELETE the campaign server-side (purges every projection).
  *  - Player: unshare each shared character so the projection rows are purged
  *    (a bare local delete would leave them on the server forever).
+ * A local table (no relay attached) has nothing to erase remotely.
  * Best-effort: the local row goes away even if the server is unreachable.
- * Local FK cascade removes shares and notes.
+ * Local FK cascade removes membership rows and notes; the NPC character rows
+ * themselves survive (they are ordinary characters, reusable at another table).
  */
 export async function deleteCampaign(id: number): Promise<void> {
   const campaign = await getCampaign(id);
   if (!campaign) return;
-  if (campaign.role === 'gm' && campaign.gmToken) {
+  if (campaign.role === 'gm' && campaign.gmToken && campaign.serverUrl && campaign.code) {
     try {
       await fetch(`${httpUrl(campaign.serverUrl)}/campaigns/${campaign.code}`, {
         method: 'DELETE',
@@ -184,22 +226,25 @@ export async function deleteCampaign(id: number): Promise<void> {
   await db.delete(campaigns).where(eq(campaigns.id, id));
 }
 
-/** Live query: the share rows of one campaign (player side). */
-export function sharesQuery(campaignId: number) {
+/**
+ * Live query: which characters belong to one table. GM side that IS the roster
+ * (read locally); player side it is the set broadcast to the GM.
+ */
+export function membersQuery(campaignId: number) {
   return db.select().from(campaignShares).where(eq(campaignShares.campaignId, campaignId));
 }
 
-/** Toggle sharing one character into one campaign. */
-export async function setShared(
+/** Add/remove one character from one table. */
+export async function setMember(
   campaignId: number,
   characterId: number,
-  shared: boolean,
+  member: boolean,
 ): Promise<void> {
   const where = and(
     eq(campaignShares.campaignId, campaignId),
     eq(campaignShares.characterId, characterId),
   );
-  if (!shared) {
+  if (!member) {
     await db.delete(campaignShares).where(where);
     return;
   }
@@ -210,15 +255,26 @@ export async function setShared(
 }
 
 /**
- * Spawn another copy of one of the GM's PNJs — the "three identical gardes,
+ * Create an NPC and put it on the table in one step — the "I need a garde, now"
+ * path. It is an ordinary character row (`kind: 'npc'`), so the full sheet, the
+ * catalogues and the export all work on it; only `nom` is required.
+ */
+export async function createNpc(campaignId: number, nom: string): Promise<{ id: number }> {
+  const row = await createCharacter({ nom: nom.trim() || 'PNJ', kind: 'npc' });
+  await setMember(campaignId, row.id, true);
+  return { id: row.id };
+}
+
+/**
+ * Spawn another copy of one of the GM's NPCs — the "three identical gardes,
  * three separate wound tracks" case. The copy is a full character row of its
  * own (fresh uuid, own `actual_state`), numbered into the source's series
- * rather than suffixed "(copie)", and shared into the campaign straight away
- * so it lands on the roster without a second trip.
+ * rather than suffixed "(copie)", and joined to the table straight away so it
+ * lands on the roster without a second trip.
  *
- * Keyed by uuid because the caller holds a roster entry, not a local id. It
- * shows up on the roster once the campaign is broadcasting — sharing while
- * paused stays local until you resume, like every other change.
+ * Keyed by uuid because the caller holds a roster entry, not a local id. The
+ * copy shows up on the roster immediately — the roster is read from the local
+ * DB, no server involved.
  */
 export async function spawnNpc(
   campaignId: number,
@@ -233,8 +289,10 @@ export async function spawnNpc(
   const id = await duplicateCharacter(source.id);
   if (id == null) return null;
   const nom = nextNpcName(source.nom, taken.map((r) => r.nom));
-  await updateCharacter(id, { nom });
-  await setShared(campaignId, id, true);
+  // `kind` explicitly: the source may be a player character the GM borrowed as
+  // a stand-in, and a spawn is always an NPC.
+  await updateCharacter(id, { nom, kind: 'npc' });
+  await setMember(campaignId, id, true);
   return { id, nom };
 }
 

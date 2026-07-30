@@ -16,11 +16,11 @@ import { effectsQuery } from '@/repositories/effects';
 import { skillsQuery } from '@/repositories/skills';
 
 /**
- * The GM editing one of their own PNJs from the campaign roster, in place.
+ * The GM editing one of their own NPCs from the table roster, in place.
  *
  * A roster card renders the *projection* — read-only and stripped — so editing
- * has to go back to the local row. `entry.charId` is the portable uuid, which
- * is the only handle the wire carries; everything here hangs off that lookup.
+ * has to go back to the local row. `entry.charId` is the portable uuid, the
+ * roster's only handle on a character; everything here hangs off that lookup.
  *
  * Scope is deliberately the in-play values (`actual_state`): what actually
  * moves during a fight. The full sheet stays on the character's Fiche.
@@ -31,7 +31,7 @@ import { skillsQuery } from '@/repositories/skills';
  * free: touching `actual_state` moves the projection signature, so a live
  * campaign pushes it on the usual debounce and a paused one syncs on resume.
  */
-export default function PnjInPlayEditor({ charUuid }: { charUuid: string }) {
+export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
   const theme = useProphecyTheme();
   // `updatedAt` is undefined until a query has actually run. useLiveQuery seeds
   // `data` with [] and fetches in an effect, so without this an empty result is

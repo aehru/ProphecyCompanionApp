@@ -12,7 +12,9 @@
 //    GM gets the full projection right away;
 //  - unchecking a character while live sends `unshare` immediately (the ghost-
 //    roster fix) — the paused path is handled by the salons via unshareFromServer;
-//  - works for BOTH roles: a GM broadcaster shares their PNJs (gmToken hello);
+//  - players broadcast; a GM only does when they opted into `shareNpcs` (their
+//    NPCs are rendered from the local DB, so publishing them is purely the
+//    co-GM/second-screen case — off by default);
 //  - STOP = pause: the socket closes, the last state stays on the server (the
 //    GM still sees it); erasure is the separate "leave campaign" flow;
 //  - background/lock drops the socket; it auto-reconnects on return.
@@ -39,7 +41,7 @@ import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
 import { diffShares, LIVE_DEBOUNCE_MS, projectionSignature } from '@/lib/campaign-live';
 import { gmHello, playerHello, unshareMsg, shareMsg } from '@/lib/campaign-protocol';
 import { toSharedCharacter } from '@/lib/character-share';
-import { campaignQuery, sharesQuery, updateCampaignName } from '@/repositories/campaigns';
+import { campaignQuery, membersQuery, updateCampaignName } from '@/repositories/campaigns';
 
 const STORAGE_KEY = 'campaign.live.id';
 
@@ -127,6 +129,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
           onServerError={setServerError}
           onCampaignName={setCampaignName}
           onSharedCount={setSharedCount}
+          onNothingToBroadcast={stop}
         />
       ) : null}
       {children}
@@ -148,12 +151,15 @@ function LiveBroadcaster({
   onServerError,
   onCampaignName,
   onSharedCount,
+  onNothingToBroadcast,
 }: {
   campaignId: number;
   onStatus: (s: SocketStatus) => void;
   onServerError: (e: string | null) => void;
   onCampaignName: (n: string) => void;
   onSharedCount: (n: number) => void;
+  /** There is nothing for this campaign to publish — go back to idle. */
+  onNothingToBroadcast: () => void;
 }) {
   // Local mirror of the status: the debounced push effect keys off it to fire the
   // first full projection as soon as the socket reports online.
@@ -161,7 +167,7 @@ function LiveBroadcaster({
 
   const { data: campRows } = useLiveQuery(campaignQuery(campaignId), [campaignId]);
   const campaign = campRows?.[0];
-  const { data: shareRows } = useLiveQuery(sharesQuery(campaignId), [campaignId]);
+  const { data: shareRows } = useLiveQuery(membersQuery(campaignId), [campaignId]);
   // Sorted ids joined into a string: a stable dep for the row queries (the array
   // identity changes on every refetch; the KEY only when the share set does).
   const sharedIds = (shareRows ?? []).map((s) => s.characterId).sort((a, b) => a - b);
@@ -206,11 +212,14 @@ function LiveBroadcaster({
   const serverUrl = campaign?.serverUrl;
   const role = campaign?.role;
   const gmToken = campaign?.gmToken;
+  // A GM publishes their NPCs only on request (see the header). Guarded here and
+  // not only in the UI, because auto-resume can revive a live campaign on launch.
+  const npcsMuted = role === 'gm' && !campaign?.shareNpcs;
 
   // Socket lifecycle: ONE per campaign while live — v2 hellos carry no charId,
   // so the shared set can change freely without a reconnect.
   useEffect(() => {
-    if (campaignRowId == null || code == null || serverUrl == null || role == null) {
+    if (campaignRowId == null || code == null || serverUrl == null || role == null || npcsMuted) {
       setStatus('offline');
       onStatus('offline');
       return;
@@ -248,7 +257,15 @@ function LiveBroadcaster({
       onlineRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [campaignRowId, code, serverUrl, role, gmToken, onStatus, onServerError]);
+  }, [campaignRowId, code, serverUrl, role, gmToken, npcsMuted, onStatus, onServerError]);
+
+  // A GM row that doesn't publish its NPCs has nothing to broadcast: end the
+  // live session rather than leave the global indicator pulsing at a socket that
+  // will never connect (this is also what an auto-resumed pre-local-table
+  // campaign lands on after the update).
+  useEffect(() => {
+    if (npcsMuted) onNothingToBroadcast();
+  }, [npcsMuted, onNothingToBroadcast]);
 
   // Surface the resolved campaign name (the indicator shows it while live).
   useEffect(() => {
