@@ -36,9 +36,9 @@ merge, character detail sheet, join disclaimer, privacy policy.
   entry winning; `characters.kind` PC/NPC + "Nouveau PNJ" straight from the
   salon; GM NPCs no longer round-trip through the server (`campaigns.share_npcs`,
   off by default).
-- [ ] **Phase 2 — full local NPC sheet.** The GM sheet still renders the wire
-  *projection* for its own NPCs (no weapons, no damage formula, no spells).
-  Local entries should render the real character rows instead; remote players
+- [x] **Phase 2 — full local NPC sheet.** The GM sheet renders the local rows
+  for its own NPCs on top of the projection: armes (damage formulas resolved
+  with the wound/effects modifier), armures, boucliers, sorts. Remote players
   stay projection-limited by protocol.
 - [ ] **Phase 3 — co-GM.** `share_npcs` publishes the NPCs already; a second GM
   seat needs server-side work (a second gmToken, ownership rules).

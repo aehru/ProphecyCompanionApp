@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Divider, IconButton, Modal, Portal, Text, TextInput } from 'react-native-paper';
+import { Button, IconButton, Modal, Portal, Text, TextInput } from 'react-native-paper';
 
 import {
   AttrTile,
@@ -20,7 +20,9 @@ import {
   RESOURCES,
   TENDANCES,
 } from '@/constants/prophecy';
+import NpcGearSections from '@/components/campaign/npc-gear-sections';
 import NpcInPlayEditor from '@/components/campaign/npc-in-play-editor';
+import Section from '@/components/campaign/sheet-section';
 import { dsIcon } from '@/components/ui/icon';
 import StatChip from '@/components/ui/stat-chip';
 import { contentWidth } from '@/hooks/use-layout';
@@ -56,11 +58,13 @@ interface Props {
  * GM-only bottom sheet: the full shared projection of one roster character plus
  * the GM's private notes, which never leave this device.
  *
- * A player's character is read-only — the protocol is one-way and the
- * projection is the privacy boundary. The GM's OWN NPCs (`owner === 'gm'`) get
- * an edit toggle instead, which swaps the read-only Ressources block for
- * <NpcInPlayEditor> — that one reaches past the projection to the local row and
- * edits the in-play values. Everything below it stays readable while you edit.
+ * A player's character is read-only AND limited to the projection — the protocol
+ * is one-way and the projection is the privacy boundary. The GM's OWN NPCs
+ * (`owner === 'gm'`) get two things more, both reaching past the projection to
+ * the local row through `charId` (= the portable uuid): an edit toggle swapping
+ * the read-only Ressources block for <NpcInPlayEditor>, and <NpcGearSections>,
+ * which shows the armes/armures/boucliers/sorts the wire never carries.
+ * Everything else stays readable while you edit.
  */
 export function GmSheetBody({
   entry,
@@ -153,17 +157,17 @@ export function GmSheetBody({
           {editing ? (
             <NpcInPlayEditor charUuid={entry.charId} />
           ) : (
-            <Section title="Ressources" theme={theme}>
+            <Section title="Ressources">
               <ResourceTiles resources={resources} />
             </Section>
           )}
 
-          <Section title="Tendances" theme={theme}>
+          <Section title="Tendances">
             <TendanceRings tend={tend} colors={tendColors} />
           </Section>
 
           {/* Attributs */}
-          <Section title="Attributs" theme={theme}>
+          <Section title="Attributs">
             <View style={styles.grid}>
               {ATTRIBUTS.map((a) => (
                 <AttrTile key={a.key} label={a.label} value={attr[a.key] ?? 0} color={attrColors[a.key]} />
@@ -172,7 +176,7 @@ export function GmSheetBody({
           </Section>
 
           {/* Caractéristiques */}
-          <Section title="Caractéristiques" theme={theme}>
+          <Section title="Caractéristiques">
             <View style={styles.grid}>
               {CARACTERISTIQUES.map((k) => (
                 <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
@@ -181,21 +185,26 @@ export function GmSheetBody({
           </Section>
 
           {/* Compétences (trained, with specializations) */}
-          <Section title="Compétences" theme={theme}>
+          <Section title="Compétences">
             <SkillGroupsView groups={groups} emptyLabel="Aucune compétence apprise." />
           </Section>
 
+          {/* Armes/armures/boucliers/sorts: only ever available for a character
+              this device owns — a player's is limited to the projection, which
+              carries none of it. Renders nothing when there is nothing to show. */}
+          {canEdit ? <NpcGearSections charUuid={entry.charId} /> : null}
+
           {effects.length > 0 ? (
-            <Section title="Effets actifs" theme={theme}>
+            <Section title="Effets actifs">
               <EffectsList effects={effects} />
             </Section>
           ) : null}
 
-          <Section title="Initiative" theme={theme}>
+          <Section title="Initiative">
             <InitiativeChips values={initiative.values ?? []} max={initiative.max ?? 0} wound={wound} />
           </Section>
 
-          <Section title="Notes privées (MJ)" theme={theme}>
+          <Section title="Notes privées (MJ)">
             <GmNotes note={note} draftRef={draftRef} />
           </Section>
         </ScrollView>
@@ -400,28 +409,6 @@ function GmNotes({
   );
 }
 
-type ThemeT = ReturnType<typeof useProphecyTheme>;
-
-function Section({
-  title,
-  theme,
-  children,
-}: {
-  title: string;
-  theme: ThemeT;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={styles.section}>
-      <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
-        {title}
-      </Text>
-      <Divider style={{ backgroundColor: theme.prophecy.border }} />
-      {children}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   wrapper: { justifyContent: 'flex-end', margin: 0 },
   sheet: {
@@ -445,7 +432,6 @@ const styles = StyleSheet.create({
   body: { gap: 18, paddingVertical: 12 },
   // In a pane the sheet has a real height to fill; in the modal it hugs.
   bodyFill: { flex: 1 },
-  section: { gap: 8 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   poolTile: {
     flexGrow: 1,
