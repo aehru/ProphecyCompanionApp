@@ -40,6 +40,24 @@ merge, character detail sheet, join disclaimer, privacy policy.
   for its own NPCs on top of the projection: armes (damage formulas resolved
   with the wound/effects modifier), armures, boucliers, sorts. Remote players
   stay projection-limited by protocol.
+- [ ] **No way to add a bonus/malus to a PNJ from the table.** `createEffect` is
+  called from exactly one place, the Fiche's "Effet" FAB
+  ([src/app/character/[id]/(tabs)/fiche.tsx](src/app/character/%5Bid%5D/(tabs)/fiche.tsx));
+  `<NpcInPlayEditor>` renders `<EffectsCard>`, which by design never spawns rows,
+  so the GM can only view and tick existing effects and has to leave the campaign
+  to create one. _Fix with the planned effect-creation rework:_ an add control in
+  the in-play editor, ideally opening `<EffectEditor>` in a `<DsDialog>` so the
+  GM stays on the table screen.
+- [ ] **A quick-created PNJ has no wound boxes and no initiative dice.**
+  `createNpc` ([src/repositories/campaigns.ts](src/repositories/campaigns.ts))
+  builds the character with a name only, so every `*Max` column keeps its `0`
+  default. `<HealthSection>` then draws `Bullets count={0}` (a bare `—`), so the
+  GM can never tick a wound and `woundMalus` is pinned at 0 for that PNJ; with
+  `initiativeMax` 0, `rollInitiativeFor` skips it and it never enters the turn
+  order. The malus plumbing itself is fine — there is simply nothing to fill.
+  _Fix:_ seed rulebook defaults in `createNpc` (needs the per-level box counts
+  from the rulebook — **to check**), and/or let `<NpcInPlayEditor>` set the
+  maxes inline so the GM doesn't have to leave the table for the full sheet.
 - [ ] **Phase 3 — co-GM.** `share_npcs` publishes the NPCs already; a second GM
   seat needs server-side work (a second gmToken, ownership rules).
 - [x] **Phase 4 — docs.** `docs/campaign-protocol.md` gained a Scope section (the
