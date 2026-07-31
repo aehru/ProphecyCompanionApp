@@ -1,9 +1,13 @@
-// GM-side live roster: connect with the gmToken, take the server's persisted
-// `roster` as the initial truth, then fold the `update`/`remove`/`presence`
-// stream into it. Purely in-memory — the durable copy lives on the server
-// (docs/campaign-protocol.md §2), so closing the screen loses nothing.
+// The REMOTE half of the table roster: connect with the gmToken, take the
+// server's persisted `roster` as the initial truth, then fold the
+// `update`/`remove`/`presence` stream into it. Purely in-memory — the durable
+// copy lives on the server (docs/campaign-protocol.md §2), so closing the screen
+// loses nothing.
+//
+// A table with no relay attached (local-only GM) never connects and simply
+// yields an empty list; its roster comes from the DB (use-local-roster).
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Campaign } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
@@ -22,18 +26,24 @@ export function useGmRoster(campaign: Campaign) {
   const nameRef = useRef(campaign.name);
   nameRef.current = campaign.name;
 
+  // Destructured outside the effect so it closes over the scalars that define
+  // the connection, not the row object (whose identity changes on every refetch).
+  const campaignId = campaign.id;
+  const { code, serverUrl, gmToken } = campaign;
+
   useEffect(() => {
-    if (!campaign.gmToken) return;
+    // No relay attached: nothing to connect to, the roster stays local-only.
+    if (!gmToken || !code || !serverUrl) return;
     const socket = new CampaignSocket({
-      serverUrl: campaign.serverUrl,
-      hello: gmHello(campaign.code, campaign.gmToken),
+      serverUrl,
+      hello: gmHello(code, gmToken),
       onStatus: setStatus,
       onMessage: (msg) => {
         switch (msg.type) {
           case 'welcome':
             setServerError(null);
             if (msg.campaign.name && msg.campaign.name !== nameRef.current) {
-              updateCampaignName(campaign.id, msg.campaign.name).catch(() => {});
+              updateCampaignName(campaignId, msg.campaign.name).catch(() => {});
             }
             break;
           case 'roster':
@@ -78,7 +88,7 @@ export function useGmRoster(campaign: Campaign) {
       socket.close();
       socketRef.current = null;
     };
-  }, [campaign.id, campaign.code, campaign.serverUrl, campaign.gmToken]);
+  }, [campaignId, code, serverUrl, gmToken]);
 
   /**
    * Kick: purge one roster entry from the server (v2 `unshare` is unrestricted
@@ -91,8 +101,18 @@ export function useGmRoster(campaign: Campaign) {
     setEntries((prev) => prev.filter((e) => e.charId !== charId));
   }, []);
 
-  const roster = [...entries].sort((a, b) =>
-    String(a.character.nom ?? '').localeCompare(String(b.character.nom ?? '')),
+  // Memoized by hand on purpose. React Compiler bails out of this whole hook
+  // because `nameRef.current` is assigned during render (above), so nothing here
+  // is auto-memoized — and an unstable `roster` identity would defeat the
+  // memoization the compiler DOES apply in the screens that consume it (the
+  // initiative order recomputes, the FlatList re-derives). Verified by compiling
+  // this file with the compiler: zero memo slots, no runtime import.
+  const roster = useMemo(
+    () =>
+      [...entries].sort((a, b) =>
+        String(a.character.nom ?? '').localeCompare(String(b.character.nom ?? '')),
+      ),
+    [entries],
   );
   return { status, serverError, roster, kick };
 }

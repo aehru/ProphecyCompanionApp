@@ -8,6 +8,7 @@ import Icon from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { ARMOR_CATALOG, ARMOR_CATEGORIES, type ArmorPreset } from '@/data/armor-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { createArmor } from '@/repositories/armor';
 
@@ -40,7 +41,7 @@ export default function ArmorCatalogModal() {
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+    <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
       <Searchbar
         placeholder="Rechercher une armure"
         value={query}

@@ -2,15 +2,17 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
-import { Button, Dialog, IconButton, List, Portal, Text, TextInput } from 'react-native-paper';
+import { Button, IconButton, List, Text, TextInput } from 'react-native-paper';
 
 import { QrScannerModal } from '@/components/campaign/qr-scanner';
 import AppFab from '@/components/ui/app-fab';
+import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   campaignsListQuery,
-  createCampaign,
+  createLocalTable,
   deleteCampaign,
   joinCampaign,
 } from '@/repositories/campaigns';
@@ -43,8 +45,12 @@ export default function CampaignsScreen() {
     }
   }, [params.code, params.server]);
   // Prefill the server field with the last one used — groups stick to one server.
+  // Local tables have none, so look for the last row that actually has one.
   const openDialog = (kind: DialogKind) => {
-    if (!serverUrl && campaigns.length > 0) setServerUrl(campaigns[campaigns.length - 1].serverUrl);
+    if (!serverUrl) {
+      const lastServer = [...campaigns].reverse().find((c) => c.serverUrl)?.serverUrl;
+      if (lastServer) setServerUrl(lastServer);
+    }
     setDialog(kind);
   };
 
@@ -60,9 +66,12 @@ export default function CampaignsScreen() {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
+      // Creating a table touches no network at all — the relay is attached
+      // later, from the table itself, and only if the GM wants the players'
+      // sheets. Joining one obviously needs a server.
       const row =
         dialog === 'create'
-          ? await createCampaign(name.trim(), serverUrl.trim(), controller.signal)
+          ? await createLocalTable(name.trim())
           : await joinCampaign(code, serverUrl.trim());
       setDialog(null);
       setName('');
@@ -79,11 +88,13 @@ export default function CampaignsScreen() {
     }
   };
 
-  const confirmDelete = (id: number, role: string) => {
+  const confirmDelete = (id: number, role: string, attached: boolean) => {
     Alert.alert(
-      role === 'gm' ? 'Supprimer la campagne ?' : 'Quitter la campagne ?',
+      role === 'gm' ? 'Supprimer la table ?' : 'Quitter la campagne ?',
       role === 'gm'
-        ? 'La campagne et toutes les fiches partagées seront effacées du serveur.'
+        ? attached
+          ? 'La table et toutes les fiches partagées seront effacées du serveur. Vos PNJ restent dans vos personnages.'
+          : 'La table et vos notes seront effacées. Vos PNJ restent dans vos personnages.'
         : 'Vos notes locales pour cette campagne seront effacées.',
       [
         { text: 'Annuler', style: 'cancel' },
@@ -93,8 +104,9 @@ export default function CampaignsScreen() {
   };
 
   const canSubmit =
-    serverUrl.trim().length > 0 &&
-    (dialog === 'create' ? name.trim().length > 0 : code.trim().length >= 4);
+    dialog === 'create'
+      ? name.trim().length > 0
+      : serverUrl.trim().length > 0 && code.trim().length >= 4;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -115,10 +127,11 @@ export default function CampaignsScreen() {
           },
         ]}>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Mode campagne. Lorsqu’un joueur partage un personnage, un extrait (nom, état de combat,
-          caractéristiques) est envoyé au serveur choisi et conservé sous la responsabilité de son
-          hébergeur — instance communautaire ou auto-hébergée. En tant que MJ, c’est vous qui
-          choisissez ce serveur. Arrêter le partage ou quitter la campagne en demande l’effacement.
+          Une table fonctionne hors ligne : vos PNJ, leur initiative et leurs fiches restent sur
+          votre appareil. Connecter un serveur est facultatif — il sert à voir les personnages de
+          vos joueurs. Dans ce cas, lorsqu’un joueur partage un personnage, un extrait (nom, état de
+          combat, caractéristiques) est envoyé au serveur choisi et conservé sous la responsabilité
+          de son hébergeur. Arrêter le partage ou quitter la campagne en demande l’effacement.
         </Text>
       </View>
 
@@ -132,16 +145,17 @@ export default function CampaignsScreen() {
             },
           ]}>
           <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
-            Aucune campagne
+            Aucune table
           </Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            Le MJ crée la campagne et partage son code avec les joueurs.
+            Créez une table pour gérer vos PNJ et leur initiative — sans serveur. Joueur ? Rejoignez
+            avec le code du MJ.
           </Text>
         </View>
       ) : (
         <FlatList
           data={campaigns}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, contentWidth]}
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           keyExtractor={(c) => String(c.id)}
           renderItem={({ item }) => (
@@ -154,7 +168,7 @@ export default function CampaignsScreen() {
                 },
               ]}
               title={item.name}
-              description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code}`}
+              description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code ?? 'hors ligne'}`}
               titleStyle={{ color: theme.colors.onSurface }}
               descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
               left={(p) => (
@@ -164,7 +178,7 @@ export default function CampaignsScreen() {
                 <IconButton
                   {...p}
                   icon="delete-outline"
-                  onPress={() => confirmDelete(item.id, item.role)}
+                  onPress={() => confirmDelete(item.id, item.role, item.serverUrl != null)}
                 />
               )}
               onPress={() => router.push(`/campaigns/${item.id}` as Href)}
@@ -173,45 +187,12 @@ export default function CampaignsScreen() {
         />
       )}
 
-      <Portal>
-        <Dialog
-          visible={dialog !== null}
-          onDismiss={cancel}
-          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
-          <Dialog.Title>
-            {dialog === 'create' ? 'Nouvelle campagne' : 'Rejoindre une campagne'}
-          </Dialog.Title>
-          <Dialog.Content style={styles.dialogContent}>
-            {dialog === 'create' ? (
-              <TextInput label="Nom de la campagne" value={name} onChangeText={setName} />
-            ) : (
-              <TextInput
-                label="Code de la campagne"
-                value={code}
-                onChangeText={setCode}
-                autoCapitalize="characters"
-                autoCorrect={false}
-              />
-            )}
-            <TextInput
-              label="Serveur"
-              value={serverUrl}
-              onChangeText={setServerUrl}
-              placeholder="exemple.fr ou 192.168.1.10:8000"
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-            />
-            {dialog === 'join' ? (
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                Les données que vous choisirez de partager ensuite (nom, état de combat,
-                caractéristiques) seront stockées sur ce serveur, sous la responsabilité de la
-                personne qui l’héberge. Cessez le partage ou quittez la campagne pour en demander
-                l’effacement.
-              </Text>
-            ) : null}
-          </Dialog.Content>
-          <Dialog.Actions>
+      <DsDialog
+        visible={dialog !== null}
+        onDismiss={cancel}
+        title={dialog === 'create' ? 'Nouvelle table' : 'Rejoindre une campagne'}
+        actions={
+          <>
             <Button onPress={cancel}>Annuler</Button>
             <Button
               mode="contained"
@@ -221,9 +202,43 @@ export default function CampaignsScreen() {
               loading={busy}>
               {dialog === 'create' ? 'Créer' : 'Rejoindre'}
             </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+          </>
+        }>
+        {dialog === 'create' ? (
+          <>
+            <TextInput label="Nom de la table" value={name} onChangeText={setName} />
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              Table hors ligne : vos PNJ, leur initiative et leurs fiches restent sur cet appareil.
+              Vous pourrez y connecter un serveur plus tard pour voir les personnages des joueurs.
+            </Text>
+          </>
+        ) : (
+          <>
+            <TextInput
+              label="Code de la campagne"
+              value={code}
+              onChangeText={setCode}
+              autoCapitalize="characters"
+              autoCorrect={false}
+            />
+            <TextInput
+              label="Serveur"
+              value={serverUrl}
+              onChangeText={setServerUrl}
+              placeholder="exemple.fr ou 192.168.1.10:8000"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+            />
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              Les données que vous choisirez de partager ensuite (nom, état de combat,
+              caractéristiques) seront stockées sur ce serveur, sous la responsabilité de la
+              personne qui l’héberge. Cessez le partage ou quittez la campagne pour en demander
+              l’effacement.
+            </Text>
+          </>
+        )}
+      </DsDialog>
 
       {/* Same landing as the OS-camera deep link: prefill + open the join
           dialog so the consent line is always seen before joining. */}
@@ -266,8 +281,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  // Match the DS card surface used by the dice-roller dialog: tighter radius +
-  // a 1px gold hairline (Paper's default Dialog corner balloons and has no border).
-  dialog: { borderRadius: 18, borderWidth: 1 },
-  dialogContent: { gap: 16 },
 });

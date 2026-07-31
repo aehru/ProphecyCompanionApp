@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Dialog, Menu, Portal, Text } from 'react-native-paper';
+import { Button, Menu, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import AppFab from '@/components/ui/app-fab';
+import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { rollDice } from '@/lib/dice';
@@ -44,83 +45,76 @@ export default function DiceRollerFab() {
   return (
     <>
       <AppFab icon={dsIcon('dice')} onPress={() => setOpen(true)} />
-      <Portal>
-        <Dialog
-          visible={open}
-          onDismiss={() => setOpen(false)}
-          style={[styles.dialog, { borderColor: theme.prophecy.border }]}>
-          <Dialog.Title>Lancer les dés</Dialog.Title>
-          <Dialog.Content style={styles.content}>
-            <View style={styles.countRow}>
-              <NumberField
-                fieldKey="count"
-                label="Nombre de dés"
-                value={String(count)}
-                onChange={(_, t) => setCountSafe(t)}
-                style={styles.countField}
-              />
-              <Text variant="titleLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-                ×
-              </Text>
-              <Menu
-                visible={sidesMenu}
-                onDismiss={() => setSidesMenu(false)}
-                anchor={
-                  <Button
-                    mode="outlined"
-                    icon={dsIcon('chev')}
-                    contentStyle={styles.sidesAnchorContent}
-                    onPress={() => setSidesMenu(true)}>
-                    {`D${sides}`}
-                  </Button>
-                }>
-                {SIDES.map((s) => (
-                  <Menu.Item key={s} title={`D${s}`} onPress={() => pickSides(s)} />
-                ))}
-              </Menu>
-            </View>
-            {result ? (
-              <View style={styles.results}>
-                <View style={styles.dice}>
-                  {result.map((v, i) => (
-                    <View
-                      key={i}
-                      style={[
-                        styles.die,
-                        {
-                          borderColor: theme.prophecy.border,
-                          backgroundColor: theme.colors.surfaceVariant,
-                        },
-                      ]}>
-                      <Text style={[styles.dieText, { color: theme.colors.onSurface }]}>{v}</Text>
-                    </View>
-                  ))}
-                </View>
-                {result.length > 1 ? (
-                  <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
-                    Total : {total}
-                  </Text>
-                ) : null}
-              </View>
-            ) : null}
-          </Dialog.Content>
-          <Dialog.Actions>
+      <DsDialog
+        visible={open}
+        onDismiss={() => setOpen(false)}
+        title="Lancer les dés"
+        actions={
+          <>
             <Button onPress={() => setOpen(false)}>Fermer</Button>
             <Button mode="contained" icon={dsIcon('dice')} onPress={roll}>
               Lancer
             </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+          </>
+        }>
+        <View style={styles.countRow}>
+          <NumberField
+            fieldKey="count"
+            label="Nombre de dés"
+            value={String(count)}
+            onChange={(_, t) => setCountSafe(t)}
+            style={styles.countField}
+          />
+          <Text variant="titleLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+            ×
+          </Text>
+          <Menu
+            visible={sidesMenu}
+            onDismiss={() => setSidesMenu(false)}
+            anchor={
+              <Button
+                mode="outlined"
+                icon={dsIcon('chev')}
+                contentStyle={styles.sidesAnchorContent}
+                onPress={() => setSidesMenu(true)}>
+                {`D${sides}`}
+              </Button>
+            }>
+            {SIDES.map((s) => (
+              <Menu.Item key={s} title={`D${s}`} onPress={() => pickSides(s)} />
+            ))}
+          </Menu>
+        </View>
+        {result ? (
+          <View style={styles.results}>
+            <View style={styles.dice}>
+              {result.map((v, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.die,
+                    {
+                      borderColor: theme.prophecy.border,
+                      backgroundColor: theme.colors.surfaceVariant,
+                    },
+                  ]}>
+                  <Text style={[styles.dieText, { color: theme.colors.onSurface }]}>{v}</Text>
+                </View>
+              ))}
+            </View>
+            {result.length > 1 ? (
+              <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
+                Total : {total}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </DsDialog>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  // Match the DS card surface: tighter radius + a 1px gold hairline (Paper's
-  // default Dialog corner balloons and has no border).
-  dialog: { borderRadius: 18, borderWidth: 1 },
-  content: { gap: 16 },
   countRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   countField: { flexGrow: 1, flexBasis: 120 },
   // Chevron trailing the "D10" label instead of leading it.

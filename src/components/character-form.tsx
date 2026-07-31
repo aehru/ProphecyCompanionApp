@@ -1,32 +1,18 @@
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Alert,
-  type TextInput as RNTextInput,
-  ScrollView,
-  StyleSheet,
-  type TextInputProps,
-  View,
-} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Button, HelperText, SegmentedButtons, Snackbar, TextInput } from 'react-native-paper';
+import { SegmentedButtons, Snackbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import AptitudesTab from '@/components/sheet-form/aptitudes-tab';
+import CombatTab from '@/components/sheet-form/combat-tab';
+import { useFieldChains } from '@/components/sheet-form/field-chain';
+import IdentityTab from '@/components/sheet-form/identity-tab';
+import MagicTab from '@/components/sheet-form/magic-tab';
 import AppFab from '@/components/ui/app-fab';
-
-import NumberField from '@/components/number-field';
-import SectionCard from '@/components/ui/section-card';
-import {
-  ATTRIBUTS,
-  CARACTERISTIQUES,
-  DISCIPLINES,
-  RESOURCES,
-  SPHERES,
-  TENDANCES,
-  WOUND_LEVELS,
-} from '@/constants/prophecy';
 import type { Character, NewCharacter } from '@/db/schema';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { contentWidth } from '@/hooks/use-layout';
 import { type FormValues, fromFormValues, toFormValues } from '@/lib/character-values';
 
 // In-page tabs to keep the long sheet from scrolling endlessly. Name stays the
@@ -39,22 +25,6 @@ const FORM_TABS = [
   { key: 'magie', label: 'Magie' },
 ] as const;
 
-// Field order per tab for the keyboard "next" chaining. Derived purely from the
-// domain constants, so they live at module scope (stable identity) — that lets
-// the chain props below be memoized once instead of rebuilt every render.
-const IDENTITE_ORDER = ['nom', 'concept', ...TENDANCES.flatMap((t) => [t.key, `${t.key}Sub`])];
-const APTITUDES_ORDER = [...ATTRIBUTS.map((a) => a.key), ...CARACTERISTIQUES.map((c) => c.key)];
-const COMBAT_ORDER = [
-  ...WOUND_LEVELS.map((w) => `${w.key}Max`),
-  ...RESOURCES.map((r) => `${r.key}Max`),
-  'initiativeMax',
-];
-const MAGIE_ORDER = [
-  'reserveMagiqueMax',
-  ...SPHERES.map((s) => `${s.key}Max`),
-  ...DISCIPLINES.map((d) => d.key),
-];
-
 export default function CharacterForm({
   initial,
   submitLabel,
@@ -66,7 +36,6 @@ export default function CharacterForm({
   onSubmit: (data: Partial<NewCharacter>) => Promise<void> | void;
   onDelete?: () => Promise<void> | void;
 }) {
-  const theme = useProphecyTheme();
   const insets = useSafeAreaInsets();
   // Match AppFab: skip the safe-area inset when inside a tab navigator, where
   // the tab bar already offsets the screen.
@@ -78,50 +47,14 @@ export default function CharacterForm({
   const [saved, setSaved] = useState(false);
   const [nameError, setNameError] = useState(false);
   const nameMissing = v.nom.trim() === '';
-  const set = (k: string) => (t: string) => setV((prev) => ({ ...prev, [k]: t }));
   // Stable setter so memoized NumberFields don't all re-render on each keystroke.
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
-
-  // Keyboard "next" wiring: chain inputs within a tab so the return key jumps to
-  // the following field instead of dismissing the keyboard.
-  const fieldRefs = useRef<Record<string, RNTextInput | null>>({});
-  const focusNext = (order: string[], key: string) =>
-    fieldRefs.current[order[order.indexOf(key) + 1]]?.focus();
-
-  // Pre-built, stable chain props per field. Memoized once (orders are module
-  // constants) so each NumberField gets the same prop identities across renders
-  // — that's what makes their React.memo actually skip re-renders while typing.
-  type ChainProps = {
-    inputRef: (el: RNTextInput | null) => void;
-    returnKeyType: TextInputProps['returnKeyType'];
-    submitBehavior: TextInputProps['submitBehavior'];
-    onSubmitEditing: () => void;
+  const setText = (key: string, text: string) => {
+    setField(key, text);
+    if (key === 'nom' && nameError && text.trim() !== '') setNameError(false);
   };
-  const chainMaps = useMemo(() => {
-    const make = (order: string[]): Record<string, ChainProps> =>
-      Object.fromEntries(
-        order.map((key, i) => {
-          const isLast = i === order.length - 1;
-          return [
-            key,
-            {
-              inputRef: (el: RNTextInput | null) => {
-                fieldRefs.current[key] = el;
-              },
-              returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
-              submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as TextInputProps['submitBehavior'],
-              onSubmitEditing: () => fieldRefs.current[order[i + 1]]?.focus(),
-            },
-          ];
-        }),
-      );
-    return {
-      identite: make(IDENTITE_ORDER),
-      aptitudes: make(APTITUDES_ORDER),
-      combat: make(COMBAT_ORDER),
-      magie: make(MAGIE_ORDER),
-    };
-  }, []);
+
+  const { chains, registerRef, focus } = useFieldChains();
 
   async function save() {
     if (nameMissing) {
@@ -161,213 +94,30 @@ export default function CharacterForm({
       </View>
 
       <KeyboardAwareScrollView
-        contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }]}
+        contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }, contentWidth]}
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}>
         {tab === 'identite' ? (
-          <>
-            <SectionCard title="IDENTITÉ">
-              <TextInput
-                label="Nom *"
-                value={v.nom}
-                onChangeText={(t) => {
-                  set('nom')(t);
-                  if (nameError && t.trim() !== '') setNameError(false);
-                }}
-                mode="outlined"
-                error={nameError && nameMissing}
-                ref={(el: unknown) => {
-                  fieldRefs.current.nom = el as RNTextInput | null;
-                }}
-                returnKeyType="next"
-                blurOnSubmit={false}
-                onSubmitEditing={() => fieldRefs.current.concept?.focus()}
-              />
-              { nameError && nameMissing ? (
-                <HelperText type="error" visible>
-                  Le nom est obligatoire
-                </HelperText>
-              ) : null }
-              <TextInput
-                label="Concept"
-                value={v.concept}
-                onChangeText={set('concept')}
-                mode="outlined"
-                ref={(el: unknown) => {
-                  fieldRefs.current.concept = el as RNTextInput | null;
-                }}
-                returnKeyType="next"
-                blurOnSubmit={false}
-                onSubmitEditing={() => focusNext(IDENTITE_ORDER, 'concept')}
-              />
-            </SectionCard>
-
-            <SectionCard title="TENDANCES">
-              {TENDANCES.map((t) => (
-                <View key={t.key} style={styles.row}>
-                  <NumberField
-                    fieldKey={t.key}
-                    label={t.label}
-                    value={v[t.key]}
-                    onChange={setField}
-                    {...chainMaps.identite[t.key]}
-                  />
-                  <NumberField
-                    fieldKey={`${t.key}Sub`}
-                    label={`${t.label} (puces)`}
-                    value={v[`${t.key}Sub`]}
-                    onChange={setField}
-                    {...chainMaps.identite[`${t.key}Sub`]}
-                  />
-                </View>
-              ))}
-            </SectionCard>
-
-            <SectionCard title="BIOGRAPHIE">
-              <TextInput
-                label="Biographie"
-                value={v.biographie}
-                onChangeText={set('biographie')}
-                mode="outlined"
-                multiline
-                style={{ minHeight: 96, maxHeight: 288 }}
-              />
-            </SectionCard>
-
-            {onDelete ? (
-              <Button
-                mode="outlined"
-                textColor={theme.colors.error}
-                onPress={confirmDelete}
-                disabled={busy}>
-                Supprimer
-              </Button>
-            ) : null}
-          </>
+          <IdentityTab
+            v={v}
+            chain={chains.identite}
+            setField={setField}
+            onText={setText}
+            nameError={nameError && nameMissing}
+            registerRef={registerRef}
+            focus={focus}
+            busy={busy}
+            onDelete={onDelete ? confirmDelete : undefined}
+          />
         ) : null}
 
         {tab === 'aptitudes' ? (
-          <>
-            <SectionCard title="ATTRIBUTS">
-              <View style={styles.grid}>
-                {ATTRIBUTS.map((a) => (
-                  <NumberField
-                    key={a.key}
-                    fieldKey={a.key}
-                    label={a.label}
-                    value={v[a.key]}
-                    onChange={setField}
-                    style={styles.col4}
-                    {...chainMaps.aptitudes[a.key]}
-                  />
-                ))}
-              </View>
-            </SectionCard>
-
-            <SectionCard title="CARACTÉRISTIQUES">
-              <View style={styles.grid}>
-                {CARACTERISTIQUES.map((c) => (
-                  <NumberField
-                    key={c.key}
-                    fieldKey={c.key}
-                    label={c.abbr}
-                    value={v[c.key]}
-                    onChange={setField}
-                    style={styles.col2}
-                    {...chainMaps.aptitudes[c.key]}
-                  />
-                ))}
-              </View>
-            </SectionCard>
-          </>
+          <AptitudesTab v={v} chain={chains.aptitudes} setField={setField} />
         ) : null}
 
-        {tab === 'combat' ? (
-          <>
-            <SectionCard title="SANTÉ (MAX PAR NIVEAU)">
-              <View style={styles.grid}>
-                {WOUND_LEVELS.map((w) => (
-                  <NumberField
-                    key={w.key}
-                    fieldKey={`${w.key}Max`}
-                    label={w.label}
-                    value={v[`${w.key}Max`]}
-                    onChange={setField}
-                    {...chainMaps.combat[`${w.key}Max`]}
-                  />
-                ))}
-              </View>
-            </SectionCard>
+        {tab === 'combat' ? <CombatTab v={v} chain={chains.combat} setField={setField} /> : null}
 
-            <SectionCard title="RESSOURCES (MAX)">
-              <View style={styles.grid}>
-                {RESOURCES.map((r) => (
-                  <NumberField
-                    key={r.key}
-                    fieldKey={`${r.key}Max`}
-                    label={r.label}
-                    value={v[`${r.key}Max`]}
-                    onChange={setField}
-                    {...chainMaps.combat[`${r.key}Max`]}
-                  />
-                ))}
-                <NumberField
-                  fieldKey="initiativeMax"
-                  label="Initiative"
-                  value={v.initiativeMax}
-                  onChange={setField}
-                  {...chainMaps.combat['initiativeMax']}
-                />
-              </View>
-            </SectionCard>
-          </>
-        ) : null}
-
-        {tab === 'magie' ? (
-          <>
-            <SectionCard title="RÉSERVE DE MAGIE (MAX)">
-              <NumberField
-                fieldKey="reserveMagiqueMax"
-                label="Réserve max (défaut = Volonté)"
-                value={v.reserveMagiqueMax}
-                onChange={setField}
-                {...chainMaps.magie['reserveMagiqueMax']}
-              />
-            </SectionCard>
-
-            <SectionCard title="SPHÈRES (MAX)">
-              <View style={styles.grid}>
-                {SPHERES.map((s) => (
-                  <NumberField
-                    key={s.key}
-                    fieldKey={`${s.key}Max`}
-                    label={s.label}
-                    value={v[`${s.key}Max`]}
-                    onChange={setField}
-                    style={styles.col2}
-                    {...chainMaps.magie[`${s.key}Max`]}
-                  />
-                ))}
-              </View>
-            </SectionCard>
-
-            <SectionCard title="DISCIPLINES">
-              <View style={styles.grid}>
-                {DISCIPLINES.map((d) => (
-                  <NumberField
-                    key={d.key}
-                    fieldKey={d.key}
-                    label={d.label}
-                    value={v[d.key]}
-                    onChange={setField}
-                    style={styles.col2}
-                    {...chainMaps.magie[d.key]}
-                  />
-                ))}
-              </View>
-            </SectionCard>
-          </>
-        ) : null}
+        {tab === 'magie' ? <MagicTab v={v} chain={chains.magie} setField={setField} /> : null}
       </KeyboardAwareScrollView>
 
       <AppFab icon="content-save" label={submitLabel} onPress={save} disabled={busy} />
@@ -382,9 +132,4 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   tabsBar: { paddingHorizontal: 16, paddingTop: 12 },
   container: { padding: 16, gap: 12 },
-  row: { flexDirection: 'row', gap: 12 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  col2: { flexBasis: '45%', minWidth: 0 },
-  // 4 even columns on one row (the 4 attributs).
-  col4: { flex: 1, flexBasis: 0, minWidth: 0 },
 });

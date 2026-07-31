@@ -3,6 +3,11 @@ import { eq } from 'drizzle-orm';
 import { actualState, type ActualState } from '@/db/schema';
 import { db } from '@/db/client';
 
+/** Live query for one character's state row. Use with useLiveQuery. */
+export function actualStateQuery(characterId: number) {
+  return db.select().from(actualState).where(eq(actualState.characterId, characterId)).limit(1);
+}
+
 export async function getActualState(characterId: number) {
   const rows = await db
     .select()

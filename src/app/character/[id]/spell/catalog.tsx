@@ -9,6 +9,7 @@ import SectionCard from '@/components/ui/section-card';
 import { DISCIPLINES, SPHERE_LABEL } from '@/constants/prophecy';
 import { SPELL_CATALOG, type SpellPreset } from '@/data/spell-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { createSpell } from '@/repositories/spells';
 
@@ -40,7 +41,7 @@ export default function SpellCatalogModal() {
   };
 
   return (
-    <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+    <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
       <Searchbar
         placeholder="Rechercher un sortilège"
         value={query}

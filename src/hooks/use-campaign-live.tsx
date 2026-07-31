@@ -12,7 +12,9 @@
 //    GM gets the full projection right away;
 //  - unchecking a character while live sends `unshare` immediately (the ghost-
 //    roster fix) — the paused path is handled by the salons via unshareFromServer;
-//  - works for BOTH roles: a GM broadcaster shares their PNJs (gmToken hello);
+//  - players broadcast; a GM only does when they opted into `shareNpcs` (their
+//    NPCs are rendered from the local DB, so publishing them is purely the
+//    co-GM/second-screen case — off by default);
 //  - STOP = pause: the socket closes, the last state stays on the server (the
 //    GM still sees it); erasure is the separate "leave campaign" flow;
 //  - background/lock drops the socket; it auto-reconnects on return.
@@ -22,7 +24,6 @@
 // while a campaign is actually live. Solo users therefore pay nothing.
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { inArray } from 'drizzle-orm';
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React, {
   createContext,
@@ -33,26 +34,13 @@ import React, {
   useState,
 } from 'react';
 
-import { db } from '@/db/client';
-import { actualState, characters, effects, skills } from '@/db/schema';
+import { useCharacterProjections } from '@/hooks/use-character-projections';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
 import { diffShares, LIVE_DEBOUNCE_MS, projectionSignature } from '@/lib/campaign-live';
 import { gmHello, playerHello, unshareMsg, shareMsg } from '@/lib/campaign-protocol';
-import { toSharedCharacter } from '@/lib/character-share';
-import { campaignQuery, sharesQuery, updateCampaignName } from '@/repositories/campaigns';
+import { campaignQuery, membersQuery, updateCampaignName } from '@/repositories/campaigns';
 
 const STORAGE_KEY = 'campaign.live.id';
-
-function groupBy<T>(rows: T[], key: (row: T) => number): Map<number, T[]> {
-  const map = new Map<number, T[]>();
-  for (const row of rows) {
-    const k = key(row);
-    const list = map.get(k);
-    if (list) list.push(row);
-    else map.set(k, [row]);
-  }
-  return map;
-}
 
 interface LiveContext {
   /** The campaign currently broadcasting, or null. */
@@ -127,6 +115,7 @@ export function CampaignLiveProvider({ children }: { children: React.ReactNode }
           onServerError={setServerError}
           onCampaignName={setCampaignName}
           onSharedCount={setSharedCount}
+          onNothingToBroadcast={stop}
         />
       ) : null}
       {children}
@@ -148,12 +137,15 @@ function LiveBroadcaster({
   onServerError,
   onCampaignName,
   onSharedCount,
+  onNothingToBroadcast,
 }: {
   campaignId: number;
   onStatus: (s: SocketStatus) => void;
   onServerError: (e: string | null) => void;
   onCampaignName: (n: string) => void;
   onSharedCount: (n: number) => void;
+  /** There is nothing for this campaign to publish — go back to idle. */
+  onNothingToBroadcast: () => void;
 }) {
   // Local mirror of the status: the debounced push effect keys off it to fire the
   // first full projection as soon as the socket reports online.
@@ -161,29 +153,10 @@ function LiveBroadcaster({
 
   const { data: campRows } = useLiveQuery(campaignQuery(campaignId), [campaignId]);
   const campaign = campRows?.[0];
-  const { data: shareRows } = useLiveQuery(sharesQuery(campaignId), [campaignId]);
-  // Sorted ids joined into a string: a stable dep for the row queries (the array
-  // identity changes on every refetch; the KEY only when the share set does).
-  const sharedIds = (shareRows ?? []).map((s) => s.characterId).sort((a, b) => a - b);
-  const sharedKey = sharedIds.join(',');
-  // `inArray` with an empty list is invalid SQL — [-1] matches nothing instead.
-  const queryIds = sharedIds.length > 0 ? sharedIds : [-1];
-  const { data: charRows } = useLiveQuery(
-    db.select().from(characters).where(inArray(characters.id, queryIds)),
-    [sharedKey],
-  );
-  const { data: stateRows } = useLiveQuery(
-    db.select().from(actualState).where(inArray(actualState.characterId, queryIds)),
-    [sharedKey],
-  );
-  const { data: skillRows } = useLiveQuery(
-    db.select().from(skills).where(inArray(skills.characterId, queryIds)),
-    [sharedKey],
-  );
-  const { data: effectRows } = useLiveQuery(
-    db.select().from(effects).where(inArray(effects.characterId, queryIds)),
-    [sharedKey],
-  );
+  const { data: shareRows } = useLiveQuery(membersQuery(campaignId), [campaignId]);
+  const sharedIds = (shareRows ?? []).map((s) => s.characterId);
+  // Same projections the local roster renders — assembled once, in one place.
+  const projected = useCharacterProjections(sharedIds);
 
   // `welcome` backfills the local campaign name, which would otherwise change the
   // socket effect's deps and reconnect mid-broadcast. Ref-read keeps the name out
@@ -206,11 +179,14 @@ function LiveBroadcaster({
   const serverUrl = campaign?.serverUrl;
   const role = campaign?.role;
   const gmToken = campaign?.gmToken;
+  // A GM publishes their NPCs only on request (see the header). Guarded here and
+  // not only in the UI, because auto-resume can revive a live campaign on launch.
+  const npcsMuted = role === 'gm' && !campaign?.shareNpcs;
 
   // Socket lifecycle: ONE per campaign while live — v2 hellos carry no charId,
   // so the shared set can change freely without a reconnect.
   useEffect(() => {
-    if (campaignRowId == null || code == null || serverUrl == null || role == null) {
+    if (campaignRowId == null || code == null || serverUrl == null || role == null || npcsMuted) {
       setStatus('offline');
       onStatus('offline');
       return;
@@ -248,19 +224,27 @@ function LiveBroadcaster({
       onlineRef.current = false;
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [campaignRowId, code, serverUrl, role, gmToken, onStatus, onServerError]);
+  }, [campaignRowId, code, serverUrl, role, gmToken, npcsMuted, onStatus, onServerError]);
+
+  // A GM row that doesn't publish its NPCs has nothing to broadcast: end the
+  // live session rather than leave the global indicator pulsing at a socket that
+  // will never connect (this is also what an auto-resumed pre-local-table
+  // campaign lands on after the update).
+  useEffect(() => {
+    if (npcsMuted) onNothingToBroadcast();
+  }, [npcsMuted, onNothingToBroadcast]);
 
   // Surface the resolved campaign name (the indicator shows it while live).
   useEffect(() => {
     onCampaignName(campaign?.name ?? '');
   }, [campaign?.name, onCampaignName]);
 
+  // What the indicator counts is what actually goes out, i.e. the characters
+  // that survived projection (uuid + state), not the raw membership rows.
+  const sharedCount = projected.length;
   useEffect(() => {
-    onSharedCount(sharedIds.length);
-    // sharedKey IS the value carrier for sharedIds — same reasoning as the row
-    // queries above.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sharedKey, onSharedCount]);
+    onSharedCount(sharedCount);
+  }, [sharedCount, onSharedCount]);
 
   // Debounced projection push, one socket for N characters. Gated on `online` so
   // prevUuidsRef only advances while the unshare diff can actually be sent — a
@@ -268,26 +252,11 @@ function LiveBroadcaster({
   useEffect(() => {
     if (!onlineRef.current) return;
 
-    // Assemble the current projections (only characters with a uuid + state).
-    const stateByChar = new Map((stateRows ?? []).map((s) => [s.characterId, s]));
-    const skillsByChar = groupBy(skillRows ?? [], (s) => s.characterId);
-    const effectsByChar = groupBy(effectRows ?? [], (e) => e.characterId);
-    const projections: { uuid: string; sig: string; msg: object }[] = [];
-    for (const character of charRows ?? []) {
-      const state = stateByChar.get(character.id);
-      if (!character.uuid || !state) continue;
-      const projection = toSharedCharacter(
-        character,
-        state,
-        skillsByChar.get(character.id) ?? [],
-        effectsByChar.get(character.id) ?? [],
-      );
-      projections.push({
-        uuid: character.uuid,
-        sig: projectionSignature(projection),
-        msg: shareMsg(character.uuid, projection),
-      });
-    }
+    const projections = projected.map((p) => ({
+      uuid: p.uuid,
+      sig: projectionSignature(p.projection),
+      msg: shareMsg(p.uuid, p.projection),
+    }));
 
     // Live unshare for characters that left the shared set (ghost-roster fix).
     const uuids = projections.map((p) => p.uuid).sort();
@@ -323,7 +292,7 @@ function LiveBroadcaster({
         }
       }, LIVE_DEBOUNCE_MS);
     }
-  }, [charRows, stateRows, skillRows, effectRows, status]);
+  }, [projected, status]);
 
   // Engine only — the UI reads everything through the context.
   return null;
