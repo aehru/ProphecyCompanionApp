@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CharacterPickList, {
   type PickableCharacter,
 } from '@/components/campaign/character-pick-list';
-import { ServerStatusChip } from '@/components/campaign/roster-visuals';
+import { ServerStatusChip } from '@/components/campaign/roster-badges';
 import TableNpcSection from '@/components/campaign/table-npc-section';
 import TableServerSection from '@/components/campaign/table-server-section';
 import { useTableRosterCtx } from '@/components/campaign/table-roster-provider';

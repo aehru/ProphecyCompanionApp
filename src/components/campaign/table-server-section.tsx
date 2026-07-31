@@ -7,7 +7,7 @@ import { Share, StyleSheet, View } from 'react-native';
 import { Button, Card, IconButton, Switch, Text } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
 
-import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-visuals';
+import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-badges';
 import type { Campaign } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { joinLink, type RosterEntry } from '@/lib/campaign-protocol';

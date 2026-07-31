@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import InitiativeList from '@/components/campaign/initiative-list';
 import CompanyCard from '@/components/campaign/company-card';
-import { ServerStatusChip } from '@/components/campaign/roster-visuals';
+import { ServerStatusChip } from '@/components/campaign/roster-badges';
 import { useTableRosterCtx } from '@/components/campaign/table-roster-provider';
 import GmCharacterSheet, { GmSheetBody } from '@/components/gm-character-sheet';
 import AppFab from '@/components/ui/app-fab';

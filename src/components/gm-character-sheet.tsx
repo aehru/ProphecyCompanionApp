@@ -4,15 +4,10 @@ import { Button, IconButton, Modal, Portal, Text } from 'react-native-paper';
 
 import NpcGearSections from '@/components/campaign/npc-gear-sections';
 import NpcInPlayEditor from '@/components/campaign/npc-in-play-editor';
-import {
-  AttrTile,
-  CaracTile,
-  groupSkills,
-  PlayerAvatar,
-  SkillGroupsView,
-  useAttrColors,
-  useTendColors,
-} from '@/components/campaign/roster-visuals';
+import { useAttrColors, useTendColors } from '@/components/campaign/roster-accents';
+import { PlayerAvatar } from '@/components/campaign/roster-badges';
+import SkillGroupsView from '@/components/campaign/skill-groups-view';
+import { AttrTile, CaracTile } from '@/components/campaign/stat-tiles';
 import {
   EffectsList,
   GmNotes,
@@ -27,6 +22,7 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { sharedWoundMalus } from '@/lib/initiative-order';
+import { groupSkills, type SharedSkill } from '@/lib/skill-groups';
 import { nums, pools, type SharedEffectView } from '@/lib/shared-character-view';
 
 interface Props {
@@ -81,11 +77,11 @@ export function GmSheetBody({
   const c = entry?.character;
   const attr = nums(c?.attributs);
   const skills = useMemo(
-    () => (Array.isArray(c?.skills) ? (c?.skills as Parameters<typeof groupSkills>[0]) : []),
+    () => (Array.isArray(c?.skills) ? (c?.skills as SharedSkill[]) : []),
     [c?.skills],
   );
   const effectRows = useMemo(
-    () => (Array.isArray(c?.effects) ? (c?.effects as Parameters<typeof groupSkills>[4]) : []),
+    () => (Array.isArray(c?.effects) ? (c?.effects as SharedEffectView[]) : []),
     [c?.effects],
   );
   const groups = useMemo(

@@ -5,7 +5,7 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { IconButton, List, Menu, Text } from 'react-native-paper';
 
-import { OwnerBadge } from '@/components/campaign/roster-visuals';
+import { OwnerBadge } from '@/components/campaign/roster-badges';
 import Icon, { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
 import { useLayout, useSplitWidth } from '@/hooks/use-layout';

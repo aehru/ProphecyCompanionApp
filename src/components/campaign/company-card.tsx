@@ -7,22 +7,15 @@ import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Divider, Text } from 'react-native-paper';
 
-import {
-  AttrTile,
-  CaracTile,
-  groupSkills,
-  OwnerBadge,
-  PlayerAvatar,
-  SkillGroupsView,
-  StatusPill,
-  TendanceRing,
-  useAttrColors,
-  useTendColors,
-} from '@/components/campaign/roster-visuals';
+import { useAttrColors, useTendColors } from '@/components/campaign/roster-accents';
+import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-badges';
+import SkillGroupsView from '@/components/campaign/skill-groups-view';
+import { AttrTile, CaracTile, TendanceRing } from '@/components/campaign/stat-tiles';
 import { ATTRIBUTS, CARACTERISTIQUES, TENDANCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import type { TableRosterEntry } from '@/lib/roster-merge';
+import { groupSkills, type SharedEffect, type SharedSkill } from '@/lib/skill-groups';
 import { nums } from '@/lib/shared-character-view';
 
 type SharedCharacter = RosterEntry['character'];
@@ -106,11 +99,11 @@ function StatsBody({ character }: { character: SharedCharacter }) {
 function SkillsBody({ character, query }: { character: SharedCharacter; query: string }) {
   const attrColors = useAttrColors();
   const skills = useMemo(
-    () => (Array.isArray(character.skills) ? (character.skills as Parameters<typeof groupSkills>[0]) : []),
+    () => (Array.isArray(character.skills) ? (character.skills as SharedSkill[]) : []),
     [character.skills],
   );
   const effects = useMemo(
-    () => (Array.isArray(character.effects) ? (character.effects as Parameters<typeof groupSkills>[4]) : []),
+    () => (Array.isArray(character.effects) ? (character.effects as SharedEffect[]) : []),
     [character.effects],
   );
   const attr = nums(character.attributs);

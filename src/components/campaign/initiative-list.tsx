@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
-import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-visuals';
+import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-badges';
 import StatChip from '@/components/ui/stat-chip';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';

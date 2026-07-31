@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 
-import { TendanceRing } from '@/components/campaign/roster-visuals';
+import { TendanceRing } from '@/components/campaign/stat-tiles';
 import StatChip from '@/components/ui/stat-chip';
 import {
   EFFECT_TARGET_LABEL,

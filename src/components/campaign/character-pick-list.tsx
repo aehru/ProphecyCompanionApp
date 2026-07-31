@@ -8,7 +8,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Checkbox, Text } from 'react-native-paper';
 
-import { PlayerAvatar } from '@/components/campaign/roster-visuals';
+import { PlayerAvatar } from '@/components/campaign/roster-badges';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 /** The slice of a character row the picker needs (uuid must be non-null). */
