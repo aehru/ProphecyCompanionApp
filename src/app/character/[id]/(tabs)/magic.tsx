@@ -2,7 +2,6 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text } from 'react-native-paper';
 
 import EnchantRow from '@/components/magic/enchant-row';
@@ -15,6 +14,7 @@ import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
 import { dsIcon } from '@/components/ui/icon';
+import TabPage from '@/components/ui/tab-page';
 import TabPager from '@/components/ui/tab-pager';
 import type {
   ActualState,
@@ -29,7 +29,6 @@ import type {
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
-import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
@@ -77,7 +76,6 @@ export default function CharacterMagicScreen() {
   // Shared by the Réserve and Enchantements tabs: unlocks bullet-tapping plus
   // the reserve-object add/delete controls, same convention across this screen.
   const [editing, setEditing] = useEditToggle(navigation);
-  const splitWidth = useSplitWidth();
   const [draft, setDraft] = useState<ReserveObjectDraft | null>(null);
 
   const fallback = characterFallback(char);
@@ -154,7 +152,7 @@ export default function CharacterMagicScreen() {
   const renderPage = (index: number) => {
     if (index === 0) {
       return (
-        <Page splitWidth={splitWidth}>
+        <TabPage>
           <ReserveTab
             rec={rec}
             stRec={stRec}
@@ -166,12 +164,12 @@ export default function CharacterMagicScreen() {
             onAddObject={() => setDraft({ id: null, nom: '', max: '3' })}
             onDeleteObject={confirmDeleteObject}
           />
-        </Page>
+        </TabPage>
       );
     }
     if (index === SPELLS_TAB) {
       return (
-        <Page splitWidth={splitWidth}>
+        <TabPage>
           {spellList.length === 0 ? (
             <Text style={{ color: theme.colors.onSurfaceVariant }}>
               Aucun sortilège. Ajoutez-en un avec le bouton « Sort ».
@@ -183,11 +181,11 @@ export default function CharacterMagicScreen() {
               ))}
             </Columns>
           )}
-        </Page>
+        </TabPage>
       );
     }
     return (
-      <Page splitWidth={splitWidth}>
+      <TabPage>
         {enchants.length === 0 ? (
           <Text style={{ color: theme.colors.onSurfaceVariant }}>
             Aucun enchantement.{' '}
@@ -213,7 +211,7 @@ export default function CharacterMagicScreen() {
             })}
           </Columns>
         )}
-      </Page>
+      </TabPage>
     );
   };
 
@@ -245,23 +243,6 @@ export default function CharacterMagicScreen() {
   );
 }
 
-/** One swipeable page: its own vertical scroll, capped to the reading width. */
-function Page({
-  splitWidth,
-  children,
-}: {
-  splitWidth: ReturnType<typeof useSplitWidth>;
-  children: React.ReactNode;
-}) {
-  return (
-    <KeyboardAwareScrollView contentContainerStyle={[styles.page, splitWidth]} bottomOffset={24}>
-      {children}
-    </KeyboardAwareScrollView>
-  );
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  // paddingBottom clears the stacked FABs at the bottom right.
-  page: { padding: 12, gap: 12, paddingBottom: 160 },
 });
