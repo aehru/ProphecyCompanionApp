@@ -30,6 +30,12 @@ describe('skillBonus', () => {
   it('is 0 without effects', () => {
     expect(skillBonus('physique', 'Escalade', [])).toBe(0);
   });
+
+  it('folds in the wound malus — it applies to every roll', () => {
+    // wound -5 + all(+1) + physique(+2) + skill(+3) = 1.
+    expect(skillBonus('physique', 'Discrétion', effects, -5)).toBe(1);
+    expect(skillBonus('physique', 'Escalade', [], -3)).toBe(-3);
+  });
 });
 
 describe('groupSkills', () => {
@@ -48,6 +54,19 @@ describe('groupSkills', () => {
       { target: 'all', value: -1 },
     ]);
     expect(group.skills[0]).toMatchObject({ value: 4, bonus: -1, total: 6 });
+  });
+
+  it('subtracts the wound malus from every skill total', () => {
+    const [group] = groupSkills(
+      [skill({ name: 'Escalade', value: 4 })],
+      attributs,
+      colors,
+      '',
+      [{ target: 'all', value: -1 }],
+      -3,
+    );
+    // 4 (value) + 3 (physique) + (-3 wound -1 effect) = 3.
+    expect(group.skills[0]).toMatchObject({ value: 4, bonus: -4, total: 3 });
   });
 
   it('renders a specialization under its own label, matching effects on the raw name', () => {
