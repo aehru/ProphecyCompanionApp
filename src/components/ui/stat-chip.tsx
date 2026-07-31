@@ -7,9 +7,13 @@ import { fmtSignedMod } from '@/lib/modifiers';
 
 /**
  * A labelled stat box. `modifier` (optional) renders a small signed badge — green
- * for a net bonus, red for a net malus — folding in wound malus + temporary
- * effects. Omitted or 0 → no badge. `style` lets the parent size it as a grid
- * column (e.g. flexGrow to fill the row).
+ * for a net bonus, red for a net malus. Omitted or 0 → no badge. `style` lets the
+ * parent size it as a grid column (e.g. flexGrow to fill the row).
+ *
+ * What goes in `modifier` is the caller's call: a stat grid passes only the
+ * effects aimed at that stat (the wound malus is shown once by
+ * <GlobalModifierRow>, since a roll uses two stats), while an initiative die —
+ * one roll on its own — passes the wound malus itself.
  */
 export default function StatChip({
   label,
