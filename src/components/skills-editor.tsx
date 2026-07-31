@@ -18,6 +18,7 @@ import SectionCard from '@/components/ui/section-card';
 import { ATTRIBUTS, ATTRIBUT_LABEL } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSkillFilter } from '@/hooks/use-skill-filter';
 import type { SkillRow } from '@/lib/character-values';
@@ -182,7 +183,7 @@ export default function SkillsEditor({
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView
-        contentContainerStyle={[styles.listContent, { paddingTop: barH }]}
+        contentContainerStyle={[styles.listContent, { paddingTop: barH }, contentWidth]}
         onScroll={onScroll}
         scrollEventThrottle={16}
         keyboardShouldPersistTaps="handled"

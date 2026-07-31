@@ -6,11 +6,13 @@ import { Button, Text } from 'react-native-paper';
 import DiceRollerFab from '@/components/dice-roller-fab';
 import TendancesCircles from '@/components/tendances-circles';
 import { characterFallback } from '@/components/ui/character-gate';
+import Columns from '@/components/ui/columns';
 import Icon, { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { mediaUri, pickCharacterMedia } from '@/lib/media';
@@ -31,6 +33,7 @@ export default function CharacterDashboardScreen() {
   // thing editable from the otherwise read-only dashboard.
   const [showPortrait, setShowPortrait] = useState(false);
   const [busyPortrait, setBusyPortrait] = useState(false);
+  const splitWidth = useSplitWidth();
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
@@ -72,7 +75,7 @@ export default function CharacterDashboardScreen() {
 
   return (
     <View style={styles.root}>
-    <ScrollView style={styles.root} contentContainerStyle={styles.container}>
+    <ScrollView style={styles.root} contentContainerStyle={[styles.container, splitWidth]}>
       {/* Hero card: identity + tendances ring gauges (replacing health/magic). */}
       <View style={[styles.hero, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border }]}>
         <View style={styles.identity}>
@@ -107,50 +110,51 @@ export default function CharacterDashboardScreen() {
         <TendancesCircles get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })} />
       </View>
 
-      {/* At-a-glance vitals (read-only; edit on the Fiche). */}
-      <SectionCard title="EN BREF" icon="compass">
-        <View style={styles.vitals}>
-          <Vital label="Blessures" value={`${woundFilled}/${woundMax}`} theme={theme} />
-          {RESOURCES.map((r) => (
-            <Vital
-              key={r.key}
-              label={r.label}
-              value={`${stRec[`${r.key}Current`] ?? 0}/${rec[`${r.key}Max`] ?? 0}`}
-              theme={theme}
-            />
-          ))}
-        </View>
-      </SectionCard>
+      <Columns>
+        {/* At-a-glance vitals (read-only; edit on the Fiche). */}
+        <SectionCard title="EN BREF" icon="compass">
+          <View style={styles.vitals}>
+            <Vital label="Blessures" value={`${woundFilled}/${woundMax}`} theme={theme} />
+            {RESOURCES.map((r) => (
+              <Vital
+                key={r.key}
+                label={r.label}
+                value={`${stRec[`${r.key}Current`] ?? 0}/${rec[`${r.key}Max`] ?? 0}`}
+                theme={theme}
+              />
+            ))}
+          </View>
+        </SectionCard>
 
-      {/* Full portrait — collapsed by default; the avatar is set via the hero tap. */}
-      <SectionCard title="ILLUSTRATION" icon="character">
-        {portrait ? (
-          <>
-            <Button compact icon={dsIcon('chev')} onPress={() => setShowPortrait((s) => !s)}>
-              {showPortrait ? 'Masquer le portrait' : 'Afficher le portrait'}
-            </Button>
-            {showPortrait ? (
-              <Pressable onPress={pickPortrait}>
-                <Image
-                  source={portrait}
-                  style={[styles.portrait, { borderColor: theme.prophecy.border }]}
-                  contentFit="cover"
-                />
-              </Pressable>
-            ) : null}
-            {showPortrait ? (
-              <Button compact textColor={theme.colors.error} onPress={clearPortrait}>
-                Retirer le portrait
+        {/* Full portrait — collapsed by default; the avatar is set via the hero tap. */}
+        <SectionCard title="ILLUSTRATION" icon="character">
+          {portrait ? (
+            <>
+              <Button compact icon={dsIcon('chev')} onPress={() => setShowPortrait((s) => !s)}>
+                {showPortrait ? 'Masquer le portrait' : 'Afficher le portrait'}
               </Button>
-            ) : null}
-          </>
-        ) : (
-          <Button mode="outlined" icon={dsIcon('plus')} loading={busyPortrait} onPress={pickPortrait}>
-            Ajouter un portrait
-          </Button>
-        )}
-      </SectionCard>
-
+              {showPortrait ? (
+                <Pressable onPress={pickPortrait}>
+                  <Image
+                    source={portrait}
+                    style={[styles.portrait, { borderColor: theme.prophecy.border }]}
+                    contentFit="cover"
+                  />
+                </Pressable>
+              ) : null}
+              {showPortrait ? (
+                <Button compact textColor={theme.colors.error} onPress={clearPortrait}>
+                  Retirer le portrait
+                </Button>
+              ) : null}
+            </>
+          ) : (
+            <Button mode="outlined" icon={dsIcon('plus')} loading={busyPortrait} onPress={pickPortrait}>
+              Ajouter un portrait
+            </Button>
+          )}
+        </SectionCard>
+      </Columns>
     </ScrollView>
       <DiceRollerFab />
     </View>

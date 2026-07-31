@@ -7,6 +7,7 @@ import SkillFilterBar from '@/components/skill-filter-bar';
 import SectionCard from '@/components/ui/section-card';
 import { ATTRIBUT_LABEL } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSkillFilter } from '@/hooks/use-skill-filter';
 import { fmtSignedMod } from '@/lib/modifiers';
@@ -86,7 +87,7 @@ export default function SkillsView({
     <View style={styles.root}>
       <ScrollView
         style={styles.list}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, contentWidth]}
         keyboardShouldPersistTaps="handled">
         <SectionCard title={title}>
           <View style={styles.legend}>

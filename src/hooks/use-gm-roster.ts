@@ -3,7 +3,7 @@
 // stream into it. Purely in-memory — the durable copy lives on the server
 // (docs/campaign-protocol.md §2), so closing the screen loses nothing.
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Campaign } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
@@ -91,8 +91,18 @@ export function useGmRoster(campaign: Campaign) {
     setEntries((prev) => prev.filter((e) => e.charId !== charId));
   }, []);
 
-  const roster = [...entries].sort((a, b) =>
-    String(a.character.nom ?? '').localeCompare(String(b.character.nom ?? '')),
+  // Memoized by hand on purpose. React Compiler bails out of this whole hook
+  // because `nameRef.current` is assigned during render (above), so nothing here
+  // is auto-memoized — and an unstable `roster` identity would defeat the
+  // memoization the compiler DOES apply in the screens that consume it (the
+  // initiative order recomputes, the FlatList re-derives). Verified by compiling
+  // this file with the compiler: zero memo slots, no runtime import.
+  const roster = useMemo(
+    () =>
+      [...entries].sort((a, b) =>
+        String(a.character.nom ?? '').localeCompare(String(b.character.nom ?? '')),
+      ),
+    [entries],
   );
   return { status, serverError, roster, kick };
 }

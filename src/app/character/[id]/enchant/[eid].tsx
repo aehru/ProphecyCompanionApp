@@ -8,6 +8,7 @@ import { Text } from 'react-native-paper';
 import EnchantEditor from '@/components/enchant-editor';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { armorQuery } from '@/repositories/armor';
 import { enchantQuery } from '@/repositories/enchants';
@@ -38,7 +39,7 @@ export default function EnchantEditModal() {
     <View style={styles.root}>
       {enchant ? (
         <>
-          <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+          <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
             <EnchantEditor
               enchant={enchant}
               weapons={weapons ?? []}

@@ -8,6 +8,7 @@ import { Text } from 'react-native-paper';
 import ShieldEditor from '@/components/shield-editor';
 import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
+import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { shieldQuery } from '@/repositories/shields';
 
@@ -26,7 +27,7 @@ export default function ShieldEditModal() {
     <View style={styles.root}>
       {shield ? (
         <>
-          <KeyboardAwareScrollView contentContainerStyle={styles.container} bottomOffset={24}>
+          <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
             <ShieldEditor shield={shield} onClose={() => router.back()} />
           </KeyboardAwareScrollView>
           <AppFab icon={dsIcon('check')} onPress={() => router.back()} />
