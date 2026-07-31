@@ -32,7 +32,12 @@ import { createItem, itemsQuery } from '@/repositories/items';
 import { shieldsQuery } from '@/repositories/shields';
 import { weaponsQuery } from '@/repositories/weapons';
 
-const TABS = ['Armes', 'Armures', 'Boucliers', 'Objets'] as const;
+const TABS = [
+  'Armes',
+  'Armures',
+  { full: 'Boucliers', short: 'Boucl.' },
+  'Objets',
+] as const;
 
 export default function CharacterWeaponsScreen() {
   const numId = useCharacterId();
