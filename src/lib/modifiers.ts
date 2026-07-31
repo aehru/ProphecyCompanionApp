@@ -14,7 +14,20 @@
 // stores its target as `skill:<name>` — see the `skill*` helpers below.
 
 import { WOUND_LEVELS } from '@/constants/prophecy';
-import type { Effect } from '@/db/schema';
+
+/**
+ * The only three fields a modifier computation reads off an effect. Structural
+ * on purpose: an `Effect` row and a projection's effect entry (see
+ * lib/character-share) both satisfy it, so the GM's views of a shared character
+ * fold in wounds and effects through this exact engine rather than a second
+ * copy of the arithmetic. A projection carries only active effects, hence
+ * `expired` being optional (absent → not expired).
+ */
+export interface ModifierSource {
+  target?: string;
+  value?: number;
+  expired?: boolean | null;
+}
 
 /** Prefix marking an effect target as a single named skill (vs a stat key). */
 export const SKILL_TARGET_PREFIX = 'skill:';
@@ -52,7 +65,7 @@ export function woundMalus(stRec: Record<string, number>): number {
 }
 
 /** Effects that currently count toward modifiers (not expired). */
-export function activeEffects(effects: Effect[]): Effect[] {
+export function activeEffects<T extends ModifierSource>(effects: readonly T[]): T[] {
   return effects.filter((e) => !e.expired);
 }
 
@@ -60,20 +73,63 @@ export function activeEffects(effects: Effect[]): Effect[] {
  * Sum of active effect values that apply to `targetKey`: effects targeting that
  * exact stat plus effects targeting `'all'`. Does not include the wound malus.
  */
-export function effectsSum(targetKey: string, effects: Effect[]): number {
+export function effectsSum(targetKey: string, effects: readonly ModifierSource[]): number {
   let total = 0;
   for (const e of effects) {
     if (e.expired) continue;
-    if (e.target === targetKey || e.target === 'all') total += e.value;
+    if (e.target === targetKey || e.target === 'all') total += e.value ?? 0;
   }
   return total;
 }
 
 /**
- * Total modifier for a roll using `targetKey`: wound malus + matching effects.
- * This is the number shown as a badge next to a caractéristique/attribut.
+ * The part of a stat's modifier that belongs to THAT stat alone: effects
+ * targeting the exact key, with `'all'` and the wound malus left out.
+ *
+ * A Prophecy roll adds an attribut to a caractéristique, so anything hitting
+ * every roll would be drawn twice — once per tile — and read as double. Those
+ * global sources are shown once, apart (see `globalModifier`); a tile badge
+ * carries only what is specific to it.
  */
-export function totalModifier(targetKey: string, effects: Effect[], wound: number): number {
+export function statModifier(targetKey: string, effects: readonly ModifierSource[]): number {
+  let total = 0;
+  for (const e of effects) {
+    if (e.expired) continue;
+    if (e.target === targetKey) total += e.value ?? 0;
+  }
+  return total;
+}
+
+/** The two sources that apply to EVERY roll, kept apart so each is readable. */
+export interface GlobalModifier {
+  /** Worst active wound level's malus (non-positive). */
+  wound: number;
+  /** Sum of the effects targeting `'all'`. */
+  effects: number;
+}
+
+/**
+ * The modifiers that apply to every roll, whatever stat it uses: the wound
+ * malus and the `'all'`-targeted effects. Shown once per character rather than
+ * on each stat — see `statModifier` for why.
+ */
+export function globalModifier(
+  effects: readonly ModifierSource[],
+  wound: number,
+): GlobalModifier {
+  return { wound, effects: statModifier('all', effects) };
+}
+
+/**
+ * Total modifier for a roll using `targetKey`: wound malus + matching effects.
+ * The full arithmetic for one roll — use it to COMPUTE a value (a skill total,
+ * a damage formula), not to badge a stat tile.
+ */
+export function totalModifier(
+  targetKey: string,
+  effects: readonly ModifierSource[],
+  wound: number,
+): number {
   return wound + effectsSum(targetKey, effects);
 }
 
@@ -85,7 +141,7 @@ export function totalModifier(targetKey: string, effects: Effect[], wound: numbe
 export function skillModifier(
   attribut: string,
   skillName: string,
-  effects: Effect[],
+  effects: readonly ModifierSource[],
   wound: number,
 ): number {
   // Only the effects targeting this exact skill — the 'all' + attribut effects
@@ -93,7 +149,7 @@ export function skillModifier(
   const target = skillTarget(skillName);
   let skillOnly = 0;
   for (const e of effects) {
-    if (!e.expired && e.target === target) skillOnly += e.value;
+    if (!e.expired && e.target === target) skillOnly += e.value ?? 0;
   }
   return totalModifier(attribut, effects, wound) + skillOnly;
 }
