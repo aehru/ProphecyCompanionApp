@@ -24,7 +24,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import SubTabs from '@/components/ui/sub-tabs';
+import SubTabs, { labelKey, type TabLabel } from '@/components/ui/sub-tabs';
 
 export default function TabPager({
   labels,
@@ -34,7 +34,7 @@ export default function TabPager({
   swipeEnabled = true,
   headerStyle,
 }: {
-  labels: readonly string[];
+  labels: readonly TabLabel[];
   active: number;
   onChange: (index: number) => void;
   /** Called for a page once it has been visited; keep it cheap for hidden ones. */
@@ -108,7 +108,7 @@ export default function TabPager({
         onMomentumScrollEnd={onSettle}
         onScrollEndDrag={onDragEnd}>
         {labels.map((label, i) => (
-          <View key={label} style={{ width }}>
+          <View key={labelKey(label)} style={{ width }}>
             {visited.includes(i) ? renderPage(i) : null}
           </View>
         ))}

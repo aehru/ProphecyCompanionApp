@@ -20,7 +20,13 @@ import type { RosterEntry } from '@/lib/campaign-protocol';
 import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
 import { rollInitiativeFor } from '@/repositories/characters';
 
-const TABS = ['Attributs', 'Compétences', 'Tendances', 'Initiative'] as const;
+// Short forms for a narrow column (a phone, or the split view's left pane).
+const TABS = [
+  { full: 'Attributs', short: 'Attr.' },
+  { full: 'Compétences', short: 'Compét.' },
+  { full: 'Tendances', short: 'Tend.' },
+  { full: 'Initiative', short: 'Init.' },
+] as const;
 // The first three tabs swap each card's body; Initiative replaces the whole
 // list with the table-wide turn order (one row per die, not per character).
 const SKILLS_TAB = 1;

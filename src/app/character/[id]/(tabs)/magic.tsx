@@ -45,7 +45,11 @@ import { shieldsQuery } from '@/repositories/shields';
 import { spellsQuery } from '@/repositories/spells';
 import { weaponsQuery } from '@/repositories/weapons';
 
-const TABS = ['Réserve', 'Sortilèges', 'Enchant.'] as const;
+const TABS = [
+  { full: 'Réserve', short: 'Rés.' },
+  { full: 'Sortilèges', short: 'Sorts' },
+  { full: 'Enchantements', short: 'Enchant.' },
+] as const;
 const SPELLS_TAB = 1;
 const ENCHANTS_TAB = 2;
 
