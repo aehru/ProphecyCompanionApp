@@ -106,8 +106,6 @@ function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) 
 
   return (
     <>
-      <IconButton icon={dsIcon('check')} style={styles.editBtn} size={18} onPress={onClose} />
-
       <TextInput label="Nom" value={name} onChangeText={setName} mode="outlined" dense />
 
       <TextInput
@@ -127,6 +125,9 @@ function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) 
         style={styles.qtyField}
       />
 
+      {/* Both actions on one row, in the flow: the close button used to float
+          over the card's top-right corner, where it landed on top of the Objets
+          search field. */}
       <View style={styles.actions}>
         <Button
           mode="outlined"
@@ -136,13 +137,19 @@ function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) 
           style={styles.actionBtn}>
           Supprimer
         </Button>
+        <Button
+          mode="contained"
+          icon={dsIcon('check')}
+          onPress={onClose}
+          style={styles.actionBtn}>
+          Terminer
+        </Button>
       </View>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  editBtn: { position: 'absolute', top: 0, right: 0, margin: 2, zIndex: 1 },
   // DS inventory row.
   item: { borderBottomWidth: 1 },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 8 },
