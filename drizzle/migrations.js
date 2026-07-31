@@ -23,6 +23,8 @@ import m0018 from './0018_groovy_rogue.sql';
 import m0019 from './0019_brainy_gambit.sql';
 import m0020 from './0020_striped_dexter_bennett.sql';
 import m0021 from './0021_daffy_miek.sql';
+import m0022 from './0022_familiar_post.sql';
+import m0023 from './0023_lonely_callisto.sql';
 
   export default {
     journal,
@@ -48,7 +50,9 @@ m0017,
 m0018,
 m0019,
 m0020,
-m0021
+m0021,
+m0022,
+m0023
     }
   }
   

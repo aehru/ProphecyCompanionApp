@@ -9,6 +9,26 @@ in both repos).
 - **`PROTOCOL_VERSION = 2`** — hard break from v1 (checked on the hello, §3).
 - **`SHARED_SCHEMA_VERSION = 2`** — the `SharedCharacter` payload shape (§2), unchanged by protocol v2.
 
+### Scope: the relay is OPTIONAL
+
+A Game Master's table is local-first. NPCs, their sheets, wounds and initiative
+live in the GM device's own SQLite DB, and a table exists with `code`,
+`server_url` and `gm_token` all NULL — nothing below applies to it. The relay is
+what adds the *players'* characters.
+
+So the roster a GM reads is a **merge**, not a server dump
+([src/lib/roster-merge.ts](../src/lib/roster-merge.ts)): the local rows
+(projected through the same `toSharedCharacter`) plus the remote entries, with
+**the local entry winning** on a `charId` collision. Consequences for anyone
+touching this protocol:
+
+- **A GM's NPCs are not published by default.** `campaigns.share_npcs` is off;
+  when on, the NPC projections go up exactly like a player's (`owner: "gm"`) —
+  that path exists for a future co-GM, not for the GM's own screen.
+- The server is never the source of truth for a character the reading device
+  owns. A late frame echoing a stale projection must not overwrite live local
+  values (hence the merge rule above).
+
 ## 1. Transport
 
 - REST for campaign lifecycle (create/delete), WebSocket (`/ws`) for everything live.
@@ -77,6 +97,9 @@ SESSION (device), not a character** — one socket may share N characters.
 ```
 
 - Players never receive the roster — it fans out to GM-role sockets only.
+- The GM app folds this stream into its LOCAL roster (see Scope above); a
+  `roster`/`update` frame for a character this device owns is dropped in favour
+  of the DB row.
 - `owner` (`"gm" | "player"`, v2) lets the GM UI badge their own PNJs. The app's
   parser tolerates a missing/unknown value (defaults to `"player"`).
 - The app's reader is tolerant (§2): unknown message types parse to `unknown`
@@ -120,8 +143,11 @@ SESSION (device), not a character** — one socket may share N characters.
   Unchecking while live sends `unshare` on the live socket; unchecking while
   paused fires a short-lived purge socket (`unshareFromServer`). **Stop = pause**
   (last state stays on the server); erasure = leave campaign.
-- **GM PNJs:** same flow, `gmHello` — entries arrive stamped `owner: "gm"`.
-  The GM device may hold two sockets (roster + broadcaster); see ROADMAP.
+- **GM NPCs (opt-in):** the GM's roster reads them locally, so nothing is sent
+  unless `campaigns.share_npcs` is on. When it is, it is the same flow with
+  `gmHello` — entries arrive stamped `owner: "gm"` — and the GM device then holds
+  two sockets (roster + broadcaster); see ROADMAP. Turning the switch off purges
+  the published NPCs (`unshare` per charId).
 - **Leave/delete (right to erasure):** player leave unshares every shared
   character; GM delete removes the campaign server-side (`DELETE
   /campaigns/{code}` with the gmToken; FK cascade purges all projections).

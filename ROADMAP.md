@@ -25,10 +25,28 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 
 ## Campaign mode
 
-Live GM/player campaigns via a self-hostable relay server (see
-[docs/campaign-protocol.md](docs/campaign-protocol.md)). Shipped: DB tables,
-wire protocol + socket client, app-level live-broadcast provider, GM roster +
-character detail sheet, join disclaimer, privacy policy.
+A GM's table is local-first (NPCs, sheets, initiative — no network); the relay
+server (see [docs/campaign-protocol.md](docs/campaign-protocol.md)) is the
+optional bonus that adds the players' characters. Shipped: DB tables, wire
+protocol + socket client, app-level live-broadcast provider, local+remote roster
+merge, character detail sheet, join disclaimer, privacy policy.
+
+- [x] **Local-first table (phase 1).** `createLocalTable` (no server, no code),
+  `attachServer` later; roster = `mergeRoster(local, remote)` with the local
+  entry winning; `characters.kind` PC/NPC + "Nouveau PNJ" straight from the
+  salon; GM NPCs no longer round-trip through the server (`campaigns.share_npcs`,
+  off by default).
+- [x] **Phase 2 — full local NPC sheet.** The GM sheet renders the local rows
+  for its own NPCs on top of the projection: armes (damage formulas resolved
+  with the wound/effects modifier), armures, boucliers, sorts. Remote players
+  stay projection-limited by protocol.
+- [ ] **Phase 3 — co-GM.** `share_npcs` publishes the NPCs already; a second GM
+  seat needs server-side work (a second gmToken, ownership rules).
+- [x] **Phase 4 — docs.** `docs/campaign-protocol.md` gained a Scope section (the
+  relay is optional, the roster is a local-first merge, NPCs are opt-in);
+  PRIVACY.md and README describe the serverless table. PRIVACY's permissions
+  section was also wrong — it claimed none were requested, while the QR scanner
+  uses the camera and the avatar picker the media library.
 
 - [x] **Ghost roster entry when a player switches shared character while live.**
   Fixed by protocol v2 (multi-share): the broadcaster

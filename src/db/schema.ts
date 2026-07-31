@@ -37,6 +37,14 @@ export const characters = sqliteTable('characters', {
   nom: text('nom').notNull().default(''),
   concept: text('concept').notNull().default(''),
 
+  // What this character IS to its owner: a player character, or an NPC the GM
+  // runs at the table. Purely a label — an NPC is a full character row with the
+  // same columns, so a PC can be promoted to NPC and back. Drives the badge in
+  // the character list and the "Nouveau PNJ" flow (UI says PNJ, code says NPC).
+  kind: text('kind', { enum: ['pc', 'npc'] })
+    .notNull()
+    .default('pc'),
+
   // Tendances — each has a main number + a subnumber (0–10)
   dragon: integer('dragon').notNull().default(0),
   dragonSub: integer('dragon_sub').notNull().default(0),
@@ -437,31 +445,43 @@ export const effects = sqliteTable('effects', {
 });
 
 /**
- * A campaign this device participates in (docs/campaign-protocol.md §5). One row
- * per joined/created campaign. `role` fixes what the row means: `gm` rows carry
- * the portable `gmToken` (proof of ownership — travels in backups so a GM who
- * changes phones keeps the campaign); `player` rows leave it null. `serverUrl`
- * is stored per campaign so different groups can use different servers
- * (community default or self-hosted).
+ * A table this device runs or plays at (docs/campaign-protocol.md §5). One row
+ * per created/joined campaign. `role` fixes what the row means: `gm` rows may
+ * carry the portable `gmToken` (proof of ownership — travels in backups so a GM
+ * who changes phones keeps the campaign); `player` rows leave it null.
+ *
+ * A GM row is LOCAL-FIRST: `code`, `serverUrl` and `gmToken` are all nullable,
+ * because a table exists (NPCs, roster, initiative) with no server at all. They
+ * are filled when the GM attaches a relay to also see the players' characters
+ * (repositories/campaigns.attachServer). A `player` row always has both — you
+ * cannot join a table without a server to join through.
  */
 export const campaigns = sqliteTable('campaigns', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  code: text('code').notNull(),
+  code: text('code'),
   name: text('name').notNull().default(''),
   role: text('role', { enum: ['gm', 'player'] }).notNull(),
   gmToken: text('gm_token'),
-  serverUrl: text('server_url').notNull(),
+  serverUrl: text('server_url'),
+  // Off by default: the GM's NPCs are rendered from the local DB and have no
+  // reason to leave the device. Turning it on republishes them to the relay —
+  // groundwork for a co-GM seeing the same NPCs (docs/campaign-protocol.md §2).
+  shareNpcs: integer('share_npcs', { mode: 'boolean' }).notNull().default(false),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
 }, (table) => [
-  // One local row per campaign — re-joining the same code updates, not duplicates.
+  // One local row per campaign — re-joining the same code updates, not
+  // duplicates. Local tables have a NULL code; SQLite treats each NULL as
+  // distinct, so any number of them coexist.
   uniqueIndex('campaigns_code_unique').on(table.code),
 ]);
 
 /**
- * Which local character is shared into which campaign (player side). The share
- * toggle writes here; the sync layer publishes projections for shared rows only.
+ * Membership: which local character belongs to which table.
+ *  - player row: the characters broadcast to the GM (the share toggle).
+ *  - gm row: the NPCs that make up the table's roster — read locally, and only
+ *    published when `campaigns.shareNpcs` is on.
  */
 export const campaignShares = sqliteTable('campaign_shares', {
   id: integer('id').primaryKey({ autoIncrement: true }),

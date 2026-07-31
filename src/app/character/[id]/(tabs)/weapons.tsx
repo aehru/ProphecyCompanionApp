@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
+import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text, TextInput } from 'react-native-paper';
 
@@ -14,6 +14,7 @@ import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
 import EditableSection from '@/components/ui/editable-section';
+import SubTabs from '@/components/ui/sub-tabs';
 import WeaponCard from '@/components/weapon-card';
 import { MONEY } from '@/constants/prophecy';
 import type { ActualState } from '@/db/schema';
@@ -111,31 +112,8 @@ export default function CharacterWeaponsScreen() {
           )}
         </EditableSection>
 
-        {/* Sub-tabs drive which category is shown (mirrors the campaign
-            Compagnie screen's Attributs/Compétences/Tendances tabs). */}
-        <View style={[styles.tabs, { borderBottomColor: theme.prophecy.borderSoft }]}>
-          {TABS.map((label, i) => {
-            const active = tab === i;
-            return (
-              <Pressable key={label} style={styles.tab} onPress={() => setTab(i)}>
-                <Text
-                  style={{
-                    fontFamily: 'Cinzel_600SemiBold',
-                    fontSize: 13,
-                    color: active ? theme.colors.primary : theme.colors.onSurfaceVariant,
-                  }}>
-                  {label}
-                </Text>
-                <View
-                  style={[
-                    styles.tabInk,
-                    { backgroundColor: active ? theme.colors.primary : 'transparent' },
-                  ]}
-                />
-              </Pressable>
-            );
-          })}
-        </View>
+        {/* Sub-tabs drive which category is shown. */}
+        <SubTabs labels={TABS} active={tab} onChange={setTab} />
 
         {tab === 0 ? (
           <View style={styles.tabContent}>
@@ -264,8 +242,5 @@ export default function CharacterWeaponsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
-  tabs: { flexDirection: 'row', borderBottomWidth: StyleSheet.hairlineWidth },
-  tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8 },
-  tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
   tabContent: { gap: 10 },
 });

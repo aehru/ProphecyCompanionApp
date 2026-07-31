@@ -5,6 +5,7 @@ import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { IconButton, List, Menu, Text } from 'react-native-paper';
 
+import { OwnerBadge } from '@/components/campaign/roster-badges';
 import Icon, { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
 import { useLayout, useSplitWidth } from '@/hooks/use-layout';
@@ -176,6 +177,9 @@ export default function CharactersListScreen() {
                     </View>
                   )
                 }
+                // NPCs live in the same list as the player characters (they ARE
+                // characters) — the badge is the only thing that tells them apart.
+                right={item.kind === 'npc' ? () => <OwnerBadge /> : undefined}
                 onPress={() => router.push(`/character/${item.id}` as Href)}
                 onLongPress={() => handleDuplicate(item.id, item.nom ?? '')}
               />

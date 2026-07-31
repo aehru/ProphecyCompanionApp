@@ -3,14 +3,15 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { IconButton } from 'react-native-paper';
 
-import { GmRosterProvider } from '@/components/campaign/gm-roster-provider';
+import { TableRosterProvider } from '@/components/campaign/table-roster-provider';
 import { campaignQuery } from '@/repositories/campaigns';
 
 /**
  * Campaign subtree: the Salon (index) and — for the GM — the Compagnie roster.
  * Draws its own headers (root marks this route headerShown:false). When the
- * user is the GM, the whole subtree is wrapped in a single roster socket so the
- * two screens share one connection (see GmRosterProvider).
+ * user is the GM, the whole subtree is wrapped in one roster provider: the local
+ * NPCs plus, when a relay is attached, a single shared socket for both screens
+ * (see TableRosterProvider).
  */
 export default function CampaignLayout() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,7 +36,7 @@ export default function CampaignLayout() {
   );
 
   if (campaign?.role === 'gm') {
-    return <GmRosterProvider campaign={campaign}>{stack}</GmRosterProvider>;
+    return <TableRosterProvider campaign={campaign}>{stack}</TableRosterProvider>;
   }
   return stack;
 }
