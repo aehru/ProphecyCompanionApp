@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import React, { useDeferredValue, useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Snackbar, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,6 +11,7 @@ import { ServerStatusChip } from '@/components/campaign/roster-visuals';
 import { useTableRosterCtx } from '@/components/campaign/table-roster-provider';
 import GmCharacterSheet, { GmSheetBody } from '@/components/gm-character-sheet';
 import AppFab from '@/components/ui/app-fab';
+import SubTabs from '@/components/ui/sub-tabs';
 import { dsIcon } from '@/components/ui/icon';
 import type { Campaign } from '@/db/schema';
 import { contentWidth, useLayout } from '@/hooks/use-layout';
@@ -137,29 +138,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
       <View style={split ? styles.splitRow : styles.fill}>
         <View style={styles.fill}>
           {/* Tabs drive every card at once. */}
-          <View style={[styles.tabs, { borderBottomColor: theme.prophecy.borderSoft }]}>
-            {TABS.map((label, i) => {
-              const active = tab === i;
-              return (
-                <Pressable key={label} style={styles.tab} onPress={() => setTab(i)}>
-                  <Text
-                    style={{
-                      fontFamily: 'Cinzel_600SemiBold',
-                      fontSize: 13,
-                      color: active ? theme.colors.primary : theme.colors.onSurfaceVariant,
-                    }}>
-                    {label}
-                  </Text>
-                  <View
-                    style={[
-                      styles.tabInk,
-                      { backgroundColor: active ? theme.colors.primary : 'transparent' },
-                    ]}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
+          <SubTabs labels={TABS} active={tab} onChange={setTab} style={styles.tabs} />
 
           {tab === INITIATIVE_TAB ? (
             // The extra inset clears the roll FAB below.
@@ -279,9 +258,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 12, flexWrap: 'wrap' },
-  tabs: { flexDirection: 'row', marginTop: 12, marginHorizontal: 16, borderBottomWidth: StyleSheet.hairlineWidth },
-  tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8 },
-  tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
+  tabs: { marginTop: 12, marginHorizontal: 16 },
   searchWrap: { paddingHorizontal: 16, paddingTop: 12 },
   fill: { flex: 1 },
   splitRow: { flex: 1, flexDirection: 'row' },
