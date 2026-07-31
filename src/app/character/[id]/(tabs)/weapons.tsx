@@ -2,7 +2,6 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text, TextInput } from 'react-native-paper';
 
 import ArmorCard from '@/components/armor-card';
@@ -14,7 +13,8 @@ import { dsIcon } from '@/components/ui/icon';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
 import EditableSection from '@/components/ui/editable-section';
-import SubTabs from '@/components/ui/sub-tabs';
+import TabPage from '@/components/ui/tab-page';
+import TabPager from '@/components/ui/tab-pager';
 import WeaponCard from '@/components/weapon-card';
 import { MONEY } from '@/constants/prophecy';
 import type { ActualState } from '@/db/schema';
@@ -98,9 +98,119 @@ export default function CharacterWeaponsScreen() {
     };
   };
 
+  // One page per category; each scrolls on its own under the pinned money card
+  // and tab strip, and a horizontal swipe moves between them.
+  const renderPage = (index: number) => {
+    if (index === 0) {
+      return (
+        <TabPage>
+          {list.length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucune arme. Ajoutez-en une avec le bouton « Arme ».
+            </Text>
+          ) : (
+            <Columns gap={10}>
+              {list.map((w) => (
+                <WeaponCard
+                  key={w.id}
+                  weapon={w}
+                  caracValue={(k) => rec[k] ?? 0}
+                  caracModifier={caracModifier}
+                  enchanted={isEnchanted('weapon', w.id)}
+                />
+              ))}
+            </Columns>
+          )}
+        </TabPage>
+      );
+    }
+    if (index === 1) {
+      return (
+        <TabPage>
+          {armorList.length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucune armure. Ajoutez-en une avec le bouton « Armure ».
+            </Text>
+          ) : (
+            <Columns gap={10}>
+              {armorList.map((a) => (
+                <ArmorCard
+                  key={a.id}
+                  armor={a}
+                  caracValue={(k) => rec[k] ?? 0}
+                  enchanted={isEnchanted('armor', a.id)}
+                />
+              ))}
+            </Columns>
+          )}
+        </TabPage>
+      );
+    }
+    if (index === 2) {
+      return (
+        <TabPage>
+          {shieldList.length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucun bouclier. Ajoutez-en un avec le bouton « Bouclier ».
+            </Text>
+          ) : (
+            <Columns gap={10}>
+              {shieldList.map((s) => (
+                <ShieldCard
+                  key={s.id}
+                  shield={s}
+                  caracValue={(k) => rec[k] ?? 0}
+                  caracModifier={caracModifier}
+                  enchanted={isEnchanted('shield', s.id)}
+                />
+              ))}
+            </Columns>
+          )}
+        </TabPage>
+      );
+    }
+    return (
+      <TabPage>
+        {/* Search scrolls with the list, as before. */}
+        {itemList.length > 0 ? (
+          <TextInput
+            mode="outlined"
+            dense
+            value={itemQuery}
+            onChangeText={setItemQuery}
+            placeholder="Rechercher un objet…"
+            left={<TextInput.Icon icon="magnify" />}
+            right={
+              itemQuery ? <TextInput.Icon icon="close" onPress={() => setItemQuery('')} /> : undefined
+            }
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        ) : null}
+        {itemList.length === 0 ? (
+          <Text style={{ color: theme.colors.onSurfaceVariant }}>
+            Aucun objet. Ajoutez-en un avec le bouton « Objet ».
+          </Text>
+        ) : filteredItems.length === 0 ? (
+          <Text style={{ color: theme.colors.onSurfaceVariant }}>
+            Aucun objet ne correspond à « {itemQuery} ».
+          </Text>
+        ) : (
+          <Columns gap={10}>
+            {filteredItems.map((it) => (
+              <ItemCard key={it.id} item={it} enchanted={isEnchanted('item', it.id)} />
+            ))}
+          </Columns>
+        )}
+      </TabPage>
+    );
+  };
+
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={[styles.container, splitWidth]} bottomOffset={24}>
+      {/* Money is pinned: it belongs to the whole inventory rather than to one
+          category, and it is what a player checks mid-trade. */}
+      <View style={[styles.money, splitWidth]}>
         <EditableSection title="ARGENT" icon="coin">
           {(editing) => (
             <MoneySection
@@ -111,110 +221,9 @@ export default function CharacterWeaponsScreen() {
             />
           )}
         </EditableSection>
+      </View>
 
-        {/* Sub-tabs drive which category is shown. */}
-        <SubTabs labels={TABS} active={tab} onChange={setTab} />
-
-        {tab === 0 ? (
-          <View style={styles.tabContent}>
-            {list.length === 0 ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                Aucune arme. Ajoutez-en une avec le bouton « Arme ».
-              </Text>
-            ) : (
-              <Columns gap={10}>
-                {list.map((w) => (
-                  <WeaponCard
-                    key={w.id}
-                    weapon={w}
-                    caracValue={(k) => rec[k] ?? 0}
-                    caracModifier={caracModifier}
-                    enchanted={isEnchanted('weapon', w.id)}
-                  />
-                ))}
-              </Columns>
-            )}
-          </View>
-        ) : null}
-
-        {tab === 1 ? (
-          <View style={styles.tabContent}>
-            {armorList.length === 0 ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                Aucune armure. Ajoutez-en une avec le bouton « Armure ».
-              </Text>
-            ) : (
-              <Columns gap={10}>
-                {armorList.map((a) => (
-                  <ArmorCard
-                    key={a.id}
-                    armor={a}
-                    caracValue={(k) => rec[k] ?? 0}
-                    enchanted={isEnchanted('armor', a.id)}
-                  />
-                ))}
-              </Columns>
-            )}
-          </View>
-        ) : null}
-
-        {tab === 2 ? (
-          <View style={styles.tabContent}>
-            {shieldList.length === 0 ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                Aucun bouclier. Ajoutez-en un avec le bouton « Bouclier ».
-              </Text>
-            ) : (
-              <Columns gap={10}>
-                {shieldList.map((s) => (
-                  <ShieldCard
-                    key={s.id}
-                    shield={s}
-                    caracValue={(k) => rec[k] ?? 0}
-                    caracModifier={caracModifier}
-                    enchanted={isEnchanted('shield', s.id)}
-                  />
-                ))}
-              </Columns>
-            )}
-          </View>
-        ) : null}
-
-        {tab === 3 ? (
-          <View style={styles.tabContent}>
-            {itemList.length > 0 ? (
-              <TextInput
-                mode="outlined"
-                dense
-                value={itemQuery}
-                onChangeText={setItemQuery}
-                placeholder="Rechercher un objet…"
-                left={<TextInput.Icon icon="magnify" />}
-                right={
-                  itemQuery ? <TextInput.Icon icon="close" onPress={() => setItemQuery('')} /> : undefined
-                }
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            ) : null}
-            {itemList.length === 0 ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                Aucun objet. Ajoutez-en un avec le bouton « Objet ».
-              </Text>
-            ) : filteredItems.length === 0 ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                Aucun objet ne correspond à « {itemQuery} ».
-              </Text>
-            ) : (
-              <Columns gap={10}>
-                {filteredItems.map((it) => (
-                  <ItemCard key={it.id} item={it} enchanted={isEnchanted('item', it.id)} />
-                ))}
-              </Columns>
-            )}
-          </View>
-        ) : null}
-      </KeyboardAwareScrollView>
+      <TabPager labels={TABS} active={tab} onChange={setTab} renderPage={renderPage} />
 
       {tab === 0 ? (
         <AppFab
@@ -241,6 +250,6 @@ export default function CharacterWeaponsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  container: { padding: 12, gap: 12, paddingBottom: 160 },
-  tabContent: { gap: 10 },
+  // Matches the pages' own padding, minus the bottom (the strip follows).
+  money: { paddingHorizontal: 12, paddingTop: 12, paddingBottom: 4 },
 });

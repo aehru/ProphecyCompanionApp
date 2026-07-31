@@ -2,7 +2,6 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Text } from 'react-native-paper';
 
 import EnchantRow from '@/components/magic/enchant-row';
@@ -15,7 +14,8 @@ import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
 import { dsIcon } from '@/components/ui/icon';
-import SubTabs from '@/components/ui/sub-tabs';
+import TabPage from '@/components/ui/tab-page';
+import TabPager from '@/components/ui/tab-pager';
 import type {
   ActualState,
   Armor,
@@ -29,7 +29,6 @@ import type {
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
-import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
@@ -77,7 +76,6 @@ export default function CharacterMagicScreen() {
   // Shared by the Réserve and Enchantements tabs: unlocks bullet-tapping plus
   // the reserve-object add/delete controls, same convention across this screen.
   const [editing, setEditing] = useEditToggle(navigation);
-  const splitWidth = useSplitWidth();
   const [draft, setDraft] = useState<ReserveObjectDraft | null>(null);
 
   const fallback = characterFallback(char);
@@ -149,12 +147,12 @@ export default function CharacterMagicScreen() {
     router.push(`/character/${numId}/enchant/${row.id}`);
   };
 
-  return (
-    <View style={styles.root}>
-      <KeyboardAwareScrollView contentContainerStyle={[styles.container, splitWidth]} bottomOffset={24}>
-        <SubTabs labels={TABS} active={tab} onChange={setTab} />
-
-        {tab === 0 ? (
+  // One page per tab. Each owns its scrolling, so the strip above stays pinned
+  // while a page scrolls — and a horizontal swipe moves between them.
+  const renderPage = (index: number) => {
+    if (index === 0) {
+      return (
+        <TabPage>
           <ReserveTab
             rec={rec}
             stRec={stRec}
@@ -166,54 +164,60 @@ export default function CharacterMagicScreen() {
             onAddObject={() => setDraft({ id: null, nom: '', max: '3' })}
             onDeleteObject={confirmDeleteObject}
           />
-        ) : null}
+        </TabPage>
+      );
+    }
+    if (index === SPELLS_TAB) {
+      return (
+        <TabPage>
+          {spellList.length === 0 ? (
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucun sortilège. Ajoutez-en un avec le bouton « Sort ».
+            </Text>
+          ) : (
+            <Columns gap={10}>
+              {spellList.map((sp) => (
+                <SpellCard key={sp.id} spell={sp} />
+              ))}
+            </Columns>
+          )}
+        </TabPage>
+      );
+    }
+    return (
+      <TabPage>
+        {enchants.length === 0 ? (
+          <Text style={{ color: theme.colors.onSurfaceVariant }}>
+            Aucun enchantement.{' '}
+            {firstTarget
+              ? 'Ajoutez-en un avec le bouton « Enchantement ».'
+              : 'Ajoutez d’abord une arme, une armure, un bouclier ou un objet à enchanter.'}
+          </Text>
+        ) : (
+          <Columns gap={10}>
+            {enchants.map((e) => {
+              const target = targetOf(e);
+              return (
+                <EnchantRow
+                  key={e.id}
+                  enchant={e}
+                  target={target}
+                  equipped={target ? isEquipped(e.targetType, target) : false}
+                  editing={editing}
+                  spells={spellList}
+                  onOpen={() => router.push(`/character/${numId}/enchant/${e.id}`)}
+                />
+              );
+            })}
+          </Columns>
+        )}
+      </TabPage>
+    );
+  };
 
-        {tab === SPELLS_TAB ? (
-          <View style={styles.tabContent}>
-            {spellList.length === 0 ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                Aucun sortilège. Ajoutez-en un avec le bouton « Sort ».
-              </Text>
-            ) : (
-              <Columns gap={10}>
-                {spellList.map((sp) => (
-                  <SpellCard key={sp.id} spell={sp} />
-                ))}
-              </Columns>
-            )}
-          </View>
-        ) : null}
-
-        {tab === ENCHANTS_TAB ? (
-          <View style={styles.tabContent}>
-            {enchants.length === 0 ? (
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                Aucun enchantement.{' '}
-                {firstTarget
-                  ? 'Ajoutez-en un avec le bouton « Enchantement ».'
-                  : 'Ajoutez d’abord une arme, une armure, un bouclier ou un objet à enchanter.'}
-              </Text>
-            ) : (
-              <Columns gap={10}>
-                {enchants.map((e) => {
-                  const target = targetOf(e);
-                  return (
-                    <EnchantRow
-                      key={e.id}
-                      enchant={e}
-                      target={target}
-                      equipped={target ? isEquipped(e.targetType, target) : false}
-                      editing={editing}
-                      spells={spellList}
-                      onOpen={() => router.push(`/character/${numId}/enchant/${e.id}`)}
-                    />
-                  );
-                })}
-              </Columns>
-            )}
-          </View>
-        ) : null}
-      </KeyboardAwareScrollView>
+  return (
+    <View style={styles.root}>
+      <TabPager labels={TABS} active={tab} onChange={setTab} renderPage={renderPage} />
 
       {tab === SPELLS_TAB ? (
         <AppFab
@@ -241,6 +245,4 @@ export default function CharacterMagicScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  container: { padding: 12, gap: 12, paddingBottom: 160 },
-  tabContent: { gap: 10 },
 });
