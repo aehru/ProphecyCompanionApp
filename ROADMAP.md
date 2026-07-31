@@ -65,3 +65,16 @@ merge, character detail sheet, join disclaimer, privacy policy.
 - [ ] **Auto-resume broadcasts on launch** (current behaviour, by choice): the
   app reconnects and pushes on startup if it was live. Revisit if a "start
   paused, confirm to resume" step is wanted for privacy.
+- [ ] **Watch: swipeable tabs keep three roster lists mounted.** The Compagnie's
+  Attributs / Compétences / Tendances tabs are three pages of a
+  [`<TabPager>`](src/components/ui/tab-pager.tsx), so each has its own
+  `FlatList` over the same roster ([roster-list.tsx](src/components/campaign/roster-list.tsx)).
+  Pages mount lazily, but once a GM has visited all three they stay mounted —
+  three windowed lists of tall cards (rings + skill groups) instead of one.
+  Fine on the tables tested so far; **if a GM with a big table (approaching the
+  server's 16-projection cap, or many spawned NPCs) reports stutter when
+  swiping, this is the first suspect.** Fixes, cheapest first: drop
+  `initialNumToRender` on inactive pages, unmount pages more than one away from
+  the active one, or hoist the list so the three tabs share one instance and
+  only the card BODY swipes. Same shape applies to Magie and Inventaire, but
+  their pages are far lighter.

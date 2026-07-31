@@ -1,20 +1,20 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import React, { useDeferredValue, useMemo, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import React, { useDeferredValue, useState } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Snackbar, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import InitiativeList from '@/components/campaign/initiative-list';
-import CompanyCard from '@/components/campaign/company-card';
+import RosterList from '@/components/campaign/roster-list';
 import { ServerStatusChip } from '@/components/campaign/roster-badges';
 import { useTableRosterCtx } from '@/components/campaign/table-roster-provider';
 import GmCharacterSheet, { GmSheetBody } from '@/components/gm-character-sheet';
 import AppFab from '@/components/ui/app-fab';
-import SubTabs from '@/components/ui/sub-tabs';
+import TabPager from '@/components/ui/tab-pager';
 import { dsIcon } from '@/components/ui/icon';
 import type { Campaign } from '@/db/schema';
-import { contentWidth, useLayout } from '@/hooks/use-layout';
+import { useLayout } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
@@ -23,13 +23,8 @@ import { rollInitiativeFor } from '@/repositories/characters';
 const TABS = ['Attributs', 'Compétences', 'Tendances', 'Initiative'] as const;
 // The first three tabs swap each card's body; Initiative replaces the whole
 // list with the table-wide turn order (one row per die, not per character).
+const SKILLS_TAB = 1;
 const INITIATIVE_TAB = 3;
-
-// Module-level so FlatList sees the same component type on every render (an
-// inline arrow remounts every separator whenever this screen re-renders — and
-// with a live roster it re-renders on every player push).
-const CardSeparator = () => <View style={styles.separator} />;
-const keyExtractor = (e: RosterEntry) => e.charId;
 
 export default function CompagnieScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -53,6 +48,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   const { status, serverError, roster, connected } = useTableRosterCtx();
   const { data: notes } = useLiveQuery(gmNotesQuery(campaign.id), [campaign.id]);
   const noteByUuid = new Map((notes ?? []).map((n) => [n.charUuid, n.body]));
+  const notedUuids = new Set(noteByUuid.keys());
 
   const [tab, setTab] = useState(0);
   const [query, setQuery] = useState('');
@@ -112,11 +108,6 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   // React re-renders at low priority and abandons when the next key lands.
   const deferredQuery = useDeferredValue(query);
   const stale = query !== deferredQuery;
-  // Everything outside `roster` that changes what a row renders.
-  const rowState = useMemo(
-    () => ({ tab, query: deferredQuery, notes }),
-    [tab, deferredQuery, notes],
-  );
   // Keep the open sheet live as updates stream in.
   const openEntry = selected ? (roster.find((e) => e.charId === selected.charId) ?? null) : null;
 
@@ -137,65 +128,54 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
           marking a PNJ's wounds never hides the table. */}
       <View style={split ? styles.splitRow : styles.fill}>
         <View style={styles.fill}>
-          {/* Tabs drive every card at once. */}
-          <SubTabs labels={TABS} active={tab} onChange={setTab} style={styles.tabs} />
-
-          {tab === INITIATIVE_TAB ? (
-            // The extra inset clears the roll FAB below.
-            <InitiativeList roster={roster} bottomInset={insets.bottom + 72} onSelect={openEditing} />
-          ) : null}
-
-          {tab === 1 ? (
-            <View style={styles.searchWrap}>
-              <TextInput
-                mode="outlined"
-                dense
-                value={query}
-                onChangeText={setQuery}
-                placeholder="Rechercher une compétence…"
-                left={<TextInput.Icon icon="magnify" />}
-                right={query ? <TextInput.Icon icon="close" onPress={() => setQuery('')} /> : undefined}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-          ) : null}
-
-          {tab === INITIATIVE_TAB ? null : roster.length === 0 ? (
-            <View style={styles.centered}>
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', paddingHorizontal: 32 }}>
-                Aucun personnage à la table. Ajoutez des PNJ depuis le salon.
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              data={roster}
-              keyExtractor={keyExtractor}
-              // flex: 1 claims the remaining height (like the salon's ScrollView);
-              // the bottom inset keeps the last card clear of the gesture area.
-              style={[styles.listFill, stale ? styles.listStale : null]}
-              contentContainerStyle={[styles.list, { paddingBottom: 16 + insets.bottom }, contentWidth]}
-              ItemSeparatorComponent={CardSeparator}
-              // Cards are tall (rings / skill groups): render a screenful, not the
-              // whole table, and drop off-screen rows on Android.
-              initialNumToRender={4}
-              maxToRenderPerBatch={4}
-              windowSize={5}
-              removeClippedSubviews
-              // A roster push leaves `roster` a new array, but switching tab or typing
-              // in the search box does not — tell the list those affect every row.
-              extraData={rowState}
-              renderItem={({ item }) => (
-                <CompanyCard
-                  entry={item}
-                  tab={tab}
-                  query={deferredQuery}
-                  hasNote={noteByUuid.has(item.charId)}
-                  onPress={() => openReading(item)}
+          <TabPager
+            labels={TABS}
+            active={tab}
+            onChange={setTab}
+            headerStyle={styles.tabs}
+            // Two panes already fill the width: a page swipe there fights the
+            // reading (and the sheet on the right owns its own gestures).
+            swipeEnabled={!split}
+            renderPage={(index) =>
+              index === INITIATIVE_TAB ? (
+                // The extra inset clears the roll FAB below.
+                <InitiativeList
+                  roster={roster}
+                  bottomInset={insets.bottom + 72}
+                  onSelect={openEditing}
                 />
-              )}
-            />
-          )}
+              ) : (
+                <View style={styles.fill}>
+                  {index === SKILLS_TAB ? (
+                    <View style={styles.searchWrap}>
+                      <TextInput
+                        mode="outlined"
+                        dense
+                        value={query}
+                        onChangeText={setQuery}
+                        placeholder="Rechercher une compétence…"
+                        left={<TextInput.Icon icon="magnify" />}
+                        right={
+                          query ? <TextInput.Icon icon="close" onPress={() => setQuery('')} /> : undefined
+                        }
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                    </View>
+                  ) : null}
+                  <RosterList
+                    roster={roster}
+                    tab={index}
+                    query={index === SKILLS_TAB ? deferredQuery : ''}
+                    notedUuids={notedUuids}
+                    bottomInset={16 + insets.bottom}
+                    stale={index === SKILLS_TAB && stale}
+                    onSelect={openReading}
+                  />
+                </View>
+              )
+            }
+          />
 
           {/* Inside the left column so the pane's own actions stay clickable. */}
           {tab === INITIATIVE_TAB ? (
@@ -269,10 +249,4 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 16,
   },
-  listFill: { flex: 1 },
-  // Cards still showing results for an older query — dim them slightly rather
-  // than blanking the list while the deferred re-filter catches up.
-  listStale: { opacity: 0.6 },
-  list: { padding: 16 },
-  separator: { height: 12 },
 });
