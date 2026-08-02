@@ -7,9 +7,42 @@ import { Text } from 'react-native-paper';
 
 import { MAX_PUCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { fmtSignedMod } from '@/lib/modifiers';
+
+/**
+ * The signed badge next to a stat, same reading as <StatChip> on the player's
+ * own sheet: the effects aimed at THIS stat, green for a net bonus, red for a
+ * net malus, nothing at all when it comes to 0. Wounds and 'all' effects are
+ * deliberately absent — they hit every roll and are shown once by
+ * <GlobalModifierRow>, since a roll uses two stats and would draw them twice.
+ */
+function ModBadge({ modifier }: { modifier?: number }) {
+  const theme = useProphecyTheme();
+  if (modifier == null || modifier === 0) return null;
+  return (
+    <Text
+      style={[
+        styles.mod,
+        { color: modifier > 0 ? theme.colors.primary : theme.colors.error },
+      ]}>
+      {fmtSignedMod(modifier)}
+    </Text>
+  );
+}
 
 /** Attribut tile: value over label with a coloured top edge. */
-export function AttrTile({ label, value, color }: { label: string; value: number; color: string }) {
+export function AttrTile({
+  label,
+  value,
+  color,
+  modifier,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  /** Effects aimed at this attribut alone. 0/undefined hides the badge. */
+  modifier?: number;
+}) {
   const theme = useProphecyTheme();
   return (
     <View
@@ -22,7 +55,10 @@ export function AttrTile({ label, value, color }: { label: string; value: number
           borderTopWidth: 2,
         },
       ]}>
-      <Text style={{ fontFamily: 'Cinzel_600SemiBold', fontSize: 18, color }}>{value}</Text>
+      <View style={styles.valueRow}>
+        <Text style={{ fontFamily: 'Cinzel_600SemiBold', fontSize: 18, color }}>{value}</Text>
+        <ModBadge modifier={modifier} />
+      </View>
       <Text style={{ fontSize: 8.5, letterSpacing: 0.4, color: theme.colors.onSurfaceVariant }}>
         {label}
       </Text>
@@ -31,7 +67,16 @@ export function AttrTile({ label, value, color }: { label: string; value: number
 }
 
 /** Caractéristique tile: abbr over value, plain surface. */
-export function CaracTile({ label, value }: { label: string; value: number }) {
+export function CaracTile({
+  label,
+  value,
+  modifier,
+}: {
+  label: string;
+  value: number;
+  /** Effects aimed at this caractéristique alone. */
+  modifier?: number;
+}) {
   const theme = useProphecyTheme();
   return (
     <View
@@ -43,10 +88,13 @@ export function CaracTile({ label, value }: { label: string; value: number }) {
         style={{ fontSize: 8.5, fontWeight: '700', letterSpacing: 0.5, color: theme.colors.onSurfaceVariant }}>
         {label}
       </Text>
-      <Text
-        style={{ fontFamily: 'Cinzel_600SemiBold', fontSize: 14, color: theme.colors.onSurface }}>
-        {value}
-      </Text>
+      <View style={styles.valueRow}>
+        <Text
+          style={{ fontFamily: 'Cinzel_600SemiBold', fontSize: 14, color: theme.colors.onSurface }}>
+          {value}
+        </Text>
+        <ModBadge modifier={modifier} />
+      </View>
     </View>
   );
 }
@@ -116,4 +164,6 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   ringCenter: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  valueRow: { flexDirection: 'row', alignItems: 'baseline', gap: 3 },
+  mod: { fontFamily: 'NotoSans_500Medium', fontSize: 10 },
 });

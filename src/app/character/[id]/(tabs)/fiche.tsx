@@ -13,6 +13,7 @@ import HealthSection from '@/components/fiche/health-section';
 import ResourcesSection from '@/components/fiche/resources-section';
 import ShieldSection from '@/components/fiche/shield-section';
 import StatGrid from '@/components/fiche/stat-grid';
+import GlobalModifierRow from '@/components/global-modifier-row';
 import NumberField from '@/components/number-field';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
@@ -31,7 +32,7 @@ import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { rollInitiative } from '@/lib/dice';
-import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { globalModifier, statModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
@@ -94,8 +95,11 @@ export default function CharacterFicheScreen() {
   const equippedArmor = (armors ?? []).find((a) => a.equipped) ?? null;
   const equippedShield = (shieldRows ?? []).find((s) => s.equipped) ?? null;
   const effectList = effects ?? [];
-  // Wound malus hits every roll; folded into each stat's badge alongside effects.
+  // Wound malus hits every roll, as do the 'all' effects — read once, above the
+  // stat grids. A roll is an attribut PLUS a caractéristique, so badging them on
+  // both tiles would show the same malus twice; a tile carries only its own.
   const wound = woundMalus(stRec);
+  const global = globalModifier(effectList, wound);
   const initiativeMax = rec.initiativeMax ?? 0;
   const initStored = state?.initiativeValues ?? [];
 
@@ -176,12 +180,14 @@ export default function CharacterFicheScreen() {
             />
           </SectionCard>
 
+          <GlobalModifierRow modifier={global} />
+
           <StatGrid
             title="ATTRIBUTS"
             icon="rune"
             stats={ATTRIBUTS}
             valueOf={(k) => num(rec[k])}
-            modifierOf={(k) => totalModifier(k, effectList, wound)}
+            modifierOf={(k) => statModifier(k, effectList)}
           />
 
           <StatGrid
@@ -189,7 +195,7 @@ export default function CharacterFicheScreen() {
             icon="star"
             stats={CARAC_TILES}
             valueOf={(k) => num(rec[k])}
-            modifierOf={(k) => totalModifier(k, effectList, wound)}
+            modifierOf={(k) => statModifier(k, effectList)}
           />
 
           <EditableSection
