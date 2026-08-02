@@ -20,6 +20,7 @@ import WeaponCard from '@/components/weapon-card';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { spellTotal } from '@/lib/spell-total';
 import { actualStateQuery } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { characterByUuidQuery } from '@/repositories/characters';
@@ -124,7 +125,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
         <Section title="Sorts">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {spellList.map((s) => (
-              <SpellCard key={s.id} spell={s} />
+              <SpellCard key={s.id} spell={s} total={spellTotal(s, rec, effectList, wound)} />
             ))}
           </View>
         </Section>
