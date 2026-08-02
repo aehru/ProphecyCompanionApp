@@ -14,11 +14,19 @@ import { AttrTile, CaracTile, TendanceRing } from '@/components/campaign/stat-ti
 import { ATTRIBUTS, CARACTERISTIQUES, TENDANCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
+import GlobalModifierRow from '@/components/global-modifier-row';
+import { sharedWoundMalus } from '@/lib/initiative-order';
+import { globalModifier, statModifier } from '@/lib/modifiers';
 import type { TableRosterEntry } from '@/lib/roster-merge';
 import { groupSkills, type SharedEffect, type SharedSkill } from '@/lib/skill-groups';
-import { nums } from '@/lib/shared-character-view';
+import { nums, pools } from '@/lib/shared-character-view';
 
 type SharedCharacter = RosterEntry['character'];
+
+/** The character's active effects, narrowed off the opaque projection. */
+function effectsOf(character: SharedCharacter): SharedEffect[] {
+  return Array.isArray(character.effects) ? (character.effects as SharedEffect[]) : [];
+}
 
 export default function CompanyCard({
   entry,
@@ -60,17 +68,30 @@ export default function CompanyCard({
   );
 }
 
-/** Attributs + caractéristiques tiles. */
+/** Attributs + caractéristiques tiles, badged with their own effects. */
 function StatsBody({ character }: { character: SharedCharacter }) {
   const theme = useProphecyTheme();
   const attrColors = useAttrColors();
   const attr = nums(character.attributs);
   const carac = nums(character.caracteristiques);
+  const effects = effectsOf(character);
+  // Wounds and 'all' effects hit every roll, so they are read once above the
+  // tiles — a roll adds an attribut to a caractéristique and would show them
+  // twice. Each tile badges only the effects aimed at that stat.
+  const global = globalModifier(effects, sharedWoundMalus(pools(character.wounds)));
+  const modOf = (key: string) => statModifier(key, effects);
   return (
     <View style={styles.statsBody}>
+      <GlobalModifierRow modifier={global} compact />
       <View style={styles.tileRow}>
         {ATTRIBUTS.map((a) => (
-          <AttrTile key={a.key} label={a.label} value={attr[a.key] ?? 0} color={attrColors[a.key]} />
+          <AttrTile
+            key={a.key}
+            label={a.label}
+            value={attr[a.key] ?? 0}
+            color={attrColors[a.key]}
+            modifier={modOf(a.key)}
+          />
         ))}
       </View>
       <View style={styles.dividerRow}>
@@ -83,12 +104,22 @@ function StatsBody({ character }: { character: SharedCharacter }) {
       </View>
       <View style={styles.tileRow}>
         {CARACTERISTIQUES.slice(0, 4).map((k) => (
-          <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
+          <CaracTile
+            key={k.key}
+            label={k.abbr}
+            value={carac[k.key] ?? 0}
+            modifier={modOf(k.key)}
+          />
         ))}
       </View>
       <View style={styles.tileRow}>
         {CARACTERISTIQUES.slice(4).map((k) => (
-          <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
+          <CaracTile
+            key={k.key}
+            label={k.abbr}
+            value={carac[k.key] ?? 0}
+            modifier={modOf(k.key)}
+          />
         ))}
       </View>
     </View>
@@ -102,14 +133,13 @@ function SkillsBody({ character, query }: { character: SharedCharacter; query: s
     () => (Array.isArray(character.skills) ? (character.skills as SharedSkill[]) : []),
     [character.skills],
   );
-  const effects = useMemo(
-    () => (Array.isArray(character.effects) ? (character.effects as SharedEffect[]) : []),
-    [character.effects],
-  );
+  const effects = useMemo(() => effectsOf(character), [character]);
   const attr = nums(character.attributs);
+  // The wound malus applies to skill rolls too — the TOT column is a roll base.
+  const wound = sharedWoundMalus(pools(character.wounds));
   const groups = useMemo(
-    () => groupSkills(skills, attr, attrColors, query, effects),
-    [skills, attr, attrColors, query, effects],
+    () => groupSkills(skills, attr, attrColors, query, effects, wound),
+    [skills, attr, attrColors, query, effects, wound],
   );
   return <SkillGroupsView groups={groups} emptyLabel="Aucune correspondance." compact />;
 }

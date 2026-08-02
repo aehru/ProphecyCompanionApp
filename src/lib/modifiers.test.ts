@@ -6,10 +6,12 @@ import {
   activeEffects,
   effectsSum,
   fmtSignedMod,
+  globalModifier,
   isSkillTarget,
   skillModifier,
   skillTarget,
   skillTargetName,
+  statModifier,
   totalModifier,
   woundMalus,
 } from './modifiers';
@@ -88,6 +90,46 @@ describe('effectsSum', () => {
 
   it('is 0 for an empty list', () => {
     expect(effectsSum('force', [])).toBe(0);
+  });
+});
+
+describe('statModifier', () => {
+  const list = [
+    makeEffect({ target: 'all', value: 2 }),
+    makeEffect({ target: 'force', value: -1 }),
+    makeEffect({ target: 'force', value: 3 }),
+  ];
+
+  it('sums only the effects aimed at that exact stat', () => {
+    // 'all' is excluded on purpose: it belongs to the global row, or a roll
+    // adding an attribut to a caractéristique would show it on both tiles.
+    expect(statModifier('force', list)).toBe(2);
+  });
+
+  it('is 0 for a stat no effect targets', () => {
+    expect(statModifier('volonte', list)).toBe(0);
+  });
+
+  it('ignores expired effects', () => {
+    expect(statModifier('force', [makeEffect({ target: 'force', value: 4, expired: true })])).toBe(0);
+  });
+});
+
+describe('globalModifier', () => {
+  it('keeps the wound and the all-roll effects apart', () => {
+    const list = [
+      makeEffect({ target: 'all', value: 1 }),
+      makeEffect({ target: 'all', value: -2 }),
+      makeEffect({ target: 'force', value: 5 }),
+    ];
+    expect(globalModifier(list, -3)).toEqual({ wound: -3, effects: -1 });
+  });
+
+  it('is all zeroes for an unwounded character with no global effect', () => {
+    expect(globalModifier([makeEffect({ target: 'force', value: 5 })], 0)).toEqual({
+      wound: 0,
+      effects: 0,
+    });
   });
 });
 

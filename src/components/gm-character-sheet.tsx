@@ -21,7 +21,9 @@ import { dsIcon } from '@/components/ui/icon';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
+import GlobalModifierRow from '@/components/global-modifier-row';
 import { sharedWoundMalus } from '@/lib/initiative-order';
+import { globalModifier, statModifier } from '@/lib/modifiers';
 import { groupSkills, type SharedSkill } from '@/lib/skill-groups';
 import { nums, pools, type SharedEffectView } from '@/lib/shared-character-view';
 
@@ -84,9 +86,14 @@ export function GmSheetBody({
     () => (Array.isArray(c?.effects) ? (c?.effects as SharedEffectView[]) : []),
     [c?.effects],
   );
+  // Wound boxes aren't surfaced as a section, but the malus applies to EVERY
+  // roll — initiative, the stat tiles and the skills' TOT column alike, same
+  // reading the turn order and the player's own sheet use. Computed before the
+  // early return so the grouping memo below can fold it in.
+  const wound = useMemo(() => sharedWoundMalus(pools(c?.wounds)), [c?.wounds]);
   const groups = useMemo(
-    () => groupSkills(skills, attr, attrColors, '', effectRows),
-    [skills, attr, attrColors, effectRows],
+    () => groupSkills(skills, attr, attrColors, '', effectRows, wound),
+    [skills, attr, attrColors, effectRows, wound],
   );
 
   if (!entry || !c) return null;
@@ -94,10 +101,11 @@ export function GmSheetBody({
   const tend = nums(c.tendances);
   const resources = pools(c.resources);
   const initiative = (c.initiative ?? {}) as { max?: number; values?: number[] };
-  const effects = Array.isArray(c.effects) ? (c.effects as SharedEffectView[]) : [];
-  // Wound boxes aren't surfaced as a section, but the wound malus still applies
-  // to initiative — same reading the turn order uses.
-  const wound = sharedWoundMalus(pools(c.wounds));
+  // Global sources (wound + 'all' effects) are read once, above the two grids;
+  // a tile badges only the effects aimed at that stat, so an attribut +
+  // caractéristique roll doesn't show the same malus twice.
+  const global = globalModifier(effectRows, wound);
+  const modOf = (key: string) => statModifier(key, effectRows);
 
   const save = () => {
     onSaveNote(entry.charId, draftRef.current);
@@ -144,6 +152,8 @@ export function GmSheetBody({
             </Section>
           )}
 
+          <GlobalModifierRow modifier={global} />
+
           <Section title="Tendances">
             <TendanceRings tend={tend} colors={tendColors} />
           </Section>
@@ -152,7 +162,13 @@ export function GmSheetBody({
           <Section title="Attributs">
             <View style={styles.grid}>
               {ATTRIBUTS.map((a) => (
-                <AttrTile key={a.key} label={a.label} value={attr[a.key] ?? 0} color={attrColors[a.key]} />
+                <AttrTile
+                  key={a.key}
+                  label={a.label}
+                  value={attr[a.key] ?? 0}
+                  color={attrColors[a.key]}
+                  modifier={modOf(a.key)}
+                />
               ))}
             </View>
           </Section>
@@ -161,7 +177,12 @@ export function GmSheetBody({
           <Section title="Caractéristiques">
             <View style={styles.grid}>
               {CARACTERISTIQUES.map((k) => (
-                <CaracTile key={k.key} label={k.abbr} value={carac[k.key] ?? 0} />
+                <CaracTile
+                  key={k.key}
+                  label={k.abbr}
+                  value={carac[k.key] ?? 0}
+                  modifier={modOf(k.key)}
+                />
               ))}
             </View>
           </Section>
@@ -176,9 +197,9 @@ export function GmSheetBody({
               carries none of it. Renders nothing when there is nothing to show. */}
           {canEdit ? <NpcGearSections charUuid={entry.charId} /> : null}
 
-          {effects.length > 0 ? (
+          {effectRows.length > 0 ? (
             <Section title="Effets actifs">
-              <EffectsList effects={effects} />
+              <EffectsList effects={effectRows} />
             </Section>
           ) : null}
 
