@@ -179,7 +179,9 @@ export default function CharactersListScreen() {
                 }
                 // NPCs live in the same list as the player characters (they ARE
                 // characters) — the badge is the only thing that tells them apart.
-                right={item.kind === 'npc' ? () => <OwnerBadge /> : undefined}
+                // `p.style` carries List.Item's own centering and margin — drop
+                // it and the pill stretches to the full row height.
+                right={item.kind === 'npc' ? (p) => <OwnerBadge style={p.style} /> : undefined}
                 onPress={() => router.push(`/character/${item.id}` as Href)}
                 onLongPress={() => handleDuplicate(item.id, item.nom ?? '')}
               />

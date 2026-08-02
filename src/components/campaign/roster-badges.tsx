@@ -3,7 +3,7 @@
 // boolean the caller read off the projection.
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
 import { initials, playerAccent } from '@/components/campaign/roster-accents';
@@ -96,12 +96,31 @@ export function StatusPill({ online }: { online: boolean }) {
   );
 }
 
-/** Ownership badge — marks entries the GM runs themselves (their NPCs). */
-export function OwnerBadge() {
+/**
+ * Ownership badge — marks entries the GM runs themselves (their NPCs), and the
+ * NPCs sitting among the player characters in the main list.
+ *
+ * `alignSelf` is set here rather than left to the caller: a bare row (`Paper`'s
+ * List.Item, the campaign cards) stretches its children, which turns a pill into
+ * a tall rounded box. Pass `style` through when the parent supplies its own
+ * spacing (List.Item's `right` gives a `marginLeft`).
+ */
+export function OwnerBadge({ style }: { style?: StyleProp<ViewStyle> }) {
   const theme = useProphecyTheme();
   return (
-    <View style={[styles.pill, { backgroundColor: `${theme.colors.secondary}22` }]}>
-      <Text style={[styles.pillLabel, { color: theme.colors.secondary }]}>PNJ</Text>
+    <View
+      style={[
+        styles.pill,
+        styles.owner,
+        {
+          backgroundColor: `${theme.colors.secondary}1F`,
+          borderColor: `${theme.colors.secondary}59`,
+        },
+        style,
+      ]}>
+      <Text style={[styles.pillLabel, styles.ownerLabel, { color: theme.colors.secondary }]}>
+        PNJ
+      </Text>
     </View>
   );
 }
@@ -109,4 +128,11 @@ export function OwnerBadge() {
 const styles = StyleSheet.create({
   pill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
   pillLabel: { fontSize: 10, fontWeight: '700' },
+  owner: {
+    alignSelf: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  ownerLabel: { fontSize: 11, letterSpacing: 0.8 },
 });
