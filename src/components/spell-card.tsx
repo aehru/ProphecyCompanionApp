@@ -18,23 +18,35 @@ import {
 import type { Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import type { SpellTotal } from '@/lib/spell-total';
 import { deleteSpell, updateSpell } from '@/repositories/spells';
 
 /**
  * One spell: a read-only summary that opens the editor in a modal (`spell/[sid]`)
  * via the pencil — mirrors WeaponCard. Spells are always "known" (no equip).
+ * `total` is this character's casting score (see lib/spell-total): shown as a
+ * badge on the collapsed row, then broken down in the detail.
  */
-export default function SpellCard({ spell }: { spell: Spell }) {
+export default function SpellCard({ spell, total }: { spell: Spell; total?: SpellTotal | null }) {
   const router = useRouter();
   return (
     <SpellSummary
       spell={spell}
+      total={total}
       onEdit={() => router.push(`/character/${spell.characterId}/spell/${spell.id}`)}
     />
   );
 }
 
-function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }) {
+function SpellSummary({
+  spell: s,
+  total,
+  onEdit,
+}: {
+  spell: Spell;
+  total?: SpellTotal | null;
+  onEdit: () => void;
+}) {
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
 
@@ -73,10 +85,22 @@ function SpellSummary({ spell: s, onEdit }: { spell: Spell; onEdit: () => void }
             </Text>
           ) : null}
         </View>
+        {/* The score is the number a player needs at a glance, so it stays on
+            the collapsed row rather than waiting for the expand. */}
+        {total ? (
+          <View
+            accessibilityLabel={`Total d'incantation ${total.total}`}
+            style={[
+              styles.totalBadge,
+              { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
+            ]}>
+            <Text style={[styles.totalValue, { color: theme.colors.primary }]}>{total.total}</Text>
+          </View>
+        ) : null}
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
 
-      {expanded ? <SpellDetail spell={s} onEdit={onEdit} /> : null}
+      {expanded ? <SpellDetail spell={s} total={total} onEdit={onEdit} /> : null}
     </View>
   );
 }
@@ -216,6 +240,16 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
   keyBadge: { alignItems: 'center', justifyContent: 'center' },
+  totalBadge: {
+    minWidth: 34,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 9,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  totalValue: { fontSize: 15, fontWeight: '700' },
   itemSub: { fontSize: 12, marginTop: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   numCol: { flexGrow: 1, flexBasis: 120, minWidth: 120 },

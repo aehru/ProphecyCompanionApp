@@ -31,6 +31,11 @@ export function charactersListQuery() {
   return db.select().from(characters).orderBy(desc(characters.updatedAt));
 }
 
+/** Live query for one character by local id. Use with useLiveQuery. */
+export function characterQuery(id: number) {
+  return db.select().from(characters).where(eq(characters.id, id)).limit(1);
+}
+
 /**
  * Live query for one character by portable uuid. This is the bridge from a
  * campaign roster entry (whose `charId` IS the uuid) back to the local row —

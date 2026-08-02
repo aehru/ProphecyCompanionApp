@@ -11,6 +11,7 @@ import { SPELL_CATALOG, type SpellPreset } from '@/data/spell-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { useSpellTotal } from '@/hooks/use-spell-total';
 import { createSpell } from '@/repositories/spells';
 
 /**
@@ -22,7 +23,19 @@ export default function SpellCatalogModal() {
   const numId = useCharacterId();
   const router = useRouter();
   const theme = useProphecyTheme();
+  // Same score the Magie tab shows — a player picking a spell wants to know
+  // what they would cast it at BEFORE adding it.
+  const spellTotalFor = useSpellTotal(numId);
   const [query, setQuery] = useState('');
+
+  // A preset's discipline/sphere are optional (the columns have DB defaults),
+  // so fall back to those same defaults rather than skipping the score.
+  const presetTotal = (p: SpellPreset) =>
+    spellTotalFor({
+      discipline: p.data.discipline ?? 'sorcellerie',
+      sphere: p.data.sphere ?? 'sphereFeu',
+      cleParfaite: p.data.cleParfaite,
+    }).total;
 
   const q = query.trim().toLowerCase();
   const filtered = useMemo(
@@ -94,6 +107,7 @@ export default function SpellCatalogModal() {
                       p.data.level ? `Niv. ${p.data.level}` : null,
                       p.data.sphere ? SPHERE_LABEL[p.data.sphere] : null,
                       `Diff. ${p.data.difficulty}`,
+                      `Total ${presetTotal(p)}`,
                     ]
                       .filter(Boolean)
                       .join(' · ')}
