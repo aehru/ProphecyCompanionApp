@@ -89,6 +89,7 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
         rangeMax: null,
         hands: 1,
         equippedHand: 'main',
+        skillName: 'Armes tranchantes',
       },
     ],
     spells: [
@@ -237,6 +238,22 @@ describe('parseImport validation', () => {
     const exp = buildExport([{ ...b, weapons: [{ ...b.weapons[0], creationTime: 0.5 }] }]);
     const r = parseImport(serializeExport(exp));
     expect(r.ok && r.data.characters[0].weapons[0].creationTime).toBe(0.5);
+  });
+
+  it('carries a weapon’s compétence through parse', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    expect(r.ok && r.data.characters[0].weapons[0].skillName).toBe('Armes tranchantes');
+  });
+
+  it('accepts a weapon predating skillName (export from before the column existed)', () => {
+    const b = makeBundle();
+    const { skillName: _dropped, ...legacyWeapon } = b.weapons[0];
+    const exp = buildExport([{ ...b, weapons: [legacyWeapon] as never }]);
+    const r = parseImport(serializeExport(exp));
+    expect(r.ok).toBe(true);
+    // Imports with no compétence — the same « non définie » state a hand-made
+    // weapon starts in, not a failure.
+    expect(r.ok && r.data.characters[0].weapons[0].skillName).toBeUndefined();
   });
 
   it('accepts a spell without level (export predating the column)', () => {
