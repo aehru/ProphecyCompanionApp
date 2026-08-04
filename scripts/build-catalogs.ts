@@ -39,7 +39,12 @@ import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '../src/constants/prophecy';
 import { parseCsvTable } from '../src/lib/csv';
 import { parseFormula, parsePrerequisites } from '../src/lib/formula';
 import { ARMOR_CATEGORIES } from '../src/data/armor-constants';
-import { HAND_VALUE, WEAPON_CATEGORIES, WEAPON_HANDS } from '../src/data/weapon-constants';
+import {
+  CATEGORY_SKILL,
+  HAND_VALUE,
+  WEAPON_CATEGORIES,
+  WEAPON_HANDS,
+} from '../src/data/weapon-constants';
 import type { ArmorPreset } from '../src/data/armor-catalog';
 import type { ShieldPreset } from '../src/data/shield-catalog';
 import type { WeaponPreset } from '../src/data/weapon-catalog';
@@ -241,12 +246,26 @@ function buildWeapons(failures: Failure[]): WeaponPreset[] {
     const nom = (rec.nom ?? '').trim();
     if (nom === '') errors.push('nom : requis');
 
+    const category = readEnum(
+      rec,
+      'categorie',
+      matchCategory,
+      WEAPON_CATEGORIES,
+      errors,
+    ) as WeaponPreset['category'];
+
     const preset: WeaponPreset = {
       id,
-      category: readEnum(rec, 'categorie', matchCategory, WEAPON_CATEGORIES, errors) as WeaponPreset['category'],
+      category,
       hands: readEnum(rec, 'mains', matchHands, WEAPON_HANDS, errors) as WeaponPreset['hands'],
       data: {
         name: nom,
+        // Resolved HERE, not in the CSV: one category maps to exactly one
+        // compétence (see CATEGORY_SKILL), so the spreadsheet stays free of a
+        // column that would only ever restate the category. Baking it into the
+        // preset means the weapon row carries the skill and the category never
+        // has to be persisted.
+        skillName: CATEGORY_SKILL[category] ?? null,
         damage: readFormula(rec, 'degats', errors, { required: true }) ?? '',
         prerequisites: readPrerequisites(rec, errors),
         initMelee: readInt(rec, 'initMelee', errors),
