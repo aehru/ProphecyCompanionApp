@@ -281,6 +281,17 @@ export const weapons = sqliteTable('weapons', {
   // Handedness as a count: 1 = one-handed, 2 = two-handed.
   hands: integer('hands').$type<1 | 2>().notNull().default(1),
   equippedHand: text('equipped_hand', { enum: EQUIPPED_HANDS }),
+  // The compétence this weapon is wielded with — a `skills.name` (or a
+  // DEFAULT_SKILLS name the character hasn't bought yet), which is what makes
+  // the attack total readable: attribut + points + modificateurs. NULLABLE on
+  // purpose, and the only column here that is: a catalogue weapon arrives with
+  // it filled (resolved from the preset's category at build time), but a
+  // hand-made weapon and every row predating this column legitimately have no
+  // skill until the player picks one — « Compétence non définie » is a real
+  // state, not an empty string. Name-keyed like `skills.parentName` and the
+  // `skill:<name>` effect targets; may hold a spécialisation's composite name
+  // ("Armes tranchantes (Épée longue)") when the player overrides it.
+  skillName: text('skill_name'),
 });
 
 /**

@@ -1,0 +1,1 @@
+ALTER TABLE `weapons` ADD `skill_name` text;
