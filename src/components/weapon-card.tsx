@@ -9,6 +9,7 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formatDecimal } from '@/lib/character-values';
 import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
 import { fmtSignedMod } from '@/lib/modifiers';
+import type { WeaponSkillReading } from '@/lib/weapon-skill';
 import { equipWeapon, unequipWeapon } from '@/repositories/weapons';
 
 type CaracValue = (caracKey: string) => number;
@@ -27,11 +28,19 @@ export default function WeaponCard({
   weapon,
   caracValue,
   caracModifier,
+  skill,
   enchanted,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
   caracModifier?: CaracModifier;
+  /**
+   * The weapon's compétence resolved against this character (see
+   * lib/weapon-skill). Computed by the caller — like SpellCard's `total` — so
+   * the card stays free of skill/effect lookups and both the Fiche and the GM's
+   * NPC sheet read the same number.
+   */
+  skill?: WeaponSkillReading;
   /** This weapon has at least one enchant bound to it (see the Magie tab). */
   enchanted?: boolean;
 }) {
@@ -41,6 +50,7 @@ export default function WeaponCard({
       weapon={weapon}
       caracValue={caracValue}
       caracModifier={caracModifier}
+      skill={skill}
       enchanted={enchanted}
       onEdit={() => router.push(`/character/${weapon.characterId}/weapon/${weapon.id}`)}
     />
@@ -111,16 +121,82 @@ function formulaCaracMod(raw: string, caracModifier?: CaracModifier): number {
   return total;
 }
 
+/**
+ * The compétence line: which skill this weapon is wielded with, and the total
+ * the player rolls on. Three readings, three tones — an unset link is a normal
+ * state (nothing to alarm about), a dangling one is an error, and a skill with
+ * no points still shows its total, tagged « non acquise » so the player knows
+ * they are rolling on the attribut alone.
+ */
+function SkillRow({ skill }: { skill: WeaponSkillReading }) {
+  const theme = useProphecyTheme();
+
+  if (skill.status === 'unset') {
+    return (
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Compétence</Text>
+        <Text style={[styles.value, { color: theme.colors.onSurfaceVariant }]}>
+          Non définie — à choisir dans « Modifier »
+        </Text>
+      </View>
+    );
+  }
+
+  if (skill.status === 'unknown') {
+    return (
+      <View style={styles.row}>
+        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Compétence</Text>
+        <Text style={[styles.value, { color: theme.colors.error }]}>
+          « {skill.name} » introuvable
+        </Text>
+      </View>
+    );
+  }
+
+  const modColor = skill.bonus > 0 ? theme.colors.primary : theme.colors.error;
+  return (
+    <View style={styles.row}>
+      <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Compétence</Text>
+      <View style={styles.formulaCol}>
+        <View style={styles.skillNameRow}>
+          <Text style={styles.skillName}>{skill.name}</Text>
+          {!skill.trained ? (
+            <Text style={[styles.untrained, { color: theme.colors.onSurfaceVariant }]}>
+              non acquise
+            </Text>
+          ) : null}
+        </View>
+        <View style={styles.resultRow}>
+          <Text style={[styles.result, { color: theme.colors.primary }]}>= {skill.total}</Text>
+          <Text style={[styles.breakdown, { color: theme.colors.onSurfaceVariant }]}>
+            ({skill.attributLabel} {skill.attributValue} + {skill.value})
+          </Text>
+          {skill.bonus !== 0 ? (
+            <>
+              <IconButton icon="alert-circle" size={14} iconColor={modColor} style={styles.modIcon} />
+              <Text style={[styles.modNote, { color: modColor }]}>
+                ({fmtSignedMod(skill.bonus)})
+              </Text>
+            </>
+          ) : null}
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function WeaponSummary({
   weapon: w,
   caracValue,
   caracModifier,
+  skill,
   enchanted,
   onEdit,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
   caracModifier?: CaracModifier;
+  skill?: WeaponSkillReading;
   enchanted?: boolean;
   onEdit: () => void;
 }) {
@@ -191,6 +267,17 @@ function WeaponSummary({
                 {subtitle}
               </Text>
             ) : null}
+            {/* Collapsed: the attack total alone. The breakdown (which
+                compétence, which attribut) is one tap away in the detail. */}
+            {skill?.status === 'ok' ? (
+              <View style={styles.skillChip}>
+                <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>·</Text>
+                <Icon name="sword" size={12} color={theme.colors.onSurfaceVariant} />
+                <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>
+                  {skill.total}
+                </Text>
+              </View>
+            ) : null}
             {equippedLabel ? (
               <Text style={[styles.itemSub, { color: theme.colors.primary }]}>
                 · Équipée ({equippedLabel})
@@ -203,6 +290,8 @@ function WeaponSummary({
 
       {expanded ? (
         <View style={styles.detail}>
+          {skill ? <SkillRow skill={skill} /> : null}
+
           <FormulaRow
             label="Dégâts"
             raw={w.damage}
@@ -313,6 +402,11 @@ const styles = StyleSheet.create({
   enchantBadge: { alignItems: 'center', justifyContent: 'center' },
   subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
   itemSub: { fontSize: 12 },
+  skillChip: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  skillNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  skillName: { fontSize: 15 },
+  untrained: { fontSize: 12, fontStyle: 'italic' },
+  breakdown: { fontSize: 13 },
   equipBtns: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   detail: { gap: 8, paddingLeft: 2, paddingBottom: 12 },
   detailEdit: { alignSelf: 'flex-start', marginTop: 2 },

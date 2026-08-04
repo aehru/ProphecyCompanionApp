@@ -24,12 +24,14 @@ import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { weaponSkillReading } from '@/lib/weapon-skill';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { enchantsQuery } from '@/repositories/enchants';
 import { effectsQuery } from '@/repositories/effects';
 import { createItem, itemsQuery } from '@/repositories/items';
 import { shieldsQuery } from '@/repositories/shields';
+import { skillsQuery } from '@/repositories/skills';
 import { weaponsQuery } from '@/repositories/weapons';
 
 const TABS = [
@@ -57,6 +59,8 @@ export default function CharacterWeaponsScreen() {
   const { data: items } = useLiveQuery(itemsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
   const { data: enchants } = useLiveQuery(enchantsQuery(numId), [numId]);
+  // Skills: a weapon's attack total is its linked compétence's total.
+  const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;
@@ -82,6 +86,7 @@ export default function CharacterWeaponsScreen() {
   // value before the multiplier in a weapon's damage formula.
   const wound = woundMalus(stRec);
   const effectList = effects ?? [];
+  const skillList = skills ?? [];
   const caracModifier = (caracKey: string) => totalModifier(caracKey, effectList, wound);
 
   const setStateValue = (key: string, value: number) => {
@@ -121,6 +126,7 @@ export default function CharacterWeaponsScreen() {
                   weapon={w}
                   caracValue={(k) => rec[k] ?? 0}
                   caracModifier={caracModifier}
+                  skill={weaponSkillReading(w.skillName, skillList, rec, effectList, wound)}
                   enchanted={isEnchanted('weapon', w.id)}
                 />
               ))}
