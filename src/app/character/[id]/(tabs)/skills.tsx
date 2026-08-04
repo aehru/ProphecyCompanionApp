@@ -13,7 +13,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { asNumRecord, buildSkillRows, type SkillRow, skillRowsToInput } from '@/lib/character-values';
-import { skillModifier, woundMalus } from '@/lib/modifiers';
+import { woundMalus } from '@/lib/modifiers';
 import { effectsQuery } from '@/repositories/effects';
 import type { SpecMother } from '@/components/skills-editor';
 import {
@@ -59,11 +59,7 @@ export default function CharacterSkillsScreen() {
       {editing ? (
         <SkillsEditorLive characterId={numId} skills={skills ?? []} />
       ) : (
-        <SkillsView
-          skills={skills ?? []}
-          attributValue={(a) => rec[a] ?? 0}
-          modifier={(s) => skillModifier(s.attribut, s.name, effectList, wound)}
-        />
+        <SkillsView skills={skills ?? []} attributs={rec} effects={effectList} wound={wound} />
       )}
     </View>
   );
