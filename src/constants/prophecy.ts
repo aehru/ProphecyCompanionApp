@@ -134,6 +134,7 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
   { name: 'Sabotage', attribut: 'manuel' },
   // Manipulation
   { name: 'Armes à projectiles', attribut: 'manuel' },
+  { name: 'Armes mécanique', attribut: 'manuel' },
   { name: 'Attelages', attribut: 'manuel' },
   { name: 'Déguisement', attribut: 'manuel' },
   { name: 'Déverrouillage', attribut: 'manuel' },

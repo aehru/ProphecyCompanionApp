@@ -169,6 +169,13 @@
       "when": 1785425794719,
       "tag": "0023_lonely_callisto",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1785862628045,
+      "tag": "0024_large_sauron",
+      "breakpoints": true
     }
   ]
 }

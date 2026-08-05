@@ -128,6 +128,11 @@ const weaponSchema = z.object({
   rangeMax: str.nullable(),
   hands: int,
   equippedHand: str.nullable(),
+  // The compétence the weapon is wielded with. OPTIONAL (not a version bump,
+  // like armor's `category`): exports made before the column existed have no
+  // such field, and the weapon imports with no skill linked — the same
+  // « Compétence non définie » state a hand-made weapon starts in.
+  skillName: str.nullable().optional(),
 });
 
 const CAST_UNITS = EFFECT_UNITS.map((u) => u.key) as [string, ...string[]];
