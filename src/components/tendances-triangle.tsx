@@ -38,11 +38,11 @@ function Unit({ tKey, placement, get, onValue, onSub }: UnitProps) {
   const badge = (
     <TendanceBadge
       value={value}
+      label={t.label}
       color={t.color}
       textColor={t.textColor}
       border={t.border}
-      onPress={onValue ? () => onValue(tKey, 1) : undefined}
-      onLongPress={onValue ? () => onValue(tKey, -1) : undefined}
+      onAdjust={onValue ? (delta) => onValue(tKey, delta) : undefined}
     />
   );
   const bullets = (
@@ -82,7 +82,7 @@ function Unit({ tKey, placement, get, onValue, onSub }: UnitProps) {
 /**
  * The three tendances as a tight triangle: Dragon on top (puces right),
  * Fatalité bottom-left (puces left), Homme bottom-right (puces right).
- * Pass onValue/onSub to make it editable (badge tap ±1, puces tappable).
+ * Pass onValue/onSub to make it editable (disc halves ±1, puces tappable).
  */
 export default function TendancesTriangle({
   get,
