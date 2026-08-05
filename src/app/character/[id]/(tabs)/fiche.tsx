@@ -170,7 +170,9 @@ export default function CharacterFicheScreen() {
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={[styles.container, splitWidth]} bottomOffset={24}>
         <Columns>
-          <SectionCard title="TENDANCES" icon="dragon" helper={editing ? "Appui +1, maintient -1" : undefined}>
+          <SectionCard
+            title="TENDANCES"
+            icon="dragon">
             <TendancesTriangle
               get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
               onValue={
