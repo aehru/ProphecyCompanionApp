@@ -116,6 +116,20 @@ Characters export to a versioned JSON envelope (`format` + `schemaVersion` + `ch
 
 Bump `SCHEMA_VERSION` on any breaking change to the bundle shape; add a migration path in `parseImport` if you need to accept older files.
 
+## Diagnostic log
+
+[src/lib/log/](src/lib/log) keeps a local ring buffer (1500 entries / 512 KB) in two files — `current`, rewritten wholesale on each flush, and `previous`, rotated in at launch — with a 7-day purge. There is **no server, no analytics and no automatic crash upload**: the Diagnostic screen's share sheet is the only way anything leaves the device.
+
+Same three layers as export/import:
+
+- **[redact.ts](src/lib/log/redact.ts) / [ring-buffer.ts](src/lib/log/ring-buffer.ts) / [serialize.ts](src/lib/log/serialize.ts)** — pure, no framework imports, **unit-tested**. The redactor is the privacy boundary: a payload key is written only if it is allow-listed *and* absent from the user-text/secret deny lists, which are checked **first** — so allow-listing `nom` by mistake still drops it, and [redact.test.ts](src/lib/log/redact.test.ts) fails if that inversion is ever undone. Everything dropped is counted as `_dropped: n`.
+- **[logger.ts](src/lib/log/logger.ts)** — the engine (injected sink + clock, level filter, 2 s debounce, immediate flush on `error`). Testable because nothing native reaches it.
+- **[index.ts](src/lib/log/index.ts)** — the singleton: platform sink, level persisted in AsyncStorage, launch rotation. It attaches the sink only once rotation is done, so an early flush can't overwrite the previous launch's file. Native glue (share sheet, clipboard) sits in [share.ts](src/lib/log/share.ts); `expo-clipboard` is a native module → **dev-client rebuild** after pulling it.
+
+The sink is platform-split behind one interface: Metro resolves `sink.native.ts` (files under the private document dir) or `sink.web.ts` (localStorage), with `sink.ts` as the in-memory default Node/vitest get.
+
+When you add a log call: the message is a constant event name (`repo.write`, `route.change`), everything variable goes in the payload, and records are named by id — never by anything the user typed. Repositories go through [`logWrite`](src/repositories/log.ts).
+
 ## Project layout
 
 ```
@@ -123,6 +137,8 @@ src/
   app/                       # expo-router routes (file = screen)
     _layout.tsx              # root: theme, Paper provider, runs DB migrations
     index.tsx                # character roster
+    diagnostics.tsx          # diagnostic log: level switcher, live tail, share/copy/clear
+    privacy.tsx              # plain-language privacy screen (in-app PRIVACY.md)
     character/
       new.tsx                # create-character modal
       [id]/
@@ -149,6 +165,7 @@ src/
   data/                      # rulebook catalogues: *-catalog.ts (types) + *.gen.ts (generated) per gear type
     weapon-constants.ts / armor-constants.ts  # taxonomy (categories/handedness), kept out of the .gen import graph
   lib/                       # character-values helpers, formula, csv, character-transfer
+    log/                     # diagnostic log: pure core + platform-split sink (see below)
   repositories/              # data access: characters, actual-state, skills, weapons, armor, shields, items, enchants, transfer
   theme/                     # Paper/navigation themes
 data-src/                    # catalogue spreadsheets (CSV `;`) — source of truth, see Catalogues

@@ -76,6 +76,11 @@ From the roster header's **group** icon, open **Campagnes**:
 
 **Privacy by design.** A table with no server sends nothing at all, and your PNJ stay on your device even when one is connected (publishing them is an off-by-default switch, meant for a co-MJ). From a player, only a minimized extract is sent — **name, combat state, caractéristiques, attributs, tendances, trained skills, and active bonuses/maluses**. Never your biography, notes, money, magic, or untrained skills. The data lives on the chosen server under its host's responsibility (community instance or self-hosted); stopping the share or leaving the campaign erases it. See [PRIVACY.md](PRIVACY.md). The server is open source — run your own from the [ProphecyCompanionServer](https://github.com/aehru/ProphecyCompanionServer) repo (`docker compose up` on your LAN).
 
+### Diagnostic — for the beta, on your terms
+Also from the roster's **⋮** menu. During the public beta the app keeps a **local log** of what it does — screens opened, records written, migrations, errors — so a bug report can be acted on. Set how much detail it keeps, read every line as it happens, then **Partager** it (share sheet), **Copier** it, or **Effacer** it.
+
+Nothing is sent automatically: there's no server, no analytics and no crash upload behind it. The log records **technical identifiers only** — a character is `characterId: 12`, a change is a list of column names — and never your names, biographies, notes, sheet values, join codes or server addresses. It's capped at 1500 entries / 512 KB, purged after 7 days, and stamped with a session id drawn at random each launch that's never stored. **Confidentialité**, in the same menu, explains all of this in the app.
+
 ## Platforms
 
 Built with Expo for **iOS and Android**. (A web build exists but mobile is the primary target.)
