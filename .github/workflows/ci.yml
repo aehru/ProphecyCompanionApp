@@ -24,6 +24,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The Expo CLI (invoked by `expo lint`) has a hard Node floor — ^20.19.4,
+      # ^22.13.0, ^24.3.0 or ^25. Pin it instead of inheriting whatever the
+      # runner image happens to ship, so an image bump can't break the build.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
