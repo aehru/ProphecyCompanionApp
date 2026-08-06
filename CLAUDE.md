@@ -28,7 +28,7 @@ Native modules (`expo-sqlite`, etc.) mean **Expo Go won't work** — a dev build
 
 ## Architecture
 
-**Stack:** Expo SDK 54 + expo-router (file-based routes under `src/app`, typed routes on), RN 0.81 / React 19, react-native-paper (Material 3), Drizzle ORM over expo-sqlite. React Compiler is on — avoid manual memo hacks that fight it.
+**Stack:** Expo SDK 57 + expo-router (file-based routes under `src/app`, typed routes on), RN 0.86 / React 19.2, react-native-paper (Material 3), Drizzle ORM over expo-sqlite. React Compiler is on — avoid manual memo hacks that fight it. **expo-router does not sit on React Navigation** (that split landed in SDK 56): import `ThemeProvider` and the navigation themes from `expo-router/react-navigation`, and `BottomTabBarHeightContext` from `expo-router/js-tabs` — never from `@react-navigation/*`, which is no longer a dependency.
 
 **The data split (central idea).** A character is stored across two 1:1 tables plus child tables ([src/db/schema.ts](src/db/schema.ts)):
 - `characters` — the *sheet*: identity, stats, maximums, magic disciplines/sphere maxes. Changes rarely.
