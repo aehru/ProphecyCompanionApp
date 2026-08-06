@@ -183,6 +183,22 @@ export default function CharactersListScreen() {
               />
             }>
             <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
+            <Menu.Item
+              leadingIcon="clipboard-text-clock-outline"
+              onPress={() => {
+                setMenuOpen(false);
+                router.push('/diagnostics' as Href);
+              }}
+              title="Diagnostic"
+            />
+            <Menu.Item
+              leadingIcon="shield-lock-outline"
+              onPress={() => {
+                setMenuOpen(false);
+                router.push('/privacy' as Href);
+              }}
+              title="Confidentialité"
+            />
           </Menu>
         </View>
       ),
