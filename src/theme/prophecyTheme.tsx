@@ -2,7 +2,7 @@ import {
     DarkTheme as NavigationDarkBaseTheme,
     DefaultTheme as NavigationDefaultTheme,
     type Theme as NavigationTheme,
-} from '@react-navigation/native';
+} from 'expo-router/react-navigation';
 import {
     configureFonts,
     MD3DarkTheme,

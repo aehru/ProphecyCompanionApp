@@ -1,4 +1,4 @@
-import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { BottomTabBarHeightContext } from 'expo-router/js-tabs';
 import React, { useCallback, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';

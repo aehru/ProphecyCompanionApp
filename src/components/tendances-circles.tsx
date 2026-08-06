@@ -78,7 +78,16 @@ export default function TendancesCircles({
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'flex-start' },
   unit: { alignItems: 'center', gap: 6 },
-  center: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  // Inlined rather than spreading StyleSheet.absoluteFillObject, which RN 0.85 dropped.
+  center: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   value: { fontFamily: 'Cinzel_600SemiBold', fontSize: 19, lineHeight: 22 },
   label: { fontFamily: 'Cinzel_500Medium', fontSize: 12, letterSpacing: 0.4 },
 });
