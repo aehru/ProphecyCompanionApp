@@ -3,6 +3,7 @@ import { asc, eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { armor, type NewArmor } from '@/db/schema';
 import { deleteEnchantsFor } from '@/repositories/enchants';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's armor catalogue (use with useLiveQuery). */
 export function armorQuery(characterId: number) {
@@ -34,16 +35,19 @@ export async function createArmor(characterId: number, data: Partial<NewArmor> =
       equipped: existing.length === 0,
     })
     .returning();
+  logWrite('armor', 'insert', { characterId, armorId: row?.id });
   return row;
 }
 
 export async function updateArmor(id: number, data: Partial<NewArmor>) {
   await db.update(armor).set(data).where(eq(armor.id, id));
+  logWrite('armor', 'update', { armorId: id }, data);
 }
 
 export async function deleteArmor(id: number) {
   await deleteEnchantsFor('armor', id);
   await db.delete(armor).where(eq(armor.id, id));
+  logWrite('armor', 'delete', { armorId: id });
 }
 
 /** Equip one armor, unequipping every other armor of the same character. */
@@ -52,4 +56,5 @@ export async function equipArmor(characterId: number, id: number) {
     await tx.update(armor).set({ equipped: false }).where(eq(armor.characterId, characterId));
     await tx.update(armor).set({ equipped: true }).where(eq(armor.id, id));
   });
+  logWrite('armor', 'update', { characterId, armorId: id }, { equipped: true });
 }

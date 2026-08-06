@@ -7,6 +7,7 @@ import { rollInitiative } from '@/lib/dice';
 import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
 import { updateActualState } from '@/repositories/actual-state';
+import { logWrite } from '@/repositories/log';
 
 /**
  * Give a portable uuid to any character that predates the `uuid` column (the
@@ -18,6 +19,7 @@ export async function backfillCharacterUuids(): Promise<void> {
   for (const r of rows) {
     await db.update(characters).set({ uuid: newUuid() }).where(eq(characters.id, r.id));
   }
+  if (rows.length > 0) logWrite('characters', 'update', { count: rows.length, phase: 'uuid-backfill' });
 }
 
 /** Magic pools whose current value should follow their max when the max changes. */
@@ -65,6 +67,7 @@ export async function rollInitiativeFor(charUuids: readonly string[]): Promise<n
     await updateActualState(row.id, { initiativeValues: rollInitiative(row.dice) });
     rolled++;
   }
+  logWrite('actual_state', 'update', { count: rolled, phase: 'roll-initiative' });
   return rolled;
 }
 
@@ -96,6 +99,7 @@ export async function createCharacter(data: Partial<NewCharacter>) {
     reserveMagiqueCurrent: row.reserveMagiqueMax,
     ...sphereCurrents,
   });
+  logWrite('characters', 'insert', { characterId: row.id, uuid: row.uuid ?? undefined, kind: row.kind });
   return row;
 }
 
@@ -122,6 +126,7 @@ export async function updateCharacter(id: number, data: Partial<NewCharacter>) {
   if (Object.keys(currentPatch).length > 0) {
     await updateActualState(id, currentPatch as Partial<NewActualState>);
   }
+  logWrite('characters', 'update', { characterId: id }, data);
   return row;
 }
 
@@ -138,12 +143,15 @@ export async function setCharacterMedia(id: number, slot: MediaSlot, path: strin
     .set({ [column]: path, updatedAt: new Date() })
     .where(eq(characters.id, id));
   if (oldPath && oldPath !== path) deleteMedia(oldPath);
+  // The path itself is a filename derived from the id, but never worth logging.
+  logWrite('characters', 'update', { characterId: id, slot, ok: path != null }, { [column]: path });
 }
 
 export async function deleteCharacter(id: number) {
   await db.delete(characters).where(eq(characters.id, id));
   // Cascade the row's media off-DB (FK cascade can't reach the filesystem).
   deleteCharacterMedia(id);
+  logWrite('characters', 'delete', { characterId: id });
 }
 
 /**

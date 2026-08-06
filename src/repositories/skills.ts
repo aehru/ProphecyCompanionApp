@@ -3,6 +3,7 @@ import { and, asc, eq, isNull } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { effects, type Skill, skills } from '@/db/schema';
 import { skillTarget } from '@/lib/modifiers';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's skills — base skills and specializations. */
 export function skillsQuery(characterId: number) {
@@ -43,6 +44,8 @@ export async function replaceSkills(characterId: number, rows: SkillInput[]) {
         .run();
     }
   });
+  // Count only — a skill name can be a player-typed specialization label.
+  logWrite('skills', 'update', { characterId, count: keep.length, phase: 'replace-base' });
 }
 
 /**
@@ -62,11 +65,13 @@ export async function createSpecialization(
     parentName: mother.name,
     specLabel: label,
   });
+  logWrite('skills', 'insert', { characterId, kind: 'specialization' });
 }
 
 /** Update a skill's value (used for specializations; base values flow through replaceSkills). */
 export async function updateSkillValue(id: number, value: number) {
   await db.update(skills).set({ value }).where(eq(skills.id, id));
+  logWrite('skills', 'update', { skillId: id }, { value });
 }
 
 /**
@@ -86,6 +91,7 @@ export async function renameSpecialization(spec: Skill, newLabel: string) {
         .run();
     }
   });
+  logWrite('skills', 'update', { skillId: spec.id, phase: 'rename-spec' });
 }
 
 /** Delete a specialization and any effect that targeted it. */
@@ -97,4 +103,5 @@ export async function deleteSpecialization(spec: Skill) {
       .where(and(eq(effects.characterId, spec.characterId), eq(effects.target, skillTarget(spec.name))))
       .run();
   });
+  logWrite('skills', 'delete', { characterId: spec.characterId, skillId: spec.id });
 }

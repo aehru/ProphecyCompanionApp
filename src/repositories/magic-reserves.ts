@@ -2,6 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { magicReserves, type NewMagicReserve } from '@/db/schema';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's magic reserve objects (use with useLiveQuery). */
 export function magicReservesQuery(characterId: number) {
@@ -26,6 +27,7 @@ export async function createMagicReserve(
     .insert(magicReserves)
     .values({ characterId, current: max, ...data })
     .returning();
+  logWrite('magic_reserves', 'insert', { characterId, reserveId: row?.id });
   return row;
 }
 
@@ -43,8 +45,10 @@ export async function updateMagicReserve(id: number, data: Partial<NewMagicReser
     if (row && row.current > patch.max) patch.current = patch.max;
   }
   await db.update(magicReserves).set(patch).where(eq(magicReserves.id, id));
+  logWrite('magic_reserves', 'update', { reserveId: id }, patch);
 }
 
 export async function deleteMagicReserve(id: number) {
   await db.delete(magicReserves).where(eq(magicReserves.id, id));
+  logWrite('magic_reserves', 'delete', { reserveId: id });
 }

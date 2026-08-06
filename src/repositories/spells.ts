@@ -2,6 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { type NewSpell, spells } from '@/db/schema';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's spellbook (use with useLiveQuery). */
 export function spellsQuery(characterId: number) {
@@ -19,13 +20,16 @@ export async function createSpell(characterId: number, data: Partial<NewSpell> =
     .insert(spells)
     .values({ characterId, ...data })
     .returning();
+  logWrite('spells', 'insert', { characterId, spellId: row?.id });
   return row;
 }
 
 export async function updateSpell(id: number, data: Partial<NewSpell>) {
   await db.update(spells).set(data).where(eq(spells.id, id));
+  logWrite('spells', 'update', { spellId: id }, data);
 }
 
 export async function deleteSpell(id: number) {
   await db.delete(spells).where(eq(spells.id, id));
+  logWrite('spells', 'delete', { spellId: id });
 }
