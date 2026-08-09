@@ -16,8 +16,13 @@ export function useDebouncedText(
 ) {
   const [value, setValue] = useState(external);
   const lastSent = useRef(external);
+  // Kept in a ref so the debounce effect below always calls the latest `persist`
+  // without restarting its timer. Assigned in an effect, not during render:
+  // writing a ref while rendering is a side effect the React Compiler rejects.
   const persistRef = useRef(persist);
-  persistRef.current = persist;
+  useEffect(() => {
+    persistRef.current = persist;
+  });
 
   useEffect(() => {
     if (external !== lastSent.current) {

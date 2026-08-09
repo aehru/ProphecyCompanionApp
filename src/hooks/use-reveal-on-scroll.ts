@@ -27,7 +27,9 @@ export function useRevealOnScroll({
   const [barHeight, setBarHeight] = useState(height);
   const heightRef = useRef(height);
   const shown = useRef(true);
-  const translateY = useRef(new Animated.Value(0)).current;
+  // Lazy useState rather than useRef(...).current: same "create once, keep
+  // forever" semantics, without reading a ref during render.
+  const [translateY] = useState(() => new Animated.Value(0));
   const lastY = useRef(0);
 
   const setVisible = useCallback(

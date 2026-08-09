@@ -18,18 +18,27 @@ import { rollDice } from '@/lib/dice';
  * "no roll history" decision.
  */
 const SIDES = [4, 6, 8, 10, 12, 20];
+
+// The last die picked, remembered across mounts so reopening the roller keeps
+// your die. Reached through accessors rather than assigned directly from the
+// component: reassigning an outer binding from inside render is a side effect
+// the React Compiler rejects, and it cannot tell a handler from render.
 let lastSides = 10;
+const getLastSides = () => lastSides;
+const rememberSides = (s: number) => {
+  lastSides = s;
+};
 
 export default function DiceRollerFab() {
   const theme = useProphecyTheme();
   const [open, setOpen] = useState(false);
   const [sidesMenu, setSidesMenu] = useState(false);
   const [count, setCount] = useState(1);
-  const [sides, setSides] = useState(lastSides);
+  const [sides, setSides] = useState(getLastSides);
   const [result, setResult] = useState<number[] | null>(null);
 
   const pickSides = (s: number) => {
-    lastSides = s;
+    rememberSides(s);
     setSides(s);
     setResult(null);
     setSidesMenu(false);

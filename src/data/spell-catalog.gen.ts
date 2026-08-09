@@ -4,6 +4,246 @@ import type { SpellPreset } from './spell-catalog';
 
 export const SPELL_CATALOG_DATA: SpellPreset[] = [
   {
+    "id": "cache-cache",
+    "data": {
+      "name": "Cache-cache",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "sorcellerie",
+      "sphere": "sphereCites",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "vêtements bien ajustés, danse de la chance, rune de silence",
+      "effect": "en jetant ce sort sur des vêtements, le mage leur donne la capacité de couvrir les bruits de celui qui les porte pendant (1 + NR) jours. Le porteur bénéficie ainsi d'un bonus de +5 à sa Compétence de Discrétion."
+    }
+  },
+  {
+    "id": "chemin-de-khy",
+    "data": {
+      "name": "Chemin de Khy",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereCites",
+      "cost": 2,
+      "castTimeAmount": 3,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "posture d'écoute, rune de la sagesse tracée en l'air, complainte de la cité",
+      "effect": "en invoquant la sagesse de Khy, le mage se voit attribuer un bonus de +5 sur ses jets d'orientation en milieu urbain (Orientation ou Vie en cité) pendant (1 + NR) heures."
+    }
+  },
+  {
+    "id": "cle-audacieuse",
+    "data": {
+      "name": "Clé audacieuse",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereCites",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "petit levier, lime, rune de la famille",
+      "effect": "le mage enchante un levier qui devient capable de déverrouiller n'importe quelle porte fermée pendant (1 + NR) jours."
+    }
+  },
+  {
+    "id": "element-du-decor",
+    "data": {
+      "name": "Élément du décor",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereCites",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "cape, rune de Khy",
+      "effect": "en s'appuyant contre un mur, le mage en prend la teinte pendant (30 + 30 par NR) minutes. Il peut ainsi se soustraire au regard des autres. La Difficulté pour le repérer augmente de +15. Si le mage utilise la magie ou parle, le sort s'arrête aussitôt. Ce sort ne fonctionne qu'en milieu urbain (village, ville, cité)."
+    }
+  },
+  {
+    "id": "flanerie-passagere",
+    "data": {
+      "name": "Flânerie passagère",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereCites",
+      "cost": 2,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "petits cailloux blancs, murmures",
+      "effect": "en lançant ce sort, le mage distrait (1 + NR) cibles pendant (1 + NR) tours. Elles voient la Difficulté de leurs actions augmenter de 5 durant ce laps de temps. Ce sort est inefficace en situation de combat."
+    }
+  },
+  {
+    "id": "heureuse-coincidence",
+    "data": {
+      "name": "Heureuse coïncidence",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereCites",
+      "cost": 1,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "sifflement, posture nonchalante",
+      "effect": "le mage découvre le nom d'une personne inconnue qu'il observe. Il bénéficie d'un bonus de (1 + NR) à ses jets de Compétence liés à l'Attribut Social pendant leur première conversation."
+    }
+  },
+  {
+    "id": "murmure-melodieux",
+    "data": {
+      "name": "Murmure mélodieux",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereCites",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "voix faible, rune du silence",
+      "effect": "le mage peut parler à une personne située à (75 + 10 par NR) mètres de lui pendant 3 tours comme s'il murmurait au creux de son oreille. Personne d'autre que la cible ne pourra l'entendre."
+    }
+  },
+  {
+    "id": "oeil-indiscret",
+    "data": {
+      "name": "Œil indiscret",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereCites",
+      "cost": 3,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "morceau de craie, rune de Khy tracée sur le mur ou la porte",
+      "effect": "en traçant un petit cercle sur un mur ou sur une porte, le mage peut observer à travers, mais pas entendre ce qui se passe, pendant (10 + 10 par NR) minutes."
+    }
+  },
+  {
+    "id": "poudre-descampette",
+    "data": {
+      "name": "Poudre d'escampette",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereCites",
+      "cost": 4,
+      "castTimeAmount": 2,
+      "castTimeUnit": "action",
+      "difficulty": 18,
+      "cle": "rune de l'oubli, voix, sentiment de confusion",
+      "effect": "ce sort ne fonctionne que dans des endroits permettant de se perdre (cité, forêt, château, etc.). Le mage peut semer (2 + NR) poursuivants pendant 1 heure."
+    }
+  },
+  {
+    "id": "poursuite-de-khy",
+    "data": {
+      "name": "Poursuite de Khy",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "sorcellerie",
+      "sphere": "sphereCites",
+      "cost": 3,
+      "castTimeAmount": 3,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "carte d'une ville ou d'un lieu, charbon pilé, voix grave",
+      "effect": "le mage pose une carte sur une table et y déverse de la poudre de charbon. Les poussières s'embrasent et se rejoignent là où se trouve la personne ou l'objet que cherche le mage. La localisation reste cependant très imprécise. De plus le charbon brûle la carte en 1 tour. La poudre de charbon reste enchantée (1 + NR) cycles."
+    }
+  },
+  {
+    "id": "sourire-enchanteur",
+    "data": {
+      "name": "Sourire enchanteur",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereCites",
+      "cost": 4,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "sourire, fard à joue",
+      "effect": "le mage augmente son Attribut Social de 3 pendant (10 + 10 par NR) minutes."
+    }
+  },
+  {
+    "id": "temoin-des-ruelles",
+    "data": {
+      "name": "Témoin des ruelles",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereCites",
+      "cost": 3,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "gestuelle de recherche, voix murmurante",
+      "effect": "le mage invoque une petite créature non agressive capable de repérer les passages dérobés qui reste à son service pendant (10 + 10 par NR) minutes."
+    }
+  },
+  {
+    "id": "la-bonne-parole",
+    "data": {
+      "name": "La bonne parole",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereCites",
+      "cost": 15,
+      "castTimeAmount": 4,
+      "castTimeUnit": "action",
+      "difficulty": 20,
+      "cle": "voix chaleureuse, rune de Khy",
+      "effect": "le mage se voit accorder l'attention et la confiance d'une foule dans un rayon de 20 mètres et à portée de voix. Il conserve cet ascendant pendant (1 + NR) heures. En cas d'échec de la tentative, la foule est prise d'une haine peu commune et se retourne contre le mage."
+    }
+  },
+  {
+    "id": "plume-de-verite",
+    "data": {
+      "name": "Plume de vérité",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "sorcellerie",
+      "sphere": "sphereCites",
+      "cost": 7,
+      "castTimeAmount": 5,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "plume de scribe, rune de la sagesse",
+      "effect": "ce sort permet de créer une plume qui oblige son utilisateur à dire la vérité pendant qu'il écrit. S'il ment, l'encre qu'il utilise change de couleur. Ce sort est utilisable même avec les analphabètes, il suffit juste de leur faire dessiner quelque chose. L'enchantement de la plume dure (1 + NR) cycles."
+    }
+  },
+  {
+    "id": "reflet-trompeur",
+    "data": {
+      "name": "Reflet trompeur",
+      "level": 3,
+      "complexity": 45,
+      "discipline": "sorcellerie",
+      "sphere": "sphereCites",
+      "cost": 10,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "masque de bois, rune, gestuelle d'imitation",
+      "effect": "le masque de bois est enchanté. Une fois placé sur le visage de quelqu'un, il reproduit parfaitement le visage, la voix et les mimiques d'une personne (et une seule) choisie par le porteur. Même la corpulence et la taille font partie de l'illusion. Cette illusion peut être découverte avec un jet de résistance de Mental + Empathie contre une Difficulté de 20. L'enchantement dure (1 + NR) jours."
+    }
+  },
+  {
     "id": "bouclier-carmin",
     "data": {
       "name": "Bouclier carmin",
@@ -15,8 +255,1496 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeAmount": 2,
       "castTimeUnit": "action",
       "difficulty": 15,
-      "cle": "Morceau de charbon, chant du feu",
-      "effect": "Pare une attaque. Disparait après (1 + NR) heures si non dissipé."
+      "cle": "morceau de charbon, chant du feu",
+      "effect": "le mage crée une petite flamme qui tourne autour de sa cible. Elle bloque la première attaque physique portée avec succès contre la personne qu'elle protège en créant un petit bouclier de feu qui pare l'attaque avant de disparaître. La flamme dépérit et devient inefficace au bout de (1 + NR) heures si elle n'a pas fait effet."
+    }
+  },
+  {
+    "id": "brise-volcanique",
+    "data": {
+      "name": "Brise volcanique",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereFeu",
+      "cost": 5,
+      "castTimeAmount": 10,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "souffle, rune des volcans, chant des volcans",
+      "effect": "ce sort crée une poche d'air chaud à 30°C de (10 + 10 par NR) m³ pendant huit heures. Elle permet de ne pas avoir froid la nuit."
+    }
+  },
+  {
+    "id": "cachet-brulant",
+    "data": {
+      "name": "Cachet brûlant",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereFeu",
+      "cost": 3,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "lettre, sceau et cire, voix forte, rune de feu",
+      "effect": "en lançant ce sort sur le sceau d'une lettre, le mage appose un mot de commande sur le cachet. Dès que le sceau est rompu sans que le mot de commande soit prononcé à voix haute, le lecteur ne dispose plus que d'un court moment pour comprendre la lettre avant qu'elle ne se consume (5 actions maximum). L'enchantement de la lettre dure (1 + NR) semaines."
+    }
+  },
+  {
+    "id": "feux-follets",
+    "data": {
+      "name": "Feux follets",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereFeu",
+      "cost": 1,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "bille de charbon, la voix",
+      "effect": "ce sort crée une lumière dansante qui illumine une zone de (1 + NR) mètres de rayon pendant une heure. C'est une lumière froide que les créatures sensibles aux sources de chaleur ne peuvent déceler."
+    }
+  },
+  {
+    "id": "guide-ecarlate",
+    "data": {
+      "name": "Guide écarlate",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereFeu",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "brindille, chant du dragon",
+      "effect": "ce sort fait apparaître un petit lézard de feu qui obéit aux ordres du mage pendant (30 + 10 par NR) minutes avant de disparaître. Il est utile pour déclencher des pièges ou bouger des bibelots à distance. Il est également capable de rendre de menus services. Craintif, il ne peut être utilisé en combat."
+    }
+  },
+  {
+    "id": "lame-ardente",
+    "data": {
+      "name": "Lame ardente",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereFeu",
+      "cost": 8,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "lame, forge, voix, gestuelle",
+      "effect": "ce sort permet à celui qui porte la lame de l'enflammer à volonté pendant (1 + NR) heures. L'arme enflammée bénéficie d'un bonus de +10 aux dommages de base."
+    }
+  },
+  {
+    "id": "loeil-de-pyrite",
+    "data": {
+      "name": "L'œil de Pyrite",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereFeu",
+      "cost": 2,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "geste vif traçant une rune de feu dans l'air, brindille et chant de la lumière",
+      "effect": "ce sort permet d'enflammer un objet combustible situé à moins de 10 mètres pendant (1 + NR) tours. Il peut servir à allumer un peu de bois sec ou une torche. Il peut enflammer une étoffe, un rideau ou une lettre. Il n'occasionne pas directement de dommage, mais une personne dont la chemise prend feu doit se dépêcher de l'éteindre ou l'enlever en 1 action maximum, sous peine de subir (15 + 1D10) points de dommages."
+    }
+  },
+  {
+    "id": "piege-lumineux",
+    "data": {
+      "name": "Piège lumineux",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "sorcellerie",
+      "sphere": "sphereFeu",
+      "cost": 6,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "sable noir, rune de lumière, danse de la lumière",
+      "effect": "ce sort piège pendant (5 + NR) heures une zone de (1 + NR) m². Toute personne qui y pénètre sans avoir préalablement prononcé le mot de pouvoir déclenche le piège. Un flash illumine toute la zone rendant visible les personnes qui s'y trouvent. Les victimes aveuglées subissent un malus de -5 à toutes leurs actions nécessitant la vue pendant 1 tour."
+    }
+  },
+  {
+    "id": "souffle-ardent",
+    "data": {
+      "name": "Souffle ardent",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereFeu",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "respiration, rune gravée sur un morceau de charbon (ou tatouée), posture d'inspiration d'air",
+      "effect": "le mage fait jaillir de sa bouche un jet de flammes de 5 mètres de long qui embrase tout objet combustible affecté. Le mage peut souffler pendant (1 + NR) tours. Ce sort inflige (15 + 1D10) points de dommages par souffle sur une zone de 2 m². Il ne peut être qu'esquivé ou paré à l'aide d'un bouclier."
+    }
+  },
+  {
+    "id": "feu-interieur",
+    "data": {
+      "name": "Feu intérieur",
+      "level": 2,
+      "complexity": 35,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereFeu",
+      "cost": 12,
+      "castTimeAmount": 6,
+      "castTimeUnit": "action",
+      "difficulty": 25,
+      "cle": "rune de l'homme, danse du feu",
+      "effect": "ce sort entoure une cible consentante d'un halo de flammes qui l'immunise, elle et son équipement, contre toutes les formes de dommages de feu pendant (10 + 10 par NR) minutes. Ce halo lui confère un bonus de +15 à ses jets de dommages à mains nues, et un Indice de protection supplémentaire de +15. Lorsque le sort prend fin, tous les objets combustibles transportés par la cible sont détruits."
+    }
+  },
+  {
+    "id": "cendres-brulantes",
+    "data": {
+      "name": "Cendres brûlantes",
+      "level": 3,
+      "complexity": 55,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereFeu",
+      "cost": 10,
+      "castTimeAmount": 3,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "voix plaintive, sentiment de perte, rune de feu tracée dans l'air",
+      "effect": "le mage invoque une pluie de cendres incandescentes qui tombe sur une zone de 2 m². Elle inflige (25 + 1D10) points de dommages à chaque tour pendant (1 + NR) tours. Les cendres ayant la fâcheuse habitude de rester collées et de continuer à grésiller. Elles infligent encore (10 + 1D10) points de dommages pendant deux tours après la fin du sort."
+    }
+  },
+  {
+    "id": "conflagration-ecarlate",
+    "data": {
+      "name": "Conflagration écarlate",
+      "level": 3,
+      "complexity": 45,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereFeu",
+      "cost": 8,
+      "castTimeAmount": 3,
+      "castTimeUnit": "action",
+      "difficulty": 20,
+      "cle": "regard, rune",
+      "effect": "le mage enflamme une sphère de 10 m³ d'air pendant (1 + NR) tours à une distance de moins de 30 mètres. Toutes les personnes et les objets à l'intérieur de cette zone subissent (20 + 1D10) points de dommages par tour."
+    }
+  },
+  {
+    "id": "la-main-des-flammes",
+    "data": {
+      "name": "La main des flammes",
+      "level": 3,
+      "complexity": 85,
+      "discipline": "sorcellerie",
+      "sphere": "sphereFeu",
+      "cost": 25,
+      "castTimeAmount": 10,
+      "castTimeUnit": "hour",
+      "difficulty": 25,
+      "cle": "gant, rune de feu, soufre",
+      "effect": "ce sort enchante un gant pendant un cycle. Une fois par jour, il permet au mage de lancer des petites boules de feu pendant (1 + NR) heures, à raison de une par tour. Les projectiles enflammés ont une portée de 50 mètres et infligent (20 + 1D10) points de dommages qui ne peuvent pas être parés, seulement esquivés avec une difficulté de +5. L'Indice de protection des armures est divisé par ??? contre ces petites boules de feu."
+    }
+  },
+  {
+    "id": "sang-de-moryagorn",
+    "data": {
+      "name": "Sang de Moryagorn",
+      "level": 3,
+      "complexity": 90,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereFeu",
+      "cost": 25,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 30,
+      "cle": "voix plaintive, posture de peur, morceaux de lave",
+      "effect": "le mage fait jaillir du sol un flot de lave à moins de 10 mètres de lui. La lave s'écoule à gros bouillons pendant (1 + NR) heures ou jusqu'à ce que le mage meure ou mette fin à ce sort. La lave inflige (80 + 2D10) points de dommages à tout ce qui se trouve sur son passage. Elle se déplace de 30 mètres par tour."
+    }
+  },
+  {
+    "id": "torche-eternelle",
+    "data": {
+      "name": "Torche éternelle",
+      "level": 3,
+      "complexity": 45,
+      "discipline": "sorcellerie",
+      "sphere": "sphereFeu",
+      "cost": 7,
+      "castTimeAmount": 5,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "torche, incantation crépitante, soufre, rune de lumière",
+      "effect": "ce sort enchante (1 + NR) torches qui brillent pendant un an sans se consumer. Elles se rallument après une poignée de minutes si elles sont éteintes avec de l'eau ou par manque d'oxygène."
+    }
+  },
+  {
+    "id": "certitude",
+    "data": {
+      "name": "Certitude",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereMetal",
+      "cost": 1,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de la précision",
+      "effect": "le mage récupère (2 + NR) Points de Maîtrise déjà dépensés. Il ne peut en aucun cas dépasser la valeur de son Attribut Maîtrise de cette façon. Rater le lancement de ce sort ne rapporte aucun Point de Chance."
+    }
+  },
+  {
+    "id": "estampille-de-kezyr",
+    "data": {
+      "name": "Estampille de Kezyr",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereMetal",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "rune de métal, marque de Kezyr gravée sur l'objet, chant du forgeron",
+      "effect": "en apposant la marque de Kezyr sur un objet, le mage en augmente définitivement la qualité de (1 + 1 par 3 NR) niveaux (de bonne à très bonne, etc.). Un objet ne peut porter qu'une marque de Kezyr et l'augmentation de qualité ne procure aucune capacité spéciale."
+    }
+  },
+  {
+    "id": "force-du-forgeron",
+    "data": {
+      "name": "Force du forgeron",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereMetal",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "tatouage ou dessin d'une rune de métal, pression musculaire",
+      "effect": "le mage augmente sa Force ou celle d'une personne consentante de 5 pendant (1 + NR) tours. Cette modification n'affecte pas l'Attribut Physique mais s'applique aux dommages physiques."
+    }
+  },
+  {
+    "id": "jeu-de-la-gravite",
+    "data": {
+      "name": "Jeu de la gravité",
+      "level": 1,
+      "complexity": 25,
+      "discipline": "sorcellerie",
+      "sphere": "sphereMetal",
+      "cost": 5,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "objet de moins d'une tonne, rune de plomb, plume",
+      "effect": "l'objet enchanté voit son poids multiplié ou divisé par 3 pendant (1 + NR) jours. Ce sort baisse les prérequis de Force des armes et armures (ainsi que leur pénalité d'encombrement) de 3."
+    }
+  },
+  {
+    "id": "lame-brisee",
+    "data": {
+      "name": "Lame brisée",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereMetal",
+      "cost": 1,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune d'acier, cri aigu",
+      "effect": "le mage brise un objet en métal situé à moins de 5 mètres. Les objets enchantés, magiques ou de très bonne qualité ne sont pas affectés par ce sort."
+    }
+  },
+  {
+    "id": "lame-du-heros",
+    "data": {
+      "name": "Lame du héros",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereMetal",
+      "cost": 10,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "arme, runes, sentiment de force, sable noir",
+      "effect": "ce sort enchante la lame d'une arme qui bénéficie alors d'un bonus de +5 aux dommages pendant (1 + NR) jours. Le sable utilisé semble rester inclus dans la lame durant ce laps de temps. Il disparaît ensuite, laissant la lame retrouver son état d'origine."
+    }
+  },
+  {
+    "id": "mine-merveilleuse",
+    "data": {
+      "name": "Mine merveilleuse",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereMetal",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "pioche ou pelle, chant de mineur",
+      "effect": "en creusant la terre d'une cinquantaine de centimètres, le mage découvre des pépites de fer. Le poids total de la découverte est de (1 + NR) kg de fer."
+    }
+  },
+  {
+    "id": "pas-legers",
+    "data": {
+      "name": "Pas légers",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereMetal",
+      "cost": 4,
+      "castTimeAmount": 3,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "plume, rune d'agilité tracée sur l'armure en métal, danse du métal, voix grave",
+      "effect": "en invoquant l'agilité de Kezyr, le mage assouplit magiquement une armure de métal et en diminue ainsi la pénalité d'encombrement de 5 pendant (5 + 2 par NR) heures."
+    }
+  },
+  {
+    "id": "poing-dacier",
+    "data": {
+      "name": "Poing d'acier",
+      "level": 1,
+      "complexity": 35,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereMetal",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune d'acier, voix",
+      "effect": "la chair d'un membre devient de l'acier malléable qui permet de lui donner la forme d'une arme ou d'un outil pendant (1 + NR) tours. Si le membre se transforme en arme, cette dernière dispose d'un bonus de +5 aux dommages. Dans le cas d'un outil, la Compétence nécessaire pour l'utiliser bénéficie d'un bonus de +5."
+    }
+  },
+  {
+    "id": "rideau-dacier",
+    "data": {
+      "name": "Rideau d'acier",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereMetal",
+      "cost": 7,
+      "castTimeAmount": 5,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune, posture (bras croisés devant le visage)",
+      "effect": "le mage est protégé par un écheveau de fins fils d'acier qui ondulent autour de lui pendant (2 + NR) tours. Cette barrière métallique divise par 3 tous les dommages physiques infligés contre le lanceur du sort et par 2 les dommages magiques. Tous les dommages sont arrondis à l'inférieur."
+    }
+  },
+  {
+    "id": "acide-de-kezyr",
+    "data": {
+      "name": "Acide de Kezyr",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "sorcellerie",
+      "sphere": "sphereMetal",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "fiole, eau, chant des fontaines mercuriales",
+      "effect": "ce sort permet de créer 1 litre d'une substance capable de liquéfier le métal. Très pratique pour les loquets et les armures trop épaisses, l'acide de Kezyr ne peut malheureusement affecter que des objets métalliques de qualité inférieure à bonne. Le liquide conserve ses propriétés pendant (3 + NR) semaines."
+    }
+  },
+  {
+    "id": "attraction-des-faibles",
+    "data": {
+      "name": "Attraction des faibles",
+      "level": 2,
+      "complexity": 35,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereMetal",
+      "cost": 12,
+      "castTimeAmount": 5,
+      "castTimeUnit": "action",
+      "difficulty": 25,
+      "cle": "rune, limaille de fer, souffle",
+      "effect": "le mage souffle sur de la poussière métallique et forme un nuage qu'il déplace à volonté pendant (30 + 30 par NR) minutes. Tous les objets métalliques situés à moins de 30 mètres sont attirés vers le mage. Les individus portant plus de 5 kg de métal subissent le même sort. Toutefois il leur est possible de résister par un jet de Manuel + Force contre une Difficulté de 15 + 1 par kilo de métal porté. S'ils sont libres, les objets métalliques s'agglutinent ensemble et ne peuvent plus être séparés."
+    }
+  },
+  {
+    "id": "globes-de-la-vengeance",
+    "data": {
+      "name": "Globes de la vengeance",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereMetal",
+      "cost": 8,
+      "castTimeAmount": 3,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "billes de plomb, grognements",
+      "effect": "le mage projette des billes de plomb vers sa cible. Elles tournoient autour de la cible et la percutent irrégulièrement, occasionnant (30 + 1D10) points de dommages par tour. Elles peuvent être parées (avec un bouclier) ou esquivées avec une Difficulté de +10. Ce sort dure pendant (1 + NR) tours."
+    }
+  },
+  {
+    "id": "serviteur-argente",
+    "data": {
+      "name": "Serviteur argenté",
+      "level": 2,
+      "complexity": 35,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereMetal",
+      "cost": 7,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "drac d'argent, rune d'argent",
+      "effect": "un petit serviteur élémentaire sort du drac d'argent. Il sert le mage pendant (10 + 10 par NR) minutes et peut accomplir de simples tâches (ouvrir une porte, apporter un message, etc.). Craintif, il ne participe à aucun combat. En disparaissant, le serviteur ne laisse pas un mais deux dracs d'argent derrière lui."
+    }
+  },
+  {
+    "id": "traits-aceres",
+    "data": {
+      "name": "Traits acérés",
+      "level": 2,
+      "complexity": 40,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereMetal",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "clous en acier, rune d'acier, posture élancée",
+      "effect": "ce sort fait jaillir des aiguilles d'acier de 30 centimètres de long vers une cible située à moins de 100 mètres. Elles occasionnent (15 + 1D10 par NR) points de dommages. Les aiguilles ne peuvent être ni parées, ni esquivées."
+    }
+  },
+  {
+    "id": "colere-du-metal",
+    "data": {
+      "name": "Colère du métal",
+      "level": 3,
+      "complexity": 60,
+      "discipline": "sorcellerie",
+      "sphere": "sphereMetal",
+      "cost": 15,
+      "castTimeAmount": 10,
+      "castTimeUnit": "hour",
+      "difficulty": 25,
+      "cle": "20 billes de fer, rune de métal, poudre de charbon",
+      "effect": "le mage enchante 20 billes de fer pendant (1 + NR) ans qu'il peut placer où il souhaite mais jamais côte à côte. Une fois placées, les billes explosent au moindre contact, occasionnant (30 + 2D10) points de dommages si le mot de commande n'est pas prononcé dans les deux mètres. Le mage peut transporter les billes sans risque dans de la poudre de charbon. Au moment de la pose, il doit les nettoyer consciencieusement et prononcer le mot de commande."
+    }
+  },
+  {
+    "id": "cercle-sacre",
+    "data": {
+      "name": "Cercle sacré",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereNature",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "branche d'arbre, chant de la forêt, rune de la colère tracée sur la branche",
+      "effect": "le mage fait appel à la protection des arbres afin d'éviter les dangers de la nature (prédateurs, insectes venimeux, etc.) pendant huit heures. Pour ce faire, il trace sur le sol un cercle sacré de (10 + 10 par NR) mètres de diamètre."
+    }
+  },
+  {
+    "id": "croissance-animale",
+    "data": {
+      "name": "Croissance animale",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereNature",
+      "cost": 5,
+      "castTimeAmount": 3,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "poignée de terre, rune de la fertilité, gorgée d'eau",
+      "effect": "le mage double la taille, les Caractéristiques physiques et l'Attribut Physique d'un animal ou d'une créature non draconique pendant (1 + NR) tours. Ce sort ne permet pas de contrôler l'animal."
+    }
+  },
+  {
+    "id": "lecorce-dheyra",
+    "data": {
+      "name": "L'écorce d'Heyra",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereNature",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "écorce de bois, danse de la nature, rune de résistance",
+      "effect": "ce sort a pour effet de doubler l'Indice de protection des équipements en bois pendant (1 + NR) semaines."
+    }
+  },
+  {
+    "id": "entraves-verdoyantes",
+    "data": {
+      "name": "Entraves verdoyantes",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereNature",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "poignée de mauvaises herbes, rune de lenteur",
+      "effect": "le mage fait pousser à vitesse accélérée des racines autour des jambes de (1 + NR) cibles. Les personnes ciblées voient leurs mouvements restreints. Se libérer de ces entraves prend normalement 5 minutes, mais seulement 1 minute si les victimes réussissent un jet de Physique + Coordination contre une Difficulté de 15. Entravée une personne voit les Difficultés de toutes ses actions augmenter de +5."
+    }
+  },
+  {
+    "id": "fruits-sauvages",
+    "data": {
+      "name": "Fruits sauvages",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereNature",
+      "cost": 1,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "pépin de fruit, danse de la fertilité",
+      "effect": "le mage fait pousser d'énormes fruits juteux et nourrissants qui permettent de sustenter (1 + NR) personnes pour un repas. Ils se conservent éventuellement deux jours."
+    }
+  },
+  {
+    "id": "lierre-grimpant",
+    "data": {
+      "name": "Lierre grimpant",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereNature",
+      "cost": 2,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "feuille de lierre, rune de la nature, danse de la fertilité",
+      "effect": "ce sort permet de faire pousser un lierre le long d'un mur qui fait office d'échelle pendant 10 tours. Sa longueur maximum est de (5 + 5 par NR) mètres."
+    }
+  },
+  {
+    "id": "parterre-de-fleurs",
+    "data": {
+      "name": "Parterre de fleurs",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereNature",
+      "cost": 1,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "graines et pétales",
+      "effect": "le mage fait fleurir un parterre de fleurs aux couleurs chatoyantes dont la beauté galvanise les personnes qui le contemplent. (1 + NR) personnes bénéficient ainsi d'un bonus de (1 + NR) à un jet de Compétence lié à l'Attribut Social."
+    }
+  },
+  {
+    "id": "puissance-du-dragon",
+    "data": {
+      "name": "Puissance du dragon",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereNature",
+      "cost": 10,
+      "castTimeAmount": 5,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "écaille de dragon, rune de force",
+      "effect": "ce sort permet d'améliorer l'efficacité d'une arme pendant (1 + NR) cycles. Elle bénéficie d'un bonus de +5 aux dommages de base."
+    }
+  },
+  {
+    "id": "regain-denergie",
+    "data": {
+      "name": "Regain d'énergie",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereNature",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "imposition des mains, feuilles grasses ou herbes séchées",
+      "effect": "ce sort stabilise l'état de santé de (1 + NR) cibles et soigne leur plus haute case de blessure."
+    }
+  },
+  {
+    "id": "vitalite-naturelle",
+    "data": {
+      "name": "Vitalité naturelle",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereNature",
+      "cost": 4,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de la nature, position du dragon accroupi",
+      "effect": "le mage, ou une cible de son choix qu'il touche, bénéficie d'un bonus de +1 à l'un de ses Attributs Majeurs pendant (1 + NR) tours."
+    }
+  },
+  {
+    "id": "colere-de-la-nature",
+    "data": {
+      "name": "Colère de la nature",
+      "level": 2,
+      "complexity": 35,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereNature",
+      "cost": 15,
+      "castTimeAmount": 5,
+      "castTimeUnit": "action",
+      "difficulty": 20,
+      "cle": "branche brisée, de la terre souillée, rune de la vengeance",
+      "effect": "ce sort ne fonctionne pas dans les zones urbaines. Les animaux et la végétation se liguent pour agresser (5 + NR) cibles. Les attaques des arbres et des animaux aux ordres du mage occasionnent (35 + 1D10) points de dommages à ces dernières, une fois par tour pendant (1 + NR) tours."
+    }
+  },
+  {
+    "id": "flute-charmeuse",
+    "data": {
+      "name": "Flûte charmeuse",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "sorcellerie",
+      "sphere": "sphereNature",
+      "cost": 3,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "flûte droite, air de musique printanier",
+      "effect": "la flûte enchantée de la sorte permet d'attirer les représentants d'une espèce animale, et de communiquer sommairement avec eux pendant (1 + NR) tours. Le mage choisit en lançant le sort quelle famille d'animaux est charmée par la musique (félins, rongeurs, poissons, etc.)."
+    }
+  },
+  {
+    "id": "nuee-de-moustiques",
+    "data": {
+      "name": "Nuée de moustiques",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereNature",
+      "cost": 10,
+      "castTimeAmount": 3,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "ailes d'insectes, rune de l'infini",
+      "effect": "le mage invoque une colonie d'insectes venimeux qui attaque la cible désignée. La nuée réalise deux attaques automatiques imparables avant de se disperser. Les dommages infligés sont de 2D10. De plus le venin des insectes entraîne un engourdissement. Ceci se traduit par un malus de -5 à toutes les actions de la victime pendant (1 + NR) tours."
+    }
+  },
+  {
+    "id": "remede-naturel",
+    "data": {
+      "name": "Remède naturel",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "sorcellerie",
+      "sphere": "sphereNature",
+      "cost": 5,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "goutte du poison ou du sang de la victime, rune de guérison",
+      "effect": "ce sort permet de créer un remède dont la durée de conservation n'est que de (1 + NR) heures. Ingéré, cette mixture neutralise de manière définitive les effets du poison et rétablit une Caractéristique éventuellement atteinte. Le remède n'est valable que pour une personne."
+    }
+  },
+  {
+    "id": "baton-du-tonnerre",
+    "data": {
+      "name": "Bâton du tonnerre",
+      "level": 3,
+      "complexity": 100,
+      "discipline": "sorcellerie",
+      "sphere": "sphereNature",
+      "cost": 30,
+      "castTimeAmount": 20,
+      "castTimeUnit": "hour",
+      "difficulty": 25,
+      "cle": "bâton de chêne centenaire, rune de la nature, chant de la foudre",
+      "effect": "le bâton enchanté permet de donner des ordres simples, sauf attaquer, à tous les animaux présents dans une zone d'effet de (200 + 100 par NR) m². Pendant les orages, il peut faire appel à la foudre une fois par tour, chaque éclair infligeant 40 points de dommages. Enfin le bâton procure un Indice de protection supplémentaire de +15 à son porteur et l'immunise aux sorts de la Sphère de l'Ombre d'un coût inférieur à 10. Le bâton est enchanté pendant (1 + NR) cycles."
+    }
+  },
+  {
+    "id": "dryade-de-la-fertilite",
+    "data": {
+      "name": "Dryade de la fertilité",
+      "level": 3,
+      "complexity": 65,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereNature",
+      "cost": 30,
+      "castTimeAmount": 45,
+      "castTimeUnit": "minute",
+      "difficulty": 25,
+      "cle": "couronne de feuilles, galet parfaitement rond, bouquet de houx, chant de la fertilité",
+      "effect": "le mage invoque un esprit de la nature pour bénéficier de sa bénédiction. La dryade est à sa disposition pendant (1 + NR) cycles. Tant qu'elle se trouve à ses côtés (elle ne peut s'éloigner de plus de 100 mètres du mage), ce dernier ne ressent pas la faim, ne peut pas se perdre et n'est jamais attaqué par aucun animal sauvage. La dryade peut aussi le soigner de 3 cases de blessure par jour en commençant par la plus grave à raison de 30 minutes par case. Enfin, tant qu'elle l'accompagne, le mage bénéficie d'un bonus de +5 lorsqu'il lance un sort de la sphère de la Nature. La dryade refuse catégoriquement de pénétrer dans un village ou une ville sous peine de rompre le charme."
+    }
+  },
+  {
+    "id": "bouclier-dembruns",
+    "data": {
+      "name": "Bouclier d'embruns",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOceans",
+      "cost": 3,
+      "castTimeAmount": 2,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune d'eau, miroir, danse de protection",
+      "effect": "le mage dresse un écran liquide autour de lui pendant (1 + NR) tours. Il lui procure un Indice de protection supplémentaire de +5 et divise par quatre tous les dommages dus au feu (magique ou non)."
+    }
+  },
+  {
+    "id": "danse-du-poisson",
+    "data": {
+      "name": "Danse du poisson",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOceans",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "rune de l'eau, rune de l'air",
+      "effect": "ce sort permet d'enchanter des vêtements pendant (1 + NR) jours de telle façon à ce que le porteur puisse flotter, même en armure. Ce sort n'annule aucunement la pénalité d'encombrement d'une armure."
+    }
+  },
+  {
+    "id": "grimoire-astucieux",
+    "data": {
+      "name": "Grimoire astucieux",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOceans",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "livre, rune de l'eau",
+      "effect": "ce sort permet d'enchanter un livre afin de le verrouiller pendant (1 + NR) jours. Il ne répond qu'à la voix du mage (ou à une imitation magique)."
+    }
+  },
+  {
+    "id": "mal-de-mer",
+    "data": {
+      "name": "Mal de mer",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOceans",
+      "cost": 2,
+      "castTimeAmount": 2,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de l'eau, claquement de doigt",
+      "effect": "au cours du prochain tour, la cible du sort doit effectuer un jet de Mental + Résistance contre une Difficulté de 15 pour ne pas être prise de vertiges. En cas d'échec, elle est prise d'un violent mal de mer qui lui inflige un malus de -5 à toutes ses actions pendant (1 + NR) tours."
+    }
+  },
+  {
+    "id": "nymphe-nacree",
+    "data": {
+      "name": "Nymphe nacrée",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOceans",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "verre d'eau de mer, chant des vagues et posture accroupie",
+      "effect": "le mage invoque une petite créature aquatique qui lui rend de menus services, simples comme éteindre un feu ou apporter un message. Craintive, la nymphe ne participe pas aux combats. Elle reste avec le mage pendant (30 + 10 par NR) minutes."
+    }
+  },
+  {
+    "id": "rumeur-des-vagues",
+    "data": {
+      "name": "Rumeur des vagues",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOceans",
+      "cost": 5,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "voix douce, poupée, cire, rune de l'enfance",
+      "effect": "cet enchantement permet au mage d'utiliser une poupée comme prolongement direct de son ouïe pendant (1 + NR) heures. Posée dans une pièce, la poupée retransmet toutes les discussions qui ont lieu autour d'elle, si le mage souhaite les entendre."
+    }
+  },
+  {
+    "id": "sapience-singuliere",
+    "data": {
+      "name": "Sapience singulière",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOceans",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune d'eau, danse du savoir",
+      "effect": "le mage augmente une Compétence de son choix liée à l'Attribut Mental de (1 + NR) pour réaliser un unique jet."
+    }
+  },
+  {
+    "id": "torrent-glace",
+    "data": {
+      "name": "Torrent glacé",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOceans",
+      "cost": 1,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "goutte d'eau froide, danse de l'eau, chant de l'équilibre",
+      "effect": "le mage ouvre un portail lié au lac d'un glacier pendant (1 + NR) tours. L'eau s'en déversant peut déséquilibrer une personne visée. Pour éviter d'être jetée au sol, cette dernière doit réussir un jet de Coordination + Physique ou d'Acrobatie contre une difficulté de 20. Le volume d'eau déversée est d'environ 1 m³ par tour."
+    }
+  },
+  {
+    "id": "vision-troublante",
+    "data": {
+      "name": "Vision troublante",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOceans",
+      "cost": 4,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "rune de l'œil, posture de la sentinelle, écuelle d'eau fraîche",
+      "effect": "le mage a une vision fugitive de l'avenir dans l'écuelle d'eau fraîche, un indice, une indication à suivre. Ce sort donne (1 + NR) informations par NR. Avec une réussite normale, le message des Dragons sera sans doute sibyllin."
+    }
+  },
+  {
+    "id": "cristal-des-profondeurs",
+    "data": {
+      "name": "Cristal des profondeurs",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOceans",
+      "cost": 8,
+      "castTimeAmount": 5,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "coupe de cristal, rune, chant d'une vierge",
+      "effect": "cette coupe a la capacité de détecter la dangerosité de tout liquide que l'on verse dedans pendant (1 + NR) cycles. Aucune substance ou poison ne résiste à cet enchantement. La couleur du liquide testé change si celui-ci est dangereux."
+    }
+  },
+  {
+    "id": "source-vive",
+    "data": {
+      "name": "Source vive",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOceans",
+      "cost": 6,
+      "castTimeAmount": 2,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune d'eau, posture (bras tendus vers la cible)",
+      "effect": "un mince jet d'eau surpuissant sort des paumes du mage. Il inflige (15 + 1D10 par NR) points de dommages. La cible peut tenter d'esquiver l'attaque mais sa Difficulté est augmentée de +10. Une parade (uniquement avec un bouclier) est possible avec une Difficulté de +5, mais le bouclier perdra systématiquement un point de protection."
+    }
+  },
+  {
+    "id": "fontaine-bienfaisante",
+    "data": {
+      "name": "Fontaine bienfaisante",
+      "level": 3,
+      "complexity": 60,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOceans",
+      "cost": 15,
+      "castTimeAmount": 10,
+      "castTimeUnit": "hour",
+      "difficulty": 25,
+      "cle": "voix chantante, rune de paix tracée dans l'eau, cours d'eau ou fontaine",
+      "effect": "ce sort enchante l'eau d'un cours d'eau ou d'une fontaine de façon à ce qu'elle soigne les maladies. Toute personne baignée dans cette eau miraculeuse voit ses tissus se régénérer. Selon la gravité d'une maladie, il faut compter entre 10 minutes et 3 heures de baignade pour que les chairs soient réparées. Si la maladie laissait cochées des cases de blessure, ces dernières sont soignées par l'immersion. La fontaine ne peut soigner qu'une personne à la fois. Ses propriétés demeurent actives pendant (1 + NR) jours."
+    }
+  },
+  {
+    "id": "fureur-dozyr",
+    "data": {
+      "name": "Fureur d'Ozyr",
+      "level": 3,
+      "complexity": 75,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOceans",
+      "cost": 15,
+      "castTimeAmount": 3,
+      "castTimeUnit": "round",
+      "difficulty": 25,
+      "cle": "miroir, voix grave, rune de l'eau tracée sur le miroir, danse de la tempête avec bris du miroir",
+      "effect": "le mage crée un tourbillon d'eau très violent autour de lui d'un volume de 20 m³. Toute personne prise dans la tourmente doit réussir un jet de Manuel + Acrobatie (ou Force) contre une Difficulté de 20 (25 dans le cas de la Force), faute de quoi elle est projetée violemment à 10 mètres du lieu du contact et reçoit (20 + 1D10) points de dommages. Toute personne tentant de s'approcher du lanceur de ce sort doit résister au tourbillon. Le mage est invulnérable au feu pendant la durée du sort qui est de (1 + NR) tours. Il bénéficie enfin d'un Indice de protection supplémentaire de +10 contre toute attaque devant traverser la barrière liquide."
+    }
+  },
+  {
+    "id": "raz-de-maree",
+    "data": {
+      "name": "Raz de marée",
+      "level": 3,
+      "complexity": 75,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOceans",
+      "cost": 20,
+      "castTimeAmount": 5,
+      "castTimeUnit": "action",
+      "difficulty": 25,
+      "cle": "écaille d'un dragon d'Ozyr, rune de tempête, posture (poings contre terre)",
+      "effect": "le mage crée un véritable mur d'eau capable de noyer plusieurs hommes. D'un volume de 100 m³, la vague avance à une vitesse de (30 + 10 par NR) mètres par tour pendant 10 tours. Si une personne est prise dans la vague, elle subit 2D10 points de dommages sans pouvoir y soustraire son Indice d'armure. Cette vague peut également détruire les bâtiments, les navires ou toute construction susceptible d'être recouverte ou balayée par la vague."
+    }
+  },
+  {
+    "id": "alteration-de-brorne",
+    "data": {
+      "name": "Altération de Brorne",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "spherePierre",
+      "cost": 3,
+      "castTimeAmount": 4,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "rune de l'esprit tracée sur la pierre à travailler, voix aiguë puis grave",
+      "effect": "en invoquant l'esprit de la pierre, le mage diminue d'un palier la dureté de (1 + NR) m³ de pierre afin de pouvoir la travailler plus facilement (de granit à grès, de grès à calcaire). Au bout d'un jour, la pierre reprend sa dureté initiale."
+    }
+  },
+  {
+    "id": "arme-de-puissance",
+    "data": {
+      "name": "Arme de puissance",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "spherePierre",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "une arme, rune de la pierre, danse de la force",
+      "effect": "ce sort permet d'enchanter une arme afin de lui donner un bonus de +5 sur ses dommages de base pendant (1 + NR) jours."
+    }
+  },
+  {
+    "id": "chemin-de-la-terre",
+    "data": {
+      "name": "Chemin de la terre",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "spherePierre",
+      "cost": 3,
+      "castTimeAmount": 4,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "rune de la mémoire tracée sur le sol, chant de la pierre, posture accroupie",
+      "effect": "en invoquant la mémoire de la pierre, le mage peut remonter la piste récente (moins d'une heure) d'une personne sur une surface minérale qui normalement ne garde pas la trace des pas (pavés, rocs, etc.), et ce pendant (30 + 15 par NR) minutes. Il doit néanmoins posséder un objet appartenant à la personne recherchée."
+    }
+  },
+  {
+    "id": "crevasse-vertigineuse",
+    "data": {
+      "name": "Crevasse vertigineuse",
+      "level": 1,
+      "complexity": 35,
+      "discipline": "magieInstinctive",
+      "sphere": "spherePierre",
+      "cost": 10,
+      "castTimeAmount": 3,
+      "castTimeUnit": "action",
+      "difficulty": 20,
+      "cle": "rune de pierre, posture accroupie",
+      "effect": "le mage fait littéralement s'ouvrir la terre à 10 mètres de lui pendant (1 + NR) tours. La crevasse fait (30 + 5 par NR) m. Les individus tombant dedans subissent 2D10 points de dommages sans armure. Les bâtiments se trouvant pris pour moitié dans la crevasse s'effondrent."
+    }
+  },
+  {
+    "id": "golem-aile",
+    "data": {
+      "name": "Golem ailé",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "spherePierre",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "morceau de granit, rune de la pierre",
+      "effect": "ce sort permet de faire apparaître une petite gargouille qui donnera l'alerte si quelqu'un s'introduit dans sa zone de surveillance (surface surveillée : 30 m²). Elle reste en poste (1 + NR) heures."
+    }
+  },
+  {
+    "id": "graviers-volants",
+    "data": {
+      "name": "Graviers volants",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "spherePierre",
+      "cost": 4,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "poignée de graviers, rune de vitesse, posture agressive",
+      "effect": "le mage lance la poignée de graviers sur une cible située à moins de 30 mètres. Cette attaque occasionne (10 + 1D10 par NR) points de dommages."
+    }
+  },
+  {
+    "id": "peau-dalbatre",
+    "data": {
+      "name": "Peau d'albâtre",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "spherePierre",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "poussière de pierre, rune de pierre, chant du courage",
+      "effect": "ce sort permet à la personne touchée par le mage de bénéficier d'un Indice de protection supplémentaire de +10 pendant (1 + NR) tours qui s'applique même contre les attaques ignorant les armures."
+    }
+  },
+  {
+    "id": "armure-de-bravoure",
+    "data": {
+      "name": "Armure de bravoure",
+      "level": 2,
+      "complexity": 35,
+      "discipline": "sorcellerie",
+      "sphere": "spherePierre",
+      "cost": 5,
+      "castTimeAmount": 2,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "armure, rune de pierre tracée sur l'armure, poudre de sable",
+      "effect": "l'armure enchantée de la sorte n'a plus besoin d'être entretenue. Pendant (1 + NR) semaines, elle régénère chaque nuit l'ensemble des points de protection perdus, et bénéficie d'un bonus à l'Indice de protection de +10 ainsi que d'une réduction de 5 de sa pénalité d'encombrement."
+    }
+  },
+  {
+    "id": "armure-de-brorne",
+    "data": {
+      "name": "Armure de Brorne",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "sorcellerie",
+      "sphere": "spherePierre",
+      "cost": 20,
+      "castTimeAmount": 5,
+      "castTimeUnit": "hour",
+      "difficulty": 25,
+      "cle": "armure en métal de qualité supérieure, nombreuses runes, postures, chants et danses",
+      "effect": "l'armure enchantée de la sorte bénéficie d'un bonus de +20 à son Indice de protection pendant (1 + NR) semaines, qui s'applique même contre les attaques ignorant les armures. De plus, elle ignore toute pénalité d'encombrement."
+    }
+  },
+  {
+    "id": "barriere-de-granit",
+    "data": {
+      "name": "Barrière de granit",
+      "level": 2,
+      "complexity": 40,
+      "discipline": "magieInstinctive",
+      "sphere": "spherePierre",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "dalle de granit, mélopée",
+      "effect": "ce sort permet de créer un mur de 4 m² maximum entre le mage et ses adversaires, qui reste en place pendant (1 + NR) tours avant de disparaître. Pour détruire cette barrière, il faut lui occasionner (50 + 2D10) points de dommages."
+    }
+  },
+  {
+    "id": "gemmes-de-breloque",
+    "data": {
+      "name": "Gemmes de breloque",
+      "level": 2,
+      "complexity": 40,
+      "discipline": "sorcellerie",
+      "sphere": "spherePierre",
+      "cost": 10,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "gemme, de petits morceaux de verre, sang de Moryagorn",
+      "effect": "le mage transforme des morceaux de verre en (1 + NR) gemmes, identiques en tout point à la gemme originale."
+    }
+  },
+  {
+    "id": "etendard-de-bravoure",
+    "data": {
+      "name": "Étendard de bravoure",
+      "level": 3,
+      "complexity": 45,
+      "discipline": "sorcellerie",
+      "sphere": "spherePierre",
+      "cost": 15,
+      "castTimeAmount": 10,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "sang d'un héros, étendard immaculé, rune de courage",
+      "effect": "une fois cette bannière enchantée, elle devient l'emblème de la compagnie (50 hommes environ) à laquelle elle appartient. Tant qu'elle est tenue haute sur le champ de bataille, toute personne partageant ses couleurs et son idéal dispose d'un bonus de +5 à ses jets de toucher et de dommages ainsi qu'à son Indice de protection. En revanche, si elle est capturée par l'ennemi, le bonus devient un malus d'égale valeur. Si l'ennemi la détruit mais qu'elle ne tombe pas entre ses mains, les bonus disparaissent. Cet enchantement dure pendant (1 + NR) heures."
+    }
+  },
+  {
+    "id": "montagne-de-nulle-part",
+    "data": {
+      "name": "Montagne de nulle part",
+      "level": 3,
+      "complexity": 45,
+      "discipline": "magieInvocatoire",
+      "sphere": "spherePierre",
+      "cost": 25,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 25,
+      "cle": "petit caillou pointu",
+      "effect": "ce sort crée un monticule de 30 m³ qui jaillit du sol. Ce monticule, qui persiste pendant (1 + NR) tours, peut boucher des trous ou éventrer des fortifications."
+    }
+  },
+  {
+    "id": "tornade-de-pierres",
+    "data": {
+      "name": "Tornade de pierres",
+      "level": 3,
+      "complexity": 75,
+      "discipline": "magieInvocatoire",
+      "sphere": "spherePierre",
+      "cost": 20,
+      "castTimeAmount": 4,
+      "castTimeUnit": "round",
+      "difficulty": 25,
+      "cle": "poignée de minéraux, danse de la guerre",
+      "effect": "ce sort destructeur provoque une tornade de sable et de pierre de plus 50 m³. Toutes les personnes prises dans la tourmente subissent (30 + 1D10) points de dommages tous les tours pendant (1 + NR) tours. Les créatures en vol cochent le double des cases prévues par les dommages qu'ils subissent. De plus, l'ensemble des victimes sont aveuglées, et subissent un malus de -5 à toutes leurs actions."
+    }
+  },
+  {
+    "id": "tremblement-de-terre",
+    "data": {
+      "name": "Tremblement de terre",
+      "level": 3,
+      "complexity": 75,
+      "discipline": "magieInstinctive",
+      "sphere": "spherePierre",
+      "cost": 30,
+      "castTimeAmount": 5,
+      "castTimeUnit": "action",
+      "difficulty": 25,
+      "cle": "profonde réflexion, trois types de pierres différentes",
+      "effect": "le mage déchaîne la colère de Brorne sur 1 km² pendant (1 + NR) tours. Toutes les constructions dans l'aire d'effet s'effondrent. Des crevasses apparaissent et les infortunés y tombant subissent (30 + 1D10) points de dommages. Dans une région volcanique, une éruption est à craindre."
+    }
+  },
+  {
+    "id": "arc-en-ciel-des-passions",
+    "data": {
+      "name": "Arc-en-ciel des passions",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereReves",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "larme de femme, rune des rêves",
+      "effect": "ce sort permet au mage de provoquer un grand émoi chez (1 + NR) cibles qu'il fixe. Ces dernières sont forcées de révéler leurs sentiments de manière claire et publique à moins qu'elles ne réussissent un jet de résistance de Social + Volonté contre une Difficulté de 20."
+    }
+  },
+  {
+    "id": "blocage-mental",
+    "data": {
+      "name": "Blocage mental",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereReves",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "voix aiguë puis grave",
+      "effect": "une cible située à une portée maximale de (10 + 10 par NR) mètres, interrompt toutes ses actions jusqu'à la fin du tour. L'activité entreprise est un échec sauf si la cible réussit un jet de résistance de Social + Volonté contre une Difficulté de 20."
+    }
+  },
+  {
+    "id": "bouclier-mystique",
+    "data": {
+      "name": "Bouclier mystique",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereReves",
+      "cost": 4,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "miroir brisé, rune du rêve",
+      "effect": "ce sort augmente la Difficulté de tous les sorts dont le mage est la cible, y compris les siens, de +10 pendant (1 + NR) heures."
+    }
+  },
+  {
+    "id": "deviation-subtile",
+    "data": {
+      "name": "Déviation subtile",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereReves",
+      "cost": 5,
+      "castTimeAmount": 3,
+      "castTimeUnit": "action",
+      "difficulty": 20,
+      "cle": "voix chaude, rune des rêves",
+      "effect": "ce sort permet au mage, une fois par tour pendant (1 + NR) tours, de contraindre une cible de son choix située à moins de 50 mètres, à rediriger une attaque ou un sort vers une autre cible. Le mage peut choisir l'attaque ou le sort à détourner une fois le jet de dés effectué. La seule façon pour sa victime de se prémunir contre les effets de \"Déviation subtile\" est de réussir un jet de Physique + Volonté contre une Difficulté de 20."
+    }
+  },
+  {
+    "id": "flots-deerie",
+    "data": {
+      "name": "Flots d'Eerie",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereReves",
+      "cost": 5,
+      "castTimeAmount": 5,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "voix, danse d'Eerie, rune",
+      "effect": "ce sort invoque de petites créatures immatérielles et spectrales difficiles à fixer. Elles donnent une information vague avec (1 + NR) éléments de précision. Elles ont tendance à parler par comptine ou par chant."
+    }
+  },
+  {
+    "id": "grelots-tintants",
+    "data": {
+      "name": "Grelots tintants",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereReves",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "trois gros grelots, rune de confiance",
+      "effect": "le mage enchante des grelots pendant (1 + NR) jours qui détectent le danger et l'avertissent par un tintement au timbre particulier."
+    }
+  },
+  {
+    "id": "heaume-dauras",
+    "data": {
+      "name": "Heaume d'auras",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereReves",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "heaume, rune de rêve, coiffure hirsute",
+      "effect": "ce sort permet à la personne qui porte le heaume enchanté par le mage de percevoir les auras de (2 + NR) personnes à la fois. La couleur des auras permet de déterminer l'état d'esprit de ces personnes. L'enchantement dure une semaine."
+    }
+  },
+  {
+    "id": "poudre-de-reve",
+    "data": {
+      "name": "Poudre de rêve",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereReves",
+      "cost": 4,
+      "castTimeAmount": 3,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "rune du sommeil, farine, voix fluette",
+      "effect": "ce sort crée une dose de poudre qui, une fois ingérée, permet au mage de bénéficier d'un bonus de +5 au lancement d'un sort, une fois par jour. Cette poudre est efficace pendant (1 + NR) semaines. Cependant elle a un effet d'accoutumance à moins de réussir un jet de résistance de Physique + Volonté contre une Difficulté de 20 à chaque ingestion. En cas d'échec, l'accoutumance oblige le mage à consommer cette poudre une fois par jour. Si elle n'est pas consommée, le mage dort toujours mal et ne regagne que la moitié de sa Réserve de magie."
+    }
+  },
+  {
+    "id": "puits-de-chance",
+    "data": {
+      "name": "Puits de chance",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereReves",
+      "cost": 1,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de la fortune",
+      "effect": "le mage récupère immédiatement (2 + NR) Points de Chance déjà dépensés. Il ne peut en aucun cas dépasser la valeur de son Attribut Chance de cette façon. Lancer efficacement ce sort ne rapporte aucun Point de Maîtrise."
+    }
+  },
+  {
+    "id": "resistance-magique",
+    "data": {
+      "name": "Résistance magique",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereReves",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "geste cabalistique, rune de la magie",
+      "effect": "le mage distord la trame magique autour d'une cible de son choix située à moins de (5 + 5 par NR) mètres. Le coût de tous les sorts lancés par la victime ou sur elle est augmenté de 2 pendant 3 tours."
+    }
+  },
+  {
+    "id": "sceau-de-maladresse",
+    "data": {
+      "name": "Sceau de maladresse",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereReves",
+      "cost": 4,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "bouteille cassée, papier déchiré",
+      "effect": "cette malédiction rend maladroite une personne située à moins de dix mètres, pendant (1 + NR) tours. La victime subit un malus de -2 sur tous ses jets. Le meneur de jeu est libre d'improviser des effets variés en cas d'échec critique sur une action."
+    }
+  },
+  {
+    "id": "somme-du-bienheureux",
+    "data": {
+      "name": "Somme du bienheureux",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereReves",
+      "cost": 2,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "voix somnolente, rune du sommeil, gestuelle des mains",
+      "effect": "ce sort endort une personne (ou une créature de taille humaine) située à moins de 10 mètres, à moins qu'elle ne réussisse un jet de résistance de Mental + Résistance contre une Difficulté de 15. La victime dort pendant (1 + NR) tours si on ne la secoue pas violemment."
+    }
+  },
+  {
+    "id": "anneau-de-sort",
+    "data": {
+      "name": "Anneau de sort",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "sorcellerie",
+      "sphere": "sphereReves",
+      "cost": 6,
+      "castTimeAmount": 5,
+      "castTimeUnit": "hour",
+      "difficulty": 18,
+      "cle": "anneau en métal précieux, rune de la magie gravée",
+      "effect": "ce sort permet d'enfermer les effets d'un sort de Magie instinctive dans un anneau. Le mage doit lancer le sort à emmagasiner 5 tours après cet enchantement et le sort ne doit pas avoir un coût en Points de Magie supérieur à 10. Pour déclencher les effets contenus, le porteur doit prononcer le mot de pouvoir choisi par le mage. Le porteur ne peut posséder qu'un seul \"Anneau de sort\" à la fois. Ce dernier reste enchanté (1 + NR) semaines et n'est utilisable qu'une seule fois avant sa désintégration."
+    }
+  },
+  {
+    "id": "benediction-etheree",
+    "data": {
+      "name": "Bénédiction éthérée",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereReves",
+      "cost": 10,
+      "castTimeAmount": 3,
+      "castTimeUnit": "action",
+      "difficulty": 20,
+      "cle": "rune de chance, posture tourbillonnante, voix exaltée",
+      "effect": "ce sort influe sur toutes les actions entreprises par le mage ou une cible de son choix pendant (5 + NR) tours. Le sujet bénéficie d'un bonus de +5 à ses jets d'attaque et d'un bonus de +10 aux dommages de base d'une arme qu'il portait à la main au moment du lancement de ce sort. De plus, le coût des sorts qu'il lance est divisé par deux."
+    }
+  },
+  {
+    "id": "dechirure-etheree",
+    "data": {
+      "name": "Déchirure éthérée",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereReves",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "action",
+      "difficulty": 18,
+      "cle": "voix douce, rune du rêve, gestuelle berçante",
+      "effect": "ce sort ouvre une porte sur un lieu de manière aléatoire (multitude de lieux possibles) pendant (1 + NR) tours. Cette destination peut être dangereuse. Utilisé en combat, ce sort permet aussi de se débarrasser d'un adversaire qui charge durant le laps de temps où la faille est ouverte. Cependant, il est possible pour l'adversaire d'effectuer un jet d'esquive pour ne pas s'y engouffrer, mais avec une Difficulté de +5."
+    }
+  },
+  {
+    "id": "receptacle-de-nenya",
+    "data": {
+      "name": "Réceptacle de Nenya",
+      "level": 2,
+      "complexity": 40,
+      "discipline": "sorcellerie",
+      "sphere": "sphereReves",
+      "cost": 10,
+      "castTimeAmount": 8,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "bâton, rune de rêve, gestuelle de remplissage",
+      "effect": "le bâton enchanté par ce sort dispose d'une Réserve de magie de 15 points que le mage peut utiliser à sa guise pour lancer ses sorts. L'enchantement dure (1 + NR) semaines et ne peut être utilisé qu'une seule fois sur un même bâton. Cette Réserve ne se régénère pas avec le temps et ne peut en aucun cas être reconstituée. Une fois la durée du sort écoulée, le bâton se désagrège en un nuage de poussières argentées qui se dissipe rapidement."
+    }
+  },
+  {
+    "id": "ailes-de-plumes-blanches",
+    "data": {
+      "name": "Ailes de plumes blanches",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereVents",
+      "cost": 10,
+      "castTimeAmount": 5,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "rune, danse du vent, prière à Szyl",
+      "effect": "ce sort crée pendant (10 + 10 par NR) minutes des ailes qui se déploient dans le dos du mage. Il peut alors s'envoler et se déplacer à la vitesse d'une course moyenne. Toutefois, il ne peut exécuter que des figures simples et en aucun cas recourir à la magie en vol. Ces ailes encaissent les dommages comme n'importe quelle autre partie du corps du mage. D'une envergure de trois mètres, elles ne sont pas aisées à dissimuler et ne permettent pas le port d'une armure normale."
+    }
+  },
+  {
+    "id": "envol-soudain",
+    "data": {
+      "name": "Envol soudain",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de vitesse, saut à pieds joints",
+      "effect": "pendant 3 tours, ce sort permet au mage de faire des bonds impressionnants de (5 + NR) mètres dans n'importe quelle direction et d'atterrir sans dommages."
     }
   },
   {
@@ -31,8 +1759,424 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeAmount": 1,
       "castTimeUnit": "action",
       "difficulty": 15,
-      "cle": "Rune de vitesse, mouvements très vifs et saccadés",
-      "effect": "-5 jets d'esquive et +10 difficulté des attaques adverses. Pendant (1 + NR) tours."
+      "cle": "rune de vitesse, mouvements très vifs et saccadés",
+      "effect": "ce sort augmente la vivacité du mage pendant (1 + NR) tours. Cette vitesse hors du commun réduit de 5 la Difficulté de ses jets d'esquive et augmente de 10 la Difficulté des attaques de ses adversaires."
+    }
+  },
+  {
+    "id": "fleches-de-sang",
+    "data": {
+      "name": "Flèches de sang",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "sorcellerie",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "flèches simples, runes, plumes pour l'empennage",
+      "effect": "ce sort enchante vingt flèches pendant (1 + NR) jours et leur donne un bonus de +5 aux dommages de base."
+    }
+  },
+  {
+    "id": "gants-de-legerete",
+    "data": {
+      "name": "Gants de légèreté",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "sorcellerie",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "paire de gants, rune de l'air, voix chaude, sentiment de joie",
+      "effect": "ce sort permet au porteur des gants enchantés de bénéficier d'une adhérence semblable à celle des pattes d'une mouche. Ils permettent de rester stationnaire contre une paroi ou un plafond sans aucun jet. De plus ces gants réduisent la Difficulté des jets d'Escalade de 10. Cet enchantement dure (1 + NR) heures."
+    }
+  },
+  {
+    "id": "hache-virevoltante",
+    "data": {
+      "name": "Hache virevoltante",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereVents",
+      "cost": 3,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "arme de jet, rune du vent",
+      "effect": "ce sort permet d'enchanter une arme de jet pendant (1 + NR) heures. Une fois lancée, elle reviendra dans la main de son lanceur si elle ne s'est pas plantée."
+    }
+  },
+  {
+    "id": "mouvement-invisible",
+    "data": {
+      "name": "Mouvement invisible",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereVents",
+      "cost": 2,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de l'air, mouvement brutal de l'index",
+      "effect": "le mage produit un mouvement d'air sur un objet situé à moins de (2 + NR) mètres. Il peut par exemple faire tomber un objet, lever un loquet ou toute autre action qui ne demande qu'un seul geste. La puissance de la poussée est égale à la Force du mage."
+    }
+  },
+  {
+    "id": "mur-dair",
+    "data": {
+      "name": "Mur d'air",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "rune, mouvement de main",
+      "effect": "le mage crée un mur d'air devant lui de (5 + 2 par NR) m² pendant 3 tours. Tous les projectiles qui traversent ce mur voient leurs dommages divisés par 3."
+    }
+  },
+  {
+    "id": "nuage-avise",
+    "data": {
+      "name": "Nuage avisé",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 3,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de l'air, voix, danse de la légèreté",
+      "effect": "ce sort crée un coussin d'air de taille variable qui se positionne de façon à amortir la chute de (1 + NR) personnes choisies par le mage. Quelle que soit la hauteur de la chute, elles ne subissent aucun dommage. Ce sort dure 1 tour."
+    }
+  },
+  {
+    "id": "plateau-ascensionnel",
+    "data": {
+      "name": "Plateau ascensionnel",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "plateau, rune, chant vibrant",
+      "effect": "le mage enchante un plateau composé d'une matière au choix du lanceur de ce sort, qui peut supporter un poids de (200 + 100 par NR) kilos pendant un jour. Le plateau se déplace uniquement à la verticale. Les mages des vents utilisent ce sort pour atteindre certaines écoles de magie et y acheminer leur matériel."
+    }
+  },
+  {
+    "id": "route-des-vents",
+    "data": {
+      "name": "Route des vents",
+      "level": 1,
+      "complexity": 5,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereVents",
+      "cost": 3,
+      "castTimeAmount": 4,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "posture d'écoute, rune de la connaissance tracée dans l'air, danse du vent",
+      "effect": "en invoquant la connaissance de Szyl, le mage se voit attribuer un bonus de +5 à tous ses jets d'Orientation en milieu naturel pendant (1 + NR) jours."
+    }
+  },
+  {
+    "id": "brise-amicale",
+    "data": {
+      "name": "Brise amicale",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereVents",
+      "cost": 10,
+      "castTimeAmount": 3,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "voix, plume de cygne, gestuelle aérienne",
+      "effect": "ce sort permet d'augmenter la force du vent d'un degré (de vent léger à vent modéré) afin de faire avancer un voilier d'une capacité de fret de 10 m³ pendant (1 + NR) heures. La capacité de fret mise en œuvre peut être multipliée par 2, 3 ou plus, mais la durée d'effet du sort est inversement réduite."
+    }
+  },
+  {
+    "id": "foudre-de-szyl",
+    "data": {
+      "name": "Foudre de Szyl",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 3,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "rune, voix (hurlement)",
+      "effect": "le mage ouvre un portail sur un orage pendant (1 + NR) tours. À chaque tour, la foudre frappe une cible choisie par le mage qui subit 20 + 1D10 points de dommages. Les armures en métal n'offrent aucune protection contre la foudre, et les autres voient leur Indice de protection réduit de moitié."
+    }
+  },
+  {
+    "id": "piege-des-brises",
+    "data": {
+      "name": "Piège des brises",
+      "level": 2,
+      "complexity": 35,
+      "discipline": "sorcellerie",
+      "sphere": "sphereVents",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "hour",
+      "difficulty": 15,
+      "cle": "ficelle, rune de l'air",
+      "effect": "ce sort protège une zone de (10 + 5 par NR) m² délimitée par une ficelle pendant un jour. Toute personne tentant d'y pénétrer pour la première fois est immédiatement projetée à 2 mètres et subit 15 points de dommages. Si la ficelle est retirée, le sort prend prématurément fin."
+    }
+  },
+  {
+    "id": "tornade",
+    "data": {
+      "name": "Tornade",
+      "level": 3,
+      "complexity": 95,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereVents",
+      "cost": 30,
+      "castTimeAmount": 5,
+      "castTimeUnit": "action",
+      "difficulty": 25,
+      "cle": "rune, danse aérienne, voix coléreuse",
+      "effect": "le mage crée une tornade autour de lui qui a la capacité d'emporter objets, personnes et animaux d'un poids inférieur à 500 kilos. Elle occasionne à ses victimes 70 points de dommages par tour du fait des objets volant en tous sens. Pour leur échapper, il faut effectuer à chaque tour un jet d'Athlétisme ou d'Acrobatie contre une Difficulté de 25. La tornade, qui peut facilement dévaster un village entier, dure (1 + NR) tours."
+    }
+  },
+  {
+    "id": "chant-de-livrogne",
+    "data": {
+      "name": "Chant de l'ivrogne",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOmbre",
+      "cost": 4,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "une boisson, poudre d'os, chant à boire",
+      "effect": "le mage rend une boisson qu'il touche particulièrement enivrante. Celui qui en boit devient complètement ivre en quelques tours. Les victimes peuvent éviter l'ivresse en effectuant un jet de Mental + Résistance contre une Difficulté de 15. La boisson est enchantée pour (30 + 10 par NR) minutes."
+    }
+  },
+  {
+    "id": "danse-du-mouchoir",
+    "data": {
+      "name": "Danse du mouchoir",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOmbre",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de l'ombre, mouchoir",
+      "effect": "ce sort permet d'enrhumer un individu que le mage désigne pendant (1 + NR) tours. La victime est alors prise d'une violente crise de toux et d'éternuements incontrôlables. La victime voit la Difficulté de toutes ses actions augmenter de 5."
+    }
+  },
+  {
+    "id": "dialogue-mortuaire",
+    "data": {
+      "name": "Dialogue mortuaire",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOmbre",
+      "cost": 1,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "une langue, caillou blanc",
+      "effect": "en plaçant la langue et le caillou dans la bouche d'une personne morte depuis moins de 24 heures, le mage peut poser (1 + NR) questions à la victime. Celle-ci répond par \"oui\", \"non\" ou \"je ne sais pas\", sans mentir. Ce sort ne peut être jeté qu'une seule fois sur un mort dont la bouche se fermera ensuite définitivement."
+    }
+  },
+  {
+    "id": "frisson-de-la-nuit",
+    "data": {
+      "name": "Frisson de la nuit",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOmbre",
+      "cost": 4,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 15,
+      "cle": "rune de l'ombre, cris",
+      "effect": "ce sort permet d'effrayer pendant (1 + NR) tours une cible unique à une portée de trois fois la valeur de sa Compétence Sphère de l'Ombre en mètres. Une cible effrayée voit la Difficulté de toutes ses actions augmenter de 10, en cas d'échec d'un jet de Social + Volonté contre une Difficulté de 15."
+    }
+  },
+  {
+    "id": "memoire-oublieuse",
+    "data": {
+      "name": "Mémoire oublieuse",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOmbre",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "action",
+      "difficulty": 18,
+      "cle": "rune de l'ombre, murmure",
+      "effect": "ce sort permet au mage de faire oublier (1 + NR) informations précises (son nom, le but de sa mission ou encore ce qu'il vient de voir) à une cible. La mémoire lui revient comme si de rien n'était au bout de (1 + NR) jours."
+    }
+  },
+  {
+    "id": "mur-dombre",
+    "data": {
+      "name": "Mur d'ombre",
+      "level": 1,
+      "complexity": 10,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOmbre",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "un voile noir, rune de l'ombre",
+      "effect": "un mur d'ombre apparaît devant le lanceur à une distance maximum de 10 mètres. Il est opaque et ne permet pas de voir ce qui se trouve de l'autre côté. Il est fixe et d'une surface de 4 m². Le mur reste en place pendant (3 + 2 par NR) tours."
+    }
+  },
+  {
+    "id": "nuage-nauseabond",
+    "data": {
+      "name": "Nuage nauséabond",
+      "level": 1,
+      "complexity": 15,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOmbre",
+      "cost": 2,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "un peu d'eau souillée, rune de l'ombre",
+      "effect": "le mage ouvre une porte vers un marais nauséabond. Il fait venir un nuage de miasmes putrides qui persiste pendant cinq tours. Toutes les personnes prises à l'intérieur de son aire d'effet de (10 + 5 par NR) m² sont indisposées et cherchent à s'en éloigner. Ce sort ne cause aucun dommage. Le nuage se déplace lentement de 10 mètres par tour."
+    }
+  },
+  {
+    "id": "eloge-de-la-folie",
+    "data": {
+      "name": "Éloge de la folie",
+      "level": 2,
+      "complexity": 30,
+      "discipline": "magieInstinctive",
+      "sphere": "sphereOmbre",
+      "cost": 12,
+      "castTimeAmount": 5,
+      "castTimeUnit": "action",
+      "difficulty": 25,
+      "cle": "danse de la folie, rune de l'ombre, cris terrifiants",
+      "effect": "la personne ciblée perd tout contrôle de ses actes pendant (10 + 2 par NR) tours. Elle attaque toute personne à sa portée et tente de les tuer. Laissée seule, elle se recroqueville sur elle-même en sanglotant, incapable d'avoir un comportement sensé. De plus, elle doit réussir un jet de résistance de Physique + Volonté contre une Difficulté de 15 pour ne pas tenter de mettre fin à ses jours. Si elle survit au sort, elle gagne définitivement un point de Volonté et devient immunisée à ce sort."
+    }
+  },
+  {
+    "id": "globe-tenebreux",
+    "data": {
+      "name": "Globe ténébreux",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOmbre",
+      "cost": 3,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "bille noire, rune de l'ombre",
+      "effect": "ce sort permet de plonger une source de lumière à moins de 10 mètres dans l'obscurité la plus complète. Il peut s'agir d'une torche ou d'un lustre. Un globe de ténèbres entoure l'objet et reste fixé autour de la cible pendant (2 + NR) tours même s'il se déplace. Ce sort ne peut pas être lancé sur un individu."
+    }
+  },
+  {
+    "id": "guerriers-fantomes",
+    "data": {
+      "name": "Guerriers fantômes",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOmbre",
+      "cost": 5,
+      "castTimeAmount": 1,
+      "castTimeUnit": "round",
+      "difficulty": 15,
+      "cle": "plume noire, mèche de cheveux blancs",
+      "effect": "ce sort ouvre un portail vers le Royaume de l'Ombre à moins de 30 mètres du mage. Une nuée de petites créatures de cauchemar en sort. Elles viennent assaillir, dans un rayon de 10 mètres, (2 + NR) cibles sur ordre du mage. Elles n'infligent aucun dommage réel mais effraient tellement les victimes qu'elles ne peuvent effectuer aucune action pendant un tour à moins de réussir un jet de résistance contre la peur de Social + Volonté contre une Difficulté de 20."
+    }
+  },
+  {
+    "id": "pacte-de-kalimsshar",
+    "data": {
+      "name": "Pacte de Kalimsshar",
+      "level": 2,
+      "complexity": 35,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOmbre",
+      "cost": 9,
+      "castTimeAmount": 2,
+      "castTimeUnit": "hour",
+      "difficulty": 20,
+      "cle": "une victime à sacrifier ayant une Caractéristique plus haute que celle du lanceur, dague en os",
+      "effect": "en sacrifiant une victime humaine selon un rituel bien précis, le mage remplace pendant (1 + NR) semaines une de ses Caractéristiques au choix par celle de sa victime."
+    }
+  },
+  {
+    "id": "pointe-suintante",
+    "data": {
+      "name": "Pointe suintante",
+      "level": 2,
+      "complexity": 25,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOmbre",
+      "cost": 6,
+      "castTimeAmount": 30,
+      "castTimeUnit": "minute",
+      "difficulty": 15,
+      "cle": "un projectile, un peu d'alcool, rune de mort tracée sur l'arme de jet",
+      "effect": "le mage enchante une arme de jet et lui donne un bonus de 2D10 sur ses dommages de base pendant (1 + NR) jours."
+    }
+  },
+  {
+    "id": "echange-de-la-vie",
+    "data": {
+      "name": "Échange de la vie",
+      "level": 3,
+      "complexity": 130,
+      "discipline": "sorcellerie",
+      "sphere": "sphereOmbre",
+      "cost": 30,
+      "castTimeAmount": 12,
+      "castTimeUnit": "hour",
+      "difficulty": 25,
+      "cle": "une victime à sacrifier, le corps de la personne à ramener d'entre les morts, tatouage de la vie et de la mort sur tout le corps",
+      "effect": "en sacrifiant une victime humaine, le mage lui arrache son principe de vie puis l'insuffle à la personne qu'il veut ressusciter. L'individu ainsi ressuscité revient en parfaite santé avec tous ses souvenirs, ses Caractéristiques, ses Attributs et ses Compétences qu'il avait au moment de sa mort. Son corps, qui pouvait être en état de décomposition avancée, se recompose. L'espérance de vie du miraculé n'est que de (1 + NR) ans, date à laquelle il meurt irrémédiablement sans aucune chance d'être à nouveau relevé d'entre les morts."
+    }
+  },
+  {
+    "id": "tourbillon-des-abysses",
+    "data": {
+      "name": "Tourbillon des abysses",
+      "level": 3,
+      "complexity": 55,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOmbre",
+      "cost": 15,
+      "castTimeAmount": 10,
+      "castTimeUnit": "action",
+      "difficulty": 25,
+      "cle": "diamant noir, un litre de sang",
+      "effect": "le mage ouvre un portail sur les entrailles du Royaume de l'Ombre. Il en jaillit une tornade noire qui dévaste tout sur son passage pendant (1 + NR) tours. Contrôlée par le lanceur, elle se déplace à une vitesse 50 mètres par tour et a un volume d'effet de 20 m³. Sa Force est égale à deux fois la valeur de la Compétence sphère de l'Ombre du mage. La tornade inflige (Force + 2D10) points de dommage par tour à toutes les personnes se trouvant sur son passage. Une fois lancée dans la direction choisie par le lanceur du sort, cette tornade destructrice ne peut plus être redirigée de quelque manière que ce soit."
     }
   }
 ];

@@ -2,7 +2,7 @@
 // gm-character-sheet.tsx so that file stays the sheet's composition and these
 // stay dumb: each takes the values it draws and nothing else.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 
@@ -161,7 +161,11 @@ export function GmNotes({
   draftRef: React.MutableRefObject<string>;
 }) {
   const [draft, setDraft] = useState(note);
-  draftRef.current = draft;
+  // Published to the parent's ref in an effect, not during render. The parent
+  // only reads it from its save handler, so it is always current by then.
+  useEffect(() => {
+    draftRef.current = draft;
+  }, [draft, draftRef]);
   return (
     <TextInput
       value={draft}

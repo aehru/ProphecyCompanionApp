@@ -162,6 +162,18 @@ describe('round-trip', () => {
     expect(b.spells[0].discipline).toBe('magieInstinctive');
   });
 
+  it('round-trips a permanent effect and a minute-lasting one', () => {
+    const bundle = makeBundle({
+      effects: [
+        { label: 'Anneau', target: 'all', value: 2, durationUnit: 'permanent', durationRemaining: 0, expired: false },
+        { label: 'Camouflage', target: 'discretion', value: 5, durationUnit: 'minute', durationRemaining: 30, expired: false },
+      ],
+    });
+    const r = parseImport(serializeExport(buildExport([bundle])));
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.characters[0].effects.map((e) => e.durationUnit)).toEqual(['permanent', 'minute']);
+  });
+
   it('round-trips an empty roster', () => {
     const json = serializeExport(buildExport([]));
     const r = parseImport(json);

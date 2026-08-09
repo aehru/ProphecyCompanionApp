@@ -25,24 +25,40 @@ export default function SectionCard({
   icon?: IconName;
   children: React.ReactNode;
 }) {
-  const theme = useProphecyTheme();
   return (
     <View style={styles.section}>
-      <View style={styles.header}>
-        {icon ? <Icon name={icon} size={15} color={theme.colors.secondary} /> : null}
-        <Text variant="titleSmall" style={[styles.title, { color: theme.colors.primary }]}>
-          {title}
-        </Text>
-        <View style={[styles.rule, { backgroundColor: theme.prophecy.borderSoft }]} />
-        {helper ? (
-          <Text
-            variant="titleSmall"
-            style={[styles.helper, { color: theme.colors.onSurfaceVariant }]}>
-            {helper}
-          </Text>
-        ) : null}
-      </View>
+      <SectionHeader title={title} helper={helper} icon={icon} />
       {children}
+    </View>
+  );
+}
+
+/**
+ * The header row on its own — for a virtualized list, where the section's rows
+ * are items rather than children (`SectionList`'s `renderSectionHeader`).
+ */
+export function SectionHeader({
+  title,
+  helper,
+  icon,
+}: {
+  title: string;
+  helper?: string;
+  icon?: IconName;
+}) {
+  const theme = useProphecyTheme();
+  return (
+    <View style={styles.header}>
+      {icon ? <Icon name={icon} size={15} color={theme.colors.secondary} /> : null}
+      <Text variant="titleSmall" style={[styles.title, { color: theme.colors.primary }]}>
+        {title}
+      </Text>
+      <View style={[styles.rule, { backgroundColor: theme.prophecy.borderSoft }]} />
+      {helper ? (
+        <Text variant="titleSmall" style={[styles.helper, { color: theme.colors.onSurfaceVariant }]}>
+          {helper}
+        </Text>
+      ) : null}
     </View>
   );
 }

@@ -9,7 +9,7 @@ import {
   NotoSans_500Medium,
 } from '@expo-google-fonts/noto-sans';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from 'expo-router/react-navigation';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';

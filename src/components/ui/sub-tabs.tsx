@@ -15,7 +15,7 @@
 // Compagnie's lives in a split pane, not the window) and against the user's
 // font scale, so 130% text triggers the same fallback as a narrow screen.
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Animated,
   type LayoutChangeEvent,
@@ -76,7 +76,14 @@ export default function SubTabs({
   const [wrapped, setWrapped] = useState(false);
   // Any change in the available room re-opens the question: a strip that got
   // wider (rotation, split pane, smaller font scale) must go back to full words.
-  useEffect(() => setWrapped(false), [tabWidth, fontScale]);
+  // Reset during render — React's "adjust state when a prop changes" recipe —
+  // so the full labels are already back on the very next paint.
+  const roomKey = `${tabWidth}|${fontScale}`;
+  const [measuredRoom, setMeasuredRoom] = useState(roomKey);
+  if (measuredRoom !== roomKey) {
+    setMeasuredRoom(roomKey);
+    setWrapped(false);
+  }
 
   const widest = Math.max(
     0,

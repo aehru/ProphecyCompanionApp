@@ -1,4 +1,4 @@
-import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import { BottomTabBarHeightContext } from 'expo-router/js-tabs';
 import React from 'react';
 import { Platform, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { FAB } from 'react-native-paper';
