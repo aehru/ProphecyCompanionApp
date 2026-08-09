@@ -4,8 +4,8 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Button, Checkbox, Icon, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
-import ChipSelect from '@/components/ui/chip-select';
 import { dsIcon } from '@/components/ui/icon';
+import SelectField from '@/components/ui/select-field';
 import SectionCard from '@/components/ui/section-card';
 import {
   EFFECT_TARGET_LABEL,
@@ -242,9 +242,9 @@ export function EffectEditor({
       />
 
       {permanent ? null : (
-        <ChipSelect
+        <SelectField
           label="Unité"
-          options={EFFECT_UNITS.map((u) => ({ key: u.key, label: u.label }))}
+          options={EFFECT_UNITS}
           value={e.durationUnit}
           onChange={(v) => updateEffect(e.id, { durationUnit: v })}
         />
