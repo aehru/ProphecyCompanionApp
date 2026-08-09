@@ -7,6 +7,7 @@ import NumberField from '@/components/number-field';
 import SpellDetail from '@/components/spell-detail';
 import ChipSelect from '@/components/ui/chip-select';
 import Icon from '@/components/ui/icon';
+import SelectField from '@/components/ui/select-field';
 import {
   CLE_PARFAITE_BONUS,
   DISCIPLINE_LABEL,
@@ -176,21 +177,29 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
           onChange={(_, t) => updateSpell(s.id, { difficulty: Number(t) || 0 })}
           style={styles.numCol}
         />
-        <NumberField
-          fieldKey="castTimeAmount"
-          label="Temps d'incantation"
-          value={s.castTimeAmount ? String(s.castTimeAmount) : ''}
-          onChange={(_, t) => updateSpell(s.id, { castTimeAmount: Number(t) || 0 })}
-          style={styles.numCol}
-        />
       </View>
 
-      <ChipSelect
-        label="Unité d'incantation"
-        options={EFFECT_UNITS}
-        value={s.castTimeUnit}
-        onChange={(k) => updateSpell(s.id, { castTimeUnit: k as Spell['castTimeUnit'] })}
-      />
+      {/* Amount + unit read as one value ("3 Tours"), so they share one title
+          and one row instead of a labelled field plus a separate chip row. */}
+      <View>
+        <Text style={[styles.fieldLabel, { color: theme.colors.onSurfaceVariant }]}>
+          Temps d&apos;incantation
+        </Text>
+        <View style={styles.castRow}>
+          <NumberField
+            fieldKey="castTimeAmount"
+            value={s.castTimeAmount ? String(s.castTimeAmount) : ''}
+            onChange={(_, t) => updateSpell(s.id, { castTimeAmount: Number(t) || 0 })}
+            style={styles.castAmount}
+          />
+          <SelectField
+            options={EFFECT_UNITS}
+            value={s.castTimeUnit}
+            onChange={(k) => updateSpell(s.id, { castTimeUnit: k as Spell['castTimeUnit'] })}
+            style={styles.castUnit}
+          />
+        </View>
+      </View>
 
       <TextInput label="Clé" value={cle} onChangeText={setCle} mode="outlined" dense />
 
@@ -253,6 +262,10 @@ const styles = StyleSheet.create({
   itemSub: { fontSize: 12, marginTop: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   numCol: { flexGrow: 1, flexBasis: 120, minWidth: 120 },
+  fieldLabel: { fontSize: 12, marginBottom: 2 },
+  castRow: { flexDirection: 'row', gap: 12 },
+  castAmount: { flexGrow: 0, flexBasis: 90 },
+  castUnit: { flexGrow: 1, flexBasis: 120 },
   effect: { minHeight: 72 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   switchMain: { flex: 1, minWidth: 0 },
