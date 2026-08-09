@@ -21,12 +21,14 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { spellTotal } from '@/lib/spell-total';
+import { weaponSkillReading } from '@/lib/weapon-skill';
 import { actualStateQuery } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { characterByUuidQuery } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
 import { enchantsQuery } from '@/repositories/enchants';
 import { shieldsQuery } from '@/repositories/shields';
+import { skillsQuery } from '@/repositories/skills';
 import { spellsQuery } from '@/repositories/spells';
 import { weaponsQuery } from '@/repositories/weapons';
 
@@ -44,6 +46,9 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   const { data: spells } = useLiveQuery(spellsQuery(localId), [localId]);
   const { data: effects } = useLiveQuery(effectsQuery(localId), [localId]);
   const { data: enchants } = useLiveQuery(enchantsQuery(localId), [localId]);
+  // Local rows again: an NPC's attack total needs its compétences, which the
+  // wire projection would carry but the GM's own characters never travel.
+  const { data: skills } = useLiveQuery(skillsQuery(localId), [localId]);
 
   if (!char) return null;
   const weaponList = weapons ?? [];
@@ -60,6 +65,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   }
 
   const rec = asNumRecord(char);
+  const skillList = skills ?? [];
   const caracValue = (key: string) => rec[key] ?? 0;
   // Same reading as the Fiche: wound malus + active effects, folded into a carac
   // BEFORE a formula's multiplier — so a damage line shown here is the damage
@@ -83,6 +89,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
                 weapon={w}
                 caracValue={caracValue}
                 caracModifier={caracModifier}
+                skill={weaponSkillReading(w.skillName, skillList, rec, effectList, wound)}
                 enchanted={isEnchanted('weapon', w.id)}
               />
             ))}

@@ -9,6 +9,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Épée courte",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 8 + 1D10",
       "prerequisites": "FOR 3",
       "initMelee": 0,
@@ -26,6 +27,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Épée vulgaire",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 4",
       "initMelee": 1,
@@ -43,6 +45,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Épée longue",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 12 + 1D10",
       "prerequisites": "FOR 5",
       "initMelee": 2,
@@ -60,6 +63,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Épée large",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 14 + 1D10",
       "prerequisites": "FOR 5",
       "initMelee": 0,
@@ -77,6 +81,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Épée de duel",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 8 + 1D10",
       "prerequisites": "FOR 4",
       "initMelee": 2,
@@ -94,6 +99,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Sabre",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 9 + 1D10",
       "prerequisites": "FOR 3, COO 4",
       "initMelee": 1,
@@ -111,6 +117,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Fauchard",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 11 + 1D10",
       "prerequisites": "FOR 4, COO 4",
       "initMelee": 1,
@@ -128,6 +135,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Cimeterre",
+      "skillName": "Armes tranchantes",
       "damage": "FOR + 13 + 1D10",
       "prerequisites": "FOR 5, COO 4",
       "initMelee": 1,
@@ -145,6 +153,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Épée bâtarde",
+      "skillName": "Armes tranchantes",
       "damage": "(FOR * 2) + 8 + 1D10",
       "prerequisites": "FOR 5",
       "initMelee": 2,
@@ -162,6 +171,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Épée à deux mains",
+      "skillName": "Armes tranchantes",
       "damage": "(FOR * 2) + 11 + 1D10",
       "prerequisites": "FOR 6",
       "initMelee": 1,
@@ -179,6 +189,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Cimeterre à deux mains",
+      "skillName": "Armes tranchantes",
       "damage": "(FOR * 2) + 13 + 1D10",
       "prerequisites": "FOR 7, COO 5",
       "initMelee": 1,
@@ -196,6 +207,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Hachette",
+      "skillName": "Armes de choc",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 4, COO 4",
       "initMelee": -1,
@@ -213,6 +225,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Hache",
+      "skillName": "Armes de choc",
       "damage": "FOR + 15 + 1D10",
       "prerequisites": "FOR 5, COO 5",
       "initMelee": -1,
@@ -230,6 +243,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Hache double",
+      "skillName": "Armes de choc",
       "damage": "FOR + 15 + 1D10",
       "prerequisites": "FOR 5, COO 6",
       "initMelee": 0,
@@ -247,6 +261,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Pic de guerre",
+      "skillName": "Armes de choc",
       "damage": "FOR + 6 + 1D10",
       "prerequisites": "FOR 3, COO 6",
       "initMelee": -1,
@@ -264,6 +279,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Bec de corbin",
+      "skillName": "Armes de choc",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 5, COO 7",
       "initMelee": -1,
@@ -281,6 +297,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Hache de justice",
+      "skillName": "Armes de choc",
       "damage": "(FOR * 2) + 15 + 1D10",
       "prerequisites": "FOR 6, COO 4",
       "initMelee": -2,
@@ -298,6 +315,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Hache à deux mains",
+      "skillName": "Armes de choc",
       "damage": "(FOR * 2) + 16 + 1D10",
       "prerequisites": "FOR 6, COO 6",
       "initMelee": -2,
@@ -315,6 +333,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Hache double à deux mains",
+      "skillName": "Armes de choc",
       "damage": "(FOR * 2) + 17 + 1D10",
       "prerequisites": "FOR 7, COO 6",
       "initMelee": -1,
@@ -332,6 +351,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Pioche de guerre",
+      "skillName": "Armes de choc",
       "damage": "(FOR * 2) + 12 + 1D10",
       "prerequisites": "FOR 6, COO 6",
       "initMelee": -1,
@@ -349,6 +369,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Gourdin",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 2) + 1D10",
       "prerequisites": "FOR 3",
       "initMelee": 0,
@@ -366,6 +387,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Gourdin ferré",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 2) + 2 + 1D10",
       "prerequisites": "FOR 4",
       "initMelee": -1,
@@ -383,6 +405,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Masse d'armes",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 2) + 4 + 1D10",
       "prerequisites": "FOR 4",
       "initMelee": 0,
@@ -400,6 +423,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Masse à ailettes",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 2) + 6 + 1D10",
       "prerequisites": "FOR 5, COO 5",
       "initMelee": 0,
@@ -417,6 +441,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Masse à pointes",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 2) + 8 + 1D10",
       "prerequisites": "FOR 6, COO 6",
       "initMelee": -1,
@@ -434,6 +459,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Massue ferrée",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 3) + 5 + 1D10",
       "prerequisites": "FOR 5",
       "initMelee": 0,
@@ -451,6 +477,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Masse à deux mains",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 3) + 7 + 1D10",
       "prerequisites": "FOR 6, COO 6",
       "initMelee": -1,
@@ -468,6 +495,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Marteau à deux mains",
+      "skillName": "Armes contondantes",
       "damage": "(FOR * 3) + 9 + 1D10",
       "prerequisites": "FOR 7",
       "initMelee": -3,
@@ -485,6 +513,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Fouet",
+      "skillName": "Armes articulées",
       "damage": "FOR",
       "prerequisites": "COO 7",
       "initMelee": 3,
@@ -502,6 +531,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Chaîne",
+      "skillName": "Armes articulées",
       "damage": "FOR + 2D10",
       "prerequisites": "FOR 4, COO 7",
       "initMelee": 1,
@@ -519,6 +549,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Fléau léger",
+      "skillName": "Armes articulées",
       "damage": "(FOR*2) + 1+ 1D10",
       "prerequisites": "FOR 4, COO 6",
       "initMelee": 1,
@@ -536,6 +567,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Fléau Triple",
+      "skillName": "Armes articulées",
       "damage": "(FOR*2) + 3 + 1D10",
       "prerequisites": "FOR 6, COO 7",
       "initMelee": 1,
@@ -553,6 +585,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Fléau lourd",
+      "skillName": "Armes articulées",
       "damage": "(FOR*2) + 5 + 1D10",
       "prerequisites": "FOR 6, COO 6",
       "initMelee": 0,
@@ -570,6 +603,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Fléau paysan",
+      "skillName": "Armes articulées",
       "damage": "(FOR*2) + 2 + 1D10",
       "prerequisites": "FOR 5, COO 5",
       "initMelee": 0,
@@ -587,6 +621,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Fléau à deux mains",
+      "skillName": "Armes articulées",
       "damage": "(FOR*3) + 5 + 1D10",
       "prerequisites": "FOR 6, COO 6",
       "initMelee": -1,
@@ -604,6 +639,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Poing de Brorne",
+      "skillName": "Armes articulées",
       "damage": "(FOR*3) + 2D10",
       "prerequisites": "FOR 7,COO 7",
       "initMelee": -2,
@@ -621,6 +657,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Double épée",
+      "skillName": "Armes doubles",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 6, COO 7",
       "initMelee": 2,
@@ -638,6 +675,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Lance-sabre",
+      "skillName": "Armes doubles",
       "damage": "FOR + 11 + 1D10",
       "prerequisites": "FOR 5, COO 6",
       "initMelee": 2,
@@ -655,6 +693,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Bâton de combat",
+      "skillName": "Armes doubles",
       "damage": "(FOR*2) + 1D10",
       "prerequisites": "COO 3",
       "initMelee": 1,
@@ -672,6 +711,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Shaaduk't",
+      "skillName": "Armes doubles",
       "damage": "(FOR*2) + 4 + 1D10",
       "prerequisites": "FOR 5, COO 6",
       "initMelee": 2,
@@ -689,6 +729,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Nirga'k Zûl",
+      "skillName": "Armes doubles",
       "damage": "(FOR*2) + 6 + 1D10",
       "prerequisites": "FOR 5, COO 6",
       "initMelee": 0,
@@ -706,6 +747,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Croc à chaîne",
+      "skillName": "Armes doubles",
       "damage": "FOR + 11 + 1D10",
       "prerequisites": "FOR 5, COO 7",
       "initMelee": 1,
@@ -723,6 +765,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Double chaîne",
+      "skillName": "Armes doubles",
       "damage": "(FOR*2) + 2D10",
       "prerequisites": "FOR 5, COO 8",
       "initMelee": 2,
@@ -740,6 +783,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Double fléau Fléau d'harmonie",
+      "skillName": "Armes doubles",
       "damage": "(FOR*3) + 4 + 1D10",
       "prerequisites": "FOR 6, COO 7",
       "initMelee": 1,
@@ -757,6 +801,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Poing",
+      "skillName": "Corps à corps",
       "damage": "FOR + 1D10",
       "prerequisites": "",
       "initMelee": 0,
@@ -774,6 +819,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Pieds",
+      "skillName": "Corps à corps",
       "damage": "FOR + 2 + 1D10",
       "prerequisites": "",
       "initMelee": 0,
@@ -791,6 +837,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Gant clouté",
+      "skillName": "Corps à corps",
       "damage": "FOR + 1 + 1D11",
       "prerequisites": "",
       "initMelee": 0,
@@ -808,6 +855,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Gant de métal",
+      "skillName": "Corps à corps",
       "damage": "FOR + 2 + 1D10",
       "prerequisites": "",
       "initMelee": 0,
@@ -825,6 +873,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Cestus",
+      "skillName": "Corps à corps",
       "damage": "FOR + 4 + 1D10",
       "prerequisites": "",
       "initMelee": 0,
@@ -842,6 +891,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Serpe",
+      "skillName": "Corps à corps",
       "damage": "FOR + 5 + 1D10",
       "prerequisites": "",
       "initMelee": -1,
@@ -859,6 +909,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Couteau",
+      "skillName": "Corps à corps",
       "damage": "FOR + 3 + 1D10",
       "prerequisites": "",
       "initMelee": 0,
@@ -876,6 +927,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Dague",
+      "skillName": "Corps à corps",
       "damage": "FOR + 6 + 1D10",
       "prerequisites": "",
       "initMelee": 0,
@@ -893,6 +945,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Dague main gauche",
+      "skillName": "Corps à corps",
       "damage": "FOR + 5 + 1D10",
       "prerequisites": "",
       "initMelee": 0,
@@ -910,6 +963,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Katar",
+      "skillName": "Corps à corps",
       "damage": "FOR + 5 + 1D10",
       "prerequisites": "",
       "initMelee": -1,
@@ -927,6 +981,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Lance courte",
+      "skillName": "Armes d'hast",
       "damage": "FOR + 8 + 1D10",
       "prerequisites": "FOR 3 , COO 3",
       "initMelee": 3,
@@ -944,6 +999,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Lance",
+      "skillName": "Armes d'hast",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 4 , COO 5",
       "initMelee": 5,
@@ -961,6 +1017,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Epieu",
+      "skillName": "Armes d'hast",
       "damage": "FOR + 12 + 1D10",
       "prerequisites": "FOR 5 , COO 4",
       "initMelee": 1,
@@ -978,6 +1035,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Vouge",
+      "skillName": "Armes d'hast",
       "damage": "FOR + 11 + 1D10",
       "prerequisites": "FOR 5 , COO 4",
       "initMelee": 3,
@@ -995,6 +1053,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Hallebarde",
+      "skillName": "Armes d'hast",
       "damage": "FOR + 11 + 1D10",
       "prerequisites": "FOR 5, COO 6",
       "initMelee": 3,
@@ -1012,6 +1071,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Trident",
+      "skillName": "Armes d'hast",
       "damage": "FOR + 14 + 1D10",
       "prerequisites": "FOR 5 , COO 4",
       "initMelee": 1,
@@ -1029,6 +1089,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Pique",
+      "skillName": "Armes d'hast",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 6 , COO 5",
       "initMelee": 10,
@@ -1046,6 +1107,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Bolas",
+      "skillName": "Armes de jet",
       "damage": "0",
       "prerequisites": "PER 3, COO 6",
       "initMelee": 0,
@@ -1063,6 +1125,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Pierre",
+      "skillName": "Armes de jet",
       "damage": "FOR + 1D10",
       "prerequisites": "",
       "initMelee": 3,
@@ -1080,6 +1143,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Dards",
+      "skillName": "Armes de jet",
       "damage": "FOR + 1D10",
       "prerequisites": "PER 3, COO 4",
       "initMelee": 4,
@@ -1097,6 +1161,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Poignards de lancer",
+      "skillName": "Armes de jet",
       "damage": "FOR + 2 + 1D10",
       "prerequisites": "PER 4, COO 4",
       "initMelee": 3,
@@ -1114,6 +1179,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Couteau étoile Zûl",
+      "skillName": "Armes de jet",
       "damage": "(FOR*2) + 5 + 1D10",
       "prerequisites": "PER 4, COO 6",
       "initMelee": 2,
@@ -1131,6 +1197,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Hachette",
+      "skillName": "Armes de jet",
       "damage": "(FOR*2) + 1D10",
       "prerequisites": "PER 5, COO 4",
       "initMelee": 1,
@@ -1148,6 +1215,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Javelot",
+      "skillName": "Armes de jet",
       "damage": "(FOR*2) + 2 + 1D10",
       "prerequisites": "PER 6, COO 4",
       "initMelee": 0,
@@ -1165,6 +1233,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Arc commun",
+      "skillName": "Armes à projectiles",
       "damage": "FOR + 6 + 1D10",
       "prerequisites": "FOR 3 , PER 4",
       "initMelee": 0,
@@ -1182,6 +1251,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Arc composite",
+      "skillName": "Armes à projectiles",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 6 , PER 4",
       "initMelee": 0,
@@ -1199,6 +1269,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Arc long",
+      "skillName": "Armes à projectiles",
       "damage": "FOR + 8 + 1D10",
       "prerequisites": "FOR 5 , PER 4",
       "initMelee": 0,
@@ -1216,6 +1287,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Une main",
     "data": {
       "name": "Fronde",
+      "skillName": "Armes à projectiles",
       "damage": "10",
       "prerequisites": "PER 4, COO 6",
       "initMelee": -1,
@@ -1233,6 +1305,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Sarbacane",
+      "skillName": "Armes à projectiles",
       "damage": "1",
       "prerequisites": "",
       "initMelee": 3,
@@ -1250,6 +1323,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Atlat",
+      "skillName": "Armes à projectiles",
       "damage": "(FOR*2) + 1D10",
       "prerequisites": "PER 5, COO 5",
       "initMelee": 0,
@@ -1267,6 +1341,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Arbalète légère",
+      "skillName": "Armes mécanique",
       "damage": "FOR + 6 + 1D10",
       "prerequisites": "FOR 4",
       "initMelee": 3,
@@ -1284,6 +1359,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Arbalète moyenne",
+      "skillName": "Armes mécanique",
       "damage": "FOR + 8 + 1D10",
       "prerequisites": "FOR 5",
       "initMelee": 3,
@@ -1301,6 +1377,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Arbalète lourde",
+      "skillName": "Armes mécanique",
       "damage": "FOR + 10 + 1D10",
       "prerequisites": "FOR 6",
       "initMelee": 3,
@@ -1318,6 +1395,7 @@ export const WEAPON_CATALOG_DATA: WeaponPreset[] = [
     "hands": "Deux mains",
     "data": {
       "name": "Lance-harpon",
+      "skillName": "Armes mécanique",
       "damage": "25",
       "prerequisites": "FOR 6",
       "initMelee": 4,

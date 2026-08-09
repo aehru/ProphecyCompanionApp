@@ -3,6 +3,7 @@ import { Alert, type TextInput as RNTextInput, StyleSheet, View } from 'react-na
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import WeaponSkillField from '@/components/weapon-skill-field';
 import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -120,6 +121,11 @@ export default function WeaponEditor({
         dense
         {...textChain('name')}
       />
+
+      {/* Right under the name: which compétence this weapon is used with is
+          part of what it IS, not a stat detail. Outside the keyboard chain —
+          it's a dialog, not a field. */}
+      <WeaponSkillField weapon={w} />
 
       <TextInput
         label="Dégâts (ex. FOR x2 +3 +1D10)"

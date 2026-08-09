@@ -19,6 +19,12 @@ export default function CharacterTabsLayout() {
 
   return (
     <Tabs
+      // Each tab is a complete page, not a step: a tab switch leaves no back
+      // history, so system back (Android hardware key, iOS edge swipe) pops the
+      // parent stack and leaves the character from any tab. The default
+      // ('firstRoute') would rewind to Accueil first — an invisible extra press,
+      // now that only Accueil shows an arrow.
+      backBehavior="none"
       screenOptions={{
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
@@ -27,12 +33,21 @@ export default function CharacterTabsLayout() {
         headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         // `height` on the JS header is the total, status bar included.
         headerStyle: { height: HEADER_HEIGHT + insets.top },
-        // No automatic back arrow at a tabs root — add one to return to the list.
-        headerLeft: () => <IconButton icon="arrow-left" onPress={() => router.back()} />,
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: 'Accueil', tabBarIcon: dsIcon('home') }}
+        options={{
+          title: 'Accueil',
+          tabBarIcon: dsIcon('home'),
+          // Only Accueil carries a back arrow: a tabs root gets none automatically,
+          // and it is the one tab that is a way *in* to the character rather than a
+          // page in its own right. From the first tab `back()` pops the parent
+          // stack, so it returns wherever the character was opened from (the list,
+          // or a campaign roster). The other tabs are self-contained — an arrow
+          // there would rewind to Accueil first (Tabs default backBehavior), which
+          // is not what it looks like it does.
+          headerLeft: () => <IconButton icon="arrow-left" onPress={() => router.back()} />,
+        }}
       />
       <Tabs.Screen
         name="fiche"
