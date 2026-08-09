@@ -77,8 +77,12 @@ function SkillsEditorLive({ characterId, skills }: { characterId: number; skills
   // Specializations are managed live (not through the wholesale base flush).
   const specs = skills.filter((s) => s.parentName != null);
 
+  // Mirrored into a ref so the debounced flush below reads the latest rows
+  // without re-arming its timer. Assigned in an effect, not during render.
   const rowsRef = useRef(rows);
-  rowsRef.current = rows;
+  useEffect(() => {
+    rowsRef.current = rows;
+  });
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirty = useRef(false);
 

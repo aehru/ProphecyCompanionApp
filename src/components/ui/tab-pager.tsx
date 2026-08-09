@@ -46,13 +46,15 @@ export default function TabPager({
 }) {
   const [width, setWidth] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  // Lazy useState rather than useRef(...).current — no ref read during render.
+  const [scrollX] = useState(() => new Animated.Value(0));
   // Pages the user has actually reached — mounted from then on.
   const [visited, setVisited] = useState<number[]>(() => [active]);
 
-  useEffect(() => {
-    setVisited((prev) => (prev.includes(active) ? prev : [...prev, active]));
-  }, [active]);
+  // Adjusted during render rather than in an effect: this is React's documented
+  // "derive state from props" update, and it mounts the page in the same commit
+  // instead of one frame later.
+  if (!visited.includes(active)) setVisited([...visited, active]);
 
   // A tap on the strip (or any external tab change) scrolls the pager. Also runs
   // on the first layout, which is what puts a non-zero initial tab on screen.

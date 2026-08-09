@@ -446,7 +446,9 @@ export const effects = sqliteTable('effects', {
   target: text('target').notNull().default('all'),
   // Signed: positive = bonus, negative = malus.
   value: integer('value').notNull().default(0),
-  // One of EFFECT_UNITS: 'action' | 'round' | 'hour' | 'day'.
+  // One of EFFECT_UNITS: 'action' | 'round' (« Tour ») | 'minute' | 'hour' | 'day',
+  // or PERMANENT_UNIT. Plain text on purpose (no CHECK), so adding a unit to the
+  // enum never needs a migration.
   durationUnit: text('duration_unit').notNull().default('round'),
   durationRemaining: integer('duration_remaining').notNull().default(0),
   expired: integer('expired', { mode: 'boolean' }).notNull().default(false),

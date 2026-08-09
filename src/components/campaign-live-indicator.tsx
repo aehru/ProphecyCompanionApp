@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { type Href, useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { Divider, Menu, Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,7 +29,9 @@ export default function CampaignLiveIndicator() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Pulse ring only while actually connected; steady (no pulse) otherwise.
-  const pulse = useRef(new Animated.Value(0)).current;
+  // Lazy useState rather than useRef(...).current: same "create once" semantics,
+  // without reading a ref during render (the interpolations below run in render).
+  const [pulse] = useState(() => new Animated.Value(0));
   useEffect(() => {
     if (status !== 'online') {
       pulse.stopAnimation();

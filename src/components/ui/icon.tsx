@@ -1,4 +1,5 @@
 import React from 'react';
+import { type ColorValue } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
 /**
@@ -55,7 +56,9 @@ export default function Icon({
 }: {
   name: IconName;
   size?: number;
-  color?: string;
+  // ColorValue, not string: expo-router's tabBarIcon hands its icon renderer a
+  // ColorValue, and Paper passes a plain string — this accepts both.
+  color?: ColorValue;
 }) {
   return <SvgXml xml={ICONS[name]} width={size} height={size} color={color} />;
 }
@@ -67,6 +70,6 @@ export default function Icon({
  */
 export const dsIcon =
   (name: IconName) =>
-  function DsIcon({ size, color }: { size: number; color: string }) {
+  function DsIcon({ size, color }: { size: number; color: ColorValue }) {
     return <Icon name={name} size={size} color={color} />;
   };

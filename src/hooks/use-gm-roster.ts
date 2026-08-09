@@ -23,8 +23,13 @@ export function useGmRoster(campaign: Campaign) {
   // The `welcome` handler backfills the local name, which changes `campaign` and
   // would tear the socket down mid-session. Read the name through a ref so it
   // stays out of the effect's deps: only the connection identity reconnects.
+  // Written in an effect, not during render: a ref write while rendering is a
+  // side effect the React Compiler rejects. The socket only reads this from its
+  // `welcome` callback, which cannot run before the connect effect below.
   const nameRef = useRef(campaign.name);
-  nameRef.current = campaign.name;
+  useEffect(() => {
+    nameRef.current = campaign.name;
+  });
 
   // Destructured outside the effect so it closes over the scalars that define
   // the connection, not the row object (whose identity changes on every refetch).
