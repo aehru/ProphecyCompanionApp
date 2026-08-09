@@ -1,25 +1,29 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { Image } from 'expo-image';
 import { type Href, useNavigation, useRouter } from 'expo-router';
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
-import { IconButton, List, Menu, Text } from 'react-native-paper';
+import { IconButton, Menu, Text } from 'react-native-paper';
 
-import { OwnerBadge } from '@/components/campaign/roster-badges';
-import Icon, { dsIcon } from '@/components/ui/icon';
+import CharacterListItem from '@/components/character-list-item';
+import CharacterSelectionActions from '@/components/character-selection-actions';
+import { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
+import { useCharacterSelection } from '@/hooks/use-character-selection';
 import { useLayout, useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { parseImport } from '@/lib/character-transfer';
 import { pickImportText, shareExport } from '@/lib/character-transfer-io';
-import { mediaUri } from '@/lib/media';
-import { charactersListQuery } from '@/repositories/characters';
-import { duplicateCharacter, exportCharacters, importCharacters } from '@/repositories/transfer';
+import { sharedCharacterNames } from '@/repositories/campaigns';
+import { charactersListQuery, deleteCharacters } from '@/repositories/characters';
+import { duplicateCharacters, exportCharacters, importCharacters } from '@/repositories/transfer';
 
 // Module-level: an inline arrow is a new component type on every render, which
 // remounts every separator instead of reusing it.
 const RowSeparator = () => <View style={styles.separator} />;
 const keyExtractor = (c: { id: number }) => String(c.id);
+
+/** « 3 personnages » / « 1 personnage » — French plural, once. */
+const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
 
 export default function CharactersListScreen() {
   const router = useRouter();
@@ -30,43 +34,84 @@ export default function CharactersListScreen() {
   const [busy, setBusy] = useState(false);
   const { columns } = useLayout();
   const splitWidth = useSplitWidth();
-
   const isEmpty = !data || data.length === 0;
+  const ids = useMemo(() => (data ?? []).map((c) => c.id), [data]);
+  const selection = useCharacterSelection(ids);
+  const { selectedIds, clear, toggleAll } = selection;
 
-  // Export every character to a shareable JSON file (full backup).
-  const handleExport = useCallback(async () => {
-    setMenuOpen(false);
-    if (isEmpty) {
-      Alert.alert('Rien à exporter', 'Créez au moins un personnage.');
-      return;
-    }
+  // Export the selected characters into ONE envelope (same shape as a full
+  // backup, just filtered) and hand it to the share sheet.
+  const handleExportSelection = useCallback(async () => {
     setBusy(true);
     try {
-      await shareExport(await exportCharacters());
+      await shareExport(await exportCharacters(selectedIds));
+      clear();
     } catch (e) {
       Alert.alert('Export impossible', e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(false);
     }
-  }, [isEmpty]);
+  }, [selectedIds, clear]);
 
-  // Long-press a row → full deep copy (new uuid) after confirmation. The live
+  // Deep copy each selected character (new uuid, « … (copie) » name). The live
   // query refreshes the list; no navigation.
-  const handleDuplicate = useCallback((id: number, nom: string) => {
-    Alert.alert('Dupliquer', `Dupliquer « ${nom || 'Sans nom'} » ?`, [
+  const handleDuplicateSelection = useCallback(() => {
+    const count = selectedIds.length;
+    Alert.alert('Dupliquer', `Dupliquer ${plural(count, 'personnage')} ?`, [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Dupliquer',
         onPress: async () => {
+          setBusy(true);
           try {
-            await duplicateCharacter(id);
+            await duplicateCharacters(selectedIds);
+            clear();
           } catch (e) {
             Alert.alert('Duplication impossible', e instanceof Error ? e.message : String(e));
+          } finally {
+            setBusy(false);
           }
         },
       },
     ]);
-  }, []);
+  }, [selectedIds, clear]);
+
+  // Destructive: confirm first, and name the characters a campaign still lists
+  // as members — deleting one leaves a hole in that table's roster.
+  const handleDeleteSelection = useCallback(async () => {
+    const count = selectedIds.length;
+    let shared: string[] = [];
+    try {
+      shared = await sharedCharacterNames(selectedIds);
+    } catch {
+      // The warning is a courtesy — never block the deletion on it.
+    }
+    const warning = shared.length
+      ? `\n\nPartagé${shared.length > 1 ? 's' : ''} dans une campagne : ${shared.join(', ')}.`
+      : '';
+    Alert.alert(
+      'Supprimer',
+      `Supprimer ${plural(count, 'personnage')} ? Cette action est définitive.${warning}`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            setBusy(true);
+            try {
+              await deleteCharacters(selectedIds);
+              clear();
+            } catch (e) {
+              Alert.alert('Suppression impossible', e instanceof Error ? e.message : String(e));
+            } finally {
+              setBusy(false);
+            }
+          },
+        },
+      ],
+    );
+  }, [selectedIds, clear]);
 
   // Pick a JSON export and add its characters (as new entries — never overwrites).
   const handleImport = useCallback(async () => {
@@ -81,7 +126,7 @@ export default function CharactersListScreen() {
         return;
       }
       const n = importCharacters(parsed.data).length;
-      Alert.alert('Import réussi', `${n} personnage${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''}.`);
+      Alert.alert('Import réussi', `${plural(n, 'personnage')} ajouté${n > 1 ? 's' : ''}.`);
     } catch (e) {
       Alert.alert('Import impossible', e instanceof Error ? e.message : String(e));
     } finally {
@@ -89,8 +134,41 @@ export default function CharactersListScreen() {
     }
   }, []);
 
+  const selectionCount = selectedIds.length;
+  const allSelected = selection.allSelected;
+
+  // The header IS the mode indicator: while rows are selected it turns into a
+  // contextual bar (count + batch actions), and the normal one comes back on
+  // clear. Same Stack screen, no navigation.
   useLayoutEffect(() => {
+    if (selection.active) {
+      navigation.setOptions({
+        title: `${selectionCount} sélectionné${selectionCount > 1 ? 's' : ''}`,
+        headerBackVisible: false,
+        headerLeft: () => (
+          <IconButton
+            icon={dsIcon('close')}
+            accessibilityLabel="Quitter la sélection"
+            onPress={clear}
+          />
+        ),
+        headerRight: () => (
+          <CharacterSelectionActions
+            allSelected={allSelected}
+            busy={busy}
+            onToggleAll={toggleAll}
+            onDuplicate={handleDuplicateSelection}
+            onExport={handleExportSelection}
+            onDelete={handleDeleteSelection}
+          />
+        ),
+      });
+      return;
+    }
     navigation.setOptions({
+      title: 'Personnages',
+      headerBackVisible: true,
+      headerLeft: undefined,
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
           <IconButton icon="account-group" onPress={() => router.push('/campaigns' as Href)} />
@@ -104,13 +182,26 @@ export default function CharactersListScreen() {
                 onPress={() => setMenuOpen(true)}
               />
             }>
-            <Menu.Item leadingIcon="export" onPress={handleExport} title="Exporter tout" />
             <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
           </Menu>
         </View>
       ),
     });
-  }, [navigation, router, menuOpen, busy, handleExport, handleImport]);
+  }, [
+    navigation,
+    router,
+    menuOpen,
+    busy,
+    handleImport,
+    selection.active,
+    selectionCount,
+    allSelected,
+    toggleAll,
+    clear,
+    handleDuplicateSelection,
+    handleExportSelection,
+    handleDeleteSelection,
+  ]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -140,56 +231,29 @@ export default function CharactersListScreen() {
           contentContainerStyle={[styles.listContent, splitWidth]}
           ItemSeparatorComponent={RowSeparator}
           keyExtractor={keyExtractor}
-          renderItem={({ item }) => {
-            const avatar = mediaUri(item.avatarPath);
-            return (
-              <List.Item
-                style={[
-                  styles.item,
-                  columns > 1 && styles.itemInGrid,
-                  {
-                    backgroundColor: theme.prophecy.surfaceContainerLow,
-                    borderColor: theme.colors.outlineVariant,
-                  },
-                ]}
-                title={item.nom || 'Sans nom'}
-                description={item.concept || undefined}
-                titleStyle={{ color: theme.colors.onSurface }}
-                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                left={(p) =>
-                  avatar ? (
-                    <Image
-                      source={avatar}
-                      style={[styles.avatar, { borderColor: theme.colors.outlineVariant }]}
-                      contentFit="cover"
-                    />
-                  ) : (
-                    <View
-                      style={[
-                        styles.avatar,
-                        styles.avatarFallback,
-                        {
-                          borderColor: theme.colors.outlineVariant,
-                          backgroundColor: theme.colors.surfaceVariant,
-                        },
-                      ]}>
-                      <Icon name="character" size={22} color={theme.colors.onSurfaceVariant} />
-                    </View>
-                  )
-                }
-                // NPCs live in the same list as the player characters (they ARE
-                // characters) — the badge is the only thing that tells them apart.
-                // `p.style` carries List.Item's own centering and margin — drop
-                // it and the pill stretches to the full row height.
-                right={item.kind === 'npc' ? (p) => <OwnerBadge style={p.style} /> : undefined}
-                onPress={() => router.push(`/character/${item.id}` as Href)}
-                onLongPress={() => handleDuplicate(item.id, item.nom ?? '')}
-              />
-            );
-          }}
+          extraData={selectedIds}
+          renderItem={({ item }) => (
+            <CharacterListItem
+              character={item}
+              inGrid={columns > 1}
+              selectionMode={selection.active}
+              selected={selection.isSelected(item.id)}
+              // A tap opens the sheet normally, but toggles the row once the
+              // selection is on — long-press then tap, the usual gesture pair.
+              onPress={() =>
+                selection.active
+                  ? selection.toggle(item.id)
+                  : router.push(`/character/${item.id}` as Href)
+              }
+              onLongPress={() => selection.toggle(item.id)}
+            />
+          )}
         />
       )}
-      <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
+      {/* Creating a character mid-selection makes no sense — the FAB steps out. */}
+      {!selection.active && (
+        <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
+      )}
     </View>
   );
 }
@@ -208,22 +272,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
   },
-  item: {
-    borderWidth: 1,
-    borderRadius: 16,
-  },
   // Grid mode: each row is a wrapper, so cells must share it and gap themselves.
   column: { gap: 8 },
-  // maxWidth only binds a lone item on the last row — without it, it stretches
-  // across both columns. flex:1 still wins for a full row (gap makes it < 50%).
-  itemInGrid: { flex: 1, maxWidth: '50%' },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
-    alignSelf: 'center',
-    marginLeft: 8,
-  },
-  avatarFallback: { alignItems: 'center', justifyContent: 'center' },
 });

@@ -122,6 +122,22 @@ export async function setShareNpcs(campaignId: number, share: boolean): Promise<
 }
 
 /**
+ * Names of the given characters that are members of at least one campaign
+ * (`campaign_shares`). Used to warn before a batch delete: dropping a character
+ * that a table still lists is legal but rarely what the user meant. Distinct by
+ * character — a row shared into two campaigns is named once.
+ */
+export async function sharedCharacterNames(ids: readonly number[]): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const rows = await db
+    .selectDistinct({ id: characters.id, nom: characters.nom })
+    .from(characters)
+    .innerJoin(campaignShares, eq(campaignShares.characterId, characters.id))
+    .where(inArray(characters.id, [...ids]));
+  return rows.map((r) => r.nom || 'Sans nom');
+}
+
+/**
  * Join an existing campaign as a player: local row only — membership on the
  * server is implied by connecting with the code. The campaign name arrives with
  * the `welcome` frame; store the code as a placeholder name until then.

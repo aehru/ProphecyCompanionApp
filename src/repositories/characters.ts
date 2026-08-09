@@ -145,3 +145,14 @@ export async function deleteCharacter(id: number) {
   // Cascade the row's media off-DB (FK cascade can't reach the filesystem).
   deleteCharacterMedia(id);
 }
+
+/**
+ * Delete several characters at once (list selection mode). One statement for the
+ * rows — the FK cascade takes the child tables — then the media folders, which
+ * SQLite can't reach.
+ */
+export async function deleteCharacters(ids: readonly number[]) {
+  if (ids.length === 0) return;
+  await db.delete(characters).where(inArray(characters.id, [...ids]));
+  for (const id of ids) deleteCharacterMedia(id);
+}

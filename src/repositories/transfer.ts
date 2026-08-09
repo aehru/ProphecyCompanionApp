@@ -222,3 +222,18 @@ export async function duplicateCharacter(id: number): Promise<number | null> {
 
   return newId;
 }
+
+/**
+ * Duplicate several characters (list selection mode). Sequential on purpose:
+ * `duplicateCharacter` writes in its own transaction and copies media files, and
+ * the uuid set is re-read per call — running them in parallel would race.
+ * Returns the new row ids, skipping any id that no longer exists.
+ */
+export async function duplicateCharacters(ids: readonly number[]): Promise<number[]> {
+  const created: number[] = [];
+  for (const id of ids) {
+    const newId = await duplicateCharacter(id);
+    if (newId != null) created.push(newId);
+  }
+  return created;
+}
