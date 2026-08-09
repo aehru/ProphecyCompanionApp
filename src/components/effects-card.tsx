@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { Button, Checkbox, Icon, SegmentedButtons, Text, TextInput } from 'react-native-paper';
+import { Button, Checkbox, Icon, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import ChipSelect from '@/components/ui/chip-select';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import {
@@ -241,14 +242,12 @@ export function EffectEditor({
       />
 
       {permanent ? null : (
-        <>
-          <Text style={[styles.fieldLabel, { color: theme.colors.onSurfaceVariant }]}>Unité</Text>
-          <SegmentedButtons
-            value={e.durationUnit}
-            onValueChange={(v) => updateEffect(e.id, { durationUnit: v })}
-            buttons={EFFECT_UNITS.map((u) => ({ value: u.key, label: u.label }))}
-          />
-        </>
+        <ChipSelect
+          label="Unité"
+          options={EFFECT_UNITS.map((u) => ({ key: u.key, label: u.label }))}
+          value={e.durationUnit}
+          onChange={(v) => updateEffect(e.id, { durationUnit: v })}
+        />
       )}
 
       <Text style={[styles.fieldLabel, { color: theme.colors.onSurfaceVariant }]}>
