@@ -18,6 +18,7 @@ import {
   EFFECT_UNITS,
   MONEY,
   NUMERIC_KEYS,
+  PERMANENT_UNIT,
   RESOURCES,
   SPHERES,
   WOUND_LEVELS,
@@ -165,11 +166,15 @@ const magicReserveSchema = z.object({
   current: int,
 });
 
+// An effect may also be permanent — a unit spells never have, which is why this
+// is not `CAST_UNITS`.
+const EFFECT_DURATION_UNITS = [...CAST_UNITS, PERMANENT_UNIT] as [string, ...string[]];
+
 const effectSchema = z.object({
   label: str,
   target: str,
   value: int,
-  durationUnit: z.enum(CAST_UNITS),
+  durationUnit: z.enum(EFFECT_DURATION_UNITS),
   durationRemaining: int,
   expired: z.boolean(),
 });

@@ -185,13 +185,18 @@ export const WOUND_LEVELS = [
 ] as const;
 
 /**
- * Time units a temporary effect can last. Independent of each other — a "time
- * passes" control ticks down only effects sharing the chosen unit (no
- * conversion between actions/rounds/hours/days).
+ * Time units a temporary effect can last, ordered by growing real duration.
+ * Independent of each other — a "time passes" control ticks down only effects
+ * sharing the chosen unit (no conversion between actions/tours/minutes/hours/
+ * days; 60 "minute" effects do NOT collapse into one "hour" tick).
+ *
+ * `round` keeps its DB key for back-compat (rows and exports predate the
+ * rename) but reads « Tour », the rulebook's word.
  */
 export const EFFECT_UNITS = [
   { key: 'action', label: 'Action', plural: 'Actions' },
-  { key: 'round', label: 'Round', plural: 'Rounds' },
+  { key: 'round', label: 'Tour', plural: 'Tours' },
+  { key: 'minute', label: 'Minute', plural: 'Minutes' },
   { key: 'hour', label: 'Heure', plural: 'Heures' },
   { key: 'day', label: 'Jour', plural: 'Jours' },
 ] as const;
