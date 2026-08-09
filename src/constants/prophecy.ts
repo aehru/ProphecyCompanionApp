@@ -52,12 +52,14 @@ export const SPHERES = [
 
 /**
  * Magic disciplines. Plain single-value stats like the caractéristiques — one
- * int column per discipline on the character (no max/current pool).
+ * int column per discipline on the character (no max/current pool). `abbr` is
+ * for chips and other tight spots (the spell catalogue's filters), never for a
+ * form field — those keep the full `label`.
  */
 export const DISCIPLINES = [
-  { key: 'magieInvocatoire', label: 'Invocatoire' },
-  { key: 'magieInstinctive', label: 'Instinctive' },
-  { key: 'sorcellerie', label: 'Sorcellerie' },
+  { key: 'magieInvocatoire', label: 'Invocatoire', abbr: 'Invo.' },
+  { key: 'magieInstinctive', label: 'Instinctive', abbr: 'Inst.' },
+  { key: 'sorcellerie', label: 'Sorcellerie', abbr: 'Sorc.' },
 ] as const;
 
 /**
