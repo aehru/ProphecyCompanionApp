@@ -7,19 +7,21 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   ...expoConfig,
   {
-    // TODO(sdk57): re-promote these to `error` and fix the 41 violations.
+    // eslint-config-expo 55+ turns on the React Compiler hook rules. `refs` and
+    // `globals` were fixed outright and stay at the preset's `error`.
     //
-    // eslint-config-expo 55+ turns on the React Compiler hook rules. They flag
-    // pre-existing patterns across 15 files — not regressions from the SDK
-    // upgrade — so they are warnings for the duration of the 54 → 57 migration
-    // and get their own pass afterwards, rather than burying a hooks refactor
-    // inside a dependency bump. `reactCompiler` is already on in app.json, so
-    // these are worth fixing for real: `globals` in particular flags a
-    // module-level variable reassigned during render (dice-roller-fab).
+    // `set-state-in-effect` keeps three deliberate exceptions, all of them
+    // effects synchronising with something outside React rather than deriving
+    // state from props:
+    //   - _layout.tsx          — reacts to an async migration failure, next to
+    //                            restoreDatabase() and AsyncStorage work.
+    //   - campaigns/index.tsx  — deep-link QR params open the join dialog, and
+    //                            it has to fire on a cold start.
+    //   - use-campaign-live    — socket lifecycle guard on the broadcast path.
+    // Rewriting these as render-time updates would either change cold-start
+    // behaviour or disturb the code that decides what leaves the device.
     rules: {
-      'react-hooks/refs': 'warn', // 35 — mostly `useRef(...).current` read in render
-      'react-hooks/set-state-in-effect': 'warn', // 5
-      'react-hooks/globals': 'warn', // 1 — likely a real bug
+      'react-hooks/set-state-in-effect': 'warn',
     },
   },
   {

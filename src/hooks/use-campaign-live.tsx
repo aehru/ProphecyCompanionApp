@@ -161,8 +161,13 @@ function LiveBroadcaster({
   // `welcome` backfills the local campaign name, which would otherwise change the
   // socket effect's deps and reconnect mid-broadcast. Ref-read keeps the name out
   // of the deps: only the connection identity reconnects.
+  // Written in an effect, not during render: a ref write while rendering is a
+  // side effect the React Compiler rejects. Only the socket's `welcome` callback
+  // reads it, and that cannot fire before the connect effect below has run.
   const nameRef = useRef(campaign?.name);
-  nameRef.current = campaign?.name;
+  useEffect(() => {
+    nameRef.current = campaign?.name;
+  });
 
   const socketRef = useRef<CampaignSocket | null>(null);
   const onlineRef = useRef(false);

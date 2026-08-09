@@ -1,11 +1,12 @@
-import React, { useRef, useState } from 'react';
-import { Alert, type TextInput as RNTextInput, StyleSheet, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import WeaponSkillField from '@/components/weapon-skill-field';
 import type { Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
+import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formatDecimal, parseDecimal } from '@/lib/character-values';
 import { parseFormula } from '@/lib/formula';
@@ -86,30 +87,7 @@ export default function WeaponEditor({
     ]);
 
   // Keyboard "next" wiring: jump to the following field instead of dismissing.
-  const refs = useRef<Record<string, RNTextInput | null>>({});
-  const focusNext = (key: string) => {
-    const next = EDIT_ORDER[EDIT_ORDER.indexOf(key as (typeof EDIT_ORDER)[number]) + 1];
-    refs.current[next]?.focus();
-  };
-  const setPaperRef = (key: string) => (el: unknown) => {
-    refs.current[key] = el as RNTextInput | null;
-  };
-  // Single-line text fields: chain to the next field on return.
-  const textChain = (key: string) => ({
-    ref: setPaperRef(key),
-    returnKeyType: 'next' as const,
-    blurOnSubmit: false,
-    onSubmitEditing: () => focusNext(key),
-  });
-  // NumberField fields: same, via its inputRef passthrough.
-  const numChain = (key: string, last = false) => ({
-    inputRef: (el: RNTextInput | null) => {
-      refs.current[key] = el;
-    },
-    returnKeyType: (last ? 'done' : 'next') as 'done' | 'next',
-    submitBehavior: (last ? 'blurAndSubmit' : 'submit') as 'blurAndSubmit' | 'submit',
-    onSubmitEditing: () => focusNext(key),
-  });
+  const { textChain, numChain } = useFieldChain(EDIT_ORDER);
 
   return (
     <>
