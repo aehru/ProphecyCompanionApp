@@ -163,4 +163,7 @@ export async function deleteCharacters(ids: readonly number[]) {
   if (ids.length === 0) return;
   await db.delete(characters).where(inArray(characters.id, [...ids]));
   for (const id of ids) deleteCharacterMedia(id);
+  // One line for the batch: the rows go in a single statement, so there is no
+  // per-row `deleteCharacter` log to explain "my characters disappeared".
+  logWrite('characters', 'delete', { ids: [...ids], count: ids.length, reason: 'batch' });
 }

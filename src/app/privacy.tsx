@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import SectionCard from '@/components/ui/section-card';
-import { dsIcon, type IconName } from '@/components/ui/icon';
+import Icon, { dsIcon, type IconName } from '@/components/ui/icon';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { SINK_DESCRIPTION } from '@/lib/log';
@@ -122,11 +122,12 @@ function Body({ children }: { children: React.ReactNode }) {
 /** A DS-iconned bullet — same register as the rest of the app's list rows. */
 function Bullet({ icon, children }: { icon: IconName; children: React.ReactNode }) {
   const theme = useProphecyTheme();
-  const Glyph = dsIcon(icon);
   return (
     <View style={styles.bullet}>
       <View style={styles.bulletIcon}>
-        <Glyph size={16} color={theme.colors.secondary} />
+        {/* <Icon>, not dsIcon(): the adapter builds a component, and one built
+            during render resets its state on every pass (react-hooks rule). */}
+        <Icon name={icon} size={16} color={theme.colors.secondary} />
       </View>
       <Text variant="bodyMedium" style={[styles.bulletText, { color: theme.colors.onSurfaceVariant }]}>
         {children}
