@@ -130,6 +130,8 @@ The sink is platform-split behind one interface: Metro resolves `sink.native.ts`
 
 When you add a log call: the message is a constant event name (`repo.write`, `route.change`), everything variable goes in the payload, and records are named by id — never by anything the user typed. Repositories go through [`logWrite`](src/repositories/log.ts).
 
+A row id alone can't say *what* was added, so the catalogue pickers log `catalog.add` with the preset's slug (`catalogId`, e.g. `boule-de-feu`) before inserting — that tells a bad generated preset apart from a bad hand edit. It is logged from the **screen**, not threaded through `createSpell`/`createWeapon`/…: which preset the user tapped is a UI fact, and a repository argument that exists only to be logged is one the next caller has to think about. Slugs are authored in `data-src/*.csv`, i.e. code identifiers, which is why `catalogId` may sit on the allow-list while the spell's `name` may not.
+
 ## Project layout
 
 ```

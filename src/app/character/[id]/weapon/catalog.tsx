@@ -17,6 +17,7 @@ import {
 import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { log } from '@/lib/log';
 import { createWeapon } from '@/repositories/weapons';
 
 // Ranged families get a compass glyph; everything else is melee (sword).
@@ -53,6 +54,9 @@ export default function WeaponCatalogModal() {
   const add = async (preset?: WeaponPreset) => {
     // Persist the preset's handedness (label → schema int) onto the new weapon.
     const data = preset ? { ...preset.data, hands: HAND_VALUE[preset.hands] } : undefined;
+    // The picked preset's slug — see the spell catalogue for why it is logged
+    // from the screen and not passed down to the repository.
+    if (preset) log.info('catalog.add', { entity: 'weapons', catalogId: preset.id });
     const row = await createWeapon(numId, data);
     router.replace(`/character/${numId}/weapon/${row.id}`);
   };

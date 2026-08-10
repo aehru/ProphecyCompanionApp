@@ -108,6 +108,10 @@ export const ALLOWED_PAYLOAD_KEYS: readonly string[] = [
   'to',
   'screen',
   'tab',
+  // catalogue slug (`boule-de-feu`) — authored in data-src/*.csv and generated
+  // into the app, i.e. a code identifier, not anything the user typed. A row id
+  // alone says "spell 11 was added" and can't tell a bad preset from a bad edit.
+  'catalogId',
   // fixed domain vocabularies
   'kind',
   'role',

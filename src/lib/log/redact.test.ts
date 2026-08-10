@@ -59,6 +59,14 @@ describe('redactPayload', () => {
     expect(JSON.stringify(out)).not.toContain('Aldric');
   });
 
+  it('keeps a catalogue slug — it names a generated preset, not the user', () => {
+    // A row id alone ("spell 11") can't tell a bad CSV preset from a bad edit;
+    // the slug is authored in data-src/*.csv, so it is a code identifier. The
+    // spell's own `name` is still user-facing content and stays out.
+    const out = redactPayload({ spellId: 11, catalogId: 'boule-de-feu', name: 'Boule de feu' });
+    expect(out).toEqual({ spellId: 11, catalogId: 'boule-de-feu', _dropped: 1 });
+  });
+
   it('returns undefined when nothing survives and nothing was dropped', () => {
     expect(redactPayload(undefined)).toBeUndefined();
     expect(redactPayload({})).toBeUndefined();
