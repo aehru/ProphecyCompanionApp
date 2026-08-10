@@ -235,6 +235,28 @@ So release signing is injected by a config plugin instead of edited into `build.
 
 - **[plugins/withReleaseSigning.js](plugins/withReleaseSigning.js)** — registered in `app.json` → `expo.plugins`. On every prebuild it rewrites `android/app/build.gradle` to sign `release` with an upload keystore, reading path + passwords from Gradle properties. If those properties are absent it falls back to debug signing, so a fresh clone or CI still builds without the keystore.
 - **[plugins/withCmakeVersion.js](plugins/withCmakeVersion.js)** — pins the app's CMake to `3.31.6` (ninja 1.12, long-path aware) so the Windows `MAX_PATH` build failure can't come back after a prebuild. Requires `sdkmanager "cmake;3.31.6"` (see [Prerequisites](#prerequisites)).
+- **[plugins/withDebugSymbolLevel.js](plugins/withDebugSymbolLevel.js)** — sets `ndk.debugSymbolLevel "SYMBOL_TABLE"` on the release build type. See [Build size](#build-size).
+
+### Build size
+
+The 0.14.0 bundle hit 96 MB uploaded. Where it went, and what each knob buys:
+
+| Lever | Where | Measured effect |
+| --- | --- | --- |
+| `buildArchs: ["arm64-v8a", "armeabi-v7a"]` | `app.json` → `expo-build-properties` | **−34 MB uploaded** (−22 MB of `lib/`, −12 MB of the debug symbols that shadow it). No Play phone is x86; those splits were only ever delivered to emulators. Nothing changes for a real device's download. |
+| Deep font imports | [src/app/_layout.tsx](src/app/_layout.tsx) | **−6 MB downloaded.** A `@expo-google-fonts/<family>` root import re-`require`s every weight in the family, so Metro bundled all 18 NotoSans faces to use two. Same trap on `@expo/vector-icons`, whose index pulls all 16 icon fonts. **Always import the subpath.** |
+| `debugSymbolLevel "SYMBOL_TABLE"` | `withDebugSymbolLevel` plugin | **0 MB.** AGP defaults to `FULL`, but React Native's prebuilt `.so` files arrive from Maven already stripped to a symbol table — `arm64-v8a/libreactnative.so.sym` is byte-identical before and after. Kept as a cap in case a future dependency does ship DWARF. Use `"NONE"` to drop the remaining ~12 MB, at the cost of native crash symbolication in Play Console. |
+
+Result: **96.1 MB → 55.5 MB uploaded**, and ~40.7 MB → ~34.4 MB downloaded on an arm64 device.
+
+Still on the table (measured, not done): R8 (`enableMinifyInReleaseBuilds`, dex is 17.8 MB of the 34 MB download and is the single biggest remaining item — needs a full smoke test, it breaks reflection silently), the bundled ML Kit barcode model `libbarhopper_v3.so` (~−5 MB/ABI, swap for the Play-Services-delivered variant), and dropping the unused `expo-symbols` / `expo-web-browser` native modules — `expo-symbols` alone still drags a 419 KB Material Symbols font into the bundle for nothing.
+
+Measure delivered size, not the `.aab` — the `.aab` is a container of per-device splits:
+
+```bash
+bundletool build-apks --bundle=android/app/build/outputs/bundle/release/prophecy-app-0.14.0.aab --output=out.apks --connected-device
+bundletool get-size total --apks=out.apks
+```
 
 **Secrets never live in the repo.** They go in `~/.gradle/gradle.properties` (global, outside the project):
 
@@ -257,6 +279,12 @@ Build a release bundle:
 ```bash
 bun run android                         # debug, on a device/emulator
 cd android && ./gradlew bundleRelease   # signed .aab for the Play Store
+```
+
+`buildArchs` applies to **every** variant, debug included, so the default build has no x86 slice — a stock Windows/Intel emulator is x86_64 and will install a binary it can't run. Physical device: nothing to do. Emulator: pass the arch as a Gradle project property for that run only. Gradle reads `ORG_GRADLE_PROJECT_*` from the environment, so the normal Expo flow still works:
+
+```powershell
+$env:ORG_GRADLE_PROJECT_reactNativeArchitectures="x86_64"; bun run android
 ```
 
 Verify which keystore the release variant uses:
