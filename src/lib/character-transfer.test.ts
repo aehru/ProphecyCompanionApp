@@ -4,8 +4,11 @@ import { MONEY, NUMERIC_KEYS, RESOURCES, SPHERES, WOUND_LEVELS } from '@/constan
 
 import {
   buildExport,
+  bundleMode,
   type CharacterBundle,
   EXPORT_FORMAT,
+  exportFileName,
+  forSharing,
   parseImport,
   planImport,
   planMagicReserves,
@@ -386,5 +389,82 @@ describe('planMagicReserves', () => {
   it('never mutates the input rows', () => {
     planMagicReserves(rows, 'copy');
     expect(rows[0].current).toBe(2);
+  });
+});
+
+describe('forSharing', () => {
+  // The whole point of issue #43: a shared file must not carry the identity, or
+  // the recipient's device claims the sender's campaign roster slot.
+  it('drops the uuid from every character', () => {
+    const exp = buildExport([
+      makeBundle({ character: { ...makeBundle().character, uuid: 'u1' } as CharacterBundle['character'] }),
+      makeBundle({ character: { ...makeBundle().character, uuid: 'u2' } as CharacterBundle['character'] }),
+    ]);
+    const shared = forSharing(exp);
+    for (const b of shared.characters) {
+      expect('uuid' in (b.character as object)).toBe(false);
+    }
+    // Everything else survives, and the source envelope is untouched.
+    expect(shared.characters[0].character.nom).toBe('Ryld');
+    expect((exp.characters[0].character as { uuid?: string }).uuid).toBe('u1');
+  });
+
+  it('leaves an already anonymous export alone', () => {
+    const exp = buildExport([makeBundle()]);
+    expect(forSharing(exp)).toEqual(exp);
+  });
+
+  it('survives the round-trip it is meant for', () => {
+    const shared = forSharing(buildExport([makeBundle({
+      character: { ...makeBundle().character, uuid: 'u1' } as CharacterBundle['character'],
+    })]));
+    const parsed = parseImport(serializeExport(shared));
+    expect(parsed.ok).toBe(true);
+  });
+});
+
+describe('exportFileName', () => {
+  const at = new Date('2026-08-10T12:00:00Z');
+  const named = (nom: string) =>
+    makeBundle({ character: { ...makeBundle().character, nom } as CharacterBundle['character'] });
+
+  it('says which intent it is, and names a lone character', () => {
+    const exp = buildExport([named('Ryld')]);
+    expect(exportFileName(exp, 'backup', at)).toBe('prophecy-sauvegarde-ryld-2026-08-10.json');
+    expect(exportFileName(exp, 'share', at)).toBe('prophecy-partage-ryld-2026-08-10.json');
+  });
+
+  it('counts a batch instead of naming it', () => {
+    const exp = buildExport([named('Ryld'), named('Alia')]);
+    expect(exportFileName(exp, 'backup', at)).toBe('prophecy-sauvegarde-2-personnages-2026-08-10.json');
+  });
+
+  it('slugifies a name that would be hostile to a filesystem', () => {
+    const exp = buildExport([named('Élénaïs / "la Rusée"')]);
+    expect(exportFileName(exp, 'share', at)).toBe('prophecy-partage-elenais-la-rusee-2026-08-10.json');
+  });
+
+  it('falls back when the name is empty or all punctuation', () => {
+    expect(exportFileName(buildExport([named('')]), 'backup', at)).toBe(
+      'prophecy-sauvegarde-personnage-2026-08-10.json',
+    );
+    expect(exportFileName(buildExport([named('???')]), 'backup', at)).toBe(
+      'prophecy-sauvegarde-personnage-2026-08-10.json',
+    );
+  });
+});
+
+describe('bundleMode', () => {
+  // A restore is only a restore for the bundles that still have an identity.
+  it('keeps restore when the bundle carries a uuid', () => {
+    expect(bundleMode('u1', 'restore')).toBe('restore');
+  });
+
+  it('falls back to copy for a shared (uuid-less) bundle', () => {
+    expect(bundleMode(undefined, 'restore')).toBe('copy');
+  });
+
+  it('never upgrades a copy import', () => {
+    expect(bundleMode('u1', 'copy')).toBe('copy');
   });
 });

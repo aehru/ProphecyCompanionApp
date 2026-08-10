@@ -24,9 +24,12 @@ import {
 import {
   ARMOR_FIELDS,
   buildExport,
+  bundleMode,
   CHARACTER_FIELDS,
   type CharacterBundle,
   EFFECT_FIELDS,
+  type ExportIntent,
+  forSharing,
   type ImportMode,
   MAGIC_RESERVE_FIELDS,
   planImport,
@@ -53,8 +56,15 @@ function pick(row: Record<string, unknown>, fields: string[]): Record<string, un
  * Gather one or more characters into a versioned export envelope. Pass character
  * ids to export a subset; omit for the whole roster (full backup). Media files
  * are not embedded — avatar/portrait paths are dropped (see character-transfer).
+ *
+ * `intent` decides whether the portable `uuid` rides along (see `ExportIntent`):
+ * a backup keeps the characters' identity, a share strips it so the recipient
+ * gets a new lineage instead of a second claim on the same campaign roster slot.
  */
-export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> {
+export async function exportCharacters(
+  ids?: number[],
+  intent: ExportIntent = 'backup',
+): Promise<ProphecyExport> {
   const rows = ids
     ? await db.select().from(characters).where(inArray(characters.id, ids))
     : await db.select().from(characters);
@@ -86,8 +96,9 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
     } as CharacterBundle);
   }
 
-  logWrite('characters', 'update', { count: bundles.length, phase: 'export' });
-  return buildExport(bundles);
+  logWrite('characters', 'update', { count: bundles.length, phase: 'export', mode: intent });
+  const exp = buildExport(bundles);
+  return intent === 'share' ? forSharing(exp) : exp;
 }
 
 /**
@@ -99,17 +110,31 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
  *   - `'restore'` — preserve each character's uuid so it re-links to its campaign
  *     roster slot. A uuid this device already holds is REPLACED in place
  *     (idempotent re-import); an unknown uuid is inserted as-is.
- * Returns the row ids of the characters written (inserted or replaced), in
- * bundle order. Wrapped in a transaction so a bad bundle can't leave a
- * half-written character behind.
+ * The mode is per FILE but the decision is per BUNDLE (`bundleMode`): a shared
+ * export carries no uuid, so it stays a copy even when the caller asked for a
+ * restore — which is what lets the import screen pass `'restore'` blindly and
+ * let the file's own shape decide.
+ *
+ * Returns the row ids written (inserted or replaced) in bundle order, plus how
+ * many of those replaced a character this device already had — the import screen
+ * reports "restaurés" vs "ajoutés" from it. Wrapped in a transaction so a bad
+ * bundle can't leave a half-written character behind.
  *
  * The expo-sqlite driver runs transactions synchronously (it commits as soon as
  * the callback returns), so the body MUST use the sync query methods
  * (`.run()` / `.returning().get()` / `.all()`) — an async callback would commit
  * before the awaited writes ran. Hence this function is synchronous.
  */
-export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): number[] {
+export interface ImportOutcome {
+  /** Row ids written, in bundle order. */
+  ids: number[];
+  /** How many of them replaced a character this device already held. */
+  restored: number;
+}
+
+export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): ImportOutcome {
   const written: number[] = [];
+  let restored = 0;
   db.transaction((tx) => {
     // Seed the live uuid set once, then keep it current as we write, so two
     // bundles carrying the same uuid in one file don't both try to insert it.
@@ -125,7 +150,9 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
     for (const b of data.characters) {
       const now = new Date();
       const incoming = (b.character as { uuid?: string }).uuid;
-      const plan = planImport(incoming, existing, mode, newUuid);
+      // A uuid-less bundle (a shared sheet) is a copy whatever the file mode.
+      const effective = bundleMode(incoming, mode);
+      const plan = planImport(incoming, existing, effective, newUuid);
       // The bundle's own uuid never wins directly — the plan decides it.
       const sheet = { ...(b.character as Partial<NewCharacter>), uuid: plan.uuid };
 
@@ -145,6 +172,7 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
             .get().id;
         } else {
           characterId = target.id;
+          restored++;
           // Overwrite the sheet (keep original createdAt) and rebuild children.
           tx.update(characters).set({ ...sheet, updatedAt: now }).where(eq(characters.id, characterId)).run();
           for (const t of [actualState, skills, armor, weapons, shields, spells, magicReserves, effects]) {
@@ -173,7 +201,7 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
       if (shieldRows.length) tx.insert(shields).values(link(shieldRows) as NewShield[]).run();
       if (b.spells.length) tx.insert(spells).values(link(b.spells) as NewSpell[]).run();
       // Reserve objects are recharged on a copy, kept as-is on a restore.
-      const reserves = planMagicReserves(b.magicReserves ?? [], mode);
+      const reserves = planMagicReserves(b.magicReserves ?? [], effective);
       if (reserves.length) {
         tx.insert(magicReserves).values(link(reserves) as NewMagicReserve[]).run();
       }
@@ -183,8 +211,14 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
       written.push(characterId);
     }
   });
-  logWrite('characters', 'insert', { ids: written, count: written.length, mode, phase: 'import' });
-  return written;
+  logWrite('characters', 'insert', {
+    ids: written,
+    count: written.length,
+    restored,
+    mode,
+    phase: 'import',
+  });
+  return { ids: written, restored };
 }
 
 /**
@@ -207,7 +241,7 @@ export async function duplicateCharacter(id: number): Promise<number | null> {
   const sheet = bundle.character as { nom?: string };
   sheet.nom = `${sheet.nom || 'Sans nom'} (copie)`;
 
-  const [newId] = importCharacters(exp, 'copy');
+  const [newId] = importCharacters(exp, 'copy').ids;
 
   // Media: copy the files (not just the paths — each character owns its folder,
   // and deleting one character removes its whole media dir).
