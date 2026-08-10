@@ -40,6 +40,7 @@ import {
 } from '@/lib/character-transfer';
 import { copyMedia } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
+import { logWrite } from '@/repositories/log';
 
 /** Copy only the listed keys off a DB row (drops id / FK / timestamps / media). */
 function pick(row: Record<string, unknown>, fields: string[]): Record<string, unknown> {
@@ -85,6 +86,7 @@ export async function exportCharacters(ids?: number[]): Promise<ProphecyExport> 
     } as CharacterBundle);
   }
 
+  logWrite('characters', 'update', { count: bundles.length, phase: 'export' });
   return buildExport(bundles);
 }
 
@@ -181,6 +183,7 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
       written.push(characterId);
     }
   });
+  logWrite('characters', 'insert', { ids: written, count: written.length, mode, phase: 'import' });
   return written;
 }
 
@@ -220,6 +223,7 @@ export async function duplicateCharacter(id: number): Promise<number | null> {
     await db.update(characters).set(media).where(eq(characters.id, newId));
   }
 
+  logWrite('characters', 'insert', { characterId: newId, id, reason: 'duplicate' });
   return newId;
 }
 

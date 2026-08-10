@@ -63,6 +63,50 @@ There is **no separate "status" screen**. Each character tab (`src/app/character
 
 **Portable character `uuid`.** `characters.uuid` (nullable at the DB level; backfilled on launch by `repositories/characters.backfillCharacterUuids`, minted for new rows via `$defaultFn` using [src/lib/uuid.ts](src/lib/uuid.ts) — a dependency-free RFC-4122 v4 so `schema.ts` stays Node-loadable by drizzle-kit/vitest). It's the stable id that survives export/import and device changes; the export preserves it on **restore** and mints a fresh one on **copy/clone** (`planImport` in `character-transfer.ts`).
 
+## Diagnostic log — retrievable, never transmitted
+
+A public-beta bug report needs evidence, and the app has no server to send it to.
+[src/lib/log/](src/lib/log) is a local ring buffer (**1500 entries / 512 KB**,
+whichever binds first) flushed to **two files**, `current` + `previous`;
+`current` is **rewritten wholesale** on every flush (never appended), rotated at
+launch, and anything past the 7-day window is purged. The **share sheet is the
+only exit** — no server, no analytics, no automatic crash upload — and
+[privacy.tsx](src/app/privacy.tsx) says so in plain French.
+
+- **The redactor is the privacy boundary, and it is deny-first.**
+  [redact.ts](src/lib/log/redact.ts) writes a payload key only if it is on
+  `ALLOWED_PAYLOAD_KEYS` **and** absent from `USER_TEXT_KEYS` / `SECRET_KEYS` —
+  the deny check runs first, so allow-listing `nom` by accident still drops it.
+  [redact.test.ts](src/lib/log/redact.test.ts) asserts that inversion; don't
+  defeat it. Records are named by opaque local id (`characterId`, `uuid`), a
+  patch by its **column names** (`fields`), never by a value. Everything dropped
+  is counted as `_dropped: n`. Strings truncate at 400, stacks at 2000. Keep this
+  module free of framework imports — like the other pure engines, it must load in
+  plain-Node vitest.
+- **Layering.** `types` → `redact` / `ring-buffer` / `serialize` / `session` (all
+  pure, all tested) → `logger.ts` (the engine: injected sink + clock, level
+  filter, 2 s debounce, immediate flush on `error`) → `index.ts` (the singleton:
+  platform sink, level persisted in AsyncStorage, launch rotation). Native-module
+  glue lives apart in [share.ts](src/lib/log/share.ts) so `index.ts` stays
+  importable anywhere.
+- **The sink is platform-split behind one interface** (`LogSink`): Metro picks
+  `sink.native.ts` (two files under the private document dir) or `sink.web.ts`
+  (localStorage); `sink.ts` is the in-memory default Node gets. The sink is dumb
+  read/write/remove — rotation and retention are pure decisions taken above it
+  from the entries' own timestamps.
+- **The logger starts with NO sink** and gets one at the end of `initDiagnostics`.
+  That is not cosmetic: a flush firing first would overwrite `current` while it is
+  still the previous launch's file waiting to be rotated.
+- **Session id is random per launch, never persisted, not device-derived**, so two
+  shared reports can't be correlated.
+- **Capture:** `installCapture()` (global handler, unhandled rejections,
+  background flush) runs at _layout **import time**, above the tree;
+  [`<LogErrorBoundary>`](src/components/log-error-boundary.tsx) catches render
+  throws; `useRouteBreadcrumbs` logs `route.change`; repositories call
+  [`logWrite`](src/repositories/log.ts) — `update` at `debug` (a stat stepper
+  fires on every tap), `insert`/`delete` at `info`. Default level is `info` in
+  prod, `debug` in dev.
+
 ## Campaign mode — a LOCAL table, optionally networked
 
 A GM's **table** is local-first and works with no network at all: NPCs, their sheets, wounds and initiative live in this device's DB. Attaching a relay **server** ([separate repo](https://github.com/aehru/ProphecyCompanionServer): FastAPI + WebSocket + SQLite; deploy behind Caddy for TLS) is the *bonus* — it adds the players' characters, which they broadcast as a **minimized, read-only projection**. The full wire contract is [docs/campaign-protocol.md](docs/campaign-protocol.md). Solo use is untouched — only an opted-in character's projection ever leaves the device.
@@ -81,4 +125,4 @@ A GM's **table** is local-first and works with no network at all: NPCs, their sh
 
 ## Testing
 
-Vitest runs in a **Node** environment ([vitest.config.ts](vitest.config.ts) mirrors the `@/` → `src` alias). Three kinds work today: pure logic (`lib/*`); the **forward-migration harness** ([src/db/migrations.test.ts](src/db/migrations.test.ts)) — it replays `drizzle/*.sql` against `better-sqlite3`, seeding a DB at each prior schema version to catch NOT-NULL-without-default, tightened CHECKs, and journal drift; and the **catalogue freshness check** ([src/data/catalog.test.ts](src/data/catalog.test.ts)), which re-runs the CSV generator and diffs it against the committed `.gen.ts`. **Run tests after every `drizzle-kit generate`.** Repository logic isn't testable yet (it imports the expo-sqlite `db` singleton — needs dependency injection first).
+Vitest runs in a **Node** environment ([vitest.config.ts](vitest.config.ts) mirrors the `@/` → `src` alias). Three kinds work today: pure logic (`lib/*`); the **forward-migration harness** ([src/db/migrations.test.ts](src/db/migrations.test.ts)) — it replays `drizzle/*.sql` against `better-sqlite3`, seeding a DB at each prior schema version to catch NOT-NULL-without-default, tightened CHECKs, and journal drift; and the **catalogue freshness check** ([src/data/catalog.test.ts](src/data/catalog.test.ts)), which re-runs the CSV generator and diffs it against the committed `.gen.ts`. Two suites are privacy guards rather than correctness ones and must not be relaxed to make a change pass: `character-share.test.ts` (the campaign wire) and [redact.test.ts](src/lib/log/redact.test.ts) (the diagnostic log's allow-list). **Run tests after every `drizzle-kit generate`.** Repository logic isn't testable yet (it imports the expo-sqlite `db` singleton — needs dependency injection first).

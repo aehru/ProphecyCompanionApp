@@ -10,6 +10,7 @@ import { ARMOR_CATALOG, ARMOR_CATEGORIES, type ArmorPreset } from '@/data/armor-
 import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { log } from '@/lib/log';
 import { createArmor } from '@/repositories/armor';
 
 /**
@@ -36,6 +37,9 @@ export default function ArmorCatalogModal() {
   // Add the armor, then replace this screen with its editor so "back" from the
   // editor returns to the Inventaire tab (not the catalogue).
   const add = async (preset?: ArmorPreset) => {
+    // The picked preset's slug — see the spell catalogue for why it is logged
+    // from the screen and not passed down to the repository.
+    if (preset) log.info('catalog.add', { entity: 'armor', catalogId: preset.id });
     const row = await createArmor(numId, preset?.data);
     router.replace(`/character/${numId}/armor/${row.id}`);
   };

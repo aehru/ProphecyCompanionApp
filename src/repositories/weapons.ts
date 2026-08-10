@@ -3,6 +3,7 @@ import { and, asc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { type EquippedHand, type NewWeapon, weapons } from '@/db/schema';
 import { deleteEnchantsFor } from '@/repositories/enchants';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's weapon catalogue (use with useLiveQuery). */
 export function weaponsQuery(characterId: number) {
@@ -24,16 +25,19 @@ export async function createWeapon(characterId: number, data: Partial<NewWeapon>
     .insert(weapons)
     .values({ characterId, ...data })
     .returning();
+  logWrite('weapons', 'insert', { characterId, weaponId: row?.id });
   return row;
 }
 
 export async function updateWeapon(id: number, data: Partial<NewWeapon>) {
   await db.update(weapons).set(data).where(eq(weapons.id, id));
+  logWrite('weapons', 'update', { weaponId: id }, data);
 }
 
 export async function deleteWeapon(id: number) {
   await deleteEnchantsFor('weapon', id);
   await db.delete(weapons).where(eq(weapons.id, id));
+  logWrite('weapons', 'delete', { weaponId: id });
 }
 
 /**
@@ -59,9 +63,11 @@ export async function equipWeapon(characterId: number, id: number, hand: Equippe
     }
     await tx.update(weapons).set({ equippedHand: hand }).where(eq(weapons.id, id));
   });
+  logWrite('weapons', 'update', { characterId, weaponId: id, slot: hand }, { equippedHand: hand });
 }
 
 /** Unequip a weapon (clears whichever hand it occupied). */
 export async function unequipWeapon(id: number) {
   await db.update(weapons).set({ equippedHand: null }).where(eq(weapons.id, id));
+  logWrite('weapons', 'update', { weaponId: id, slot: 'none' }, { equippedHand: null });
 }

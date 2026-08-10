@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 
 import { actualState, type ActualState } from '@/db/schema';
 import { db } from '@/db/client';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for one character's state row. Use with useLiveQuery. */
 export function actualStateQuery(characterId: number) {
@@ -22,6 +23,7 @@ export async function ensureActualState(characterId: number) {
   const existing = await getActualState(characterId);
   if (existing) return existing;
   const [row] = await db.insert(actualState).values({ characterId }).returning();
+  logWrite('actual_state', 'insert', { characterId, reason: 'ensure' });
   return row;
 }
 
@@ -30,4 +32,7 @@ export async function updateActualState(characterId: number, data: Partial<Actua
     .update(actualState)
     .set({ ...data, updatedAt: new Date() })
     .where(eq(actualState.characterId, characterId));
+  // The highest-frequency write in the app (every wound tap, every bullet) —
+  // hence `debug`, and column names only.
+  logWrite('actual_state', 'update', { characterId }, data);
 }

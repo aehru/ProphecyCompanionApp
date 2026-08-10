@@ -18,9 +18,13 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PaperProvider, Text } from 'react-native-paper';
 
 import CampaignLiveIndicator from '@/components/campaign-live-indicator';
+import LogErrorBoundary from '@/components/log-error-boundary';
 import { backupDatabase, clearBackup, restoreDatabase } from '@/db/backup';
 import { db, resetDatabase } from '@/db/client';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
+import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
+import { initDiagnostics, log } from '@/lib/log';
+import { installCapture } from '@/lib/log/capture';
 import { backfillCharacterUuids } from '@/repositories/characters';
 import migrations from '../../drizzle/migrations';
 import {
@@ -31,6 +35,18 @@ import {
 } from '@/theme/prophecyTheme';
 
 const RESET_FLAG = 'db_reset_attempted';
+
+/** Emits a `route.change` breadcrumb. Null render — it only needs the router. */
+function RouteBreadcrumbs() {
+  useRouteBreadcrumbs();
+  return null;
+}
+
+// Diagnostics come up at import time, before anything renders: a crash during
+// the very first render (or inside a migration) has to land in the log too.
+// Both calls are best-effort and never throw.
+installCapture();
+void initDiagnostics();
 
 // react-native-paper resolves its default icons through @expo/vector-icons.
 const paperSettings = {
@@ -62,11 +78,13 @@ export default function RootLayout() {
   //    so a genuinely broken migration shows the error instead of looping.
   useEffect(() => {
     if (!error) return;
+    log.error('db.migrate.failed', error, { phase: __DEV__ ? 'dev' : 'prod' });
     if (!__DEV__) {
       // Recover the pre-migration snapshot so a failed prod migration doesn't
       // leave a broken/half-migrated DB. The user's data is preserved for the
       // next launch (or a future retry/export flow) instead of being wiped.
-      restoreDatabase();
+      const restored = restoreDatabase();
+      log.warn('db.restore', { restored });
       setFatal(error.message);
       return;
     }
@@ -78,6 +96,7 @@ export default function RootLayout() {
         return;
       }
       await AsyncStorage.setItem(RESET_FLAG, '1');
+      log.warn('db.reset', { reason: 'migration-failed' });
       resetDatabase();
       DevSettings.reload();
     })();
@@ -88,6 +107,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (success) {
+      log.info('db.migrate.ok');
       // Migration went through — the pre-migration snapshot is no longer needed.
       clearBackup();
       AsyncStorage.removeItem(RESET_FLAG);
@@ -119,22 +139,29 @@ export default function RootLayout() {
         <ThemeProvider
           value={colorScheme === 'dark' ? ProphecyNavigationDarkTheme : ProphecyNavigationLightTheme}>
           <CampaignLiveProvider>
-            <View style={styles.root}>
-              <Stack screenOptions={{ headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' } }}>
-                <Stack.Screen name="index" options={{ title: 'Personnages' }} />
-                <Stack.Screen
-                  name="character/new"
-                  options={{ title: 'Nouveau personnage', presentation: 'modal' }}
-                />
-                {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
-                <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
-                <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
-                {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
-                <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
-              </Stack>
-              {/* Floating overlay — shows on every screen while a campaign is live. */}
-              <CampaignLiveIndicator />
-            </View>
+            {/* Catches render-time throws the global handler never sees, and puts
+                the stack in the diagnostic log instead of a blank screen. */}
+            <LogErrorBoundary>
+              <View style={styles.root}>
+                <Stack screenOptions={{ headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' } }}>
+                  <Stack.Screen name="index" options={{ title: 'Personnages' }} />
+                  <Stack.Screen
+                    name="character/new"
+                    options={{ title: 'Nouveau personnage', presentation: 'modal' }}
+                  />
+                  {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
+                  <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
+                  <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
+                  {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
+                  <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
+                  <Stack.Screen name="diagnostics" options={{ title: 'Diagnostic' }} />
+                  <Stack.Screen name="privacy" options={{ title: 'Confidentialité' }} />
+                </Stack>
+                {/* Floating overlay — shows on every screen while a campaign is live. */}
+                <CampaignLiveIndicator />
+                <RouteBreadcrumbs />
+              </View>
+            </LogErrorBoundary>
           </CampaignLiveProvider>
         </ThemeProvider>
       </PaperProvider>

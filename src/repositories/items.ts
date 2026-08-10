@@ -3,6 +3,7 @@ import { asc, eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { items, type NewItem } from '@/db/schema';
 import { deleteEnchantsFor } from '@/repositories/enchants';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's inventory (use with useLiveQuery). */
 export function itemsQuery(characterId: number) {
@@ -11,14 +12,17 @@ export function itemsQuery(characterId: number) {
 
 export async function createItem(characterId: number, name = '') {
   const [row] = await db.insert(items).values({ characterId, name }).returning();
+  logWrite('items', 'insert', { characterId, itemId: row?.id });
   return row;
 }
 
 export async function updateItem(id: number, data: Partial<NewItem>) {
   await db.update(items).set(data).where(eq(items.id, id));
+  logWrite('items', 'update', { itemId: id }, data);
 }
 
 export async function deleteItem(id: number) {
   await deleteEnchantsFor('item', id);
   await db.delete(items).where(eq(items.id, id));
+  logWrite('items', 'delete', { itemId: id });
 }

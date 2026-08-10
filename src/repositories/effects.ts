@@ -2,6 +2,7 @@ import { and, asc, eq, gt, sql } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { effects, type NewEffect } from '@/db/schema';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's temporary effects (use with useLiveQuery). */
 export function effectsQuery(characterId: number) {
@@ -23,15 +24,18 @@ export async function createEffect(characterId: number, data: Partial<NewEffect>
     .insert(effects)
     .values({ characterId, expired: false, ...data })
     .returning();
+  logWrite('effects', 'insert', { characterId, effectId: row?.id });
   return row;
 }
 
 export async function updateEffect(id: number, data: Partial<NewEffect>) {
   await db.update(effects).set(data).where(eq(effects.id, id));
+  logWrite('effects', 'update', { effectId: id }, data);
 }
 
 export async function deleteEffect(id: number) {
   await db.delete(effects).where(eq(effects.id, id));
+  logWrite('effects', 'delete', { effectId: id });
 }
 
 /**
@@ -64,4 +68,5 @@ export async function tickUnit(characterId: number, unit: string) {
         ),
       );
   });
+  logWrite('effects', 'update', { characterId, unit, phase: 'tick' });
 }
