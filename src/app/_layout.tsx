@@ -1,16 +1,16 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  Cinzel_500Medium,
-  Cinzel_600SemiBold,
-  useFonts,
-} from '@expo-google-fonts/cinzel';
-import {
-  NotoSans_400Regular,
-  NotoSans_500Medium,
-} from '@expo-google-fonts/noto-sans';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+// Import each weight through its own subpath, NEVER the package root: the root
+// index re-`require`s every .ttf in the family, so Metro bundles all 18 NotoSans
+// weights (5.3 MB) to use two. Same trap on `@expo/vector-icons`, whose index
+// pulls all 16 icon fonts. Keep these imports deep.
+import { Cinzel_500Medium } from '@expo-google-fonts/cinzel/500Medium';
+import { Cinzel_600SemiBold } from '@expo-google-fonts/cinzel/600SemiBold';
+import { NotoSans_400Regular } from '@expo-google-fonts/noto-sans/400Regular';
+import { NotoSans_500Medium } from '@expo-google-fonts/noto-sans/500Medium';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider } from 'expo-router/react-navigation';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, DevSettings, StyleSheet, useColorScheme, View } from 'react-native';
