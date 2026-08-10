@@ -6,12 +6,13 @@ import { IconButton, Menu, Text } from 'react-native-paper';
 
 import CharacterListItem from '@/components/character-list-item';
 import CharacterSelectionActions from '@/components/character-selection-actions';
+import ExportIntentDialog from '@/components/export-intent-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
 import { useCharacterSelection } from '@/hooks/use-character-selection';
 import { useLayout, useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { parseImport } from '@/lib/character-transfer';
+import { type ExportIntent, parseImport } from '@/lib/character-transfer';
 import { pickImportText, shareExport } from '@/lib/character-transfer-io';
 import { sharedCharacterNames } from '@/repositories/campaigns';
 import { charactersListQuery, deleteCharacters } from '@/repositories/characters';
@@ -32,6 +33,7 @@ export default function CharactersListScreen() {
   const { data } = useLiveQuery(charactersListQuery());
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [askingIntent, setAskingIntent] = useState(false);
   const { columns } = useLayout();
   const splitWidth = useSplitWidth();
   const isEmpty = !data || data.length === 0;
@@ -40,18 +42,25 @@ export default function CharactersListScreen() {
   const { selectedIds, clear, toggleAll } = selection;
 
   // Export the selected characters into ONE envelope (same shape as a full
-  // backup, just filtered) and hand it to the share sheet.
-  const handleExportSelection = useCallback(async () => {
-    setBusy(true);
-    try {
-      await shareExport(await exportCharacters(selectedIds));
-      clear();
-    } catch (e) {
-      Alert.alert('Export impossible', e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  }, [selectedIds, clear]);
+  // backup, just filtered) and hand it to the share sheet. Which intent —
+  // sauvegarde (keeps the characters' identity) or partage (a fresh lineage for
+  // the recipient) — is asked first, because the file looks the same either way
+  // and only the writer knows what it is for. See ExportIntentDialog.
+  const handleExport = useCallback(
+    async (intent: ExportIntent) => {
+      setAskingIntent(false);
+      setBusy(true);
+      try {
+        await shareExport(await exportCharacters(selectedIds, intent), intent);
+        clear();
+      } catch (e) {
+        Alert.alert('Export impossible', e instanceof Error ? e.message : String(e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [selectedIds, clear],
+  );
 
   // Deep copy each selected character (new uuid, « … (copie) » name). The live
   // query refreshes the list; no navigation.
@@ -113,7 +122,10 @@ export default function CharactersListScreen() {
     );
   }, [selectedIds, clear]);
 
-  // Pick a JSON export and add its characters (as new entries — never overwrites).
+  // Pick a JSON export and read it back. `'restore'` is safe as a blanket mode:
+  // the FILE decides per character (`bundleMode`) — a backup carries the uuid and
+  // replaces its own character in place, a shared sheet carries none and lands as
+  // a new one. The alert says which of the two happened.
   const handleImport = useCallback(async () => {
     setMenuOpen(false);
     setBusy(true);
@@ -125,8 +137,15 @@ export default function CharactersListScreen() {
         Alert.alert('Import impossible', parsed.error);
         return;
       }
-      const n = importCharacters(parsed.data).length;
-      Alert.alert('Import réussi', `${plural(n, 'personnage')} ajouté${n > 1 ? 's' : ''}.`);
+      const { ids, restored } = importCharacters(parsed.data, 'restore');
+      const added = ids.length - restored;
+      const parts: string[] = [];
+      if (restored > 0) {
+        parts.push(`${plural(restored, 'personnage')} restauré${restored > 1 ? 's' : ''}`);
+      }
+      if (added > 0) parts.push(`${plural(added, 'personnage')} ajouté${added > 1 ? 's' : ''}`);
+      const detail = restored > 0 ? '\n\nUne restauration remplace la fiche déjà présente.' : '';
+      Alert.alert('Import réussi', `${parts.join(', ')}.${detail}`);
     } catch (e) {
       Alert.alert('Import impossible', e instanceof Error ? e.message : String(e));
     } finally {
@@ -158,7 +177,7 @@ export default function CharactersListScreen() {
             busy={busy}
             onToggleAll={toggleAll}
             onDuplicate={handleDuplicateSelection}
-            onExport={handleExportSelection}
+            onExport={() => setAskingIntent(true)}
             onDelete={handleDeleteSelection}
           />
         ),
@@ -215,7 +234,6 @@ export default function CharactersListScreen() {
     toggleAll,
     clear,
     handleDuplicateSelection,
-    handleExportSelection,
     handleDeleteSelection,
   ]);
 
@@ -270,6 +288,13 @@ export default function CharactersListScreen() {
       {!selection.active && (
         <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
       )}
+
+      <ExportIntentDialog
+        visible={askingIntent}
+        count={selectionCount}
+        onDismiss={() => setAskingIntent(false)}
+        onChoose={handleExport}
+      />
     </View>
   );
 }

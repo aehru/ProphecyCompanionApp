@@ -290,6 +290,87 @@ export interface ImportPlan {
 }
 
 /**
+ * What an export is FOR (issue #43). The two intents differ by one thing — the
+ * portable `uuid` — but the consequence is large:
+ *
+ *   - `backup` keeps it, so re-importing the file restores THE character: same
+ *     campaign roster slot, same GM notes, replaced in place instead of doubled.
+ *   - `share` strips it, so the receiving player gets a NEW lineage. Handing a
+ *     sheet to a friend must never hand over the identity too: two devices
+ *     broadcasting one uuid collapse onto a single roster row, overwrite each
+ *     other's projection, and one player's `unshare` purges the other's.
+ *
+ * The intent therefore has to be decided when the file is WRITTEN — an importer
+ * cannot tell "my own backup" from "a copy someone sent me", and guessing wrong
+ * is exactly the collision above.
+ */
+export type ExportIntent = 'backup' | 'share';
+
+/**
+ * Strip the portable identity off an export, making it a shareable copy. Pure:
+ * returns a new envelope, leaves the input alone. A bundle with no uuid (legacy
+ * file) is already share-shaped and passes through.
+ */
+export function forSharing(exp: ProphecyExport): ProphecyExport {
+  return {
+    ...exp,
+    characters: exp.characters.map((b) => {
+      const { uuid: _uuid, ...character } = b.character as { uuid?: string };
+      return { ...b, character } as CharacterBundle;
+    }),
+  };
+}
+
+/**
+ * Filename for an export, so the two intents are tellable apart in a Files app
+ * six months later — the envelopes look identical from the outside, and picking
+ * the wrong one back is exactly the mistake `ExportIntent` exists to prevent.
+ * A single-character share is named after the character (that is how it will be
+ * talked about: "je t'envoie Ryld"); a batch is named by its count.
+ *
+ * Pure, and the character name is slugified rather than used raw: it is user
+ * text landing in a filesystem path.
+ */
+export function exportFileName(
+  exp: ProphecyExport,
+  intent: ExportIntent,
+  now: Date = new Date(),
+): string {
+  const stamp = now.toISOString().slice(0, 10);
+  const kind = intent === 'share' ? 'partage' : 'sauvegarde';
+  const chars = exp.characters;
+  const subject =
+    chars.length === 1
+      ? slug(String((chars[0].character as { nom?: string }).nom ?? '')) || 'personnage'
+      : `${chars.length}-personnages`;
+  return `prophecy-${kind}-${subject}-${stamp}.json`;
+}
+
+/** Accent-free, lowercase, filesystem-safe, capped. Empty when nothing survives. */
+function slug(s: string): string {
+  return s
+    .normalize('NFD')
+    // Combining marks, escaped rather than literal — invisible characters in a
+    // regex are a trap for the next reader (and for a careless editor).
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 24)
+    .replace(/-+$/, '');
+}
+
+/**
+ * The mode that actually applies to ONE bundle. A `restore` import is only a
+ * restore for the bundles that carry an identity: a shared file (uuid stripped)
+ * read back under `'restore'` is still a copy, and must be treated as one all
+ * the way down — including its magic reserves, which recharge on a copy.
+ */
+export function bundleMode(incomingUuid: string | undefined, mode: ImportMode): ImportMode {
+  return mode === 'restore' && incomingUuid ? 'restore' : 'copy';
+}
+
+/**
  * Decide the uuid + write action for one incoming character. Pure — `mintUuid`
  * is injected so the caller (and tests) control id generation.
  */
