@@ -7,20 +7,28 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 
-import { serializeExport, type ProphecyExport } from '@/lib/character-transfer';
-
-/** YYYY-MM-DD for a human-readable export filename. */
-function dateStamp(d = new Date()): string {
-  return d.toISOString().slice(0, 10);
-}
+import {
+  type ExportIntent,
+  exportFileName,
+  serializeExport,
+  type ProphecyExport,
+} from '@/lib/character-transfer';
 
 /**
  * Write an export to a cache file and open the OS share sheet (save to Files,
  * send to another device, etc.). No-op with a thrown error if sharing is
  * unavailable on the platform.
+ *
+ * `intent` only shapes the filename and the sheet's title — the envelope itself
+ * was already made backup- or share-shaped upstream. It matters because the two
+ * files are indistinguishable once they sit in a Files app: `prophecy-partage-…`
+ * vs `prophecy-sauvegarde-…` is what stops someone re-importing the wrong one.
  */
-export async function shareExport(exp: ProphecyExport): Promise<void> {
-  const file = new File(Paths.cache, `prophecy-${dateStamp()}.json`);
+export async function shareExport(
+  exp: ProphecyExport,
+  intent: ExportIntent = 'backup',
+): Promise<void> {
+  const file = new File(Paths.cache, exportFileName(exp, intent));
   try {
     if (file.exists) file.delete();
   } catch {
@@ -34,7 +42,8 @@ export async function shareExport(exp: ProphecyExport): Promise<void> {
   }
   await Sharing.shareAsync(file.uri, {
     mimeType: 'application/json',
-    dialogTitle: 'Exporter les personnages',
+    dialogTitle:
+      intent === 'share' ? 'Partager les personnages' : 'Sauvegarder les personnages',
     UTI: 'public.json',
   });
 }

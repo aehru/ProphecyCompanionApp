@@ -108,13 +108,35 @@ bun run check:catalogs   # verify the .gen files match the CSV (no write)
 
 ## Export / import
 
-Characters export to a versioned JSON envelope (`format` + `schemaVersion` + `characters[]`) and import back as **new** characters (fresh ids — import never overwrites). Three layers:
+Characters export to a versioned JSON envelope (`format` + `schemaVersion` + `characters[]`) and import back. Three layers:
 
 - **[src/lib/character-transfer.ts](src/lib/character-transfer.ts)** — pure: builds the envelope, `serializeExport`, and `parseImport` (zod-validated, returns a French error string instead of throwing). Column key lists are derived from the zod shapes (`CHARACTER_FIELDS`, …) so the repo picks exactly the exportable columns. **Unit-tested.**
 - **[src/repositories/transfer.ts](src/repositories/transfer.ts)** — gathers DB rows into bundles (strips id / FK / timestamps / media) and re-inserts them in a transaction.
 - **[src/lib/character-transfer-io.ts](src/lib/character-transfer-io.ts)** — device glue (`expo-file-system` + `expo-sharing` + `expo-document-picker`). Native modules → **needs a dev-client rebuild** (`bun run android` / `ios`) after pulling these deps.
 
-Bump `SCHEMA_VERSION` on any breaking change to the bundle shape; add a migration path in `parseImport` if you need to accept older files.
+**Sauvegarde vs partage (issue #43).** The two exports differ by one field, the portable `uuid`, and the difference is the whole feature. A **backup** keeps it: re-importing restores *that* character — replaced in place instead of doubled, still holding its campaign roster slot and its GM notes. A **share** strips it (`forSharing`), because two devices broadcasting one `charId` collapse onto a single roster row, overwrite each other's projection, and either player's `unshare` purges the other. The intent is chosen when the file is **written** ([`<ExportIntentDialog>`](src/components/export-intent-dialog.tsx) spells out both consequences) — an importer cannot tell "my own backup" from "a copy a friend sent me".
+
+Import therefore passes `'restore'` blindly and lets each bundle decide (`bundleMode`): uuid present ⇒ restore, absent ⇒ new lineage — including its magic reserves, which recharge on a copy and keep their spent puces on a restore. `importCharacters` returns `{ ids, restored }` so the screen can say « restaurés » vs « ajoutés ».
+
+The intent is also written on the outside, since the two envelopes are identical to look at once they sit in a Files app — `exportFileName` (pure, tested) gives `prophecy-sauvegarde-ryld-2026-08-10.json` / `prophecy-partage-ryld-…`, falling back to `…-3-personnages-…` for a batch. A lone character is named because that is how the file gets talked about; the name is slugified (accents stripped, non-alphanumerics collapsed, capped) because it is user text going into a path.
+
+Bump `SCHEMA_VERSION` on any breaking change to the bundle shape; add a migration path in `parseImport` if you need to accept older files. `uuid` is optional in the schema, which is why stripping it needs no bump.
+
+## Diagnostic log
+
+[src/lib/log/](src/lib/log) keeps a local ring buffer (1500 entries / 512 KB) in two files — `current`, rewritten wholesale on each flush, and `previous`, rotated in at launch — with a 7-day purge. There is **no server, no analytics and no automatic crash upload**: the Diagnostic screen's share sheet is the only way anything leaves the device.
+
+Same three layers as export/import:
+
+- **[redact.ts](src/lib/log/redact.ts) / [ring-buffer.ts](src/lib/log/ring-buffer.ts) / [serialize.ts](src/lib/log/serialize.ts)** — pure, no framework imports, **unit-tested**. The redactor is the privacy boundary: a payload key is written only if it is allow-listed *and* absent from the user-text/secret deny lists, which are checked **first** — so allow-listing `nom` by mistake still drops it, and [redact.test.ts](src/lib/log/redact.test.ts) fails if that inversion is ever undone. Everything dropped is counted as `_dropped: n`.
+- **[logger.ts](src/lib/log/logger.ts)** — the engine (injected sink + clock, level filter, 2 s debounce, immediate flush on `error`). Testable because nothing native reaches it.
+- **[index.ts](src/lib/log/index.ts)** — the singleton: platform sink, level persisted in AsyncStorage, launch rotation. It attaches the sink only once rotation is done, so an early flush can't overwrite the previous launch's file. Native glue (share sheet, clipboard) sits in [share.ts](src/lib/log/share.ts); `expo-clipboard` is a native module → **dev-client rebuild** after pulling it.
+
+The sink is platform-split behind one interface: Metro resolves `sink.native.ts` (files under the private document dir) or `sink.web.ts` (localStorage), with `sink.ts` as the in-memory default Node/vitest get.
+
+When you add a log call: the message is a constant event name (`repo.write`, `route.change`), everything variable goes in the payload, and records are named by id — never by anything the user typed. Repositories go through [`logWrite`](src/repositories/log.ts).
+
+A row id alone can't say *what* was added, so the catalogue pickers log `catalog.add` with the preset's slug (`catalogId`, e.g. `boule-de-feu`) before inserting — that tells a bad generated preset apart from a bad hand edit. It is logged from the **screen**, not threaded through `createSpell`/`createWeapon`/…: which preset the user tapped is a UI fact, and a repository argument that exists only to be logged is one the next caller has to think about. Slugs are authored in `data-src/*.csv`, i.e. code identifiers, which is why `catalogId` may sit on the allow-list while the spell's `name` may not.
 
 ## Project layout
 
@@ -123,6 +145,8 @@ src/
   app/                       # expo-router routes (file = screen)
     _layout.tsx              # root: theme, Paper provider, runs DB migrations
     index.tsx                # character roster
+    diagnostics.tsx          # diagnostic log: level switcher, live tail, share/copy/clear
+    privacy.tsx              # plain-language privacy screen (in-app PRIVACY.md)
     character/
       new.tsx                # create-character modal
       [id]/
@@ -149,6 +173,7 @@ src/
   data/                      # rulebook catalogues: *-catalog.ts (types) + *.gen.ts (generated) per gear type
     weapon-constants.ts / armor-constants.ts  # taxonomy (categories/handedness), kept out of the .gen import graph
   lib/                       # character-values helpers, formula, csv, character-transfer
+    log/                     # diagnostic log: pure core + platform-split sink (see below)
   repositories/              # data access: characters, actual-state, skills, weapons, armor, shields, items, enchants, transfer
   theme/                     # Paper/navigation themes
 data-src/                    # catalogue spreadsheets (CSV `;`) — source of truth, see Catalogues

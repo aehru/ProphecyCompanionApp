@@ -9,6 +9,7 @@ import { SHIELD_CATALOG, type ShieldPreset } from '@/data/shield-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { log } from '@/lib/log';
 import { createShield } from '@/repositories/shields';
 
 /**
@@ -33,6 +34,9 @@ export default function ShieldCatalogModal() {
   );
 
   const add = async (preset?: ShieldPreset) => {
+    // The picked preset's slug — see the spell catalogue for why it is logged
+    // from the screen and not passed down to the repository.
+    if (preset) log.info('catalog.add', { entity: 'shields', catalogId: preset.id });
     const row = await createShield(numId, preset?.data);
     router.replace(`/character/${numId}/shield/${row.id}`);
   };

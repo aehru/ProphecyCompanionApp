@@ -2,6 +2,7 @@ import { and, asc, eq } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { type EnchantTarget, enchants, type NewEnchant } from '@/db/schema';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for every enchant a character owns, across all targets. */
 export function enchantsQuery(characterId: number) {
@@ -27,15 +28,18 @@ export async function createEnchant(
     .insert(enchants)
     .values({ characterId, targetType, targetId, ...data })
     .returning();
+  logWrite('enchants', 'insert', { characterId, enchantId: row?.id, kind: targetType });
   return row;
 }
 
 export async function updateEnchant(id: number, data: Partial<NewEnchant>) {
   await db.update(enchants).set(data).where(eq(enchants.id, id));
+  logWrite('enchants', 'update', { enchantId: id }, data);
 }
 
 export async function deleteEnchant(id: number) {
   await db.delete(enchants).where(eq(enchants.id, id));
+  logWrite('enchants', 'delete', { enchantId: id });
 }
 
 /**
@@ -49,4 +53,5 @@ export async function deleteEnchantsFor(targetType: EnchantTarget, targetId: num
   await db
     .delete(enchants)
     .where(and(eq(enchants.targetType, targetType), eq(enchants.targetId, targetId)));
+  logWrite('enchants', 'delete', { kind: targetType, id: targetId, reason: 'cascade' });
 }

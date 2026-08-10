@@ -3,6 +3,7 @@ import { asc, eq } from 'drizzle-orm';
 import { db } from '@/db/client';
 import { type NewShield, shields } from '@/db/schema';
 import { deleteEnchantsFor } from '@/repositories/enchants';
+import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's shields (use with useLiveQuery). */
 export function shieldsQuery(characterId: number) {
@@ -23,16 +24,19 @@ export async function createShield(characterId: number, data: Partial<NewShield>
     .insert(shields)
     .values({ characterId, defenseCurrent: data.defenseMax ?? 0, ...data })
     .returning();
+  logWrite('shields', 'insert', { characterId, shieldId: row?.id });
   return row;
 }
 
 export async function updateShield(id: number, data: Partial<NewShield>) {
   await db.update(shields).set(data).where(eq(shields.id, id));
+  logWrite('shields', 'update', { shieldId: id }, data);
 }
 
 export async function deleteShield(id: number) {
   await deleteEnchantsFor('shield', id);
   await db.delete(shields).where(eq(shields.id, id));
+  logWrite('shields', 'delete', { shieldId: id });
 }
 
 /** Equip one shield, unequipping every other shield of the same character. */
@@ -41,9 +45,11 @@ export async function equipShield(characterId: number, id: number) {
     await tx.update(shields).set({ equipped: false }).where(eq(shields.characterId, characterId));
     await tx.update(shields).set({ equipped: true }).where(eq(shields.id, id));
   });
+  logWrite('shields', 'update', { characterId, shieldId: id }, { equipped: true });
 }
 
 /** Unequip a shield. */
 export async function unequipShield(id: number) {
   await db.update(shields).set({ equipped: false }).where(eq(shields.id, id));
+  logWrite('shields', 'update', { shieldId: id }, { equipped: false });
 }

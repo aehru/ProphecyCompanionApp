@@ -2,7 +2,7 @@
 
 **App:** Prophecy Companion App
 **Package:** `fr.aehru.prophecyapp`
-**Last updated:** 2026-07-30
+**Last updated:** 2026-08-06
 
 ## Summary
 
@@ -91,6 +91,53 @@ No name, e-mail address, phone number, or device identifier is collected.
   data from the server immediately.
 - A Game Master **deleting the campaign** deletes all of its shared data from
   the server immediately.
+
+## Diagnostic log (public beta)
+
+To make bug reports usable, the app keeps a **local diagnostic log** of what it
+does: screens opened, records written to the database, migrations, and errors.
+It is stored in the app's private storage on your device (browser local storage
+on the web version) and is visible in full under **Diagnostic**, reachable from
+the character list menu.
+
+**Nothing is ever sent automatically.** There is no server, no analytics
+endpoint, and no automatic crash upload. The system share sheet — or the
+clipboard, if you choose to copy the log — is the only way any of it can leave
+the device, and you can read every line before deciding.
+
+### What the log may contain
+
+The log works by **allow-list**: only a fixed set of technical fields is ever
+written, and everything else is discarded on the spot and merely counted (shown
+as `_dropped`). What survives is limited to:
+
+- opaque local identifiers (`characterId: 12`, a character's internal UUID);
+- database table and **column names**, never the values in them;
+- fixed vocabularies (`insert`/`update`/`delete`, `pc`/`npc`, roles);
+- route paths (`/character/12`), counters, durations;
+- error names, messages and stack traces as produced by the system.
+
+### What it never contains
+
+- anything you typed: names, concepts, biographies, notes, conditions, labels,
+  specialization names, search text;
+- the contents of your sheets: statistics, money, spells, equipment;
+- campaign join codes, server addresses, or Game Master tokens.
+
+Long strings are truncated (400 characters, 2000 for a stack trace).
+
+### Session identifier, size and retention
+
+- A **session identifier is drawn at random at each launch**. It is never stored
+  and is not derived from your device, so two logs shared days apart cannot be
+  linked to each other or to you.
+- The log holds at most **1500 entries or 512 KB**, across the current launch and
+  the previous one.
+- Anything **older than 7 days is purged** automatically at launch, and
+  **Effacer** deletes both files immediately.
+
+The level of detail is yours to set (Détail / Normal / Alertes / Erreurs); a
+released build defaults to Normal.
 
 ## Network access
 

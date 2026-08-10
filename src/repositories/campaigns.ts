@@ -13,6 +13,7 @@ import {
 import { nextNpcName } from '@/lib/npc-name';
 import { newUuid } from '@/lib/uuid';
 import { createCharacter, updateCharacter } from '@/repositories/characters';
+import { logWrite } from '@/repositories/log';
 import { duplicateCharacter } from '@/repositories/transfer';
 
 /** Live query for the campaign list, for useLiveQuery. */
@@ -40,6 +41,7 @@ export async function createLocalTable(name: string): Promise<Campaign> {
     .insert(campaigns)
     .values({ name, role: 'gm', createdAt: new Date() })
     .returning();
+  logWrite('campaigns', 'insert', { campaignId: row.id, role: 'gm', mode: 'local' });
   return row;
 }
 
@@ -98,6 +100,8 @@ export async function attachServer(
     .set({ code: body.code, gmToken, serverUrl: host })
     .where(eq(campaigns.id, campaignId))
     .returning();
+  // Never the code, the host or the token — all three are on the deny list.
+  logWrite('campaigns', 'update', { campaignId, phase: 'attach-server', status: res.status });
   return row;
 }
 
@@ -108,6 +112,7 @@ export async function attachServer(
  */
 export async function setShareNpcs(campaignId: number, share: boolean): Promise<void> {
   await db.update(campaigns).set({ shareNpcs: share }).where(eq(campaigns.id, campaignId));
+  logWrite('campaigns', 'update', { campaignId, phase: 'share-npcs', ok: share });
   if (share) return;
   const campaign = await getCampaign(campaignId);
   if (!campaign?.serverUrl || !campaign.code) return;
@@ -154,12 +159,14 @@ export async function joinCampaign(code: string, serverUrl: string): Promise<Cam
       createdAt: new Date(),
     })
     .returning();
+  logWrite('campaigns', 'insert', { campaignId: row.id, role: 'player' });
   return row;
 }
 
 /** Backfill the real campaign name once a `welcome` frame delivers it. */
 export async function updateCampaignName(id: number, name: string): Promise<void> {
   await db.update(campaigns).set({ name }).where(eq(campaigns.id, id));
+  logWrite('campaigns', 'update', { campaignId: id, phase: 'name-backfill' });
 }
 
 /**
@@ -240,6 +247,7 @@ export async function deleteCampaign(id: number): Promise<void> {
     }
   }
   await db.delete(campaigns).where(eq(campaigns.id, id));
+  logWrite('campaigns', 'delete', { campaignId: id, role: campaign.role });
 }
 
 /**
@@ -262,11 +270,13 @@ export async function setMember(
   );
   if (!member) {
     await db.delete(campaignShares).where(where);
+    logWrite('campaign_shares', 'delete', { campaignId, characterId });
     return;
   }
   const existing = await db.select().from(campaignShares).where(where).limit(1);
   if (existing.length === 0) {
     await db.insert(campaignShares).values({ campaignId, characterId });
+    logWrite('campaign_shares', 'insert', { campaignId, characterId });
   }
 }
 
@@ -309,6 +319,7 @@ export async function spawnNpc(
   // a stand-in, and a spawn is always an NPC.
   await updateCharacter(id, { nom, kind: 'npc' });
   await setMember(campaignId, id, true);
+  logWrite('characters', 'insert', { campaignId, characterId: id, kind: 'npc', reason: 'spawn' });
   return { id, nom };
 }
 
@@ -330,4 +341,6 @@ export async function upsertGmNote(
   } else {
     await db.insert(gmNotes).values({ campaignId, charUuid, body, updatedAt: new Date() });
   }
+  // The note body is the GM's own prose — length only, never content.
+  logWrite('gm_notes', 'update', { campaignId, charUuid, length: body.length });
 }

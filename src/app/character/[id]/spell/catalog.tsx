@@ -13,6 +13,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellTotal } from '@/hooks/use-spell-total';
+import { log } from '@/lib/log';
 import { createSpell } from '@/repositories/spells';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -100,6 +101,11 @@ export default function SpellCatalogModal() {
   // editor returns to the Magie tab (not the catalogue).
   const add = useCallback(
     async (preset?: SpellPreset) => {
+      // Which preset was picked, logged HERE rather than threaded through the
+      // repository: the slug is a UI fact (what the catalogue offered), and a
+      // report saying only "spell 11 inserted" can't tell a bad generated preset
+      // from a bad hand edit. Custom spells have no slug and no line.
+      if (preset) log.info('catalog.add', { entity: 'spells', catalogId: preset.id });
       const row = await createSpell(numId, preset?.data);
       router.replace(`/character/${numId}/spell/${row.id}`);
     },

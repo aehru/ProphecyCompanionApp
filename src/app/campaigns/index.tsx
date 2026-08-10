@@ -221,9 +221,14 @@ export default function CampaignsScreen() {
               autoCapitalize="characters"
               autoCorrect={false}
             />
+            {/* `defaultValue`, NOT `value` — see the attach dialog on the table
+                screen: a controlled field restarts the Android IME on the first
+                keystroke and Gboard falls back from its number page to letters.
+                The prefills (last server used, QR scan, deep link) all land
+                while this dialog is closed, so the remount picks them up. */}
             <TextInput
               label="Serveur"
-              value={serverUrl}
+              defaultValue={serverUrl}
               onChangeText={setServerUrl}
               placeholder="exemple.fr ou 192.168.1.10:8000"
               autoCapitalize="none"

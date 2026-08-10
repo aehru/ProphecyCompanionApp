@@ -216,9 +216,15 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
             </Button>
           </>
         }>
+        {/* `defaultValue`, NOT `value`: a controlled TextInput writes the JS
+            string back into the native field on the first keystroke, which
+            restarts the Android IME — Gboard then drops off its number page
+            back to the letters one, exactly once, mid-way through typing an
+            IP. State still follows through onChangeText, and the dialog
+            unmounts when hidden, so each open re-reads the prefill. */}
         <TextInput
           label="Serveur"
-          value={attachUrl ?? ''}
+          defaultValue={attachUrl ?? ''}
           onChangeText={setAttachUrl}
           placeholder="exemple.fr ou 192.168.1.10:8000"
           autoCapitalize="none"
