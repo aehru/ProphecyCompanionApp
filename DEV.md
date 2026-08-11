@@ -1,6 +1,6 @@
 # Developing Prophecy Companion App
 
-Contributor guide. For what the app *is*, see [README.md](README.md).
+Contributor guide. For what the app *is*, see [README.md](README.md); for the full feature tour, [docs/FEATURES.md](docs/FEATURES.md).
 
 ## Stack
 
@@ -78,7 +78,10 @@ bun run test:watch    # vitest (watch mode)
 Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](src/lib/formula.test.ts)). The `@/` alias is mirrored in [vitest.config.ts](vitest.config.ts) so imports match the app.
 
 **Covered today:**
-- Pure logic — `lib/formula` (weapon formula parse/compute), `lib/modifiers` (wound malus + effect stacking), `lib/character-transfer` (export/import serialize + validate). Keep new pure logic covered here.
+- Pure logic — `lib/formula` (weapon formula parse/compute), `lib/modifiers` (wound malus + effect stacking), `lib/character-transfer` (export/import serialize + validate), `lib/character-values`, `lib/csv`, `lib/dice`, `lib/uuid`, `lib/weapon-skill`, `lib/skill-groups` + `lib/skill-grouping`, `lib/spell-total`, `lib/initiative-order`, `lib/npc-name`. Keep new pure logic covered here.
+- **Campaign wire** — `lib/campaign-protocol` (builders + tolerant parser), `lib/campaign-client` (reconnecting socket, injected WS), `lib/campaign-live` (projection signature), `lib/roster-merge` (local wins on collision).
+- **Two privacy guards** — [character-share.test.ts](src/lib/character-share.test.ts) fails if the campaign projection widens beyond its allowed set, [redact.test.ts](src/lib/log/redact.test.ts) fails if the log's deny-before-allow order is undone. Neither may be relaxed to make a change pass.
+- **Catalogue freshness** — [src/data/catalog.test.ts](src/data/catalog.test.ts) re-runs the CSV generator and diffs the committed `.gen.ts`.
 - **Forward migrations** — [src/db/migrations.test.ts](src/db/migrations.test.ts) replays the bundled `drizzle/*.sql` against **better-sqlite3** (same SQLite engine; expo-sqlite can't run under Node but the SQL is portable). It seeds a DB at every prior schema version and runs the remaining migrations, catching NOT-NULL-without-default, tightened CHECKs against existing rows, and journal/`.sql` drift. Run this after every `drizzle-kit generate`.
 
 **Not yet covered:** repository logic — anything importing `@/db/client` pulls in expo-sqlite. Repository tests need the db decoupled from the singleton (inject it) so a better-sqlite3 instance can stand in — see [ROADMAP.md](ROADMAP.md).
@@ -122,6 +125,18 @@ The intent is also written on the outside, since the two envelopes are identical
 
 Bump `SCHEMA_VERSION` on any breaking change to the bundle shape; add a migration path in `parseImport` if you need to accept older files. `uuid` is optional in the schema, which is why stripping it needs no bump.
 
+## Campaign mode
+
+A GM's **table** is local-first and works with no network at all: PNJ, their sheets, wounds and initiative are ordinary rows in this device's DB. Attaching a **relay server** ([ProphecyCompanionServer](https://github.com/aehru/ProphecyCompanionServer) — FastAPI + WebSocket + SQLite) is the bonus that adds the *players'* characters. Solo use is untouched. The full wire contract is **[docs/campaign-protocol.md](docs/campaign-protocol.md)**; mirror any wire change into the server's `app/schemas.py` — the two languages are hand-synced.
+
+Code is English (`npc` in columns and identifiers), the UI is French (« PNJ »).
+
+- **The projection is the privacy boundary.** [character-share.ts](src/lib/character-share.ts) `toSharedCharacter` emits only name, caractéristiques, attributs, tendances, wounds, ressources, initiative, conditions, *trained* skills and *active* effects — never concept, biographie, notes, money, magic, untrained skills or expired effects. `SHARED_SCHEMA_VERSION` is `2`; evolve it additively. The data-minimization test is a guard, not a formality.
+- **The roster is a merge, local first.** [roster-merge.ts](src/lib/roster-merge.ts) `mergeRoster(local, remote)` — the local entry **wins** on a `charId` collision, so a late server echo can't roll back a wound the GM just marked. Local half: [use-local-roster.ts](src/hooks/use-local-roster.ts) (same `toSharedCharacter`); remote half: [use-gm-roster.ts](src/hooks/use-gm-roster.ts), which simply never connects without a relay. Both are assembled once for the subtree by [`<TableRosterProvider>`](src/components/campaign/table-roster-provider.tsx).
+- **Broadcast is app-level, not screen-scoped.** [use-campaign-live.tsx](src/hooks/use-campaign-live.tsx) is mounted above the Stack in the root layout, so one campaign keeps broadcasting on any screen while foregrounded (floating indicator: [campaign-live-indicator.tsx](src/components/campaign-live-indicator.tsx)). One socket carries every shared character; pushes fire when a character's **projection signature** changes ([campaign-live.ts](src/lib/campaign-live.ts) — in-play values *and* sheet edits), on a shared 5 s debounce. **Stop = pause** (the last state stays on the server); leaving purges.
+- **Pure + tested:** protocol builders/parser, the reconnecting socket (injectable WS), the projection signature, the merge, [initiative-order.ts](src/lib/initiative-order.ts) (one row per die, wounded value, unusable dice last), [npc-name.ts](src/lib/npc-name.ts).
+- **GM identity is a portable `gmToken`**, not a device id; the server stores only its hash. Known wart with `share_npcs` on (two sockets on one GM device) is tracked in [ROADMAP.md](ROADMAP.md).
+
 ## Diagnostic log
 
 [src/lib/log/](src/lib/log) keeps a local ring buffer (1500 entries / 512 KB) in two files — `current`, rewritten wholesale on each flush, and `previous`, rotated in at launch — with a 7-day purge. There is **no server, no analytics and no automatic crash upload**: the Diagnostic screen's share sheet is the only way anything leaves the device.
@@ -143,10 +158,15 @@ A row id alone can't say *what* was added, so the catalogue pickers log `catalog
 ```
 src/
   app/                       # expo-router routes (file = screen)
-    _layout.tsx              # root: theme, Paper provider, runs DB migrations
+    _layout.tsx              # root: theme, Paper provider, DB migrations, live-broadcast provider
     index.tsx                # character roster
     diagnostics.tsx          # diagnostic log: level switcher, live tail, share/copy/clear
     privacy.tsx              # plain-language privacy screen (in-app PRIVACY.md)
+    campaigns/
+      index.tsx              # campaign list: create a table, join with a code/QR
+      [id]/
+        index.tsx            #   the salon: members, PNJ, server section (attach/code/QR)
+        compagnie.tsx        #   the GM's table: roster + Initiative, split view above 840dp
     character/
       new.tsx                # create-character modal
       [id]/
@@ -154,27 +174,34 @@ src/
         weapon/               #   catalog picker + full-screen editor (modal routes)
         armor/                #   catalog picker + full-screen editor (modal routes)
         shield/                #   catalog picker + full-screen editor (modal routes)
-        (tabs)/              # Résumé + Compétences + Inventaire + Magie tabs
-          index.tsx          #   sheet read view + per-card live edit; header pencil → full form
+        (tabs)/              # Accueil + Fiche + Compétences + Inventaire + Magie tabs
+          index.tsx          #   Accueil: read-only dashboard (tendance rings, vitals, illustration)
           fiche.tsx           #   full sheet: caracs, initiative, santé, effets, armure/bouclier, ressources…
           skills.tsx         #   skills read view / live editor
           weapons.tsx        #   Inventaire: argent + Armes/Armures/Boucliers/Objets sub-tabs
           magic.tsx           #   Réserve/Sortilèges/Enchantements sub-tabs
   components/                # reusable UI (forms, chips, bullets, triangle…)
     weapon-card.tsx / weapon-editor.tsx      # read summary / full editor (mirrored by armor-*, shield-*)
+    gm-character-sheet.tsx    # the GM's read of a roster entry (embedded pane or bottom sheet)
+    campaign/                 # roster list/cards, initiative list, NPC editors, QR scanner
     fiche/                    # per-section fiche cards (health, armor, shield, money, resources…)
-    ui/                      # small primitives (section-card, editable-section, stat-chip, character-gate)
+    ui/                      # small primitives (ds-dialog, tab-pager, section-card, columns, stat-chip)
   constants/
     prophecy.ts              # game domain: tendances, caracs, attributs, skills, wounds, resources
   db/
     client.ts                # opens the SQLite DB, exposes `db`, resetDatabase()
     schema.ts                # Drizzle tables: characters, actual_state, skills, weapons, armor, shields…
-  hooks/                     # use-character-id, use-character-state, use-prophecy-theme
+  hooks/                     # use-layout (all responsive decisions), use-character-state,
+                             # use-campaign-live (app-level broadcaster), use-gm-roster,
+                             # use-local-roster, use-character-projections, use-prophecy-theme…
   data/                      # rulebook catalogues: *-catalog.ts (types) + *.gen.ts (generated) per gear type
     weapon-constants.ts / armor-constants.ts  # taxonomy (categories/handedness), kept out of the .gen import graph
-  lib/                       # character-values helpers, formula, csv, character-transfer
+  lib/                       # pure engines: formula, modifiers, character-values, csv, character-transfer,
+                             # weapon-skill, skill-groups, initiative-order, dice, uuid,
+                             # campaign-protocol / campaign-client / character-share / roster-merge
     log/                     # diagnostic log: pure core + platform-split sink (see below)
-  repositories/              # data access: characters, actual-state, skills, weapons, armor, shields, items, enchants, transfer
+  repositories/              # data access: characters, actual-state, skills, weapons, armor, shields,
+                             # items, spells, magic-reserves, effects, enchants, campaigns, transfer, log
   theme/                     # Paper/navigation themes
 data-src/                    # catalogue spreadsheets (CSV `;`) — source of truth, see Catalogues
 scripts/
@@ -192,6 +219,11 @@ The core split (see [src/db/schema.ts](src/db/schema.ts), which has the full, cu
 - **`skills`** — one row per owned skill (`name`, `attribut`, `value`). Skills at value 0 are not persisted (see `replaceSkills`).
 - **`weapons`** / **`armor`** / **`shields`** — one row per owned item, FK cascade on character delete. `armor` and `shields` share most columns (category — armor only —, prerequisites, creation difficulty/time, special, `encombrementMalus`); kept as separate tables rather than one polymorphic table because their column shapes genuinely differ (a shield also has a `damage` formula, armor doesn't). `weapons.equippedHand` is a nullable enum (multi-slot, hand-aware); `armor.equipped` / `shields.equipped` are plain exclusive booleans (one of each equipped at a time, independent of each other and of weapon hands).
 - **`enchants`** — polymorphic: `targetType` (`weapon`/`armor`/`shield`/`item`) + `targetId` point at one of the gear tables above. No real FK (SQLite can't cascade across four possible parents), so each gear repo's delete function purges matching enchants itself via `deleteEnchantsFor`.
+- **`magic_reserves`** — reserve *objects* (gemme, bâton, talisman). The exception to the sheet/state split: `max` and `current` both sit on the row, because each object is an independent pool that never touches the global réserve.
+- **`effects`** — temporary bonus/malus rows, targeting every roll, one caractéristique or one attribut. Folded into stat totals by `lib/modifiers`, alongside the wound malus.
+- **`campaigns` / `campaign_shares` / `gm_notes`** — campaign mode (below). `code`, `server_url` and `gm_token` are all **nullable**: a GM's table exists before any server does.
+- **`characters.uuid`** — the portable id that survives export/import and device changes (minted by a `$defaultFn`, backfilled on launch by `backfillCharacterUuids`). It is the `charId` on the campaign wire and the key of `gm_notes`.
+- **`weapons.skillName`** — a **`skills.name`**, not a category: a weapon's attack total *is* its compétence's total. Resolution (row → catalogue → unknown) lives in [src/lib/weapon-skill.ts](src/lib/weapon-skill.ts); the attribut always comes from the skill, never hardcoded.
 
 ### Naming convention (important)
 
