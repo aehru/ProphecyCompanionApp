@@ -50,6 +50,12 @@ JSON** (latest only, UPSERT, no history) and never validates it deeply — a new
 app can add fields without breaking an older server (tolerant reader, both
 directions).
 
+`initiative.max` is the **effective** dice count — the sheet's `initiativeMax`
+plus the in-play temporary dice (`actual_state.initiative_bonus_dice`, signed:
+two-weapon fighting and some spells grant an extra action). The bonus itself is
+deliberately NOT a wire field: to the GM a die is a die, and shipping the split
+would widen the projection for no tactical gain.
+
 ## 3. Hello & version gate
 
 The first frame on a socket must be a `hello`. **v2: the hello identifies the

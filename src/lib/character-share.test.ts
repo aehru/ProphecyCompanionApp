@@ -124,6 +124,24 @@ describe('toSharedCharacter', () => {
     expect(shared.initiative).toEqual({ max: 3, values: [12, 7, 4] });
   });
 
+  it('ships the EFFECTIVE dice count — temporary dice included, not as a field', () => {
+    const shared = toSharedCharacter(
+      makeCharacter({ initiativeMax: 2 }),
+      makeState({ initiativeBonusDice: 1, initiativeValues: [9, 5, 2] }),
+    );
+    // The GM sees three dice, with no way to tell the temporary one apart.
+    expect(shared.initiative).toEqual({ max: 3, values: [9, 5, 2] });
+    expect(shared.initiative).not.toHaveProperty('bonus');
+  });
+
+  it('never ships a negative dice count', () => {
+    const shared = toSharedCharacter(
+      makeCharacter({ initiativeMax: 1 }),
+      makeState({ initiativeBonusDice: -4 }),
+    );
+    expect(shared.initiative.max).toBe(0);
+  });
+
   it('passes conditions through', () => {
     const shared = toSharedCharacter(makeCharacter(), makeState({ conditions: 'À terre' }));
     expect(shared.conditions).toBe('À terre');

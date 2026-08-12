@@ -69,6 +69,10 @@ const stateSchema = z.object({
     int,
   ),
   initiativeValues: z.array(int),
+  // Temporary initiative dice. OPTIONAL (not a version bump): exports made
+  // before the column existed have no such key and import at the column default
+  // 0. Signed — see the schema comment.
+  initiativeBonusDice: int.optional(),
   conditions: str,
   notes: str,
 });

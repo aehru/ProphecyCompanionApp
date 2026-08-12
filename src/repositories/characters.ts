@@ -3,7 +3,7 @@ import { desc, eq, inArray, isNull } from 'drizzle-orm';
 import { SPHERES } from '@/constants/prophecy';
 import { db } from '@/db/client';
 import { actualState, characters, type NewActualState, type NewCharacter } from '@/db/schema';
-import { rollInitiative } from '@/lib/dice';
+import { initiativeDiceCount, rollInitiative } from '@/lib/dice';
 import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
 import { updateActualState } from '@/repositories/actual-state';
@@ -52,19 +52,29 @@ export function characterByUuidQuery(uuid: string) {
  * their whole side rather than tapping through each PNJ.
  *
  * Keyed by uuid because the caller holds roster entries. A character with no
- * initiative dice (`initiativeMax` 0) is skipped rather than given an empty
- * roll, so the count returned is how many actually rolled.
+ * die in play is skipped rather than given an empty roll, so the count returned
+ * is how many actually rolled — and "in play" means the sheet's `initiativeMax`
+ * PLUS the temporary `initiativeBonusDice`, hence the join: a PNJ fighting with
+ * two weapons must roll its extra die here too, not only on the Fiche.
  */
 export async function rollInitiativeFor(charUuids: readonly string[]): Promise<number> {
   if (charUuids.length === 0) return 0;
   const rows = await db
-    .select({ id: characters.id, dice: characters.initiativeMax })
+    .select({
+      id: characters.id,
+      max: characters.initiativeMax,
+      bonus: actualState.initiativeBonusDice,
+    })
     .from(characters)
+    // Left join: a character whose state row doesn't exist yet still rolls its
+    // sheet dice (bonus reads as null → 0).
+    .leftJoin(actualState, eq(actualState.characterId, characters.id))
     .where(inArray(characters.uuid, [...charUuids]));
   let rolled = 0;
   for (const row of rows) {
-    if ((row.dice ?? 0) <= 0) continue;
-    await updateActualState(row.id, { initiativeValues: rollInitiative(row.dice) });
+    const dice = initiativeDiceCount(row.max ?? 0, row.bonus ?? 0);
+    if (dice <= 0) continue;
+    await updateActualState(row.id, { initiativeValues: rollInitiative(dice) });
     rolled++;
   }
   logWrite('actual_state', 'update', { count: rolled, phase: 'roll-initiative' });
