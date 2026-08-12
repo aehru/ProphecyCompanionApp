@@ -2,7 +2,7 @@
 // "Ajouter « X »" shortcut still works, but it only appears once you have typed
 // something that matches nothing — this is the discoverable path.
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import ChipSelect from '@/components/ui/chip-select';
@@ -29,12 +29,16 @@ export default function AddSkillDialog({
   const [attribut, setAttribut] = useState(defaultAttribut);
 
   // Every opening starts blank and re-seeds the attribut from the active tab.
-  useEffect(() => {
+  // Adjusted during render (React's "derive state from props") rather than in an
+  // effect: the first frame of the dialog is already the reset one.
+  const [wasVisible, setWasVisible] = useState(visible);
+  if (visible !== wasVisible) {
+    setWasVisible(visible);
     if (visible) {
       setName('');
       setAttribut(defaultAttribut);
     }
-  }, [visible, defaultAttribut]);
+  }
 
   const trimmed = name.trim();
   const duplicate = existingNames.has(trimmed.toLowerCase());
