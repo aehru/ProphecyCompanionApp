@@ -4,8 +4,10 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Button, Divider, Text } from 'react-native-paper';
 
 import SkillFilterBar from '@/components/skill-filter-bar';
+import AddSkillDialog from '@/components/skills/add-skill-dialog';
 import SkillRow, { type SpecMother } from '@/components/skills/skill-row';
 import SpecRow from '@/components/skills/spec-row';
+import AppFab from '@/components/ui/app-fab';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import type { Skill } from '@/db/schema';
@@ -24,8 +26,11 @@ const BAR_HEIGHT_GUESS = 112;
 /**
  * Edit a character's skills. Skills are grouped into one tab per attribut to
  * avoid a long scroll; the search bar filters across ALL attributs (global) and
- * overrides the active tab. No match → add a free (custom) skill. Skills left at
- * 0 are not saved.
+ * overrides the active tab. Skills left at 0 are not saved.
+ *
+ * Two ways to add a free (custom) skill: the FAB (explicit — the search-only
+ * path was invisible to anyone who never typed a miss) and the "Ajouter « X »"
+ * button that still appears under a search with no match.
  *
  * Owns its scroll so the filter bar (+ add button) can float over the top and
  * reveal on scroll-UP (see use-reveal-on-scroll).
@@ -60,6 +65,7 @@ export default function SkillsEditor({
 }) {
   const theme = useProphecyTheme();
   const [menuFor, setMenuFor] = useState<number | null>(null);
+  const [adding, setAdding] = useState(false);
   const { activeAttr, setActiveAttr, q, searching, title } = useSkillFilter({
     value: search,
     onChange: onSearch,
@@ -80,6 +86,18 @@ export default function SkillsEditor({
     }
   }, []);
 
+  // Both add paths (FAB dialog, search-with-no-match) go through here.
+  const addSkill = useCallback(
+    (name: string, attribut: string) => {
+      // Follow the new row to its tab: the dialog can pick an attribut other
+      // than the active one, and a row added out of sight can't take focus.
+      setActiveAttr(attribut);
+      onAddCustom(name, attribut);
+      setPendingFocus(name);
+    },
+    [onAddCustom, setActiveAttr],
+  );
+
   // Stable so each NumberField keeps the same onChange identity and its
   // React.memo can skip re-rendering untouched rows. NumberField hands back its
   // fieldKey (the row index as a string).
@@ -93,8 +111,8 @@ export default function SkillsEditor({
   const visible = visibleRows(rows, scope);
   const orphans = orphanGroups(rows, specs, scope);
 
-  const exactMatch = rows.some((r) => r.name.trim().toLowerCase() === q);
-  const canAdd = searching && !exactMatch;
+  const existingNames = new Set(rows.map((r) => r.name.trim().toLowerCase()));
+  const canAdd = searching && !existingNames.has(q);
 
   return (
     <View style={styles.root}>
@@ -173,17 +191,25 @@ export default function SkillsEditor({
           <Button
             icon={dsIcon('plus')}
             mode="outlined"
-            onPress={() => {
-              const name = search.trim();
-              // The active tab, not ATTRIBUTS[0]: the new skill lands where the
-              // user is working (they can still re-link it via the row menu, #50).
-              onAddCustom(name, activeAttr);
-              setPendingFocus(name);
-            }}>
+            // The active tab, not ATTRIBUTS[0]: the new skill lands where the
+            // user is working (they can still re-link it via the row menu, #50).
+            onPress={() => addSkill(search.trim(), activeAttr)}>
             Ajouter « {search.trim()} »
           </Button>
         ) : null}
       </Animated.View>
+
+      {/* The visible way in — the search shortcut only shows itself once you
+          have already typed a name that matches nothing. */}
+      <AppFab icon={dsIcon('plus')} onPress={() => setAdding(true)} />
+
+      <AddSkillDialog
+        visible={adding}
+        onDismiss={() => setAdding(false)}
+        onAdd={addSkill}
+        defaultAttribut={activeAttr}
+        existingNames={existingNames}
+      />
     </View>
   );
 }
