@@ -33,6 +33,7 @@ export default function TabPager({
   renderPage,
   swipeEnabled = true,
   headerStyle,
+  headerRight,
 }: {
   labels: readonly TabLabel[];
   active: number;
@@ -43,6 +44,8 @@ export default function TabPager({
   swipeEnabled?: boolean;
   /** Screen-level spacing for the strip (margins only). */
   headerStyle?: StyleProp<ViewStyle>;
+  /** A control parked at the end of the strip (see <SubTabs> `right`). */
+  headerRight?: React.ReactNode;
 }) {
   const [width, setWidth] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
@@ -90,7 +93,14 @@ export default function TabPager({
 
   return (
     <View style={styles.root}>
-      <SubTabs labels={labels} active={active} onChange={onChange} style={headerStyle} progress={progress} />
+      <SubTabs
+        labels={labels}
+        active={active}
+        onChange={onChange}
+        style={headerStyle}
+        progress={progress}
+        right={headerRight}
+      />
 
       <Animated.ScrollView
         ref={scrollRef}

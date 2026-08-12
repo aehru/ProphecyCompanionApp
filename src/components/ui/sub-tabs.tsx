@@ -1,6 +1,6 @@
 // The in-screen tab strip: Cinzel labels over a hairline, an ink bar under the
-// active one. Three screens draw it (Magie, Inventaire, la Compagnie) — it lives
-// here so they stay in sync instead of each keeping a copy.
+// active one. Four screens draw it (Compétences, Magie, Inventaire, la
+// Compagnie) — it lives here so they stay in sync instead of each keeping a copy.
 //
 // Two modes. On its own it draws a static ink bar under the active tab. Given a
 // `progress` value (the pager's scroll position in pages, see <TabPager>), the
@@ -54,6 +54,7 @@ export default function SubTabs({
   onChange,
   style,
   progress,
+  right,
 }: {
   labels: readonly TabLabel[];
   /** Index of the active tab. */
@@ -63,6 +64,13 @@ export default function SubTabs({
   style?: StyleProp<ViewStyle>;
   /** Live pager position, in pages (0 → first tab, 1.5 → halfway to the third). */
   progress?: Animated.AnimatedInterpolation<number>;
+  /**
+   * A control parked at the end of the strip, inside its rule (Compétences puts
+   * the search magnifier there). It sits OUTSIDE the measured tab row on
+   * purpose — the columns and the ink bar are sized from the tabs' own width, so
+   * adding one never shifts the bar off its label.
+   */
+  right?: React.ReactNode;
 }) {
   const theme = useProphecyTheme();
   const { fontScale } = useWindowDimensions();
@@ -98,63 +106,65 @@ export default function SubTabs({
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
 
   return (
-    <View
-      style={[styles.tabs, { borderBottomColor: theme.prophecy.borderSoft }, style]}
-      onLayout={onLayout}>
-      {labels.map((label, i) => {
-        const isActive = active === i;
-        return (
-          <Pressable key={labelKey(label)} style={styles.tab} onPress={() => onChange(i)}>
-            <Text
-              // Once short, never let it wrap: ellipsis beats a two-line strip.
-              numberOfLines={compact ? 1 : undefined}
-              onTextLayout={compact ? undefined : onTextLayout}
-              style={{
-                fontFamily: 'Cinzel_600SemiBold',
-                fontSize: FONT_SIZE,
-                // Label colour follows the SETTLED tab, not the drag: flickering
-                // colours mid-swipe read as a glitch, the moving bar carries the
-                // gesture on its own.
-                color: isActive ? theme.colors.primary : theme.colors.onSurfaceVariant,
-              }}>
-              {labelText(label, compact)}
-            </Text>
-            {/* Static mode draws its ink here; the sliding one is one view for
-                the whole strip (below), so it can travel between tabs. */}
-            {sliding ? (
-              <View style={styles.tabInk} />
-            ) : (
-              <View
-                style={[
-                  styles.tabInk,
-                  { backgroundColor: isActive ? theme.colors.primary : 'transparent' },
-                ]}
-              />
-            )}
-          </Pressable>
-        );
-      })}
+    <View style={[styles.tabs, { borderBottomColor: theme.prophecy.borderSoft }, style]}>
+      <View style={styles.tabRow} onLayout={onLayout}>
+        {labels.map((label, i) => {
+          const isActive = active === i;
+          return (
+            <Pressable key={labelKey(label)} style={styles.tab} onPress={() => onChange(i)}>
+              <Text
+                // Once short, never let it wrap: ellipsis beats a two-line strip.
+                numberOfLines={compact ? 1 : undefined}
+                onTextLayout={compact ? undefined : onTextLayout}
+                style={{
+                  fontFamily: 'Cinzel_600SemiBold',
+                  fontSize: FONT_SIZE,
+                  // Label colour follows the SETTLED tab, not the drag: flickering
+                  // colours mid-swipe read as a glitch, the moving bar carries the
+                  // gesture on its own.
+                  color: isActive ? theme.colors.primary : theme.colors.onSurfaceVariant,
+                }}>
+                {labelText(label, compact)}
+              </Text>
+              {/* Static mode draws its ink here; the sliding one is one view for
+                  the whole row (below), so it can travel between tabs. */}
+              {sliding ? (
+                <View style={styles.tabInk} />
+              ) : (
+                <View
+                  style={[
+                    styles.tabInk,
+                    { backgroundColor: isActive ? theme.colors.primary : 'transparent' },
+                  ]}
+                />
+              )}
+            </Pressable>
+          );
+        })}
 
-      {sliding && tabWidth > 0 ? (
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.slidingInk,
-            {
-              width: tabWidth,
-              backgroundColor: theme.colors.primary,
-              transform: [
-                {
-                  translateX: progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, tabWidth],
-                  }),
-                },
-              ],
-            },
-          ]}
-        />
-      ) : null}
+        {sliding && tabWidth > 0 ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.slidingInk,
+              {
+                width: tabWidth,
+                backgroundColor: theme.colors.primary,
+                transform: [
+                  {
+                    translateX: progress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0, tabWidth],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
+        ) : null}
+      </View>
+
+      {right}
     </View>
   );
 }
@@ -163,7 +173,9 @@ export default function SubTabs({
 const LABEL_PADDING = 8;
 
 const styles = StyleSheet.create({
-  tabs: { flexDirection: 'row', borderBottomWidth: StyleSheet.hairlineWidth },
+  tabs: { flexDirection: 'row', alignItems: 'flex-end', borderBottomWidth: StyleSheet.hairlineWidth },
+  // The measured part: the ink bar's geometry is this row's width / tab count.
+  tabRow: { flex: 1, flexDirection: 'row' },
   tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8, paddingHorizontal: 2 },
   tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
   slidingInk: { position: 'absolute', bottom: 0, left: 0, height: 2, borderRadius: 2 },
