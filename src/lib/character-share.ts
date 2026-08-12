@@ -38,6 +38,7 @@ import {
 } from '@/constants/prophecy';
 import type { ActualState, Character, Effect, Skill } from '@/db/schema';
 import { asNumRecord } from '@/lib/character-values';
+import { initiativeDiceCount } from '@/lib/dice';
 
 /** Bumped on any breaking change to the SharedCharacter shape. v2: skills + effects. */
 export const SHARED_SCHEMA_VERSION = 2;
@@ -132,7 +133,11 @@ export function toSharedCharacter(
       ]),
     ),
     initiative: {
-      max: c.initiativeMax ?? 0,
+      // The EFFECTIVE dice count (sheet max + temporary dice), not the sheet
+      // number: to the GM a die is a die, and shipping the bonus separately
+      // would widen the wire for no tactical gain. No schema bump — the field
+      // keeps its shape and meaning ("how many dice this character rolls").
+      max: initiativeDiceCount(c.initiativeMax ?? 0, s.initiativeBonusDice ?? 0),
       values: Array.isArray(state.initiativeValues) ? state.initiativeValues : [],
     },
     conditions: state.conditions ?? '',
