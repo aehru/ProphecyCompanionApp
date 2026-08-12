@@ -1,8 +1,10 @@
 import { useRouter } from 'expo-router';
 import React, { useCallback, useDeferredValue, useMemo, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, View } from 'react-native';
-import { Searchbar, Text } from 'react-native-paper';
+import { Searchbar, Snackbar, Text } from 'react-native-paper';
 
+import CatalogRow from '@/components/catalog-row';
+import SpellDetail from '@/components/spell-detail';
 import ChipSelect from '@/components/ui/chip-select';
 import Icon from '@/components/ui/icon';
 import { SectionHeader } from '@/components/ui/section-card';
@@ -14,6 +16,7 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellTotal } from '@/hooks/use-spell-total';
 import { log } from '@/lib/log';
+import type { SpellTotal } from '@/lib/spell-total';
 import { createSpell } from '@/repositories/spells';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -50,8 +53,10 @@ const DISCIPLINE_OPTIONS = [
 const SPHERE_OPTIONS = [{ key: '', label: 'Toutes' }, ...SPHERES];
 
 /**
- * Spell catalogue picker (modal). Select a preset to add it and jump into its
- * editor, or start from a blank custom spell. Presets live in {@link SPELL_CATALOG}.
+ * Spell catalogue picker (modal). Tap a row to preview the sortilège — the same
+ * detail the Magie tab shows, with this character's casting score — or the `+`
+ * to add it. Adding keeps the catalogue open; the toast links to the new
+ * spell's editor. Presets live in {@link SPELL_CATALOG}.
  *
  * Grouped by **sphère** — the axis a player shops along — and narrowed by name
  * search plus sphère/discipline/niveau facets. Unlike the weapon catalogue this
@@ -72,6 +77,7 @@ export default function SpellCatalogModal() {
   const [sphere, setSphere] = useState('');
   const [discipline, setDiscipline] = useState('');
   const [level, setLevel] = useState('');
+  const [toast, setToast] = useState<{ text: string; spellId: number } | null>(null);
 
   // Re-sectioning the catalogue is the expensive half of a keystroke; deferring
   // it keeps the Searchbar and the chips responsive while the list catches up.
@@ -97,8 +103,6 @@ export default function SpellCatalogModal() {
       .filter((s) => s.data.length > 0);
   }, [q, sphereFilter, disciplineFilter, levelFilter]);
 
-  // Add the spell, then replace this screen with its editor so "back" from the
-  // editor returns to the Magie tab (not the catalogue).
   const add = useCallback(
     async (preset?: SpellPreset) => {
       // Which preset was picked, logged HERE rather than threaded through the
@@ -107,7 +111,13 @@ export default function SpellCatalogModal() {
       // from a bad hand edit. Custom spells have no slug and no line.
       if (preset) log.info('catalog.add', { entity: 'spells', catalogId: preset.id });
       const row = await createSpell(numId, preset?.data);
-      router.replace(`/character/${numId}/spell/${row.id}`);
+      // A blank spell has nothing to read in the catalogue, so it still opens
+      // its editor; a preset stays here so the player can pick the next one.
+      if (!preset) {
+        router.replace(`/character/${numId}/spell/${row.id}`);
+        return;
+      }
+      setToast({ text: `« ${preset.data.name} » ajouté.`, spellId: row.id });
     },
     [numId, router],
   );
@@ -116,98 +126,116 @@ export default function SpellCatalogModal() {
     ({ item }: { item: Entry }) => (
       <SpellRow
         entry={item}
-        total={
-          spellTotalFor({
-            discipline: item.discipline,
-            sphere: item.sphere,
-            cleParfaite: item.preset.data.cleParfaite,
-          }).total
-        }
-        onPress={add}
+        total={spellTotalFor({
+          discipline: item.discipline,
+          sphere: item.sphere,
+          cleParfaite: item.preset.data.cleParfaite,
+        })}
+        onAdd={add}
       />
     ),
     [add, spellTotalFor],
   );
 
   return (
-    <SectionList
-      sections={sections}
-      keyExtractor={(e) => e.preset.id}
-      renderItem={renderItem}
-      renderSectionHeader={({ section }) => (
-        <View style={styles.sectionHeader}>
-          <SectionHeader title={section.title} icon="magic" />
-        </View>
-      )}
-      // The headers are transparent (a title + a hairline rule), so pinning one
-      // over scrolling rows would just overlap them.
-      stickySectionHeadersEnabled={false}
-      // A tap must add the spell on the first press even with the search
-      // keyboard up, instead of being eaten by the dismiss.
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
-      contentContainerStyle={[styles.container, contentWidth]}
-      ListHeaderComponent={
-        // An element, not a component: an inline component type would remount
-        // on every render and the Searchbar would lose focus mid-word.
-        <View style={styles.header}>
-          <Searchbar
-            placeholder="Rechercher un sortilège"
-            value={query}
-            onChangeText={setQuery}
-            icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
-          />
-
-          {/* Discipline and niveau are few and short — chips, visible at a
-              glance. The 9 spheres would be a wall of them, so that one stays a
-              dropdown (and doubles as a jump to one section). */}
-          <View style={styles.filters}>
-            <SelectField
-              label="Sphère"
-              options={SPHERE_OPTIONS}
-              value={sphere}
-              onChange={setSphere}
-              style={styles.sphereFilter}
-            />
-            <View style={styles.disciplineFilter}>
-              <ChipSelect
-                label="Discipline"
-                options={DISCIPLINE_OPTIONS}
-                value={discipline}
-                onChange={setDiscipline}
-              />
-            </View>
-            <View style={styles.levelFilter}>
-              <ChipSelect label="Niveau" options={LEVEL_OPTIONS} value={level} onChange={setLevel} />
-            </View>
+    <View style={styles.root}>
+      <SectionList
+        sections={sections}
+        keyExtractor={(e) => e.preset.id}
+        renderItem={renderItem}
+        renderSectionHeader={({ section }) => (
+          <View style={styles.sectionHeader}>
+            <SectionHeader title={section.title} icon="magic" />
           </View>
+        )}
+        // The headers are transparent (a title + a hairline rule), so pinning one
+        // over scrolling rows would just overlap them.
+        stickySectionHeadersEnabled={false}
+        // A tap must reach the row on the first press even with the search
+        // keyboard up, instead of being eaten by the dismiss.
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        contentContainerStyle={[styles.container, contentWidth]}
+        ListHeaderComponent={
+          // An element, not a component: an inline component type would remount
+          // on every render and the Searchbar would lose focus mid-word.
+          <View style={styles.header}>
+            <Searchbar
+              placeholder="Rechercher un sortilège"
+              value={query}
+              onChangeText={setQuery}
+              icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
+            />
 
-          <Pressable
-            onPress={() => add()}
-            style={[styles.row, { borderBottomColor: theme.prophecy.borderSoft }]}>
-            <View
-              style={[
-                styles.tile,
-                { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary },
-              ]}>
-              <Icon name="plus" size={22} color={theme.colors.primary} />
+            {/* Discipline and niveau are few and short — chips, visible at a
+                glance. The 9 spheres would be a wall of them, so that one stays a
+                dropdown (and doubles as a jump to one section). */}
+            <View style={styles.filters}>
+              <SelectField
+                label="Sphère"
+                options={SPHERE_OPTIONS}
+                value={sphere}
+                onChange={setSphere}
+                style={styles.sphereFilter}
+              />
+              <View style={styles.disciplineFilter}>
+                <ChipSelect
+                  label="Discipline"
+                  options={DISCIPLINE_OPTIONS}
+                  value={discipline}
+                  onChange={setDiscipline}
+                />
+              </View>
+              <View style={styles.levelFilter}>
+                <ChipSelect
+                  label="Niveau"
+                  options={LEVEL_OPTIONS}
+                  value={level}
+                  onChange={setLevel}
+                />
+              </View>
             </View>
-            <View style={styles.main}>
-              <Text style={styles.name}>Sortilège personnalisé</Text>
-              <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]}>
-                Partir de zéro
-              </Text>
-            </View>
-            <Icon name="chev" size={18} color={theme.colors.onSurfaceVariant} />
-          </Pressable>
-        </View>
-      }
-      ListEmptyComponent={
-        <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
-          Aucun sortilège ne correspond.
-        </Text>
-      }
-    />
+
+            <Pressable
+              onPress={() => add()}
+              style={[styles.row, { borderBottomColor: theme.prophecy.borderSoft }]}>
+              <View
+                style={[
+                  styles.tile,
+                  { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary },
+                ]}>
+                <Icon name="plus" size={22} color={theme.colors.primary} />
+              </View>
+              <View style={styles.main}>
+                <Text style={styles.name}>Sortilège personnalisé</Text>
+                <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]}>
+                  Partir de zéro
+                </Text>
+              </View>
+              <Icon name="chev" size={18} color={theme.colors.onSurfaceVariant} />
+            </Pressable>
+          </View>
+        }
+        ListEmptyComponent={
+          <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
+            Aucun sortilège ne correspond.
+          </Text>
+        }
+      />
+
+      <Snackbar
+        visible={toast !== null}
+        onDismiss={() => setToast(null)}
+        duration={3000}
+        action={{
+          label: 'Modifier',
+          onPress: () => {
+            if (toast) router.replace(`/character/${numId}/spell/${toast.spellId}`);
+          },
+        }}>
+        {toast?.text ?? ''}
+      </Snackbar>
+    </View>
   );
 }
 
@@ -218,49 +246,42 @@ export default function SpellCatalogModal() {
 const SpellRow = React.memo(function SpellRow({
   entry,
   total,
-  onPress,
+  onAdd,
 }: {
   entry: Entry;
-  total: number;
-  onPress: (preset: SpellPreset) => void;
+  total: SpellTotal;
+  onAdd: (preset: SpellPreset) => void;
 }) {
-  const theme = useProphecyTheme();
   const { preset: p } = entry;
   // The sphère is the section title, so the row names its discipline instead.
   const sub = [
     p.data.level ? `Niv. ${p.data.level}` : null,
     DISCIPLINE_LABEL[entry.discipline],
     `Diff. ${p.data.difficulty}`,
-    `Total ${total}`,
+    `Total ${total.total}`,
   ]
     .filter(Boolean)
     .join(' · ');
 
   return (
-    <Pressable
-      onPress={() => onPress(p)}
-      style={[styles.row, { borderBottomColor: theme.prophecy.borderSoft }]}>
-      <View
-        style={[
-          styles.tile,
-          { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
-        ]}>
-        <Icon name="magic" size={22} color={theme.colors.primary} />
-      </View>
-      <View style={styles.main}>
-        <Text style={styles.name} numberOfLines={1}>
-          {p.data.name}
-        </Text>
-        <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
-          {sub}
-        </Text>
-      </View>
-      <Icon name="chev" size={18} color={theme.colors.onSurfaceVariant} />
-    </Pressable>
+    <CatalogRow
+      icon="magic"
+      name={p.data.name ?? ''}
+      subtitle={sub}
+      addLabel={`Ajouter ${p.data.name}`}
+      onAdd={() => onAdd(p)}>
+      {/* The preset's discipline/sphère fall back the same way the index does,
+          so the preview's total matches the row's. */}
+      <SpellDetail
+        spell={{ ...p.data, discipline: entry.discipline, sphere: entry.sphere }}
+        total={total}
+      />
+    </CatalogRow>
   );
 });
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   container: { padding: 16, paddingBottom: 48 },
   header: { gap: 16, marginBottom: 16 },
   // Wraps to one column on a phone, sits on one line once there is room.
