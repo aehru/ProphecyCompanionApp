@@ -10,28 +10,25 @@ import ConditionsCard from '@/components/conditions-card';
 import EffectsCard from '@/components/effects-card';
 import ArmorSection from '@/components/fiche/armor-section';
 import HealthSection from '@/components/fiche/health-section';
+import InitiativeSection from '@/components/fiche/initiative-section';
 import ResourcesSection from '@/components/fiche/resources-section';
 import ShieldSection from '@/components/fiche/shield-section';
 import StatGrid from '@/components/fiche/stat-grid';
 import GlobalModifierRow from '@/components/global-modifier-row';
-import NumberField from '@/components/number-field';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
-import EditableSection from '@/components/ui/editable-section';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
-import StatChip from '@/components/ui/stat-chip';
 import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSplitWidth } from '@/hooks/use-layout';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
-import { rollInitiative } from '@/lib/dice';
+import { initiativeDiceCount, rollInitiative, trimInitiativeValues } from '@/lib/dice';
 import { globalModifier, statModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
@@ -54,7 +51,6 @@ export default function CharacterFicheScreen() {
   const numId = useCharacterId();
   const router = useRouter();
   const navigation = useNavigation();
-  const theme = useProphecyTheme();
   // ensure: live in-play edits write current values to actual_state.
   const { char, state, setChar, setState, reload } = useCharacterState(numId, {
     ensure: true,
@@ -101,6 +97,10 @@ export default function CharacterFicheScreen() {
   const wound = woundMalus(stRec);
   const global = globalModifier(effectList, wound);
   const initiativeMax = rec.initiativeMax ?? 0;
+  const initBonus = stRec.initiativeBonusDice ?? 0;
+  // How many dice are actually in play this turn — sheet max plus the temporary
+  // ones. Sizes the grid, the roll and the per-die writes alike.
+  const initCount = initiativeDiceCount(initiativeMax, initBonus);
   const initStored = state?.initiativeValues ?? [];
 
   // Live writers: update local state immediately, persist in the background.
@@ -123,14 +123,22 @@ export default function CharacterFicheScreen() {
     );
 
   const setInit = (i: number, n: number) => {
-    const next = Array.from({ length: initiativeMax }, (_, j) => (j === i ? n : initStored[j] ?? 0));
+    const next = Array.from({ length: initCount }, (_, j) => (j === i ? n : initStored[j] ?? 0));
     setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
     updateActualState(numId, { initiativeValues: next });
   };
 
-  // Roll all initiative dice at once: initiativeMax plain D10, stored descending.
+  // Losing a die also drops its stored roll, so granting one back shows an empty
+  // slot rather than a stale number.
+  const setInitBonus = (n: number) =>
+    persistState({
+      initiativeBonusDice: n,
+      initiativeValues: trimInitiativeValues(initStored, initiativeDiceCount(initiativeMax, n)),
+    });
+
+  // Roll every die in play at once: `initCount` plain D10, stored descending.
   const rollInit = () => {
-    const next = rollInitiative(initiativeMax);
+    const next = rollInitiative(initCount);
     setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
     updateActualState(numId, { initiativeValues: next });
   };
@@ -200,64 +208,15 @@ export default function CharacterFicheScreen() {
             modifierOf={(k) => statModifier(k, effectList)}
           />
 
-          <EditableSection
-            title="INITIATIVE"
-            action={() =>
-              initiativeMax > 0 ? (
-                <IconButton
-                  icon={dsIcon('dice')}
-                  size={18}
-                  onPress={rollInit}
-                  accessibilityLabel="Lancer l’initiative"
-                  style={styles.initRoll}
-                />
-              ) : null
-            }>
-            {(initEditing) => {
-              if (initiativeMax <= 0) {
-                return (
-                  <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                    Définis l’initiative (max) avec le crayon en haut.
-                  </Text>
-                );
-              }
-              const vals = Array.from({ length: initiativeMax }, (_, i) => initStored[i] ?? 0);
-              return (
-                <View style={styles.initGrid}>
-                  {vals.map((val, i) => {
-                    if (initEditing) {
-                      return (
-                        <NumberField
-                          key={i}
-                          fieldKey={String(i)}
-                          label={`Dé ${i + 1}`}
-                          value={String(val)}
-                          onChange={(k, t) => setInit(Number(k), parseInt(t, 10) || 0)}
-                          style={styles.initField}
-                        />
-                      );
-                    }
-                    // Wound malus applies to initiative like any roll. A rolled die
-                    // driven to 0 or below is unusable → error border.
-                    const unusable = val > 0 && val + wound <= 0;
-                    return (
-                      <StatChip
-                        key={i}
-                        label={`Dé ${i + 1}`}
-                        value={String(val)}
-                        modifier={wound}
-                        style={
-                          unusable
-                            ? { borderColor: theme.colors.error, borderWidth: 1.5 }
-                            : undefined
-                        }
-                      />
-                    );
-                  })}
-                </View>
-              );
-            }}
-          </EditableSection>
+          <InitiativeSection
+            max={initiativeMax}
+            bonus={initBonus}
+            values={initStored}
+            wound={wound}
+            onSetDie={setInit}
+            onSetBonus={setInitBonus}
+            onRoll={rollInit}
+          />
 
           <HealthSection
             maxOf={(k) => rec[k] ?? 0}
@@ -301,7 +260,4 @@ export default function CharacterFicheScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
-  initRoll: { margin: 0 },
-  initGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  initField: { flexGrow: 0, flexBasis: 72, minWidth: 72 },
 });
