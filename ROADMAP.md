@@ -22,6 +22,15 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
+- [ ] **Re-test the catalogue previews on web/desktop after the PWA merge.** The
+  expandable preview rows (`<CatalogRow>` + the shared `*Detail` bodies) were
+  verified by typecheck, the test suite and a full **web bundle**, but not by
+  clicking them in a browser: on this base expo-sqlite's *sync* web bridge dies
+  at boot (`SharedArrayBuffer is not defined`, then `Sync operation timeout`), so
+  the exported app never reaches a screen. Once the async sqlite-proxy / PWA work
+  lands, re-check on web specifically: the `+` `IconButton` nested inside the
+  row's `Pressable` (that both fire correctly and the tap targets don't overlap),
+  and the Snackbar's « Modifier » action.
 
 ## Campaign mode
 
