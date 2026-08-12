@@ -1,0 +1,1 @@
+ALTER TABLE `actual_state` ADD `initiative_bonus_dice` integer DEFAULT 0 NOT NULL;

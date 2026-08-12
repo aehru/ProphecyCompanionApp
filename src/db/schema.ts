@@ -156,11 +156,17 @@ export const actualState = sqliteTable('actual_state', {
   dracArgent: integer('drac_argent').notNull().default(0),
   dracOr: integer('drac_or').notNull().default(0),
 
-  // Current-turn initiative values (X = the character's initiativeMax)
+  // Current-turn initiative values (X = the character's effective dice count)
   initiativeValues: text('initiative_values', { mode: 'json' })
     .$type<number[]>()
     .notNull()
     .default(sql`'[]'`),
+  // Temporary initiative dice, in play. SIGNED: two-weapon fighting and some
+  // spells grant extra actions, other situations take one away. Deliberately a
+  // plain count the player manages by hand rather than a rules engine — the
+  // rulebook has too many sources to enumerate, and any malus that comes with
+  // the extra die is entered as a normal `effects` row. Never auto-cleared.
+  initiativeBonusDice: integer('initiative_bonus_dice').notNull().default(0),
 
   conditions: text('conditions').notNull().default(''),
   notes: text('notes').notNull().default(''),
