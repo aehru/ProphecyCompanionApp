@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { rollDice, rollDie, rollInitiative, type Rng } from './dice';
+import {
+  initiativeDiceCount,
+  rollDice,
+  rollDie,
+  rollInitiative,
+  trimInitiativeValues,
+  type Rng,
+} from './dice';
 
 // A deterministic RNG that replays a fixed sequence in [0,1), looping. Lets us
 // pin exact faces: face = floor(r * sides) + 1.
@@ -56,5 +63,40 @@ describe('rollInitiative', () => {
     }
     // sorted descending
     expect([...out].sort((a, b) => b - a)).toEqual(out);
+  });
+});
+
+describe('initiativeDiceCount', () => {
+  it('adds the temporary dice to the sheet max', () => {
+    expect(initiativeDiceCount(2, 0)).toBe(2);
+    expect(initiativeDiceCount(2, 1)).toBe(3); // two-weapon fighting
+  });
+
+  it('subtracts a negative bonus', () => {
+    expect(initiativeDiceCount(3, -1)).toBe(2);
+  });
+
+  it('floors at 0 rather than going negative', () => {
+    expect(initiativeDiceCount(2, -5)).toBe(0);
+  });
+
+  it('lets a temporary die stand alone on a character with no initiative', () => {
+    expect(initiativeDiceCount(0, 1)).toBe(1);
+  });
+});
+
+describe('trimInitiativeValues', () => {
+  it('drops the rolls of dice that are no longer in play', () => {
+    expect(trimInitiativeValues([9, 5, 2], 2)).toEqual([9, 5]);
+    expect(trimInitiativeValues([9, 5, 2], 0)).toEqual([]);
+  });
+
+  it('leaves a shorter list alone — the grid renders a missing slot as 0', () => {
+    expect(trimInitiativeValues([9], 3)).toEqual([9]);
+  });
+
+  it('never returns the same array instance (callers persist it)', () => {
+    const values = [9, 5];
+    expect(trimInitiativeValues(values, 5)).not.toBe(values);
   });
 });
