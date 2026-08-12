@@ -1,28 +1,26 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
-import Icon, { dsIcon } from '@/components/ui/icon';
+import {
+  prerequisitesUnmet,
+  type CaracModifier,
+  type CaracValue,
+} from '@/components/gear-detail-rows';
+import Icon from '@/components/ui/icon';
+import WeaponDetail, { fmtSigned } from '@/components/weapon-detail';
 import type { Weapon } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { formatDecimal } from '@/lib/character-values';
-import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
-import { fmtSignedMod } from '@/lib/modifiers';
+import { formulaResult } from '@/lib/formula';
 import type { WeaponSkillReading } from '@/lib/weapon-skill';
 import { equipWeapon, unequipWeapon } from '@/repositories/weapons';
 
-type CaracValue = (caracKey: string) => number;
-/**
- * Net wound + temporary-effect modifier for a caractéristique. Folded into the
- * carac value before any multiplier in the damage formula.
- */
-type CaracModifier = (caracKey: string) => number;
-
 /**
  * One weapon: a read-only summary. The pencil opens the editor in a modal screen
- * (`weapon/[wid]`). Formula fields (damage, ranges) show the raw formula plus its
- * computed result for this character; prerequisites are checked against caracs.
+ * (`weapon/[wid]`). The expanded body is {@link WeaponDetail}, shared with the
+ * weapon catalogue's preview: formula fields show the raw formula plus its
+ * computed result for this character, and prerequisites are checked against caracs.
  */
 export default function WeaponCard({
   weapon,
@@ -57,134 +55,6 @@ export default function WeaponCard({
   );
 }
 
-function FormulaRow({
-  label,
-  raw,
-  caracValue,
-  // Per-carac modifier (wound + effects), folded into carac values before the
-  // multiplier. Only the damage row passes this; ranges ignore combat maluses.
-  caracModifier,
-}: {
-  label: string;
-  raw: string | null;
-  caracValue: CaracValue;
-  caracModifier?: CaracModifier;
-}) {
-  const theme = useProphecyTheme();
-  if (raw == null || raw.trim() === '') return null;
-  const result = formulaResult(raw, caracValue, caracModifier);
-  // Badge = the raw carac modifier (wound + effects), shown BEFORE any multiplier:
-  // a +2 on `FOR x2` reads "+2", not "+4".
-  const delta = formulaCaracMod(raw, caracModifier);
-  const modColor = delta > 0 ? theme.colors.primary : theme.colors.error;
-  return (
-    <View style={styles.row}>
-      <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
-      <View style={styles.formulaCol}>
-        <Text>{raw.trim()}</Text>
-        {result != null && result !== raw.trim() ? (
-          <View style={styles.resultRow}>
-            <Text style={[styles.result, { color: theme.colors.primary }]}>= {result}</Text>
-            {delta !== 0 ? (
-              <>
-                <IconButton
-                  icon="alert-circle"
-                  size={14}
-                  iconColor={modColor}
-                  style={styles.modIcon}
-                />
-                <Text style={[styles.modNote, { color: modColor }]}>
-                  ({fmtSignedMod(delta)})
-                </Text>
-              </>
-            ) : null}
-          </View>
-        ) : null}
-      </View>
-    </View>
-  );
-}
-
-/**
- * Sum of the raw carac modifiers for the distinct caractéristiques a formula
- * uses — the value applied to each carac before its multiplier. For a single-carac
- * formula (the common case) this is just that carac's modifier.
- */
-function formulaCaracMod(raw: string, caracModifier?: CaracModifier): number {
-  if (!caracModifier) return 0;
-  const parsed = parseFormula(raw);
-  if (!parsed.ok) return 0;
-  const keys = new Set<string>();
-  for (const t of parsed.formula.terms) if (t.kind === 'carac') keys.add(t.carac);
-  let total = 0;
-  for (const k of keys) total += caracModifier(k);
-  return total;
-}
-
-/**
- * The compétence line: which skill this weapon is wielded with, and the total
- * the player rolls on. Three readings, three tones — an unset link is a normal
- * state (nothing to alarm about), a dangling one is an error, and a skill with
- * no points still shows its total, tagged « non acquise » so the player knows
- * they are rolling on the attribut alone.
- */
-function SkillRow({ skill }: { skill: WeaponSkillReading }) {
-  const theme = useProphecyTheme();
-
-  if (skill.status === 'unset') {
-    return (
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Compétence</Text>
-        <Text style={[styles.value, { color: theme.colors.onSurfaceVariant }]}>
-          Non définie — à choisir dans « Modifier »
-        </Text>
-      </View>
-    );
-  }
-
-  if (skill.status === 'unknown') {
-    return (
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Compétence</Text>
-        <Text style={[styles.value, { color: theme.colors.error }]}>
-          « {skill.name} » introuvable
-        </Text>
-      </View>
-    );
-  }
-
-  const modColor = skill.bonus > 0 ? theme.colors.primary : theme.colors.error;
-  return (
-    <View style={styles.row}>
-      <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Compétence</Text>
-      <View style={styles.formulaCol}>
-        <View style={styles.skillNameRow}>
-          <Text style={styles.skillName}>{skill.name}</Text>
-          {!skill.trained ? (
-            <Text style={[styles.untrained, { color: theme.colors.onSurfaceVariant }]}>
-              non acquise
-            </Text>
-          ) : null}
-        </View>
-        <View style={styles.resultRow}>
-          <Text style={[styles.result, { color: theme.colors.primary }]}>= {skill.total}</Text>
-          <Text style={[styles.breakdown, { color: theme.colors.onSurfaceVariant }]}>
-            ({skill.attributLabel} {skill.attributValue} + {skill.value})
-          </Text>
-          {skill.bonus !== 0 ? (
-            <>
-              <IconButton icon="alert-circle" size={14} iconColor={modColor} style={styles.modIcon} />
-              <Text style={[styles.modNote, { color: modColor }]}>
-                ({fmtSignedMod(skill.bonus)})
-              </Text>
-            </>
-          ) : null}
-        </View>
-      </View>
-    </View>
-  );
-}
-
 function WeaponSummary({
   weapon: w,
   caracValue,
@@ -202,9 +72,8 @@ function WeaponSummary({
 }) {
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
-  const prereqs = parsePrerequisites(w.prerequisites);
   // Any unmet prerequisite flags the weapon's tile with an error border.
-  const prereqUnmet = prereqs.some((p) => caracValue(p.carac) < p.min);
+  const prereqUnmet = prerequisitesUnmet(w.prerequisites, caracValue);
 
   // Equip state. Two-handed weapons occupy 'both'; one-handed toggle 'main'/'off'.
   const equippedLabel =
@@ -289,99 +158,17 @@ function WeaponSummary({
       </Pressable>
 
       {expanded ? (
-        <View style={styles.detail}>
-          {skill ? <SkillRow skill={skill} /> : null}
-
-          <FormulaRow
-            label="Dégâts"
-            raw={w.damage}
-            caracValue={caracValue}
-            caracModifier={caracModifier}
-          />
-
-          {prereqs.length > 0 ? (
-            <View style={styles.row}>
-              <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Prérequis</Text>
-              <View style={styles.prereqWrap}>
-                {prereqs.map((p) => {
-                  const met = caracValue(p.carac) >= p.min;
-                  return (
-                    <Text
-                      key={p.carac}
-                      style={[
-                        styles.prereq,
-                        { color: met ? theme.colors.primary : theme.colors.error },
-                      ]}>
-                      {p.abbr} {p.min}
-                    </Text>
-                  );
-                })}
-              </View>
-            </View>
-          ) : null}
-
-          <FormulaRow label="Portée eff." raw={w.rangeEffective} caracValue={caracValue} />
-          <FormulaRow label="Portée max" raw={w.rangeMax} caracValue={caracValue} />
-
-          <View style={styles.row}>
-            <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Initiative</Text>
-            <Text style={styles.value}>
-              Mêlée {fmtSigned(w.initMelee)} · CàC {fmtSigned(w.initCorpsACorps)}
-            </Text>
-          </View>
-
-          <View style={styles.row}>
-            <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Création</Text>
-            <Text style={styles.value}>
-              Diff. {w.creationDifficulty} · Temps {formatDecimal(w.creationTime)}
-            </Text>
-          </View>
-
-          {w.special.trim() !== '' ? (
-            <View style={styles.row}>
-              <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Spécial</Text>
-              <Text style={styles.value}>{w.special.trim()}</Text>
-            </View>
-          ) : null}
-
-          <View style={styles.row}>
-            <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Équiper</Text>
-            <View style={styles.equipBtns}>
-              <Button
-                compact
-                mode={w.equippedHand === 'main' ? 'contained-tonal' : 'outlined'}
-                onPress={() => toggleHand('main')}>
-                Main
-              </Button>
-              <Button
-                compact
-                mode={w.equippedHand === 'off' ? 'contained-tonal' : 'outlined'}
-                onPress={() => toggleHand('off')}>
-                Main sec.
-              </Button>
-              {/* Two-handed only: a 1H weapon is never wielded in both hands. */}
-              {w.hands === 2 ? (
-                <Button
-                  compact
-                  mode={w.equippedHand === 'both' ? 'contained-tonal' : 'outlined'}
-                  onPress={() => toggleHand('both')}>
-                  Deux mains
-                </Button>
-              ) : null}
-            </View>
-          </View>
-
-          <Button compact icon={dsIcon('edit')} onPress={onEdit} style={styles.detailEdit}>
-            Modifier
-          </Button>
-        </View>
+        <WeaponDetail
+          weapon={w}
+          caracValue={caracValue}
+          caracModifier={caracModifier}
+          skill={skill}
+          equip={{ hands: w.hands, equippedHand: w.equippedHand, onToggle: toggleHand }}
+          onEdit={onEdit}
+        />
       ) : null}
     </View>
   );
-}
-
-function fmtSigned(n: number) {
-  return n > 0 ? `+${n}` : String(n);
 }
 
 const styles = StyleSheet.create({
@@ -403,21 +190,4 @@ const styles = StyleSheet.create({
   subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
   itemSub: { fontSize: 12 },
   skillChip: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  skillNameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  skillName: { fontSize: 15 },
-  untrained: { fontSize: 12, fontStyle: 'italic' },
-  breakdown: { fontSize: 13 },
-  equipBtns: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  detail: { gap: 8, paddingLeft: 2, paddingBottom: 12 },
-  detailEdit: { alignSelf: 'flex-start', marginTop: 2 },
-  row: { flexDirection: 'row', gap: 12 },
-  label: { width: 92, fontSize: 14 },
-  value: { flex: 1, fontSize: 15 },
-  formulaCol: { flex: 1 },
-  resultRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  result: { fontSize: 15, fontWeight: '700' },
-  modIcon: { margin: 0 },
-  modNote: { fontSize: 13, fontWeight: '700' },
-  prereqWrap: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  prereq: { fontSize: 15, fontWeight: '600' },
 });

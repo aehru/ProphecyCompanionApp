@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { groupSkills, skillBonus, type SharedSkill } from './skill-groups';
+import { detachOrphanSpecs, groupSkills, skillBonus, type SharedSkill } from './skill-groups';
 
 const colors = { physique: '#p', mental: '#m', manuel: '#h', social: '#s' };
 const attributs = { physique: 3, mental: 2, manuel: 0, social: 1 };
@@ -35,6 +35,29 @@ describe('skillBonus', () => {
     // wound -5 + all(+1) + physique(+2) + skill(+3) = 1.
     expect(skillBonus('physique', 'Discrétion', effects, -5)).toBe(1);
     expect(skillBonus('physique', 'Escalade', [], -3)).toBe(-3);
+  });
+});
+
+describe('detachOrphanSpecs', () => {
+  const mother = skill({ name: 'Équitation' });
+  const spec = skill({ name: 'Équitation (chameau)', parentName: 'Équitation', specLabel: 'chameau' });
+
+  it('keeps a specialization attached when its mother is owned', () => {
+    expect(detachOrphanSpecs([mother, spec])[1]).toEqual(spec);
+  });
+
+  it('detaches one whose mother is missing, so it renders under its own name', () => {
+    const [orphan] = detachOrphanSpecs([spec]);
+    expect(orphan).toMatchObject({
+      name: 'Équitation (chameau)',
+      parentName: null,
+      specLabel: null,
+    });
+    // And the grouping then reads it as a plain skill, not an indented child.
+    const [group] = groupSkills(detachOrphanSpecs([spec]), attributs, colors);
+    expect(group.skills).toEqual([
+      expect.objectContaining({ name: 'Équitation (chameau)', isSpec: false }),
+    ]);
   });
 });
 

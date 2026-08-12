@@ -54,6 +54,22 @@ export function skillBonus(
 }
 
 /**
+ * A specialization whose mother isn't owned is NOT a child row: the GM may allow
+ * a spec without the base skill, so it must stand on its own — un-indented,
+ * under its full composite name — instead of hanging off a mother that never
+ * renders. Detaching it here means {@link groupSkills} sees a plain skill.
+ *
+ * Only the player's own sheet needs this: a shared projection carries trained
+ * skills only, so a mother it links to is either present or was never owned.
+ */
+export function detachOrphanSpecs(skills: readonly SharedSkill[]): SharedSkill[] {
+  const baseNames = new Set(skills.filter((s) => !s.parentName).map((s) => s.name));
+  return skills.map((s) =>
+    s.parentName && !baseNames.has(s.parentName) ? { ...s, parentName: null, specLabel: null } : s,
+  );
+}
+
+/**
  * Group a character's trained skills by attribut (in the canonical ATTRIBUTS
  * order) and compute the three GM columns per skill:
  *   value  — the raw skill points

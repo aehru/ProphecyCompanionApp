@@ -6,10 +6,13 @@ import { ActivityIndicator, Text } from 'react-native-paper';
 import ConditionsCard from '@/components/conditions-card';
 import EffectsCard from '@/components/effects-card';
 import HealthSection from '@/components/fiche/health-section';
+import InitiativeSection from '@/components/fiche/initiative-section';
 import ResourcesSection from '@/components/fiche/resources-section';
 import type { ActualState } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp } from '@/lib/character-values';
+import { initiativeDiceCount, rollInitiative, trimInitiativeValues } from '@/lib/dice';
+import { woundMalus } from '@/lib/modifiers';
 import { actualStateQuery, updateActualState } from '@/repositories/actual-state';
 import { characterByUuidQuery } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
@@ -66,6 +69,10 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
 
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
+  const initMax = rec.initiativeMax ?? 0;
+  const initBonus = stRec.initiativeBonusDice ?? 0;
+  const initCount = initiativeDiceCount(initMax, initBonus);
+  const initStored = state.initiativeValues ?? [];
 
   const setStateValue = (key: string, value: number) =>
     updateActualState(localId, { [key]: value } as Partial<ActualState>);
@@ -75,9 +82,30 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
       `${key}Current`,
       clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
     );
+  const setInit = (i: number, n: number) =>
+    persistState({
+      initiativeValues: Array.from({ length: initCount }, (_, j) =>
+        j === i ? n : initStored[j] ?? 0,
+      ),
+    });
 
   return (
     <View style={styles.root}>
+      <InitiativeSection
+        max={initMax}
+        bonus={initBonus}
+        values={initStored}
+        wound={woundMalus(stRec)}
+        onSetDie={setInit}
+        onSetBonus={(n) =>
+          // Dropping a die drops its stored roll too — see the Fiche.
+          persistState({
+            initiativeBonusDice: n,
+            initiativeValues: trimInitiativeValues(initStored, initiativeDiceCount(initMax, n)),
+          })
+        }
+        onRoll={() => persistState({ initiativeValues: rollInitiative(initCount) })}
+      />
       <HealthSection
         maxOf={(k) => rec[k] ?? 0}
         currentOf={(k) => stRec[k] ?? 0}

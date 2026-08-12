@@ -11,6 +11,16 @@ export interface IndexedRow {
   index: number;
 }
 
+/**
+ * Which rows are in scope: one attribut's page, or a global search across all of
+ * them. Both filters below read it, and so does the editor list that draws them.
+ */
+export interface SkillScope {
+  searching: boolean;
+  query: string;
+  activeAttr: string;
+}
+
 /** Specializations of one mother the character does NOT have as a base row. */
 export type OrphanGroup = [motherName: string, specs: Skill[]];
 
@@ -32,7 +42,7 @@ export function groupSpecsByMother(specs: readonly Skill[]): Map<string, Skill[]
  */
 export function visibleRows(
   rows: readonly SkillRow[],
-  { searching, query, activeAttr }: { searching: boolean; query: string; activeAttr: string },
+  { searching, query, activeAttr }: SkillScope,
 ): IndexedRow[] {
   return rows
     .map((row, index) => ({ row, index }))
@@ -51,7 +61,7 @@ export function visibleRows(
 export function orphanGroups(
   rows: readonly SkillRow[],
   specs: readonly Skill[],
-  { searching, query, activeAttr }: { searching: boolean; query: string; activeAttr: string },
+  { searching, query, activeAttr }: SkillScope,
 ): OrphanGroup[] {
   const covered = new Set(rows.map((r) => r.name));
   const byMother = new Map<string, Skill[]>();

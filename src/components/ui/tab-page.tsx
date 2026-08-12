@@ -11,7 +11,12 @@ import { useSplitWidth } from '@/hooks/use-layout';
 export default function TabPage({ children }: { children: React.ReactNode }) {
   const splitWidth = useSplitWidth();
   return (
-    <KeyboardAwareScrollView contentContainerStyle={[styles.page, splitWidth]} bottomOffset={24}>
+    <KeyboardAwareScrollView
+      contentContainerStyle={[styles.page, splitWidth]}
+      // A page full of fields (Compétences) needs a tap on a chip or a menu to
+      // land while the keyboard is up, instead of being eaten by the dismiss.
+      keyboardShouldPersistTaps="handled"
+      bottomOffset={24}>
       {children}
     </KeyboardAwareScrollView>
   );
