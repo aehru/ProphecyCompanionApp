@@ -20,12 +20,19 @@ export default function SkillsSearchOverlay({
   value,
   onChange,
   onClose,
+  action,
   children,
 }: {
   value: string;
   onChange: (text: string) => void;
   /** Closes the layer AND clears the query — the pager comes back untouched. */
   onClose: () => void;
+  /**
+   * Pinned under the field, above the results — where the « Ajouter « X » »
+   * button goes. It stays with the query rather than scrolling off with the
+   * results, since it answers « nothing matched what I typed ».
+   */
+  action?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const theme = useProphecyTheme();
@@ -53,6 +60,7 @@ export default function SkillsSearchOverlay({
           left={<TextInput.Icon icon={dsIcon('search')} />}
           right={<TextInput.Icon icon={dsIcon('close')} onPress={onClose} />}
         />
+        {action}
       </View>
 
       <KeyboardAwareScrollView
@@ -66,7 +74,7 @@ export default function SkillsSearchOverlay({
 }
 
 const styles = StyleSheet.create({
-  bar: { padding: 12, paddingBottom: 8 },
+  bar: { padding: 12, paddingBottom: 8, gap: 8 },
   // paddingBottom clears the stacked FABs, like <TabPage>.
   content: { paddingHorizontal: 12, paddingBottom: 160, gap: 16 },
 });

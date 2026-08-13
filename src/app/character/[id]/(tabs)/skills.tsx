@@ -2,7 +2,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useNavigation } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { IconButton } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
 
 import AddSkillDialog from '@/components/skills/add-skill-dialog';
 import SkillsEditList from '@/components/skills/skills-edit-list';
@@ -63,7 +63,9 @@ export default function CharacterSkillsScreen() {
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [adding, setAdding] = useState(false);
+  // The add dialog's prefilled name, or null when it is closed: the FAB opens it
+  // blank, the search's add button opens it on the query.
+  const [addingName, setAddingName] = useState<string | null>(null);
   // A just-added custom skill: its value field grabs focus when its row mounts.
   const [pendingFocus, setPendingFocus] = useState<string | null>(null);
 
@@ -159,6 +161,10 @@ export default function CharacterSkillsScreen() {
     );
   };
 
+  // Nothing matched what was typed: offer to make it a free skill, prefilling
+  // the dialog with the query. Edit mode only — the read view adds nothing.
+  const canAdd = editing && q !== '' && !existingNames.has(q);
+
   // Search spans every attribut: the editor filters its own rows globally, the
   // read view groups the matches into one titled section per attribut.
   const results = editing ? (
@@ -192,23 +198,37 @@ export default function CharacterSkillsScreen() {
       />
 
       {searchOpen ? (
-        <SkillsSearchOverlay value={search} onChange={setSearch} onClose={closeSearch}>
+        <SkillsSearchOverlay
+          value={search}
+          onChange={setSearch}
+          onClose={closeSearch}
+          action={
+            canAdd ? (
+              <Button
+                icon={dsIcon('plus')}
+                mode="outlined"
+                onPress={() => setAddingName(search.trim())}>
+                Ajouter « {search.trim()} »
+              </Button>
+            ) : null
+          }>
           {results}
         </SkillsSearchOverlay>
       ) : null}
 
       {/* Edit toggle is the primary FAB; adding a skill stacks above it, the
           same pairing the Magie tab uses. */}
-      {editing ? <AppFab icon={dsIcon('plus')} onPress={() => setAdding(true)} offset={72} /> : null}
+      {editing ? <AppFab icon={dsIcon('plus')} onPress={() => setAddingName('')} offset={72} /> : null}
       <AppFab
         icon={editing ? dsIcon('check') : dsIcon('edit')}
         onPress={() => setEditing((e) => !e)}
       />
 
       <AddSkillDialog
-        visible={adding}
-        onDismiss={() => setAdding(false)}
+        visible={addingName !== null}
+        onDismiss={() => setAddingName(null)}
         onAdd={addSkill}
+        defaultName={addingName ?? ''}
         defaultAttribut={ATTRIBUTS[tab].key}
         existingNames={existingNames}
       />
