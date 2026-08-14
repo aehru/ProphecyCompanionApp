@@ -19,6 +19,7 @@ import Section from '@/components/campaign/sheet-section';
 import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
 import { dsIcon } from '@/components/ui/icon';
 import { contentWidth } from '@/hooks/use-layout';
+import { useLocalDieIcons } from '@/hooks/use-local-die-icons';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import GlobalModifierRow from '@/components/global-modifier-row';
@@ -91,6 +92,10 @@ export function GmSheetBody({
   // reading the turn order and the player's own sheet use. Computed before the
   // early return so the grouping memo below can fold it in.
   const wound = useMemo(() => sharedWoundMalus(pools(c?.wounds)), [c?.wounds]);
+  // Die marks never cross the wire, so they come from the local rows — filled
+  // for the GM's own PNJs, absent for a player's character.
+  const dieIconsByUuid = useLocalDieIcons();
+  const dieIcons = dieIconsByUuid.get(entry?.charId ?? '') ?? [];
   const groups = useMemo(
     () => groupSkills(skills, attr, attrColors, '', effectRows, wound),
     [skills, attr, attrColors, effectRows, wound],
@@ -204,7 +209,12 @@ export function GmSheetBody({
           ) : null}
 
           <Section title="Initiative">
-            <InitiativeChips values={initiative.values ?? []} max={initiative.max ?? 0} wound={wound} />
+            <InitiativeChips
+              values={initiative.values ?? []}
+              max={initiative.max ?? 0}
+              wound={wound}
+              icons={dieIcons}
+            />
           </Section>
 
           <Section title="Notes privées (MJ)">
