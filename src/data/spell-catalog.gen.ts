@@ -6240,6 +6240,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "effect": "Le mage projette son esprit aux frontières du Gouffre des Ames et tente de retrouver les restes de l'âme errante d'un défunt. L'époque du décès peut être d'un siècle par point en Ombre. Le mage rassemble les effluves de cette âme amnésique et communique télépathiquement avec. Les chances pour que l'âme comprenne ce qu'on lui dit ou réponde à une question sont égales à la Tendance Fatalité du lanceur+1/NR au lancement sur 1D10. Le contact dure une minute par point de Volonté du mage. Ce sort est une variante du dialogue mortuaire, mais infiniment plus dangereuse, bien que plus précise. En cas d'échec au lancement, le mage doit effectuer un jet de Mental+Volonté contre 20 ou perdre son âme, aspirée par le Gouffre. Il meurt alors instantanément.",
       "inGameEffect": "Retrouve l'âme errante d'un défunt mort depuis un siècle au maximum par point en Ombre, et communique télépathiquement avec elle. Les chances qu'elle comprenne ou réponde sont égales à la Tendance Fatalité du lanceur + 1 par NR, sur 1D10. Le contact dure une minute par point de Volonté du mage. Variante du Dialogue mortuaire, plus précise mais infiniment plus dangereuse : en cas d'échec au lancement, le mage doit réussir un jet de Mental + Volonté contre 20 ou voir son âme aspirée par le Gouffre — il meurt alors instantanément.",
       "sensoryEffect": "Le mage projette son esprit aux frontières du Gouffre des Âmes et rassemble les effluves d'une âme amnésique.",
+      "duration": "VOL",
+      "durationUnit": "minute",
       "tags": [
         "communication",
         "summoning",
