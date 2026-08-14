@@ -62,6 +62,11 @@ const WEAPON_COLUMNS = [
 const SPELL_COLUMNS = [
   'id', 'nom', 'niveau', 'complexite', 'discipline', 'sphere', 'cout',
   'tempsIncantation', 'uniteIncantation', 'difficulte', 'cle', 'effet',
+  // Editorial provenance (which rulebook a spell comes from). Declared so the
+  // header check accepts it, then deliberately NOT read: the app catalogue has
+  // no use for it, and the `spells` table has no column to hold it. It lives in
+  // the spreadsheet for the authors, not for the build.
+  'rulebook',
 ];
 const ARMOR_COLUMNS = [
   'id', 'categorie', 'nom', 'defenseMax', 'prerequis', 'diffCreation',
