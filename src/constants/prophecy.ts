@@ -270,9 +270,13 @@ export const TIME_UNITS = [
   { key: 'hour', label: 'Heure', plural: 'Heures' },
   { key: 'day', label: 'Jour', plural: 'Jours' },
   { key: 'week', label: 'Semaine', plural: 'Semaines' },
-  // The Prophecy calendar's own unit, used by a dozen enchantment spells
-  // ("l'enchantement dure (1 + NR) cycles").
+  // The Prophecy calendar's OWN units, used as durations by a couple dozen
+  // enchantment spells ("l'enchantement dure (1 + NR) cycles", "ce sort dure un
+  // Augure"). Their position here is by convention, not measurement — the
+  // rulebook gives neither an equivalence in days, and nothing needs one since
+  // units never convert into one another.
   { key: 'cycle', label: 'Cycle', plural: 'Cycles' },
+  { key: 'augure', label: 'Augure', plural: 'Augures' },
   { key: 'month', label: 'Mois', plural: 'Mois' },
   { key: 'year', label: 'An', plural: 'Ans' },
 ] as const;
