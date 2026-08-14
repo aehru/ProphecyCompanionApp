@@ -5,16 +5,26 @@ import { type IconName } from '@/components/ui/icon';
  * hand », « that one is the sortilège ».
  *
  * Drawn from the DS set (no emoji: they ignore the theme and render differently
- * per platform), and deliberately a SHORT list — a mark is a memo for the next
- * two minutes of a fight, not a taxonomy. The app attaches no rule to one:
- * « la dague » is whatever the player decided « la dague » is.
+ * per platform). The app attaches no rule to a mark: « la dague » is whatever
+ * the player decided « la dague » is — which is why two blades and a hand sit
+ * next to a moon.
+ *
+ * Ordered weapons first, since the case that prompted the feature is two-weapon
+ * fighting: `hand` for main/off, then the blades, then the ranged pair, then the
+ * open-ended marks. `sword` is diagonal and `sword2` vertical precisely so a
+ * player can mark two different swords apart.
  *
  * Lives here rather than in `lib/` because it is typed by the icon set, and
  * `lib/` stays free of framework imports so it loads in plain-Node vitest.
  */
 export const DIE_ICONS: readonly IconName[] = [
+  'hand',
   'sword',
+  'sword2',
+  'dagger',
   'shield',
+  'bow',
+  'crossbow',
   'magic',
   'fire',
   'potion',
