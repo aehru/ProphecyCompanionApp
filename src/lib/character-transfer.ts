@@ -73,6 +73,9 @@ const stateSchema = z.object({
   // before the column existed have no such key and import at the column default
   // 0. Signed — see the schema comment.
   initiativeBonusDice: int.optional(),
+  // Per-die marks, index-aligned with initiativeValues. OPTIONAL for the same
+  // reason as above: exports predating the column import at the default [].
+  initiativeDiceIcons: z.array(str).optional(),
   conditions: str,
   notes: str,
 });
