@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   computeFormula,
   formulaResult,
+  nrFormulaResult,
   parseFormula,
   parsePrerequisites,
 } from './formula';
@@ -167,5 +168,77 @@ describe('parsePrerequisites', () => {
     expect(parsePrerequisites('FOR 4, blah, XYZ 3')).toEqual([
       { carac: 'force', abbr: 'FOR', min: 4 },
     ]);
+  });
+});
+
+describe('NR terms', () => {
+  it('rejects NR unless opted in', () => {
+    // Weapons must not accept it: `CARAC_RE` would otherwise match "NR" and
+    // report an unknown caractéristique, so assert the message too.
+    const r = parseFormula('1 + NR');
+    expect(r.ok).toBe(false);
+  });
+
+  it('parses a bare NR as coefficient 1', () => {
+    const r = parseFormula('1 + NR', { nr: true });
+    expect(r).toEqual({
+      ok: true,
+      formula: { terms: [{ kind: 'flat', value: 1 }, { kind: 'nr', mult: 1 }] },
+    });
+  });
+
+  it('accepts every spelling the rulebook uses for a coefficient', () => {
+    // "30 par NR", "30/NR", "30 x NR" and "NR x30" all mean 30 per NR.
+    for (const raw of ['30 par NR', '30/NR', '30 x NR', 'NR x30']) {
+      const r = parseFormula(raw, { nr: true });
+      expect(r, raw).toEqual({ ok: true, formula: { terms: [{ kind: 'nr', mult: 30 }] } });
+    }
+  });
+
+  it('folds NR into the static total when a value is given', () => {
+    const parsed = parseFormula('30 + 30 par NR', { nr: true });
+    if (!parsed.ok) throw new Error(parsed.error);
+    const { staticTotal, nrTerms } = computeFormula(parsed.formula, caracValue({}), undefined, 3);
+    expect(staticTotal).toBe(120);
+    expect(nrTerms).toEqual([]);
+  });
+
+  it('keeps NR symbolic when no value is given', () => {
+    const parsed = parseFormula('1 + NR', { nr: true });
+    if (!parsed.ok) throw new Error(parsed.error);
+    const { staticTotal, nrTerms } = computeFormula(parsed.formula, caracValue({}));
+    expect(staticTotal).toBe(1);
+    expect(nrTerms).toEqual([{ mult: 1 }]);
+  });
+});
+
+describe('nrFormulaResult', () => {
+  it('returns null for an empty formula', () => {
+    expect(nrFormulaResult('')).toBeNull();
+    expect(nrFormulaResult(null)).toBeNull();
+    expect(nrFormulaResult(undefined)).toBeNull();
+  });
+
+  it('renders symbolically before the roll', () => {
+    expect(nrFormulaResult('1 + NR')).toBe('1 + NR');
+    expect(nrFormulaResult('30 + 30 par NR')).toBe('30 + 30 × NR');
+  });
+
+  it('resolves to a number once NR is known', () => {
+    expect(nrFormulaResult('1 + NR', 3)).toBe('4');
+    expect(nrFormulaResult('30 + 30 par NR', 2)).toBe('90');
+  });
+
+  it('does not print a leading zero for a lone NR', () => {
+    expect(nrFormulaResult('NR')).toBe('NR');
+    expect(nrFormulaResult('2 par NR')).toBe('2 × NR');
+  });
+
+  it('still prints a lone zero', () => {
+    expect(nrFormulaResult('0')).toBe('0');
+  });
+
+  it('falls back to raw text when the formula does not parse', () => {
+    expect(nrFormulaResult('  autant que NR  ')).toBe('autant que NR');
   });
 });
