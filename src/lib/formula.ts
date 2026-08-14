@@ -22,12 +22,24 @@
 // an author can copy the book verbatim instead of learning a syntax. It stays
 // opt-in because a weapon's damage has no NR — letting it through there would
 // turn a typo into a silently valid formula.
+//
+// SPHERE is the second opt-in variable — `{ sphere: true }`. The supplements
+// scale most of their durations off the caster's sphere score: « dure (Sphère
+// des vents) tours », « (Sphère de la nature × 2) tours », « une heure par point
+// en Sphère des cités ». Bare `SPHERE` means THE SPELL'S OWN sphere, which is
+// what every occurrence in the catalogue turned out to be — a spell of the
+// Sphère des Vents never scales off another sphere. `SPHERE_VENTS` names one
+// explicitly for the day one does; the name is matched loosely (accents, case,
+// with or without the `sphere` prefix, singular or plural) so an author can
+// write `SPHERE_VENT` or `SPHERE_Vents` and mean the same thing.
 
-import { CARACTERISTIQUES } from '@/constants/prophecy';
+import { CARACTERISTIQUES, SPHERES } from '@/constants/prophecy';
 
 export type FormulaTerm =
   | { kind: 'carac'; carac: string; abbr: string; mult: number }
   | { kind: 'nr'; mult: number }
+  /** `sphere: null` = the spell's own sphere; otherwise a `SPHERES` key. */
+  | { kind: 'sphere'; sphere: string | null; mult: number }
   | { kind: 'flat'; value: number }
   | { kind: 'dice'; count: number; sides: number };
 
@@ -54,9 +66,28 @@ const NR_RE = /^NR$/i;
  * is the book's "par", NOT division — the grammar still has no division.
  */
 const NR_MULT_RE = /^(?:NR\s*[x×*]\s*(\d+)|(\d+)\s*(?:[x×*]\s*NR|par\s+NR|\/\s*NR))$/i;
+/** `SPHERE`, `SPHERE_VENTS`, either optionally followed by `x2`. */
+const SPHERE_RE = /^SPH[EÈ]RE(?:_([A-Za-zÀ-ÿ]+))?(?:\s*[x×*]\s*(\d+))?$/i;
+
+/** Accepted sphere spellings → canonical `SPHERES` key. */
+const SPHERE_BY_NAME: Record<string, string> = (() => {
+  const fold = (s: string) =>
+    s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const out: Record<string, string> = {};
+  for (const s of SPHERES) {
+    const bare = s.key.replace(/^sphere/, '');
+    for (const spelling of [s.key, bare, s.label]) {
+      const f = fold(spelling);
+      out[f] = s.key;
+      // Tolerate the other number: "Vents" written "Vent", "Cites" as "Cite".
+      out[f.replace(/s$/, '')] = s.key;
+    }
+  }
+  return out;
+})();
 
 /** Parse a formula string into terms. Empty string parses to zero terms. */
-export function parseFormula(input: string, { nr = false } = {}): ParseResult {
+export function parseFormula(input: string, { nr = false, sphere = false } = {}): ParseResult {
   const raw = (input ?? '').trim();
   if (raw === '') return { ok: true, formula: { terms: [] } };
 
@@ -79,6 +110,21 @@ export function parseFormula(input: string, { nr = false } = {}): ParseResult {
       const nrMult = part.match(NR_MULT_RE);
       if (nrMult) {
         terms.push({ kind: 'nr', mult: Number(nrMult[1] ?? nrMult[2]) });
+        continue;
+      }
+    }
+    if (sphere) {
+      const sph = part.match(SPHERE_RE);
+      if (sph) {
+        const [, name, mult] = sph;
+        if (name === undefined) {
+          terms.push({ kind: 'sphere', sphere: null, mult: Number(mult ?? 1) });
+          continue;
+        }
+        const canonical =
+          SPHERE_BY_NAME[name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()];
+        if (!canonical) return { ok: false, error: `Sphère inconnue : ${name}` };
+        terms.push({ kind: 'sphere', sphere: canonical, mult: Number(mult ?? 1) });
         continue;
       }
     }
@@ -110,7 +156,10 @@ export function parseFormula(input: string, { nr = false } = {}): ParseResult {
  *
  * `nr` folds NR terms in the same way. Leave it undefined and they stay symbolic
  * too, returned in `nrTerms` — that is the "spell not cast yet" reading, where
- * a durée must still display as « 1 + NR jours ».
+ * a durée must still display as « 1 + NR jours ». `sphereValue` does the same
+ * for SPHERE terms: return a number to fold it in, or null/undefined to leave it
+ * symbolic (a caller that only knows the spell's OWN sphere answers for `null`
+ * and declines the named ones).
  */
 export function computeFormula(
   formula: ParsedFormula,
@@ -120,14 +169,17 @@ export function computeFormula(
   // `FOR x2` term gives (5-1)*2 = 8, not 5*2-1 = 9.
   caracModifier?: (caracKey: string) => number,
   nr?: number | null,
+  sphereValue?: (sphereKey: string | null) => number | null | undefined,
 ): {
   staticTotal: number;
   dice: { count: number; sides: number }[];
   nrTerms: { mult: number }[];
+  sphereTerms: { sphere: string | null; mult: number }[];
 } {
   let staticTotal = 0;
   const dice: { count: number; sides: number }[] = [];
   const nrTerms: { mult: number }[] = [];
+  const sphereTerms: { sphere: string | null; mult: number }[] = [];
   for (const t of formula.terms) {
     if (t.kind === 'flat') staticTotal += t.value;
     else if (t.kind === 'carac') {
@@ -136,9 +188,13 @@ export function computeFormula(
     } else if (t.kind === 'nr') {
       if (nr == null) nrTerms.push({ mult: t.mult });
       else staticTotal += nr * t.mult;
+    } else if (t.kind === 'sphere') {
+      const v = sphereValue?.(t.sphere);
+      if (v == null) sphereTerms.push({ sphere: t.sphere, mult: t.mult });
+      else staticTotal += v * t.mult;
     } else dice.push({ count: t.count, sides: t.sides });
   }
-  return { staticTotal, dice, nrTerms };
+  return { staticTotal, dice, nrTerms, sphereTerms };
 }
 
 /**
@@ -162,23 +218,48 @@ export function formulaResult(
   return parts.join(' + ');
 }
 
+/** Sphere key → the accented label a symbolic term prints. */
+const SPHERE_LABEL_BY_KEY: Record<string, string> = Object.fromEntries(
+  SPHERES.map((s) => [s.key, s.label]),
+);
+
 /**
- * Resolve an NR-bearing formula (a spell's durée or nombre de cibles) to a
- * display string. Pass the achieved `nr` to get a plain number — « 4 » — and
- * leave it null before the roll to keep it symbolic — « 1 + NR ». Returns null
- * for an empty formula; an unparseable one falls back to its raw text, like
+ * Resolve a spell formula (a durée or a nombre de cibles) to a display string.
+ * Both variables resolve independently, and whichever is still unknown stays
+ * symbolic — so a durée reads « 1 + NR jours » before the roll, « Sphère tours »
+ * with no character in context, and a plain number once both are known. Returns
+ * null for an empty formula; an unparseable one falls back to its raw text, like
  * `formulaResult`.
  */
-export function nrFormulaResult(raw: string | null | undefined, nr?: number | null): string | null {
+export function spellFormulaResult(
+  raw: string | null | undefined,
+  {
+    nr,
+    sphere,
+  }: {
+    nr?: number | null;
+    /** Answer for `null` (the spell's own sphere); return null to stay symbolic. */
+    sphere?: (sphereKey: string | null) => number | null | undefined;
+  } = {},
+): string | null {
   if (raw == null || raw.trim() === '') return null;
-  const parsed = parseFormula(raw, { nr: true });
+  const parsed = parseFormula(raw, { nr: true, sphere: true });
   if (!parsed.ok) return raw.trim();
-  const { staticTotal, dice, nrTerms } = computeFormula(parsed.formula, () => 0, undefined, nr);
+  const { staticTotal, dice, nrTerms, sphereTerms } = computeFormula(
+    parsed.formula,
+    () => 0,
+    undefined,
+    nr,
+    sphere,
+  );
 
+  const symbolic = nrTerms.length + sphereTerms.length;
   const parts: string[] = [];
-  // A lone `NR` must not print a leading "0"; a lone `0` still has to show.
-  if (staticTotal !== 0 || (nrTerms.length === 0 && dice.length === 0)) {
-    parts.push(String(staticTotal));
+  // A lone variable must not print a leading "0"; a lone `0` still has to show.
+  if (staticTotal !== 0 || (symbolic === 0 && dice.length === 0)) parts.push(String(staticTotal));
+  for (const t of sphereTerms) {
+    const name = t.sphere == null ? 'Sphère' : `Sphère ${SPHERE_LABEL_BY_KEY[t.sphere]}`;
+    parts.push(t.mult === 1 ? name : `${name} × ${t.mult}`);
   }
   for (const t of nrTerms) parts.push(t.mult === 1 ? 'NR' : `${t.mult} × NR`);
   for (const d of dice) parts.push(`${d.count}D${d.sides}`);

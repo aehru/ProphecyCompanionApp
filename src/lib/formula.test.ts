@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   computeFormula,
   formulaResult,
-  nrFormulaResult,
+  spellFormulaResult,
   parseFormula,
   parsePrerequisites,
 } from './formula';
@@ -212,33 +212,107 @@ describe('NR terms', () => {
   });
 });
 
-describe('nrFormulaResult', () => {
+describe('SPHERE terms', () => {
+  it('rejects SPHERE unless opted in', () => {
+    expect(parseFormula('SPHERE').ok).toBe(false);
+    expect(parseFormula('SPHERE', { nr: true }).ok).toBe(false);
+  });
+
+  it('parses a bare SPHERE as the spell’s own sphere', () => {
+    const r = parseFormula('SPHERE', { sphere: true });
+    expect(r).toEqual({
+      ok: true,
+      formula: { terms: [{ kind: 'sphere', sphere: null, mult: 1 }] },
+    });
+  });
+
+  it('parses a multiplier', () => {
+    const r = parseFormula('SPHERE x2', { sphere: true });
+    expect(r.ok && r.formula.terms[0]).toEqual({ kind: 'sphere', sphere: null, mult: 2 });
+  });
+
+  it('accepts a named sphere in any spelling', () => {
+    // Accents, case, the `sphere` prefix and the plural are all optional.
+    for (const raw of ['SPHERE_VENTS', 'SPHERE_VENT', 'sphere_vents', 'SPHERE_sphereVents']) {
+      const r = parseFormula(raw, { sphere: true });
+      expect(r.ok && r.formula.terms[0], raw).toEqual({
+        kind: 'sphere',
+        sphere: 'sphereVents',
+        mult: 1,
+      });
+    }
+    const accented = parseFormula('SPHÈRE_OCÉANS', { sphere: true });
+    expect(accented.ok && accented.formula.terms[0]).toMatchObject({ sphere: 'sphereOceans' });
+  });
+
+  it('rejects an unknown sphere', () => {
+    const r = parseFormula('SPHERE_BANANE', { sphere: true });
+    expect(r.ok).toBe(false);
+    expect(!r.ok && r.error).toMatch(/inconnue/i);
+  });
+
+  it('folds a sphere the resolver answers for, keeps the others symbolic', () => {
+    const parsed = parseFormula('SPHERE + SPHERE_FEU', { sphere: true });
+    if (!parsed.ok) throw new Error(parsed.error);
+    // A caller that only knows the spell's OWN sphere answers for `null`.
+    const { staticTotal, sphereTerms } = computeFormula(
+      parsed.formula,
+      caracValue({}),
+      undefined,
+      undefined,
+      (key) => (key == null ? 4 : null),
+    );
+    expect(staticTotal).toBe(4);
+    expect(sphereTerms).toEqual([{ sphere: 'sphereFeu', mult: 1 }]);
+  });
+});
+
+describe('spellFormulaResult', () => {
+  const ownSphere = (n: number) => (key: string | null) => (key == null ? n : null);
+
   it('returns null for an empty formula', () => {
-    expect(nrFormulaResult('')).toBeNull();
-    expect(nrFormulaResult(null)).toBeNull();
-    expect(nrFormulaResult(undefined)).toBeNull();
+    expect(spellFormulaResult('')).toBeNull();
+    expect(spellFormulaResult(null)).toBeNull();
+    expect(spellFormulaResult(undefined)).toBeNull();
   });
 
   it('renders symbolically before the roll', () => {
-    expect(nrFormulaResult('1 + NR')).toBe('1 + NR');
-    expect(nrFormulaResult('30 + 30 par NR')).toBe('30 + 30 × NR');
+    expect(spellFormulaResult('1 + NR')).toBe('1 + NR');
+    expect(spellFormulaResult('30 + 30 par NR')).toBe('30 + 30 × NR');
   });
 
   it('resolves to a number once NR is known', () => {
-    expect(nrFormulaResult('1 + NR', 3)).toBe('4');
-    expect(nrFormulaResult('30 + 30 par NR', 2)).toBe('90');
+    expect(spellFormulaResult('1 + NR', { nr: 3 })).toBe('4');
+    expect(spellFormulaResult('30 + 30 par NR', { nr: 2 })).toBe('90');
   });
 
   it('does not print a leading zero for a lone NR', () => {
-    expect(nrFormulaResult('NR')).toBe('NR');
-    expect(nrFormulaResult('2 par NR')).toBe('2 × NR');
+    expect(spellFormulaResult('NR')).toBe('NR');
+    expect(spellFormulaResult('2 par NR')).toBe('2 × NR');
   });
 
   it('still prints a lone zero', () => {
-    expect(nrFormulaResult('0')).toBe('0');
+    expect(spellFormulaResult('0')).toBe('0');
   });
 
   it('falls back to raw text when the formula does not parse', () => {
-    expect(nrFormulaResult('  autant que NR  ')).toBe('autant que NR');
+    expect(spellFormulaResult('  autant que NR  ')).toBe('autant que NR');
+  });
+
+  it('renders SPHERE symbolically with no character in context', () => {
+    expect(spellFormulaResult('SPHERE')).toBe('Sphère');
+    expect(spellFormulaResult('SPHERE x2')).toBe('Sphère × 2');
+    expect(spellFormulaResult('SPHERE_VENTS')).toBe('Sphère Vents');
+  });
+
+  it('resolves SPHERE against the character', () => {
+    expect(spellFormulaResult('SPHERE', { sphere: ownSphere(6) })).toBe('6');
+    expect(spellFormulaResult('SPHERE x2', { sphere: ownSphere(6) })).toBe('12');
+  });
+
+  it('resolves the two variables independently', () => {
+    // Sphere known, NR not yet rolled — the durée still has to read.
+    expect(spellFormulaResult('SPHERE + 3 par NR', { sphere: ownSphere(5) })).toBe('5 + 3 × NR');
+    expect(spellFormulaResult('SPHERE + 3 par NR', { nr: 2, sphere: ownSphere(5) })).toBe('11');
   });
 });
