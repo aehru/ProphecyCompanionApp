@@ -313,6 +313,11 @@ bun run android                         # debug, on a device/emulator
 cd android && ./gradlew bundleRelease   # signed .aab for the Play Store
 ```
 
+One line
+```bash
+bunx expo prebuild --platform android && cd .\android\ && ./gradlew bundleRelease --stacktrace
+```
+
 `buildArchs` applies to **every** variant, debug included, so the default build has no x86 slice — a stock Windows/Intel emulator is x86_64 and will install a binary it can't run. Physical device: nothing to do. Emulator: pass the arch as a Gradle project property for that run only. Gradle reads `ORG_GRADLE_PROJECT_*` from the environment, so the normal Expo flow still works:
 
 ```powershell

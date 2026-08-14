@@ -1,6 +1,11 @@
 // Read-mode search results: every attribut whose skills match, each as its own
 // titled section.
 //
+// An empty query lists EVERYTHING — opening the search is also how you read the
+// whole sheet in one scroll, instead of paging through four attributs, so a
+// blank page there would waste the one view that shows the lot. It is what the
+// editor's side already does (its filter matches every row on an empty query).
+//
 // It owns the grouping rather than taking it from the screen, so the second
 // `groupSkills` pass only exists while the search layer is actually open.
 
@@ -30,16 +35,11 @@ export default function SkillsSearchResults({
   const theme = useProphecyTheme();
   const groups = useSkillGroups({ skills, attributs, effects, wound, query });
 
-  if (query.trim() === '') {
-    return (
-      <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
-        Saisissez une compétence à rechercher.
-      </Text>
-    );
-  }
   if (groups.length === 0) {
     return (
-      <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>Aucun résultat.</Text>
+      <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
+        {query.trim() === '' ? 'Aucune compétence.' : 'Aucun résultat.'}
+      </Text>
     );
   }
   return (

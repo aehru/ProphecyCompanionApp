@@ -14,28 +14,32 @@ export default function AddSkillDialog({
   visible,
   onDismiss,
   onAdd,
+  defaultName = '',
   defaultAttribut,
   existingNames,
 }: {
   visible: boolean;
   onDismiss: () => void;
   onAdd: (name: string, attribut: string) => void;
+  /** Prefilled name — the search's « Ajouter « X » » hands over its query. */
+  defaultName?: string;
   /** The tab the user is on — the new skill lands where they are working. */
   defaultAttribut: string;
   /** Lower-cased names already in the editor, to refuse a duplicate. */
   existingNames: Set<string>;
 }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(defaultName);
   const [attribut, setAttribut] = useState(defaultAttribut);
 
-  // Every opening starts blank and re-seeds the attribut from the active tab.
-  // Adjusted during render (React's "derive state from props") rather than in an
-  // effect: the first frame of the dialog is already the reset one.
+  // Every opening re-seeds from the props: blank from the FAB, the query from
+  // the search's add button, and the attribut from the active tab. Adjusted
+  // during render (React's "derive state from props") rather than in an effect,
+  // so the first frame of the dialog is already the seeded one.
   const [wasVisible, setWasVisible] = useState(visible);
   if (visible !== wasVisible) {
     setWasVisible(visible);
     if (visible) {
-      setName('');
+      setName(defaultName);
       setAttribut(defaultAttribut);
     }
   }
