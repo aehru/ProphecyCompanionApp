@@ -12,7 +12,7 @@ import {
 } from '@/constants/prophecy';
 import type { Spell } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { nrFormulaResult } from '@/lib/formula';
+import { spellFormulaResult } from '@/lib/formula';
 import { spellTotalBreakdown, type SpellTotal, type SpellTotalInput } from '@/lib/spell-total';
 
 /**
@@ -79,12 +79,16 @@ export default function SpellDetail({
   const targets = (s.targets ?? '').trim();
   const tags = s.tags ?? [];
 
-  // Durée and cibles stay SYMBOLIC here — « 1 + NR », not a number. Resolving
-  // them needs the NR the player actually rolled, which belongs to a cast, not
-  // to the spell; `nrFormulaResult` takes that value as its second argument and
-  // the future "Lancer le sort" flow is what will pass it.
-  const durationValue = nrFormulaResult(duration);
-  const targetsValue = nrFormulaResult(targets);
+  // SPHERE resolves right here — `total.sphere` IS the character's score in the
+  // spell's own sphere, which is the only one the catalogue ever scales off. NR
+  // stays symbolic: it belongs to a cast, not to the spell, and the future
+  // "Lancer le sort" flow is what will pass it. So a durée reads « Sphère tours »
+  // with no character in context and « 6 tours » on a sheet.
+  const sphereValue = total
+    ? (key: string | null) => (key == null ? total.sphere : null)
+    : undefined;
+  const durationValue = spellFormulaResult(duration, { sphere: sphereValue });
+  const targetsValue = spellFormulaResult(targets, { sphere: sphereValue });
 
   return (
     <View style={styles.detail}>
@@ -106,9 +110,10 @@ export default function SpellDetail({
       {durationValue ? (
         <DetailRow
           label="Durée"
-          // No amount to agree with while the formula is symbolic, so the unit
-          // reads as a plural — « 1 + NR jours ».
-          value={`${durationValue} ${timeUnitLabel(s.durationUnit ?? '')}`}
+          // The unit agrees with the amount once the formula resolved to a plain
+          // number; while any variable is still symbolic there is nothing to
+          // agree with, so it reads as a plural — « 1 + NR jours ».
+          value={`${durationValue} ${timeUnitLabel(s.durationUnit ?? '', Number(durationValue) || null)}`}
         />
       ) : null}
       {targetsValue ? <DetailRow label="Cibles" value={targetsValue} /> : null}
