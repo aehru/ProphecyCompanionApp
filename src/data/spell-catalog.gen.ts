@@ -145,8 +145,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "effect": "le mage découvre le nom d'une personne inconnue qu'il observe. Il bénéficie d'un bonus de (1 + NR) à ses jets de Compétence liés à l'Attribut Social pendant leur première conversation.",
       "inGameEffect": "Le mage apprend le nom d'une personne inconnue qu'il observe, et gagne un bonus de (1 + NR) à ses jets de Compétence liés à l'Attribut Social pendant leur première conversation.",
       "tags": [
-        "detection",
         "buff",
+        "detection",
         "social"
       ]
     }
@@ -294,8 +294,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "10 + 10 par NR",
       "durationUnit": "minute",
       "tags": [
-        "summoning",
         "detection",
+        "summoning",
         "exploration",
         "urban"
       ]
@@ -445,8 +445,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "week",
       "tags": [
         "protection",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -543,8 +543,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "round",
       "tags": [
         "attack",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -786,8 +786,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "sensoryEffect": "Le mage appose la marque de Kezyr sur l'objet.",
       "tags": [
         "buff",
-        "object",
-        "creation"
+        "creation",
+        "object"
       ]
     }
   },
@@ -834,8 +834,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "day",
       "tags": [
         "buff",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -1484,8 +1484,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "cycle",
       "tags": [
-        "buff",
         "protection",
+        "buff",
         "object",
         "combat"
       ]
@@ -1510,9 +1510,9 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "cycle",
       "tags": [
-        "summoning",
-        "healing",
         "buff",
+        "healing",
+        "summoning",
         "exploration"
       ]
     }
@@ -1585,8 +1585,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "day",
       "tags": [
         "protection",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -1824,8 +1824,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "round",
       "tags": [
-        "protection",
         "attack",
+        "protection",
         "area",
         "combat"
       ]
@@ -1875,9 +1875,9 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1",
       "durationUnit": "day",
       "tags": [
+        "creation",
         "utility",
-        "object",
-        "creation"
+        "object"
       ]
     }
   },
@@ -1973,8 +1973,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "hour",
       "tags": [
-        "summoning",
         "detection",
+        "summoning",
         "place",
         "exploration"
       ]
@@ -2044,8 +2044,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "week",
       "tags": [
-        "buff",
         "protection",
+        "buff",
         "object",
         "combat"
       ]
@@ -2069,8 +2069,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "week",
       "tags": [
-        "buff",
         "protection",
+        "buff",
         "object",
         "combat"
       ]
@@ -2117,8 +2117,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "inGameEffect": "Transforme des morceaux de verre en (1 + NR) gemmes, identiques en tout point à la gemme originale.",
       "targets": "1 + NR",
       "tags": [
-        "creation",
         "illusion",
+        "creation",
         "object",
         "social"
       ]
@@ -2143,8 +2143,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "hour",
       "tags": [
         "buff",
-        "object",
         "ally",
+        "object",
         "combat"
       ]
     }
@@ -2337,8 +2337,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "inGameEffect": "Les créatures invoquées donnent une information vague, avec (1 + NR) éléments de précision.",
       "sensoryEffect": "De petites créatures immatérielles et spectrales, difficiles à fixer, ont tendance à parler par comptine ou par chant.",
       "tags": [
-        "summoning",
         "detection",
+        "summoning",
         "exploration"
       ]
     }
@@ -2531,8 +2531,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "week",
       "tags": [
         "creation",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -2578,8 +2578,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "round",
       "tags": [
-        "movement",
         "debuff",
+        "movement",
         "combat"
       ]
     }
@@ -2604,8 +2604,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "week",
       "tags": [
         "creation",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -2845,8 +2845,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "day",
       "tags": [
         "movement",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -3038,8 +3038,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "effect": "en plaçant la langue et le caillou dans la bouche d'une personne morte depuis moins de 24 heures, le mage peut poser (1 + NR) questions à la victime. Celle-ci répond par \"oui\", \"non\" ou \"je ne sais pas\", sans mentir. Ce sort ne peut être jeté qu'une seule fois sur un mort dont la bouche se fermera ensuite définitivement.",
       "inGameEffect": "Le mage pose (1 + NR) questions à une personne morte depuis moins de 24 heures, en plaçant la langue et le caillou dans sa bouche. Elle répond par « oui », « non » ou « je ne sais pas », sans mentir. Ne peut être jeté qu'une seule fois sur un mort, dont la bouche se fermera ensuite définitivement.",
       "tags": [
-        "communication",
         "detection",
+        "communication",
         "exploration"
       ]
     }
@@ -3211,8 +3211,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "sensoryEffect": "Un portail vers le Royaume de l'Ombre s'ouvre à moins de 30 mètres du mage ; une nuée de petites créatures de cauchemar en sort.",
       "targets": "2 + NR",
       "tags": [
-        "summoning",
         "debuff",
+        "summoning",
         "enemy",
         "combat"
       ]
@@ -3382,8 +3382,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "inGameEffect": "Localise intuitivement une connaissance dans la cité où se trouve le mage. NR minimum selon la familiarité : 0 pour un ami ou compagnon régulier, 1 pour un individu connu de vue, 2 pour un homme aperçu une seule fois. Posséder un objet de la cible donne un bonus direct de 1 (objet usuel impersonnel), 3 (objet personnel commun) ou 5 (objet très personnel). Chaque NR au-delà du minimum donne une information supplémentaire.",
       "tags": [
         "detection",
-        "urban",
-        "exploration"
+        "exploration",
+        "urban"
       ]
     }
   },
@@ -3431,8 +3431,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "tags": [
         "illusion",
         "self",
-        "urban",
-        "exploration"
+        "exploration",
+        "urban"
       ]
     }
   },
@@ -3478,8 +3478,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1",
       "durationUnit": "year",
       "tags": [
-        "buff",
         "protection",
+        "buff",
         "object",
         "urban"
       ]
@@ -3844,8 +3844,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "3 + 1 par NR",
       "durationUnit": "round",
       "tags": [
-        "summoning",
         "attack",
+        "summoning",
         "combat"
       ]
     }
@@ -3991,8 +3991,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1",
       "durationUnit": "cycle",
       "tags": [
-        "utility",
         "creation",
+        "utility",
         "object"
       ]
     }
@@ -4066,8 +4066,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "SPHERE",
       "durationUnit": "day",
       "tags": [
-        "debuff",
         "protection",
+        "debuff",
         "object",
         "combat"
       ]
@@ -4228,8 +4228,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "round",
       "tags": [
         "debuff",
-        "object",
         "area",
+        "object",
         "combat"
       ]
     }
@@ -4326,8 +4326,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "hour",
       "tags": [
         "creation",
-        "object",
-        "utility"
+        "utility",
+        "object"
       ]
     }
   },
@@ -4729,8 +4729,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "SPHERE x2",
       "durationUnit": "round",
       "tags": [
-        "summoning",
         "attack",
+        "summoning",
         "combat"
       ]
     }
@@ -4946,8 +4946,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "minute",
       "tags": [
         "detection",
-        "ritual",
-        "exploration"
+        "exploration",
+        "ritual"
       ]
     }
   },
@@ -5252,8 +5252,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "SPHERE",
       "durationUnit": "round",
       "tags": [
-        "debuff",
         "buff",
+        "debuff",
         "area",
         "social"
       ]
@@ -5664,8 +5664,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "hour",
       "tags": [
         "buff",
-        "area",
-        "ally"
+        "ally",
+        "area"
       ]
     }
   },
@@ -5761,8 +5761,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "inGameEffect": "Transmet un message à une personne, quelle qu'elle soit et où qu'elle soit, en passant directement par l'Éther. Le mage peut obtenir une réponse immédiate et renvoyer la sirène pour autant d'allers-retours qu'il a de NR ; le dialogue est quasiment instantané, avec 1 action de délai par voyage. La sirène doit partir dès son apparition, sans quoi elle perd toute concentration et se libère du contrôle du mage.",
       "sensoryEffect": "Une petite sirène éthérée flotte à côté du mage.",
       "tags": [
-        "communication",
         "summoning",
+        "communication",
         "exploration"
       ]
     }
@@ -5783,8 +5783,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "effect": "Le magicien ouvre une porte sur le rêve d'une cible au contact et peut ainsi y entrer avec d'autres personnes (au maximum une par point en Sphère des rêves). Reportez-vous aux textes sur les voyages oniriques (Les voiles de Nenya et La Colère des Dragons) pour la gestion de ce sort. Il faut cependant toujours garder à l'esprit que si le rêveur se réveille, tous les voyageurs disparaissent en même temps que le rêve se dissout.",
       "inGameEffect": "Ouvre une porte sur le rêve d'une cible au contact, où le mage peut entrer avec d'autres personnes — au maximum une par point en Sphère des rêves. Si le rêveur se réveille, tous les voyageurs disparaissent en même temps que le rêve se dissout.",
       "tags": [
-        "movement",
         "detection",
+        "movement",
         "ritual"
       ]
     }
@@ -5853,10 +5853,10 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1",
       "durationUnit": "week",
       "tags": [
-        "detection",
         "debuff",
-        "object",
-        "enemy"
+        "detection",
+        "enemy",
+        "object"
       ]
     }
   },
@@ -6022,8 +6022,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1",
       "durationUnit": "hour",
       "tags": [
-        "detection",
         "protection",
+        "detection",
         "ally",
         "combat"
       ]
@@ -6122,8 +6122,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "SPHERE",
       "durationUnit": "round",
       "tags": [
-        "buff",
         "attack",
+        "buff",
         "self",
         "combat"
       ]
@@ -6148,8 +6148,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "tags": [
         "buff",
         "object",
-        "ritual",
-        "combat"
+        "combat",
+        "ritual"
       ]
     }
   },
@@ -6243,8 +6243,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "VOL",
       "durationUnit": "minute",
       "tags": [
-        "communication",
         "summoning",
+        "communication",
         "ritual"
       ]
     }
@@ -6265,8 +6265,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "effect": "Ce sort permet d'enchanter une zone en y concentrant les forces primales de la vie. L'ovale peut faire jusqu'à 3m de longueur par point en Ombre (environ les deux tiers en largeur). Toutes les créatures à l'intérieur de cette zone lors de la fin de l'incantation sont alors soignées d'une case de blessure (en commençant par les Egratignures). Le mage dispose de plus de 1 case par NR qu'il peut régénérer chez une cible ou plusieurs (toujours en commençant par les plus basses). Tout mort-vivant présent dans le cercle subit un niveau de blessure par NR du mage et devra sortir, ne pensant plus qu'à cela. Toute relation sexuelle dans le cercle est fertile et donnera un ou plusieurs enfants tout à fait normaux. Les champs ainsi bénis verront leur récolte doubler lors de la prochaine moisson. Au dehors du cercle, une surface importante (une bande d'environ la moitié de la largeur) est instantanément drainée de sa force vitale. Les champs deviennent envahis d'herbes rachitiques, la récolte pourrit et les personnes présentes subissent un niveau de blessure (en commençant par les Egratignures). Les morts vivants tombent en poussière et leurs spectres reviendront périodiquement hanter l'endroit.",
       "inGameEffect": "Enchante un ovale de jusqu'à 3 m de longueur par point en Ombre, sur environ deux tiers en largeur. Toute créature à l'intérieur à la fin de l'incantation est soignée d'une case de blessure, en commençant par les Égratignures ; le mage dispose en plus d'une case par NR à répartir sur une ou plusieurs cibles. Tout mort-vivant présent subit un niveau de blessure par NR et doit sortir, ne pensant plus qu'à cela. Toute relation sexuelle dans le cercle est fertile et donne des enfants normaux ; un champ ainsi béni double sa prochaine récolte. À l'extérieur, une bande d'environ la moitié de la largeur est instantanément drainée de sa force vitale : les récoltes pourrissent, les personnes présentes subissent un niveau de blessure, les morts-vivants tombent en poussière et leurs spectres reviennent périodiquement hanter l'endroit.",
       "tags": [
-        "healing",
         "attack",
+        "healing",
         "area",
         "ritual"
       ]
@@ -6458,8 +6458,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "round",
       "targets": "2",
       "tags": [
-        "healing",
         "debuff",
+        "healing",
         "combat"
       ]
     }
@@ -6505,8 +6505,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "effect": "Ce sort est semblable au sort Psychonaute des mages des rêves. Il ne s'utilise par contre que sur une cible en proie à un cauchemar. Le ou les intrus (un par point en Sphère de l'ombre au maximum) entrant dans le cauchemar rencontreront toujours des situation désagréables ou dangereuses, vu l'état d'esprit du dormeur. Il est possible de rester dans le cauchemar tant que le dormeur est inconscient. Si les intrus règlent la situation effrayante (comme détruire un monstre hideux et agressif...), ils risquent de transformer le cauchemar en rêve et doivent alors instantanément jeter 1D10 (non modifiable, pas de Tendances) sous leur Volonté. Si ce jet est manqué, ils se dissolvent et disparaissent comme dans le cas d'un réveil inopiné. Si ce jet est réussi, ils sont bannis de l'esprit du dormeur, qui s'éveillera quelques minutes plus tard en se souvenant d'avoir rêvé d'eux.",
       "inGameEffect": "Semblable au Psychonaute des mages des rêves, mais utilisable uniquement sur une cible en proie à un cauchemar. Les intrus — un par point en Sphère de l'ombre au maximum — y rencontrent toujours des situations désagréables ou dangereuses, vu l'état d'esprit du dormeur, et peuvent rester tant qu'il est inconscient. S'ils règlent la situation effrayante et risquent de transformer le cauchemar en rêve, chacun jette aussitôt 1D10 non modifiable, sans Tendances, sous sa Volonté : raté, il se dissout et disparaît comme lors d'un réveil inopiné ; réussi, il est banni de l'esprit du dormeur, qui s'éveille quelques minutes plus tard en se souvenant d'avoir rêvé de lui.",
       "tags": [
-        "movement",
         "detection",
+        "movement",
         "ritual"
       ]
     }
@@ -6694,8 +6694,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "inGameEffect": "Les forces de l'ordre les plus proches entendent automatiquement le cri du mage, apprennent instantanément sa localisation et sa nature de mage, et ressentent le besoin de se précipiter à son aide. Ne fonctionne que dans les limites d'une cité. Les mages des Cités ayant une réputation sulfureuse, ils ne l'utilisent qu'en dernière extrémité.",
       "tags": [
         "communication",
-        "urban",
-        "social"
+        "social",
+        "urban"
       ]
     }
   },
@@ -6764,8 +6764,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "minute",
       "tags": [
-        "movement",
         "buff",
+        "movement",
         "self",
         "exploration"
       ]
@@ -6910,8 +6910,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "effect": "Le mage se met en transe dans un lieu dépassant les 50°C. À la fin du rituel, il enchante les cendres volcaniques pour une heure. Celles-ci, lancées sur une cible, permettent de se fondre dans un feu et d'y trouver refuge. Il est aussi possible de l'utiliser avec de la lave. La cible se transforme en flammes et se mêle au brasier proche. Elle est alors indétectable normalement, tout en restant consciente de son environnement. Il est réduit à une conscience pure et ne peut parler (bien que la télépathie reste utilisable), ni bouger, ni interagir avec son équipement (qui est dématérialisé). Le sort dure tant que le feu est actif, au maximum 1 heure puis trente minutes par NR. S'il s'éteint et que le personnage est inconscient (en sommeil ou en méditation), il est alors rematérialisé brutalement et subit 1D10 blessures, en commençant par les Égratignures. Le personnage peut mettre fin au sort et se rematérialiser en une action dès qu'il le désire. Dans le brasier, ses points de magie de la sphère du Feu se régénèrent au rythme de 2 par heure et les créatures élémentaires se régénèrent quatre fois plus vite.",
       "inGameEffect": "Les cendres, lancées sur une cible, la transforment en flammes qui se mêlent à un brasier proche — utilisable aussi avec de la lave. Elle devient indétectable normalement tout en restant consciente de son environnement, mais réduite à une conscience pure : elle ne peut ni parler (la télépathie reste utilisable), ni bouger, ni interagir avec son équipement, dématérialisé. Dure tant que le feu est actif, au maximum 1 heure plus trente minutes par NR. Si le feu s'éteint alors que le personnage est inconscient — en sommeil ou en méditation — il est rematérialisé brutalement et subit 1D10 blessures, en commençant par les Égratignures. Il peut mettre fin au sort et se rematérialiser en une action quand il le désire. Dans le brasier, ses points de magie de la Sphère du Feu se régénèrent de 2 par heure, et les créatures élémentaires quatre fois plus vite.",
       "tags": [
-        "illusion",
         "protection",
+        "illusion",
         "self",
         "ritual"
       ]
@@ -7029,8 +7029,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1 + NR",
       "durationUnit": "day",
       "tags": [
-        "utility",
         "creation",
+        "utility",
         "object"
       ]
     }
@@ -7121,8 +7121,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "1",
       "durationUnit": "augure",
       "tags": [
-        "summoning",
         "attack",
+        "summoning",
         "object",
         "combat"
       ]
@@ -7434,8 +7434,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "durationUnit": "round",
       "tags": [
         "buff",
-        "self",
-        "utility"
+        "utility",
+        "self"
       ]
     }
   },
@@ -7458,8 +7458,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "duration": "5 + NR",
       "durationUnit": "round",
       "tags": [
-        "creation",
         "attack",
+        "creation",
         "object",
         "combat"
       ]

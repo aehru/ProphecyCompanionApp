@@ -205,11 +205,20 @@ function readOptionalEnum(
   return canonical;
 }
 
+/** Tag key → its rank in SPELL_TAGS, so a tag list can be put in one order. */
+const TAG_ORDER = new Map(SPELL_TAGS.map((t, i) => [t.key as string, i]));
+
 /**
  * A comma-separated tag list, matched against SPELL_TAGS. Strict like every
  * other enum here: a tag that is not in the taxonomy is a typo, and silently
  * dropping it would leave the spell unfindable in the filter it was tagged for.
  * Duplicates are collapsed rather than rejected — they change nothing.
+ *
+ * Sorted into TAXONOMY order rather than kept in the author's. The editor's
+ * `<ChipMultiSelect>` already normalizes that way, so without this the same tag
+ * set renders in two different orders depending on whether the spell came from
+ * the CSV or from the app — and re-typing a cell would reshuffle the generated
+ * array for no semantic change.
  */
 function readTags(rec: Record<string, string>, col: string, errors: RowErrors): string[] {
   const raw = (rec[col] ?? '').trim();
@@ -222,7 +231,7 @@ function readTags(rec: Record<string, string>, col: string, errors: RowErrors): 
     if (canonical == null) errors.push(`${col} : tag « ${label} » inconnu`);
     else out.add(canonical);
   }
-  return [...out];
+  return [...out].sort((a, b) => (TAG_ORDER.get(a) ?? 0) - (TAG_ORDER.get(b) ?? 0));
 }
 
 function readEnum(
