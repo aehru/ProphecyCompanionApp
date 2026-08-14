@@ -11,7 +11,7 @@ import ResourcesSection from '@/components/fiche/resources-section';
 import type { ActualState } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord, clamp } from '@/lib/character-values';
-import { initiativeDiceCount, rollInitiative, trimInitiativeValues } from '@/lib/dice';
+import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
 import { woundMalus } from '@/lib/modifiers';
 import { actualStateQuery, updateActualState } from '@/repositories/actual-state';
 import { characterByUuidQuery } from '@/repositories/characters';
@@ -73,6 +73,7 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
   const initBonus = stRec.initiativeBonusDice ?? 0;
   const initCount = initiativeDiceCount(initMax, initBonus);
   const initStored = state.initiativeValues ?? [];
+  const initIcons = state.initiativeDiceIcons ?? [];
 
   const setStateValue = (key: string, value: number) =>
     updateActualState(localId, { [key]: value } as Partial<ActualState>);
@@ -88,6 +89,12 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
         j === i ? n : initStored[j] ?? 0,
       ),
     });
+  const setInitIcon = (i: number, icon: string) =>
+    persistState({
+      initiativeDiceIcons: Array.from({ length: initCount }, (_, j) =>
+        j === i ? icon : initIcons[j] ?? '',
+      ),
+    });
 
   return (
     <View style={styles.root}>
@@ -95,16 +102,23 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
         max={initMax}
         bonus={initBonus}
         values={initStored}
+        icons={initIcons}
         wound={woundMalus(stRec)}
         onSetDie={setInit}
-        onSetBonus={(n) =>
-          // Dropping a die drops its stored roll too — see the Fiche.
+        onSetIcon={setInitIcon}
+        onSetBonus={(n) => {
+          // Dropping a die drops its stored roll and its mark — see the Fiche.
+          const next = initiativeDiceCount(initMax, n);
           persistState({
             initiativeBonusDice: n,
-            initiativeValues: trimInitiativeValues(initStored, initiativeDiceCount(initMax, n)),
-          })
-        }
-        onRoll={() => persistState({ initiativeValues: rollInitiative(initCount) })}
+            initiativeValues: trimInitiativeSlots(initStored, next),
+            initiativeDiceIcons: trimInitiativeSlots(initIcons, next),
+          });
+        }}
+        onRoll={() => {
+          const { values, icons } = rollInitiativeWithIcons(initCount, initIcons);
+          persistState({ initiativeValues: values, initiativeDiceIcons: icons });
+        }}
       />
       <HealthSection
         maxOf={(k) => rec[k] ?? 0}

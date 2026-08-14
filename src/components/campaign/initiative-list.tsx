@@ -3,8 +3,10 @@ import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-badges';
+import { asDieIcon } from '@/components/ui/die-icons';
 import StatChip from '@/components/ui/stat-chip';
 import { contentWidth } from '@/hooks/use-layout';
+import { useLocalDieIcons } from '@/hooks/use-local-die-icons';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { initiativeOrder, type InitiativeInput, type InitiativeRow } from '@/lib/initiative-order';
@@ -41,6 +43,9 @@ export default function InitiativeList({
     return initiativeOrder(inputs);
   }, [roster]);
 
+  // Die marks are local-only, so they come from this device's rows rather than
+  // the roster: the GM's own PNJs carry them, a player's character doesn't.
+  const dieIcons = useLocalDieIcons();
   const byId = useMemo(() => new Map(roster.map((e) => [e.charId, e])), [roster]);
   const open = (charId: string) => {
     const entry = byId.get(charId);
@@ -65,7 +70,14 @@ export default function InitiativeList({
       contentContainerStyle={[styles.list, { paddingBottom: 16 + bottomInset }, contentWidth]}
       ItemSeparatorComponent={Separator}
       renderItem={({ item, index }) => (
-        <OrderRow row={item} rank={index + 1} onPress={() => open(item.charId)} />
+        <OrderRow
+          row={item}
+          rank={index + 1}
+          // `dieIndex` indexes the projection's values, which is the very array
+          // the local icons are aligned with — same order, same source row.
+          icon={dieIcons.get(item.charId)?.[item.dieIndex]}
+          onPress={() => open(item.charId)}
+        />
       )}
       ListEmptyComponent={
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -104,10 +116,13 @@ const Separator = () => <View style={styles.separator} />;
 function OrderRow({
   row,
   rank,
+  icon,
   onPress,
 }: {
   row: InitiativeRow;
   rank: number;
+  /** Local die mark, if this character lives on this device. */
+  icon?: string;
   onPress: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -140,11 +155,17 @@ function OrderRow({
       <StatusPill online={row.online} />
       {/* Same reading as every other initiative display: the roll is the value,
           the wound malus is the badge. The rank column already conveys order. */}
+      {/* "Dé 2/3": the list ranks every character's dice together, so the index
+          alone doesn't say how many actions this one still has coming. */}
       <StatChip
-        label={`Dé ${row.dieIndex + 1}`}
+        label={`Dé ${row.dieIndex + 1}/${row.dieCount}`}
         value={String(row.raw)}
         modifier={row.malus}
-        style={row.unusable ? { borderColor: theme.colors.error, borderWidth: 1.5 } : undefined}
+        icon={asDieIcon(icon)}
+        style={[
+          styles.orderChip,
+          row.unusable ? { borderColor: theme.colors.error, borderWidth: 1.5 } : null,
+        ]}
       />
     </Pressable>
   );
@@ -165,6 +186,9 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   rowUnusable: { opacity: 0.55 },
+  // "Dé 2/3" plus a possible mark needs more room than the chip's 64dp default,
+  // or adjustsFontSizeToFit shrinks the label past reading size.
+  orderChip: { minWidth: 76 },
   rank: { minWidth: 20, textAlign: 'center', fontFamily: 'Cinzel_600SemiBold', fontSize: 15 },
   name: { flex: 1 },
   footer: { gap: 8, paddingTop: 20 },

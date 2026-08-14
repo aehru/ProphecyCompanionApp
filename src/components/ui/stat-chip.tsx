@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 
+import Icon, { type IconName } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { fmtSignedMod } from '@/lib/modifiers';
 
@@ -19,11 +20,14 @@ export default function StatChip({
   label,
   value,
   modifier,
+  icon,
   style,
 }: {
   label: string;
   value: string;
   modifier?: number;
+  /** Optional glyph in the label row — e.g. what an initiative die is for. */
+  icon?: IconName;
   style?: StyleProp<ViewStyle>;
 }) {
   const theme = useProphecyTheme();
@@ -38,13 +42,16 @@ export default function StatChip({
         },
         style,
       ]}>
-      <Text
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.6}
-        style={[styles.label, { color: theme.colors.secondary }]}>
-        {label}
-      </Text>
+      <View style={styles.labelRow}>
+        {icon ? <Icon name={icon} size={10} color={theme.colors.secondary} /> : null}
+        <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}
+          style={[styles.label, { color: theme.colors.secondary }]}>
+          {label}
+        </Text>
+      </View>
       <View style={styles.valueRow}>
         <Text variant="titleMedium" style={styles.value}>
           {value}
@@ -74,11 +81,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     overflow: 'hidden',
   },
+  // Centers the optional glyph with the label; `label` still stretches inside it
+  // so adjustsFontSizeToFit keeps its shrink room.
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 3, alignSelf: 'stretch' },
   // Engraved label: Noto Sans, uppercase, widely tracked, gold. Stretched to the
   // chip width + centered, giving adjustsFontSizeToFit room to shrink long
   // labels ("Physique") onto one line instead of clipping.
   label: {
-    alignSelf: 'stretch',
+    flexShrink: 1,
+    flexGrow: 1,
     textAlign: 'center',
     fontFamily: 'NotoSans_500Medium',
     fontSize: 8,

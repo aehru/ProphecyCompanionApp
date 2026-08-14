@@ -41,6 +41,25 @@ describe('initiativeOrder', () => {
     expect(rows.map((r) => r.dieIndex)).toEqual([0, 1, 2]);
   });
 
+  it('tags every row with the character total, so a row reads "Dé 2/3"', () => {
+    const { rows } = initiativeOrder([entry('Garde', [8, 5, 2]), entry('Arden', [9])]);
+    const garde = rows.filter((r) => r.nom === 'Garde');
+    expect(garde.map((r) => [r.dieIndex, r.dieCount])).toEqual([
+      [0, 3],
+      [1, 3],
+      [2, 3],
+    ]);
+    // The total is per character, not the length of the whole ranking.
+    expect(rows.find((r) => r.nom === 'Arden')?.dieCount).toBe(1);
+  });
+
+  it('counts unusable dice in the total — they are flagged, not dropped', () => {
+    // A wound malus deep enough to kill the low die: it still counts as one of
+    // the character's dice, and its own row says it buys no action.
+    const { rows } = initiativeOrder([entry('Blessé', [9, 1], { grave: { current: 1, max: 3 } })]);
+    expect(rows.every((r) => r.dieCount === 2)).toBe(true);
+  });
+
   it('ranks every die across characters, highest first', () => {
     const { rows } = initiativeOrder([entry('Garde', [4, 9]), entry('Arden', [7, 2])]);
     expect(rows.map((r) => [r.nom, r.raw])).toEqual([

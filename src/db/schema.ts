@@ -167,6 +167,17 @@ export const actualState = sqliteTable('actual_state', {
   // rulebook has too many sources to enumerate, and any malus that comes with
   // the extra die is entered as a normal `effects` row. Never auto-cleared.
   initiativeBonusDice: integer('initiative_bonus_dice').notNull().default(0),
+  // What each die is FOR — one DS icon key per slot, index-aligned with
+  // `initiativeValues` ('' = unmarked). A player fighting with two weapons marks
+  // which die is the off hand; the app attaches no rule to the mark, it is a
+  // memo. A SEPARATE array rather than making `initiativeValues` an array of
+  // objects: that column shipped as `number[]`, crosses the wire, and reshaping
+  // it would force a tolerant reader on every consumer forever. Device-local —
+  // it is not projected to a GM (see ROADMAP, revisited for the co-GM).
+  initiativeDiceIcons: text('initiative_dice_icons', { mode: 'json' })
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'`),
 
   conditions: text('conditions').notNull().default(''),
   notes: text('notes').notNull().default(''),

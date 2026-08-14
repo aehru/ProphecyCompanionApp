@@ -69,6 +69,13 @@ merge, character detail sheet, join disclaimer, privacy policy.
   maxes inline so the GM doesn't have to leave the table for the full sheet.
 - [ ] **Phase 3 — co-GM.** `share_npcs` publishes the NPCs already; a second GM
   seat needs server-side work (a second gmToken, ownership rules).
+  - [ ] **Per-die icons stay local — revisit for the co-GM.** Each initiative die
+    can carry an icon saying what granted it (off hand, sort, action retardée).
+    Deliberately NOT projected: a GM doesn't need it for a *player's* character,
+    and it would widen the wire for people who never asked. A co-GM reading the
+    host's PNJs is the one case that wants it — at which point the icon key (an
+    enum, never free text) joins the projection and `SHARED_SCHEMA_VERSION` goes
+    to 3. Until then the column is device-local.
 - [x] **Phase 4 — docs.** `docs/campaign-protocol.md` gained a Scope section (the
   relay is optional, the roster is a local-first merge, NPCs are opt-in);
   PRIVACY.md and README describe the serverless table. PRIVACY's permissions

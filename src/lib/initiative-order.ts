@@ -26,6 +26,14 @@ export type InitiativeRow = {
   owner?: string;
   /** 0-based die index, so the UI can label it "Dé 2". */
   dieIndex: number;
+  /**
+   * How many dice this character rolled in total, so a row can read "Dé 2/3".
+   * The ranking scatters one character's dice down the list, so the index alone
+   * doesn't say how many actions they still have coming — the denominator does.
+   * Counts every rolled die, unusable ones included: those are flagged on their
+   * own row rather than silently dropped from the total.
+   */
+  dieCount: number;
   /** The number rolled, shown as-is. */
   raw: number;
   /** Non-positive wound malus applied to every roll. */
@@ -80,6 +88,7 @@ export function initiativeOrder(entries: readonly InitiativeInput[]): {
         online: e.online,
         owner: e.owner,
         dieIndex,
+        dieCount: values.length,
         raw,
         malus,
         effective,

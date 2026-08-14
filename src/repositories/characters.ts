@@ -3,7 +3,7 @@ import { desc, eq, inArray, isNull } from 'drizzle-orm';
 import { SPHERES } from '@/constants/prophecy';
 import { db } from '@/db/client';
 import { actualState, characters, type NewActualState, type NewCharacter } from '@/db/schema';
-import { initiativeDiceCount, rollInitiative } from '@/lib/dice';
+import { initiativeDiceCount, rollInitiativeWithIcons } from '@/lib/dice';
 import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
 import { updateActualState } from '@/repositories/actual-state';
@@ -64,6 +64,7 @@ export async function rollInitiativeFor(charUuids: readonly string[]): Promise<n
       id: characters.id,
       max: characters.initiativeMax,
       bonus: actualState.initiativeBonusDice,
+      icons: actualState.initiativeDiceIcons,
     })
     .from(characters)
     // Left join: a character whose state row doesn't exist yet still rolls its
@@ -74,7 +75,10 @@ export async function rollInitiativeFor(charUuids: readonly string[]): Promise<n
   for (const row of rows) {
     const dice = initiativeDiceCount(row.max ?? 0, row.bonus ?? 0);
     if (dice <= 0) continue;
-    await updateActualState(row.id, { initiativeValues: rollInitiative(dice) });
+    // Marks ride along with their own roll, exactly as on the Fiche — a bulk
+    // roll must not shuffle which die is the PNJ's off hand.
+    const { values, icons } = rollInitiativeWithIcons(dice, row.icons ?? []);
+    await updateActualState(row.id, { initiativeValues: values, initiativeDiceIcons: icons });
     rolled++;
   }
   logWrite('actual_state', 'update', { count: rolled, phase: 'roll-initiative' });
