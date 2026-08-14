@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { Button, Switch, Text, TextInput } from 'react-native-paper';
+import { Button, HelperText, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SpellDetail from '@/components/spell-detail';
@@ -20,8 +20,15 @@ import {
 import type { Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { parseFormula } from '@/lib/formula';
 import type { SpellTotal } from '@/lib/spell-total';
 import { deleteSpell, updateSpell } from '@/repositories/spells';
+
+/** Validation message for a spell formula field (null = valid or empty). */
+function spellFormulaError(raw: string): string | null {
+  const res = parseFormula(raw, { nr: true, sphere: true });
+  return res.ok ? null : res.error;
+}
 
 /**
  * One spell: a read-only summary that opens the editor in a modal (`spell/[sid]`)
@@ -144,6 +151,10 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
     updateSpell(s.id, { targets: t }),
   );
 
+  // Same parser, same opt-ins as the catalogue build (scripts/build-catalogs).
+  const durationErr = spellFormulaError(duration);
+  const targetsErr = spellFormulaError(targets);
+
   const confirmDelete = () =>
     Alert.alert('Supprimer', 'Supprimer ce sortilège ?', [
       { text: 'Annuler', style: 'cancel' },
@@ -253,34 +264,51 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
         style={styles.effect}
       />
 
-      {/* Durée / cibles accept the rulebook's own wording — « 1 + NR », « 30 +
-          30 par NR » — so a spell can be typed straight off the page. */}
-      <View style={styles.grid}>
-        <TextInput
-          label="Durée"
-          value={duration}
-          onChangeText={setDuration}
-          placeholder="1 + NR"
-          mode="outlined"
-          dense
-          style={styles.numCol}
-        />
-        <SelectField
-          options={TIME_UNITS}
-          value={s.durationUnit}
-          onChange={(k) => updateSpell(s.id, { durationUnit: k as Spell['durationUnit'] })}
-          style={styles.numCol}
-        />
-        <TextInput
-          label="Cibles"
-          value={targets}
-          onChangeText={setTargets}
-          placeholder="1 + NR"
-          mode="outlined"
-          dense
-          style={styles.numCol}
-        />
+      {/* Durée and cibles accept the rulebook's own wording — « 1 + NR », « 30 +
+          30 par NR », « SPHERE x2 » — so a spell can be typed straight off the
+          page. Validated against the same parser the catalogue build runs, or
+          the two authoring surfaces would disagree on what counts as a formula.
+          Amount + unit share one title, exactly like the cast time above. */}
+      <View>
+        <Text style={[styles.fieldLabel, { color: theme.colors.onSurfaceVariant }]}>Durée</Text>
+        <View style={styles.castRow}>
+          <TextInput
+            value={duration}
+            onChangeText={setDuration}
+            placeholder="1 + NR"
+            mode="outlined"
+            dense
+            error={!!durationErr}
+            style={styles.formulaField}
+          />
+          <SelectField
+            options={TIME_UNITS}
+            value={s.durationUnit}
+            onChange={(k) => updateSpell(s.id, { durationUnit: k as Spell['durationUnit'] })}
+            style={styles.castUnit}
+          />
+        </View>
       </View>
+      {durationErr ? (
+        <HelperText type="error" visible>
+          {durationErr}
+        </HelperText>
+      ) : null}
+
+      <TextInput
+        label="Cibles"
+        value={targets}
+        onChangeText={setTargets}
+        placeholder="1 + NR"
+        mode="outlined"
+        dense
+        error={!!targetsErr}
+      />
+      {targetsErr ? (
+        <HelperText type="error" visible>
+          {targetsErr}
+        </HelperText>
+      ) : null}
 
       <TextInput
         label="Effet de jeu"
@@ -347,6 +375,9 @@ const styles = StyleSheet.create({
   castRow: { flexDirection: 'row', gap: 12 },
   castAmount: { flexGrow: 0, flexBasis: 90 },
   castUnit: { flexGrow: 1, flexBasis: 120 },
+  // Wider than `castAmount`: this one holds a formula ("30 + 30 par NR"), not a
+  // two-digit count.
+  formulaField: { flexGrow: 1, flexBasis: 150 },
   effect: { minHeight: 72 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   switchMain: { flex: 1, minWidth: 0 },
