@@ -1,37 +1,15 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import { asDieIcon, DIE_ICONS } from '@/components/ui/die-icons';
 import DsDialog from '@/components/ui/ds-dialog';
 import EditableSection from '@/components/ui/editable-section';
-import { dsIcon, type IconName } from '@/components/ui/icon';
+import Icon, { dsIcon, type IconName } from '@/components/ui/icon';
 import StatChip from '@/components/ui/stat-chip';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { initiativeDiceCount } from '@/lib/dice';
-
-/**
- * The glyphs a die can be marked with. Drawn from the DS set (no emoji: they
- * ignore the theme and render differently per platform), and deliberately a
- * SHORT list — it is a memo for the next two minutes of a fight, not a
- * taxonomy. The app attaches no rule to a mark; « la dague » is whatever the
- * player decided « la dague » is.
- */
-const DIE_ICONS: readonly IconName[] = [
-  'sword',
-  'shield',
-  'magic',
-  'fire',
-  'potion',
-  'rune',
-  'star',
-  'moon',
-];
-
-/** A stored icon key is only rendered if it is still one we know. */
-function asDieIcon(key: string | undefined): IconName | undefined {
-  return key && (DIE_ICONS as readonly string[]).includes(key) ? (key as IconName) : undefined;
-}
 
 /**
  * INITIATIVE: one slot per die rolled this turn, the extra-dice stepper, and a
@@ -147,17 +125,20 @@ export default function InitiativeSection({
                         label={`Dé ${i + 1}`}
                         value={String(val)}
                         onChange={(k, t) => onSetDie(Number(k), parseInt(t, 10) || 0)}
+                        style={styles.slotField}
                       />
-                      <IconButton
-                        // No mark yet reads as a faint plus, so an empty slot
-                        // still says "you can mark me".
-                        icon={dsIcon(icon ?? 'plus')}
-                        size={16}
-                        iconColor={icon ? theme.colors.primary : theme.colors.onSurfaceVariant}
-                        style={styles.slotMark}
+                      <Pressable
                         onPress={() => setPicking(i)}
                         accessibilityLabel={`Marquer le dé ${i + 1}`}
-                      />
+                        // An unmarked die shows NO glyph — a placeholder icon
+                        // reads as a real mark. The empty hairline slot is the
+                        // affordance instead.
+                        style={[
+                          styles.slotMark,
+                          { borderColor: icon ? 'transparent' : theme.prophecy.borderSoft },
+                        ]}>
+                        {icon ? <Icon name={icon} size={16} color={theme.colors.primary} /> : null}
+                      </Pressable>
                     </View>
                   );
                 }
@@ -255,8 +236,20 @@ const styles = StyleSheet.create({
   bonusLabel: { flex: 1, fontSize: 16 },
   bonusCount: { minWidth: 32, textAlign: 'center', fontSize: 16 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  // One editable die: the number, then its mark button underneath.
-  slot: { flexGrow: 0, flexBasis: 72, minWidth: 72, alignItems: 'center' },
-  slotMark: { margin: 0 },
+  // One editable die: the number, then its mark underneath. NumberField's own
+  // base style is 90dp wide — left alone it overflows a narrower slot and the
+  // fields overlap, hence `slotField` resetting the basis to the slot's.
+  slot: { flexGrow: 0, flexBasis: 76, minWidth: 76, alignItems: 'center', gap: 4 },
+  slotField: { flexGrow: 0, flexBasis: 'auto', minWidth: 0, alignSelf: 'stretch' },
+  // Square tap target, sized like the glyph it may hold so a marked and an
+  // unmarked die keep the same height.
+  slotMark: {
+    width: 28,
+    height: 24,
+    borderWidth: 1,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   picker: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 4 },
 });
