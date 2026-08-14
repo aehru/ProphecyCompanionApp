@@ -56,6 +56,11 @@ two-weapon fighting and some spells grant an extra action). The bonus itself is
 deliberately NOT a wire field: to the GM a die is a die, and shipping the split
 would widen the projection for no tactical gain.
 
+Per-die marks (`actual_state.initiative_dice_icons` — what each die is *for*:
+off hand, sortilège…) are **device-local and never projected**, for the same
+reason. The one case that would want them is a co-GM reading the host's PNJs;
+see ROADMAP, and note it would take `SHARED_SCHEMA_VERSION` to 3.
+
 ## 3. Hello & version gate
 
 The first frame on a socket must be a `hello`. **v2: the hello identifies the
