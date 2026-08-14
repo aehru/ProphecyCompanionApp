@@ -59,10 +59,13 @@ export type SpellView = Partial<
 export default function SpellDetail({
   spell: s,
   total,
+  caracValue,
   onEdit,
 }: {
   spell: SpellView;
   total?: SpellTotal | null;
+  /** Resolves a durée written against a stat (« une minute par point de Volonté »). */
+  caracValue?: (caracKey: string) => number;
   onEdit?: () => void;
 }) {
   // A crafted clé parfaite makes the spell easier to cast: the roll gains
@@ -84,11 +87,14 @@ export default function SpellDetail({
   // stays symbolic: it belongs to a cast, not to the spell, and the future
   // "Lancer le sort" flow is what will pass it. So a durée reads « Sphère tours »
   // with no character in context and « 6 tours » on a sheet.
-  const sphereValue = total
-    ? (key: string | null) => (key == null ? total.sphere : null)
-    : undefined;
-  const durationValue = spellFormulaResult(duration, { sphere: sphereValue });
-  const targetsValue = spellFormulaResult(targets, { sphere: sphereValue });
+  const vars = {
+    // `total.sphere` IS the character's score in the spell's own sphere, the
+    // only one the catalogue ever scales off — so it costs nothing to resolve.
+    sphere: total ? (key: string | null) => (key == null ? total.sphere : null) : undefined,
+    carac: caracValue,
+  };
+  const durationValue = spellFormulaResult(duration, vars);
+  const targetsValue = spellFormulaResult(targets, vars);
 
   return (
     <View style={styles.detail}>

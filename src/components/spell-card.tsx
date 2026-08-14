@@ -29,12 +29,22 @@ import { deleteSpell, updateSpell } from '@/repositories/spells';
  * `total` is this character's casting score (see lib/spell-total): shown as a
  * badge on the collapsed row, then broken down in the detail.
  */
-export default function SpellCard({ spell, total }: { spell: Spell; total?: SpellTotal | null }) {
+export default function SpellCard({
+  spell,
+  total,
+  caracValue,
+}: {
+  spell: Spell;
+  total?: SpellTotal | null;
+  /** Passed through to the detail — resolves a durée written against a stat. */
+  caracValue?: (caracKey: string) => number;
+}) {
   const router = useRouter();
   return (
     <SpellSummary
       spell={spell}
       total={total}
+      caracValue={caracValue}
       onEdit={() => router.push(`/character/${spell.characterId}/spell/${spell.id}`)}
     />
   );
@@ -43,10 +53,12 @@ export default function SpellCard({ spell, total }: { spell: Spell; total?: Spel
 function SpellSummary({
   spell: s,
   total,
+  caracValue,
   onEdit,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
+  caracValue?: (caracKey: string) => number;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -102,7 +114,9 @@ function SpellSummary({
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
 
-      {expanded ? <SpellDetail spell={s} total={total} onEdit={onEdit} /> : null}
+      {expanded ? (
+        <SpellDetail spell={s} total={total} caracValue={caracValue} onEdit={onEdit} />
+      ) : null}
     </View>
   );
 }
