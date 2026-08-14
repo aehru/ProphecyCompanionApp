@@ -22,6 +22,28 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
+- [ ] **« Lancer le sort » — the cast flow.** The last piece of the spell
+  breakdown layer; everything it needs is already in place. Today a durée renders
+  symbolically (« 1 + NR jours ») because NR belongs to a *cast*, not to a spell:
+  `FormulaVars.nr` is the one resolver nothing fills. An earlier inline "NR
+  obtenu" field on `<SpellDetail>` was **removed on purpose** — the number is
+  worth entering as part of casting, not as a stray field, so don't re-add it
+  standalone.
+  _Agreed flow:_ a button on the spell card opens a `<DsDialog>` showing `total`
+  vs `difficulté` → the player enters the NR they rolled → durée / cibles resolve
+  through `spellFormulaResult` → **two checkboxes, both OFF by default**:
+  ☐ déduire le coût de la réserve, ☐ créer l'effet. Nothing fires on its own; a
+  player who prefers doing it by hand ignores the button entirely.
+  _Why the pieces fit:_ `TIME_UNITS` was merged into one list ([src/constants/prophecy.ts](src/constants/prophecy.ts))
+  precisely so a durée in semaines or cycles can become an `effects` row with no
+  conversion step. 70% of catalogue spells carry a machine-readable `duration`;
+  the rest state it in `inGameEffect` and the dialog should simply not offer the
+  effect checkbox for those.
+  _Open questions:_ **which pool the coût comes from** — `reserveMagiqueCurrent`,
+  the per-sphere current, or a `magic_reserves` row — is a real rules choice, not
+  an implementation detail, and the dialog probably has to ask. And the deferred
+  `bonus` column (« +5 à Discrétion ») was left out on purpose, so the created
+  effect starts from prefilled, editable text rather than a parsed target.
 - [ ] **Re-test the catalogue previews on web/desktop after the PWA merge.** The
   expandable preview rows (`<CatalogRow>` + the shared `*Detail` bodies) were
   verified by typecheck, the test suite and a full **web bundle**, but not by

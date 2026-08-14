@@ -68,7 +68,7 @@ function ShieldSummary({
       ? theme.colors.error
       : theme.colors.onSurfaceVariant;
 
-  const dmg = formulaResult(s.damage, caracValue, caracModifier);
+  const dmg = formulaResult(s.damage, { carac: caracValue, caracModifier });
   const subtitle = [
     s.damage.trim() !== '' ? `Dégâts ${dmg ?? s.damage.trim()}` : null,
     `Défense ${s.defenseCurrent}/${s.defenseMax}`,

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   computeFormula,
   formulaResult,
+  spellFormulaResult,
   parseFormula,
   parsePrerequisites,
 } from './formula';
@@ -84,61 +85,84 @@ describe('parseFormula', () => {
 });
 
 describe('computeFormula', () => {
-  it('folds carac and flat terms into a static total, keeps dice symbolic', () => {
+  it('folds carac and flat terms into the total, keeps dice symbolic', () => {
     const parsed = parseFormula('FOR x2 +3 +1D10');
     if (!parsed.ok) throw new Error('fixture should parse');
-    const { staticTotal, dice } = computeFormula(parsed.formula, caracValue({ force: 4 }));
-    expect(staticTotal).toBe(11); // 4*2 + 3
-    expect(dice).toEqual([{ count: 1, sides: 10 }]);
+    const { total, symbolic } = computeFormula(parsed.formula, { carac: caracValue({ force: 4 }) });
+    expect(total).toBe(11); // 4*2 + 3
+    expect(symbolic).toEqual([{ kind: 'dice', count: 1, sides: 10 }]);
   });
 
   it('applies the modifier to the carac value BEFORE the multiplier', () => {
     const parsed = parseFormula('FOR x2 +3');
     if (!parsed.ok) throw new Error('fixture should parse');
     // (5 - 1) * 2 + 3 = 11, NOT 5*2 - 1 + 3 = 12.
-    const { staticTotal } = computeFormula(
-      parsed.formula,
-      caracValue({ force: 5 }),
-      () => -1,
-    );
-    expect(staticTotal).toBe(11);
+    const { total } = computeFormula(parsed.formula, {
+      carac: caracValue({ force: 5 }),
+      caracModifier: () => -1,
+    });
+    expect(total).toBe(11);
   });
 
-  it('returns a zero static total for a dice-only formula', () => {
+  it('returns a zero total for a dice-only formula', () => {
     const parsed = parseFormula('1D10');
     if (!parsed.ok) throw new Error('fixture should parse');
-    const { staticTotal, dice } = computeFormula(parsed.formula, caracValue({}));
-    expect(staticTotal).toBe(0);
-    expect(dice).toEqual([{ count: 1, sides: 10 }]);
+    const { total, symbolic } = computeFormula(parsed.formula, { carac: caracValue({}) });
+    expect(total).toBe(0);
+    expect(symbolic).toEqual([{ kind: 'dice', count: 1, sides: 10 }]);
+  });
+
+  it('keeps a carac symbolic when NO resolver is given', () => {
+    // The hole this closes: an absent resolver used to silently count as 0.
+    const parsed = parseFormula('FOR x2 +3');
+    if (!parsed.ok) throw new Error('fixture should parse');
+    const { total, symbolic } = computeFormula(parsed.formula);
+    expect(total).toBe(3);
+    expect(symbolic).toEqual([{ kind: 'carac', carac: 'force', abbr: 'FOR', mult: 2 }]);
   });
 });
 
 describe('formulaResult', () => {
+  const carac = (values: Record<string, number>) => ({ carac: caracValue(values) });
+
   it('returns null for an empty or nullish formula', () => {
-    expect(formulaResult('', caracValue({}))).toBeNull();
-    expect(formulaResult(null, caracValue({}))).toBeNull();
-    expect(formulaResult(undefined, caracValue({}))).toBeNull();
+    expect(formulaResult('', carac({}))).toBeNull();
+    expect(formulaResult(null, carac({}))).toBeNull();
+    expect(formulaResult(undefined, carac({}))).toBeNull();
   });
 
-  it('renders the computed static total plus symbolic dice', () => {
-    expect(formulaResult('FOR x2 +3 +1D10', caracValue({ force: 4 }))).toBe('11 + 1D10');
+  it('renders the computed total plus symbolic dice', () => {
+    expect(formulaResult('FOR x2 +3 +1D10', carac({ force: 4 }))).toBe('11 + 1D10');
   });
 
-  it('omits a zero static total when there is a dice term', () => {
-    expect(formulaResult('1D10', caracValue({}))).toBe('1D10');
+  it('omits a zero total when there is a dice term', () => {
+    expect(formulaResult('1D10', carac({}))).toBe('1D10');
   });
 
-  it('keeps a zero static total when there is no dice term', () => {
-    expect(formulaResult('FOR x0', caracValue({ force: 4 }))).toBe('0');
+  it('keeps a zero total when there is no symbolic term', () => {
+    expect(formulaResult('FOR x0', carac({ force: 4 }))).toBe('0');
   });
 
   it('falls back to the raw string for an invalid formula', () => {
-    expect(formulaResult('  FOR-2  ', caracValue({ force: 4 }))).toBe('FOR-2');
+    expect(formulaResult('  FOR-2  ', carac({ force: 4 }))).toBe('FOR-2');
   });
 
   it('folds the modifier into the rendered result', () => {
     // FOR 5, modifier -1, ×2 → (5-1)*2 = 8.
-    expect(formulaResult('FOR x2', caracValue({ force: 5 }), () => -1)).toBe('8');
+    expect(
+      formulaResult('FOR x2', { carac: caracValue({ force: 5 }), caracModifier: () => -1 }),
+    ).toBe('8');
+  });
+
+  it('renders an unresolved carac by its abbreviation', () => {
+    expect(formulaResult('VOL')).toBe('VOL');
+    expect(formulaResult('FOR x2 +3')).toBe('3 + FOR × 2');
+  });
+
+  it('still rejects the spell variables unless `parse` opts in', () => {
+    expect(formulaResult('1 + NR')).toBe('1 + NR'); // unparseable → raw text
+    expect(formulaResult('1 + NR', {}, { nr: true })).toBe('1 + NR'); // parsed, symbolic
+    expect(formulaResult('1 + NR', { nr: 3 }, { nr: true })).toBe('4');
   });
 });
 
@@ -167,5 +191,169 @@ describe('parsePrerequisites', () => {
     expect(parsePrerequisites('FOR 4, blah, XYZ 3')).toEqual([
       { carac: 'force', abbr: 'FOR', min: 4 },
     ]);
+  });
+});
+
+describe('NR terms', () => {
+  it('rejects NR unless opted in', () => {
+    // Weapons must not accept it — see the message assertion in "SPHERE terms".
+    const r = parseFormula('1 + NR');
+    expect(r.ok).toBe(false);
+  });
+
+  it('parses a bare NR as coefficient 1', () => {
+    const r = parseFormula('1 + NR', { nr: true });
+    expect(r).toEqual({
+      ok: true,
+      formula: { terms: [{ kind: 'flat', value: 1 }, { kind: 'nr', mult: 1 }] },
+    });
+  });
+
+  it('accepts every spelling the rulebook uses for a coefficient', () => {
+    // "30 par NR", "30/NR", "30 x NR" and "NR x30" all mean 30 per NR.
+    for (const raw of ['30 par NR', '30/NR', '30 x NR', 'NR x30']) {
+      const r = parseFormula(raw, { nr: true });
+      expect(r, raw).toEqual({ ok: true, formula: { terms: [{ kind: 'nr', mult: 30 }] } });
+    }
+  });
+
+  it('folds NR into the total when a value is given', () => {
+    const parsed = parseFormula('30 + 30 par NR', { nr: true });
+    if (!parsed.ok) throw new Error(parsed.error);
+    const { total, symbolic } = computeFormula(parsed.formula, { nr: 3 });
+    expect(total).toBe(120);
+    expect(symbolic).toEqual([]);
+  });
+
+  it('keeps NR symbolic when no value is given', () => {
+    const parsed = parseFormula('1 + NR', { nr: true });
+    if (!parsed.ok) throw new Error(parsed.error);
+    const { total, symbolic } = computeFormula(parsed.formula);
+    expect(total).toBe(1);
+    expect(symbolic).toEqual([{ kind: 'nr', mult: 1 }]);
+  });
+});
+
+describe('SPHERE terms', () => {
+  it('rejects SPHERE unless opted in, and says why', () => {
+    const r = parseFormula('SPHERE');
+    expect(r.ok).toBe(false);
+    // NOT "caractéristique inconnue" — CARAC_RE matches the bare word, and that
+    // message would send a weapon author hunting for a stat.
+    expect(!r.ok && r.error).toMatch(/sortil[èe]ge/i);
+    expect(parseFormula('SPHERE', { nr: true }).ok).toBe(false);
+  });
+
+  it('says the same for NR outside a spell formula', () => {
+    const r = parseFormula('1 + NR');
+    expect(!r.ok && r.error).toMatch(/sortil[èe]ge/i);
+  });
+
+  it('parses a bare SPHERE as the spell’s own sphere', () => {
+    const r = parseFormula('SPHERE', { sphere: true });
+    expect(r).toEqual({
+      ok: true,
+      formula: { terms: [{ kind: 'sphere', sphere: null, mult: 1 }] },
+    });
+  });
+
+  it('parses a multiplier', () => {
+    const r = parseFormula('SPHERE x2', { sphere: true });
+    expect(r.ok && r.formula.terms[0]).toEqual({ kind: 'sphere', sphere: null, mult: 2 });
+  });
+
+  it('accepts a named sphere in any spelling', () => {
+    // Accents, case, separator, French article, the `sphere` prefix and the
+    // plural are all optional — the rulebook says « Sphère des Vents ».
+    for (const raw of [
+      'SPHERE_VENTS',
+      'SPHERE_VENT',
+      'sphere_vents',
+      'SPHERE_DES_VENTS',
+      'SPHERE DES VENTS',
+      'SPHERE_sphereVents',
+    ]) {
+      const r = parseFormula(raw, { sphere: true });
+      expect(r.ok && r.formula.terms[0], raw).toEqual({
+        kind: 'sphere',
+        sphere: 'sphereVents',
+        mult: 1,
+      });
+    }
+    const accented = parseFormula('SPHÈRE_OCÉANS', { sphere: true });
+    expect(accented.ok && accented.formula.terms[0]).toMatchObject({ sphere: 'sphereOceans' });
+    const article = parseFormula('SPHERE_LA_PIERRE x2', { sphere: true });
+    expect(article.ok && article.formula.terms[0]).toEqual({
+      kind: 'sphere',
+      sphere: 'spherePierre',
+      mult: 2,
+    });
+  });
+
+  it('rejects an unknown sphere', () => {
+    const r = parseFormula('SPHERE_BANANE', { sphere: true });
+    expect(r.ok).toBe(false);
+    expect(!r.ok && r.error).toMatch(/inconnue/i);
+  });
+
+  it('folds a sphere the resolver answers for, keeps the others symbolic', () => {
+    const parsed = parseFormula('SPHERE + SPHERE_FEU', { sphere: true });
+    if (!parsed.ok) throw new Error(parsed.error);
+    // A caller that only knows the spell's OWN sphere answers for `null`.
+    const { total, symbolic } = computeFormula(parsed.formula, {
+      sphere: (key) => (key == null ? 4 : null),
+    });
+    expect(total).toBe(4);
+    expect(symbolic).toEqual([{ kind: 'sphere', sphere: 'sphereFeu', mult: 1 }]);
+  });
+});
+
+describe('spellFormulaResult', () => {
+  const ownSphere = (n: number) => (key: string | null) => (key == null ? n : null);
+
+  it('returns null for an empty formula', () => {
+    expect(spellFormulaResult('')).toBeNull();
+    expect(spellFormulaResult(null)).toBeNull();
+    expect(spellFormulaResult(undefined)).toBeNull();
+  });
+
+  it('renders symbolically before the roll', () => {
+    expect(spellFormulaResult('1 + NR')).toBe('1 + NR');
+    expect(spellFormulaResult('30 + 30 par NR')).toBe('30 + 30 × NR');
+  });
+
+  it('resolves to a number once NR is known', () => {
+    expect(spellFormulaResult('1 + NR', { nr: 3 })).toBe('4');
+    expect(spellFormulaResult('30 + 30 par NR', { nr: 2 })).toBe('90');
+  });
+
+  it('does not print a leading zero for a lone NR', () => {
+    expect(spellFormulaResult('NR')).toBe('NR');
+    expect(spellFormulaResult('2 par NR')).toBe('2 × NR');
+  });
+
+  it('still prints a lone zero', () => {
+    expect(spellFormulaResult('0')).toBe('0');
+  });
+
+  it('falls back to raw text when the formula does not parse', () => {
+    expect(spellFormulaResult('  autant que NR  ')).toBe('autant que NR');
+  });
+
+  it('renders SPHERE symbolically with no character in context', () => {
+    expect(spellFormulaResult('SPHERE')).toBe('Sphère');
+    expect(spellFormulaResult('SPHERE x2')).toBe('Sphère × 2');
+    expect(spellFormulaResult('SPHERE_VENTS')).toBe('Sphère Vents');
+  });
+
+  it('resolves SPHERE against the character', () => {
+    expect(spellFormulaResult('SPHERE', { sphere: ownSphere(6) })).toBe('6');
+    expect(spellFormulaResult('SPHERE x2', { sphere: ownSphere(6) })).toBe('12');
+  });
+
+  it('resolves the two variables independently', () => {
+    // Sphere known, NR not yet rolled — the durée still has to read.
+    expect(spellFormulaResult('SPHERE + 3 par NR', { sphere: ownSphere(5) })).toBe('5 + 3 × NR');
+    expect(spellFormulaResult('SPHERE + 3 par NR', { nr: 2, sphere: ownSphere(5) })).toBe('11');
   });
 });

@@ -78,6 +78,65 @@ export const SPHERE_LABEL: Record<string, string> = Object.fromEntries(
 );
 
 /**
+ * Axes a spell tag can belong to. Purely a grouping for the filter UI — a spell
+ * carries a flat list of tag keys and may have several from the same axis (a
+ * spell that both protects and hinders is `protection` + `entrave`).
+ */
+export const SPELL_TAG_GROUPS = [
+  { key: 'role', label: 'Rôle' },
+  { key: 'target', label: 'Cible' },
+  { key: 'context', label: 'Contexte' },
+] as const;
+
+/**
+ * Spell taxonomy — OUR classification, not a rulebook one: with 300+ sortilèges
+ * the sphère/discipline/niveau triple is no longer enough to find anything, so
+ * every catalogue spell is tagged by what it DOES. Being ours and not a game
+ * term, the keys are ENGLISH like any other generic column; `label` carries the
+ * French the UI shows. The CSV is authored with the French labels and the
+ * generator normalizes them, exactly as it does for sphères and disciplines.
+ *
+ * Deliberately coarse: a tag exists to narrow 300 spells to 20, not to encode
+ * the rules. When in doubt a spell gets fewer tags, never a new one — the list
+ * only grows if a whole family of spells has nowhere to sit.
+ */
+export const SPELL_TAGS = [
+  // role — what the spell is for
+  { key: 'attack', label: 'Attaque', group: 'role' },
+  { key: 'protection', label: 'Protection', group: 'role' },
+  { key: 'buff', label: 'Amélioration', group: 'role' },
+  { key: 'debuff', label: 'Entrave', group: 'role' },
+  { key: 'detection', label: 'Détection', group: 'role' },
+  { key: 'movement', label: 'Déplacement', group: 'role' },
+  { key: 'healing', label: 'Soin', group: 'role' },
+  { key: 'summoning', label: 'Invocation', group: 'role' },
+  { key: 'illusion', label: 'Illusion', group: 'role' },
+  { key: 'communication', label: 'Communication', group: 'role' },
+  { key: 'creation', label: 'Création', group: 'role' },
+  { key: 'utility', label: 'Utilitaire', group: 'role' },
+  // target — who or what it lands on
+  { key: 'self', label: 'Soi', group: 'target' },
+  { key: 'ally', label: 'Allié', group: 'target' },
+  { key: 'enemy', label: 'Ennemi', group: 'target' },
+  { key: 'area', label: 'Zone', group: 'target' },
+  { key: 'object', label: 'Objet', group: 'target' },
+  { key: 'place', label: 'Lieu', group: 'target' },
+  // context — when it comes out
+  { key: 'combat', label: 'Combat', group: 'context' },
+  { key: 'exploration', label: 'Exploration', group: 'context' },
+  { key: 'social', label: 'Social', group: 'context' },
+  { key: 'ritual', label: 'Rituel', group: 'context' },
+  { key: 'urban', label: 'Urbain', group: 'context' },
+] as const;
+
+export type SpellTag = (typeof SPELL_TAGS)[number]['key'];
+
+/** Spell tag key → display label (accented). */
+export const SPELL_TAG_LABEL: Record<string, string> = Object.fromEntries(
+  SPELL_TAGS.map((t) => [t.key, t.label]),
+);
+
+/**
  * Default skill catalogue. Single global list, same for every
  * character. Each skill links to one attribut key.
  */
@@ -187,37 +246,68 @@ export const WOUND_LEVELS = [
 ] as const;
 
 /**
- * Time units a temporary effect can last, ordered by growing real duration.
- * Independent of each other — a "time passes" control ticks down only effects
- * sharing the chosen unit (no conversion between actions/tours/minutes/hours/
- * days; 60 "minute" effects do NOT collapse into one "hour" tick).
+ * THE time scale — ordered by growing real duration. ONE list for every
+ * duration in the app: how long a temporary effect lasts, how long a spell
+ * takes to cast, and how long a spell's own effect runs. They were briefly two
+ * lists (a short one for effects, a longer one for spells) and that was a
+ * mistake: a spell whose durée is « (1 + NR) semaines » has to be able to
+ * become an `effects` row without a conversion step, so both sides need the
+ * same vocabulary.
+ *
+ * Units are independent of each other — a "time passes" control ticks down only
+ * effects sharing the chosen unit (no conversion between actions/tours/minutes;
+ * 60 "minute" effects do NOT collapse into one "hour" tick). That is also why
+ * `cycle` can sit here at all: the rulebook never gives it an exact equivalence
+ * in days, and nothing here needs one.
  *
  * `round` keeps its DB key for back-compat (rows and exports predate the
  * rename) but reads « Tour », the rulebook's word.
  */
-export const EFFECT_UNITS = [
+export const TIME_UNITS = [
   { key: 'action', label: 'Action', plural: 'Actions' },
   { key: 'round', label: 'Tour', plural: 'Tours' },
   { key: 'minute', label: 'Minute', plural: 'Minutes' },
   { key: 'hour', label: 'Heure', plural: 'Heures' },
   { key: 'day', label: 'Jour', plural: 'Jours' },
+  { key: 'week', label: 'Semaine', plural: 'Semaines' },
+  // The Prophecy calendar's OWN units, used as durations by a couple dozen
+  // enchantment spells ("l'enchantement dure (1 + NR) cycles", "ce sort dure un
+  // Augure"). Their position here is by convention, not measurement — the
+  // rulebook gives neither an equivalence in days, and nothing needs one since
+  // units never convert into one another.
+  { key: 'cycle', label: 'Cycle', plural: 'Cycles' },
+  { key: 'augure', label: 'Augure', plural: 'Augures' },
+  { key: 'month', label: 'Mois', plural: 'Mois' },
+  { key: 'year', label: 'An', plural: 'Ans' },
 ] as const;
 
-export type EffectUnit = (typeof EFFECT_UNITS)[number]['key'];
+export type TimeUnit = (typeof TIME_UNITS)[number]['key'];
 
 /**
  * Sentinel duration for an effect that never ticks down and never expires
  * (always-on bonus/malus). Stored in `effects.durationUnit`; NOT a member of
- * EFFECT_UNITS (which stays the ticking-time set shared with spell cast times),
- * so it never leaks into "temps écoulé" controls or spell pickers.
+ * TIME_UNITS (which stays the ticking-time set), so it never leaks into "temps
+ * écoulé" controls or spell pickers.
  */
 export const PERMANENT_UNIT = 'permanent';
 
-/** Unit key → singular label, for compact display (e.g. "3 Rounds"). */
-export const EFFECT_UNIT_LABEL: Record<string, string> = {
-  ...Object.fromEntries(EFFECT_UNITS.map((u) => [u.key, u.label])),
+/** Unit key → singular label, for compact display (e.g. "3 Tour"). */
+export const TIME_UNIT_LABEL: Record<string, string> = {
+  ...Object.fromEntries(TIME_UNITS.map((u) => [u.key, u.label])),
   [PERMANENT_UNIT]: 'Permanent',
 };
+
+/**
+ * Duration unit rendered inline after an amount — « 4 jours », « 1 + NR tours ».
+ * Lowercase, because it reads as part of a sentence rather than as a field
+ * label. `amount` picks singular vs plural; pass null when the amount is still
+ * symbolic (« 1 + NR »), which reads as a plural.
+ */
+export function timeUnitLabel(key: string, amount?: number | null): string {
+  const unit = TIME_UNITS.find((u) => u.key === key);
+  if (!unit) return '';
+  return (amount != null && Math.abs(amount) < 2 ? unit.label : unit.plural).toLowerCase();
+}
 
 /**
  * Targets an effect can apply to: every roll (`all`), one caractéristique, or

@@ -16,7 +16,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "vêtements bien ajustés, danse de la chance, rune de silence",
-      "effect": "en jetant ce sort sur des vêtements, le mage leur donne la capacité de couvrir les bruits de celui qui les porte pendant (1 + NR) jours. Le porteur bénéficie ainsi d'un bonus de +5 à sa Compétence de Discrétion."
+      "effect": "en jetant ce sort sur des vêtements, le mage leur donne la capacité de couvrir les bruits de celui qui les porte pendant (1 + NR) jours. Le porteur bénéficie ainsi d'un bonus de +5 à sa Compétence de Discrétion.",
+      "inGameEffect": "Le porteur des vêtements enchantés bénéficie d'un bonus de +5 à sa Compétence de Discrétion.",
+      "sensoryEffect": "Les vêtements couvrent les bruits de celui qui les porte.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -32,7 +41,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "posture d'écoute, rune de la sagesse tracée en l'air, complainte de la cité",
-      "effect": "en invoquant la sagesse de Khy, le mage se voit attribuer un bonus de +5 sur ses jets d'orientation en milieu urbain (Orientation ou Vie en cité) pendant (1 + NR) heures."
+      "effect": "en invoquant la sagesse de Khy, le mage se voit attribuer un bonus de +5 sur ses jets d'orientation en milieu urbain (Orientation ou Vie en cité) pendant (1 + NR) heures.",
+      "inGameEffect": "Bonus de +5 sur les jets d'orientation en milieu urbain (Orientation ou Vie en cité).",
+      "sensoryEffect": "Le mage invoque la sagesse de Khy.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "self",
+        "exploration",
+        "urban"
+      ]
     }
   },
   {
@@ -48,7 +67,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "petit levier, lime, rune de la famille",
-      "effect": "le mage enchante un levier qui devient capable de déverrouiller n'importe quelle porte fermée pendant (1 + NR) jours."
+      "effect": "le mage enchante un levier qui devient capable de déverrouiller n'importe quelle porte fermée pendant (1 + NR) jours.",
+      "inGameEffect": "Le levier enchanté déverrouille n'importe quelle porte fermée.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "utility",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -64,7 +91,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "cape, rune de Khy",
-      "effect": "en s'appuyant contre un mur, le mage en prend la teinte pendant (30 + 30 par NR) minutes. Il peut ainsi se soustraire au regard des autres. La Difficulté pour le repérer augmente de +15. Si le mage utilise la magie ou parle, le sort s'arrête aussitôt. Ce sort ne fonctionne qu'en milieu urbain (village, ville, cité)."
+      "effect": "en s'appuyant contre un mur, le mage en prend la teinte pendant (30 + 30 par NR) minutes. Il peut ainsi se soustraire au regard des autres. La Difficulté pour le repérer augmente de +15. Si le mage utilise la magie ou parle, le sort s'arrête aussitôt. Ce sort ne fonctionne qu'en milieu urbain (village, ville, cité).",
+      "inGameEffect": "La Difficulté pour repérer le mage augmente de +15. Le sort s'arrête aussitôt si le mage parle ou utilise la magie. Ne fonctionne qu'en milieu urbain (village, ville, cité).",
+      "sensoryEffect": "En s'appuyant contre un mur, le mage en prend la teinte et se soustrait au regard des autres.",
+      "duration": "30 + 30 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "illusion",
+        "self",
+        "exploration",
+        "urban"
+      ]
     }
   },
   {
@@ -80,7 +117,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "petits cailloux blancs, murmures",
-      "effect": "en lançant ce sort, le mage distrait (1 + NR) cibles pendant (1 + NR) tours. Elles voient la Difficulté de leurs actions augmenter de 5 durant ce laps de temps. Ce sort est inefficace en situation de combat."
+      "effect": "en lançant ce sort, le mage distrait (1 + NR) cibles pendant (1 + NR) tours. Elles voient la Difficulté de leurs actions augmenter de 5 durant ce laps de temps. Ce sort est inefficace en situation de combat.",
+      "inGameEffect": "Les cibles distraites voient la Difficulté de leurs actions augmenter de 5. Inefficace en situation de combat.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "targets": "1 + NR",
+      "tags": [
+        "debuff",
+        "enemy",
+        "exploration"
+      ]
     }
   },
   {
@@ -96,7 +142,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "sifflement, posture nonchalante",
-      "effect": "le mage découvre le nom d'une personne inconnue qu'il observe. Il bénéficie d'un bonus de (1 + NR) à ses jets de Compétence liés à l'Attribut Social pendant leur première conversation."
+      "effect": "le mage découvre le nom d'une personne inconnue qu'il observe. Il bénéficie d'un bonus de (1 + NR) à ses jets de Compétence liés à l'Attribut Social pendant leur première conversation.",
+      "inGameEffect": "Le mage apprend le nom d'une personne inconnue qu'il observe, et gagne un bonus de (1 + NR) à ses jets de Compétence liés à l'Attribut Social pendant leur première conversation.",
+      "tags": [
+        "buff",
+        "detection",
+        "social"
+      ]
     }
   },
   {
@@ -112,7 +164,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "voix faible, rune du silence",
-      "effect": "le mage peut parler à une personne située à (75 + 10 par NR) mètres de lui pendant 3 tours comme s'il murmurait au creux de son oreille. Personne d'autre que la cible ne pourra l'entendre."
+      "effect": "le mage peut parler à une personne située à (75 + 10 par NR) mètres de lui pendant 3 tours comme s'il murmurait au creux de son oreille. Personne d'autre que la cible ne pourra l'entendre.",
+      "inGameEffect": "Portée de (75 + 10 par NR) mètres. Personne d'autre que la cible ne peut entendre le mage.",
+      "sensoryEffect": "Le mage parle à sa cible comme s'il lui murmurait au creux de l'oreille.",
+      "duration": "3",
+      "durationUnit": "round",
+      "tags": [
+        "communication",
+        "ally",
+        "social"
+      ]
     }
   },
   {
@@ -128,7 +189,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "morceau de craie, rune de Khy tracée sur le mur ou la porte",
-      "effect": "en traçant un petit cercle sur un mur ou sur une porte, le mage peut observer à travers, mais pas entendre ce qui se passe, pendant (10 + 10 par NR) minutes."
+      "effect": "en traçant un petit cercle sur un mur ou sur une porte, le mage peut observer à travers, mais pas entendre ce qui se passe, pendant (10 + 10 par NR) minutes.",
+      "inGameEffect": "Le mage voit à travers le mur ou la porte, mais n'entend pas ce qui s'y passe.",
+      "sensoryEffect": "Le mage trace un petit cercle sur un mur ou sur une porte et observe au travers.",
+      "duration": "10 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "detection",
+        "place",
+        "exploration"
+      ]
     }
   },
   {
@@ -144,7 +214,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "rune de l'oubli, voix, sentiment de confusion",
-      "effect": "ce sort ne fonctionne que dans des endroits permettant de se perdre (cité, forêt, château, etc.). Le mage peut semer (2 + NR) poursuivants pendant 1 heure."
+      "effect": "ce sort ne fonctionne que dans des endroits permettant de se perdre (cité, forêt, château, etc.). Le mage peut semer (2 + NR) poursuivants pendant 1 heure.",
+      "inGameEffect": "Le mage sème (2 + NR) poursuivants. Ne fonctionne que dans un endroit permettant de se perdre (cité, forêt, château, etc.).",
+      "duration": "1",
+      "durationUnit": "hour",
+      "targets": "2 + NR",
+      "tags": [
+        "movement",
+        "self",
+        "exploration"
+      ]
     }
   },
   {
@@ -160,7 +239,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "carte d'une ville ou d'un lieu, charbon pilé, voix grave",
-      "effect": "le mage pose une carte sur une table et y déverse de la poudre de charbon. Les poussières s'embrasent et se rejoignent là où se trouve la personne ou l'objet que cherche le mage. La localisation reste cependant très imprécise. De plus le charbon brûle la carte en 1 tour. La poudre de charbon reste enchantée (1 + NR) cycles."
+      "effect": "le mage pose une carte sur une table et y déverse de la poudre de charbon. Les poussières s'embrasent et se rejoignent là où se trouve la personne ou l'objet que cherche le mage. La localisation reste cependant très imprécise. De plus le charbon brûle la carte en 1 tour. La poudre de charbon reste enchantée (1 + NR) cycles.",
+      "inGameEffect": "Localise une personne ou un objet, de façon très imprécise. Le charbon brûle la carte en 1 tour ; la poudre reste enchantée (1 + NR) cycles.",
+      "sensoryEffect": "Le mage déverse de la poudre de charbon sur une carte posée sur une table ; les poussières s'embrasent et se rejoignent là où se trouve ce qu'il cherche.",
+      "duration": "1 + NR",
+      "durationUnit": "cycle",
+      "tags": [
+        "detection",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -176,7 +264,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "sourire, fard à joue",
-      "effect": "le mage augmente son Attribut Social de 3 pendant (10 + 10 par NR) minutes."
+      "effect": "le mage augmente son Attribut Social de 3 pendant (10 + 10 par NR) minutes.",
+      "inGameEffect": "Attribut Social +3.",
+      "duration": "10 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "buff",
+        "self",
+        "social"
+      ]
     }
   },
   {
@@ -192,7 +288,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "gestuelle de recherche, voix murmurante",
-      "effect": "le mage invoque une petite créature non agressive capable de repérer les passages dérobés qui reste à son service pendant (10 + 10 par NR) minutes."
+      "effect": "le mage invoque une petite créature non agressive capable de repérer les passages dérobés qui reste à son service pendant (10 + 10 par NR) minutes.",
+      "inGameEffect": "La créature invoquée repère les passages dérobés et reste au service du mage.",
+      "sensoryEffect": "Le mage invoque une petite créature non agressive.",
+      "duration": "10 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "detection",
+        "summoning",
+        "exploration",
+        "urban"
+      ]
     }
   },
   {
@@ -208,7 +314,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "voix chaleureuse, rune de Khy",
-      "effect": "le mage se voit accorder l'attention et la confiance d'une foule dans un rayon de 20 mètres et à portée de voix. Il conserve cet ascendant pendant (1 + NR) heures. En cas d'échec de la tentative, la foule est prise d'une haine peu commune et se retourne contre le mage."
+      "effect": "le mage se voit accorder l'attention et la confiance d'une foule dans un rayon de 20 mètres et à portée de voix. Il conserve cet ascendant pendant (1 + NR) heures. En cas d'échec de la tentative, la foule est prise d'une haine peu commune et se retourne contre le mage.",
+      "inGameEffect": "Le mage obtient l'attention et la confiance d'une foule, dans un rayon de 20 mètres et à portée de voix. En cas d'échec de la tentative, la foule est prise d'une haine peu commune et se retourne contre le mage.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "communication",
+        "area",
+        "social",
+        "urban"
+      ]
     }
   },
   {
@@ -224,7 +339,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "plume de scribe, rune de la sagesse",
-      "effect": "ce sort permet de créer une plume qui oblige son utilisateur à dire la vérité pendant qu'il écrit. S'il ment, l'encre qu'il utilise change de couleur. Ce sort est utilisable même avec les analphabètes, il suffit juste de leur faire dessiner quelque chose. L'enchantement de la plume dure (1 + NR) cycles."
+      "effect": "ce sort permet de créer une plume qui oblige son utilisateur à dire la vérité pendant qu'il écrit. S'il ment, l'encre qu'il utilise change de couleur. Ce sort est utilisable même avec les analphabètes, il suffit juste de leur faire dessiner quelque chose. L'enchantement de la plume dure (1 + NR) cycles.",
+      "inGameEffect": "La plume enchantée oblige son utilisateur à dire la vérité pendant qu'il écrit. Utilisable même avec un analphabète : il suffit de lui faire dessiner quelque chose.",
+      "sensoryEffect": "S'il ment, l'encre qu'il utilise change de couleur.",
+      "duration": "1 + NR",
+      "durationUnit": "cycle",
+      "tags": [
+        "detection",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -240,7 +364,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "masque de bois, rune, gestuelle d'imitation",
-      "effect": "le masque de bois est enchanté. Une fois placé sur le visage de quelqu'un, il reproduit parfaitement le visage, la voix et les mimiques d'une personne (et une seule) choisie par le porteur. Même la corpulence et la taille font partie de l'illusion. Cette illusion peut être découverte avec un jet de résistance de Mental + Empathie contre une Difficulté de 20. L'enchantement dure (1 + NR) jours."
+      "effect": "le masque de bois est enchanté. Une fois placé sur le visage de quelqu'un, il reproduit parfaitement le visage, la voix et les mimiques d'une personne (et une seule) choisie par le porteur. Même la corpulence et la taille font partie de l'illusion. Cette illusion peut être découverte avec un jet de résistance de Mental + Empathie contre une Difficulté de 20. L'enchantement dure (1 + NR) jours.",
+      "inGameEffect": "Le masque de bois reproduit une personne (et une seule) choisie par le porteur. L'illusion peut être découverte avec un jet de résistance de Mental + Empathie contre une Difficulté de 20.",
+      "sensoryEffect": "Une fois placé sur le visage, le masque reproduit parfaitement le visage, la voix et les mimiques de la personne choisie ; même la corpulence et la taille font partie de l'illusion.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "illusion",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -256,7 +389,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "morceau de charbon, chant du feu",
-      "effect": "le mage crée une petite flamme qui tourne autour de sa cible. Elle bloque la première attaque physique portée avec succès contre la personne qu'elle protège en créant un petit bouclier de feu qui pare l'attaque avant de disparaître. La flamme dépérit et devient inefficace au bout de (1 + NR) heures si elle n'a pas fait effet."
+      "effect": "le mage crée une petite flamme qui tourne autour de sa cible. Elle bloque la première attaque physique portée avec succès contre la personne qu'elle protège en créant un petit bouclier de feu qui pare l'attaque avant de disparaître. La flamme dépérit et devient inefficace au bout de (1 + NR) heures si elle n'a pas fait effet.",
+      "inGameEffect": "Bloque la première attaque physique portée avec succès contre la personne protégée, puis disparaît. La flamme dépérit et devient inefficace au bout de (1 + NR) heures si elle n'a pas fait effet.",
+      "sensoryEffect": "Une petite flamme tourne autour de la cible ; elle pare l'attaque en formant un petit bouclier de feu.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "protection",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -272,7 +414,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "souffle, rune des volcans, chant des volcans",
-      "effect": "ce sort crée une poche d'air chaud à 30°C de (10 + 10 par NR) m³ pendant huit heures. Elle permet de ne pas avoir froid la nuit."
+      "effect": "ce sort crée une poche d'air chaud à 30°C de (10 + 10 par NR) m³ pendant huit heures. Elle permet de ne pas avoir froid la nuit.",
+      "inGameEffect": "Crée une poche d'air chaud à 30 °C de (10 + 10 par NR) m³. Permet de ne pas avoir froid la nuit.",
+      "duration": "8",
+      "durationUnit": "hour",
+      "tags": [
+        "utility",
+        "area",
+        "exploration"
+      ]
     }
   },
   {
@@ -288,7 +438,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "lettre, sceau et cire, voix forte, rune de feu",
-      "effect": "en lançant ce sort sur le sceau d'une lettre, le mage appose un mot de commande sur le cachet. Dès que le sceau est rompu sans que le mot de commande soit prononcé à voix haute, le lecteur ne dispose plus que d'un court moment pour comprendre la lettre avant qu'elle ne se consume (5 actions maximum). L'enchantement de la lettre dure (1 + NR) semaines."
+      "effect": "en lançant ce sort sur le sceau d'une lettre, le mage appose un mot de commande sur le cachet. Dès que le sceau est rompu sans que le mot de commande soit prononcé à voix haute, le lecteur ne dispose plus que d'un court moment pour comprendre la lettre avant qu'elle ne se consume (5 actions maximum). L'enchantement de la lettre dure (1 + NR) semaines.",
+      "inGameEffect": "Le mage appose un mot de commande sur le cachet d'une lettre. Si le sceau est rompu sans que le mot ait été prononcé à voix haute, le lecteur n'a que 5 actions au maximum pour comprendre la lettre avant qu'elle ne se consume.",
+      "sensoryEffect": "La lettre se consume.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "protection",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -304,7 +463,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "bille de charbon, la voix",
-      "effect": "ce sort crée une lumière dansante qui illumine une zone de (1 + NR) mètres de rayon pendant une heure. C'est une lumière froide que les créatures sensibles aux sources de chaleur ne peuvent déceler."
+      "effect": "ce sort crée une lumière dansante qui illumine une zone de (1 + NR) mètres de rayon pendant une heure. C'est une lumière froide que les créatures sensibles aux sources de chaleur ne peuvent déceler.",
+      "inGameEffect": "Illumine une zone de (1 + NR) mètres de rayon. Lumière froide : les créatures sensibles aux sources de chaleur ne peuvent la déceler.",
+      "sensoryEffect": "Une lumière dansante apparaît.",
+      "duration": "1",
+      "durationUnit": "hour",
+      "tags": [
+        "utility",
+        "area",
+        "exploration"
+      ]
     }
   },
   {
@@ -320,7 +488,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "brindille, chant du dragon",
-      "effect": "ce sort fait apparaître un petit lézard de feu qui obéit aux ordres du mage pendant (30 + 10 par NR) minutes avant de disparaître. Il est utile pour déclencher des pièges ou bouger des bibelots à distance. Il est également capable de rendre de menus services. Craintif, il ne peut être utilisé en combat."
+      "effect": "ce sort fait apparaître un petit lézard de feu qui obéit aux ordres du mage pendant (30 + 10 par NR) minutes avant de disparaître. Il est utile pour déclencher des pièges ou bouger des bibelots à distance. Il est également capable de rendre de menus services. Craintif, il ne peut être utilisé en combat.",
+      "inGameEffect": "Le lézard invoqué obéit aux ordres du mage : déclencher des pièges, bouger des bibelots à distance, rendre de menus services. Craintif, il ne peut pas être utilisé en combat.",
+      "sensoryEffect": "Un petit lézard de feu apparaît, puis disparaît à la fin du sort.",
+      "duration": "30 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "summoning",
+        "utility",
+        "exploration"
+      ]
     }
   },
   {
@@ -336,7 +513,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "lame, forge, voix, gestuelle",
-      "effect": "ce sort permet à celui qui porte la lame de l'enflammer à volonté pendant (1 + NR) heures. L'arme enflammée bénéficie d'un bonus de +10 aux dommages de base."
+      "effect": "ce sort permet à celui qui porte la lame de l'enflammer à volonté pendant (1 + NR) heures. L'arme enflammée bénéficie d'un bonus de +10 aux dommages de base.",
+      "inGameEffect": "Le porteur de la lame peut l'enflammer à volonté. L'arme enflammée bénéficie d'un bonus de +10 aux dommages de base.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -352,7 +537,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "geste vif traçant une rune de feu dans l'air, brindille et chant de la lumière",
-      "effect": "ce sort permet d'enflammer un objet combustible situé à moins de 10 mètres pendant (1 + NR) tours. Il peut servir à allumer un peu de bois sec ou une torche. Il peut enflammer une étoffe, un rideau ou une lettre. Il n'occasionne pas directement de dommage, mais une personne dont la chemise prend feu doit se dépêcher de l'éteindre ou l'enlever en 1 action maximum, sous peine de subir (15 + 1D10) points de dommages."
+      "effect": "ce sort permet d'enflammer un objet combustible situé à moins de 10 mètres pendant (1 + NR) tours. Il peut servir à allumer un peu de bois sec ou une torche. Il peut enflammer une étoffe, un rideau ou une lettre. Il n'occasionne pas directement de dommage, mais une personne dont la chemise prend feu doit se dépêcher de l'éteindre ou l'enlever en 1 action maximum, sous peine de subir (15 + 1D10) points de dommages.",
+      "inGameEffect": "Enflamme un objet combustible situé à moins de 10 mètres (bois sec, torche, étoffe, rideau, lettre). N'occasionne pas directement de dommages, mais une personne dont la chemise prend feu doit l'éteindre ou l'enlever en 1 action maximum, sous peine de subir (15 + 1D10) points de dommages.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -368,7 +561,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "sable noir, rune de lumière, danse de la lumière",
-      "effect": "ce sort piège pendant (5 + NR) heures une zone de (1 + NR) m². Toute personne qui y pénètre sans avoir préalablement prononcé le mot de pouvoir déclenche le piège. Un flash illumine toute la zone rendant visible les personnes qui s'y trouvent. Les victimes aveuglées subissent un malus de -5 à toutes leurs actions nécessitant la vue pendant 1 tour."
+      "effect": "ce sort piège pendant (5 + NR) heures une zone de (1 + NR) m². Toute personne qui y pénètre sans avoir préalablement prononcé le mot de pouvoir déclenche le piège. Un flash illumine toute la zone rendant visible les personnes qui s'y trouvent. Les victimes aveuglées subissent un malus de -5 à toutes leurs actions nécessitant la vue pendant 1 tour.",
+      "inGameEffect": "Piège une zone de (1 + NR) m². Toute personne qui y pénètre sans avoir prononcé le mot de pouvoir déclenche le piège. Les victimes aveuglées subissent un malus de -5 à toutes leurs actions nécessitant la vue pendant 1 tour.",
+      "sensoryEffect": "Un flash illumine toute la zone, rendant visibles les personnes qui s'y trouvent.",
+      "duration": "5 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "debuff",
+        "detection",
+        "area"
+      ]
     }
   },
   {
@@ -384,7 +586,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "respiration, rune gravée sur un morceau de charbon (ou tatouée), posture d'inspiration d'air",
-      "effect": "le mage fait jaillir de sa bouche un jet de flammes de 5 mètres de long qui embrase tout objet combustible affecté. Le mage peut souffler pendant (1 + NR) tours. Ce sort inflige (15 + 1D10) points de dommages par souffle sur une zone de 2 m². Il ne peut être qu'esquivé ou paré à l'aide d'un bouclier."
+      "effect": "le mage fait jaillir de sa bouche un jet de flammes de 5 mètres de long qui embrase tout objet combustible affecté. Le mage peut souffler pendant (1 + NR) tours. Ce sort inflige (15 + 1D10) points de dommages par souffle sur une zone de 2 m². Il ne peut être qu'esquivé ou paré à l'aide d'un bouclier.",
+      "inGameEffect": "Inflige (15 + 1D10) points de dommages par souffle sur une zone de 2 m², et embrase tout objet combustible affecté. Le jet de flammes mesure 5 mètres de long. Ne peut être qu'esquivé ou paré à l'aide d'un bouclier.",
+      "sensoryEffect": "Un jet de flammes jaillit de la bouche du mage.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -400,7 +611,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "rune de l'homme, danse du feu",
-      "effect": "ce sort entoure une cible consentante d'un halo de flammes qui l'immunise, elle et son équipement, contre toutes les formes de dommages de feu pendant (10 + 10 par NR) minutes. Ce halo lui confère un bonus de +15 à ses jets de dommages à mains nues, et un Indice de protection supplémentaire de +15. Lorsque le sort prend fin, tous les objets combustibles transportés par la cible sont détruits."
+      "effect": "ce sort entoure une cible consentante d'un halo de flammes qui l'immunise, elle et son équipement, contre toutes les formes de dommages de feu pendant (10 + 10 par NR) minutes. Ce halo lui confère un bonus de +15 à ses jets de dommages à mains nues, et un Indice de protection supplémentaire de +15. Lorsque le sort prend fin, tous les objets combustibles transportés par la cible sont détruits.",
+      "inGameEffect": "La cible consentante et son équipement sont immunisés contre toutes les formes de dommages de feu. Bonus de +15 aux jets de dommages à mains nues et Indice de protection supplémentaire de +15. Lorsque le sort prend fin, tous les objets combustibles transportés par la cible sont détruits.",
+      "sensoryEffect": "Un halo de flammes entoure la cible.",
+      "duration": "10 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "protection",
+        "buff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -416,7 +637,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "voix plaintive, sentiment de perte, rune de feu tracée dans l'air",
-      "effect": "le mage invoque une pluie de cendres incandescentes qui tombe sur une zone de 2 m². Elle inflige (25 + 1D10) points de dommages à chaque tour pendant (1 + NR) tours. Les cendres ayant la fâcheuse habitude de rester collées et de continuer à grésiller. Elles infligent encore (10 + 1D10) points de dommages pendant deux tours après la fin du sort."
+      "effect": "le mage invoque une pluie de cendres incandescentes qui tombe sur une zone de 2 m². Elle inflige (25 + 1D10) points de dommages à chaque tour pendant (1 + NR) tours. Les cendres ayant la fâcheuse habitude de rester collées et de continuer à grésiller. Elles infligent encore (10 + 1D10) points de dommages pendant deux tours après la fin du sort.",
+      "inGameEffect": "Inflige (25 + 1D10) points de dommages à chaque tour sur une zone de 2 m². Les cendres restent collées et infligent encore (10 + 1D10) points de dommages pendant deux tours après la fin du sort.",
+      "sensoryEffect": "Une pluie de cendres incandescentes tombe sur la zone et continue de grésiller.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -432,7 +662,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "regard, rune",
-      "effect": "le mage enflamme une sphère de 10 m³ d'air pendant (1 + NR) tours à une distance de moins de 30 mètres. Toutes les personnes et les objets à l'intérieur de cette zone subissent (20 + 1D10) points de dommages par tour."
+      "effect": "le mage enflamme une sphère de 10 m³ d'air pendant (1 + NR) tours à une distance de moins de 30 mètres. Toutes les personnes et les objets à l'intérieur de cette zone subissent (20 + 1D10) points de dommages par tour.",
+      "inGameEffect": "Enflamme une sphère de 10 m³ d'air à moins de 30 mètres. Toutes les personnes et tous les objets à l'intérieur de la zone subissent (20 + 1D10) points de dommages par tour.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -448,7 +686,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "gant, rune de feu, soufre",
-      "effect": "ce sort enchante un gant pendant un cycle. Une fois par jour, il permet au mage de lancer des petites boules de feu pendant (1 + NR) heures, à raison de une par tour. Les projectiles enflammés ont une portée de 50 mètres et infligent (20 + 1D10) points de dommages qui ne peuvent pas être parés, seulement esquivés avec une difficulté de +5. L'Indice de protection des armures est divisé par 2 contre ces petites boules de feu."
+      "effect": "ce sort enchante un gant pendant un cycle. Une fois par jour, il permet au mage de lancer des petites boules de feu pendant (1 + NR) heures, à raison de une par tour. Les projectiles enflammés ont une portée de 50 mètres et infligent (20 + 1D10) points de dommages qui ne peuvent pas être parés, seulement esquivés avec une difficulté de +5. L'Indice de protection des armures est divisé par 2 contre ces petites boules de feu.",
+      "inGameEffect": "Le gant enchanté dure un cycle. Une fois par jour, il permet de lancer de petites boules de feu pendant (1 + NR) heures, à raison d'une par tour. Portée de 50 mètres, (20 + 1D10) points de dommages. Elles ne peuvent pas être parées, seulement esquivées avec une difficulté de +5 ; l'Indice de protection des armures est divisé par 2 contre elles.",
+      "duration": "1",
+      "durationUnit": "cycle",
+      "tags": [
+        "attack",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -464,7 +710,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 30,
       "cle": "voix plaintive, posture de peur, morceaux de lave",
-      "effect": "le mage fait jaillir du sol un flot de lave à moins de 10 mètres de lui. La lave s'écoule à gros bouillons pendant (1 + NR) heures ou jusqu'à ce que le mage meure ou mette fin à ce sort. La lave inflige (80 + 2D10) points de dommages à tout ce qui se trouve sur son passage. Elle se déplace de 30 mètres par tour."
+      "effect": "le mage fait jaillir du sol un flot de lave à moins de 10 mètres de lui. La lave s'écoule à gros bouillons pendant (1 + NR) heures ou jusqu'à ce que le mage meure ou mette fin à ce sort. La lave inflige (80 + 2D10) points de dommages à tout ce qui se trouve sur son passage. Elle se déplace de 30 mètres par tour.",
+      "inGameEffect": "Fait jaillir du sol un flot de lave à moins de 10 mètres. Inflige (80 + 2D10) points de dommages à tout ce qui se trouve sur son passage et se déplace de 30 mètres par tour. S'arrête si le mage meurt ou met fin au sort.",
+      "sensoryEffect": "La lave s'écoule à gros bouillons.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -480,7 +735,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "torche, incantation crépitante, soufre, rune de lumière",
-      "effect": "ce sort enchante (1 + NR) torches qui brillent pendant un an sans se consumer. Elles se rallument après une poignée de minutes si elles sont éteintes avec de l'eau ou par manque d'oxygène."
+      "effect": "ce sort enchante (1 + NR) torches qui brillent pendant un an sans se consumer. Elles se rallument après une poignée de minutes si elles sont éteintes avec de l'eau ou par manque d'oxygène.",
+      "inGameEffect": "Enchante (1 + NR) torches qui brillent pendant un an sans se consumer. Éteintes avec de l'eau ou par manque d'oxygène, elles se rallument après une poignée de minutes.",
+      "duration": "1",
+      "durationUnit": "year",
+      "targets": "1 + NR",
+      "tags": [
+        "creation",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -496,7 +760,12 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de la précision",
-      "effect": "le mage récupère (2 + NR) Points de Maîtrise déjà dépensés. Il ne peut en aucun cas dépasser la valeur de son Attribut Maîtrise de cette façon. Rater le lancement de ce sort ne rapporte aucun Point de Chance."
+      "effect": "le mage récupère (2 + NR) Points de Maîtrise déjà dépensés. Il ne peut en aucun cas dépasser la valeur de son Attribut Maîtrise de cette façon. Rater le lancement de ce sort ne rapporte aucun Point de Chance.",
+      "inGameEffect": "Le mage récupère (2 + NR) Points de Maîtrise déjà dépensés, sans jamais dépasser la valeur de son Attribut Maîtrise. Rater le lancement de ce sort ne rapporte aucun Point de Chance.",
+      "tags": [
+        "utility",
+        "self"
+      ]
     }
   },
   {
@@ -512,7 +781,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "rune de métal, marque de Kezyr gravée sur l'objet, chant du forgeron",
-      "effect": "en apposant la marque de Kezyr sur un objet, le mage en augmente définitivement la qualité de (1 + 1 par 3 NR) niveaux (de bonne à très bonne, etc.). Un objet ne peut porter qu'une marque de Kezyr et l'augmentation de qualité ne procure aucune capacité spéciale."
+      "effect": "en apposant la marque de Kezyr sur un objet, le mage en augmente définitivement la qualité de (1 + 1 par 3 NR) niveaux (de bonne à très bonne, etc.). Un objet ne peut porter qu'une marque de Kezyr et l'augmentation de qualité ne procure aucune capacité spéciale.",
+      "inGameEffect": "Augmente définitivement la qualité de l'objet de (1 + 1 par 3 NR) niveaux (de bonne à très bonne, etc.). Un objet ne peut porter qu'une seule marque de Kezyr, et l'augmentation de qualité ne procure aucune capacité spéciale.",
+      "sensoryEffect": "Le mage appose la marque de Kezyr sur l'objet.",
+      "tags": [
+        "buff",
+        "creation",
+        "object"
+      ]
     }
   },
   {
@@ -528,7 +804,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "tatouage ou dessin d'une rune de métal, pression musculaire",
-      "effect": "le mage augmente sa Force ou celle d'une personne consentante de 5 pendant (1 + NR) tours. Cette modification n'affecte pas l'Attribut Physique mais s'applique aux dommages physiques."
+      "effect": "le mage augmente sa Force ou celle d'une personne consentante de 5 pendant (1 + NR) tours. Cette modification n'affecte pas l'Attribut Physique mais s'applique aux dommages physiques.",
+      "inGameEffect": "Force +5 pour le mage ou une personne consentante. Cette modification n'affecte pas l'Attribut Physique mais s'applique aux dommages physiques.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -544,7 +828,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "objet de moins d'une tonne, rune de plomb, plume",
-      "effect": "l'objet enchanté voit son poids multiplié ou divisé par 3 pendant (1 + NR) jours. Ce sort baisse les prérequis de Force des armes et armures (ainsi que leur pénalité d'encombrement) de 3."
+      "effect": "l'objet enchanté voit son poids multiplié ou divisé par 3 pendant (1 + NR) jours. Ce sort baisse les prérequis de Force des armes et armures (ainsi que leur pénalité d'encombrement) de 3.",
+      "inGameEffect": "Le poids de l'objet enchanté est multiplié ou divisé par 3. Baisse de 3 les prérequis de Force des armes et armures, ainsi que leur pénalité d'encombrement.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -560,7 +852,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune d'acier, cri aigu",
-      "effect": "le mage brise un objet en métal situé à moins de 5 mètres. Les objets enchantés, magiques ou de très bonne qualité ne sont pas affectés par ce sort."
+      "effect": "le mage brise un objet en métal situé à moins de 5 mètres. Les objets enchantés, magiques ou de très bonne qualité ne sont pas affectés par ce sort.",
+      "inGameEffect": "Brise un objet en métal situé à moins de 5 mètres. Les objets enchantés, magiques ou de très bonne qualité ne sont pas affectés.",
+      "tags": [
+        "attack",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -576,7 +874,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "arme, runes, sentiment de force, sable noir",
-      "effect": "ce sort enchante la lame d'une arme qui bénéficie alors d'un bonus de +5 aux dommages pendant (1 + NR) jours. Le sable utilisé semble rester inclus dans la lame durant ce laps de temps. Il disparaît ensuite, laissant la lame retrouver son état d'origine."
+      "effect": "ce sort enchante la lame d'une arme qui bénéficie alors d'un bonus de +5 aux dommages pendant (1 + NR) jours. Le sable utilisé semble rester inclus dans la lame durant ce laps de temps. Il disparaît ensuite, laissant la lame retrouver son état d'origine.",
+      "inGameEffect": "L'arme enchantée bénéficie d'un bonus de +5 aux dommages.",
+      "sensoryEffect": "Le sable utilisé semble rester inclus dans la lame, puis disparaît en laissant la lame retrouver son état d'origine.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -592,7 +899,12 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "pioche ou pelle, chant de mineur",
-      "effect": "en creusant la terre d'une cinquantaine de centimètres, le mage découvre des pépites de fer. Le poids total de la découverte est de (1 + NR) kg de fer."
+      "effect": "en creusant la terre d'une cinquantaine de centimètres, le mage découvre des pépites de fer. Le poids total de la découverte est de (1 + NR) kg de fer.",
+      "inGameEffect": "En creusant la terre d'une cinquantaine de centimètres, le mage découvre (1 + NR) kg de pépites de fer.",
+      "tags": [
+        "creation",
+        "exploration"
+      ]
     }
   },
   {
@@ -608,7 +920,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "plume, rune d'agilité tracée sur l'armure en métal, danse du métal, voix grave",
-      "effect": "en invoquant l'agilité de Kezyr, le mage assouplit magiquement une armure de métal et en diminue ainsi la pénalité d'encombrement de 5 pendant (5 + 2 par NR) heures."
+      "effect": "en invoquant l'agilité de Kezyr, le mage assouplit magiquement une armure de métal et en diminue ainsi la pénalité d'encombrement de 5 pendant (5 + 2 par NR) heures.",
+      "inGameEffect": "Diminue de 5 la pénalité d'encombrement d'une armure de métal.",
+      "sensoryEffect": "Le mage invoque l'agilité de Kezyr et assouplit magiquement l'armure.",
+      "duration": "5 + 2 par NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -624,7 +945,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune d'acier, voix",
-      "effect": "la chair d'un membre devient de l'acier malléable qui permet de lui donner la forme d'une arme ou d'un outil pendant (1 + NR) tours. Si le membre se transforme en arme, cette dernière dispose d'un bonus de +5 aux dommages. Dans le cas d'un outil, la Compétence nécessaire pour l'utiliser bénéficie d'un bonus de +5."
+      "effect": "la chair d'un membre devient de l'acier malléable qui permet de lui donner la forme d'une arme ou d'un outil pendant (1 + NR) tours. Si le membre se transforme en arme, cette dernière dispose d'un bonus de +5 aux dommages. Dans le cas d'un outil, la Compétence nécessaire pour l'utiliser bénéficie d'un bonus de +5.",
+      "inGameEffect": "Le membre transformé en arme bénéficie d'un bonus de +5 aux dommages ; transformé en outil, la Compétence nécessaire pour l'utiliser bénéficie d'un bonus de +5.",
+      "sensoryEffect": "La chair d'un membre devient de l'acier malléable auquel le mage donne la forme d'une arme ou d'un outil.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -640,7 +970,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune, posture (bras croisés devant le visage)",
-      "effect": "le mage est protégé par un écheveau de fins fils d'acier qui ondulent autour de lui pendant (2 + NR) tours. Cette barrière métallique divise par 3 tous les dommages physiques infligés contre le lanceur du sort et par 2 les dommages magiques. Tous les dommages sont arrondis à l'inférieur."
+      "effect": "le mage est protégé par un écheveau de fins fils d'acier qui ondulent autour de lui pendant (2 + NR) tours. Cette barrière métallique divise par 3 tous les dommages physiques infligés contre le lanceur du sort et par 2 les dommages magiques. Tous les dommages sont arrondis à l'inférieur.",
+      "inGameEffect": "Divise par 3 tous les dommages physiques infligés au lanceur et par 2 les dommages magiques. Tous les dommages sont arrondis à l'inférieur.",
+      "sensoryEffect": "Un écheveau de fins fils d'acier ondule autour du mage.",
+      "duration": "2 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -656,7 +995,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "fiole, eau, chant des fontaines mercuriales",
-      "effect": "ce sort permet de créer 1 litre d'une substance capable de liquéfier le métal. Très pratique pour les loquets et les armures trop épaisses, l'acide de Kezyr ne peut malheureusement affecter que des objets métalliques de qualité inférieure à bonne. Le liquide conserve ses propriétés pendant (3 + NR) semaines."
+      "effect": "ce sort permet de créer 1 litre d'une substance capable de liquéfier le métal. Très pratique pour les loquets et les armures trop épaisses, l'acide de Kezyr ne peut malheureusement affecter que des objets métalliques de qualité inférieure à bonne. Le liquide conserve ses propriétés pendant (3 + NR) semaines.",
+      "inGameEffect": "Crée 1 litre d'une substance capable de liquéfier le métal (loquets, armures trop épaisses). N'affecte que les objets métalliques de qualité inférieure à bonne.",
+      "duration": "3 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "creation",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -672,7 +1019,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "rune, limaille de fer, souffle",
-      "effect": "le mage souffle sur de la poussière métallique et forme un nuage qu'il déplace à volonté pendant (30 + 30 par NR) minutes. Tous les objets métalliques situés à moins de 30 mètres sont attirés vers le mage. Les individus portant plus de 5 kg de métal subissent le même sort. Toutefois il leur est possible de résister par un jet de Manuel + Force contre une Difficulté de 15 + 1 par kilo de métal porté. S'ils sont libres, les objets métalliques s'agglutinent ensemble et ne peuvent plus être séparés."
+      "effect": "le mage souffle sur de la poussière métallique et forme un nuage qu'il déplace à volonté pendant (30 + 30 par NR) minutes. Tous les objets métalliques situés à moins de 30 mètres sont attirés vers le mage. Les individus portant plus de 5 kg de métal subissent le même sort. Toutefois il leur est possible de résister par un jet de Manuel + Force contre une Difficulté de 15 + 1 par kilo de métal porté. S'ils sont libres, les objets métalliques s'agglutinent ensemble et ne peuvent plus être séparés.",
+      "inGameEffect": "Tous les objets métalliques situés à moins de 30 mètres sont attirés vers le mage. Les individus portant plus de 5 kg de métal subissent le même sort, mais peuvent résister par un jet de Manuel + Force contre une Difficulté de 15 + 1 par kilo de métal porté. Les objets libres s'agglutinent ensemble et ne peuvent plus être séparés.",
+      "sensoryEffect": "Le mage souffle sur de la poussière métallique et forme un nuage qu'il déplace à volonté.",
+      "duration": "30 + 30 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -688,7 +1044,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "billes de plomb, grognements",
-      "effect": "le mage projette des billes de plomb vers sa cible. Elles tournoient autour de la cible et la percutent irrégulièrement, occasionnant (30 + 1D10) points de dommages par tour. Elles peuvent être parées (avec un bouclier) ou esquivées avec une Difficulté de +10. Ce sort dure pendant (1 + NR) tours."
+      "effect": "le mage projette des billes de plomb vers sa cible. Elles tournoient autour de la cible et la percutent irrégulièrement, occasionnant (30 + 1D10) points de dommages par tour. Elles peuvent être parées (avec un bouclier) ou esquivées avec une Difficulté de +10. Ce sort dure pendant (1 + NR) tours.",
+      "inGameEffect": "Occasionne (30 + 1D10) points de dommages par tour. Peuvent être parées avec un bouclier ou esquivées avec une Difficulté de +10.",
+      "sensoryEffect": "Des billes de plomb tournoient autour de la cible et la percutent irrégulièrement.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -704,7 +1069,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "drac d'argent, rune d'argent",
-      "effect": "un petit serviteur élémentaire sort du drac d'argent. Il sert le mage pendant (10 + 10 par NR) minutes et peut accomplir de simples tâches (ouvrir une porte, apporter un message, etc.). Craintif, il ne participe à aucun combat. En disparaissant, le serviteur ne laisse pas un mais deux dracs d'argent derrière lui."
+      "effect": "un petit serviteur élémentaire sort du drac d'argent. Il sert le mage pendant (10 + 10 par NR) minutes et peut accomplir de simples tâches (ouvrir une porte, apporter un message, etc.). Craintif, il ne participe à aucun combat. En disparaissant, le serviteur ne laisse pas un mais deux dracs d'argent derrière lui.",
+      "inGameEffect": "Le serviteur accomplit de simples tâches (ouvrir une porte, apporter un message, etc.). Craintif, il ne participe à aucun combat. En disparaissant, il laisse deux dracs d'argent derrière lui au lieu d'un.",
+      "sensoryEffect": "Un petit serviteur élémentaire sort du drac d'argent.",
+      "duration": "10 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "summoning",
+        "utility",
+        "exploration"
+      ]
     }
   },
   {
@@ -720,7 +1094,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "clous en acier, rune d'acier, posture élancée",
-      "effect": "ce sort fait jaillir des aiguilles d'acier de 30 centimètres de long vers une cible située à moins de 100 mètres. Elles occasionnent (15 + 1D10 par NR) points de dommages. Les aiguilles ne peuvent être ni parées, ni esquivées."
+      "effect": "ce sort fait jaillir des aiguilles d'acier de 30 centimètres de long vers une cible située à moins de 100 mètres. Elles occasionnent (15 + 1D10 par NR) points de dommages. Les aiguilles ne peuvent être ni parées, ni esquivées.",
+      "inGameEffect": "Occasionne (15 + 1D10 par NR) points de dommages à une cible située à moins de 100 mètres. Les aiguilles ne peuvent être ni parées, ni esquivées.",
+      "sensoryEffect": "Des aiguilles d'acier de 30 centimètres de long jaillissent vers la cible.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -736,7 +1117,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "20 billes de fer, rune de métal, poudre de charbon",
-      "effect": "le mage enchante 20 billes de fer pendant (1 + NR) ans qu'il peut placer où il souhaite mais jamais côte à côte. Une fois placées, les billes explosent au moindre contact, occasionnant (30 + 2D10) points de dommages si le mot de commande n'est pas prononcé dans les deux mètres. Le mage peut transporter les billes sans risque dans de la poudre de charbon. Au moment de la pose, il doit les nettoyer consciencieusement et prononcer le mot de commande."
+      "effect": "le mage enchante 20 billes de fer pendant (1 + NR) ans qu'il peut placer où il souhaite mais jamais côte à côte. Une fois placées, les billes explosent au moindre contact, occasionnant (30 + 2D10) points de dommages si le mot de commande n'est pas prononcé dans les deux mètres. Le mage peut transporter les billes sans risque dans de la poudre de charbon. Au moment de la pose, il doit les nettoyer consciencieusement et prononcer le mot de commande.",
+      "inGameEffect": "Enchante 20 billes de fer, à placer où le mage le souhaite mais jamais côte à côte. Une fois placées, elles explosent au moindre contact et occasionnent (30 + 2D10) points de dommages si le mot de commande n'est pas prononcé dans les deux mètres. Le mage peut les transporter sans risque dans de la poudre de charbon ; au moment de la pose, il doit les nettoyer consciencieusement et prononcer le mot de commande.",
+      "duration": "1 + NR",
+      "durationUnit": "year",
+      "tags": [
+        "attack",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -752,7 +1141,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "branche d'arbre, chant de la forêt, rune de la colère tracée sur la branche",
-      "effect": "le mage fait appel à la protection des arbres afin d'éviter les dangers de la nature (prédateurs, insectes venimeux, etc.) pendant huit heures. Pour ce faire, il trace sur le sol un cercle sacré de (10 + 10 par NR) mètres de diamètre."
+      "effect": "le mage fait appel à la protection des arbres afin d'éviter les dangers de la nature (prédateurs, insectes venimeux, etc.) pendant huit heures. Pour ce faire, il trace sur le sol un cercle sacré de (10 + 10 par NR) mètres de diamètre.",
+      "inGameEffect": "Protège des dangers de la nature (prédateurs, insectes venimeux, etc.) dans un cercle de (10 + 10 par NR) mètres de diamètre tracé sur le sol.",
+      "sensoryEffect": "Le mage fait appel à la protection des arbres.",
+      "duration": "8",
+      "durationUnit": "hour",
+      "tags": [
+        "protection",
+        "area",
+        "exploration"
+      ]
     }
   },
   {
@@ -768,7 +1166,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "poignée de terre, rune de la fertilité, gorgée d'eau",
-      "effect": "le mage double la taille, les Caractéristiques physiques et l'Attribut Physique d'un animal ou d'une créature non draconique pendant (1 + NR) tours. Ce sort ne permet pas de contrôler l'animal."
+      "effect": "le mage double la taille, les Caractéristiques physiques et l'Attribut Physique d'un animal ou d'une créature non draconique pendant (1 + NR) tours. Ce sort ne permet pas de contrôler l'animal.",
+      "inGameEffect": "Double la taille, les Caractéristiques physiques et l'Attribut Physique d'un animal ou d'une créature non draconique. Ne permet pas de contrôler l'animal.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "combat"
+      ]
     }
   },
   {
@@ -784,7 +1189,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "écorce de bois, danse de la nature, rune de résistance",
-      "effect": "ce sort a pour effet de doubler l'Indice de protection des équipements en bois pendant (1 + NR) semaines."
+      "effect": "ce sort a pour effet de doubler l'Indice de protection des équipements en bois pendant (1 + NR) semaines.",
+      "inGameEffect": "Double l'Indice de protection des équipements en bois.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "protection",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -800,7 +1213,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "poignée de mauvaises herbes, rune de lenteur",
-      "effect": "le mage fait pousser à vitesse accélérée des racines autour des jambes de (1 + NR) cibles. Les personnes ciblées voient leurs mouvements restreints. Se libérer de ces entraves prend normalement 5 minutes, mais seulement 1 minute si les victimes réussissent un jet de Physique + Coordination contre une Difficulté de 15. Entravée une personne voit les Difficultés de toutes ses actions augmenter de +5."
+      "effect": "le mage fait pousser à vitesse accélérée des racines autour des jambes de (1 + NR) cibles. Les personnes ciblées voient leurs mouvements restreints. Se libérer de ces entraves prend normalement 5 minutes, mais seulement 1 minute si les victimes réussissent un jet de Physique + Coordination contre une Difficulté de 15. Entravée une personne voit les Difficultés de toutes ses actions augmenter de +5.",
+      "inGameEffect": "Les cibles entravées voient les Difficultés de toutes leurs actions augmenter de +5. Se libérer prend 5 minutes, ou 1 minute en réussissant un jet de Physique + Coordination contre une Difficulté de 15.",
+      "sensoryEffect": "Des racines poussent à vitesse accélérée autour des jambes des cibles et restreignent leurs mouvements.",
+      "targets": "1 + NR",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -816,7 +1237,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "pépin de fruit, danse de la fertilité",
-      "effect": "le mage fait pousser d'énormes fruits juteux et nourrissants qui permettent de sustenter (1 + NR) personnes pour un repas. Ils se conservent éventuellement deux jours."
+      "effect": "le mage fait pousser d'énormes fruits juteux et nourrissants qui permettent de sustenter (1 + NR) personnes pour un repas. Ils se conservent éventuellement deux jours.",
+      "inGameEffect": "Sustente (1 + NR) personnes pour un repas. Les fruits se conservent éventuellement deux jours.",
+      "sensoryEffect": "Le mage fait pousser d'énormes fruits juteux et nourrissants.",
+      "targets": "1 + NR",
+      "tags": [
+        "creation",
+        "exploration"
+      ]
     }
   },
   {
@@ -832,7 +1260,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "feuille de lierre, rune de la nature, danse de la fertilité",
-      "effect": "ce sort permet de faire pousser un lierre le long d'un mur qui fait office d'échelle pendant 10 tours. Sa longueur maximum est de (5 + 5 par NR) mètres."
+      "effect": "ce sort permet de faire pousser un lierre le long d'un mur qui fait office d'échelle pendant 10 tours. Sa longueur maximum est de (5 + 5 par NR) mètres.",
+      "inGameEffect": "Le lierre pousse le long d'un mur et fait office d'échelle. Longueur maximum de (5 + 5 par NR) mètres.",
+      "duration": "10",
+      "durationUnit": "round",
+      "tags": [
+        "movement",
+        "utility",
+        "exploration"
+      ]
     }
   },
   {
@@ -848,7 +1284,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "graines et pétales",
-      "effect": "le mage fait fleurir un parterre de fleurs aux couleurs chatoyantes dont la beauté galvanise les personnes qui le contemplent. (1 + NR) personnes bénéficient ainsi d'un bonus de (1 + NR) à un jet de Compétence lié à l'Attribut Social."
+      "effect": "le mage fait fleurir un parterre de fleurs aux couleurs chatoyantes dont la beauté galvanise les personnes qui le contemplent. (1 + NR) personnes bénéficient ainsi d'un bonus de (1 + NR) à un jet de Compétence lié à l'Attribut Social.",
+      "inGameEffect": "(1 + NR) personnes bénéficient d'un bonus de (1 + NR) à un jet de Compétence lié à l'Attribut Social.",
+      "sensoryEffect": "Un parterre de fleurs aux couleurs chatoyantes se met à fleurir ; sa beauté galvanise ceux qui le contemplent.",
+      "targets": "1 + NR",
+      "tags": [
+        "buff",
+        "ally",
+        "social"
+      ]
     }
   },
   {
@@ -864,7 +1308,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "écaille de dragon, rune de force",
-      "effect": "ce sort permet d'améliorer l'efficacité d'une arme pendant (1 + NR) cycles. Elle bénéficie d'un bonus de +5 aux dommages de base."
+      "effect": "ce sort permet d'améliorer l'efficacité d'une arme pendant (1 + NR) cycles. Elle bénéficie d'un bonus de +5 aux dommages de base.",
+      "inGameEffect": "L'arme améliorée bénéficie d'un bonus de +5 aux dommages de base.",
+      "duration": "1 + NR",
+      "durationUnit": "cycle",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -880,7 +1332,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "imposition des mains, feuilles grasses ou herbes séchées",
-      "effect": "ce sort stabilise l'état de santé de (1 + NR) cibles et soigne leur plus haute case de blessure."
+      "effect": "ce sort stabilise l'état de santé de (1 + NR) cibles et soigne leur plus haute case de blessure.",
+      "inGameEffect": "Stabilise l'état de santé de (1 + NR) cibles et soigne leur plus haute case de blessure.",
+      "targets": "1 + NR",
+      "tags": [
+        "healing",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -896,7 +1355,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de la nature, position du dragon accroupi",
-      "effect": "le mage, ou une cible de son choix qu'il touche, bénéficie d'un bonus de +1 à l'un de ses Attributs Majeurs pendant (1 + NR) tours."
+      "effect": "le mage, ou une cible de son choix qu'il touche, bénéficie d'un bonus de +1 à l'un de ses Attributs Majeurs pendant (1 + NR) tours.",
+      "inGameEffect": "Bonus de +1 à l'un des Attributs Majeurs du mage, ou d'une cible de son choix qu'il touche.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -912,7 +1379,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "branche brisée, de la terre souillée, rune de la vengeance",
-      "effect": "ce sort ne fonctionne pas dans les zones urbaines. Les animaux et la végétation se liguent pour agresser (5 + NR) cibles. Les attaques des arbres et des animaux aux ordres du mage occasionnent (35 + 1D10) points de dommages à ces dernières, une fois par tour pendant (1 + NR) tours."
+      "effect": "ce sort ne fonctionne pas dans les zones urbaines. Les animaux et la végétation se liguent pour agresser (5 + NR) cibles. Les attaques des arbres et des animaux aux ordres du mage occasionnent (35 + 1D10) points de dommages à ces dernières, une fois par tour pendant (1 + NR) tours.",
+      "inGameEffect": "Les attaques des arbres et des animaux aux ordres du mage occasionnent (35 + 1D10) points de dommages aux cibles, une fois par tour. Ne fonctionne pas dans les zones urbaines.",
+      "sensoryEffect": "Les animaux et la végétation se liguent pour agresser les cibles.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "targets": "5 + NR",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -928,7 +1405,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "flûte droite, air de musique printanier",
-      "effect": "la flûte enchantée de la sorte permet d'attirer les représentants d'une espèce animale, et de communiquer sommairement avec eux pendant (1 + NR) tours. Le mage choisit en lançant le sort quelle famille d'animaux est charmée par la musique (félins, rongeurs, poissons, etc.)."
+      "effect": "la flûte enchantée de la sorte permet d'attirer les représentants d'une espèce animale, et de communiquer sommairement avec eux pendant (1 + NR) tours. Le mage choisit en lançant le sort quelle famille d'animaux est charmée par la musique (félins, rongeurs, poissons, etc.).",
+      "inGameEffect": "Attire les représentants d'une espèce animale et permet de communiquer sommairement avec eux. Le mage choisit la famille d'animaux charmée (félins, rongeurs, poissons, etc.) au lancement du sort.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "communication",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -944,7 +1429,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "ailes d'insectes, rune de l'infini",
-      "effect": "le mage invoque une colonie d'insectes venimeux qui attaque la cible désignée. La nuée réalise deux attaques automatiques imparables avant de se disperser. Les dommages infligés sont de 2D10. De plus le venin des insectes entraîne un engourdissement. Ceci se traduit par un malus de -5 à toutes les actions de la victime pendant (1 + NR) tours."
+      "effect": "le mage invoque une colonie d'insectes venimeux qui attaque la cible désignée. La nuée réalise deux attaques automatiques imparables avant de se disperser. Les dommages infligés sont de 2D10. De plus le venin des insectes entraîne un engourdissement. Ceci se traduit par un malus de -5 à toutes les actions de la victime pendant (1 + NR) tours.",
+      "inGameEffect": "La nuée réalise deux attaques automatiques imparables de 2D10 dommages avant de se disperser. Le venin entraîne un engourdissement : malus de -5 à toutes les actions de la victime.",
+      "sensoryEffect": "Une colonie d'insectes venimeux s'abat sur la cible désignée.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -960,7 +1455,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "goutte du poison ou du sang de la victime, rune de guérison",
-      "effect": "ce sort permet de créer un remède dont la durée de conservation n'est que de (1 + NR) heures. Ingéré, cette mixture neutralise de manière définitive les effets du poison et rétablit une Caractéristique éventuellement atteinte. Le remède n'est valable que pour une personne."
+      "effect": "ce sort permet de créer un remède dont la durée de conservation n'est que de (1 + NR) heures. Ingéré, cette mixture neutralise de manière définitive les effets du poison et rétablit une Caractéristique éventuellement atteinte. Le remède n'est valable que pour une personne.",
+      "inGameEffect": "Crée un remède valable pour une seule personne. Ingéré, il neutralise définitivement les effets du poison et rétablit une Caractéristique éventuellement atteinte. Sa durée de conservation n'est que de (1 + NR) heures.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "healing",
+        "creation",
+        "object"
+      ]
     }
   },
   {
@@ -976,7 +1479,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "bâton de chêne centenaire, rune de la nature, chant de la foudre",
-      "effect": "le bâton enchanté permet de donner des ordres simples, sauf attaquer, à tous les animaux présents dans une zone d'effet de (200 + 100 par NR) m². Pendant les orages, il peut faire appel à la foudre une fois par tour, chaque éclair infligeant 40 points de dommages. Enfin le bâton procure un Indice de protection supplémentaire de +15 à son porteur et l'immunise aux sorts de la Sphère de l'Ombre d'un coût inférieur à 10. Le bâton est enchanté pendant (1 + NR) cycles."
+      "effect": "le bâton enchanté permet de donner des ordres simples, sauf attaquer, à tous les animaux présents dans une zone d'effet de (200 + 100 par NR) m². Pendant les orages, il peut faire appel à la foudre une fois par tour, chaque éclair infligeant 40 points de dommages. Enfin le bâton procure un Indice de protection supplémentaire de +15 à son porteur et l'immunise aux sorts de la Sphère de l'Ombre d'un coût inférieur à 10. Le bâton est enchanté pendant (1 + NR) cycles.",
+      "inGameEffect": "Le bâton permet de donner des ordres simples, sauf attaquer, à tous les animaux présents dans une zone de (200 + 100 par NR) m². Pendant les orages, il fait appel à la foudre une fois par tour, chaque éclair infligeant 40 points de dommages. Il procure un Indice de protection supplémentaire de +15 à son porteur et l'immunise aux sorts de la Sphère de l'Ombre d'un coût inférieur à 10.",
+      "duration": "1 + NR",
+      "durationUnit": "cycle",
+      "tags": [
+        "protection",
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -992,7 +1504,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 25,
       "cle": "couronne de feuilles, galet parfaitement rond, bouquet de houx, chant de la fertilité",
-      "effect": "le mage invoque un esprit de la nature pour bénéficier de sa bénédiction. La dryade est à sa disposition pendant (1 + NR) cycles. Tant qu'elle se trouve à ses côtés (elle ne peut s'éloigner de plus de 100 mètres du mage), ce dernier ne ressent pas la faim, ne peut pas se perdre et n'est jamais attaqué par aucun animal sauvage. La dryade peut aussi le soigner de 3 cases de blessure par jour en commençant par la plus grave à raison de 30 minutes par case. Enfin, tant qu'elle l'accompagne, le mage bénéficie d'un bonus de +5 lorsqu'il lance un sort de la sphère de la Nature. La dryade refuse catégoriquement de pénétrer dans un village ou une ville sous peine de rompre le charme."
+      "effect": "le mage invoque un esprit de la nature pour bénéficier de sa bénédiction. La dryade est à sa disposition pendant (1 + NR) cycles. Tant qu'elle se trouve à ses côtés (elle ne peut s'éloigner de plus de 100 mètres du mage), ce dernier ne ressent pas la faim, ne peut pas se perdre et n'est jamais attaqué par aucun animal sauvage. La dryade peut aussi le soigner de 3 cases de blessure par jour en commençant par la plus grave à raison de 30 minutes par case. Enfin, tant qu'elle l'accompagne, le mage bénéficie d'un bonus de +5 lorsqu'il lance un sort de la sphère de la Nature. La dryade refuse catégoriquement de pénétrer dans un village ou une ville sous peine de rompre le charme.",
+      "inGameEffect": "Tant que la dryade se trouve à ses côtés (elle ne peut s'éloigner de plus de 100 mètres), le mage ne ressent pas la faim, ne peut pas se perdre et n'est jamais attaqué par aucun animal sauvage. Elle le soigne de 3 cases de blessure par jour en commençant par la plus grave, à raison de 30 minutes par case, et lui donne un bonus de +5 pour lancer un sort de la Sphère de la Nature. Elle refuse catégoriquement de pénétrer dans un village ou une ville, sous peine de rompre le charme.",
+      "sensoryEffect": "Le mage invoque un esprit de la nature pour bénéficier de sa bénédiction.",
+      "duration": "1 + NR",
+      "durationUnit": "cycle",
+      "tags": [
+        "buff",
+        "healing",
+        "summoning",
+        "exploration"
+      ]
     }
   },
   {
@@ -1008,7 +1530,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune d'eau, miroir, danse de protection",
-      "effect": "le mage dresse un écran liquide autour de lui pendant (1 + NR) tours. Il lui procure un Indice de protection supplémentaire de +5 et divise par quatre tous les dommages dus au feu (magique ou non)."
+      "effect": "le mage dresse un écran liquide autour de lui pendant (1 + NR) tours. Il lui procure un Indice de protection supplémentaire de +5 et divise par quatre tous les dommages dus au feu (magique ou non).",
+      "inGameEffect": "Indice de protection supplémentaire de +5 et division par quatre de tous les dommages dus au feu, magique ou non.",
+      "sensoryEffect": "Un écran liquide se dresse autour du mage.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -1024,7 +1555,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "rune de l'eau, rune de l'air",
-      "effect": "ce sort permet d'enchanter des vêtements pendant (1 + NR) jours de telle façon à ce que le porteur puisse flotter, même en armure. Ce sort n'annule aucunement la pénalité d'encombrement d'une armure."
+      "effect": "ce sort permet d'enchanter des vêtements pendant (1 + NR) jours de telle façon à ce que le porteur puisse flotter, même en armure. Ce sort n'annule aucunement la pénalité d'encombrement d'une armure.",
+      "inGameEffect": "Le porteur des vêtements enchantés peut flotter, même en armure. N'annule aucunement la pénalité d'encombrement d'une armure.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "movement",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -1040,7 +1579,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "livre, rune de l'eau",
-      "effect": "ce sort permet d'enchanter un livre afin de le verrouiller pendant (1 + NR) jours. Il ne répond qu'à la voix du mage (ou à une imitation magique)."
+      "effect": "ce sort permet d'enchanter un livre afin de le verrouiller pendant (1 + NR) jours. Il ne répond qu'à la voix du mage (ou à une imitation magique).",
+      "inGameEffect": "Le livre enchanté est verrouillé et ne répond qu'à la voix du mage (ou à une imitation magique).",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "protection",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -1056,7 +1603,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de l'eau, claquement de doigt",
-      "effect": "au cours du prochain tour, la cible du sort doit effectuer un jet de Mental + Résistance contre une Difficulté de 15 pour ne pas être prise de vertiges. En cas d'échec, elle est prise d'un violent mal de mer qui lui inflige un malus de -5 à toutes ses actions pendant (1 + NR) tours."
+      "effect": "au cours du prochain tour, la cible du sort doit effectuer un jet de Mental + Résistance contre une Difficulté de 15 pour ne pas être prise de vertiges. En cas d'échec, elle est prise d'un violent mal de mer qui lui inflige un malus de -5 à toutes ses actions pendant (1 + NR) tours.",
+      "inGameEffect": "Au cours du prochain tour, la cible doit réussir un jet de Mental + Résistance contre une Difficulté de 15. En cas d'échec, elle subit un malus de -5 à toutes ses actions.",
+      "sensoryEffect": "La cible est prise d'un violent mal de mer et de vertiges.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1072,7 +1628,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "verre d'eau de mer, chant des vagues et posture accroupie",
-      "effect": "le mage invoque une petite créature aquatique qui lui rend de menus services, simples comme éteindre un feu ou apporter un message. Craintive, la nymphe ne participe pas aux combats. Elle reste avec le mage pendant (30 + 10 par NR) minutes."
+      "effect": "le mage invoque une petite créature aquatique qui lui rend de menus services, simples comme éteindre un feu ou apporter un message. Craintive, la nymphe ne participe pas aux combats. Elle reste avec le mage pendant (30 + 10 par NR) minutes.",
+      "inGameEffect": "La nymphe rend de menus services, simples comme éteindre un feu ou apporter un message. Craintive, elle ne participe pas aux combats.",
+      "sensoryEffect": "Le mage invoque une petite créature aquatique.",
+      "duration": "30 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "summoning",
+        "utility",
+        "exploration"
+      ]
     }
   },
   {
@@ -1088,7 +1653,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "voix douce, poupée, cire, rune de l'enfance",
-      "effect": "cet enchantement permet au mage d'utiliser une poupée comme prolongement direct de son ouïe pendant (1 + NR) heures. Posée dans une pièce, la poupée retransmet toutes les discussions qui ont lieu autour d'elle, si le mage souhaite les entendre."
+      "effect": "cet enchantement permet au mage d'utiliser une poupée comme prolongement direct de son ouïe pendant (1 + NR) heures. Posée dans une pièce, la poupée retransmet toutes les discussions qui ont lieu autour d'elle, si le mage souhaite les entendre.",
+      "inGameEffect": "La poupée sert de prolongement direct de l'ouïe du mage : posée dans une pièce, elle lui retransmet toutes les discussions qui ont lieu autour d'elle, s'il souhaite les entendre.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "detection",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -1104,7 +1677,12 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune d'eau, danse du savoir",
-      "effect": "le mage augmente une Compétence de son choix liée à l'Attribut Mental de (1 + NR) pour réaliser un unique jet."
+      "effect": "le mage augmente une Compétence de son choix liée à l'Attribut Mental de (1 + NR) pour réaliser un unique jet.",
+      "inGameEffect": "Augmente de (1 + NR) une Compétence au choix liée à l'Attribut Mental, pour un unique jet.",
+      "tags": [
+        "buff",
+        "self"
+      ]
     }
   },
   {
@@ -1120,7 +1698,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "goutte d'eau froide, danse de l'eau, chant de l'équilibre",
-      "effect": "le mage ouvre un portail lié au lac d'un glacier pendant (1 + NR) tours. L'eau s'en déversant peut déséquilibrer une personne visée. Pour éviter d'être jetée au sol, cette dernière doit réussir un jet de Coordination + Physique ou d'Acrobatie contre une difficulté de 20. Le volume d'eau déversée est d'environ 1 m³ par tour."
+      "effect": "le mage ouvre un portail lié au lac d'un glacier pendant (1 + NR) tours. L'eau s'en déversant peut déséquilibrer une personne visée. Pour éviter d'être jetée au sol, cette dernière doit réussir un jet de Coordination + Physique ou d'Acrobatie contre une difficulté de 20. Le volume d'eau déversée est d'environ 1 m³ par tour.",
+      "inGameEffect": "Environ 1 m³ d'eau se déverse par tour. Pour éviter d'être jetée au sol, la personne visée doit réussir un jet de Coordination + Physique ou d'Acrobatie contre une Difficulté de 20.",
+      "sensoryEffect": "Le mage ouvre un portail lié au lac d'un glacier ; l'eau s'en déverse.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1136,7 +1723,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "rune de l'œil, posture de la sentinelle, écuelle d'eau fraîche",
-      "effect": "le mage a une vision fugitive de l'avenir dans l'écuelle d'eau fraîche, un indice, une indication à suivre. Ce sort donne (1 + NR) informations par NR. Avec une réussite normale, le message des Dragons sera sans doute sibyllin."
+      "effect": "le mage a une vision fugitive de l'avenir dans l'écuelle d'eau fraîche, un indice, une indication à suivre. Ce sort donne (1 + NR) informations par NR. Avec une réussite normale, le message des Dragons sera sans doute sibyllin.",
+      "inGameEffect": "Donne (1 + NR) informations par NR. Avec une réussite normale, le message des Dragons sera sans doute sibyllin.",
+      "sensoryEffect": "Le mage a une vision fugitive de l'avenir dans une écuelle d'eau fraîche : un indice, une indication à suivre.",
+      "tags": [
+        "detection",
+        "exploration"
+      ]
     }
   },
   {
@@ -1152,7 +1745,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "coupe de cristal, rune, chant d'une vierge",
-      "effect": "cette coupe a la capacité de détecter la dangerosité de tout liquide que l'on verse dedans pendant (1 + NR) cycles. Aucune substance ou poison ne résiste à cet enchantement. La couleur du liquide testé change si celui-ci est dangereux."
+      "effect": "cette coupe a la capacité de détecter la dangerosité de tout liquide que l'on verse dedans pendant (1 + NR) cycles. Aucune substance ou poison ne résiste à cet enchantement. La couleur du liquide testé change si celui-ci est dangereux.",
+      "inGameEffect": "La coupe détecte la dangerosité de tout liquide qu'on y verse. Aucune substance ni poison ne résiste à cet enchantement.",
+      "sensoryEffect": "La couleur du liquide testé change s'il est dangereux.",
+      "duration": "1 + NR",
+      "durationUnit": "cycle",
+      "tags": [
+        "detection",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -1168,7 +1770,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune d'eau, posture (bras tendus vers la cible)",
-      "effect": "un mince jet d'eau surpuissant sort des paumes du mage. Il inflige (15 + 1D10 par NR) points de dommages. La cible peut tenter d'esquiver l'attaque mais sa Difficulté est augmentée de +10. Une parade (uniquement avec un bouclier) est possible avec une Difficulté de +5, mais le bouclier perdra systématiquement un point de protection."
+      "effect": "un mince jet d'eau surpuissant sort des paumes du mage. Il inflige (15 + 1D10 par NR) points de dommages. La cible peut tenter d'esquiver l'attaque mais sa Difficulté est augmentée de +10. Une parade (uniquement avec un bouclier) est possible avec une Difficulté de +5, mais le bouclier perdra systématiquement un point de protection.",
+      "inGameEffect": "Inflige (15 + 1D10 par NR) points de dommages. La cible peut esquiver, mais sa Difficulté est augmentée de +10. La parade, uniquement au bouclier, est possible avec une Difficulté de +5, mais le bouclier perd systématiquement un point de protection.",
+      "sensoryEffect": "Un mince jet d'eau surpuissant sort des paumes du mage.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1184,7 +1793,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "voix chantante, rune de paix tracée dans l'eau, cours d'eau ou fontaine",
-      "effect": "ce sort enchante l'eau d'un cours d'eau ou d'une fontaine de façon à ce qu'elle soigne les maladies. Toute personne baignée dans cette eau miraculeuse voit ses tissus se régénérer. Selon la gravité d'une maladie, il faut compter entre 10 minutes et 3 heures de baignade pour que les chairs soient réparées. Si la maladie laissait cochées des cases de blessure, ces dernières sont soignées par l'immersion. La fontaine ne peut soigner qu'une personne à la fois. Ses propriétés demeurent actives pendant (1 + NR) jours."
+      "effect": "ce sort enchante l'eau d'un cours d'eau ou d'une fontaine de façon à ce qu'elle soigne les maladies. Toute personne baignée dans cette eau miraculeuse voit ses tissus se régénérer. Selon la gravité d'une maladie, il faut compter entre 10 minutes et 3 heures de baignade pour que les chairs soient réparées. Si la maladie laissait cochées des cases de blessure, ces dernières sont soignées par l'immersion. La fontaine ne peut soigner qu'une personne à la fois. Ses propriétés demeurent actives pendant (1 + NR) jours.",
+      "inGameEffect": "L'eau enchantée soigne les maladies. Selon la gravité, il faut compter entre 10 minutes et 3 heures de baignade. Si la maladie laissait des cases de blessure cochées, elles sont soignées par l'immersion. La fontaine ne peut soigner qu'une personne à la fois.",
+      "sensoryEffect": "Toute personne baignée dans cette eau miraculeuse voit ses tissus se régénérer.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "healing",
+        "place",
+        "exploration"
+      ]
     }
   },
   {
@@ -1200,7 +1818,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 25,
       "cle": "miroir, voix grave, rune de l'eau tracée sur le miroir, danse de la tempête avec bris du miroir",
-      "effect": "le mage crée un tourbillon d'eau très violent autour de lui d'un volume de 20 m³. Toute personne prise dans la tourmente doit réussir un jet de Manuel + Acrobatie (ou Force) contre une Difficulté de 20 (25 dans le cas de la Force), faute de quoi elle est projetée violemment à 10 mètres du lieu du contact et reçoit (20 + 1D10) points de dommages. Toute personne tentant de s'approcher du lanceur de ce sort doit résister au tourbillon. Le mage est invulnérable au feu pendant la durée du sort qui est de (1 + NR) tours. Il bénéficie enfin d'un Indice de protection supplémentaire de +10 contre toute attaque devant traverser la barrière liquide."
+      "effect": "le mage crée un tourbillon d'eau très violent autour de lui d'un volume de 20 m³. Toute personne prise dans la tourmente doit réussir un jet de Manuel + Acrobatie (ou Force) contre une Difficulté de 20 (25 dans le cas de la Force), faute de quoi elle est projetée violemment à 10 mètres du lieu du contact et reçoit (20 + 1D10) points de dommages. Toute personne tentant de s'approcher du lanceur de ce sort doit résister au tourbillon. Le mage est invulnérable au feu pendant la durée du sort qui est de (1 + NR) tours. Il bénéficie enfin d'un Indice de protection supplémentaire de +10 contre toute attaque devant traverser la barrière liquide.",
+      "inGameEffect": "Tourbillon de 20 m³ autour du mage. Toute personne prise dans la tourmente doit réussir un jet de Manuel + Acrobatie contre une Difficulté de 20 (25 avec la Force), faute de quoi elle est projetée à 10 mètres du point de contact et reçoit (20 + 1D10) points de dommages. Quiconque tente d'approcher le lanceur doit résister au tourbillon. Le mage est invulnérable au feu pendant la durée du sort et bénéficie d'un Indice de protection supplémentaire de +10 contre toute attaque devant traverser la barrière liquide.",
+      "sensoryEffect": "Un tourbillon d'eau très violent se forme autour du mage.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "protection",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1216,7 +1844,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "écaille d'un dragon d'Ozyr, rune de tempête, posture (poings contre terre)",
-      "effect": "le mage crée un véritable mur d'eau capable de noyer plusieurs hommes. D'un volume de 100 m³, la vague avance à une vitesse de (30 + 10 par NR) mètres par tour pendant 10 tours. Si une personne est prise dans la vague, elle subit 2D10 points de dommages sans pouvoir y soustraire son Indice d'armure. Cette vague peut également détruire les bâtiments, les navires ou toute construction susceptible d'être recouverte ou balayée par la vague."
+      "effect": "le mage crée un véritable mur d'eau capable de noyer plusieurs hommes. D'un volume de 100 m³, la vague avance à une vitesse de (30 + 10 par NR) mètres par tour pendant 10 tours. Si une personne est prise dans la vague, elle subit 2D10 points de dommages sans pouvoir y soustraire son Indice d'armure. Cette vague peut également détruire les bâtiments, les navires ou toute construction susceptible d'être recouverte ou balayée par la vague.",
+      "inGameEffect": "Vague de 100 m³ avançant à (30 + 10 par NR) mètres par tour. Une personne prise dans la vague subit 2D10 points de dommages sans pouvoir y soustraire son Indice d'armure. La vague peut détruire bâtiments, navires ou toute construction susceptible d'être recouverte ou balayée.",
+      "sensoryEffect": "Le mage crée un véritable mur d'eau capable de noyer plusieurs hommes.",
+      "duration": "10",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1232,7 +1869,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "rune de l'esprit tracée sur la pierre à travailler, voix aiguë puis grave",
-      "effect": "en invoquant l'esprit de la pierre, le mage diminue d'un palier la dureté de (1 + NR) m³ de pierre afin de pouvoir la travailler plus facilement (de granit à grès, de grès à calcaire). Au bout d'un jour, la pierre reprend sa dureté initiale."
+      "effect": "en invoquant l'esprit de la pierre, le mage diminue d'un palier la dureté de (1 + NR) m³ de pierre afin de pouvoir la travailler plus facilement (de granit à grès, de grès à calcaire). Au bout d'un jour, la pierre reprend sa dureté initiale.",
+      "inGameEffect": "Diminue d'un palier la dureté de (1 + NR) m³ de pierre, afin de la travailler plus facilement (de granit à grès, de grès à calcaire). Au bout d'un jour, la pierre reprend sa dureté initiale.",
+      "sensoryEffect": "Le mage invoque l'esprit de la pierre.",
+      "duration": "1",
+      "durationUnit": "day",
+      "tags": [
+        "creation",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -1248,7 +1894,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "une arme, rune de la pierre, danse de la force",
-      "effect": "ce sort permet d'enchanter une arme afin de lui donner un bonus de +5 sur ses dommages de base pendant (1 + NR) jours."
+      "effect": "ce sort permet d'enchanter une arme afin de lui donner un bonus de +5 sur ses dommages de base pendant (1 + NR) jours.",
+      "inGameEffect": "L'arme enchantée gagne un bonus de +5 sur ses dommages de base.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -1264,7 +1918,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "rune de la mémoire tracée sur le sol, chant de la pierre, posture accroupie",
-      "effect": "en invoquant la mémoire de la pierre, le mage peut remonter la piste récente (moins d'une heure) d'une personne sur une surface minérale qui normalement ne garde pas la trace des pas (pavés, rocs, etc.), et ce pendant (30 + 15 par NR) minutes. Il doit néanmoins posséder un objet appartenant à la personne recherchée."
+      "effect": "en invoquant la mémoire de la pierre, le mage peut remonter la piste récente (moins d'une heure) d'une personne sur une surface minérale qui normalement ne garde pas la trace des pas (pavés, rocs, etc.), et ce pendant (30 + 15 par NR) minutes. Il doit néanmoins posséder un objet appartenant à la personne recherchée.",
+      "inGameEffect": "Permet de remonter la piste récente (moins d'une heure) d'une personne sur une surface minérale qui ne garde normalement pas la trace des pas (pavés, rocs, etc.). Le mage doit posséder un objet appartenant à la personne recherchée.",
+      "sensoryEffect": "Le mage invoque la mémoire de la pierre.",
+      "duration": "30 + 15 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "detection",
+        "exploration"
+      ]
     }
   },
   {
@@ -1280,7 +1942,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "rune de pierre, posture accroupie",
-      "effect": "le mage fait littéralement s'ouvrir la terre à 10 mètres de lui pendant (1 + NR) tours. La crevasse fait (30 + 5 par NR) m. Les individus tombant dedans subissent 2D10 points de dommages sans armure. Les bâtiments se trouvant pris pour moitié dans la crevasse s'effondrent."
+      "effect": "le mage fait littéralement s'ouvrir la terre à 10 mètres de lui pendant (1 + NR) tours. La crevasse fait (30 + 5 par NR) m. Les individus tombant dedans subissent 2D10 points de dommages sans armure. Les bâtiments se trouvant pris pour moitié dans la crevasse s'effondrent.",
+      "inGameEffect": "La terre s'ouvre à 10 mètres du mage sur (30 + 5 par NR) m. Les individus qui y tombent subissent 2D10 points de dommages sans armure. Les bâtiments pris pour moitié dans la crevasse s'effondrent.",
+      "sensoryEffect": "La terre s'ouvre littéralement.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1296,7 +1967,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "morceau de granit, rune de la pierre",
-      "effect": "ce sort permet de faire apparaître une petite gargouille qui donnera l'alerte si quelqu'un s'introduit dans sa zone de surveillance (surface surveillée : 30 m²). Elle reste en poste (1 + NR) heures."
+      "effect": "ce sort permet de faire apparaître une petite gargouille qui donnera l'alerte si quelqu'un s'introduit dans sa zone de surveillance (surface surveillée : 30 m²). Elle reste en poste (1 + NR) heures.",
+      "inGameEffect": "La gargouille donne l'alerte si quelqu'un s'introduit dans sa zone de surveillance, d'une surface de 30 m².",
+      "sensoryEffect": "Une petite gargouille apparaît et reste en poste.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "detection",
+        "summoning",
+        "place",
+        "exploration"
+      ]
     }
   },
   {
@@ -1312,7 +1993,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "poignée de graviers, rune de vitesse, posture agressive",
-      "effect": "le mage lance la poignée de graviers sur une cible située à moins de 30 mètres. Cette attaque occasionne (10 + 1D10 par NR) points de dommages."
+      "effect": "le mage lance la poignée de graviers sur une cible située à moins de 30 mètres. Cette attaque occasionne (10 + 1D10 par NR) points de dommages.",
+      "inGameEffect": "Le mage lance une poignée de graviers sur une cible située à moins de 30 mètres. Occasionne (10 + 1D10 par NR) points de dommages.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1328,7 +2015,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "poussière de pierre, rune de pierre, chant du courage",
-      "effect": "ce sort permet à la personne touchée par le mage de bénéficier d'un Indice de protection supplémentaire de +10 pendant (1 + NR) tours qui s'applique même contre les attaques ignorant les armures."
+      "effect": "ce sort permet à la personne touchée par le mage de bénéficier d'un Indice de protection supplémentaire de +10 pendant (1 + NR) tours qui s'applique même contre les attaques ignorant les armures.",
+      "inGameEffect": "La personne touchée par le mage bénéficie d'un Indice de protection supplémentaire de +10, qui s'applique même contre les attaques ignorant les armures.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -1344,7 +2039,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "armure, rune de pierre tracée sur l'armure, poudre de sable",
-      "effect": "l'armure enchantée de la sorte n'a plus besoin d'être entretenue. Pendant (1 + NR) semaines, elle régénère chaque nuit l'ensemble des points de protection perdus, et bénéficie d'un bonus à l'Indice de protection de +10 ainsi que d'une réduction de 5 de sa pénalité d'encombrement."
+      "effect": "l'armure enchantée de la sorte n'a plus besoin d'être entretenue. Pendant (1 + NR) semaines, elle régénère chaque nuit l'ensemble des points de protection perdus, et bénéficie d'un bonus à l'Indice de protection de +10 ainsi que d'une réduction de 5 de sa pénalité d'encombrement.",
+      "inGameEffect": "L'armure enchantée n'a plus besoin d'être entretenue : elle régénère chaque nuit l'ensemble des points de protection perdus, gagne un bonus de +10 à l'Indice de protection et voit sa pénalité d'encombrement réduite de 5.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "protection",
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -1360,7 +2064,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "armure en métal de qualité supérieure, nombreuses runes, postures, chants et danses",
-      "effect": "l'armure enchantée de la sorte bénéficie d'un bonus de +20 à son Indice de protection pendant (1 + NR) semaines, qui s'applique même contre les attaques ignorant les armures. De plus, elle ignore toute pénalité d'encombrement."
+      "effect": "l'armure enchantée de la sorte bénéficie d'un bonus de +20 à son Indice de protection pendant (1 + NR) semaines, qui s'applique même contre les attaques ignorant les armures. De plus, elle ignore toute pénalité d'encombrement.",
+      "inGameEffect": "L'armure enchantée gagne un bonus de +20 à son Indice de protection, qui s'applique même contre les attaques ignorant les armures, et ignore toute pénalité d'encombrement.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "protection",
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -1376,7 +2089,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "dalle de granit, mélopée",
-      "effect": "ce sort permet de créer un mur de 4 m² maximum entre le mage et ses adversaires, qui reste en place pendant (1 + NR) tours avant de disparaître. Pour détruire cette barrière, il faut lui occasionner (50 + 2D10) points de dommages."
+      "effect": "ce sort permet de créer un mur de 4 m² maximum entre le mage et ses adversaires, qui reste en place pendant (1 + NR) tours avant de disparaître. Pour détruire cette barrière, il faut lui occasionner (50 + 2D10) points de dommages.",
+      "inGameEffect": "Crée un mur de 4 m² maximum entre le mage et ses adversaires. Pour le détruire, il faut lui occasionner (50 + 2D10) points de dommages.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1392,7 +2113,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "gemme, de petits morceaux de verre, sang de Moryagorn",
-      "effect": "le mage transforme des morceaux de verre en (1 + NR) gemmes, identiques en tout point à la gemme originale."
+      "effect": "le mage transforme des morceaux de verre en (1 + NR) gemmes, identiques en tout point à la gemme originale.",
+      "inGameEffect": "Transforme des morceaux de verre en (1 + NR) gemmes, identiques en tout point à la gemme originale.",
+      "targets": "1 + NR",
+      "tags": [
+        "illusion",
+        "creation",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -1408,7 +2137,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "sang d'un héros, étendard immaculé, rune de courage",
-      "effect": "une fois cette bannière enchantée, elle devient l'emblème de la compagnie (50 hommes environ) à laquelle elle appartient. Tant qu'elle est tenue haute sur le champ de bataille, toute personne partageant ses couleurs et son idéal dispose d'un bonus de +5 à ses jets de toucher et de dommages ainsi qu'à son Indice de protection. En revanche, si elle est capturée par l'ennemi, le bonus devient un malus d'égale valeur. Si l'ennemi la détruit mais qu'elle ne tombe pas entre ses mains, les bonus disparaissent. Cet enchantement dure pendant (1 + NR) heures."
+      "effect": "une fois cette bannière enchantée, elle devient l'emblème de la compagnie (50 hommes environ) à laquelle elle appartient. Tant qu'elle est tenue haute sur le champ de bataille, toute personne partageant ses couleurs et son idéal dispose d'un bonus de +5 à ses jets de toucher et de dommages ainsi qu'à son Indice de protection. En revanche, si elle est capturée par l'ennemi, le bonus devient un malus d'égale valeur. Si l'ennemi la détruit mais qu'elle ne tombe pas entre ses mains, les bonus disparaissent. Cet enchantement dure pendant (1 + NR) heures.",
+      "inGameEffect": "La bannière devient l'emblème de la compagnie (50 hommes environ) à laquelle elle appartient. Tant qu'elle est tenue haute sur le champ de bataille, toute personne partageant ses couleurs et son idéal dispose d'un bonus de +5 à ses jets de toucher, de dommages et à son Indice de protection. Capturée par l'ennemi, le bonus devient un malus d'égale valeur ; détruite sans tomber entre ses mains, les bonus disparaissent.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "ally",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -1424,7 +2162,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 25,
       "cle": "petit caillou pointu",
-      "effect": "ce sort crée un monticule de 30 m³ qui jaillit du sol. Ce monticule, qui persiste pendant (1 + NR) tours, peut boucher des trous ou éventrer des fortifications."
+      "effect": "ce sort crée un monticule de 30 m³ qui jaillit du sol. Ce monticule, qui persiste pendant (1 + NR) tours, peut boucher des trous ou éventrer des fortifications.",
+      "inGameEffect": "Crée un monticule de 30 m³ qui jaillit du sol. Il peut boucher des trous ou éventrer des fortifications.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "creation",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1440,7 +2186,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 25,
       "cle": "poignée de minéraux, danse de la guerre",
-      "effect": "ce sort destructeur provoque une tornade de sable et de pierre de plus 50 m³. Toutes les personnes prises dans la tourmente subissent (30 + 1D10) points de dommages tous les tours pendant (1 + NR) tours. Les créatures en vol cochent le double des cases prévues par les dommages qu'ils subissent. De plus, l'ensemble des victimes sont aveuglées, et subissent un malus de -5 à toutes leurs actions."
+      "effect": "ce sort destructeur provoque une tornade de sable et de pierre de plus 50 m³. Toutes les personnes prises dans la tourmente subissent (30 + 1D10) points de dommages tous les tours pendant (1 + NR) tours. Les créatures en vol cochent le double des cases prévues par les dommages qu'ils subissent. De plus, l'ensemble des victimes sont aveuglées, et subissent un malus de -5 à toutes leurs actions.",
+      "inGameEffect": "Toutes les personnes prises dans la tourmente subissent (30 + 1D10) points de dommages tous les tours et sont aveuglées, avec un malus de -5 à toutes leurs actions. Les créatures en vol cochent le double des cases prévues par les dommages subis.",
+      "sensoryEffect": "Une tornade de sable et de pierre de plus de 50 m³ se déchaîne.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1456,7 +2212,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "profonde réflexion, trois types de pierres différentes",
-      "effect": "le mage déchaîne la colère de Brorne sur 1 km² pendant (1 + NR) tours. Toutes les constructions dans l'aire d'effet s'effondrent. Des crevasses apparaissent et les infortunés y tombant subissent (30 + 1D10) points de dommages. Dans une région volcanique, une éruption est à craindre."
+      "effect": "le mage déchaîne la colère de Brorne sur 1 km² pendant (1 + NR) tours. Toutes les constructions dans l'aire d'effet s'effondrent. Des crevasses apparaissent et les infortunés y tombant subissent (30 + 1D10) points de dommages. Dans une région volcanique, une éruption est à craindre.",
+      "inGameEffect": "Toutes les constructions dans l'aire d'effet de 1 km² s'effondrent. Des crevasses apparaissent et les infortunés qui y tombent subissent (30 + 1D10) points de dommages. Dans une région volcanique, une éruption est à craindre.",
+      "sensoryEffect": "Le mage déchaîne la colère de Brorne.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1472,7 +2237,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "larme de femme, rune des rêves",
-      "effect": "ce sort permet au mage de provoquer un grand émoi chez (1 + NR) cibles qu'il fixe. Ces dernières sont forcées de révéler leurs sentiments de manière claire et publique à moins qu'elles ne réussissent un jet de résistance de Social + Volonté contre une Difficulté de 20."
+      "effect": "ce sort permet au mage de provoquer un grand émoi chez (1 + NR) cibles qu'il fixe. Ces dernières sont forcées de révéler leurs sentiments de manière claire et publique à moins qu'elles ne réussissent un jet de résistance de Social + Volonté contre une Difficulté de 20.",
+      "inGameEffect": "Les cibles que le mage fixe sont forcées de révéler leurs sentiments de manière claire et publique, à moins de réussir un jet de résistance de Social + Volonté contre une Difficulté de 20.",
+      "sensoryEffect": "Les cibles sont prises d'un grand émoi.",
+      "targets": "1 + NR",
+      "tags": [
+        "debuff",
+        "enemy",
+        "social"
+      ]
     }
   },
   {
@@ -1488,7 +2261,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "voix aiguë puis grave",
-      "effect": "une cible située à une portée maximale de (10 + 10 par NR) mètres, interrompt toutes ses actions jusqu'à la fin du tour. L'activité entreprise est un échec sauf si la cible réussit un jet de résistance de Social + Volonté contre une Difficulté de 20."
+      "effect": "une cible située à une portée maximale de (10 + 10 par NR) mètres, interrompt toutes ses actions jusqu'à la fin du tour. L'activité entreprise est un échec sauf si la cible réussit un jet de résistance de Social + Volonté contre une Difficulté de 20.",
+      "inGameEffect": "Une cible située à (10 + 10 par NR) mètres au maximum interrompt toutes ses actions jusqu'à la fin du tour. L'activité entreprise est un échec, sauf si la cible réussit un jet de résistance de Social + Volonté contre une Difficulté de 20.",
+      "duration": "1",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1504,7 +2285,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "miroir brisé, rune du rêve",
-      "effect": "ce sort augmente la Difficulté de tous les sorts dont le mage est la cible, y compris les siens, de +10 pendant (1 + NR) heures."
+      "effect": "ce sort augmente la Difficulté de tous les sorts dont le mage est la cible, y compris les siens, de +10 pendant (1 + NR) heures.",
+      "inGameEffect": "Augmente de +10 la Difficulté de tous les sorts dont le mage est la cible, y compris les siens.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -1520,7 +2309,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "voix chaude, rune des rêves",
-      "effect": "ce sort permet au mage, une fois par tour pendant (1 + NR) tours, de contraindre une cible de son choix située à moins de 50 mètres, à rediriger une attaque ou un sort vers une autre cible. Le mage peut choisir l'attaque ou le sort à détourner une fois le jet de dés effectué. La seule façon pour sa victime de se prémunir contre les effets de \"Déviation subtile\" est de réussir un jet de Physique + Volonté contre une Difficulté de 20."
+      "effect": "ce sort permet au mage, une fois par tour pendant (1 + NR) tours, de contraindre une cible de son choix située à moins de 50 mètres, à rediriger une attaque ou un sort vers une autre cible. Le mage peut choisir l'attaque ou le sort à détourner une fois le jet de dés effectué. La seule façon pour sa victime de se prémunir contre les effets de \"Déviation subtile\" est de réussir un jet de Physique + Volonté contre une Difficulté de 20.",
+      "inGameEffect": "Une fois par tour, le mage contraint une cible située à moins de 50 mètres à rediriger une attaque ou un sort vers une autre cible. Il choisit ce qu'il détourne une fois le jet de dés effectué. La victime ne peut s'en prémunir qu'en réussissant un jet de Physique + Volonté contre une Difficulté de 20.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1536,7 +2333,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "voix, danse d'Eerie, rune",
-      "effect": "ce sort invoque de petites créatures immatérielles et spectrales difficiles à fixer. Elles donnent une information vague avec (1 + NR) éléments de précision. Elles ont tendance à parler par comptine ou par chant."
+      "effect": "ce sort invoque de petites créatures immatérielles et spectrales difficiles à fixer. Elles donnent une information vague avec (1 + NR) éléments de précision. Elles ont tendance à parler par comptine ou par chant.",
+      "inGameEffect": "Les créatures invoquées donnent une information vague, avec (1 + NR) éléments de précision.",
+      "sensoryEffect": "De petites créatures immatérielles et spectrales, difficiles à fixer, ont tendance à parler par comptine ou par chant.",
+      "tags": [
+        "detection",
+        "summoning",
+        "exploration"
+      ]
     }
   },
   {
@@ -1552,7 +2356,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "trois gros grelots, rune de confiance",
-      "effect": "le mage enchante des grelots pendant (1 + NR) jours qui détectent le danger et l'avertissent par un tintement au timbre particulier."
+      "effect": "le mage enchante des grelots pendant (1 + NR) jours qui détectent le danger et l'avertissent par un tintement au timbre particulier.",
+      "inGameEffect": "Les grelots enchantés détectent le danger et en avertissent le porteur.",
+      "sensoryEffect": "Les grelots avertissent par un tintement au timbre particulier.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "detection",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -1568,7 +2381,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "heaume, rune de rêve, coiffure hirsute",
-      "effect": "ce sort permet à la personne qui porte le heaume enchanté par le mage de percevoir les auras de (2 + NR) personnes à la fois. La couleur des auras permet de déterminer l'état d'esprit de ces personnes. L'enchantement dure une semaine."
+      "effect": "ce sort permet à la personne qui porte le heaume enchanté par le mage de percevoir les auras de (2 + NR) personnes à la fois. La couleur des auras permet de déterminer l'état d'esprit de ces personnes. L'enchantement dure une semaine.",
+      "inGameEffect": "Le porteur du heaume perçoit les auras de (2 + NR) personnes à la fois. La couleur des auras permet de déterminer leur état d'esprit.",
+      "duration": "1",
+      "durationUnit": "week",
+      "targets": "2 + NR",
+      "tags": [
+        "detection",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -1584,7 +2406,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "rune du sommeil, farine, voix fluette",
-      "effect": "ce sort crée une dose de poudre qui, une fois ingérée, permet au mage de bénéficier d'un bonus de +5 au lancement d'un sort, une fois par jour. Cette poudre est efficace pendant (1 + NR) semaines. Cependant elle a un effet d'accoutumance à moins de réussir un jet de résistance de Physique + Volonté contre une Difficulté de 20 à chaque ingestion. En cas d'échec, l'accoutumance oblige le mage à consommer cette poudre une fois par jour. Si elle n'est pas consommée, le mage dort toujours mal et ne regagne que la moitié de sa Réserve de magie."
+      "effect": "ce sort crée une dose de poudre qui, une fois ingérée, permet au mage de bénéficier d'un bonus de +5 au lancement d'un sort, une fois par jour. Cette poudre est efficace pendant (1 + NR) semaines. Cependant elle a un effet d'accoutumance à moins de réussir un jet de résistance de Physique + Volonté contre une Difficulté de 20 à chaque ingestion. En cas d'échec, l'accoutumance oblige le mage à consommer cette poudre une fois par jour. Si elle n'est pas consommée, le mage dort toujours mal et ne regagne que la moitié de sa Réserve de magie.",
+      "inGameEffect": "Une dose de poudre qui, ingérée, donne un bonus de +5 au lancement d'un sort, une fois par jour. Effet d'accoutumance à moins de réussir un jet de résistance de Physique + Volonté contre une Difficulté de 20 à chaque ingestion : en cas d'échec, le mage doit en consommer une fois par jour, sans quoi il dort mal et ne regagne que la moitié de sa Réserve de magie.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "buff",
+        "creation",
+        "object"
+      ]
     }
   },
   {
@@ -1600,7 +2430,12 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de la fortune",
-      "effect": "le mage récupère immédiatement (2 + NR) Points de Chance déjà dépensés. Il ne peut en aucun cas dépasser la valeur de son Attribut Chance de cette façon. Lancer efficacement ce sort ne rapporte aucun Point de Maîtrise."
+      "effect": "le mage récupère immédiatement (2 + NR) Points de Chance déjà dépensés. Il ne peut en aucun cas dépasser la valeur de son Attribut Chance de cette façon. Lancer efficacement ce sort ne rapporte aucun Point de Maîtrise.",
+      "inGameEffect": "Le mage récupère immédiatement (2 + NR) Points de Chance déjà dépensés, sans jamais dépasser la valeur de son Attribut Chance. Lancer efficacement ce sort ne rapporte aucun Point de Maîtrise.",
+      "tags": [
+        "utility",
+        "self"
+      ]
     }
   },
   {
@@ -1616,7 +2451,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "geste cabalistique, rune de la magie",
-      "effect": "le mage distord la trame magique autour d'une cible de son choix située à moins de (5 + 5 par NR) mètres. Le coût de tous les sorts lancés par la victime ou sur elle est augmenté de 2 pendant 3 tours."
+      "effect": "le mage distord la trame magique autour d'une cible de son choix située à moins de (5 + 5 par NR) mètres. Le coût de tous les sorts lancés par la victime ou sur elle est augmenté de 2 pendant 3 tours.",
+      "inGameEffect": "Le coût de tous les sorts lancés par la victime ou sur elle est augmenté de 2. Portée de (5 + 5 par NR) mètres.",
+      "sensoryEffect": "Le mage distord la trame magique autour de sa cible.",
+      "duration": "3",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1632,7 +2476,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "bouteille cassée, papier déchiré",
-      "effect": "cette malédiction rend maladroite une personne située à moins de dix mètres, pendant (1 + NR) tours. La victime subit un malus de -2 sur tous ses jets. Le meneur de jeu est libre d'improviser des effets variés en cas d'échec critique sur une action."
+      "effect": "cette malédiction rend maladroite une personne située à moins de dix mètres, pendant (1 + NR) tours. La victime subit un malus de -2 sur tous ses jets. Le meneur de jeu est libre d'improviser des effets variés en cas d'échec critique sur une action.",
+      "inGameEffect": "La victime, située à moins de dix mètres, subit un malus de -2 sur tous ses jets. Le meneur de jeu est libre d'improviser des effets variés en cas d'échec critique sur une action.",
+      "sensoryEffect": "La malédiction rend la victime maladroite.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1648,7 +2501,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "voix somnolente, rune du sommeil, gestuelle des mains",
-      "effect": "ce sort endort une personne (ou une créature de taille humaine) située à moins de 10 mètres, à moins qu'elle ne réussisse un jet de résistance de Mental + Résistance contre une Difficulté de 15. La victime dort pendant (1 + NR) tours si on ne la secoue pas violemment."
+      "effect": "ce sort endort une personne (ou une créature de taille humaine) située à moins de 10 mètres, à moins qu'elle ne réussisse un jet de résistance de Mental + Résistance contre une Difficulté de 15. La victime dort pendant (1 + NR) tours si on ne la secoue pas violemment.",
+      "inGameEffect": "Endort une personne (ou une créature de taille humaine) située à moins de 10 mètres, à moins qu'elle ne réussisse un jet de résistance de Mental + Résistance contre une Difficulté de 15. La victime dort si on ne la secoue pas violemment.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1664,7 +2525,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 18,
       "cle": "anneau en métal précieux, rune de la magie gravée",
-      "effect": "ce sort permet d'enfermer les effets d'un sort de Magie instinctive dans un anneau. Le mage doit lancer le sort à emmagasiner 5 tours après cet enchantement et le sort ne doit pas avoir un coût en Points de Magie supérieur à 10. Pour déclencher les effets contenus, le porteur doit prononcer le mot de pouvoir choisi par le mage. Le porteur ne peut posséder qu'un seul \"Anneau de sort\" à la fois. Ce dernier reste enchanté (1 + NR) semaines et n'est utilisable qu'une seule fois avant sa désintégration."
+      "effect": "ce sort permet d'enfermer les effets d'un sort de Magie instinctive dans un anneau. Le mage doit lancer le sort à emmagasiner 5 tours après cet enchantement et le sort ne doit pas avoir un coût en Points de Magie supérieur à 10. Pour déclencher les effets contenus, le porteur doit prononcer le mot de pouvoir choisi par le mage. Le porteur ne peut posséder qu'un seul \"Anneau de sort\" à la fois. Ce dernier reste enchanté (1 + NR) semaines et n'est utilisable qu'une seule fois avant sa désintégration.",
+      "inGameEffect": "Enferme les effets d'un sort de Magie instinctive dans un anneau. Le mage doit lancer le sort à emmagasiner 5 tours après cet enchantement, et ce sort ne doit pas coûter plus de 10 Points de Magie. Pour déclencher les effets contenus, le porteur prononce le mot de pouvoir choisi par le mage. Il ne peut posséder qu'un seul « Anneau de sort » à la fois ; l'anneau n'est utilisable qu'une seule fois avant sa désintégration.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "creation",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -1680,7 +2549,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "rune de chance, posture tourbillonnante, voix exaltée",
-      "effect": "ce sort influe sur toutes les actions entreprises par le mage ou une cible de son choix pendant (5 + NR) tours. Le sujet bénéficie d'un bonus de +5 à ses jets d'attaque et d'un bonus de +10 aux dommages de base d'une arme qu'il portait à la main au moment du lancement de ce sort. De plus, le coût des sorts qu'il lance est divisé par deux."
+      "effect": "ce sort influe sur toutes les actions entreprises par le mage ou une cible de son choix pendant (5 + NR) tours. Le sujet bénéficie d'un bonus de +5 à ses jets d'attaque et d'un bonus de +10 aux dommages de base d'une arme qu'il portait à la main au moment du lancement de ce sort. De plus, le coût des sorts qu'il lance est divisé par deux.",
+      "inGameEffect": "Le mage ou une cible de son choix bénéficie d'un bonus de +5 à ses jets d'attaque, d'un bonus de +10 aux dommages de base d'une arme qu'il tenait en main au lancement du sort, et voit le coût de ses sorts divisé par deux.",
+      "duration": "5 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -1696,7 +2573,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "voix douce, rune du rêve, gestuelle berçante",
-      "effect": "ce sort ouvre une porte sur un lieu de manière aléatoire (multitude de lieux possibles) pendant (1 + NR) tours. Cette destination peut être dangereuse. Utilisé en combat, ce sort permet aussi de se débarrasser d'un adversaire qui charge durant le laps de temps où la faille est ouverte. Cependant, il est possible pour l'adversaire d'effectuer un jet d'esquive pour ne pas s'y engouffrer, mais avec une Difficulté de +5."
+      "effect": "ce sort ouvre une porte sur un lieu de manière aléatoire (multitude de lieux possibles) pendant (1 + NR) tours. Cette destination peut être dangereuse. Utilisé en combat, ce sort permet aussi de se débarrasser d'un adversaire qui charge durant le laps de temps où la faille est ouverte. Cependant, il est possible pour l'adversaire d'effectuer un jet d'esquive pour ne pas s'y engouffrer, mais avec une Difficulté de +5.",
+      "inGameEffect": "Ouvre une porte sur un lieu aléatoire parmi une multitude de destinations possibles, qui peut être dangereuse. En combat, permet de se débarrasser d'un adversaire qui charge pendant que la faille est ouverte ; celui-ci peut tenter un jet d'esquive pour ne pas s'y engouffrer, avec une Difficulté de +5.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "movement",
+        "combat"
+      ]
     }
   },
   {
@@ -1712,7 +2597,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "bâton, rune de rêve, gestuelle de remplissage",
-      "effect": "le bâton enchanté par ce sort dispose d'une Réserve de magie de 15 points que le mage peut utiliser à sa guise pour lancer ses sorts. L'enchantement dure (1 + NR) semaines et ne peut être utilisé qu'une seule fois sur un même bâton. Cette Réserve ne se régénère pas avec le temps et ne peut en aucun cas être reconstituée. Une fois la durée du sort écoulée, le bâton se désagrège en un nuage de poussières argentées qui se dissipe rapidement."
+      "effect": "le bâton enchanté par ce sort dispose d'une Réserve de magie de 15 points que le mage peut utiliser à sa guise pour lancer ses sorts. L'enchantement dure (1 + NR) semaines et ne peut être utilisé qu'une seule fois sur un même bâton. Cette Réserve ne se régénère pas avec le temps et ne peut en aucun cas être reconstituée. Une fois la durée du sort écoulée, le bâton se désagrège en un nuage de poussières argentées qui se dissipe rapidement.",
+      "inGameEffect": "Le bâton enchanté dispose d'une Réserve de magie de 15 points que le mage utilise à sa guise pour lancer ses sorts. Cette Réserve ne se régénère pas et ne peut en aucun cas être reconstituée. Le sort ne peut être utilisé qu'une seule fois sur un même bâton.",
+      "sensoryEffect": "Une fois la durée écoulée, le bâton se désagrège en un nuage de poussières argentées qui se dissipe rapidement.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "creation",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -1728,7 +2622,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "rune, danse du vent, prière à Szyl",
-      "effect": "ce sort crée pendant (10 + 10 par NR) minutes des ailes qui se déploient dans le dos du mage. Il peut alors s'envoler et se déplacer à la vitesse d'une course moyenne. Toutefois, il ne peut exécuter que des figures simples et en aucun cas recourir à la magie en vol. Ces ailes encaissent les dommages comme n'importe quelle autre partie du corps du mage. D'une envergure de trois mètres, elles ne sont pas aisées à dissimuler et ne permettent pas le port d'une armure normale."
+      "effect": "ce sort crée pendant (10 + 10 par NR) minutes des ailes qui se déploient dans le dos du mage. Il peut alors s'envoler et se déplacer à la vitesse d'une course moyenne. Toutefois, il ne peut exécuter que des figures simples et en aucun cas recourir à la magie en vol. Ces ailes encaissent les dommages comme n'importe quelle autre partie du corps du mage. D'une envergure de trois mètres, elles ne sont pas aisées à dissimuler et ne permettent pas le port d'une armure normale.",
+      "inGameEffect": "Le mage s'envole et se déplace à la vitesse d'une course moyenne. Il ne peut exécuter que des figures simples et ne peut en aucun cas recourir à la magie en vol. Les ailes encaissent les dommages comme n'importe quelle autre partie de son corps ; d'une envergure de trois mètres, elles ne sont pas aisées à dissimuler et ne permettent pas le port d'une armure normale.",
+      "sensoryEffect": "Des ailes se déploient dans le dos du mage.",
+      "duration": "10 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "movement",
+        "self",
+        "exploration"
+      ]
     }
   },
   {
@@ -1744,7 +2647,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de vitesse, saut à pieds joints",
-      "effect": "pendant 3 tours, ce sort permet au mage de faire des bonds impressionnants de (5 + NR) mètres dans n'importe quelle direction et d'atterrir sans dommages."
+      "effect": "pendant 3 tours, ce sort permet au mage de faire des bonds impressionnants de (5 + NR) mètres dans n'importe quelle direction et d'atterrir sans dommages.",
+      "inGameEffect": "Le mage fait des bonds de (5 + NR) mètres dans n'importe quelle direction et atterrit sans dommages.",
+      "duration": "3",
+      "durationUnit": "round",
+      "tags": [
+        "movement",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -1760,7 +2671,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de vitesse, mouvements très vifs et saccadés",
-      "effect": "ce sort augmente la vivacité du mage pendant (1 + NR) tours. Cette vitesse hors du commun réduit de 5 la Difficulté de ses jets d'esquive et augmente de 10 la Difficulté des attaques de ses adversaires."
+      "effect": "ce sort augmente la vivacité du mage pendant (1 + NR) tours. Cette vitesse hors du commun réduit de 5 la Difficulté de ses jets d'esquive et augmente de 10 la Difficulté des attaques de ses adversaires.",
+      "inGameEffect": "Réduit de 5 la Difficulté des jets d'esquive du mage et augmente de 10 la Difficulté des attaques de ses adversaires.",
+      "sensoryEffect": "La vivacité du mage devient hors du commun.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -1776,7 +2696,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "flèches simples, runes, plumes pour l'empennage",
-      "effect": "ce sort enchante vingt flèches pendant (1 + NR) jours et leur donne un bonus de +5 aux dommages de base."
+      "effect": "ce sort enchante vingt flèches pendant (1 + NR) jours et leur donne un bonus de +5 aux dommages de base.",
+      "inGameEffect": "Enchante vingt flèches et leur donne un bonus de +5 aux dommages de base.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -1792,7 +2720,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "paire de gants, rune de l'air, voix chaude, sentiment de joie",
-      "effect": "ce sort permet au porteur des gants enchantés de bénéficier d'une adhérence semblable à celle des pattes d'une mouche. Ils permettent de rester stationnaire contre une paroi ou un plafond sans aucun jet. De plus ces gants réduisent la Difficulté des jets d'Escalade de 10. Cet enchantement dure (1 + NR) heures."
+      "effect": "ce sort permet au porteur des gants enchantés de bénéficier d'une adhérence semblable à celle des pattes d'une mouche. Ils permettent de rester stationnaire contre une paroi ou un plafond sans aucun jet. De plus ces gants réduisent la Difficulté des jets d'Escalade de 10. Cet enchantement dure (1 + NR) heures.",
+      "inGameEffect": "Le porteur des gants bénéficie d'une adhérence semblable à celle des pattes d'une mouche : il reste stationnaire contre une paroi ou un plafond sans aucun jet, et la Difficulté de ses jets d'Escalade est réduite de 10.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -1808,7 +2744,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "arme de jet, rune du vent",
-      "effect": "ce sort permet d'enchanter une arme de jet pendant (1 + NR) heures. Une fois lancée, elle reviendra dans la main de son lanceur si elle ne s'est pas plantée."
+      "effect": "ce sort permet d'enchanter une arme de jet pendant (1 + NR) heures. Une fois lancée, elle reviendra dans la main de son lanceur si elle ne s'est pas plantée.",
+      "inGameEffect": "Une fois lancée, l'arme de jet enchantée revient dans la main de son lanceur si elle ne s'est pas plantée.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -1824,7 +2768,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de l'air, mouvement brutal de l'index",
-      "effect": "le mage produit un mouvement d'air sur un objet situé à moins de (2 + NR) mètres. Il peut par exemple faire tomber un objet, lever un loquet ou toute autre action qui ne demande qu'un seul geste. La puissance de la poussée est égale à la Force du mage."
+      "effect": "le mage produit un mouvement d'air sur un objet situé à moins de (2 + NR) mètres. Il peut par exemple faire tomber un objet, lever un loquet ou toute autre action qui ne demande qu'un seul geste. La puissance de la poussée est égale à la Force du mage.",
+      "inGameEffect": "Produit un mouvement d'air sur un objet situé à moins de (2 + NR) mètres : faire tomber un objet, lever un loquet, ou toute autre action ne demandant qu'un seul geste. La puissance de la poussée est égale à la Force du mage.",
+      "tags": [
+        "utility",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -1840,7 +2790,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "rune, mouvement de main",
-      "effect": "le mage crée un mur d'air devant lui de (5 + 2 par NR) m² pendant 3 tours. Tous les projectiles qui traversent ce mur voient leurs dommages divisés par 3."
+      "effect": "le mage crée un mur d'air devant lui de (5 + 2 par NR) m² pendant 3 tours. Tous les projectiles qui traversent ce mur voient leurs dommages divisés par 3.",
+      "inGameEffect": "Mur d'air de (5 + 2 par NR) m² devant le mage. Tous les projectiles qui le traversent voient leurs dommages divisés par 3.",
+      "duration": "3",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1856,7 +2814,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de l'air, voix, danse de la légèreté",
-      "effect": "ce sort crée un coussin d'air de taille variable qui se positionne de façon à amortir la chute de (1 + NR) personnes choisies par le mage. Quelle que soit la hauteur de la chute, elles ne subissent aucun dommage. Ce sort dure 1 tour."
+      "effect": "ce sort crée un coussin d'air de taille variable qui se positionne de façon à amortir la chute de (1 + NR) personnes choisies par le mage. Quelle que soit la hauteur de la chute, elles ne subissent aucun dommage. Ce sort dure 1 tour.",
+      "inGameEffect": "Un coussin d'air de taille variable amortit la chute de (1 + NR) personnes choisies par le mage. Quelle que soit la hauteur de la chute, elles ne subissent aucun dommage.",
+      "duration": "1",
+      "durationUnit": "round",
+      "targets": "1 + NR",
+      "tags": [
+        "protection",
+        "ally",
+        "exploration"
+      ]
     }
   },
   {
@@ -1872,7 +2839,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "plateau, rune, chant vibrant",
-      "effect": "le mage enchante un plateau composé d'une matière au choix du lanceur de ce sort, qui peut supporter un poids de (200 + 100 par NR) kilos pendant un jour. Le plateau se déplace uniquement à la verticale. Les mages des vents utilisent ce sort pour atteindre certaines écoles de magie et y acheminer leur matériel."
+      "effect": "le mage enchante un plateau composé d'une matière au choix du lanceur de ce sort, qui peut supporter un poids de (200 + 100 par NR) kilos pendant un jour. Le plateau se déplace uniquement à la verticale. Les mages des vents utilisent ce sort pour atteindre certaines écoles de magie et y acheminer leur matériel.",
+      "inGameEffect": "Le plateau enchanté, composé d'une matière au choix du lanceur, supporte un poids de (200 + 100 par NR) kilos et se déplace uniquement à la verticale. Les mages des vents l'utilisent pour atteindre certaines écoles de magie et y acheminer leur matériel.",
+      "duration": "1",
+      "durationUnit": "day",
+      "tags": [
+        "movement",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -1888,7 +2863,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "posture d'écoute, rune de la connaissance tracée dans l'air, danse du vent",
-      "effect": "en invoquant la connaissance de Szyl, le mage se voit attribuer un bonus de +5 à tous ses jets d'Orientation en milieu naturel pendant (1 + NR) jours."
+      "effect": "en invoquant la connaissance de Szyl, le mage se voit attribuer un bonus de +5 à tous ses jets d'Orientation en milieu naturel pendant (1 + NR) jours.",
+      "inGameEffect": "Bonus de +5 à tous les jets d'Orientation en milieu naturel.",
+      "sensoryEffect": "Le mage invoque la connaissance de Szyl.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "self",
+        "exploration"
+      ]
     }
   },
   {
@@ -1904,7 +2888,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "voix, plume de cygne, gestuelle aérienne",
-      "effect": "ce sort permet d'augmenter la force du vent d'un degré (de vent léger à vent modéré) afin de faire avancer un voilier d'une capacité de fret de 10 m³ pendant (1 + NR) heures. La capacité de fret mise en œuvre peut être multipliée par 2, 3 ou plus, mais la durée d'effet du sort est inversement réduite."
+      "effect": "ce sort permet d'augmenter la force du vent d'un degré (de vent léger à vent modéré) afin de faire avancer un voilier d'une capacité de fret de 10 m³ pendant (1 + NR) heures. La capacité de fret mise en œuvre peut être multipliée par 2, 3 ou plus, mais la durée d'effet du sort est inversement réduite.",
+      "inGameEffect": "Augmente la force du vent d'un degré (de vent léger à vent modéré) pour faire avancer un voilier d'une capacité de fret de 10 m³. La capacité mise en œuvre peut être multipliée par 2, 3 ou plus, mais la durée d'effet du sort est réduite d'autant.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "movement",
+        "utility",
+        "exploration"
+      ]
     }
   },
   {
@@ -1920,7 +2912,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "rune, voix (hurlement)",
-      "effect": "le mage ouvre un portail sur un orage pendant (1 + NR) tours. À chaque tour, la foudre frappe une cible choisie par le mage qui subit 20 + 1D10 points de dommages. Les armures en métal n'offrent aucune protection contre la foudre, et les autres voient leur Indice de protection réduit de moitié."
+      "effect": "le mage ouvre un portail sur un orage pendant (1 + NR) tours. À chaque tour, la foudre frappe une cible choisie par le mage qui subit 20 + 1D10 points de dommages. Les armures en métal n'offrent aucune protection contre la foudre, et les autres voient leur Indice de protection réduit de moitié.",
+      "inGameEffect": "À chaque tour, la foudre frappe une cible choisie par le mage, qui subit (20 + 1D10) points de dommages. Les armures en métal n'offrent aucune protection contre la foudre ; les autres voient leur Indice de protection réduit de moitié.",
+      "sensoryEffect": "Le mage ouvre un portail sur un orage.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -1936,7 +2937,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "ficelle, rune de l'air",
-      "effect": "ce sort protège une zone de (10 + 5 par NR) m² délimitée par une ficelle pendant un jour. Toute personne tentant d'y pénétrer pour la première fois est immédiatement projetée à 2 mètres et subit 15 points de dommages. Si la ficelle est retirée, le sort prend prématurément fin."
+      "effect": "ce sort protège une zone de (10 + 5 par NR) m² délimitée par une ficelle pendant un jour. Toute personne tentant d'y pénétrer pour la première fois est immédiatement projetée à 2 mètres et subit 15 points de dommages. Si la ficelle est retirée, le sort prend prématurément fin.",
+      "inGameEffect": "Protège une zone de (10 + 5 par NR) m² délimitée par une ficelle. Toute personne tentant d'y pénétrer pour la première fois est immédiatement projetée à 2 mètres et subit 15 points de dommages. Si la ficelle est retirée, le sort prend prématurément fin.",
+      "duration": "1",
+      "durationUnit": "day",
+      "tags": [
+        "protection",
+        "debuff",
+        "area",
+        "place"
+      ]
     }
   },
   {
@@ -1952,7 +2962,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "rune, danse aérienne, voix coléreuse",
-      "effect": "le mage crée une tornade autour de lui qui a la capacité d'emporter objets, personnes et animaux d'un poids inférieur à 500 kilos. Elle occasionne à ses victimes 70 points de dommages par tour du fait des objets volant en tous sens. Pour leur échapper, il faut effectuer à chaque tour un jet d'Athlétisme ou d'Acrobatie contre une Difficulté de 25. La tornade, qui peut facilement dévaster un village entier, dure (1 + NR) tours."
+      "effect": "le mage crée une tornade autour de lui qui a la capacité d'emporter objets, personnes et animaux d'un poids inférieur à 500 kilos. Elle occasionne à ses victimes 70 points de dommages par tour du fait des objets volant en tous sens. Pour leur échapper, il faut effectuer à chaque tour un jet d'Athlétisme ou d'Acrobatie contre une Difficulté de 25. La tornade, qui peut facilement dévaster un village entier, dure (1 + NR) tours.",
+      "inGameEffect": "La tornade emporte objets, personnes et animaux d'un poids inférieur à 500 kilos et occasionne 70 points de dommages par tour à ses victimes, du fait des objets volant en tous sens. Pour lui échapper, il faut réussir chaque tour un jet d'Athlétisme ou d'Acrobatie contre une Difficulté de 25. Elle peut facilement dévaster un village entier.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -1968,7 +2986,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "une boisson, poudre d'os, chant à boire",
-      "effect": "le mage rend une boisson qu'il touche particulièrement enivrante. Celui qui en boit devient complètement ivre en quelques tours. Les victimes peuvent éviter l'ivresse en effectuant un jet de Mental + Résistance contre une Difficulté de 15. La boisson est enchantée pour (30 + 10 par NR) minutes."
+      "effect": "le mage rend une boisson qu'il touche particulièrement enivrante. Celui qui en boit devient complètement ivre en quelques tours. Les victimes peuvent éviter l'ivresse en effectuant un jet de Mental + Résistance contre une Difficulté de 15. La boisson est enchantée pour (30 + 10 par NR) minutes.",
+      "inGameEffect": "Celui qui boit la boisson enchantée devient complètement ivre en quelques tours. Les victimes peuvent éviter l'ivresse en réussissant un jet de Mental + Résistance contre une Difficulté de 15.",
+      "duration": "30 + 10 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "debuff",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -1984,7 +3010,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de l'ombre, mouchoir",
-      "effect": "ce sort permet d'enrhumer un individu que le mage désigne pendant (1 + NR) tours. La victime est alors prise d'une violente crise de toux et d'éternuements incontrôlables. La victime voit la Difficulté de toutes ses actions augmenter de 5."
+      "effect": "ce sort permet d'enrhumer un individu que le mage désigne pendant (1 + NR) tours. La victime est alors prise d'une violente crise de toux et d'éternuements incontrôlables. La victime voit la Difficulté de toutes ses actions augmenter de 5.",
+      "inGameEffect": "La victime voit la Difficulté de toutes ses actions augmenter de 5.",
+      "sensoryEffect": "La victime est prise d'une violente crise de toux et d'éternuements incontrôlables.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2000,7 +3035,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "une langue, caillou blanc",
-      "effect": "en plaçant la langue et le caillou dans la bouche d'une personne morte depuis moins de 24 heures, le mage peut poser (1 + NR) questions à la victime. Celle-ci répond par \"oui\", \"non\" ou \"je ne sais pas\", sans mentir. Ce sort ne peut être jeté qu'une seule fois sur un mort dont la bouche se fermera ensuite définitivement."
+      "effect": "en plaçant la langue et le caillou dans la bouche d'une personne morte depuis moins de 24 heures, le mage peut poser (1 + NR) questions à la victime. Celle-ci répond par \"oui\", \"non\" ou \"je ne sais pas\", sans mentir. Ce sort ne peut être jeté qu'une seule fois sur un mort dont la bouche se fermera ensuite définitivement.",
+      "inGameEffect": "Le mage pose (1 + NR) questions à une personne morte depuis moins de 24 heures, en plaçant la langue et le caillou dans sa bouche. Elle répond par « oui », « non » ou « je ne sais pas », sans mentir. Ne peut être jeté qu'une seule fois sur un mort, dont la bouche se fermera ensuite définitivement.",
+      "tags": [
+        "detection",
+        "communication",
+        "exploration"
+      ]
     }
   },
   {
@@ -2016,7 +3057,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de l'ombre, cris",
-      "effect": "ce sort permet d'effrayer pendant (1 + NR) tours une cible unique à une portée de trois fois la valeur de sa Compétence Sphère de l'Ombre en mètres. Une cible effrayée voit la Difficulté de toutes ses actions augmenter de 10, en cas d'échec d'un jet de Social + Volonté contre une Difficulté de 15."
+      "effect": "ce sort permet d'effrayer pendant (1 + NR) tours une cible unique à une portée de trois fois la valeur de sa Compétence Sphère de l'Ombre en mètres. Une cible effrayée voit la Difficulté de toutes ses actions augmenter de 10, en cas d'échec d'un jet de Social + Volonté contre une Difficulté de 15.",
+      "inGameEffect": "Une cible unique, à une portée de trois fois la valeur de la Compétence Sphère de l'Ombre en mètres, voit la Difficulté de toutes ses actions augmenter de 10 si elle échoue à un jet de Social + Volonté contre une Difficulté de 15.",
+      "sensoryEffect": "La cible est effrayée.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2032,7 +3082,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "rune de l'ombre, murmure",
-      "effect": "ce sort permet au mage de faire oublier (1 + NR) informations précises (son nom, le but de sa mission ou encore ce qu'il vient de voir) à une cible. La mémoire lui revient comme si de rien n'était au bout de (1 + NR) jours."
+      "effect": "ce sort permet au mage de faire oublier (1 + NR) informations précises (son nom, le but de sa mission ou encore ce qu'il vient de voir) à une cible. La mémoire lui revient comme si de rien n'était au bout de (1 + NR) jours.",
+      "inGameEffect": "Fait oublier (1 + NR) informations précises à une cible (son nom, le but de sa mission, ce qu'elle vient de voir). La mémoire lui revient comme si de rien n'était au bout de (1 + NR) jours.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "debuff",
+        "enemy",
+        "social"
+      ]
     }
   },
   {
@@ -2048,7 +3106,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "un voile noir, rune de l'ombre",
-      "effect": "un mur d'ombre apparaît devant le lanceur à une distance maximum de 10 mètres. Il est opaque et ne permet pas de voir ce qui se trouve de l'autre côté. Il est fixe et d'une surface de 4 m². Le mur reste en place pendant (3 + 2 par NR) tours."
+      "effect": "un mur d'ombre apparaît devant le lanceur à une distance maximum de 10 mètres. Il est opaque et ne permet pas de voir ce qui se trouve de l'autre côté. Il est fixe et d'une surface de 4 m². Le mur reste en place pendant (3 + 2 par NR) tours.",
+      "inGameEffect": "Mur fixe de 4 m², opaque, apparaissant à 10 mètres au maximum du lanceur. Il ne permet pas de voir ce qui se trouve de l'autre côté.",
+      "sensoryEffect": "Un mur d'ombre apparaît devant le lanceur.",
+      "duration": "3 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -2064,7 +3131,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "un peu d'eau souillée, rune de l'ombre",
-      "effect": "le mage ouvre une porte vers un marais nauséabond. Il fait venir un nuage de miasmes putrides qui persiste pendant cinq tours. Toutes les personnes prises à l'intérieur de son aire d'effet de (10 + 5 par NR) m² sont indisposées et cherchent à s'en éloigner. Ce sort ne cause aucun dommage. Le nuage se déplace lentement de 10 mètres par tour."
+      "effect": "le mage ouvre une porte vers un marais nauséabond. Il fait venir un nuage de miasmes putrides qui persiste pendant cinq tours. Toutes les personnes prises à l'intérieur de son aire d'effet de (10 + 5 par NR) m² sont indisposées et cherchent à s'en éloigner. Ce sort ne cause aucun dommage. Le nuage se déplace lentement de 10 mètres par tour.",
+      "inGameEffect": "Toutes les personnes prises dans l'aire d'effet de (10 + 5 par NR) m² sont indisposées et cherchent à s'en éloigner. Ne cause aucun dommage. Le nuage se déplace lentement, de 10 mètres par tour.",
+      "sensoryEffect": "Le mage ouvre une porte vers un marais nauséabond ; il en vient un nuage de miasmes putrides.",
+      "duration": "5",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -2080,7 +3156,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "danse de la folie, rune de l'ombre, cris terrifiants",
-      "effect": "la personne ciblée perd tout contrôle de ses actes pendant (10 + 2 par NR) tours. Elle attaque toute personne à sa portée et tente de les tuer. Laissée seule, elle se recroqueville sur elle-même en sanglotant, incapable d'avoir un comportement sensé. De plus, elle doit réussir un jet de résistance de Physique + Volonté contre une Difficulté de 15 pour ne pas tenter de mettre fin à ses jours. Si elle survit au sort, elle gagne définitivement un point de Volonté et devient immunisée à ce sort."
+      "effect": "la personne ciblée perd tout contrôle de ses actes pendant (10 + 2 par NR) tours. Elle attaque toute personne à sa portée et tente de les tuer. Laissée seule, elle se recroqueville sur elle-même en sanglotant, incapable d'avoir un comportement sensé. De plus, elle doit réussir un jet de résistance de Physique + Volonté contre une Difficulté de 15 pour ne pas tenter de mettre fin à ses jours. Si elle survit au sort, elle gagne définitivement un point de Volonté et devient immunisée à ce sort.",
+      "inGameEffect": "La cible perd tout contrôle de ses actes et attaque toute personne à sa portée en tentant de la tuer. Elle doit réussir un jet de résistance de Physique + Volonté contre une Difficulté de 15 pour ne pas tenter de mettre fin à ses jours. Si elle survit au sort, elle gagne définitivement un point de Volonté et devient immunisée à ce sort.",
+      "sensoryEffect": "Laissée seule, la victime se recroqueville sur elle-même en sanglotant, incapable d'avoir un comportement sensé.",
+      "duration": "10 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2096,7 +3181,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "bille noire, rune de l'ombre",
-      "effect": "ce sort permet de plonger une source de lumière à moins de 10 mètres dans l'obscurité la plus complète. Il peut s'agir d'une torche ou d'un lustre. Un globe de ténèbres entoure l'objet et reste fixé autour de la cible pendant (2 + NR) tours même s'il se déplace. Ce sort ne peut pas être lancé sur un individu."
+      "effect": "ce sort permet de plonger une source de lumière à moins de 10 mètres dans l'obscurité la plus complète. Il peut s'agir d'une torche ou d'un lustre. Un globe de ténèbres entoure l'objet et reste fixé autour de la cible pendant (2 + NR) tours même s'il se déplace. Ce sort ne peut pas être lancé sur un individu.",
+      "inGameEffect": "Plonge une source de lumière située à moins de 10 mètres (torche, lustre) dans l'obscurité la plus complète. Le globe reste fixé autour de la cible même si elle se déplace. Ne peut pas être lancé sur un individu.",
+      "sensoryEffect": "Un globe de ténèbres entoure l'objet.",
+      "duration": "2 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2112,7 +3206,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "plume noire, mèche de cheveux blancs",
-      "effect": "ce sort ouvre un portail vers le Royaume de l'Ombre à moins de 30 mètres du mage. Une nuée de petites créatures de cauchemar en sort. Elles viennent assaillir, dans un rayon de 10 mètres, (2 + NR) cibles sur ordre du mage. Elles n'infligent aucun dommage réel mais effraient tellement les victimes qu'elles ne peuvent effectuer aucune action pendant un tour à moins de réussir un jet de résistance contre la peur de Social + Volonté contre une Difficulté de 20."
+      "effect": "ce sort ouvre un portail vers le Royaume de l'Ombre à moins de 30 mètres du mage. Une nuée de petites créatures de cauchemar en sort. Elles viennent assaillir, dans un rayon de 10 mètres, (2 + NR) cibles sur ordre du mage. Elles n'infligent aucun dommage réel mais effraient tellement les victimes qu'elles ne peuvent effectuer aucune action pendant un tour à moins de réussir un jet de résistance contre la peur de Social + Volonté contre une Difficulté de 20.",
+      "inGameEffect": "Les créatures assaillent (2 + NR) cibles dans un rayon de 10 mètres, sur ordre du mage. Elles n'infligent aucun dommage réel, mais les victimes effrayées ne peuvent effectuer aucune action pendant un tour, à moins de réussir un jet de résistance contre la peur de Social + Volonté contre une Difficulté de 20.",
+      "sensoryEffect": "Un portail vers le Royaume de l'Ombre s'ouvre à moins de 30 mètres du mage ; une nuée de petites créatures de cauchemar en sort.",
+      "targets": "2 + NR",
+      "tags": [
+        "debuff",
+        "summoning",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2128,7 +3231,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "une victime à sacrifier ayant une Caractéristique plus haute que celle du lanceur, dague en os",
-      "effect": "en sacrifiant une victime humaine selon un rituel bien précis, le mage remplace pendant (1 + NR) semaines une de ses Caractéristiques au choix par celle de sa victime."
+      "effect": "en sacrifiant une victime humaine selon un rituel bien précis, le mage remplace pendant (1 + NR) semaines une de ses Caractéristiques au choix par celle de sa victime.",
+      "inGameEffect": "En sacrifiant une victime humaine selon un rituel bien précis, le mage remplace une de ses Caractéristiques au choix par celle de sa victime.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "buff",
+        "self",
+        "ritual"
+      ]
     }
   },
   {
@@ -2144,7 +3255,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "un projectile, un peu d'alcool, rune de mort tracée sur l'arme de jet",
-      "effect": "le mage enchante une arme de jet et lui donne un bonus de 2D10 sur ses dommages de base pendant (1 + NR) jours."
+      "effect": "le mage enchante une arme de jet et lui donne un bonus de 2D10 sur ses dommages de base pendant (1 + NR) jours.",
+      "inGameEffect": "L'arme de jet enchantée gagne un bonus de 2D10 sur ses dommages de base.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2160,7 +3279,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "une victime à sacrifier, le corps de la personne à ramener d'entre les morts, tatouage de la vie et de la mort sur tout le corps",
-      "effect": "en sacrifiant une victime humaine, le mage lui arrache son principe de vie puis l'insuffle à la personne qu'il veut ressusciter. L'individu ainsi ressuscité revient en parfaite santé avec tous ses souvenirs, ses Caractéristiques, ses Attributs et ses Compétences qu'il avait au moment de sa mort. Son corps, qui pouvait être en état de décomposition avancée, se recompose. L'espérance de vie du miraculé n'est que de (1 + NR) ans, date à laquelle il meurt irrémédiablement sans aucune chance d'être à nouveau relevé d'entre les morts."
+      "effect": "en sacrifiant une victime humaine, le mage lui arrache son principe de vie puis l'insuffle à la personne qu'il veut ressusciter. L'individu ainsi ressuscité revient en parfaite santé avec tous ses souvenirs, ses Caractéristiques, ses Attributs et ses Compétences qu'il avait au moment de sa mort. Son corps, qui pouvait être en état de décomposition avancée, se recompose. L'espérance de vie du miraculé n'est que de (1 + NR) ans, date à laquelle il meurt irrémédiablement sans aucune chance d'être à nouveau relevé d'entre les morts.",
+      "inGameEffect": "En sacrifiant une victime humaine, le mage lui arrache son principe de vie et l'insuffle à la personne qu'il veut ressusciter. Le ressuscité revient en parfaite santé, avec tous ses souvenirs, Caractéristiques, Attributs et Compétences au moment de sa mort. Son espérance de vie n'est que de (1 + NR) ans, date à laquelle il meurt irrémédiablement, sans aucune chance d'être à nouveau relevé d'entre les morts.",
+      "sensoryEffect": "Le corps, qui pouvait être en état de décomposition avancée, se recompose.",
+      "duration": "1 + NR",
+      "durationUnit": "year",
+      "tags": [
+        "healing",
+        "ritual"
+      ]
     }
   },
   {
@@ -2176,7 +3303,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "diamant noir, un litre de sang",
-      "effect": "le mage ouvre un portail sur les entrailles du Royaume de l'Ombre. Il en jaillit une tornade noire qui dévaste tout sur son passage pendant (1 + NR) tours. Contrôlée par le lanceur, elle se déplace à une vitesse 50 mètres par tour et a un volume d'effet de 20 m³. Sa Force est égale à deux fois la valeur de la Compétence sphère de l'Ombre du mage. La tornade inflige (Force + 2D10) points de dommage par tour à toutes les personnes se trouvant sur son passage. Une fois lancée dans la direction choisie par le lanceur du sort, cette tornade destructrice ne peut plus être redirigée de quelque manière que ce soit."
+      "effect": "le mage ouvre un portail sur les entrailles du Royaume de l'Ombre. Il en jaillit une tornade noire qui dévaste tout sur son passage pendant (1 + NR) tours. Contrôlée par le lanceur, elle se déplace à une vitesse 50 mètres par tour et a un volume d'effet de 20 m³. Sa Force est égale à deux fois la valeur de la Compétence sphère de l'Ombre du mage. La tornade inflige (Force + 2D10) points de dommage par tour à toutes les personnes se trouvant sur son passage. Une fois lancée dans la direction choisie par le lanceur du sort, cette tornade destructrice ne peut plus être redirigée de quelque manière que ce soit.",
+      "inGameEffect": "Tornade de 20 m³ contrôlée par le lanceur, se déplaçant à 50 mètres par tour. Sa Force est égale à deux fois la valeur de la Compétence Sphère de l'Ombre du mage, et elle inflige (Force + 2D10) points de dommages par tour à toutes les personnes sur son passage. Une fois lancée dans la direction choisie, elle ne peut plus être redirigée de quelque manière que ce soit.",
+      "sensoryEffect": "Le mage ouvre un portail sur les entrailles du Royaume de l'Ombre ; il en jaillit une tornade noire qui dévaste tout sur son passage.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -2192,7 +3328,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Rune des cités, claquement de doigts, éclat de miroir (consommé)",
-      "effect": "En se focalisant sur une cible à moins de 50 m, le personnage va provoquer une baisse de vigilance indétectable par la victime, mais de forte puissance. Si elle échoue à un jet de Mental+Volonté contre le score d'incantation du mage, la cible subit alors un malus de Perception de 3+2/NR (sur le jet d'incantation). Ce malus s'applique à tout jet de perception active, de Réaction ou peut être interprété par le Mj à son gré, (un bâillement prolongé qui lui fera fermer les yeux deux ou trois secondes, une rêverie passagère qui focalisera son attention sur un point du décor durant un moment...). En cas d'échec sur le jet d'Opposition, le cible prend conscience de la présence du mage de façon intuitive et sera immédiatement sur ses gardes, même si le mage est indétectable (la cible regardera dans sa direction, croira avoir entendu un bruit, pourra s'approcher avec une torche...)."
+      "effect": "En se focalisant sur une cible à moins de 50 m, le personnage va provoquer une baisse de vigilance indétectable par la victime, mais de forte puissance. Si elle échoue à un jet de Mental+Volonté contre le score d'incantation du mage, la cible subit alors un malus de Perception de 3+2/NR (sur le jet d'incantation). Ce malus s'applique à tout jet de perception active, de Réaction ou peut être interprété par le Mj à son gré, (un bâillement prolongé qui lui fera fermer les yeux deux ou trois secondes, une rêverie passagère qui focalisera son attention sur un point du décor durant un moment...). En cas d'échec sur le jet d'Opposition, le cible prend conscience de la présence du mage de façon intuitive et sera immédiatement sur ses gardes, même si le mage est indétectable (la cible regardera dans sa direction, croira avoir entendu un bruit, pourra s'approcher avec une torche...).",
+      "inGameEffect": "Cible à moins de 50 m. Si elle échoue à un jet de Mental + Volonté contre le score d'incantation du mage, elle subit un malus de Perception de (3 + 2 par NR), applicable à tout jet de perception active ou de Réaction. En cas d'échec sur le jet d'opposition, la cible prend intuitivement conscience de la présence du mage et se met immédiatement sur ses gardes, même s'il reste indétectable.",
+      "sensoryEffect": "La baisse de vigilance est indétectable par la victime : un bâillement prolongé qui lui fait fermer les yeux deux ou trois secondes, une rêverie passagère qui fixe son attention sur un point du décor.",
+      "tags": [
+        "debuff",
+        "enemy",
+        "exploration"
+      ]
     }
   },
   {
@@ -2208,7 +3351,18 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 16,
       "cle": "Position (adossé à un mur dans un coin d'ombre), rune des cités (tracée du bout du doigt), yeux fermés quelques secondes",
-      "effect": "Ce sortilège courant permet au mage de rentrer en relation avec les ombres qui peuplent les ruelles des cités. En tant qu'énergies élémentaires inertes, les ombres urbaines possèdent une sorte de conscience collective que le mage parvient à appréhender pour son propre bénéfice. Il peut ainsi s'y glisser et amoindrir l'attention que l'on voudrait lui porter en jouant sur les lois de la réalité pour inciter inconsciemment les humains alentours à ne pas s'intéresser à lui. Il obtient alors un bonus de Discrétion égal à sa Sphère des cités et peut affecter une personne en plus de lui par NR obtenu (qui doit le toucher au moment de l'incantation). Ce sort dure 5mn, puis un point de magie par tour si on souhaite le prolonger. Il ne permet pas réellement de manipuler les ombres, mais d'influencer la concentration des personnes avoisinantes. Toutefois, le mage peut décider de ne pas recourir aux ombres des rues pour se rendre insignifiant, mais au contraire pour sentir, repérer ou découvrir un élément caché ou seulement soupçonné dans le quartier où il se trouve. Il obtient un bonus égal à sa Sphère des cités pour un unique jet de Perception ou de Vie en cité destiné à voir un individu précis dans une foule, à dénicher une ruelle si étroite qu'on passe devant sans la voir ou encore improviser un chemin rapide pour contourner un obstacle ou rejoindre un lieu. Ce sort ne fonctionne que dans les villes et dans les villages d'au moins cinquante de maisons. Si la cité est un dragon de Khy sous forme élémentaire, le personnage en prend alors confusément conscience et vivra donc un échange télépathique instantané avec le dragon avant que ce dernier ne daigne lui accorder les effets de son sort. Pour le mage, cette conversation peut durer d'une à deux minutes, mais dans la réalité, elle est instantanée et indétectable. Le dragon peut évidemment choisir de ne pas se révéler à l'humain."
+      "effect": "Ce sortilège courant permet au mage de rentrer en relation avec les ombres qui peuplent les ruelles des cités. En tant qu'énergies élémentaires inertes, les ombres urbaines possèdent une sorte de conscience collective que le mage parvient à appréhender pour son propre bénéfice. Il peut ainsi s'y glisser et amoindrir l'attention que l'on voudrait lui porter en jouant sur les lois de la réalité pour inciter inconsciemment les humains alentours à ne pas s'intéresser à lui. Il obtient alors un bonus de Discrétion égal à sa Sphère des cités et peut affecter une personne en plus de lui par NR obtenu (qui doit le toucher au moment de l'incantation). Ce sort dure 5mn, puis un point de magie par tour si on souhaite le prolonger. Il ne permet pas réellement de manipuler les ombres, mais d'influencer la concentration des personnes avoisinantes. Toutefois, le mage peut décider de ne pas recourir aux ombres des rues pour se rendre insignifiant, mais au contraire pour sentir, repérer ou découvrir un élément caché ou seulement soupçonné dans le quartier où il se trouve. Il obtient un bonus égal à sa Sphère des cités pour un unique jet de Perception ou de Vie en cité destiné à voir un individu précis dans une foule, à dénicher une ruelle si étroite qu'on passe devant sans la voir ou encore improviser un chemin rapide pour contourner un obstacle ou rejoindre un lieu. Ce sort ne fonctionne que dans les villes et dans les villages d'au moins cinquante de maisons. Si la cité est un dragon de Khy sous forme élémentaire, le personnage en prend alors confusément conscience et vivra donc un échange télépathique instantané avec le dragon avant que ce dernier ne daigne lui accorder les effets de son sort. Pour le mage, cette conversation peut durer d'une à deux minutes, mais dans la réalité, elle est instantanée et indétectable. Le dragon peut évidemment choisir de ne pas se révéler à l'humain.",
+      "inGameEffect": "Bonus de Discrétion égal à la Sphère des cités, pour le mage et une personne de plus par NR (qui doit le toucher au moment de l'incantation). Dure 5 minutes, puis un point de magie par tour pour le prolonger. Au choix du mage, le sort peut au contraire servir à chercher : bonus égal à la Sphère des cités sur un unique jet de Perception ou de Vie en cité (repérer un individu dans une foule, dénicher une ruelle, improviser un chemin). Ne fonctionne que dans les villes et les villages d'au moins cinquante maisons.",
+      "sensoryEffect": "Le mage se glisse dans les ombres des ruelles et incite inconsciemment les humains alentour à ne pas s'intéresser à lui. Si la cité est un dragon de Khy sous forme élémentaire, il en prend confusément conscience et vit un échange télépathique instantané avec lui.",
+      "duration": "5",
+      "durationUnit": "minute",
+      "targets": "1 + NR",
+      "tags": [
+        "buff",
+        "detection",
+        "self",
+        "urban"
+      ]
     }
   },
   {
@@ -2224,7 +3378,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 17,
       "cle": "Un drac d'argent (lancé en l'air d'une main, rattrapé de l'autre, consommé), rune des cités, claquement de langue",
-      "effect": "En lançant ce sort, un mage peut intuitivement localiser l'une de ses connaissances au sein de la cité où il se trouve lui-même actuellement. Il importe d'obtenir un certain nombre de NR selon le degré de familiarité avec la cible : 0 pour un ami ou un compagnon régulier, 1 NR pour un individu connu de vue ou croisé à quelques reprises, 2 NR pour un homme rencontré ou aperçu une fois, etc. La possession d'un objet appartenant à la cible peut apporter un bonus direct de 1 (pour un objet usuel impersonnel comme un gobelet ou le lit de la nuit passée), 3 (pour un objet personnel commun comme une cape ou une selle) voire 5 (pour un objet très personnel comme une marque de caste, un bijou familial ou un écu de naissance dungari). Chaque NR obtenu en plus du minimum est susceptible de donner une information supplémentaire au mage."
+      "effect": "En lançant ce sort, un mage peut intuitivement localiser l'une de ses connaissances au sein de la cité où il se trouve lui-même actuellement. Il importe d'obtenir un certain nombre de NR selon le degré de familiarité avec la cible : 0 pour un ami ou un compagnon régulier, 1 NR pour un individu connu de vue ou croisé à quelques reprises, 2 NR pour un homme rencontré ou aperçu une fois, etc. La possession d'un objet appartenant à la cible peut apporter un bonus direct de 1 (pour un objet usuel impersonnel comme un gobelet ou le lit de la nuit passée), 3 (pour un objet personnel commun comme une cape ou une selle) voire 5 (pour un objet très personnel comme une marque de caste, un bijou familial ou un écu de naissance dungari). Chaque NR obtenu en plus du minimum est susceptible de donner une information supplémentaire au mage.",
+      "inGameEffect": "Localise intuitivement une connaissance dans la cité où se trouve le mage. NR minimum selon la familiarité : 0 pour un ami ou compagnon régulier, 1 pour un individu connu de vue, 2 pour un homme aperçu une seule fois. Posséder un objet de la cible donne un bonus direct de 1 (objet usuel impersonnel), 3 (objet personnel commun) ou 5 (objet très personnel). Chaque NR au-delà du minimum donne une information supplémentaire.",
+      "tags": [
+        "detection",
+        "exploration",
+        "urban"
+      ]
     }
   },
   {
@@ -2240,7 +3400,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Goutte de sang de dragon (consommée), rune des cités (servant à dessiner la rune sur la cible), sourire confiant",
-      "effect": "Parfois dévoyé dans son utilisation, ce sort est une amélioration considérable du Sourire enchanteur. Il nimbe la cible d'un charisme et d'une prestance digne d'un dragon, provoquant chez ses interlocuteurs un respect et une obéissance intuitive. Ironie du sort (ou de la magie des cités ?), plus les spectateurs auront des croyances fortes et affirmées pour les Ailés, plus ils se persuaderont de l'importance du personnage. Ils peuvent soupçonner un important citoyen voyageant incognito en Kor, se persuader qu'il est un émissaire draconique secret ou même, dans les cas les plus extrêmes, croire qu'il s'agit d'un dragon sous forme humaine qui ne juge pas utile de se déclarer (seulement si le sort fait dépasser 10 au Social du personnage). Les spectateurs se font chacun leur idée, mais s'accorderont toujours à penser que « c'est sûr, c'est un envoyé des Dragons, mais il tient à son anonymat, soyons malin et respectons son choix »... Ce sort dure une heure par point en Sphère des cités et octroie un bonus de Social égal à deux fois la Tendance Dragon de son interlocuteur. Dans le cas d'une foule, une Tendance moyenne devra être estimée par le Mj (voir à ce sujet le tableau de la page 79 selon les régions). Le personnage peut ainsi dépasser 10 aux yeux de ses cibles (et donc passer pour un dragon, ce qui est toutefois un crime majeur dans de nombreux pays...). Malheureusement, ce sort n'est efficace que sur les humains, les animaux ne ressentant pas la peur normalement due aux dragons et les Ailés perçant à jour le subterfuge d'un simple regard. De plus, il convient que le personnage tienne son rôle de façon crédible, car toute décision manifestement aberrante permettra aussitôt un jet de Mental+Perception de la part des victimes pour briser le charme. Si plus de la moitié des interlocuteurs du personnage sont persuadés du subterfuge à un même moment, le sort se dissipe brutalement, avec toutes les conséquences néfastes que l'on peut envisager..."
+      "effect": "Parfois dévoyé dans son utilisation, ce sort est une amélioration considérable du Sourire enchanteur. Il nimbe la cible d'un charisme et d'une prestance digne d'un dragon, provoquant chez ses interlocuteurs un respect et une obéissance intuitive. Ironie du sort (ou de la magie des cités ?), plus les spectateurs auront des croyances fortes et affirmées pour les Ailés, plus ils se persuaderont de l'importance du personnage. Ils peuvent soupçonner un important citoyen voyageant incognito en Kor, se persuader qu'il est un émissaire draconique secret ou même, dans les cas les plus extrêmes, croire qu'il s'agit d'un dragon sous forme humaine qui ne juge pas utile de se déclarer (seulement si le sort fait dépasser 10 au Social du personnage). Les spectateurs se font chacun leur idée, mais s'accorderont toujours à penser que « c'est sûr, c'est un envoyé des Dragons, mais il tient à son anonymat, soyons malin et respectons son choix »... Ce sort dure une heure par point en Sphère des cités et octroie un bonus de Social égal à deux fois la Tendance Dragon de son interlocuteur. Dans le cas d'une foule, une Tendance moyenne devra être estimée par le Mj (voir à ce sujet le tableau de la page 79 selon les régions). Le personnage peut ainsi dépasser 10 aux yeux de ses cibles (et donc passer pour un dragon, ce qui est toutefois un crime majeur dans de nombreux pays...). Malheureusement, ce sort n'est efficace que sur les humains, les animaux ne ressentant pas la peur normalement due aux dragons et les Ailés perçant à jour le subterfuge d'un simple regard. De plus, il convient que le personnage tienne son rôle de façon crédible, car toute décision manifestement aberrante permettra aussitôt un jet de Mental+Perception de la part des victimes pour briser le charme. Si plus de la moitié des interlocuteurs du personnage sont persuadés du subterfuge à un même moment, le sort se dissipe brutalement, avec toutes les conséquences néfastes que l'on peut envisager...",
+      "inGameEffect": "Dure une heure par point en Sphère des cités. Bonus de Social égal à deux fois la Tendance Dragon de l'interlocuteur — pour une foule, le meneur de jeu estime une Tendance moyenne. Le personnage peut ainsi dépasser 10 aux yeux de ses cibles et passer pour un dragon, ce qui est un crime majeur dans de nombreux pays. N'agit que sur les humains : les animaux ne ressentent pas la peur due aux dragons et les Ailés percent le subterfuge d'un simple regard. Toute décision manifestement aberrante autorise aussitôt un jet de Mental + Perception pour briser le charme ; si plus de la moitié des interlocuteurs sont détrompés au même moment, le sort se dissipe brutalement.",
+      "sensoryEffect": "La cible est nimbée d'un charisme et d'une prestance dignes d'un dragon, qui provoquent respect et obéissance intuitive. Les spectateurs se persuadent qu'ils ont affaire à un citoyen important voyageant incognito, à un émissaire draconique secret, voire à un dragon sous forme humaine.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "illusion",
+        "self",
+        "social"
+      ]
     }
   },
   {
@@ -2256,7 +3426,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "Robe de soie blanche, pièce saturée de vapeurs d'encens de Khy (équivalent de vingt bâtons, consommés), gouttelettes d'huile de nacre (à appliquer sur les yeux, consommées).",
-      "effect": "Difficile à lancer, ce sort nécessite souvent des préparatifs soignés ou une assistance extérieure pour être correctement mis en place. Juste avant de se réveiller ou de s'endormir, le personnage peut échapper aux lois de la physique humaine et devenir littéralement invisible pour toute la journée ou toute la nuit qui suit. Sous cette \" forme \", il ne peut ni parler, ni se faire entendre, ni user de magie, mais reste capable de toucher toute matière physique. Chacune de ses actions reste perceptible dans la réalité et peut le faire remarquer. La Difficulté du jet de Mental+Perception pour le repérer à ce moment est égale à son score obtenu lors de son jet d'incantation. Ce sort n'affecte pas les dragons des cités. Tant qu'il n'effectue aucune action susceptible de le faire repérer (bouger un objet, porter un coup, etc...), il n'est pas possible de tenter de jet. Une fois qu'une personne a perçu le personnage, elle n'est plus sensible au sort et le voit normalement. Elle ne peut par contre que le désigner approximativement à d'autres spectateurs, lesquels ne le voient toujours pas et doivent attendre une action réagissant avec la réalité pour tenter un jet. Une fois que le sort a été outrepassé par autant de spectateurs que la Tendance Homme du personnage, le charme se dissipe irrévocablement."
+      "effect": "Difficile à lancer, ce sort nécessite souvent des préparatifs soignés ou une assistance extérieure pour être correctement mis en place. Juste avant de se réveiller ou de s'endormir, le personnage peut échapper aux lois de la physique humaine et devenir littéralement invisible pour toute la journée ou toute la nuit qui suit. Sous cette \" forme \", il ne peut ni parler, ni se faire entendre, ni user de magie, mais reste capable de toucher toute matière physique. Chacune de ses actions reste perceptible dans la réalité et peut le faire remarquer. La Difficulté du jet de Mental+Perception pour le repérer à ce moment est égale à son score obtenu lors de son jet d'incantation. Ce sort n'affecte pas les dragons des cités. Tant qu'il n'effectue aucune action susceptible de le faire repérer (bouger un objet, porter un coup, etc...), il n'est pas possible de tenter de jet. Une fois qu'une personne a perçu le personnage, elle n'est plus sensible au sort et le voit normalement. Elle ne peut par contre que le désigner approximativement à d'autres spectateurs, lesquels ne le voient toujours pas et doivent attendre une action réagissant avec la réalité pour tenter un jet. Une fois que le sort a été outrepassé par autant de spectateurs que la Tendance Homme du personnage, le charme se dissipe irrévocablement.",
+      "inGameEffect": "Lancé juste avant de s'endormir ou de se réveiller, rend le mage invisible pour toute la journée ou toute la nuit qui suit. Sous cette forme il ne peut ni parler, ni se faire entendre, ni user de magie, mais peut toucher la matière physique. La Difficulté du jet de Mental + Perception pour le repérer est égale à son score d'incantation, et n'est tentable qu'après une action perceptible (bouger un objet, porter un coup). Qui l'a perçu une fois le voit normalement ensuite, et ne peut le désigner aux autres qu'approximativement. Le charme se dissipe irrévocablement une fois outrepassé par autant de spectateurs que la Tendance Homme du mage. N'affecte pas les dragons des cités.",
+      "tags": [
+        "illusion",
+        "self",
+        "exploration",
+        "urban"
+      ]
     }
   },
   {
@@ -2272,7 +3449,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "Bague de Bonne qualité, lumière de Khyméra, sentiment d'amour (ressenti par quelqu'un d'autre que le mage durant tout l'enchantement)",
-      "effect": "Ce sortilège permet d'enchanter une bague – ou par extension, tout bijou discret pouvant être offert – pour permettre à son porteur et à son enchanteur d'établir une forme singulière de communication empathique. En lançant ce sortilège, le mage doit se concentrer sur la personne à qui il souhaite l'offrir, car l'enchantement est à destination unique et ne fonctionne que si l'objet est porté par le bénéficiaire désigné au moment de l'incantation. Par la suite et durant un Cycle, en réussissant un jet de Mental + Empathie + Tendance Homme contre une Difficulté de 20, le porteur de l'objet peut provoquer une relation télépathique à double sens pour entendre l'enchanteur de l'objet et parler librement avec lui pendant 1 + 1/NR minutes (calculés sur le jet de Mental+Empathie). De son côté, l'enchanteur peut faire de même quand il le désire, mais la Difficulté de son propre jet de Mental + Empathie + Tendance Homme est de 15. Cette liaison peut être utilisée trois fois par jour, mais s'il le désire, le porteur du bijou peut l'activer artificiellement en dépensant cinq de ses points de magie par contact. Le Mj reste libre de modifier ces Difficultés en fonction de la distance et des circonstances dans lesquelles les jets sont effectués – stress extrême, fatigue, proximité, disputes, etc."
+      "effect": "Ce sortilège permet d'enchanter une bague – ou par extension, tout bijou discret pouvant être offert – pour permettre à son porteur et à son enchanteur d'établir une forme singulière de communication empathique. En lançant ce sortilège, le mage doit se concentrer sur la personne à qui il souhaite l'offrir, car l'enchantement est à destination unique et ne fonctionne que si l'objet est porté par le bénéficiaire désigné au moment de l'incantation. Par la suite et durant un Cycle, en réussissant un jet de Mental + Empathie + Tendance Homme contre une Difficulté de 20, le porteur de l'objet peut provoquer une relation télépathique à double sens pour entendre l'enchanteur de l'objet et parler librement avec lui pendant 1 + 1/NR minutes (calculés sur le jet de Mental+Empathie). De son côté, l'enchanteur peut faire de même quand il le désire, mais la Difficulté de son propre jet de Mental + Empathie + Tendance Homme est de 15. Cette liaison peut être utilisée trois fois par jour, mais s'il le désire, le porteur du bijou peut l'activer artificiellement en dépensant cinq de ses points de magie par contact. Le Mj reste libre de modifier ces Difficultés en fonction de la distance et des circonstances dans lesquelles les jets sont effectués – stress extrême, fatigue, proximité, disputes, etc.",
+      "inGameEffect": "Enchante une bague — ou tout bijou discret pouvant être offert — à destination unique : ne fonctionne que porté par le bénéficiaire désigné au moment de l'incantation. Le porteur ouvre une liaison télépathique à double sens en réussissant un jet de Mental + Empathie + Tendance Homme contre une Difficulté de 20, et parle librement avec l'enchanteur pendant (1 + 1 par NR) minutes. L'enchanteur peut faire de même à volonté, sa Difficulté étant de 15. Utilisable trois fois par jour, ou davantage si le porteur dépense cinq points de magie par contact.",
+      "duration": "1",
+      "durationUnit": "cycle",
+      "tags": [
+        "communication",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -2288,7 +3473,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 22,
       "cle": "Vêtement de qualité, fil d'argent, rune de Khy",
-      "effect": "Ce sortilège extrêmement populaire a fait la gloire de nombreux artisans élémentaires et sorciers des Cités. Il permet d'ensorceler un vêtement durant un an pour lui conférer plusieurs capacités mineures très utiles en ville. En premier lieu, le porteur dispose d'un bonus de +1 en Social. Il peut de plus changer les motifs et les couleurs de son vêtement une fois par jour, ce qui permet de changer de tenue en ne possédant qu'un habit. Il confère au vêtement une solidité particulière qui lui octroie un indice de protection de 3. La résistance surnaturelle du vêtement fait disparaître toute déchirure ou accroc en une nuit, ce qui régénère les points d'armure et évite tout entretien actif. Enfin, les poches du vêtement communiquent magiquement entre elles et permettent de tirer de sa poche gauche un objet placé dans la poche droite ou encore d'accéder à sa ceinture ou sa tunique sans avoir à retirer sa robe. Dans ces circonstances, un voleur à la tire qui tenterait de faire les poches au mage subirait un malus égal à la Sphère des cités du lanceur. Ce sort est une exception, car il peut être lancé par un artisan élémentaire des cités par un jet de Manuel+Artisanat élémentaire contre la Difficulté du sort et la dépense normale des 19 points de magie (par contre, un artisan élémentaire ne peut disposer de bonus dus à des sites élémentaires ou des Eéries, voir p.206). Un artisan élémentaire aura besoin des mêmes Clés qu'un mage, même s'il s'en servira différemment (au lieu de coudre et d'enchanter, il fusionnera les matériaux et sculptera la rune dans le tissu). Les robes de ce type font l'objet d'un commerce hautement spécialisé uniquement géré par les Négociants de la caste (III° Statut). Leur prix varie en général entre (300 à 500 x Sphère ou Artisanat élémentaire du mage) df. Ils sont indétectables en tant que tel."
+      "effect": "Ce sortilège extrêmement populaire a fait la gloire de nombreux artisans élémentaires et sorciers des Cités. Il permet d'ensorceler un vêtement durant un an pour lui conférer plusieurs capacités mineures très utiles en ville. En premier lieu, le porteur dispose d'un bonus de +1 en Social. Il peut de plus changer les motifs et les couleurs de son vêtement une fois par jour, ce qui permet de changer de tenue en ne possédant qu'un habit. Il confère au vêtement une solidité particulière qui lui octroie un indice de protection de 3. La résistance surnaturelle du vêtement fait disparaître toute déchirure ou accroc en une nuit, ce qui régénère les points d'armure et évite tout entretien actif. Enfin, les poches du vêtement communiquent magiquement entre elles et permettent de tirer de sa poche gauche un objet placé dans la poche droite ou encore d'accéder à sa ceinture ou sa tunique sans avoir à retirer sa robe. Dans ces circonstances, un voleur à la tire qui tenterait de faire les poches au mage subirait un malus égal à la Sphère des cités du lanceur. Ce sort est une exception, car il peut être lancé par un artisan élémentaire des cités par un jet de Manuel+Artisanat élémentaire contre la Difficulté du sort et la dépense normale des 19 points de magie (par contre, un artisan élémentaire ne peut disposer de bonus dus à des sites élémentaires ou des Eéries, voir p.206). Un artisan élémentaire aura besoin des mêmes Clés qu'un mage, même s'il s'en servira différemment (au lieu de coudre et d'enchanter, il fusionnera les matériaux et sculptera la rune dans le tissu). Les robes de ce type font l'objet d'un commerce hautement spécialisé uniquement géré par les Négociants de la caste (III° Statut). Leur prix varie en général entre (300 à 500 x Sphère ou Artisanat élémentaire du mage) df. Ils sont indétectables en tant que tel.",
+      "inGameEffect": "Ensorcelle un vêtement pour un an : +1 en Social ; motifs et couleurs changeables une fois par jour ; indice de protection de 3, dont les points se régénèrent en une nuit, toute déchirure disparaissant sans entretien ; les poches communiquent magiquement entre elles, et un voleur à la tire subit un malus égal à la Sphère des cités du lanceur. Exception : peut être lancé par un artisan élémentaire des cités sur un jet de Manuel + Artisanat élémentaire contre la Difficulté du sort, sans bonus de site élémentaire ni d'Eérie. Indétectable en tant qu'objet enchanté ; prix courant de 300 à 500 × Sphère (ou Artisanat élémentaire) df.",
+      "duration": "1",
+      "durationUnit": "year",
+      "tags": [
+        "protection",
+        "buff",
+        "object",
+        "urban"
+      ]
     }
   },
   {
@@ -2304,7 +3498,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 21,
       "cle": "Un élément d'architecture de Bonne qualité, huile élémentaire spéciale (poudre d'argent et de nacre mélangées à du Sang de Moryagorn), rune de Khy (tracée avec l'huile élémentaire)",
-      "effect": "Ce sortilège très puissant réservé à de rares mages des cités, permet de créer un portail entre deux endroits distincts d'une cité. Ainsi, après avoir enchanté une porte, une statue, l'angle d'un bâtiment, le personnage peut choisir un autre élément (qu'il a au moins vu une fois personnellement), situé dans la même cité, où il se transportera instantanément dès qu'il entrera en contact avec le premier lieu enchanté. La distance maximale entre les deux sites ne peut dépasser 100 fois le niveau de (Sphère des cités + Statut) du personnage en mètres. Ainsi, un mage de Statut IV possédant 8 en Sphère des cités pourra choisir deux lieux distants de 1.200 mètres au maximum. Le personnage \" disparaît \" dès qu'il touche l'un des deux sites et se retrouve instantanément à l'autre extrémité. Si la cité est un enfant de Khy sous forme élémentaire, l'esprit du personnage peut se retrouver confronté à celui du dragon lors de son voyage qui, s'il reste immédiat, peut se prolonger dans ce monde immatériel qui sépare les deux portes (relire à ce sujet le sort Ombre des ruelles \"). Le personnage doit réussir un jet de Magie instinctive + Sphère des Cités contre une Difficulté de 20 pour réussir à se transporter. Si le jet est raté, il ne parvient pas à se glisser dans la faille magique constituée par la porte. Il ne peut alors pas tenter de réutiliser le Seuil durant dix minutes. Il est possible d'emmener par le Seuil des êtres possédant au moins 1 en Tendance Homme. Cette possibilité est définie à la création du Seuil, à raison d'une personne par NR sur le jet d'incantation. Chaque passage demande un point de magie du mage (plus un par allié emporté). Le seuil reste ouvert jusqu'au prochain lever ou coucher du soleil. Lancer ce sort est une tentative de gauchir la réalité en fonction de la force d'esprit du mage. Si le sort est manqué, un Seuil est toutefois créé sans que le mage se doute d'une anomalie. Ce n'est que lors du transport que des complications peuvent apparaître, comme une dépense plus importante de points de magie, un décalage avec le point d'arrivé prévu, un délai de transport de plusieurs minutes, etc... Dans tous les cas, ces désagréments sont gênants sans être très dangereux (à discrétion du Mj). Par contre, en cas d'échec critique, le Mj est libre d'inventer toutes sortes de complications réellement dangereuses (relire à ce propos les dangers liés aux voyages Eériques dans La Colère des Dragons, p.15, qui s'ils ne sont pas directement applicables, donnent de bonnes inspirations)."
+      "effect": "Ce sortilège très puissant réservé à de rares mages des cités, permet de créer un portail entre deux endroits distincts d'une cité. Ainsi, après avoir enchanté une porte, une statue, l'angle d'un bâtiment, le personnage peut choisir un autre élément (qu'il a au moins vu une fois personnellement), situé dans la même cité, où il se transportera instantanément dès qu'il entrera en contact avec le premier lieu enchanté. La distance maximale entre les deux sites ne peut dépasser 100 fois le niveau de (Sphère des cités + Statut) du personnage en mètres. Ainsi, un mage de Statut IV possédant 8 en Sphère des cités pourra choisir deux lieux distants de 1.200 mètres au maximum. Le personnage \" disparaît \" dès qu'il touche l'un des deux sites et se retrouve instantanément à l'autre extrémité. Si la cité est un enfant de Khy sous forme élémentaire, l'esprit du personnage peut se retrouver confronté à celui du dragon lors de son voyage qui, s'il reste immédiat, peut se prolonger dans ce monde immatériel qui sépare les deux portes (relire à ce sujet le sort Ombre des ruelles \"). Le personnage doit réussir un jet de Magie instinctive + Sphère des Cités contre une Difficulté de 20 pour réussir à se transporter. Si le jet est raté, il ne parvient pas à se glisser dans la faille magique constituée par la porte. Il ne peut alors pas tenter de réutiliser le Seuil durant dix minutes. Il est possible d'emmener par le Seuil des êtres possédant au moins 1 en Tendance Homme. Cette possibilité est définie à la création du Seuil, à raison d'une personne par NR sur le jet d'incantation. Chaque passage demande un point de magie du mage (plus un par allié emporté). Le seuil reste ouvert jusqu'au prochain lever ou coucher du soleil. Lancer ce sort est une tentative de gauchir la réalité en fonction de la force d'esprit du mage. Si le sort est manqué, un Seuil est toutefois créé sans que le mage se doute d'une anomalie. Ce n'est que lors du transport que des complications peuvent apparaître, comme une dépense plus importante de points de magie, un décalage avec le point d'arrivé prévu, un délai de transport de plusieurs minutes, etc... Dans tous les cas, ces désagréments sont gênants sans être très dangereux (à discrétion du Mj). Par contre, en cas d'échec critique, le Mj est libre d'inventer toutes sortes de complications réellement dangereuses (relire à ce propos les dangers liés aux voyages Eériques dans La Colère des Dragons, p.15, qui s'ils ne sont pas directement applicables, donnent de bonnes inspirations).",
+      "inGameEffect": "Crée un portail entre deux lieux d'une même cité — le second devant avoir été vu au moins une fois. Distance maximale de 100 × (Sphère des cités + Statut) mètres. Le passage demande un jet de Magie instinctive + Sphère des Cités contre une Difficulté de 20 ; échoué, le Seuil ne peut être retenté avant dix minutes. Peut emmener des êtres ayant au moins 1 en Tendance Homme, à raison d'une personne par NR au lancement, et coûte un point de magie par passage (plus un par allié). Reste ouvert jusqu'au prochain lever ou coucher du soleil. Un sort manqué crée quand même un Seuil sans que le mage s'en doute : les complications n'apparaissent qu'au transport (dépense accrue, décalage du point d'arrivée, délai de plusieurs minutes) et restent gênantes sans être dangereuses, sauf échec critique.",
+      "sensoryEffect": "Le personnage disparaît dès qu'il touche l'un des deux sites et se retrouve instantanément à l'autre. Si la cité est un enfant de Khy sous forme élémentaire, son esprit peut croiser celui du dragon dans le monde immatériel qui sépare les deux portes.",
+      "targets": "NR",
+      "tags": [
+        "movement",
+        "place",
+        "urban"
+      ]
     }
   },
   {
@@ -2320,7 +3522,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Poudre de souffre (consommée), voix crépitante, expiration mesurée",
-      "effect": "Le mage peut générer à la surface de son corps une petite flamme inoffensive dont il peut contrôler l'intensité durant 1+1/NR tours. Contrairement au Souffle ardent, ce sort ne provoque pas de dommages notables mais peut servir à calciner de petits objets ou à travailler un matériau car il est très précis et délicat."
+      "effect": "Le mage peut générer à la surface de son corps une petite flamme inoffensive dont il peut contrôler l'intensité durant 1+1/NR tours. Contrairement au Souffle ardent, ce sort ne provoque pas de dommages notables mais peut servir à calciner de petits objets ou à travailler un matériau car il est très précis et délicat.",
+      "inGameEffect": "Génère à la surface du corps du mage une petite flamme inoffensive dont il contrôle l'intensité. Ne provoque pas de dommages notables, mais sert à calciner de petits objets ou à travailler un matériau, étant très précise et délicate.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "utility",
+        "self",
+        "exploration"
+      ]
     }
   },
   {
@@ -2336,7 +3546,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Respiration bloquée, claquement violent des mains, regard fixe",
-      "effect": "Une explosion est provoquée juste à côté des oreilles d'une cible distante de moins de trente mètres. Ce sort peut toucher 1+1/NR cibles et impose un jet de Mental+Résistance contre une Difficulté de 20. S'il est manqué, la ou les cibles sont assourdies par le bruit et perdent toutes leurs actions pendant 2 tours. Si la ou les cibles ratent leur jet de façon Critique, elles deviennent complètement sourdes pour une journée."
+      "effect": "Une explosion est provoquée juste à côté des oreilles d'une cible distante de moins de trente mètres. Ce sort peut toucher 1+1/NR cibles et impose un jet de Mental+Résistance contre une Difficulté de 20. S'il est manqué, la ou les cibles sont assourdies par le bruit et perdent toutes leurs actions pendant 2 tours. Si la ou les cibles ratent leur jet de façon Critique, elles deviennent complètement sourdes pour une journée.",
+      "inGameEffect": "Provoque une explosion juste à côté des oreilles de (1 + 1 par NR) cibles distantes de moins de trente mètres. Chacune doit réussir un jet de Mental + Résistance contre une Difficulté de 20 ; manqué, elle est assourdie et perd toutes ses actions pendant 2 tours. Sur un échec critique, elle devient complètement sourde pour une journée.",
+      "duration": "2",
+      "durationUnit": "round",
+      "targets": "1 + 1 par NR",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2352,7 +3571,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Rune de la foudre, kata de la fureur des braises (Corps à corps Diff.15), regard vitreux",
-      "effect": "Ce sort augmente la vitesse du magicien, qui perçoit alors les mouvements de son entourage au ralenti. Cette altération lui octroie un bonus de +3 sur tous ses jets de défense physique (esquive, parade). De plus, il dispose d'un bonus de +3 sur tous ses jets d'attaque. Ce sort n'influe pas sur le nombre d'actions ou la vitesse de déplacement du mage et dure 1+1/NR tours."
+      "effect": "Ce sort augmente la vitesse du magicien, qui perçoit alors les mouvements de son entourage au ralenti. Cette altération lui octroie un bonus de +3 sur tous ses jets de défense physique (esquive, parade). De plus, il dispose d'un bonus de +3 sur tous ses jets d'attaque. Ce sort n'influe pas sur le nombre d'actions ou la vitesse de déplacement du mage et dure 1+1/NR tours.",
+      "inGameEffect": "Bonus de +3 sur tous les jets de défense physique — esquive, parade — et de +3 sur tous les jets d'attaque. N'influe ni sur le nombre d'actions, ni sur la vitesse de déplacement du mage.",
+      "sensoryEffect": "Le magicien perçoit les mouvements de son entourage au ralenti.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -2368,7 +3596,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Runes de la lumière et des volcans entremêlées (Don artistique: Dessin de Diff.15), danse de la salamandre, murmure lancinant",
-      "effect": "Le magicien choisit une cible à moins de 20 mètres et l'hypnotise par le mouvement d'une aura d'étincelles qui danse autour de lui. La victime doit réussir un jet d'Opposition de Mental+Volonté contre le score d'incantation du mage pour résister. Dans le cas contraire, elle se perd dans la contemplation des effets de lumière qui jaillissent des mains du magicien. Deux de ses dés d'Initiative (au choix, mais désignés avant le lancer) subissent alors un malus de -5 pendant 1+1/NR tours. Les dés dont le score tombe à 0 ou moins sont perdus et inutilisables."
+      "effect": "Le magicien choisit une cible à moins de 20 mètres et l'hypnotise par le mouvement d'une aura d'étincelles qui danse autour de lui. La victime doit réussir un jet d'Opposition de Mental+Volonté contre le score d'incantation du mage pour résister. Dans le cas contraire, elle se perd dans la contemplation des effets de lumière qui jaillissent des mains du magicien. Deux de ses dés d'Initiative (au choix, mais désignés avant le lancer) subissent alors un malus de -5 pendant 1+1/NR tours. Les dés dont le score tombe à 0 ou moins sont perdus et inutilisables.",
+      "inGameEffect": "Cible à moins de 20 mètres, qui doit réussir un jet d'opposition de Mental + Volonté contre le score d'incantation pour résister. Sinon, deux de ses dés d'Initiative — au choix, mais désignés avant le lancer — subissent un malus de -5. Les dés dont le score tombe à 0 ou moins sont perdus et inutilisables.",
+      "sensoryEffect": "Une aura d'étincelles danse autour du magicien ; la victime se perd dans la contemplation des effets de lumière qui jaillissent de ses mains.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2384,7 +3621,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "Limaille de cuivre (consommée), position (bras croisés sur les oreilles, puis mains descendant vivement le long des flancs), mélopée sourde.",
-      "effect": "Le magicien choisit une cible à moins de 10 m et lance la limaille de cuivre dans sa direction. Il se crée alors une cascade jaillissant du néant qui recouvre la cible de minuscules étincelles virevoltantes. Elles lui confèrent alors un bonus de protection physique de +8, dont l'indice est cumulable avec d'autres armures ou sorts de protection. Les étincelles scintillent pendant 4 +1/NR tours avant de disparaître."
+      "effect": "Le magicien choisit une cible à moins de 10 m et lance la limaille de cuivre dans sa direction. Il se crée alors une cascade jaillissant du néant qui recouvre la cible de minuscules étincelles virevoltantes. Elles lui confèrent alors un bonus de protection physique de +8, dont l'indice est cumulable avec d'autres armures ou sorts de protection. Les étincelles scintillent pendant 4 +1/NR tours avant de disparaître.",
+      "inGameEffect": "Confère à une cible située à moins de 10 m un bonus de protection physique de +8, cumulable avec d'autres armures ou sorts de protection.",
+      "sensoryEffect": "Une cascade jaillie du néant recouvre la cible de minuscules étincelles virevoltantes, qui scintillent avant de disparaître.",
+      "duration": "4 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -2400,7 +3646,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "Bille de verre rouge (consommée), position (en tailleur, mains croisées sur les yeux), quelques braises où poser la bille de verre (consommées)",
-      "effect": "Le magicien utilise toutes les sources de lumière à moins de 50 mètres (feu de camp, torche) pour y projeter ses sens et ainsi voir et entendre pendant 5+1/NR minutes. Il ne peut projeter ses sens que dans une seule source à la fois. Si le sort est manqué, le mage entrouvre brièvement une fissure dans la trame de la réalité entre lui et le feu le plus proche, s'infligeant 10 points de dommages par brûlure. De même, si la source dans laquelle il se trouve est brutalement éteinte, le sort est brisé et le mage subit cette fois 20 points de dommages psychiques à cause de la rupture."
+      "effect": "Le magicien utilise toutes les sources de lumière à moins de 50 mètres (feu de camp, torche) pour y projeter ses sens et ainsi voir et entendre pendant 5+1/NR minutes. Il ne peut projeter ses sens que dans une seule source à la fois. Si le sort est manqué, le mage entrouvre brièvement une fissure dans la trame de la réalité entre lui et le feu le plus proche, s'infligeant 10 points de dommages par brûlure. De même, si la source dans laquelle il se trouve est brutalement éteinte, le sort est brisé et le mage subit cette fois 20 points de dommages psychiques à cause de la rupture.",
+      "inGameEffect": "Projette les sens du mage dans une source de lumière située à moins de 50 mètres — feu de camp, torche — pour y voir et entendre. Une seule source à la fois. Si le sort est manqué, le mage entrouvre une fissure dans la trame de la réalité entre lui et le feu le plus proche et subit 10 points de dommages par brûlure. Si la source où il se trouve est brutalement éteinte, le sort est brisé et il subit 20 points de dommages psychiques dus à la rupture.",
+      "duration": "5 + 1 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "detection",
+        "exploration"
+      ]
     }
   },
   {
@@ -2416,7 +3669,18 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Danse de guerre des Dompteurs de Flammes (Don artistique: Danse Diff.15), runes de l'immatérialité et des volcans imbriquées à tracer sur le corps, hurlement sauvage durant la charge",
-      "effect": "Cette invocation est utilisée lors des charges pour impressionner les adversaires. En effet, les Rugissantes sont des formes voilées qui flottent derrière le mage et qui le dépassent lors de sa charge pour se transformer en d'impressionnants monstres spectraux dont la présence est affreusement réaliste. Elles n'existent que pendant le tour de la charge du mage. Les Rugissantes effraient la cible de la charge plus deux par NR (au plus proche). Chaque victime doit réussir un jet de Mental + Volonté contre une Difficulté de 20, ou prendre immédiatement la fuite. Les mages d'au moins III° Statut sont immunisés à ce sort. Les Rugissantes n'infligent aucun dommage, mais elles changent d'apparence à chaque invocation, rendant toute habitude impossible."
+      "effect": "Cette invocation est utilisée lors des charges pour impressionner les adversaires. En effet, les Rugissantes sont des formes voilées qui flottent derrière le mage et qui le dépassent lors de sa charge pour se transformer en d'impressionnants monstres spectraux dont la présence est affreusement réaliste. Elles n'existent que pendant le tour de la charge du mage. Les Rugissantes effraient la cible de la charge plus deux par NR (au plus proche). Chaque victime doit réussir un jet de Mental + Volonté contre une Difficulté de 20, ou prendre immédiatement la fuite. Les mages d'au moins III° Statut sont immunisés à ce sort. Les Rugissantes n'infligent aucun dommage, mais elles changent d'apparence à chaque invocation, rendant toute habitude impossible.",
+      "inGameEffect": "S'utilise lors d'une charge. Effraie la cible de la charge plus deux par NR, au plus proche ; chaque victime doit réussir un jet de Mental + Volonté contre une Difficulté de 20 ou prendre immédiatement la fuite. N'existent que pendant le tour de la charge et n'infligent aucun dommage. Les mages d'au moins III° Statut y sont immunisés.",
+      "sensoryEffect": "Des formes voilées flottent derrière le mage, le dépassent lors de sa charge et se transforment en d'impressionnants monstres spectraux, d'une présence affreusement réaliste. Elles changent d'apparence à chaque invocation, rendant toute habitude impossible.",
+      "duration": "1",
+      "durationUnit": "round",
+      "targets": "1 + 2 par NR",
+      "tags": [
+        "debuff",
+        "summoning",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2432,7 +3696,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens de Kroryn, posture (méditation debout, jambes écartées, bras brandis vers le ciel), cercle runique formé de braises",
-      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière rougeâtre qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Kroryn (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Kroryn peuvent priver l'invocateur de l'usage de sa Sphère du feu pour un jour par tranche d'âge s'ils estiment que sa requête est futile, tout comme ils peuvent violenter un impudent qui les dérangerait sans raison. Même s'il ne vient pas pour se battre, un enfant de Kroryn est toujours prompt à la violence et les circonstances d'accueil (cérémonie, bataille, bouleversement climatique ou magique) peuvent largement altérer son humeur."
+      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière rougeâtre qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Kroryn (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Kroryn peuvent priver l'invocateur de l'usage de sa Sphère du feu pour un jour par tranche d'âge s'ils estiment que sa requête est futile, tout comme ils peuvent violenter un impudent qui les dérangerait sans raison. Même s'il ne vient pas pour se battre, un enfant de Kroryn est toujours prompt à la violence et les circonstances d'accueil (cérémonie, bataille, bouleversement climatique ou magique) peuvent largement altérer son humeur.",
+      "inGameEffect": "Attire l'attention du fils de Kroryn le plus proche pour lui demander conseil ou solliciter un transport vers une destination précise. Le dragon est de la seconde tranche d'âge + 1 par NR. Il faut une bonne raison de solliciter son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Kroryn peuvent priver l'invocateur de sa Sphère du feu pour un jour par tranche d'âge s'ils jugent la requête futile, et peuvent violenter un impudent qui les dérangerait sans raison. Même s'il ne vient pas se battre, un enfant de Kroryn est toujours prompt à la violence, et les circonstances d'accueil — cérémonie, bataille, bouleversement climatique ou magique — altèrent largement son humeur.",
+      "sensoryEffect": "À la fin de la méditation, le mage sort de transe tandis que les runes du cercle émettent des rayons de lumière rougeâtre qui jaillissent vers le ciel.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -2448,7 +3719,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Rune du feu, posture (mains en coupole au-dessus de la tête, geste de lancer des deux mains), hurlement bestial",
-      "effect": "Une décharge d'énergie, mélange de foudre et de flammes élémentaires incontrôlables, sort de la main du magicien et inflige 30 +10/NR points de dommages, à une cible distante de moins de 20 mètres. En cas d'échec, c'est le magicien qui reçoit la décharge et qui subit 30 points de dommages."
+      "effect": "Une décharge d'énergie, mélange de foudre et de flammes élémentaires incontrôlables, sort de la main du magicien et inflige 30 +10/NR points de dommages, à une cible distante de moins de 20 mètres. En cas d'échec, c'est le magicien qui reçoit la décharge et qui subit 30 points de dommages.",
+      "inGameEffect": "Inflige (30 + 10 par NR) points de dommages à une cible distante de moins de 20 mètres. En cas d'échec, c'est le magicien qui reçoit la décharge et subit 30 points de dommages.",
+      "sensoryEffect": "Une décharge d'énergie, mélange de foudre et de flammes élémentaires incontrôlables, sort de la main du magicien.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2464,7 +3742,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Poudre combustible (soufre, salpêtre ou explosif de Brorne, consommée), graviers de lave (consommés), posture (lancer en cloche la poudre et les graviers au-dessus de la cible)",
-      "effect": "En lançant le mélange vers une cible située à moins de 20 mètres de lui, le mage transforme les particules en de véritables petites comètes qui retombent en une pluie incandescente à la vitesse de l'éclair. Elles infligent au total et en une seule fois 20+1D10/NR points de dommages. Ce sort ne peut être esquivé et ne se pare qu'à l'aide d'un bouclier."
+      "effect": "En lançant le mélange vers une cible située à moins de 20 mètres de lui, le mage transforme les particules en de véritables petites comètes qui retombent en une pluie incandescente à la vitesse de l'éclair. Elles infligent au total et en une seule fois 20+1D10/NR points de dommages. Ce sort ne peut être esquivé et ne se pare qu'à l'aide d'un bouclier.",
+      "inGameEffect": "Inflige au total et en une seule fois (20 + 1D10 par NR) points de dommages à une cible située à moins de 20 mètres. Ne peut être esquivé et ne se pare qu'à l'aide d'un bouclier.",
+      "sensoryEffect": "Les particules lancées se transforment en petites comètes qui retombent en une pluie incandescente à la vitesse de l'éclair.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2480,7 +3765,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "Rune des volcans tracée à la suie sur le dos des mains, posture défensive (bras croisés devant le visage)",
-      "effect": "Le magicien, ou une cible de son choix à moins de 5 mètres, devient complètement immunisé aux dégâts provoqués par le feu et la chaleur pendant 2+2/NR tours (qu'ils soient d'origine magique ou naturelle). En revanche, son équipement et ses vêtements subissent des dégâts normaux. En doublant la dépense des points de magie, le magicien peut cibler en même temps deux personnes proches (moins de 2m). Il est impossible de faire profiter de ce sort à plus de 2 personnes."
+      "effect": "Le magicien, ou une cible de son choix à moins de 5 mètres, devient complètement immunisé aux dégâts provoqués par le feu et la chaleur pendant 2+2/NR tours (qu'ils soient d'origine magique ou naturelle). En revanche, son équipement et ses vêtements subissent des dégâts normaux. En doublant la dépense des points de magie, le magicien peut cibler en même temps deux personnes proches (moins de 2m). Il est impossible de faire profiter de ce sort à plus de 2 personnes.",
+      "inGameEffect": "Le magicien, ou une cible de son choix à moins de 5 mètres, devient complètement immunisé aux dégâts du feu et de la chaleur, d'origine magique ou naturelle. Son équipement et ses vêtements subissent en revanche des dégâts normaux. En doublant la dépense de points de magie, le mage peut cibler deux personnes proches, à moins de 2 m l'une de l'autre ; jamais plus de 2 personnes.",
+      "duration": "2 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -2496,7 +3789,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Rune de l'éclair, œuf de luciole de lave (consommé), posture (doigts entrecroisés selon une position complexe)",
-      "effect": "Le magicien fait exploser une boule de lumière devant les yeux d'une cible à moins de 15 mètres de lui. Pour fermer les yeux à temps, la victime doit réussir un jet d'esquive en Opposition contre le score d'incantation du mage. En cas d'échec, elle est aveuglée pendant 1+1/NR tours. Elle subit alors un malus de -8 à toutes ses actions impliquant la vue. Le mage peut doubler la dépense de points de magie pour viser en même temps, une cible supplémentaire."
+      "effect": "Le magicien fait exploser une boule de lumière devant les yeux d'une cible à moins de 15 mètres de lui. Pour fermer les yeux à temps, la victime doit réussir un jet d'esquive en Opposition contre le score d'incantation du mage. En cas d'échec, elle est aveuglée pendant 1+1/NR tours. Elle subit alors un malus de -8 à toutes ses actions impliquant la vue. Le mage peut doubler la dépense de points de magie pour viser en même temps, une cible supplémentaire.",
+      "inGameEffect": "Cible à moins de 15 mètres. Pour fermer les yeux à temps, la victime doit réussir un jet d'esquive en opposition contre le score d'incantation ; en cas d'échec elle est aveuglée et subit un malus de -8 à toutes ses actions impliquant la vue. Le mage peut doubler la dépense de points de magie pour viser en même temps une cible supplémentaire.",
+      "sensoryEffect": "Une boule de lumière explose devant les yeux de la cible.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2512,7 +3814,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 17,
       "cle": "Rune du feu, poudre de pierre précieuse (rubis, opale ou agate de feu), exhalation grave",
-      "effect": "Le magicien invoque un mur de flammes d'un volume égal à deux fois son score de Sphère du feu, à 5 mètres maximum de lui. Ce volume peut prendre une forme au choix du mage, décidée durant l'invocation. Ces flammes infligent 15+1D10 points de dommages à tout ce qui les traverse. Il est impossible de le déplacer, et il reste actif pendant 10+5/NR mn."
+      "effect": "Le magicien invoque un mur de flammes d'un volume égal à deux fois son score de Sphère du feu, à 5 mètres maximum de lui. Ce volume peut prendre une forme au choix du mage, décidée durant l'invocation. Ces flammes infligent 15+1D10 points de dommages à tout ce qui les traverse. Il est impossible de le déplacer, et il reste actif pendant 10+5/NR mn.",
+      "inGameEffect": "Invoque à 5 mètres au maximum un mur de flammes d'un volume égal à deux fois le score de Sphère du feu, dans une forme choisie pendant l'invocation. Inflige 15 + 1D10 points de dommages à tout ce qui le traverse. Impossible à déplacer.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -2528,7 +3838,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Danse sautillante, rune des volcans, pierres précieuses (minimum 200 df)",
-      "effect": "Le mage invoque de petites dryades de feu qui apparaissent autour de lui (moins de deux mètres). Ces esprits follets dansent et sautillent en permanence en chantonnant d'une voix aigue et discrète. D'une intelligence rudimentaire, elles ne peuvent identifier les objets ou comprendre les termes humains désignant l'environnement. Elles sont capables de danser, chanter ou enflammer des objets combustibles sur demande. En cas de danger, elles se précipitent vers la menace en pirouettant pour la gêner, y boutant du même coup le feu et provoquant 15+1D10 points de dommages. Leur Initiative est de 1D et leur attaque ou déplacement est résolu globalement pour le groupe. Leurs attaques peuvent s'esquiver normalement sans NR, mais pas se parer. Un simple ordre permet de les rappeler. Elles restent présentes pendant 3+1/NR tours."
+      "effect": "Le mage invoque de petites dryades de feu qui apparaissent autour de lui (moins de deux mètres). Ces esprits follets dansent et sautillent en permanence en chantonnant d'une voix aigue et discrète. D'une intelligence rudimentaire, elles ne peuvent identifier les objets ou comprendre les termes humains désignant l'environnement. Elles sont capables de danser, chanter ou enflammer des objets combustibles sur demande. En cas de danger, elles se précipitent vers la menace en pirouettant pour la gêner, y boutant du même coup le feu et provoquant 15+1D10 points de dommages. Leur Initiative est de 1D et leur attaque ou déplacement est résolu globalement pour le groupe. Leurs attaques peuvent s'esquiver normalement sans NR, mais pas se parer. Un simple ordre permet de les rappeler. Elles restent présentes pendant 3+1/NR tours.",
+      "inGameEffect": "Invoque de petites dryades de feu à moins de deux mètres du mage. D'une intelligence rudimentaire, elles ne peuvent identifier les objets ni comprendre les termes humains désignant l'environnement, mais savent danser, chanter ou enflammer des objets combustibles sur demande. En cas de danger, elles se précipitent vers la menace pour la gêner, y boutent le feu et provoquent 15 + 1D10 points de dommages. Leur Initiative est de 1D et leur attaque ou déplacement se résout globalement pour le groupe. Leurs attaques s'esquivent normalement, sans NR, mais ne se parent pas. Un simple ordre permet de les rappeler.",
+      "sensoryEffect": "Ces esprits follets dansent et sautillent en permanence en chantonnant d'une voix aiguë et discrète.",
+      "duration": "3 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "summoning",
+        "combat"
+      ]
     }
   },
   {
@@ -2544,7 +3863,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Braises incandescentes ou source de feu, chaînette d'or ou de cuivre (consommée), danse circulaire d'enchevêtrement",
-      "effect": "Ce sort permet d'ouvrir une connexion pyrétique avec une Eérie volcanique, que le mage peut ensuite faire progresser vers une cible de son choix à moins de 25 m, l'emprisonnant ainsi dans un carcan brûlant, qui le suivra dans ses mouvements et déplacements. La cible peut tenter un jet d'esquive en Opposition contre le score d'invocation du mage. En cas d'échec, la victime est environnée de vapeurs brûlantes et sulfureuses et se dessèche à vue d'œil durant autant de tours que la Sphère du feu de l'invocateur. Elle subit alors 10 +1D10/NR points de dommages par tour sans aucune protection physique. Le seul moyen de faire disparaître la zone brûlante consiste à rendre l'invocateur inconscient ou à lancer un sort des Océans capable de créer des dommages dont le score d'invocation sera supérieur à celui du Portail maudit. Les protections surnaturelles contre le feu ou la chaleur sont utilisables, tout comme les éventuelles capacités capables de clore de force un portail d'invocation."
+      "effect": "Ce sort permet d'ouvrir une connexion pyrétique avec une Eérie volcanique, que le mage peut ensuite faire progresser vers une cible de son choix à moins de 25 m, l'emprisonnant ainsi dans un carcan brûlant, qui le suivra dans ses mouvements et déplacements. La cible peut tenter un jet d'esquive en Opposition contre le score d'invocation du mage. En cas d'échec, la victime est environnée de vapeurs brûlantes et sulfureuses et se dessèche à vue d'œil durant autant de tours que la Sphère du feu de l'invocateur. Elle subit alors 10 +1D10/NR points de dommages par tour sans aucune protection physique. Le seul moyen de faire disparaître la zone brûlante consiste à rendre l'invocateur inconscient ou à lancer un sort des Océans capable de créer des dommages dont le score d'invocation sera supérieur à celui du Portail maudit. Les protections surnaturelles contre le feu ou la chaleur sont utilisables, tout comme les éventuelles capacités capables de clore de force un portail d'invocation.",
+      "inGameEffect": "Ouvre une connexion pyrétique avec une Eérie volcanique, que le mage fait progresser vers une cible à moins de 25 m pour l'emprisonner dans un carcan brûlant qui la suit dans ses déplacements. La cible peut tenter un jet d'esquive en opposition contre le score d'invocation. En cas d'échec, elle subit (10 + 1D10 par NR) points de dommages par tour, sans aucune protection physique, pendant autant de tours que la Sphère du feu de l'invocateur. Le seul moyen de faire disparaître la zone est de rendre l'invocateur inconscient, ou de lancer un sort des Océans créant des dommages avec un score d'invocation supérieur. Les protections surnaturelles contre le feu ou la chaleur restent utilisables, comme les capacités capables de clore de force un portail d'invocation.",
+      "sensoryEffect": "La victime est environnée de vapeurs brûlantes et sulfureuses et se dessèche à vue d'œil.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2560,7 +3888,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Une arme de qualité au moins Bonne, rune de Kroryn tracée avec le sang du mage sur l'arme (consommée), murmures incantatoires",
-      "effect": "Le magicien évoque l'Esprit du sang, une créature draconique née du sang de Kroryn versé sur les champs de bataille où le Grand Dragon a été blessé. Créature martyre de lave et de sang bouillonnant, l'Esprit a une forme fluctuante grossièrement draconique. Une fois invoqué, l'Esprit se focalise sur l'arme par laquelle il a été convoqué. Il s'en saisit et la plonge alors dans ses entrailles pour la rendre à son propriétaire en une action. Il se dissipe ensuite alors que l'arme dégouttante de sang igné se met à crépiter d'étincelles orangées. Durant 1+1/NR tours, l'arme ignore les armures physiques car elle peut percer et trancher n'importe quelle matière (sauf les écailles draconiques). Utilisée en combat, ses dommages sont augmentés de la Sphère de feu de l'invocateur et octroie également un bonus d'attaque de +3. Si l'invocation du sort échoue, l'invocateur perd tous les points de magie de sa Sphère du feu, absorbés par l'Esprit et l'arme utilisée fond en un clin d'œil."
+      "effect": "Le magicien évoque l'Esprit du sang, une créature draconique née du sang de Kroryn versé sur les champs de bataille où le Grand Dragon a été blessé. Créature martyre de lave et de sang bouillonnant, l'Esprit a une forme fluctuante grossièrement draconique. Une fois invoqué, l'Esprit se focalise sur l'arme par laquelle il a été convoqué. Il s'en saisit et la plonge alors dans ses entrailles pour la rendre à son propriétaire en une action. Il se dissipe ensuite alors que l'arme dégouttante de sang igné se met à crépiter d'étincelles orangées. Durant 1+1/NR tours, l'arme ignore les armures physiques car elle peut percer et trancher n'importe quelle matière (sauf les écailles draconiques). Utilisée en combat, ses dommages sont augmentés de la Sphère de feu de l'invocateur et octroie également un bonus d'attaque de +3. Si l'invocation du sort échoue, l'invocateur perd tous les points de magie de sa Sphère du feu, absorbés par l'Esprit et l'arme utilisée fond en un clin d'œil.",
+      "inGameEffect": "L'Esprit invoqué se saisit de l'arme par laquelle il a été convoqué, la plonge dans ses entrailles et la rend à son propriétaire en une action, puis se dissipe. Pendant (1 + 1 par NR) tours, l'arme ignore les armures physiques et peut percer et trancher n'importe quelle matière, sauf les écailles draconiques. Ses dommages sont augmentés de la Sphère de feu de l'invocateur, et elle octroie un bonus d'attaque de +3. Si l'invocation échoue, l'invocateur perd tous les points de magie de sa Sphère du feu, absorbés par l'Esprit, et l'arme fond en un clin d'œil.",
+      "sensoryEffect": "Créature martyre de lave et de sang bouillonnant, l'Esprit a une forme fluctuante grossièrement draconique. L'arme rendue, dégouttante de sang igné, se met à crépiter d'étincelles orangées.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "summoning",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2576,7 +3914,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Posture (bras écartés, pieds fermement campés, poings fermés), rugissement de défi, cercle de braises",
-      "effect": "Ce sort s'utilise lorsqu'une armée est en déroute ou qu'un groupe est effrayé. Le magicien se poste devant les rangs qui battent en retraite et leur redonne courage. Ce sort affecte les 5 cibles les plus proches du mage, plus 2 par NR, en s'éloignant progressivement de lui. Ce sort peut influencer des combattants jusqu'à (Sphère du feu x4) mètres, car les cris porteurs de la fougue de Kroryn dépendent directement de la puissance du lanceur. Ce sort n'immunise pas à la peur ultérieurement, mais peut relancer dans la bataille une troupe démoralisée. Toute perte ultérieure de moral devra être gérée séparément. Dans le cas d'un effet de peur permanent (comme un sort ou une aura de peur draconique), ce sort est efficace durant un seul tour."
+      "effect": "Ce sort s'utilise lorsqu'une armée est en déroute ou qu'un groupe est effrayé. Le magicien se poste devant les rangs qui battent en retraite et leur redonne courage. Ce sort affecte les 5 cibles les plus proches du mage, plus 2 par NR, en s'éloignant progressivement de lui. Ce sort peut influencer des combattants jusqu'à (Sphère du feu x4) mètres, car les cris porteurs de la fougue de Kroryn dépendent directement de la puissance du lanceur. Ce sort n'immunise pas à la peur ultérieurement, mais peut relancer dans la bataille une troupe démoralisée. Toute perte ultérieure de moral devra être gérée séparément. Dans le cas d'un effet de peur permanent (comme un sort ou une aura de peur draconique), ce sort est efficace durant un seul tour.",
+      "inGameEffect": "Redonne courage à une troupe en déroute ou à un groupe effrayé : affecte les 5 cibles les plus proches du mage, plus 2 par NR, en s'éloignant progressivement, jusqu'à (Sphère du feu × 4) mètres. N'immunise pas à la peur pour la suite — toute perte de moral ultérieure se gère séparément. Contre un effet de peur permanent, comme un sort ou une aura de peur draconique, n'est efficace qu'un seul tour.",
+      "sensoryEffect": "Le magicien se poste devant les rangs qui battent en retraite et lance des cris porteurs de la fougue de Kroryn.",
+      "targets": "5 + 2 par NR",
+      "tags": [
+        "buff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -2592,7 +3938,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 22,
       "cle": "Plume d'or, encens élémentaire des volcans (consommé), danse voltigeante",
-      "effect": "Par ce sort, le mage va invoquer un des phénix élémentaires composé de cendres et de lave. L'oiseau de feu apparaît devant l'invocateur et s'interpose entre lui et tous les coups physiques ou magiques qu'il pourrait subir (seuls les effets de zone ne peuvent être absorbés). Le phénix refusera de se battre pour un humain et se contentera de s'interposer. Il ne possède qu'une case de blessure, dont le seuil est égal à (1+NR) fois le score de Sphère de feu du mage. S'il est dispersé, le phénix renaît de ses cendres au début du tour suivant, à un rang d'action de 15, avec la même case de blessure vierge. Le phénix est immunisé au feu et aux vents et les dommages infligés par ces Sphères augmentent le seuil de sa case de blessure à raison de 1 point pour 5 points de dommages. Le phénix n'accorde son attention au mage que pour un nombre de tours égal à sa Tendance Dragon plus son Statut. Si aucun danger immédiat ne menace le mage, le phénix disparaît dans une gerbe d'étincelles et de braises qui inflige vingt points de dommages au mage. Il est impossible de convoquer plusieurs phénix simultanément, ces créatures draconiques se battant entre elle sans retenue lorsqu'elles se rencontrent, quittant tout contrôle humain."
+      "effect": "Par ce sort, le mage va invoquer un des phénix élémentaires composé de cendres et de lave. L'oiseau de feu apparaît devant l'invocateur et s'interpose entre lui et tous les coups physiques ou magiques qu'il pourrait subir (seuls les effets de zone ne peuvent être absorbés). Le phénix refusera de se battre pour un humain et se contentera de s'interposer. Il ne possède qu'une case de blessure, dont le seuil est égal à (1+NR) fois le score de Sphère de feu du mage. S'il est dispersé, le phénix renaît de ses cendres au début du tour suivant, à un rang d'action de 15, avec la même case de blessure vierge. Le phénix est immunisé au feu et aux vents et les dommages infligés par ces Sphères augmentent le seuil de sa case de blessure à raison de 1 point pour 5 points de dommages. Le phénix n'accorde son attention au mage que pour un nombre de tours égal à sa Tendance Dragon plus son Statut. Si aucun danger immédiat ne menace le mage, le phénix disparaît dans une gerbe d'étincelles et de braises qui inflige vingt points de dommages au mage. Il est impossible de convoquer plusieurs phénix simultanément, ces créatures draconiques se battant entre elle sans retenue lorsqu'elles se rencontrent, quittant tout contrôle humain.",
+      "inGameEffect": "Le phénix s'interpose entre le mage et tous les coups physiques ou magiques qu'il pourrait subir — seuls les effets de zone ne sont pas absorbés. Il refuse de se battre pour un humain et se contente de s'interposer. Il n'a qu'une case de blessure, dont le seuil vaut (1 + NR) fois le score de Sphère de feu du mage ; dispersé, il renaît de ses cendres au début du tour suivant, à un rang d'action de 15, avec la même case vierge. Immunisé au feu et aux vents, il voit au contraire le seuil de sa case augmenter de 1 point pour 5 points de dommages infligés par ces Sphères. Il n'accorde son attention au mage que pour un nombre de tours égal à sa Tendance Dragon plus son Statut. Sans danger immédiat, il disparaît dans une gerbe d'étincelles et de braises qui inflige vingt points de dommages au mage. Impossible d'en convoquer plusieurs à la fois : ces créatures draconiques se battent entre elles sans retenue et échappent à tout contrôle humain.",
+      "sensoryEffect": "L'oiseau de feu, composé de cendres et de lave, apparaît devant l'invocateur.",
+      "tags": [
+        "protection",
+        "summoning",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -2608,7 +3962,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 18,
       "cle": "Stylet d'or ou de cuivre, encre élémentaire du feu (consommée), petit cercle runique complexe",
-      "effect": "Le magicien ensorcelle un crayon pendant une semaine lui permettant d'écrire (pour 4 points de magie), sur n'importe quelle surface de 1+1/NR m² des lettres de feu visibles uniquement par les personnes choisies verbalement par le mage. Beaucoup s'en servent pour marquer leur chemin ou laisser des messages. Les écritures perdurent une heure par point en Sphère du feu du sorcier."
+      "effect": "Le magicien ensorcelle un crayon pendant une semaine lui permettant d'écrire (pour 4 points de magie), sur n'importe quelle surface de 1+1/NR m² des lettres de feu visibles uniquement par les personnes choisies verbalement par le mage. Beaucoup s'en servent pour marquer leur chemin ou laisser des messages. Les écritures perdurent une heure par point en Sphère du feu du sorcier.",
+      "inGameEffect": "Ensorcelle un crayon pendant une semaine. Pour 4 points de magie, il écrit sur n'importe quelle surface de (1 + 1 par NR) m² des lettres de feu visibles uniquement par les personnes désignées verbalement par le mage. Les écritures perdurent une heure par point en Sphère du feu du sorcier. Beaucoup s'en servent pour marquer leur chemin ou laisser des messages.",
+      "duration": "1",
+      "durationUnit": "week",
+      "tags": [
+        "communication",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -2624,7 +3986,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "Baguette d'étain (consommée), rune des forges, position (mains jointes à l'équerre paume contre paume, bras alignés en travers du torse)",
-      "effect": "Le mage ensorcelle un bâtonnet qui devient, durant un Cycle, capable de souder magiquement des pièces métalliques après un tour complet de contact. Il est ainsi possible de souder des pointes à un bouclier, un loquet de porte ou encore un renfort sur une porte d'acier. Suivant le nombre de NR, la taille des objets soudés est variable: un loquet de coffret pour une réussite simple, un cadenas avec 1 NR, une porte à son montant pour 2 NR, etc...."
+      "effect": "Le mage ensorcelle un bâtonnet qui devient, durant un Cycle, capable de souder magiquement des pièces métalliques après un tour complet de contact. Il est ainsi possible de souder des pointes à un bouclier, un loquet de porte ou encore un renfort sur une porte d'acier. Suivant le nombre de NR, la taille des objets soudés est variable: un loquet de coffret pour une réussite simple, un cadenas avec 1 NR, une porte à son montant pour 2 NR, etc....",
+      "inGameEffect": "Ensorcelle un bâtonnet capable de souder magiquement des pièces métalliques après un tour complet de contact — pointes sur un bouclier, loquet de porte, renfort sur une porte d'acier. La taille des objets soudés dépend des NR : un loquet de coffret pour une réussite simple, un cadenas avec 1 NR, une porte à son montant avec 2 NR.",
+      "duration": "1",
+      "durationUnit": "cycle",
+      "tags": [
+        "creation",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -2640,7 +4010,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 22,
       "cle": "Arme de jet de Bonne qualité, rune des volcans (à tracer sur l'arme), incantation hachée",
-      "effect": "Le magicien enchante une arme de jet pendant 1+1/NR heures. Lorsqu'elle est lancée (et ce autant de fois que la Sphère du feu du mage), l'arme se nimbe d'une aura crépitante d'étincelles ardentes et augmente les dommages de base de l'arme de 5. L'indice de protection des armures est divisé par deux contre une arme ainsi ensorcelée. Si le sort est manqué, l'arme est réduite instantanément en cendres et scories."
+      "effect": "Le magicien enchante une arme de jet pendant 1+1/NR heures. Lorsqu'elle est lancée (et ce autant de fois que la Sphère du feu du mage), l'arme se nimbe d'une aura crépitante d'étincelles ardentes et augmente les dommages de base de l'arme de 5. L'indice de protection des armures est divisé par deux contre une arme ainsi ensorcelée. Si le sort est manqué, l'arme est réduite instantanément en cendres et scories.",
+      "inGameEffect": "Enchante une arme de jet. Lancée — autant de fois que la Sphère du feu du mage — elle augmente ses dommages de base de 5, et l'indice de protection des armures est divisé par deux contre elle. Si le sort est manqué, l'arme est instantanément réduite en cendres et scories.",
+      "sensoryEffect": "L'arme se nimbe d'une aura crépitante d'étincelles ardentes.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2656,7 +4035,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 24,
       "cle": "Sable fin (consommé), mélopée d'invocation des volcans, rune de vapeur (à tracer dans la poignée de sable avant le lancer)",
-      "effect": "Le magicien enchante du sable pour une journée. Ce sable se lance avec un jet de Manuel+Coordination (Diff. 15) sur une cible à moins de 5 m. Si le sable touche (il ne peut que s'esquiver, pas se parer), il se colle et s'enfonce dans sa peau. Dès l'action suivante, l'eau du corps de la victime commence à bouillir et s'échappe sous forme de vapeur, provoquant des douleurs effroyables. La victime subit 5+1D10/NR points de dommages par tour. Aucune protection physique ne fonctionne et les facultés surnaturelles destinées à intercepter les dommages sont inopérantes. Ce sort dure Sphère du feu tours et s'interrompt si la cible est copieusement aspergée d'eau, ce qui est la seule méthode pour chasser le sable."
+      "effect": "Le magicien enchante du sable pour une journée. Ce sable se lance avec un jet de Manuel+Coordination (Diff. 15) sur une cible à moins de 5 m. Si le sable touche (il ne peut que s'esquiver, pas se parer), il se colle et s'enfonce dans sa peau. Dès l'action suivante, l'eau du corps de la victime commence à bouillir et s'échappe sous forme de vapeur, provoquant des douleurs effroyables. La victime subit 5+1D10/NR points de dommages par tour. Aucune protection physique ne fonctionne et les facultés surnaturelles destinées à intercepter les dommages sont inopérantes. Ce sort dure Sphère du feu tours et s'interrompt si la cible est copieusement aspergée d'eau, ce qui est la seule méthode pour chasser le sable.",
+      "inGameEffect": "Enchante du sable pour une journée. Il se lance sur un jet de Manuel + Coordination de Difficulté 15, sur une cible à moins de 5 m ; il ne peut qu'être esquivé, jamais paré. S'il touche, il se colle et s'enfonce dans la peau. Dès l'action suivante, la victime subit (5 + 1D10 par NR) points de dommages par tour, pendant (Sphère du feu) tours. Aucune protection physique ne fonctionne et les facultés surnaturelles destinées à intercepter les dommages sont inopérantes. Le sort s'interrompt si la cible est copieusement aspergée d'eau, seule méthode pour chasser le sable.",
+      "sensoryEffect": "L'eau du corps de la victime se met à bouillir et s'échappe en vapeur, provoquant des douleurs effroyables.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2672,7 +4060,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 22,
       "cle": "Bouclier de métal de Bonne qualité, sang de salamandre (consommé), rune du soleil (à tracer avec le sang de la salamandre)",
-      "effect": "Ce sort enchante un bouclier pendant autant de jours que son score en Sphère du feu. Ce dernier peut alors s'embraser d'une aura flamboyante capable d'éblouir un adversaire à moins de 10 m. Le bouclier peut être utilisé 7 fois par jour. La cible doit réussir un jet d'esquive contre une Difficulté égale au score d'incantation du mage enchanteur pour se protéger les yeux à temps ou être aveuglée pendant 1 tour, et subir un malus de -5 à toutes ses actions physiques (pouvant même aller jusqu'à l'impossibilité d'agir). Activer ce pouvoir ne requiert pas d'action complexe de la part du porteur."
+      "effect": "Ce sort enchante un bouclier pendant autant de jours que son score en Sphère du feu. Ce dernier peut alors s'embraser d'une aura flamboyante capable d'éblouir un adversaire à moins de 10 m. Le bouclier peut être utilisé 7 fois par jour. La cible doit réussir un jet d'esquive contre une Difficulté égale au score d'incantation du mage enchanteur pour se protéger les yeux à temps ou être aveuglée pendant 1 tour, et subir un malus de -5 à toutes ses actions physiques (pouvant même aller jusqu'à l'impossibilité d'agir). Activer ce pouvoir ne requiert pas d'action complexe de la part du porteur.",
+      "inGameEffect": "Enchante un bouclier pour autant de jours que le score en Sphère du feu. Il peut alors s'embraser pour éblouir un adversaire à moins de 10 m, 7 fois par jour, sans que l'activation demande une action complexe au porteur. La cible doit réussir un jet d'esquive contre une Difficulté égale au score d'incantation du mage enchanteur pour se protéger les yeux à temps, faute de quoi elle est aveuglée pendant 1 tour et subit un malus de -5 à toutes ses actions physiques, pouvant aller jusqu'à l'impossibilité d'agir.",
+      "sensoryEffect": "Le bouclier s'embrase d'une aura flamboyante.",
+      "duration": "SPHERE",
+      "durationUnit": "day",
+      "tags": [
+        "protection",
+        "debuff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2688,7 +4086,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 22,
       "cle": "Flacon d'alcool fort (consommé), braises élémentaires (consommées), rune de force (à tracer sur le bouchon)",
-      "effect": "Le magicien enchante pour (Sphère du feu) jours le contenu élémentaire et flamboyant d'un flacon. Au contact de l'air, ce liquide s'enflamme et explose (que ce soit par ouverture ou éclatement du récipient). L'explosion atteint toutes les cibles présentes dans un rayon de 5 mètres. Les cibles touchées par l'Eau de feu subissent 20 + 5/NR points de dommages. Les armures ne comptent pas. Note : Il est extrêmement dangereux de porter une telle fiole sur soi. Le produit est instable et peut exploser au moindre choc, causant les mêmes dommages à son porteur. Généralement, on le lance du haut des remparts d'un château attaqué."
+      "effect": "Le magicien enchante pour (Sphère du feu) jours le contenu élémentaire et flamboyant d'un flacon. Au contact de l'air, ce liquide s'enflamme et explose (que ce soit par ouverture ou éclatement du récipient). L'explosion atteint toutes les cibles présentes dans un rayon de 5 mètres. Les cibles touchées par l'Eau de feu subissent 20 + 5/NR points de dommages. Les armures ne comptent pas. Note : Il est extrêmement dangereux de porter une telle fiole sur soi. Le produit est instable et peut exploser au moindre choc, causant les mêmes dommages à son porteur. Généralement, on le lance du haut des remparts d'un château attaqué.",
+      "inGameEffect": "Enchante le contenu d'un flacon pour (Sphère du feu) jours. Au contact de l'air — par ouverture ou éclatement du récipient — le liquide s'enflamme et explose, atteignant toutes les cibles dans un rayon de 5 mètres pour (20 + 5 par NR) points de dommages, armures non comptées. Extrêmement dangereux à porter sur soi : le produit est instable et peut exploser au moindre choc, causant les mêmes dommages à son porteur. On le lance généralement du haut des remparts d'un château attaqué.",
+      "tags": [
+        "attack",
+        "creation",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -2704,7 +4109,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 33,
       "cle": "Statuette de Kroryn en or pur (consommée), deux rubis purs constituant les yeux de la statuette (consommés)",
-      "effect": "On ne sait combien de magiciens sont capables d'utiliser un tel sort. Pour ce faire, le magicien doit enchanter une statuette de Kroryn définitivement. Une fois activée, l'effigie explose et inflige 200 points de dommages en une seule fois à 25+5/NR mètres à la ronde. Rien ne peut contrer une telle force, ni magie, ni rempart, ni protection physique. On estime qu'il faut se trouver à plus de 2 kilomètres pour ne pas sentir la terre trembler suite au contrecoup."
+      "effect": "On ne sait combien de magiciens sont capables d'utiliser un tel sort. Pour ce faire, le magicien doit enchanter une statuette de Kroryn définitivement. Une fois activée, l'effigie explose et inflige 200 points de dommages en une seule fois à 25+5/NR mètres à la ronde. Rien ne peut contrer une telle force, ni magie, ni rempart, ni protection physique. On estime qu'il faut se trouver à plus de 2 kilomètres pour ne pas sentir la terre trembler suite au contrecoup.",
+      "inGameEffect": "Enchante définitivement une statuette de Kroryn. Une fois activée, l'effigie explose et inflige 200 points de dommages en une seule fois à (25 + 5 par NR) mètres à la ronde. Rien ne peut contrer une telle force : ni magie, ni rempart, ni protection physique. On estime qu'il faut se trouver à plus de 2 kilomètres pour ne pas sentir la terre trembler sous le contrecoup.",
+      "tags": [
+        "attack",
+        "area",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2720,7 +4132,12 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 16,
       "cle": "Tête baissée, yeux clos, paume ouverte vers le ciel",
-      "effect": "En lançant ce sortilège, le mage peut transformer autant de points de Chance qu'il le souhaite - et qu'il possède au moment de l'incantation - en points de Maîtrise. Le coût du sort est réduit d'un point de magie par NR obtenu."
+      "effect": "En lançant ce sortilège, le mage peut transformer autant de points de Chance qu'il le souhaite - et qu'il possède au moment de l'incantation - en points de Maîtrise. Le coût du sort est réduit d'un point de magie par NR obtenu.",
+      "inGameEffect": "Transforme en points de Maîtrise autant de points de Chance que le mage le souhaite, parmi ceux qu'il possède au moment de l'incantation. Le coût du sort est réduit d'un point de magie par NR obtenu.",
+      "tags": [
+        "utility",
+        "self"
+      ]
     }
   },
   {
@@ -2736,7 +4153,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Arme de Bonne qualité, gestuelle des doigts, murmure saccadé",
-      "effect": "En passant rapidement ses doigts sur une lame ou le fer d'une arme, le personnage lui confère, le temps de 1+NR attaques (obligatoirement les prochaines à toucher), la faculté de réduire de moitié l'Indice de protection de n'importe quelle armure métallique - ou comportant des parties métalliques (ou d'un bouclier, mais pas des deux en même temps, au choix du lanceur). Si l'armure est enchantée, l'Indice de protection n'est réduit que d'un quart. Ce sortilège est sans effet contre les dragons du Métal ou les armures draconiques faites à partir de leurs écailles. Ce sort est inefficace sur les armes en os, en pierre, en bois ou en Sombre Acier."
+      "effect": "En passant rapidement ses doigts sur une lame ou le fer d'une arme, le personnage lui confère, le temps de 1+NR attaques (obligatoirement les prochaines à toucher), la faculté de réduire de moitié l'Indice de protection de n'importe quelle armure métallique - ou comportant des parties métalliques (ou d'un bouclier, mais pas des deux en même temps, au choix du lanceur). Si l'armure est enchantée, l'Indice de protection n'est réduit que d'un quart. Ce sortilège est sans effet contre les dragons du Métal ou les armures draconiques faites à partir de leurs écailles. Ce sort est inefficace sur les armes en os, en pierre, en bois ou en Sombre Acier.",
+      "inGameEffect": "Pendant les (1 + NR) prochaines attaques à toucher, l'arme réduit de moitié l'Indice de protection de n'importe quelle armure métallique ou comportant des parties métalliques — ou d'un bouclier, mais pas des deux à la fois, au choix du lanceur. Contre une armure enchantée, l'Indice n'est réduit que d'un quart. Sans effet contre les dragons du Métal et les armures draconiques faites de leurs écailles. Inefficace sur les armes en os, en pierre, en bois ou en Sombre Acier.",
+      "sensoryEffect": "Le personnage passe rapidement ses doigts sur la lame ou le fer de l'arme.",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2752,7 +4176,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 17,
       "cle": "Sifflement grave, paume ouverte, rune du métal sur la paume",
-      "effect": "En tendant la main vers un objet métallique, le personnage peut provoquer une impulsion élémentaire capable de le faire jaillir vers sa main. A l'inverse, l'impulsion peut projeter un objet de sa main vers un adversaire ou un endroit précis. L'objet ou la cible doit être situé à moins de (Sphère du métal) m et peser moins de deux kilos par point en Sphère du métal (ex : avec un score de 6, un mage peut déplacer un objet de 12 kg situé à moins de 6m de lui ou guider à 6 m un objet qu'il tiendrait dans la main). Ce sort ne permet pas de manipuler une arme métallique pour parer un coup mais une épée, une hache ou une dague peuvent devenir des projectiles mortels qui ne demandent pas d'armer son coup. Il n'y a pas de jet d'attaque car les éventuels NR du sort servent à calculer la Difficulté d'une parade ou d'une esquive. Dans ce cas, au lieu d'utiliser la Force pour calculer les dommages, on utilise la Sphère du mage. Si un objet attiré est attaché, le Mj doit déterminer le nombre de NR nécessaire pour l'arracher (1 pour un râtelier, 2 pour une arme maintenue par une chaîne, 3 pour une épée enfoncée dans un mur depuis 50 ans...). Si l'objet est tenu par un adversaire, ce dernier peut tenter un jet d'Opposition de Physique+Force contre le jet d'incantation pour garder l'objet. Ce sort ne permet que de mouvoir un objet vers ou depuis sa main, pas de le manipuler avec télékinésie."
+      "effect": "En tendant la main vers un objet métallique, le personnage peut provoquer une impulsion élémentaire capable de le faire jaillir vers sa main. A l'inverse, l'impulsion peut projeter un objet de sa main vers un adversaire ou un endroit précis. L'objet ou la cible doit être situé à moins de (Sphère du métal) m et peser moins de deux kilos par point en Sphère du métal (ex : avec un score de 6, un mage peut déplacer un objet de 12 kg situé à moins de 6m de lui ou guider à 6 m un objet qu'il tiendrait dans la main). Ce sort ne permet pas de manipuler une arme métallique pour parer un coup mais une épée, une hache ou une dague peuvent devenir des projectiles mortels qui ne demandent pas d'armer son coup. Il n'y a pas de jet d'attaque car les éventuels NR du sort servent à calculer la Difficulté d'une parade ou d'une esquive. Dans ce cas, au lieu d'utiliser la Force pour calculer les dommages, on utilise la Sphère du mage. Si un objet attiré est attaché, le Mj doit déterminer le nombre de NR nécessaire pour l'arracher (1 pour un râtelier, 2 pour une arme maintenue par une chaîne, 3 pour une épée enfoncée dans un mur depuis 50 ans...). Si l'objet est tenu par un adversaire, ce dernier peut tenter un jet d'Opposition de Physique+Force contre le jet d'incantation pour garder l'objet. Ce sort ne permet que de mouvoir un objet vers ou depuis sa main, pas de le manipuler avec télékinésie.",
+      "inGameEffect": "Fait jaillir un objet métallique vers la main du mage, ou projette un objet de sa main vers un adversaire ou un point précis. Portée de (Sphère du métal) mètres, poids maximum de deux kilos par point de Sphère du métal. Pas de jet d'attaque : les NR du sort servent à calculer la Difficulté d'une parade ou d'une esquive, et les dommages utilisent la Sphère du mage au lieu de la Force. Arracher un objet attaché demande des NR fixés par le meneur de jeu (1 pour un râtelier, 2 pour une arme tenue par une chaîne, 3 pour une épée enfoncée dans un mur depuis 50 ans) ; un objet tenu par un adversaire autorise un jet d'opposition de Physique + Force contre le jet d'incantation. Ne permet ni de parer avec une arme métallique, ni de manipuler l'objet en télékinésie — seulement de le mouvoir vers ou depuis la main.",
+      "tags": [
+        "utility",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2768,7 +4198,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens de Kezyr, posture (un genou à terre, une épée scintillante à la main la pointe en bas, tête baissée, attitude révérente), cercle runique formé de limaille de métal",
-      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière argentée qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Kezyr (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide, mais un présent pour service rendu n'est pas obligatoire. Les dragons de Kezyr peuvent priver l'invocateur de l'usage de sa Sphère du métal pour un jour par tranche d'âge s'ils estiment que sa requête est futile, mais n'useront généralement pas de violence vis à vis d'un mage doté de peu de discernement. En général, le fait d'oser cette invocation les incitera à la patience et c'est avec un a priori confiant qu'ils rejoindront le mage. Tant que ce dernier ne les mène pas visiblement en bateau, ils lui accorderont une confiance relative. Par contre, les dragons de Kezyr ont tendance à rester longtemps aux côtés des humains après leur avoir prodigué des conseils, juste pour voir s'ils en font bon usage, mais sans leur en prodiguer d'autres..."
+      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière argentée qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Kezyr (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide, mais un présent pour service rendu n'est pas obligatoire. Les dragons de Kezyr peuvent priver l'invocateur de l'usage de sa Sphère du métal pour un jour par tranche d'âge s'ils estiment que sa requête est futile, mais n'useront généralement pas de violence vis à vis d'un mage doté de peu de discernement. En général, le fait d'oser cette invocation les incitera à la patience et c'est avec un a priori confiant qu'ils rejoindront le mage. Tant que ce dernier ne les mène pas visiblement en bateau, ils lui accorderont une confiance relative. Par contre, les dragons de Kezyr ont tendance à rester longtemps aux côtés des humains après leur avoir prodigué des conseils, juste pour voir s'ils en font bon usage, mais sans leur en prodiguer d'autres...",
+      "inGameEffect": "Attire l'attention du fils de Kezyr le plus proche pour lui demander conseil ou solliciter un transport vers une destination précise. Le dragon est de la seconde tranche d'âge + 1 par NR. Il vient par ses propres moyens, peut mettre un moment à arriver, n'a aucune obligation envers le mage et ne vient pas se battre. Les dragons de Kezyr peuvent priver l'invocateur de sa Sphère du métal pour un jour par tranche d'âge s'ils jugent la requête futile, mais n'usent généralement pas de violence. Ils ont tendance à rester longtemps auprès des humains après leur avoir donné un conseil, juste pour voir s'ils en font bon usage.",
+      "sensoryEffect": "À la fin de la méditation, le mage sort de transe tandis que les runes du cercle émettent des rayons de lumière argentée qui jaillissent vers le ciel.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -2784,7 +4221,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Minerai de métal brut (consommé), perle de valeur (au moins 200 df, consommée), respiration bloquée",
-      "effect": "En écrasant la perle dans sa main avec les grains de minerai, le mage libère autour de lui une vague d'énergie qui affecte chaque élément métallique présent dans un rayon de 1 mètre/Statut + 1m/NR. Tous les éléments métalliques présents reprennent instantanément leur indépendance et se désolidarisent des matières et éléments non métalliques auxquels ils étaient fixés - gonds, attaches, éléments d'armure, etc. Ils se nimbent alors d'une lueur nacrée et flottent durant un tour avant de retomber au sol sous le coup de la gravité. Le mage est affecté par les effets de son propre sort. Par la suite, la Difficulté de tous les jets de réparation est augmentée de 3 pour assembler de nouveau les parties métalliques ainsi dispersées."
+      "effect": "En écrasant la perle dans sa main avec les grains de minerai, le mage libère autour de lui une vague d'énergie qui affecte chaque élément métallique présent dans un rayon de 1 mètre/Statut + 1m/NR. Tous les éléments métalliques présents reprennent instantanément leur indépendance et se désolidarisent des matières et éléments non métalliques auxquels ils étaient fixés - gonds, attaches, éléments d'armure, etc. Ils se nimbent alors d'une lueur nacrée et flottent durant un tour avant de retomber au sol sous le coup de la gravité. Le mage est affecté par les effets de son propre sort. Par la suite, la Difficulté de tous les jets de réparation est augmentée de 3 pour assembler de nouveau les parties métalliques ainsi dispersées.",
+      "inGameEffect": "Rayon de (1 mètre par Statut + 1 mètre par NR). Tous les éléments métalliques présents se désolidarisent instantanément des matières non métalliques auxquelles ils étaient fixés — gonds, attaches, éléments d'armure. Le mage est affecté par son propre sort. Par la suite, la Difficulté de tous les jets de réparation visant à réassembler ces parties est augmentée de 3.",
+      "sensoryEffect": "Le mage écrase la perle et les grains de minerai dans sa main, libérant une vague d'énergie ; les éléments métalliques se nimbent d'une lueur nacrée et flottent un tour avant de retomber au sol.",
+      "duration": "1",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "area",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2800,7 +4247,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 18,
       "cle": "Encens de Kezyr (consommé), diamant gravé d'une rune du métal (à passer lentement sur l'objet), mantra sourd",
-      "effect": "En lançant ce sort sur un objet manufacturé comportant du métal (pour au moins la moitié de sa composition), le mage peut bonifier le travail de l'artisan. Ce faisant, il épure les défauts dont pourrait être entaché l'objet et lui confère 1+1/NR niveau de qualité virtuel. Ces NR sont capables de conférer des qualités comme s'ils étaient issus du travail de l'artisan. Néanmoins, pour être efficace, le mage doit lancer ce sort avec un jet d'incantation plus élevé que le score final d'Artisanat (ou de création) qui a servi à obtenir l'objet. Les capacités obtenues sont décidées par le mage en fonction des effets possibles sur la table de la page 146. Les effets de ce sort durent Sphère du métal jours."
+      "effect": "En lançant ce sort sur un objet manufacturé comportant du métal (pour au moins la moitié de sa composition), le mage peut bonifier le travail de l'artisan. Ce faisant, il épure les défauts dont pourrait être entaché l'objet et lui confère 1+1/NR niveau de qualité virtuel. Ces NR sont capables de conférer des qualités comme s'ils étaient issus du travail de l'artisan. Néanmoins, pour être efficace, le mage doit lancer ce sort avec un jet d'incantation plus élevé que le score final d'Artisanat (ou de création) qui a servi à obtenir l'objet. Les capacités obtenues sont décidées par le mage en fonction des effets possibles sur la table de la page 146. Les effets de ce sort durent Sphère du métal jours.",
+      "inGameEffect": "Sur un objet manufacturé composé de métal pour au moins la moitié : épure ses défauts et lui confère (1 + 1 par NR) niveau de qualité virtuel, capable de donner des qualités comme s'il sortait du travail de l'artisan. N'est efficace que si le jet d'incantation dépasse le score final d'Artisanat ayant servi à créer l'objet. Les capacités obtenues sont choisies par le mage. Dure (Sphère du métal) jours.",
+      "duration": "SPHERE",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "creation",
+        "object"
+      ]
     }
   },
   {
@@ -2816,7 +4271,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 25,
       "cle": "Runes (rune de Kezyr à porter sur le front et runes de larmes d'argent sous les yeux), kata de la pureté de l'âme (Empathie+Acrobatie Diff.15), poussière d'argent (à frotter sur le corps avant le kata, consommée)",
-      "effect": "Ce sortilège est une protection issue de la clémence du Grand Dragon du Métal. Elle est invoquée avant les actes d'un grand courage pouvant entraîner la mort du mage, ou un combat qui semble perdu d'avance. Ce sortilège n'est utilisable qu'une fois par jour – et Kezyr se réserve le droit d'en refuser l'activation, car il ne saurait constituer une garantie systématique. Il est en effet destiné à favoriser les actes glorieux et/ou courageux afin de donner l'exemple à l'Humanité. Durant toute la journée qui suit le lancement, au moment où le mage s'apprête à recevoir un coup fatal (et non une simple blessure), le mage ressentira le chagrin de Kezyr lorsque le premier décès eut lieu sur Kor. Cet accès de tristesse provoquera une aura d'énergie faite d'éclairs argentés qui annulera les dommages du coup (mais pas un éventuel renversement ou recul) et intimidera son adversaire par sa nature profondément draconique. Durant tout le reste du tour, les agresseurs comme les alliés du mage à portée de vue seront frappés de stupeur et ne pourront effectuer aucune action, mis à part se défendre avec un malus de –5. Si le mage est affecté par un effet intimidant, paralysant ou terrifiant, il est immédiatement dissipé. Lorsque l'aura disparaît, toutes les Réserves de Sphère du mage tombent à 0 et sa Réserve personnelle actuelle est divisée par 2 – arrondi à l'inférieur."
+      "effect": "Ce sortilège est une protection issue de la clémence du Grand Dragon du Métal. Elle est invoquée avant les actes d'un grand courage pouvant entraîner la mort du mage, ou un combat qui semble perdu d'avance. Ce sortilège n'est utilisable qu'une fois par jour – et Kezyr se réserve le droit d'en refuser l'activation, car il ne saurait constituer une garantie systématique. Il est en effet destiné à favoriser les actes glorieux et/ou courageux afin de donner l'exemple à l'Humanité. Durant toute la journée qui suit le lancement, au moment où le mage s'apprête à recevoir un coup fatal (et non une simple blessure), le mage ressentira le chagrin de Kezyr lorsque le premier décès eut lieu sur Kor. Cet accès de tristesse provoquera une aura d'énergie faite d'éclairs argentés qui annulera les dommages du coup (mais pas un éventuel renversement ou recul) et intimidera son adversaire par sa nature profondément draconique. Durant tout le reste du tour, les agresseurs comme les alliés du mage à portée de vue seront frappés de stupeur et ne pourront effectuer aucune action, mis à part se défendre avec un malus de –5. Si le mage est affecté par un effet intimidant, paralysant ou terrifiant, il est immédiatement dissipé. Lorsque l'aura disparaît, toutes les Réserves de Sphère du mage tombent à 0 et sa Réserve personnelle actuelle est divisée par 2 – arrondi à l'inférieur.",
+      "inGameEffect": "Utilisable une seule fois par jour, et Kezyr se réserve le droit d'en refuser l'activation. Pendant toute la journée qui suit, au moment où le mage s'apprête à recevoir un coup fatal — et non une simple blessure — les dommages sont annulés, sans empêcher un éventuel renversement ou recul. Pour tout le reste du tour, agresseurs comme alliés à portée de vue sont frappés de stupeur et ne peuvent rien faire d'autre que se défendre avec un malus de -5. Tout effet intimidant, paralysant ou terrifiant affectant le mage est immédiatement dissipé. Quand l'aura disparaît, toutes les Réserves de Sphère du mage tombent à 0 et sa Réserve personnelle actuelle est divisée par 2, arrondie à l'inférieur.",
+      "sensoryEffect": "Le mage ressent le chagrin de Kezyr lors du premier décès survenu sur Kor ; cet accès de tristesse provoque une aura d'énergie faite d'éclairs argentés, dont la nature profondément draconique intimide son adversaire.",
+      "duration": "1",
+      "durationUnit": "day",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -2832,7 +4296,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 30,
       "cle": "Rune de Kezyr ciselée sur l'objet (Diff. 15, mais au moins 2 NR), gouttelette de sang de Kezyr, chant sacré de vénération",
-      "effect": "En lançant ce sortilège sur un objet manufacturé de nature mécanique (et donc normalement interdite), le personnage peut lui conférer une aura magique liée à la Sphère du métal durant un Cycle. Cette aura a force de reconnaissance auprès des autorités draconiques et ne doit pas être utilisée à la légère (sa durée permet d'ailleurs une surveillance de l'usage de l'objet conforme aux préceptes draconiques). Ce sort est relativement rare et ne s'utilise que sur des objets dont l'utilité commune est indéniable (moulin, horloge publique, arme de siège tolérée dans les régions les plus dangereuses...). Très souvent, les cadrans élémentaires en sont munis afin de renforcer la paternité draconique de cet objet courant. Tout mage de premier statut sait lire profondément la trame de l'enchantement, dans laquelle apparaît toujours le nom et l'identité psychique du lanceur (si ce dernier possède le Privilège Anonymat, sa trace peut être altérée ou brouillée, revoir p.115). Ce sort est socialement discuté car sa mise au point (il y a à peine un siècle) par les Visionnaires n'est toujours pas très bien acceptée par les érudits, et dans une moindre mesure, par les Prodiges et l'Inquisition. A ce jour, on n'a jamais vu un mage le lancer à la légère sur un objet clairement hérétique, et toute confrontation entre le lanceur du Sceau et un érudit le remettant en cause s'est toujours réglée par prééminence de Statut, voire par l'arbitrage suprême d'un dragon."
+      "effect": "En lançant ce sortilège sur un objet manufacturé de nature mécanique (et donc normalement interdite), le personnage peut lui conférer une aura magique liée à la Sphère du métal durant un Cycle. Cette aura a force de reconnaissance auprès des autorités draconiques et ne doit pas être utilisée à la légère (sa durée permet d'ailleurs une surveillance de l'usage de l'objet conforme aux préceptes draconiques). Ce sort est relativement rare et ne s'utilise que sur des objets dont l'utilité commune est indéniable (moulin, horloge publique, arme de siège tolérée dans les régions les plus dangereuses...). Très souvent, les cadrans élémentaires en sont munis afin de renforcer la paternité draconique de cet objet courant. Tout mage de premier statut sait lire profondément la trame de l'enchantement, dans laquelle apparaît toujours le nom et l'identité psychique du lanceur (si ce dernier possède le Privilège Anonymat, sa trace peut être altérée ou brouillée, revoir p.115). Ce sort est socialement discuté car sa mise au point (il y a à peine un siècle) par les Visionnaires n'est toujours pas très bien acceptée par les érudits, et dans une moindre mesure, par les Prodiges et l'Inquisition. A ce jour, on n'a jamais vu un mage le lancer à la légère sur un objet clairement hérétique, et toute confrontation entre le lanceur du Sceau et un érudit le remettant en cause s'est toujours réglée par prééminence de Statut, voire par l'arbitrage suprême d'un dragon.",
+      "inGameEffect": "Confère à un objet manufacturé de nature mécanique — normalement interdite — une aura magique liée à la Sphère du métal, qui a force de reconnaissance auprès des autorités draconiques. Ne s'utilise que sur des objets d'utilité commune indéniable (moulin, horloge publique, arme de siège tolérée dans les régions dangereuses) ; les cadrans élémentaires en sont souvent munis. Tout mage de premier statut peut lire la trame de l'enchantement, où apparaissent toujours le nom et l'identité psychique du lanceur — altérables ou brouillés par le Privilège Anonymat.",
+      "duration": "1",
+      "durationUnit": "cycle",
+      "tags": [
+        "utility",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -2848,7 +4320,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "Runes de la révélation, du métal et de la transformation à entrelacer sur l'objet (Manuel+Don artistique: Gravure Diff.15), chant des Matières Essentielles, gestuelle de malaxage et d'assouplissement de l'objet.",
-      "effect": "Ce sort repose sur la croyance qui stipule que \"tout outil existe en fait au sein d'un autre, il suffit de le révéler comme le sculpteur dévoile la statue qui existe au sein du bloc de marbre.\" En se concentrant sur une certaine utilisation, le personnage peut transformer un objet métallique (ou même un simple lingot) en un outil parfaitement approprié à l'usage auquel il pense. Au maximum, ce sort peut affecter un objet d'un kilo par point dans la Sphère du métal. Il peut être lancé par avance sur un objet et activé seulement par un mot choisi par le mage (auquel cas il prend la forme que le mage a prévu durant son incantation, sans qu'aucune modification ne soit possible). Dans ce cas, l'objet peut se transformer une fois, dans la limite de Sphère jours. On peut bien sûr porter plusieurs fois le sort sur un même objet, tant que les mots de commande sont différents. L'objet prend forme en une action et reprend sa forme originelle au bout d'une heure. La Difficulté de base est de 15, mais certains objets complexes requièrent des NR pour émerger: 0 pour un simple stylet ou un burin, 1 NR pour un loquet de porte ou des tenailles, 2 NR pour un outil mécanique ou comportant des parties mobiles complexes, un ressort ou encore un engrenage, etc... Si l'objet d'origine est déjà un objet mécanique, l'interaction entre la Sphère du métal et la science humaniste augmente la Difficulté de 5. Par contre, il sera ainsi possible de transformer un ressort ou un mécanisme d'arbalète en poinçon ou en burin, etc."
+      "effect": "Ce sort repose sur la croyance qui stipule que \"tout outil existe en fait au sein d'un autre, il suffit de le révéler comme le sculpteur dévoile la statue qui existe au sein du bloc de marbre.\" En se concentrant sur une certaine utilisation, le personnage peut transformer un objet métallique (ou même un simple lingot) en un outil parfaitement approprié à l'usage auquel il pense. Au maximum, ce sort peut affecter un objet d'un kilo par point dans la Sphère du métal. Il peut être lancé par avance sur un objet et activé seulement par un mot choisi par le mage (auquel cas il prend la forme que le mage a prévu durant son incantation, sans qu'aucune modification ne soit possible). Dans ce cas, l'objet peut se transformer une fois, dans la limite de Sphère jours. On peut bien sûr porter plusieurs fois le sort sur un même objet, tant que les mots de commande sont différents. L'objet prend forme en une action et reprend sa forme originelle au bout d'une heure. La Difficulté de base est de 15, mais certains objets complexes requièrent des NR pour émerger: 0 pour un simple stylet ou un burin, 1 NR pour un loquet de porte ou des tenailles, 2 NR pour un outil mécanique ou comportant des parties mobiles complexes, un ressort ou encore un engrenage, etc... Si l'objet d'origine est déjà un objet mécanique, l'interaction entre la Sphère du métal et la science humaniste augmente la Difficulté de 5. Par contre, il sera ainsi possible de transformer un ressort ou un mécanisme d'arbalète en poinçon ou en burin, etc.",
+      "inGameEffect": "Transforme un objet métallique, ou un simple lingot, en un outil approprié à l'usage auquel le mage pense. Poids maximum d'un kilo par point de Sphère du métal. Difficulté de base 15, avec des NR pour les objets complexes : 0 pour un stylet ou un burin, 1 pour un loquet ou des tenailles, 2 pour un outil mécanique à parties mobiles, ressort ou engrenage. Un objet d'origine déjà mécanique augmente la Difficulté de 5, mais permet de transformer un ressort ou un mécanisme d'arbalète en poinçon ou en burin. L'objet prend forme en une action et reprend sa forme originelle au bout d'une heure. Le sort peut être lancé par avance et activé par un mot choisi par le mage — la forme est alors figée à l'incantation, l'objet ne se transforme qu'une fois, dans la limite de (Sphère) jours ; on peut le lancer plusieurs fois sur un même objet avec des mots de commande différents.",
+      "duration": "1",
+      "durationUnit": "hour",
+      "tags": [
+        "creation",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -2864,7 +4344,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 27,
       "cle": "Poudre d'argent (consommée), rune du métal (à tisser ou à broder), chant du métal scandé sous un orage (magique ou non)",
-      "effect": "Ce sort peut être lancé sur un vêtement, une cape, un manteau ou même une armure. Seul impératif, que le vêtement comporte des éléments de métal (clous, rivets, mailles, boucles). Bien souvent, les mages du métal le lancent sur les capes de mailles fines qu'ils portent au dessus de leurs vêtements. Dès que l'armure ou le vêtement est touché par une arme en métal, elle devient capable de déchaîner la foudre vengeresse de Kezyr. Les dommages sont de 2D10+5 et cet effet peut être déclenché jusqu'à (Tendance Dragon du porteur) fois par jour, mais le porteur n'a aucun pouvoir sur le déclenchement, qui est systématique à chaque touche. Ce sort dure un Augure. Il n'est pas possible de se prémunir matériellement de cette attaque, de la parer, de l'esquiver ou de comptabiliser une armure physique. On ne peut prendre en compte que les protections dues à un enchantement ou un objet ensorcelé, tel qu'une armure, un talisman ou un sort."
+      "effect": "Ce sort peut être lancé sur un vêtement, une cape, un manteau ou même une armure. Seul impératif, que le vêtement comporte des éléments de métal (clous, rivets, mailles, boucles). Bien souvent, les mages du métal le lancent sur les capes de mailles fines qu'ils portent au dessus de leurs vêtements. Dès que l'armure ou le vêtement est touché par une arme en métal, elle devient capable de déchaîner la foudre vengeresse de Kezyr. Les dommages sont de 2D10+5 et cet effet peut être déclenché jusqu'à (Tendance Dragon du porteur) fois par jour, mais le porteur n'a aucun pouvoir sur le déclenchement, qui est systématique à chaque touche. Ce sort dure un Augure. Il n'est pas possible de se prémunir matériellement de cette attaque, de la parer, de l'esquiver ou de comptabiliser une armure physique. On ne peut prendre en compte que les protections dues à un enchantement ou un objet ensorcelé, tel qu'une armure, un talisman ou un sort.",
+      "inGameEffect": "Se lance sur un vêtement, une cape, un manteau ou une armure comportant des éléments de métal (clous, rivets, mailles, boucles). Dès que la pièce est touchée par une arme en métal, elle inflige 2D10+5 points de dommages, jusqu'à (Tendance Dragon du porteur) fois par jour. Le déclenchement est systématique à chaque touche : le porteur n'a aucun contrôle dessus. L'attaque ne peut être ni parée, ni esquivée, et l'armure physique ne compte pas — seules les protections dues à un enchantement ou à un objet ensorcelé s'appliquent.",
+      "sensoryEffect": "L'armure déchaîne la foudre vengeresse de Kezyr.",
+      "duration": "1",
+      "durationUnit": "augure",
+      "tags": [
+        "attack",
+        "protection",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -2880,7 +4370,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Dessin de la créature recherchée tracée sur le sol (Manuel+Don artistique: Dessin Diff.15), sève végétale (pour tracer le dessin, consommée), posture (genoux à terre, mains de chaque côté du dessin)",
-      "effect": "En entrant en contact avec la conscience du sol et de la terre, le mage peut apprendre si une créature particulière est passée par là (zone de 10 m² environ) récemment. La durée écoulée depuis son passage varie selon le score en Sphère de la Nature à raison d'une semaine par point. Lorsqu'il lance le sort, le mage doit dessiner le type de créature qu'il recherche - dragon, humain, oiseau, rongeur, félin, etc. - et pour chaque NR, il peut obtenir une information supplémentaire - humain corrompu, dragon du feu. Ce sort ne fonctionne jamais dans les villes ou les villages et ne peut apporter des informations que sur une créature."
+      "effect": "En entrant en contact avec la conscience du sol et de la terre, le mage peut apprendre si une créature particulière est passée par là (zone de 10 m² environ) récemment. La durée écoulée depuis son passage varie selon le score en Sphère de la Nature à raison d'une semaine par point. Lorsqu'il lance le sort, le mage doit dessiner le type de créature qu'il recherche - dragon, humain, oiseau, rongeur, félin, etc. - et pour chaque NR, il peut obtenir une information supplémentaire - humain corrompu, dragon du feu. Ce sort ne fonctionne jamais dans les villes ou les villages et ne peut apporter des informations que sur une créature.",
+      "inGameEffect": "Apprend si une créature particulière est passée dans une zone d'environ 10 m², jusqu'à une semaine dans le passé par point de Sphère de la Nature. Le mage doit dessiner le type de créature qu'il cherche — dragon, humain, oiseau, rongeur, félin — et obtient une information supplémentaire par NR, comme « humain corrompu » ou « dragon du feu ». Ne renseigne que sur une seule créature et ne fonctionne jamais dans les villes ou les villages.",
+      "sensoryEffect": "Le mage entre en contact avec la conscience du sol et de la terre.",
+      "tags": [
+        "detection",
+        "place",
+        "exploration"
+      ]
     }
   },
   {
@@ -2896,7 +4393,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Rune de la nature tracée dans le sol, poignée de glaise (consommée), posture (poing brandi écrasant la glaise en un mouvement de haut en bas)",
-      "effect": "Ce sort n'est utilisable que dans un milieu naturel, sur un terrain meuble ou la terre (et donc à l'exclusion des pavés, des rues ou des montagnes rocheuses). Le magicien ouvre une faille sous les pieds de sa cible (à moins de 30+5/NR m), qui s'enfonce au rythme de 50cm par tour. La victime peut faire un jet de Physique + Coordination contre une Difficulté de 15 pour se libérer, mais cela nécessite de dépenser une action complète à ne faire que cela. De plus, la Difficulté du jet est augmentée de 5 par tour. Si rien n'est fait, la victime est complètement enterrée au bout de 4 tours. On applique alors les règles de l'asphyxie, p.194 du Livre de Base."
+      "effect": "Ce sort n'est utilisable que dans un milieu naturel, sur un terrain meuble ou la terre (et donc à l'exclusion des pavés, des rues ou des montagnes rocheuses). Le magicien ouvre une faille sous les pieds de sa cible (à moins de 30+5/NR m), qui s'enfonce au rythme de 50cm par tour. La victime peut faire un jet de Physique + Coordination contre une Difficulté de 15 pour se libérer, mais cela nécessite de dépenser une action complète à ne faire que cela. De plus, la Difficulté du jet est augmentée de 5 par tour. Si rien n'est fait, la victime est complètement enterrée au bout de 4 tours. On applique alors les règles de l'asphyxie, p.194 du Livre de Base.",
+      "inGameEffect": "Utilisable uniquement en milieu naturel, sur terrain meuble ou terre — jamais sur des pavés, une rue ou une montagne rocheuse. Ouvre une faille sous les pieds d'une cible située à moins de (30 + 5 par NR) m, qui s'enfonce de 50 cm par tour. La victime se libère sur un jet de Physique + Coordination contre une Difficulté de 15, en y consacrant une action complète, la Difficulté augmentant de 5 par tour. Sans réaction, elle est complètement enterrée au bout de 4 tours et les règles de l'asphyxie s'appliquent.",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -2912,7 +4415,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Rune de la nature, yeux fermés, œil d'animal séché (consommé)",
-      "effect": "En serrant dans sa main l'œil séché, le mage peut effectuer un jet de Mental + Perception contre une Difficulté de 15 pour tenter de voir une scène située hors de son champ de vision, du moment qu'elle se situe sur le même type de sol que celui où se trouve le mage (terre, roche brute, marécages, plage...). Ce sort est inefficace en ville, mais fonctionne en villages. Le sort dure 2+1/NR tours, et son éloignement maximal est égal à 4 mètres par niveau de Sphère de la Nature du mage et il est possible de changer de scène à chaque action (chaque changement demandant un jet). Il est ainsi possible d'observer ce qui se passe dans une pièce adjacente mais, pour chaque mur ou paroi qu'il traverse ainsi, le mage doit dépenser 1 point de magie supplémentaire. Il est impossible d'entendre, de parler ou d'agir de quelque manière que ce soit."
+      "effect": "En serrant dans sa main l'œil séché, le mage peut effectuer un jet de Mental + Perception contre une Difficulté de 15 pour tenter de voir une scène située hors de son champ de vision, du moment qu'elle se situe sur le même type de sol que celui où se trouve le mage (terre, roche brute, marécages, plage...). Ce sort est inefficace en ville, mais fonctionne en villages. Le sort dure 2+1/NR tours, et son éloignement maximal est égal à 4 mètres par niveau de Sphère de la Nature du mage et il est possible de changer de scène à chaque action (chaque changement demandant un jet). Il est ainsi possible d'observer ce qui se passe dans une pièce adjacente mais, pour chaque mur ou paroi qu'il traverse ainsi, le mage doit dépenser 1 point de magie supplémentaire. Il est impossible d'entendre, de parler ou d'agir de quelque manière que ce soit.",
+      "inGameEffect": "Sur un jet de Mental + Perception contre une Difficulté de 15, permet de voir une scène hors du champ de vision, à condition qu'elle se situe sur le même type de sol que le mage (terre, roche brute, marécage, plage). Éloignement maximal de 4 mètres par niveau de Sphère de la Nature. Changer de scène est possible à chaque action, chaque changement demandant un nouveau jet ; chaque mur ou paroi traversé coûte 1 point de magie supplémentaire. Impossible d'entendre, de parler ou d'agir de quelque manière que ce soit. Inefficace en ville, mais fonctionne dans les villages.",
+      "sensoryEffect": "Le mage serre dans sa main l'œil séché.",
+      "duration": "2 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "detection",
+        "exploration"
+      ]
     }
   },
   {
@@ -2928,7 +4439,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Rune de la nature, rune des océans, chant des torrents (Don artistique: Chant Diff.15)",
-      "effect": "Le mage fait apparaître, là où il a tracé ses runes, une petite fontaine d'eau pure et fraîche - capable de fournir 100 + 50/NR litres d'eau cristalline en quelques minutes. Le nom du sort vient des chants d'ondines que l'on entend lorsque l'eau apparaît, en écho au chant du mage."
+      "effect": "Le mage fait apparaître, là où il a tracé ses runes, une petite fontaine d'eau pure et fraîche - capable de fournir 100 + 50/NR litres d'eau cristalline en quelques minutes. Le nom du sort vient des chants d'ondines que l'on entend lorsque l'eau apparaît, en écho au chant du mage.",
+      "inGameEffect": "Fait apparaître, là où le mage a tracé ses runes, une petite fontaine fournissant (100 + 50 par NR) litres d'eau pure et fraîche en quelques minutes.",
+      "sensoryEffect": "On entend des chants d'ondines lorsque l'eau apparaît, en écho au chant du mage.",
+      "tags": [
+        "creation",
+        "exploration"
+      ]
     }
   },
   {
@@ -2944,7 +4461,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "Rune de la nature, cercle sacré de la nature (Manuel+Conn. de la magie Diff.15), un peu de nourriture (consommée)",
-      "effect": "Grâce à ce sortilège, le mage peut invoquer une petite créature naturelle qui lui rendra de menus services - chercher à manger, montrer le chemin, monter la garde, etc. Le serviteur est incapable de se battre et fuira au moindre signe de danger. Il peut porter de petits objets et partager toutes les images mentales que le mage est capable de lui fournir - lui permettant ainsi de retrouver quelque chose ou quelqu'un dans une zone donnée. Le serviteur ne peut en aucun cas quitter son milieu naturel et reste présent 1 heure par point en Sphère de la nature."
+      "effect": "Grâce à ce sortilège, le mage peut invoquer une petite créature naturelle qui lui rendra de menus services - chercher à manger, montrer le chemin, monter la garde, etc. Le serviteur est incapable de se battre et fuira au moindre signe de danger. Il peut porter de petits objets et partager toutes les images mentales que le mage est capable de lui fournir - lui permettant ainsi de retrouver quelque chose ou quelqu'un dans une zone donnée. Le serviteur ne peut en aucun cas quitter son milieu naturel et reste présent 1 heure par point en Sphère de la nature.",
+      "inGameEffect": "Invoque une petite créature naturelle qui rend de menus services — chercher à manger, montrer le chemin, monter la garde. Incapable de se battre, elle fuit au moindre signe de danger. Elle porte de petits objets et partage toutes les images mentales que le mage lui fournit, ce qui permet de retrouver quelque chose ou quelqu'un dans une zone donnée. Elle ne peut en aucun cas quitter son milieu naturel et reste présente 1 heure par point en Sphère de la nature.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "tags": [
+        "summoning",
+        "utility",
+        "exploration"
+      ]
     }
   },
   {
@@ -2960,7 +4485,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 16,
       "cle": "Deux pendentifs portant la rune de la nature (un sur le mage, un sur le familier), posture (bras à l'équerre, index et majeurs masquant les yeux), cri du familier imité par le mage (Social+Conn. des animaux Diff.15).",
-      "effect": "En lançant ce sort avec son familier situé à moins de vingt mètre, le mage peut voir par les yeux de l'animal durant 3+2/NR tours. C'est une vision partagée et le familier ne perd pas la vue. L'animal peut se déplacer et agir à son gré durant les effets du sort et il est impossible de le contrôler par le biais du sort. Ce sort est généralement utilisé par les mages possédant un familier dressé qu'ils peuvent commander de façon relative. Ellorian Dorsac est le mage qui a inventé ce sort. Aveugle, il a pu continuer à combattre une créature de Kalimsshar en utilisant la vue de ses familiers."
+      "effect": "En lançant ce sort avec son familier situé à moins de vingt mètre, le mage peut voir par les yeux de l'animal durant 3+2/NR tours. C'est une vision partagée et le familier ne perd pas la vue. L'animal peut se déplacer et agir à son gré durant les effets du sort et il est impossible de le contrôler par le biais du sort. Ce sort est généralement utilisé par les mages possédant un familier dressé qu'ils peuvent commander de façon relative. Ellorian Dorsac est le mage qui a inventé ce sort. Aveugle, il a pu continuer à combattre une créature de Kalimsshar en utilisant la vue de ses familiers.",
+      "inGameEffect": "Avec son familier situé à moins de vingt mètres, le mage voit par les yeux de l'animal. Vision partagée : le familier ne perd pas la vue, se déplace et agit à son gré, et le sort ne permet pas de le contrôler.",
+      "duration": "3 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "detection",
+        "exploration"
+      ]
     }
   },
   {
@@ -2976,7 +4508,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens de Heyra, posture (méditation allongé au sol, en posture fœtale), cercle runique formé de mousse et de fleurs.",
-      "effect": "A la fin de la méditation, le mage sort de sa transe alors que les runes du cercle émettent des rayons de lumière verdâtres qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Heyra (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Heyra peuvent priver l'invocateur de l'usage de la Sphère de la nature pour un jour par tranche d'âge s'ils estiment que sa requête est futile mais aussi corriger le mage pour lui remettre les idées en place. Les dragons de la nature sont par essence enclins à rester un moment avec les humains qu'ils rencontrent afin de veiller sur eux, interférant parfois avec leurs affaires s'ils l'estiment nécessaire. Ils auront tendance à vouloir guider les hommes et les instruire avec sagesse, et alterneront les attitudes bienveillantes et directives."
+      "effect": "A la fin de la méditation, le mage sort de sa transe alors que les runes du cercle émettent des rayons de lumière verdâtres qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Heyra (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Heyra peuvent priver l'invocateur de l'usage de la Sphère de la nature pour un jour par tranche d'âge s'ils estiment que sa requête est futile mais aussi corriger le mage pour lui remettre les idées en place. Les dragons de la nature sont par essence enclins à rester un moment avec les humains qu'ils rencontrent afin de veiller sur eux, interférant parfois avec leurs affaires s'ils l'estiment nécessaire. Ils auront tendance à vouloir guider les hommes et les instruire avec sagesse, et alterneront les attitudes bienveillantes et directives.",
+      "inGameEffect": "Attire l'attention du fils de Heyra le plus proche pour lui demander conseil ou solliciter un transport vers une destination précise. Le dragon est de la seconde tranche d'âge + 1 par NR. Il faut une bonne raison de solliciter son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Heyra peuvent priver l'invocateur de sa Sphère de la nature pour un jour par tranche d'âge s'ils jugent la requête futile, et aussi le corriger pour lui remettre les idées en place. Enclins à rester un moment auprès des humains pour veiller sur eux, ils interfèrent parfois dans leurs affaires et alternent attitudes bienveillantes et directives.",
+      "sensoryEffect": "À la fin de la méditation, le mage sort de transe tandis que les runes du cercle émettent des rayons de lumière verdâtre qui jaillissent vers le ciel.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -2992,7 +4531,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 17,
       "cle": "Une feuille morte (consommée), rune du Cycle du silence, chant harmonique grave",
-      "effect": "Ce sort ne fonctionne que dans un lieu boisé. Les feuilles tombent des arbres et vont tourbillonner autour de 1+1/NR cibles désignées par le mage, situées à moins de trente mètres de lui. Chaque fois qu'elles souhaitent agir, les victimes doivent dépenser une action supplémentaire et voient la Difficulté de toutes leurs actions physiques augmenter de 3. Ce sortilège reste actif pendant un nombre de tours égal à la Tendance Dragon du mage."
+      "effect": "Ce sort ne fonctionne que dans un lieu boisé. Les feuilles tombent des arbres et vont tourbillonner autour de 1+1/NR cibles désignées par le mage, situées à moins de trente mètres de lui. Chaque fois qu'elles souhaitent agir, les victimes doivent dépenser une action supplémentaire et voient la Difficulté de toutes leurs actions physiques augmenter de 3. Ce sortilège reste actif pendant un nombre de tours égal à la Tendance Dragon du mage.",
+      "inGameEffect": "Fonctionne uniquement en lieu boisé. (1 + 1 par NR) cibles désignées à moins de trente mètres doivent dépenser une action supplémentaire chaque fois qu'elles souhaitent agir, et voient la Difficulté de toutes leurs actions physiques augmenter de 3. Reste actif un nombre de tours égal à la Tendance Dragon du mage.",
+      "sensoryEffect": "Les feuilles tombent des arbres et tourbillonnent autour des cibles.",
+      "targets": "1 + 1 par NR",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3008,7 +4555,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 17,
       "cle": "Main tendue vers l'agression, mot mystique d'appel à la bienveillance de la Nature (Social+Connaissance de la Magie Diff. 15), posture d'interposition",
-      "effect": "Ce sort peut être utilisé comme action de défense au même titre qu'une parade ou une esquive et ce en utilisant un dé d'action comme prévu au chapitre Combat. Il ne peut être utilisé que si le lanceur se trouve à moins de (Sphère de la nature) mètres d'un arbre ou d'un animal susceptible de subir des dommages à sa place. Au moment où le mage va subir une blessure, il peut lancer le sort et effectuer un jet de Empathie + Magie Instinctive contre une Difficulté de 15 pour entrer en symbiose immédiate avec l'arbre ou l'animal de son choix. Ce dernier subit les dommages à sa place, mais le mage gagne immédiatement un nombre de cercles de Tendance Fatalité égal à 2 + le malus lié à la Blessure qu'il aurait dû subir. Si la créature ou le végétal meurt de cette blessure, le mage gagne immédiatement 1 point de Tendance Fatalité et perd l'usage de ce sortilège pour un Augure. Sa Sphère Nature est également réduite de 1 de façon permanente."
+      "effect": "Ce sort peut être utilisé comme action de défense au même titre qu'une parade ou une esquive et ce en utilisant un dé d'action comme prévu au chapitre Combat. Il ne peut être utilisé que si le lanceur se trouve à moins de (Sphère de la nature) mètres d'un arbre ou d'un animal susceptible de subir des dommages à sa place. Au moment où le mage va subir une blessure, il peut lancer le sort et effectuer un jet de Empathie + Magie Instinctive contre une Difficulté de 15 pour entrer en symbiose immédiate avec l'arbre ou l'animal de son choix. Ce dernier subit les dommages à sa place, mais le mage gagne immédiatement un nombre de cercles de Tendance Fatalité égal à 2 + le malus lié à la Blessure qu'il aurait dû subir. Si la créature ou le végétal meurt de cette blessure, le mage gagne immédiatement 1 point de Tendance Fatalité et perd l'usage de ce sortilège pour un Augure. Sa Sphère Nature est également réduite de 1 de façon permanente.",
+      "inGameEffect": "S'utilise comme action de défense, au même titre qu'une parade ou une esquive, et consomme un dé d'action. Le lanceur doit se trouver à moins de (Sphère de la nature) mètres d'un arbre ou d'un animal. Au moment de subir une blessure, il réussit un jet d'Empathie + Magie Instinctive contre une Difficulté de 15 pour entrer en symbiose avec lui : la créature ou le végétal subit les dommages à sa place, mais le mage gagne aussitôt un nombre de cercles de Tendance Fatalité égal à 2 + le malus lié à la Blessure évitée. Si la créature ou le végétal en meurt, le mage gagne immédiatement 1 point de Tendance Fatalité, perd l'usage de ce sortilège pour un Augure, et sa Sphère Nature est réduite de 1 de façon permanente.",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -3024,7 +4577,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Rune de nature (à tracer sur la matière), mélange de tourbe et de sciure de bois (à étaler sur l'objet ou la matière, consommé), psaume sourd",
-      "effect": "Ce sort très puissant transforme instantanément toute matière solide en bois sur un volume de 1+1/NR m³ au toucher. Le métal, la pierre ou même la glace peuvent être affectés par cet effet. Si la cible est un objet manufacturé et ensorcelé (par magie, artisanat élémentaire ou fabrication Légendaire), le mage doit réussir un jet d'incantation au moins égal au jet de Compétence ou d'incantation qui a rendu l'objet enchanté. La transformation perdure une heure. A l'expiration du sort, la matière garde son état et peut donc avoir été détruite."
+      "effect": "Ce sort très puissant transforme instantanément toute matière solide en bois sur un volume de 1+1/NR m³ au toucher. Le métal, la pierre ou même la glace peuvent être affectés par cet effet. Si la cible est un objet manufacturé et ensorcelé (par magie, artisanat élémentaire ou fabrication Légendaire), le mage doit réussir un jet d'incantation au moins égal au jet de Compétence ou d'incantation qui a rendu l'objet enchanté. La transformation perdure une heure. A l'expiration du sort, la matière garde son état et peut donc avoir été détruite.",
+      "inGameEffect": "Transforme instantanément en bois toute matière solide au toucher, sur (1 + 1 par NR) m³ — métal, pierre, même glace. Si la cible est un objet manufacturé et ensorcelé (magie, artisanat élémentaire ou fabrication Légendaire), le jet d'incantation doit au moins égaler le jet qui a rendu l'objet enchanté. À l'expiration, la matière garde son état et peut donc avoir été détruite.",
+      "duration": "1",
+      "durationUnit": "hour",
+      "tags": [
+        "utility",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -3040,7 +4601,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "Rune de la nature (à tracer sur la partie du corps étant altérée), goutte de sang de la créature imitée (à mélanger avec une goutte de sang de la cible), cri de la créature imitée (Présence +Connaissance des animaux Diff.15)",
-      "effect": "Ce sortilège permet au mage de partager brièvement n'importe quelle caractéristique physique d'une créature vivante de son choix lui étant connue – dragons et humains exclus. En lançant ce sortilège, le mage doit déterminer la créature et la caractéristique qu'il souhaite partager – la résistance du chêne, la rapidité du loup, la vision nocturne d'un prédateur, etc. Il est impossible de voler de cette façon, car le corps du mage ne se modifie pas au point de lui faire pousser des ailes. Le sortilège dure Sphère de la nature tours et permet de gagner une faculté ou un bonus de Caractéristique de 1+1/NR points. Durant cette période, les Attributs et valeurs de jeu découlant de cette Caractéristique sont temporairement réévaluées selon le tableau de calcul des Attributs ou des seuils de blessure indiqué dans le livre de base p.76-77. Dans le cas de cases de blessures acquises temporairement, ce sont d'abord les cases de blessures du personnage qui seront cochées (et qui subsisteront donc). D'éventuelles cases de blessures temporaires cochées disparaissent sans effet secondaire."
+      "effect": "Ce sortilège permet au mage de partager brièvement n'importe quelle caractéristique physique d'une créature vivante de son choix lui étant connue – dragons et humains exclus. En lançant ce sortilège, le mage doit déterminer la créature et la caractéristique qu'il souhaite partager – la résistance du chêne, la rapidité du loup, la vision nocturne d'un prédateur, etc. Il est impossible de voler de cette façon, car le corps du mage ne se modifie pas au point de lui faire pousser des ailes. Le sortilège dure Sphère de la nature tours et permet de gagner une faculté ou un bonus de Caractéristique de 1+1/NR points. Durant cette période, les Attributs et valeurs de jeu découlant de cette Caractéristique sont temporairement réévaluées selon le tableau de calcul des Attributs ou des seuils de blessure indiqué dans le livre de base p.76-77. Dans le cas de cases de blessures acquises temporairement, ce sont d'abord les cases de blessures du personnage qui seront cochées (et qui subsisteront donc). D'éventuelles cases de blessures temporaires cochées disparaissent sans effet secondaire.",
+      "inGameEffect": "Partage une caractéristique physique d'une créature vivante connue du mage — dragons et humains exclus : la résistance du chêne, la rapidité du loup, la vision nocturne d'un prédateur. La créature et la caractéristique sont fixées au lancement. Impossible de voler ainsi, le corps du mage ne se modifiant pas au point de lui faire pousser des ailes. Dure (Sphère de la nature) tours et donne une faculté ou un bonus de Caractéristique de (1 + 1 par NR) points, les Attributs et valeurs qui en découlent étant temporairement réévalués. Pour des cases de blessure acquises temporairement, ce sont d'abord celles du personnage qui sont cochées et qui subsistent ; les cases temporaires cochées disparaissent sans effet secondaire.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -3056,7 +4625,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 22,
       "cle": "Pétale de rose ou pousse de rosier, rune de fertilité",
-      "effect": "Le magicien fait pousser devant lui un rosier dont les épines mouvantes suintent d'un poison foudroyant. La plante va grandir et former un cercle (Sphère de la nature x2) m² autour de l'invocateur en 1 tour. Toute créature tentant de franchir la barrière épineuse subit immédiatement 3D10+1D10/NR points de dommages (avec armure ou protection surnaturelle, mais sans bouclier). Si la cible est blessée (au moins une Egratignure), elle doit réussir un jet de Physique+Résistance contre une Difficulté de 20 ou subir immédiatement une blessure Fatale. La barrière flagelle toute créature éventuellement prise dans ses tiges à chaque tour, infligeant ses dommages à la fin du tour. La barrière dure une heure au maximum, mais peut être contournée par le haut (soit par des créature volantes ou très grandes), car elle ne s'élève qu'à hauteur d'épaule."
+      "effect": "Le magicien fait pousser devant lui un rosier dont les épines mouvantes suintent d'un poison foudroyant. La plante va grandir et former un cercle (Sphère de la nature x2) m² autour de l'invocateur en 1 tour. Toute créature tentant de franchir la barrière épineuse subit immédiatement 3D10+1D10/NR points de dommages (avec armure ou protection surnaturelle, mais sans bouclier). Si la cible est blessée (au moins une Egratignure), elle doit réussir un jet de Physique+Résistance contre une Difficulté de 20 ou subir immédiatement une blessure Fatale. La barrière flagelle toute créature éventuellement prise dans ses tiges à chaque tour, infligeant ses dommages à la fin du tour. La barrière dure une heure au maximum, mais peut être contournée par le haut (soit par des créature volantes ou très grandes), car elle ne s'élève qu'à hauteur d'épaule.",
+      "inGameEffect": "Fait pousser en 1 tour un rosier formant un cercle de (Sphère de la nature × 2) m² autour de l'invocateur. Toute créature tentant de franchir la barrière subit (3D10 + 1D10 par NR) points de dommages — armure et protection surnaturelle comptent, le bouclier non. Si elle est blessée, ne serait-ce que d'une Égratignure, elle doit réussir un jet de Physique + Résistance contre une Difficulté de 20 ou subir immédiatement une blessure Fatale. La barrière flagelle à chaque tour toute créature prise dans ses tiges, infligeant ses dommages en fin de tour. Dure une heure au maximum et ne s'élève qu'à hauteur d'épaule : elle se contourne par le haut, par une créature volante ou très grande.",
+      "sensoryEffect": "Les épines mouvantes du rosier suintent d'un poison foudroyant.",
+      "duration": "1",
+      "durationUnit": "hour",
+      "tags": [
+        "attack",
+        "protection",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -3072,7 +4651,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "Rune de Heyra (à porter sur l'arme), du sang de la créature visée (consommé), hurlement aux lunes",
-      "effect": "En procédant à un rituel nocturne, le mage enduit une arme d'un mélange à base de sang pour conférer à la lame un bonus au toucher et aux dommages contre une créature naturelle animale (excluant donc les peuples anciens, les dragons ou les hommes). Le bonus est égal à 3 + 1/NR. Il doit impérativement s'agir d'un type de créature précis qui, une fois déterminé, ne peut plus être changé. Une même arme ne peut recevoir deux fois l'enchantement de ce sortilège. Le sortilège s'applique quelle que soit la taille de l'arme, de la dague à l'épée à deux mains, car il diffuse son pouvoir sur toute la lame. Il permet également d'enchanter cinq flèches ou carreaux et perdure jusqu'au prochain coucher du soleil."
+      "effect": "En procédant à un rituel nocturne, le mage enduit une arme d'un mélange à base de sang pour conférer à la lame un bonus au toucher et aux dommages contre une créature naturelle animale (excluant donc les peuples anciens, les dragons ou les hommes). Le bonus est égal à 3 + 1/NR. Il doit impérativement s'agir d'un type de créature précis qui, une fois déterminé, ne peut plus être changé. Une même arme ne peut recevoir deux fois l'enchantement de ce sortilège. Le sortilège s'applique quelle que soit la taille de l'arme, de la dague à l'épée à deux mains, car il diffuse son pouvoir sur toute la lame. Il permet également d'enchanter cinq flèches ou carreaux et perdure jusqu'au prochain coucher du soleil.",
+      "inGameEffect": "Rituel nocturne enduisant une arme d'un mélange à base de sang : bonus de (3 + 1 par NR) au toucher et aux dommages contre un type précis de créature animale naturelle — peuples anciens, dragons et hommes exclus. Le type est fixé une fois pour toutes et une même arme ne peut recevoir deux fois l'enchantement. S'applique quelle que soit la taille de l'arme, de la dague à l'épée à deux mains, le pouvoir se diffusant sur toute la lame ; permet aussi d'enchanter cinq flèches ou carreaux. Perdure jusqu'au prochain coucher du soleil.",
+      "tags": [
+        "buff",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -3088,7 +4673,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 22,
       "cle": "Rune de Moryagorn (tracée dans la boue), boue, poudre d'argent (consommée)",
-      "effect": "En mélangeant la boue à divers ingrédients élémentaires, le mage créé un onguent qui, une fois appliqué sur le corps, confère une totale immunité contre un élément particulier durant (Sphère de la Nature) heures - flammes et chaleur, froid, électricité, etc. La quantité créée est suffisante pour 1+1/NR personnes de taille adulte. La boue confère sa protection même si le personnage qui se l'applique porte une armure, mais seule sa peau bénéficie du pouvoir protecteur - ainsi, ses vêtements et objets fragiles subissent les dommages normaux. La boue reste efficace une journée entière, après quoi, il est nécessaire de procéder à un nouveau rituel. Elle se conserve donc très mal (elle doit de plus être gardée au sec et à l'abri de la lumière sous peine de durcir), c'est pourquoi les mages n'en font jamais de réserve..."
+      "effect": "En mélangeant la boue à divers ingrédients élémentaires, le mage créé un onguent qui, une fois appliqué sur le corps, confère une totale immunité contre un élément particulier durant (Sphère de la Nature) heures - flammes et chaleur, froid, électricité, etc. La quantité créée est suffisante pour 1+1/NR personnes de taille adulte. La boue confère sa protection même si le personnage qui se l'applique porte une armure, mais seule sa peau bénéficie du pouvoir protecteur - ainsi, ses vêtements et objets fragiles subissent les dommages normaux. La boue reste efficace une journée entière, après quoi, il est nécessaire de procéder à un nouveau rituel. Elle se conserve donc très mal (elle doit de plus être gardée au sec et à l'abri de la lumière sous peine de durcir), c'est pourquoi les mages n'en font jamais de réserve...",
+      "inGameEffect": "Crée un onguent qui, appliqué sur le corps, confère une totale immunité contre un élément particulier — flammes et chaleur, froid, électricité — pendant (Sphère de la Nature) heures. La quantité suffit pour (1 + 1 par NR) personnes de taille adulte. Protège même sous une armure, mais seule la peau en bénéficie : vêtements et objets fragiles subissent les dommages normaux. La boue reste efficace une journée entière, doit être gardée au sec et à l'abri de la lumière sous peine de durcir, et ne se conserve donc pas — les mages n'en font jamais de réserve.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "targets": "1 + 1 par NR",
+      "tags": [
+        "protection",
+        "creation",
+        "object"
+      ]
     }
   },
   {
@@ -3104,7 +4698,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "Rune de la tanière suprême (Manuel+Conn. de la magie Diff.15), morceau de bois précieux (à déposer dans le gîte), berceuse de Heyra",
-      "effect": "Ce sortilège permet au mage de faire d'un abri sommaire (faille rocheuse, creux sous un arbre...) un abri solide et chaud, capable d'abriter 3+2/NR personnes de taille humaine (l'endroit se dilate et s'étend au moment du lancement). Le refuge protège du vent et du froid et, grâce à sa nature magique, dissuade les animaux et les prédateurs de s'en approcher. La guérison est accélérée à l'intérieur du refuge car toute nuit de repos complète compte en fait pour une journée de repos total (soit deux jours de moins à la période de guérison d'éventuelles blessures en cours de régénération). De plus, au matin, tous les mages non Fatalistes regagnent l'intégralité de leurs points de Magie, quelles qu'en soient les Sphères - sauf la Sphère de l'Ombre. Les êtres vivants possédant plus de 2 en Tendance Fatalité ne peuvent pénétrer dans le refuge. Ceux qui possèdent plus de 3 ne peuvent s'en approcher à plus de cinq mètres. Le refuge subsiste un jour complet."
+      "effect": "Ce sortilège permet au mage de faire d'un abri sommaire (faille rocheuse, creux sous un arbre...) un abri solide et chaud, capable d'abriter 3+2/NR personnes de taille humaine (l'endroit se dilate et s'étend au moment du lancement). Le refuge protège du vent et du froid et, grâce à sa nature magique, dissuade les animaux et les prédateurs de s'en approcher. La guérison est accélérée à l'intérieur du refuge car toute nuit de repos complète compte en fait pour une journée de repos total (soit deux jours de moins à la période de guérison d'éventuelles blessures en cours de régénération). De plus, au matin, tous les mages non Fatalistes regagnent l'intégralité de leurs points de Magie, quelles qu'en soient les Sphères - sauf la Sphère de l'Ombre. Les êtres vivants possédant plus de 2 en Tendance Fatalité ne peuvent pénétrer dans le refuge. Ceux qui possèdent plus de 3 ne peuvent s'en approcher à plus de cinq mètres. Le refuge subsiste un jour complet.",
+      "inGameEffect": "Transforme un abri sommaire — faille rocheuse, creux sous un arbre — en abri solide et chaud pour (3 + 2 par NR) personnes de taille humaine, l'endroit se dilatant au lancement. Protège du vent et du froid et dissuade animaux et prédateurs d'approcher. La guérison y est accélérée : toute nuit de repos complète compte pour une journée de repos total, soit deux jours de moins sur une régénération en cours. Au matin, tous les mages non Fatalistes regagnent l'intégralité de leurs points de Magie, quelles qu'en soient les Sphères, sauf celle de l'Ombre. Les êtres ayant plus de 2 en Tendance Fatalité ne peuvent y pénétrer ; au-delà de 3, ils ne peuvent s'en approcher à moins de cinq mètres. Subsiste un jour complet.",
+      "duration": "1",
+      "durationUnit": "day",
+      "targets": "3 + 2 par NR",
+      "tags": [
+        "protection",
+        "healing",
+        "place",
+        "exploration"
+      ]
     }
   },
   {
@@ -3120,7 +4724,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 16,
       "cle": "Brindille de bois précieux (consommée), kata de la colère de la Nature (Don artistique: Danse Diff.15), rune du Flux d'Ether (Manuel+Conn. de la magie Diff.15)",
-      "effect": "En lançant ce sortilège, le mage invoque un peu de la puissance de la Nature qui, l'espace d'un combat, prend la forme d'un colossal gourdin de bois à deux mains. Les dommages de base sont de (FORx3)+Sphère de la nature. Le marteau de chêne divise par deux l'armure de tout adversaire possédant plus de 3 en Tendance Fatalité et s'utilise avec Armes contondantes en bénéficiant d'un bonus de +1/NR. Sa taille varie selon la force et la puissance du mage et permet de plus de Renverser en mêlée. Ce marteau perdure (Sphère de la nature x2) tours et peut être manipulé par toute personne possédant la Sphère de la nature."
+      "effect": "En lançant ce sortilège, le mage invoque un peu de la puissance de la Nature qui, l'espace d'un combat, prend la forme d'un colossal gourdin de bois à deux mains. Les dommages de base sont de (FORx3)+Sphère de la nature. Le marteau de chêne divise par deux l'armure de tout adversaire possédant plus de 3 en Tendance Fatalité et s'utilise avec Armes contondantes en bénéficiant d'un bonus de +1/NR. Sa taille varie selon la force et la puissance du mage et permet de plus de Renverser en mêlée. Ce marteau perdure (Sphère de la nature x2) tours et peut être manipulé par toute personne possédant la Sphère de la nature.",
+      "inGameEffect": "Invoque un colossal gourdin de bois à deux mains, dont les dommages de base sont (FOR ×3) + Sphère de la nature. Divise par deux l'armure de tout adversaire ayant plus de 3 en Tendance Fatalité, s'utilise avec Armes contondantes avec un bonus de +1 par NR, et permet de Renverser en mêlée. Sa taille varie selon la force et la puissance du mage. Perdure (Sphère de la nature × 2) tours et peut être manipulé par toute personne possédant la Sphère de la nature.",
+      "duration": "SPHERE x2",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "summoning",
+        "combat"
+      ]
     }
   },
   {
@@ -3136,7 +4748,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 25,
       "cle": "Cercle runique de la nature (Manuel+Conn. de la magie Diff.15), encens de Heyra (consommé), chant féerique (Don artistique : Chant Diff.15)",
-      "effect": "Ce sort est à la fois une invocation et un rituel de présentation vis à vis des Fenn'dans, le peuple féerique de Heyra. Ce sort lance un appel paisible aux Fenn'dans dans les 10 km à la ronde. Ces derniers sont alors avertis de la présence du mage et de sa demande. Selon les créatures présentes, les réactions peuvent varier considérablement. Les Fenn'dans ne se montrent pas toujours, mais il y en aura toujours certains pour montrer au mage leur présence et tenter d'agir en sa faveur. Il peut s'agir de simples lumières bleutés, comme d'un arbre qui s'anime et écrase tout sur son passage. Au pire et si aucune aide n'est accordée, le refus sera justifié au mage par respect pour lui. Bien évidemment, ce sort n'oblige en rien le peuple ancien de Heyra à obéir au mage et encore moins à ses compagnons qui ne bénéficieront pas de la même tolérance. Bien souvent, ce sort est lancé en solitaire par les mages maîtrisant sa puissance. Pour en savoir plus sur les Fenn'danns et les Fenn'dreds, reportez-vous aux secrets des Grands Dragons (cf. l'écran de Prophecy)."
+      "effect": "Ce sort est à la fois une invocation et un rituel de présentation vis à vis des Fenn'dans, le peuple féerique de Heyra. Ce sort lance un appel paisible aux Fenn'dans dans les 10 km à la ronde. Ces derniers sont alors avertis de la présence du mage et de sa demande. Selon les créatures présentes, les réactions peuvent varier considérablement. Les Fenn'dans ne se montrent pas toujours, mais il y en aura toujours certains pour montrer au mage leur présence et tenter d'agir en sa faveur. Il peut s'agir de simples lumières bleutés, comme d'un arbre qui s'anime et écrase tout sur son passage. Au pire et si aucune aide n'est accordée, le refus sera justifié au mage par respect pour lui. Bien évidemment, ce sort n'oblige en rien le peuple ancien de Heyra à obéir au mage et encore moins à ses compagnons qui ne bénéficieront pas de la même tolérance. Bien souvent, ce sort est lancé en solitaire par les mages maîtrisant sa puissance. Pour en savoir plus sur les Fenn'danns et les Fenn'dreds, reportez-vous aux secrets des Grands Dragons (cf. l'écran de Prophecy).",
+      "inGameEffect": "À la fois invocation et rituel de présentation : lance un appel paisible aux Fenn'dans dans les 10 km à la ronde, qui sont avertis de la présence du mage et de sa demande. Les réactions varient considérablement selon les créatures présentes ; certains montrent toujours leur présence et tentent d'agir en sa faveur. N'oblige en rien le peuple ancien de Heyra à obéir au mage, et encore moins à ses compagnons, qui ne bénéficient pas de la même tolérance. Si aucune aide n'est accordée, le refus est justifié au mage par respect pour lui.",
+      "sensoryEffect": "L'aide peut prendre la forme de simples lumières bleutées comme d'un arbre qui s'anime et écrase tout sur son passage.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -3152,7 +4771,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 17,
       "cle": "Rune de la Terre, un peu de sang",
-      "effect": "En faisant couler son propre sang, le mage fait appel à la justice de Heyra pour que la fureur du Grand Dragon s'abatte sur son ennemi. Les manifestations de Heyra sont toujours différentes et, en fonction du sol et de l'environnement, peuvent prendre la forme d'une énorme racine venant enserrer sa cible, d'une salve d'énergie verdâtre jaillissant du sol, d'une nuée de créatures déchiquetant le victime, etc. La cible, située à moins de 25 +10/NR m, subit une attaque dont elle ne peut se défendre physiquement (pas de parade, esquive ou armure) et dont les dommages sont de 20 + 1D10 par point de sa propre Tendance Fatalité. Si le mage s'en sert à mauvais escient, contre une créature bienveillante ou un Elu de Heyra par exemple, c'est lui qui subit les dommages."
+      "effect": "En faisant couler son propre sang, le mage fait appel à la justice de Heyra pour que la fureur du Grand Dragon s'abatte sur son ennemi. Les manifestations de Heyra sont toujours différentes et, en fonction du sol et de l'environnement, peuvent prendre la forme d'une énorme racine venant enserrer sa cible, d'une salve d'énergie verdâtre jaillissant du sol, d'une nuée de créatures déchiquetant le victime, etc. La cible, située à moins de 25 +10/NR m, subit une attaque dont elle ne peut se défendre physiquement (pas de parade, esquive ou armure) et dont les dommages sont de 20 + 1D10 par point de sa propre Tendance Fatalité. Si le mage s'en sert à mauvais escient, contre une créature bienveillante ou un Elu de Heyra par exemple, c'est lui qui subit les dommages.",
+      "inGameEffect": "Le mage fait couler son propre sang pour appeler la fureur de Heyra sur son ennemi. La cible, à moins de (25 + 10 par NR) m, subit une attaque contre laquelle elle ne peut se défendre physiquement — ni parade, ni esquive, ni armure — infligeant 20 + 1D10 par point de sa propre Tendance Fatalité. Employé à mauvais escient, contre une créature bienveillante ou un Élu de Heyra, c'est le mage qui subit les dommages.",
+      "sensoryEffect": "Les manifestations de Heyra sont toujours différentes et dépendent du sol et de l'environnement : une énorme racine venant enserrer la cible, une salve d'énergie verdâtre jaillissant du sol, une nuée de créatures déchiquetant la victime.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3168,7 +4794,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 22,
       "cle": "Terre argileuse, sable fin, rune de la nature (cercle)",
-      "effect": "Le mage doit être nu et se passer le baume sur tout le corps et les cheveux (ce qui lui prend 10 mn). Il lui suffit alors de se plaquer contre une surface pour en prendre la couleur pendant une heure par point en Sphère de la nature. Plus la surface est plane, moins le camouflage est efficace. Sur un mur, il n'a aucun effet. Toute personne qui croisera le camouflé subira un malus de 3 + 1/NR pour le détecter. Le baume peut se conserver une semaine avant de perdre ses capacités surnaturelles."
+      "effect": "Le mage doit être nu et se passer le baume sur tout le corps et les cheveux (ce qui lui prend 10 mn). Il lui suffit alors de se plaquer contre une surface pour en prendre la couleur pendant une heure par point en Sphère de la nature. Plus la surface est plane, moins le camouflage est efficace. Sur un mur, il n'a aucun effet. Toute personne qui croisera le camouflé subira un malus de 3 + 1/NR pour le détecter. Le baume peut se conserver une semaine avant de perdre ses capacités surnaturelles.",
+      "inGameEffect": "Le mage doit être nu et se passer le baume sur tout le corps et les cheveux, ce qui prend 10 minutes. Il lui suffit ensuite de se plaquer contre une surface pour en prendre la couleur, pendant une heure par point en Sphère de la nature. Plus la surface est plane, moins le camouflage est efficace — sur un mur, il n'a aucun effet. Toute personne croisant le camouflé subit un malus de (3 + 1 par NR) pour le détecter. Le baume se conserve une semaine avant de perdre ses capacités surnaturelles.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "tags": [
+        "illusion",
+        "self",
+        "exploration"
+      ]
     }
   },
   {
@@ -3184,7 +4818,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 22,
       "cle": "Rune de Heyra, fruit à enchanter (consommé), soupir de puissance",
-      "effect": "Le mage ensorcelle 1+1/NR fruits ou baies qui, une fois ingérées, permettent d'effectuer un jet de Physique + Résistance contre une Difficulté de 10. Si le jet est réussi, le bénéficiaire peut effacer une Egratignure. Si des NR sont obtenus à ce jet, il est alors possible de soigner une blessure plus grave (une Légère pour 1 NR, une Grave pour 2NR, etc...bien qu'il soit impossible de soigner une blessure mortelle par ce moyen). Chaque fruit ne soigne qu'une blessure. Pour chaque nouveau fruit ingéré par un même individu dans l'espace d'une journée, la Difficulté du jet est augmentée de 5. Les fruits se conservent un jour par point en Sphère de la nature."
+      "effect": "Le mage ensorcelle 1+1/NR fruits ou baies qui, une fois ingérées, permettent d'effectuer un jet de Physique + Résistance contre une Difficulté de 10. Si le jet est réussi, le bénéficiaire peut effacer une Egratignure. Si des NR sont obtenus à ce jet, il est alors possible de soigner une blessure plus grave (une Légère pour 1 NR, une Grave pour 2NR, etc...bien qu'il soit impossible de soigner une blessure mortelle par ce moyen). Chaque fruit ne soigne qu'une blessure. Pour chaque nouveau fruit ingéré par un même individu dans l'espace d'une journée, la Difficulté du jet est augmentée de 5. Les fruits se conservent un jour par point en Sphère de la nature.",
+      "inGameEffect": "Ensorcelle (1 + 1 par NR) fruits ou baies. Ingérée, chacune permet un jet de Physique + Résistance contre une Difficulté de 10 : réussi, il efface une Égratignure ; avec des NR, il soigne une blessure plus grave — une Légère pour 1 NR, une Grave pour 2 NR — sans jamais pouvoir soigner une blessure mortelle. Chaque fruit ne soigne qu'une blessure, et pour chaque nouveau fruit ingéré par le même individu dans la journée la Difficulté augmente de 5. Les fruits se conservent un jour par point en Sphère de la nature.",
+      "duration": "SPHERE",
+      "durationUnit": "day",
+      "targets": "1 + 1 par NR",
+      "tags": [
+        "healing",
+        "creation",
+        "object"
+      ]
     }
   },
   {
@@ -3200,7 +4843,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "Un diapason orné de la rune de Heyra, danse d'harmonisation (Don artistique : Danse Diff.15), ambiance calme",
-      "effect": "Le diapason doit être frappé contre un arbre. Ce dernier se met alors à chanter. Le son qui en sort est une sorte de grondement harmonique et très grave qui monte dans les aigus quand on arrive aux plus hautes branches. L'arbre appelle ses frères et leur demande un unique renseignement que le mage aura précisé - localisation d'une créature, témoignage sur un événement passé, rapporter des paroles prononcées au loin.... La réponse est compréhensible par toute personne proche de l'arbre qui chante. Le diapason est inutilisable durant un combat, une tempête ou un incendie de forêt (par exemple). Les arbres mis en vibration doivent appartenir à un même ensemble végétal (forêt, bois, bosquet) et il est donc impossible d'utiliser le diapason sur un arbre isolé au milieu d'une lande. Au maximum, les arbres sont mis en vibration jusqu'à 10+5/NR km autour de l'arbre central, mais il est impossible d'utiliser le diapason plus d'une fois par jour, la Nature n'acceptant pas d'être dérangée à outrance. Le diapason reste toutefois enchanté jusqu'au début du prochain Augure."
+      "effect": "Le diapason doit être frappé contre un arbre. Ce dernier se met alors à chanter. Le son qui en sort est une sorte de grondement harmonique et très grave qui monte dans les aigus quand on arrive aux plus hautes branches. L'arbre appelle ses frères et leur demande un unique renseignement que le mage aura précisé - localisation d'une créature, témoignage sur un événement passé, rapporter des paroles prononcées au loin.... La réponse est compréhensible par toute personne proche de l'arbre qui chante. Le diapason est inutilisable durant un combat, une tempête ou un incendie de forêt (par exemple). Les arbres mis en vibration doivent appartenir à un même ensemble végétal (forêt, bois, bosquet) et il est donc impossible d'utiliser le diapason sur un arbre isolé au milieu d'une lande. Au maximum, les arbres sont mis en vibration jusqu'à 10+5/NR km autour de l'arbre central, mais il est impossible d'utiliser le diapason plus d'une fois par jour, la Nature n'acceptant pas d'être dérangée à outrance. Le diapason reste toutefois enchanté jusqu'au début du prochain Augure.",
+      "inGameEffect": "Le diapason, frappé contre un arbre, le fait chanter : il appelle ses frères et leur demande un unique renseignement précisé par le mage — localisation d'une créature, témoignage sur un événement passé, paroles prononcées au loin. La réponse est compréhensible par toute personne proche de l'arbre. Les arbres mis en vibration doivent appartenir à un même ensemble végétal (forêt, bois, bosquet), jusqu'à (10 + 5 par NR) km autour de l'arbre central — jamais sur un arbre isolé au milieu d'une lande. Inutilisable pendant un combat, une tempête ou un incendie de forêt, et pas plus d'une fois par jour, la Nature n'acceptant pas d'être dérangée à outrance.",
+      "sensoryEffect": "L'arbre émet un grondement harmonique et très grave, qui monte dans les aigus à mesure qu'on atteint les plus hautes branches.",
+      "duration": "1",
+      "durationUnit": "augure",
+      "tags": [
+        "detection",
+        "communication",
+        "object"
+      ]
     }
   },
   {
@@ -3216,7 +4868,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "Un bouclier, danse de protection, résine",
-      "effect": "Le mage ensorcelle le bouclier pour une semaine. Ce dernier devient habité par une partie de la Nature et protège alors son porteur contre le feu, le froid et la foudre avec plus d'efficacité. Lorsqu'il utilise son bouclier pour parer une attaque utilisant une de ces énergies, il obtient un bonus de +4. De plus, il peut bénéficier de ce bonus lorsqu'il combat une créature animale, draconique ou élémentaire. Le bouclier permet même de parer des sorts n'autorisant pas de parade, mais sans bonus, et ce tant qu'ils utilisent une de ces énergies. De plus, le bouclier ne réduit pas son indice de protection du fait des coups ou des sorts, ce qui lui confère une durabilité exceptionnelle. Tant qu'il porte ce bouclier, le personnage ne peut porter atteinte à la Nature de façon consciente sous peine de briser le sort. Tout porteur possédant moins de 3 en Tendance Dragon brise immédiatement le sort en empoignant le bouclier, faute de croyance solide."
+      "effect": "Le mage ensorcelle le bouclier pour une semaine. Ce dernier devient habité par une partie de la Nature et protège alors son porteur contre le feu, le froid et la foudre avec plus d'efficacité. Lorsqu'il utilise son bouclier pour parer une attaque utilisant une de ces énergies, il obtient un bonus de +4. De plus, il peut bénéficier de ce bonus lorsqu'il combat une créature animale, draconique ou élémentaire. Le bouclier permet même de parer des sorts n'autorisant pas de parade, mais sans bonus, et ce tant qu'ils utilisent une de ces énergies. De plus, le bouclier ne réduit pas son indice de protection du fait des coups ou des sorts, ce qui lui confère une durabilité exceptionnelle. Tant qu'il porte ce bouclier, le personnage ne peut porter atteinte à la Nature de façon consciente sous peine de briser le sort. Tout porteur possédant moins de 3 en Tendance Dragon brise immédiatement le sort en empoignant le bouclier, faute de croyance solide.",
+      "inGameEffect": "Le bouclier enchanté donne +4 pour parer une attaque de feu, de froid ou de foudre, ainsi que face à une créature animale, draconique ou élémentaire. Il permet même de parer des sorts n'autorisant pas la parade, sans bonus, tant qu'ils utilisent une de ces énergies. Son indice de protection ne se réduit ni sous les coups ni sous les sorts, ce qui lui donne une durabilité exceptionnelle. Tant qu'il le porte, le personnage ne peut porter atteinte à la Nature de façon consciente sous peine de briser le sort ; un porteur ayant moins de 3 en Tendance Dragon le brise immédiatement en l'empoignant, faute de croyance solide.",
+      "sensoryEffect": "Le bouclier est habité par une partie de la Nature.",
+      "duration": "1",
+      "durationUnit": "week",
+      "tags": [
+        "protection",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -3232,7 +4893,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 17,
       "cle": "mains ouvertes, paumes vers le sol, rune des Océans",
-      "effect": "ce sortilège très utilisé par les navigateurs et les enseignants des Sources permet de faire flotter des objets inanimés ou des personnes immobiles à la surface de l'eau. Il fait flotter 10 kg, et chaque Niveau de Réussite multiplie ce poids maximal par 10. Ce sortilège n'affecte qu'un objet ou être, pour une durée égale au niveau de la Sphère des océans en heures. Si la personne ou l'animal bouge violemment (porte un coup, se débat ou gesticule), le sort se dissipe en un tour."
+      "effect": "ce sortilège très utilisé par les navigateurs et les enseignants des Sources permet de faire flotter des objets inanimés ou des personnes immobiles à la surface de l'eau. Il fait flotter 10 kg, et chaque Niveau de Réussite multiplie ce poids maximal par 10. Ce sortilège n'affecte qu'un objet ou être, pour une durée égale au niveau de la Sphère des océans en heures. Si la personne ou l'animal bouge violemment (porte un coup, se débat ou gesticule), le sort se dissipe en un tour.",
+      "inGameEffect": "Fait flotter à la surface de l'eau un seul objet inanimé ou une seule personne immobile. Porte 10 kg, chaque Niveau de Réussite multipliant ce poids maximal par 10. Dure (Sphère des océans) heures. Si la personne ou l'animal bouge violemment — porte un coup, se débat, gesticule — le sort se dissipe en un tour.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "tags": [
+        "utility",
+        "ally",
+        "exploration"
+      ]
     }
   },
   {
@@ -3248,7 +4917,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 17,
       "cle": "gourde d'eau, sable, poussière ou terre, rune des Océans",
-      "effect": "en versant un peu d'eau dans le creux de sa main, le mage voit tomber à terre assez de liquide pour dessiner sur le sable les contours des sources, lacs et rivières présentes dans un rayon de 10 kilomètres par Niveau de Réussite. Une carte des cours d'eau se forme alors à ses pieds, lui permettant de localiser les plus proches."
+      "effect": "en versant un peu d'eau dans le creux de sa main, le mage voit tomber à terre assez de liquide pour dessiner sur le sable les contours des sources, lacs et rivières présentes dans un rayon de 10 kilomètres par Niveau de Réussite. Une carte des cours d'eau se forme alors à ses pieds, lui permettant de localiser les plus proches.",
+      "inGameEffect": "Dessine au sol une carte des sources, lacs et rivières présents dans un rayon de 10 kilomètres par Niveau de Réussite, permettant de localiser les plus proches.",
+      "sensoryEffect": "Le mage verse un peu d'eau dans le creux de sa main ; il en tombe à terre assez de liquide pour tracer les contours des cours d'eau sur le sable.",
+      "tags": [
+        "detection",
+        "exploration"
+      ]
     }
   },
   {
@@ -3264,7 +4939,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "gemme transparente de grande valeur (à réduire en poudre et à lancer dans le bassin, consommée), robe ou vêtements blancs, cercle runique des océans tout autour du bassin.",
-      "effect": "en plaçant un objet ou un être vivant dans un bassin, un lac ou toute autre volume assez grand pour l'immerger totalement, le mage provoque une transe qui fera résonner des souvenirs, lui permettant d'user de psychométrie. Le mage doit avoir une idée précise de ce qu'il souhaite savoir pour \" voir \" (en gardant les yeux fermés) des images se former dans son esprit. Avec un Niveau de Réussite, il ressent de plus les sensations de l'objet ou de l'être vivant, et avec trois, il perçoit le contexte sonore. Les visions durent Sphère minutes, chaque minute permettant de remonter d'un siècle."
+      "effect": "en plaçant un objet ou un être vivant dans un bassin, un lac ou toute autre volume assez grand pour l'immerger totalement, le mage provoque une transe qui fera résonner des souvenirs, lui permettant d'user de psychométrie. Le mage doit avoir une idée précise de ce qu'il souhaite savoir pour \" voir \" (en gardant les yeux fermés) des images se former dans son esprit. Avec un Niveau de Réussite, il ressent de plus les sensations de l'objet ou de l'être vivant, et avec trois, il perçoit le contexte sonore. Les visions durent Sphère minutes, chaque minute permettant de remonter d'un siècle.",
+      "inGameEffect": "Psychométrie sur un objet ou un être vivant totalement immergé dans un bassin, un lac ou un volume assez grand. Le mage doit avoir une idée précise de ce qu'il cherche. Avec un Niveau de Réussite il ressent en plus les sensations de l'objet ou de l'être, et avec trois il perçoit le contexte sonore. Les visions durent (Sphère) minutes, chaque minute permettant de remonter d'un siècle.",
+      "sensoryEffect": "La transe fait résonner des souvenirs : yeux fermés, le mage « voit » des images se former dans son esprit.",
+      "duration": "SPHERE",
+      "durationUnit": "minute",
+      "tags": [
+        "detection",
+        "exploration",
+        "ritual"
+      ]
     }
   },
   {
@@ -3280,7 +4964,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "mélange d'eau de mer et de coraux (consommé), sculpture à créer à partir du mélange (Don artistique: Sculpture Diff. 15), Outils gravés de la rune des océans",
-      "effect": "pour procéder à ce rituel, le mage doit réunir suffisamment d'eau de mer et de coraux pour façonner, par magie et par sculpture avec des outils sacrés, une statue de la taille et de la corpulence d'un homme. La magie opérant, cet étonnant golem prend les traits, les attitudes et la pose désirés par le mage, avec une précision stupéfiante. Il est ainsi possible de façonner une statue à l'effigie de tout homme connu du mage, vêtements, couleurs et équipement compris. La statue est faite de corail dur comme de l'os et disparaît dès qu'elle est brisée. Le mage ne peut en façonner qu'une à la fois."
+      "effect": "pour procéder à ce rituel, le mage doit réunir suffisamment d'eau de mer et de coraux pour façonner, par magie et par sculpture avec des outils sacrés, une statue de la taille et de la corpulence d'un homme. La magie opérant, cet étonnant golem prend les traits, les attitudes et la pose désirés par le mage, avec une précision stupéfiante. Il est ainsi possible de façonner une statue à l'effigie de tout homme connu du mage, vêtements, couleurs et équipement compris. La statue est faite de corail dur comme de l'os et disparaît dès qu'elle est brisée. Le mage ne peut en façonner qu'une à la fois.",
+      "inGameEffect": "Façonne, à partir d'eau de mer et de coraux travaillés avec des outils sacrés, une statue de la taille et de la corpulence d'un homme. Elle peut prendre les traits, attitudes et pose de tout homme connu du mage, vêtements, couleurs et équipement compris. Faite de corail dur comme de l'os, elle disparaît dès qu'elle est brisée. Le mage ne peut en façonner qu'une à la fois.",
+      "tags": [
+        "creation",
+        "object",
+        "ritual"
+      ]
     }
   },
   {
@@ -3296,7 +4986,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens d'Ozyr, posture (à genoux au bord d'une étendue d'eau, prosterné), cercle runique des océans",
-      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière bleu-vert qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils d'Ozyr (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires à régler). Le magicien doit avoir une bonne raison de demander de l'aide, et seule une grande révérence assurera l'amabilité de l'Ailé. Les dragons d'Ozyr peuvent priver l'invocateur de l'usage de sa Sphère des Océans pour un jour par tranche d'âge s'ils estiment que sa requête est futile, mais usent peu de violence physique. Par nature, les dragons des océans seront curieux et attentifs à l'exposé du mage. Ce n'est qu'après réflexion qu'ils s'exprimeront et prendront leur décision. Ils seront souvent assez sévères envers un mage qui les sollicitera pour de l'aide, et ne se priveront pas de le tancer pour son incompétence. Toutefois, l'homme étant faible et faillible, ils accorderont leur aide contre des quêtes ou des promesses d'actes symboliques et personnels (s'impliquer dans une aventure draconique, offrir bénévolement ses services à une caste pour un temps donné, parfaire un savoir...) Les dragons d'Ozyr préfèrent donner des conseils que d'agir directement et leurs services coûteront au mage. Ils vérifient toujours les promesses et en cas de manquement, prendront des sanctions sociales très lourdes (procès, déchéance, quête expiatoire) ..."
+      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière bleu-vert qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils d'Ozyr (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires à régler). Le magicien doit avoir une bonne raison de demander de l'aide, et seule une grande révérence assurera l'amabilité de l'Ailé. Les dragons d'Ozyr peuvent priver l'invocateur de l'usage de sa Sphère des Océans pour un jour par tranche d'âge s'ils estiment que sa requête est futile, mais usent peu de violence physique. Par nature, les dragons des océans seront curieux et attentifs à l'exposé du mage. Ce n'est qu'après réflexion qu'ils s'exprimeront et prendront leur décision. Ils seront souvent assez sévères envers un mage qui les sollicitera pour de l'aide, et ne se priveront pas de le tancer pour son incompétence. Toutefois, l'homme étant faible et faillible, ils accorderont leur aide contre des quêtes ou des promesses d'actes symboliques et personnels (s'impliquer dans une aventure draconique, offrir bénévolement ses services à une caste pour un temps donné, parfaire un savoir...) Les dragons d'Ozyr préfèrent donner des conseils que d'agir directement et leurs services coûteront au mage. Ils vérifient toujours les promesses et en cas de manquement, prendront des sanctions sociales très lourdes (procès, déchéance, quête expiatoire) ...",
+      "inGameEffect": "Attire l'attention du fils d'Ozyr le plus proche pour lui demander conseil ou solliciter un transport vers une destination précise. Le dragon est de la seconde tranche d'âge + 1 par NR. Il vient par ses propres moyens, n'a aucune obligation envers le mage et ne vient pas se battre ; seule une grande révérence assure l'amabilité de l'Ailé. Les dragons d'Ozyr peuvent priver l'invocateur de sa Sphère des Océans pour un jour par tranche d'âge s'ils jugent la requête futile. Ils préfèrent conseiller qu'agir, accordent leur aide contre des quêtes ou des promesses d'actes symboliques, vérifient toujours les promesses et sanctionnent lourdement tout manquement (procès, déchéance, quête expiatoire).",
+      "sensoryEffect": "À la fin de la méditation, le mage sort de transe tandis que les runes du cercle émettent des rayons de lumière bleu-vert qui jaillissent vers le ciel.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -3312,7 +5009,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 17,
       "cle": "une perle de valeur, yeux clos, respiration retenue, rune des Océans",
-      "effect": "En lui faisant retenir sa respiration et en la faisant empoigner hermétiquement la perle, le mage ralentit le rythme cardiaque de la cible. Cette dernière peut alors se passer d'air pendant (Sphère des océans)+3/NR tours. Quand les effets du sortilège se dissipent, la cible ne dispose que de quelques secondes d'oxygène... Si le mage est en contact physique avec la cible (ou s'il s'agit de lui même), il peut alors prolonger les effets du sort de (Sphère tours) en re-dépensant 4 points de magie. Cela ne compte pas comme un nouveau lancement du sort. Ce sort ne fonctionne que si le mage et sa cible sont aspergées d'eau."
+      "effect": "En lui faisant retenir sa respiration et en la faisant empoigner hermétiquement la perle, le mage ralentit le rythme cardiaque de la cible. Cette dernière peut alors se passer d'air pendant (Sphère des océans)+3/NR tours. Quand les effets du sortilège se dissipent, la cible ne dispose que de quelques secondes d'oxygène... Si le mage est en contact physique avec la cible (ou s'il s'agit de lui même), il peut alors prolonger les effets du sort de (Sphère tours) en re-dépensant 4 points de magie. Cela ne compte pas comme un nouveau lancement du sort. Ce sort ne fonctionne que si le mage et sa cible sont aspergées d'eau.",
+      "inGameEffect": "La cible, qui retient sa respiration et empoigne hermétiquement la perle, peut se passer d'air pendant (Sphère des océans) + 3 par NR tours. À la dissipation, elle ne dispose plus que de quelques secondes d'oxygène. En contact physique avec la cible — ou sur lui-même — le mage peut prolonger l'effet de (Sphère) tours en dépensant à nouveau 4 points de magie, sans que cela compte comme un nouveau lancement. Ne fonctionne que si le mage et sa cible sont aspergés d'eau.",
+      "sensoryEffect": "Le rythme cardiaque de la cible ralentit.",
+      "duration": "SPHERE + 3 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "ally",
+        "exploration"
+      ]
     }
   },
   {
@@ -3328,7 +5034,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 22,
       "cle": "bord de mer, bandeau de lin blanc marqué d'une rune des Océans, position du lotus",
-      "effect": "pour lancer ce sortilège, le mage ferme les yeux et s'y noue un bandeau. Puis, en conservant les mains en coupole, il médite une heure (environ 12 tours, revoir marge p.66 de la Colère des dragons) en se concentrant sur le flux des vagues. Ensuite, pendant une durée de Sphère heures, il voit ses Attributs Physique, Manuel et Social réduits à 0. Son Attribut Mental, est augmenté de la valeur cumulée des trois autres. Les rares actions physiques et manuelles du personnage sont augmentées de 10 pendant la durée du sortilège, qui se dissipe si le bandeau est ôté. Toutes les actions requérant la vision sont impossibles, et le meneur de jeu reste juge de ce que le personnage peut ou ne peut logiquement accomplir dans cette position, car il perd conscience de son propre corps. A la fin du sort, le personnage a besoin de dix minutes pour reprendre conscience et pouvoir se mouvoir normalement."
+      "effect": "pour lancer ce sortilège, le mage ferme les yeux et s'y noue un bandeau. Puis, en conservant les mains en coupole, il médite une heure (environ 12 tours, revoir marge p.66 de la Colère des dragons) en se concentrant sur le flux des vagues. Ensuite, pendant une durée de Sphère heures, il voit ses Attributs Physique, Manuel et Social réduits à 0. Son Attribut Mental, est augmenté de la valeur cumulée des trois autres. Les rares actions physiques et manuelles du personnage sont augmentées de 10 pendant la durée du sortilège, qui se dissipe si le bandeau est ôté. Toutes les actions requérant la vision sont impossibles, et le meneur de jeu reste juge de ce que le personnage peut ou ne peut logiquement accomplir dans cette position, car il perd conscience de son propre corps. A la fin du sort, le personnage a besoin de dix minutes pour reprendre conscience et pouvoir se mouvoir normalement.",
+      "inGameEffect": "Après une heure de méditation les yeux bandés, et pendant (Sphère) heures : les Attributs Physique, Manuel et Social tombent à 0, l'Attribut Mental augmente de la valeur cumulée des trois autres, et les rares actions physiques et manuelles sont augmentées de 10. Toute action requérant la vision est impossible et le personnage perd conscience de son propre corps, le meneur de jeu jugeant de ce qu'il peut accomplir. Le sort se dissipe si le bandeau est ôté. À la fin, le personnage a besoin de dix minutes pour reprendre conscience et se mouvoir normalement.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "debuff",
+        "self",
+        "ritual"
+      ]
     }
   },
   {
@@ -3344,7 +5059,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 22,
       "cle": "gemmes de valeur liées aux océans (aigue-marine, saphir, lapis-lazuli, au moins 1000 df, consommées), chant des Puissances Marines (Don artistique : Chant Diff. 15), immergé dans l'eau jusqu'aux épaules",
-      "effect": "en plaçant une statue façonnée à l'aide De l'eau à l'os dans une large étendue d'eau naturelle (lac, cascade, mer, etc...), le mage peut invoquer la puissance des Océans et animer son œuvre, qui deviendra capable de se mouvoir et d'effectuer des actions physiques, mais non de parler. L'enchantement confère à la statue des Caractéristiques et Attributs définies ci-dessous, des Compétences Physiques et Manuelles identiques à celles du mage mais aucune faculté magique ou Capacités tels que des Faveurs, Techniques, Privilèges... Les Caractéristiques du mage sont additionnées et réparties dans celles du golem (maximum 10). Il en va de même pour les Attributs (maximum 10). Les Compétences sont par contre identiques à celles du mage (sauf en Mental et Social qui sont absentes). Le golem comprend les volontés du mage, (lui seul étant capable de le commander), et accomplira de son mieux les tâches lui étant confiées. Il reste animé un nombre de jours égaux à la Sphère des Océans et se dissipe aux premiers rayons du soleil du matin suivant le dernier jour."
+      "effect": "en plaçant une statue façonnée à l'aide De l'eau à l'os dans une large étendue d'eau naturelle (lac, cascade, mer, etc...), le mage peut invoquer la puissance des Océans et animer son œuvre, qui deviendra capable de se mouvoir et d'effectuer des actions physiques, mais non de parler. L'enchantement confère à la statue des Caractéristiques et Attributs définies ci-dessous, des Compétences Physiques et Manuelles identiques à celles du mage mais aucune faculté magique ou Capacités tels que des Faveurs, Techniques, Privilèges... Les Caractéristiques du mage sont additionnées et réparties dans celles du golem (maximum 10). Il en va de même pour les Attributs (maximum 10). Les Compétences sont par contre identiques à celles du mage (sauf en Mental et Social qui sont absentes). Le golem comprend les volontés du mage, (lui seul étant capable de le commander), et accomplira de son mieux les tâches lui étant confiées. Il reste animé un nombre de jours égaux à la Sphère des Océans et se dissipe aux premiers rayons du soleil du matin suivant le dernier jour.",
+      "inGameEffect": "Anime une statue façonnée avec « De l'eau à l'os », placée dans une large étendue d'eau naturelle. Le golem se meut et agit physiquement mais ne parle pas. Les Caractéristiques du mage sont additionnées puis réparties dans les siennes (maximum 10), de même pour les Attributs (maximum 10) ; ses Compétences Physiques et Manuelles sont identiques à celles du mage, sans Mental ni Social, et il ne reçoit aucune faculté magique, Faveur, Technique ni Privilège. Il comprend les volontés du mage, seul capable de le commander, et accomplit de son mieux les tâches confiées. Reste animé un nombre de jours égal à la Sphère des Océans, puis se dissipe aux premiers rayons du soleil du matin suivant.",
+      "duration": "SPHERE",
+      "durationUnit": "day",
+      "tags": [
+        "summoning",
+        "creation",
+        "ritual"
+      ]
     }
   },
   {
@@ -3360,7 +5083,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 22,
       "cle": "diamant pur, gourde d'eau pure, rune des Océans, longue expiration",
-      "effect": "En déversant lentement le contenu d'une gourde au sol, le mage tend la main vers une créature vivante et provoque l'évaporation de ses fluides vitaux. Dès le lancement du sortilège, la victime subit 10+1D10/NR points de dommages sans aucune résistance possible (ni armure, ni esquive, ni parade, seules les capacités immunisant aux sort peuvent être envisagées). Les embruns de la Marée-Mère sont actifs autant de tours que la sphère des océans du mage divisée par deux (arrondie au supérieur). Les effets physiques sont visibles, la peau se dessèche à grande vitesse et une insoutenable douleur torture la victime."
+      "effect": "En déversant lentement le contenu d'une gourde au sol, le mage tend la main vers une créature vivante et provoque l'évaporation de ses fluides vitaux. Dès le lancement du sortilège, la victime subit 10+1D10/NR points de dommages sans aucune résistance possible (ni armure, ni esquive, ni parade, seules les capacités immunisant aux sort peuvent être envisagées). Les embruns de la Marée-Mère sont actifs autant de tours que la sphère des océans du mage divisée par deux (arrondie au supérieur). Les effets physiques sont visibles, la peau se dessèche à grande vitesse et une insoutenable douleur torture la victime.",
+      "inGameEffect": "La victime subit (10 + 1D10 par NR) points de dommages sans résistance possible — ni armure, ni esquive, ni parade ; seules les capacités immunisant aux sorts s'appliquent. Actif autant de tours que la Sphère des océans du mage divisée par deux, arrondie au supérieur.",
+      "sensoryEffect": "Le mage déverse lentement le contenu d'une gourde au sol et tend la main vers sa victime, dont les fluides vitaux s'évaporent : la peau se dessèche à grande vitesse et une insoutenable douleur la torture.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3376,7 +5106,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 26,
       "cle": "poudre d'écaille de dragon d'Ozyr (consommée), hymne d'Eveil Suprême (Don artistique : Chant Diff. 22), sang du mage (provoque une Egratignure et une blessure Légère, à asperger sur le golem. Les traces de sang disparaissent immédiatement)",
-      "effect": "ce sortilège constitue l'ultime étape de la création du golem des Océans et permet au mage de manipuler les énergies primordiales et de conférer à une statue créée par De l'eau à l'os des capacités physiques considérables et des Compétences de son choix. Le mage fait la somme de ses Caractéristiques et répartit ces points dans les Caractéristiques du golem – dans la limite de 15 par Caractéristique. Il fait ensuite de même pour les Attributs – 12 maximum – et dans chacun des groupes de Compétences– 15 maximum, les points d'un groupe ne s'attribuent que pour ce groupe. Chaque NR obtenu peut devenir un multiplicateur pour UN des groupes de points (Caractéristiques, Attributs, Physique, Mental, Manuel, Social). Ainsi, un NR peut permettre de multiplier un des ces groupes par 2, deux NR par trois, etc... Les NR peuvent être répartis sur plusieurs groupes (un NR pour un x2 sur un groupe et un autre pour un x2 sur un autre). Le golem peut porter et manier toutes les armes et armures que le mage est en mesure de lui fournir. Il n'est pas conscient de sa propre existence et ne possède pas de sentiments. Il est dénué d'humour, d'imagination ou d'un réel sens artistique (il ne maîtrise que les techniques, pas la flamme qui donne vie à une œuvre). L'enchantement d'animation reste actif jusqu'au prochain matin du jour des Océans."
+      "effect": "ce sortilège constitue l'ultime étape de la création du golem des Océans et permet au mage de manipuler les énergies primordiales et de conférer à une statue créée par De l'eau à l'os des capacités physiques considérables et des Compétences de son choix. Le mage fait la somme de ses Caractéristiques et répartit ces points dans les Caractéristiques du golem – dans la limite de 15 par Caractéristique. Il fait ensuite de même pour les Attributs – 12 maximum – et dans chacun des groupes de Compétences– 15 maximum, les points d'un groupe ne s'attribuent que pour ce groupe. Chaque NR obtenu peut devenir un multiplicateur pour UN des groupes de points (Caractéristiques, Attributs, Physique, Mental, Manuel, Social). Ainsi, un NR peut permettre de multiplier un des ces groupes par 2, deux NR par trois, etc... Les NR peuvent être répartis sur plusieurs groupes (un NR pour un x2 sur un groupe et un autre pour un x2 sur un autre). Le golem peut porter et manier toutes les armes et armures que le mage est en mesure de lui fournir. Il n'est pas conscient de sa propre existence et ne possède pas de sentiments. Il est dénué d'humour, d'imagination ou d'un réel sens artistique (il ne maîtrise que les techniques, pas la flamme qui donne vie à une œuvre). L'enchantement d'animation reste actif jusqu'au prochain matin du jour des Océans.",
+      "inGameEffect": "Ultime étape de la création du golem des Océans, sur une statue créée par « De l'eau à l'os ». Le mage répartit la somme de ses Caractéristiques dans celles du golem (15 maximum chacune), puis de même pour les Attributs (12 maximum) et pour chaque groupe de Compétences (15 maximum, les points d'un groupe ne servant que pour ce groupe). Chaque NR sert de multiplicateur pour UN groupe de points : un NR pour ×2, deux NR pour ×3, et ils peuvent être répartis sur plusieurs groupes. Le golem porte et manie toutes les armes et armures que le mage lui fournit. Il n'a pas conscience de sa propre existence, pas de sentiments, ni humour, imagination ou sens artistique — il ne maîtrise que les techniques. L'animation reste active jusqu'au prochain matin du jour des Océans.",
+      "tags": [
+        "summoning",
+        "creation",
+        "ritual"
+      ]
     }
   },
   {
@@ -3392,7 +5128,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 25,
       "cle": "une journée entière de cérémonie (RES+Conn. de la Magie Diff. 20), Chant Spirituel (Mental+Don artistique : Chant Diff. 15), robe de cérémonie bordée d'une rune des océans en fils d'or.",
-      "effect": "Ce sortilège permet de purifier l'esprit perturbé d'un être humain. Il chasse les traumatismes, atténue les ravages de l'âge et ré-instaure l'équilibre mental. Le mage doit accomplir une cérémonie s'étendant des premières lueurs de l'aube jusqu'à la tombée de la nuit. Le ??? est placé dans la mer et son corps se met à flotter seul. Au terme d'une journée de prières, en prononçant les mots de pouvoir du Chant Spirituel, le mage demande à Ozyr de ré-insuffler l'équilibre perdu... Un homme ne peut bénéficier de ce sortilège qu'une seule fois dans sa vie, quelles que soient les circonstances. Seul un mage ne possédant aucun point en Tendances Homme et Fatalité peut lancer ce sortilège, et celui qui en bénéficie voit ces deux Tendances réduites à 0. Il peut également rayer des Désavantages mentaux à raison d'un point de Désavantage par point du mage en Sphère des océans. Une seule tentative est possible dans toute une vie et il arrive qu'Ozyr refuse d'accorder cette faveur – que le jet soit réussi ou non – si le bénéficiaire est jugé indigne."
+      "effect": "Ce sortilège permet de purifier l'esprit perturbé d'un être humain. Il chasse les traumatismes, atténue les ravages de l'âge et ré-instaure l'équilibre mental. Le mage doit accomplir une cérémonie s'étendant des premières lueurs de l'aube jusqu'à la tombée de la nuit. Le ??? est placé dans la mer et son corps se met à flotter seul. Au terme d'une journée de prières, en prononçant les mots de pouvoir du Chant Spirituel, le mage demande à Ozyr de ré-insuffler l'équilibre perdu... Un homme ne peut bénéficier de ce sortilège qu'une seule fois dans sa vie, quelles que soient les circonstances. Seul un mage ne possédant aucun point en Tendances Homme et Fatalité peut lancer ce sortilège, et celui qui en bénéficie voit ces deux Tendances réduites à 0. Il peut également rayer des Désavantages mentaux à raison d'un point de Désavantage par point du mage en Sphère des océans. Une seule tentative est possible dans toute une vie et il arrive qu'Ozyr refuse d'accorder cette faveur – que le jet soit réussi ou non – si le bénéficiaire est jugé indigne.",
+      "inGameEffect": "Purifie l'esprit perturbé d'un être humain : chasse les traumatismes, atténue les ravages de l'âge, rétablit l'équilibre mental. Peut rayer des Désavantages mentaux à raison d'un point de Désavantage par point du mage en Sphère des océans. Seul un mage n'ayant aucun point en Tendances Homme et Fatalité peut le lancer, et le bénéficiaire voit ces deux Tendances réduites à 0. Un homme n'en bénéficie qu'une seule fois dans sa vie, et une seule tentative est possible : Ozyr peut refuser la faveur, que le jet soit réussi ou non, s'il juge le bénéficiaire indigne.",
+      "sensoryEffect": "La cérémonie s'étend des premières lueurs de l'aube à la tombée de la nuit ; le bénéficiaire, placé dans la mer, flotte seul tandis que le mage prie une journée entière avant de prononcer les mots de pouvoir du Chant Spirituel.",
+      "tags": [
+        "healing",
+        "ally",
+        "ritual"
+      ]
     }
   },
   {
@@ -3408,7 +5151,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 17,
       "cle": "cachet de cire, lettre soigneusement rédigée et enluminée durant l'incantation (Manuel+Don artistique: Enluminures Diff. 15), encre mêlée de cristaux de sel-gemme (consommée).",
-      "effect": "A la fin du sort, en scellant le parchemin avec ce sceau et en y apposant des enluminures sacrées, le mage prononce le nom de la seule personne capable de l'ouvrir. Si le sceau est rompu par une autre personne, une brusque vague d'eau bouillante balaie la surface du parchemin, dissolvant instantanément le texte en une tache d'encre. Ce sort dure un Augure, après quoi l'énergie élémentaire des océans imbibe le parchemin et le change en une pulpe grisâtre et illisible. * Ce sort se lance tout au long de l'écriture d'une lettre calligraphiée par le mage (ou par un scribe, auquel cas le mage doit être en contact avec lui)."
+      "effect": "A la fin du sort, en scellant le parchemin avec ce sceau et en y apposant des enluminures sacrées, le mage prononce le nom de la seule personne capable de l'ouvrir. Si le sceau est rompu par une autre personne, une brusque vague d'eau bouillante balaie la surface du parchemin, dissolvant instantanément le texte en une tache d'encre. Ce sort dure un Augure, après quoi l'énergie élémentaire des océans imbibe le parchemin et le change en une pulpe grisâtre et illisible. * Ce sort se lance tout au long de l'écriture d'une lettre calligraphiée par le mage (ou par un scribe, auquel cas le mage doit être en contact avec lui).",
+      "inGameEffect": "Se lance tout au long de l'écriture d'une lettre calligraphiée par le mage, ou par un scribe avec lequel il reste en contact. En scellant le parchemin, le mage prononce le nom de la seule personne capable de l'ouvrir. Rompu par quelqu'un d'autre, le sceau dissout instantanément le texte. À l'expiration, l'énergie élémentaire des océans imbibe le parchemin et le change en une pulpe grisâtre et illisible.",
+      "sensoryEffect": "Une brusque vague d'eau bouillante balaie la surface du parchemin, dissolvant le texte en une tache d'encre.",
+      "duration": "1",
+      "durationUnit": "augure",
+      "tags": [
+        "protection",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -3424,7 +5176,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Rune de la pierre brisée, poudre de roche, exhalation silencieuse",
-      "effect": "Le magicien trace la rune sur une pierre et l'effrite en passant sa main enduite de poudre de roche au travers. Le mage désagrège la pierre à chaque mouvement de la main, laquelle ruisselle au sol sous forme de poussière. Le volume affecté est de Sphère m³. Si la roche est ensorcelée, le mage doit réussir un jet d'opposition contre le sort ou l'effet l'ayant rendue magique afin de pouvoir la désagréger."
+      "effect": "Le magicien trace la rune sur une pierre et l'effrite en passant sa main enduite de poudre de roche au travers. Le mage désagrège la pierre à chaque mouvement de la main, laquelle ruisselle au sol sous forme de poussière. Le volume affecté est de Sphère m³. Si la roche est ensorcelée, le mage doit réussir un jet d'opposition contre le sort ou l'effet l'ayant rendue magique afin de pouvoir la désagréger.",
+      "inGameEffect": "Désagrège (Sphère) m³ de pierre. Si la roche est ensorcelée, le mage doit réussir un jet d'opposition contre le sort ou l'effet l'ayant rendue magique.",
+      "sensoryEffect": "Le magicien trace la rune sur la pierre et l'effrite en y passant sa main enduite de poudre de roche ; la pierre ruisselle au sol sous forme de poussière.",
+      "tags": [
+        "utility",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -3440,7 +5199,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Voix tombante, posture (manipulation d'une masse)",
-      "effect": "Une cible à moins de 30 mètres subit une attaque de type \" Assommer \". Ce sort ne peut ni s'esquiver ni se parer. Le jet de résistance du défenseur s'effectue directement contre le score d'incantation du mage qui fait alors office de score de dommages (revoir p.185 du livre de base pour la résolution de cette attaque). Si le lancement du sort échoue, le mage subit lui même les effets du sort, avec des dommages égaux à la Difficulté du sort (soit 15 dans presque tous les cas)."
+      "effect": "Une cible à moins de 30 mètres subit une attaque de type \" Assommer \". Ce sort ne peut ni s'esquiver ni se parer. Le jet de résistance du défenseur s'effectue directement contre le score d'incantation du mage qui fait alors office de score de dommages (revoir p.185 du livre de base pour la résolution de cette attaque). Si le lancement du sort échoue, le mage subit lui même les effets du sort, avec des dommages égaux à la Difficulté du sort (soit 15 dans presque tous les cas).",
+      "inGameEffect": "Attaque de type « Assommer » sur une cible à moins de 30 mètres. Ne peut être ni esquivée ni parée. Le jet de résistance du défenseur s'effectue directement contre le score d'incantation du mage, qui fait office de score de dommages. Si le lancement échoue, le mage subit lui-même les effets du sort, avec des dommages égaux à la Difficulté du sort — soit 15 dans presque tous les cas.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3456,7 +5221,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 16,
       "cle": "Sable gravier fin (consommé), cabriole souple (Physique+Acrobatie Diff.15), rune de la pierre.",
-      "effect": "Le magicien jette du sable vers une cible en mouvement (ou derrière lui pour couvrir sa fuite). Il peut atteindre au maximum un point situé à 10m. Ce sable gonfle et se transforme en petites billes qui rendent tout déplacement instable sur une zone de (Sphère de la pierre x4) m² centrée sur le point de lancer. La cible doit réussir un jet de Physique + Coordination contre le score d'incantation du mage pour ne pas tomber. Les billes subsistent 3+NR tours puis se retransforment en sable. Ce sort ne peut se parer, mais une esquive réussie signifie que le personnage arrive à se jeter hors de la zone de gonflement des billes, mais sans contrôle sur sa direction. Le Mj peut refuser toute esquive en espaces clos."
+      "effect": "Le magicien jette du sable vers une cible en mouvement (ou derrière lui pour couvrir sa fuite). Il peut atteindre au maximum un point situé à 10m. Ce sable gonfle et se transforme en petites billes qui rendent tout déplacement instable sur une zone de (Sphère de la pierre x4) m² centrée sur le point de lancer. La cible doit réussir un jet de Physique + Coordination contre le score d'incantation du mage pour ne pas tomber. Les billes subsistent 3+NR tours puis se retransforment en sable. Ce sort ne peut se parer, mais une esquive réussie signifie que le personnage arrive à se jeter hors de la zone de gonflement des billes, mais sans contrôle sur sa direction. Le Mj peut refuser toute esquive en espaces clos.",
+      "inGameEffect": "Zone instable de (Sphère de la pierre × 4) m² centrée sur un point situé à 10 m au maximum. La cible doit réussir un jet de Physique + Coordination contre le score d'incantation du mage pour ne pas tomber. Ne peut être paré ; une esquive réussie jette le personnage hors de la zone, mais sans contrôle sur sa direction, et le meneur de jeu peut refuser toute esquive en espace clos.",
+      "sensoryEffect": "Le sable jeté gonfle et se transforme en petites billes, qui se retransforment en sable à la fin du sort.",
+      "duration": "3 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -3472,7 +5246,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Inspiration lente et profonde, posture du Gardien Eternel (Physique+Présence Diff.15), fragment de pierre de Kern (à tenir dans son poing fermé, consommé)",
-      "effect": "Le magicien ouvre une porte sur l'écho de la voix de Brorne. Tout individu dans les 10m de rayon possédant moins de 3 en Tendance Dragon doit effectuer un jet de Mental + Volonté contre le score d'incantation du mage ou subir les effets d'une Intimidation avec 1 NR (voir Livre de base p.94) durant (Sphère de la pierre) tours. Si la cible est interrogée (lors d'une séance de torture inquisitoriale par exemple), elle avoue tout ce qu'elle sait (à moins d'un blocage magique élaboré, auquel cas le Mj peut secrètement comparer le jet d'incantation du sort au jet ayant créé le blocage pour déterminer si ce dernier résiste). Par contre, tout individu dans les 10m de rayon possédant plus de 3 en Tendance Dragon bénéficie d'un bonus de +3 à tous ses jets de moral, de résistance à la peur ou à l'intimidation durant (Sphère de la pierre) tours. Ce sort ne peut briser une frayeur ou une déroute, mais captive automatiquement toutes les attentions dans la zone d'effet."
+      "effect": "Le magicien ouvre une porte sur l'écho de la voix de Brorne. Tout individu dans les 10m de rayon possédant moins de 3 en Tendance Dragon doit effectuer un jet de Mental + Volonté contre le score d'incantation du mage ou subir les effets d'une Intimidation avec 1 NR (voir Livre de base p.94) durant (Sphère de la pierre) tours. Si la cible est interrogée (lors d'une séance de torture inquisitoriale par exemple), elle avoue tout ce qu'elle sait (à moins d'un blocage magique élaboré, auquel cas le Mj peut secrètement comparer le jet d'incantation du sort au jet ayant créé le blocage pour déterminer si ce dernier résiste). Par contre, tout individu dans les 10m de rayon possédant plus de 3 en Tendance Dragon bénéficie d'un bonus de +3 à tous ses jets de moral, de résistance à la peur ou à l'intimidation durant (Sphère de la pierre) tours. Ce sort ne peut briser une frayeur ou une déroute, mais captive automatiquement toutes les attentions dans la zone d'effet.",
+      "inGameEffect": "Dans un rayon de 10 m, pendant (Sphère de la pierre) tours : tout individu ayant moins de 3 en Tendance Dragon doit réussir un jet de Mental + Volonté contre le score d'incantation ou subir une Intimidation avec 1 NR ; interrogé, il avoue alors tout ce qu'il sait, sauf blocage magique élaboré. Tout individu ayant plus de 3 en Tendance Dragon gagne au contraire +3 à ses jets de moral et de résistance à la peur ou à l'intimidation. Ne peut briser une frayeur ou une déroute, mais captive automatiquement toutes les attentions dans la zone.",
+      "sensoryEffect": "Le magicien ouvre une porte sur l'écho de la voix de Brorne.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "debuff",
+        "area",
+        "social"
+      ]
     }
   },
   {
@@ -3488,7 +5272,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens de Brorne, posture (méditation à genoux, bras écartées, paumes plaquées au sol), cercle runique de pierres soigneusement disposées",
-      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière marbrée qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Brorne (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une très bonne raison de demander son aide et un présent pour service rendu est quasiment indispensable. Les dragons de Brorne peuvent priver l'invocateur de l'usage de sa Sphère de la pierre pour une semaine par tranche d'âge s'ils estiment que sa requête est futile, tout comme ils peuvent sévèrement tancer un impudent qui les dérangerait sans raison. Les dragons de pierre sont lents à offrir leur aide et prendront souvent un long temps de réflexion après avoir posé un maximum de questions. Soucieux de se montrer le plus réfléchi dans son assistance, un dragon de pierre consacrera du temps à saisir les tenants et les aboutissants des affaires. Selon la portée des faits, il n'hésitera pas à faire appel à un de ses aînés ou à commander une intervention des forces draconistes locales, au mépris de l'avis du mage l'ayant invoqué. Biens qu'ils se battent rarement en ayant été invoqués, les dragons de la pierre se montrent impitoyables une fois en colère."
+      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière marbrée qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Brorne (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une très bonne raison de demander son aide et un présent pour service rendu est quasiment indispensable. Les dragons de Brorne peuvent priver l'invocateur de l'usage de sa Sphère de la pierre pour une semaine par tranche d'âge s'ils estiment que sa requête est futile, tout comme ils peuvent sévèrement tancer un impudent qui les dérangerait sans raison. Les dragons de pierre sont lents à offrir leur aide et prendront souvent un long temps de réflexion après avoir posé un maximum de questions. Soucieux de se montrer le plus réfléchi dans son assistance, un dragon de pierre consacrera du temps à saisir les tenants et les aboutissants des affaires. Selon la portée des faits, il n'hésitera pas à faire appel à un de ses aînés ou à commander une intervention des forces draconistes locales, au mépris de l'avis du mage l'ayant invoqué. Biens qu'ils se battent rarement en ayant été invoqués, les dragons de la pierre se montrent impitoyables une fois en colère.",
+      "inGameEffect": "Attire l'attention du fils de Brorne le plus proche pour lui demander conseil ou solliciter un transport vers une destination précise. Le dragon est de la seconde tranche d'âge + 1 par NR. Il faut une très bonne raison de solliciter son aide, et un présent pour service rendu est quasiment indispensable. Les dragons de Brorne peuvent priver l'invocateur de sa Sphère de la pierre pour une semaine par tranche d'âge s'ils jugent la requête futile. Lents à offrir leur aide, ils posent un maximum de questions et prennent un long temps de réflexion ; selon la portée des faits, ils font appel à un aîné ou commandent une intervention des forces draconistes locales, au mépris de l'avis du mage.",
+      "sensoryEffect": "À la fin de la méditation, le mage sort de transe tandis que les runes du cercle émettent des rayons de lumière marbrée qui jaillissent vers le ciel.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -3504,7 +5295,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Prière à Brorne, encens de la pierre (consommé), rune de la pierre (à tracer sur le lieu à étudier)",
-      "effect": "Le magicien peut sentir si une créature de Kalimsshar a été présente durant la journée dans un lieu précis (15 m de rayon). Le magicien peut le sentir à raison de 1 jour dans le passé par NR. La créature doit avoir 3 ou plus en Tendance Fatalité. Le mage n'obtient pas de renseignement précis sur la nature, le nombre ou les différents types de créatures, simplement un renseignement sur la souillure du lieu. Ce sort ne permet pas de détecter sur le moment une créature de l'ombre (ou un serviteur de Kalimsshar), car il est basé sur la réaction de la trame de Kor à la présence de la Fatalité. Il ne peut donc être efficace qu'une dizaine de minutes après que la créature ait quitté les lieux."
+      "effect": "Le magicien peut sentir si une créature de Kalimsshar a été présente durant la journée dans un lieu précis (15 m de rayon). Le magicien peut le sentir à raison de 1 jour dans le passé par NR. La créature doit avoir 3 ou plus en Tendance Fatalité. Le mage n'obtient pas de renseignement précis sur la nature, le nombre ou les différents types de créatures, simplement un renseignement sur la souillure du lieu. Ce sort ne permet pas de détecter sur le moment une créature de l'ombre (ou un serviteur de Kalimsshar), car il est basé sur la réaction de la trame de Kor à la présence de la Fatalité. Il ne peut donc être efficace qu'une dizaine de minutes après que la créature ait quitté les lieux.",
+      "inGameEffect": "Détecte si une créature de Kalimsshar ayant 3 ou plus en Tendance Fatalité est passée dans un lieu de 15 m de rayon, jusqu'à 1 jour dans le passé par NR. Ne renseigne ni sur la nature, ni sur le nombre, ni sur le type des créatures — seulement sur la souillure du lieu. Fondé sur la réaction de la trame de Kor à la présence de la Fatalité, il ne détecte pas une créature sur le moment et n'est efficace qu'une dizaine de minutes après son départ.",
+      "tags": [
+        "detection",
+        "place",
+        "exploration"
+      ]
     }
   },
   {
@@ -3520,7 +5317,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "Poudre de roche (à souffler vers la cible, consommée), posture de la main (Signe de la montagne : Manuel+Conn. de la magie Diff.15), rune de la pierre",
-      "effect": "Ce sort est très spectaculaire car il est généralement lancé sur une personne qui tombe ou qui va percuter un élément plus dur qu'elle. Au moment de l'impact, elle devient solide comme le roc et réduit de moitié (arrondi au supérieur) les dommages subis. Si ces derniers sont encore mortels, la victime s'éparpille en petits morceaux de pierre et son corps est détruit. Visuellement, sa peau semble devenir minérale pour un instant, puis redevient normale. Il est possible de lancer ce sort sur un individu (jusqu'à 30 m) sur le point d'être percuté par un projectile (rocher, arme, tronc d'arbre...) ou de subir une attaque physique (arme, poing, charge animale, projectile solide résultant d'un sort...). Ce sort doit être lancé au rang d'Initiative précédant le choc, et utilise un dé d'action. Bien sûr, ce dé doit avoir un rang supérieur au moment du choc. Il est impossible de lancer ce sort par avance, ses effets ne durant qu'un rang. Par contre, tous les chocs subis durant ce rang sont réduits. Il est donc primordial de pouvoir deviner les rangs d'action de ses ennemis ou de conserver un dé d'action en tant qu'action retardée pour pouvoir lancer le sort au moment où le coup s'arme. Exemple: un mage de la pierre assiste un compagnon aux prises avec un Zaal. Il a obtenu deux dé à 10 et en a utilisé un pour lancer une hachette. Il conserve l'autre pour lancer \"Rigidité\" au moment où le Zaal va agir. A 8, le Zaal possède trois actions simultanées (dues à un tirage d'Initiative chanceux). Il arme son coup à 9, moment auquel le mage s'alarme et lance \"Rigidité\". S'il le réussit, à 8, les trois attaques enchaînées par le Zaal frapperont un corps magiquement durci. Mais si le Zaal avait feinté ou décidé de déléguer certaines de ces actions simultanées (comme de faire 8, 7 et 6), il aurait abusé le mage et son compagnon. Vu son score d'Intelligence, il risque vite d'adapter son rythme de combat..."
+      "effect": "Ce sort est très spectaculaire car il est généralement lancé sur une personne qui tombe ou qui va percuter un élément plus dur qu'elle. Au moment de l'impact, elle devient solide comme le roc et réduit de moitié (arrondi au supérieur) les dommages subis. Si ces derniers sont encore mortels, la victime s'éparpille en petits morceaux de pierre et son corps est détruit. Visuellement, sa peau semble devenir minérale pour un instant, puis redevient normale. Il est possible de lancer ce sort sur un individu (jusqu'à 30 m) sur le point d'être percuté par un projectile (rocher, arme, tronc d'arbre...) ou de subir une attaque physique (arme, poing, charge animale, projectile solide résultant d'un sort...). Ce sort doit être lancé au rang d'Initiative précédant le choc, et utilise un dé d'action. Bien sûr, ce dé doit avoir un rang supérieur au moment du choc. Il est impossible de lancer ce sort par avance, ses effets ne durant qu'un rang. Par contre, tous les chocs subis durant ce rang sont réduits. Il est donc primordial de pouvoir deviner les rangs d'action de ses ennemis ou de conserver un dé d'action en tant qu'action retardée pour pouvoir lancer le sort au moment où le coup s'arme. Exemple: un mage de la pierre assiste un compagnon aux prises avec un Zaal. Il a obtenu deux dé à 10 et en a utilisé un pour lancer une hachette. Il conserve l'autre pour lancer \"Rigidité\" au moment où le Zaal va agir. A 8, le Zaal possède trois actions simultanées (dues à un tirage d'Initiative chanceux). Il arme son coup à 9, moment auquel le mage s'alarme et lance \"Rigidité\". S'il le réussit, à 8, les trois attaques enchaînées par le Zaal frapperont un corps magiquement durci. Mais si le Zaal avait feinté ou décidé de déléguer certaines de ces actions simultanées (comme de faire 8, 7 et 6), il aurait abusé le mage et son compagnon. Vu son score d'Intelligence, il risque vite d'adapter son rythme de combat...",
+      "inGameEffect": "Réduit de moitié, arrondi au supérieur, les dommages d'un choc — chute, projectile, arme, poing, charge animale. Si les dommages restent mortels, la victime s'éparpille en morceaux de pierre et son corps est détruit. Portée de 30 m. Doit être lancé au rang d'Initiative précédant le choc et consomme un dé d'action ; impossible à lancer par avance, ses effets ne durant qu'un rang — mais tous les chocs subis pendant ce rang sont réduits. Il faut donc deviner les rangs d'action de l'adversaire, ou garder un dé en action retardée pour lancer le sort au moment où le coup s'arme.",
+      "sensoryEffect": "La peau de la cible semble devenir minérale un instant, puis redevient normale.",
+      "tags": [
+        "protection",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -3536,7 +5340,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Rune de la pierre (à porter sur la cible), posture (doigts pliés de façon complexe contre l'obstacle: Manuel + Conn.magie Diff.15), murmure decrescendo.",
-      "effect": "Le magicien minéralise une porte ou une partie mobile d'un édifice et multiplie ainsi par trois sa solidité. Les éventuels loquets fonctionnent toujours mais l'obstacle est trois fois plus lourd. Le sort dure (Sphère de la pierre) heures. Le volume affecté dépend des NR obtenus: une réussite simple permet d'affecter une porte de meuble, une fenêtre ou une trappe. Un NR permet d'affecter une porte ou une grille, deux NR une porte cochère ou l'entrée d'un entrepôt, trois NR affectent la porte d'un château ou un pont-levis."
+      "effect": "Le magicien minéralise une porte ou une partie mobile d'un édifice et multiplie ainsi par trois sa solidité. Les éventuels loquets fonctionnent toujours mais l'obstacle est trois fois plus lourd. Le sort dure (Sphère de la pierre) heures. Le volume affecté dépend des NR obtenus: une réussite simple permet d'affecter une porte de meuble, une fenêtre ou une trappe. Un NR permet d'affecter une porte ou une grille, deux NR une porte cochère ou l'entrée d'un entrepôt, trois NR affectent la porte d'un château ou un pont-levis.",
+      "inGameEffect": "Minéralise une porte ou une partie mobile d'un édifice et multiplie sa solidité par trois ; les loquets fonctionnent toujours, mais l'obstacle est trois fois plus lourd. Dure (Sphère de la pierre) heures. Le volume dépend des NR : une réussite simple affecte une porte de meuble, une fenêtre ou une trappe ; 1 NR une porte ou une grille ; 2 NR une porte cochère ou l'entrée d'un entrepôt ; 3 NR la porte d'un château ou un pont-levis.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "tags": [
+        "protection",
+        "object",
+        "place"
+      ]
     }
   },
   {
@@ -3552,7 +5364,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Posture (bras écartés, pieds fermement campés, poings fermés), cris de ralliement, cercle de sang du mage",
-      "effect": "Ce sort s'utilise lorsqu'une armée est en déroute ou qu'un groupe est effrayé. Le magicien se poste devant les rangs qui battent en retraite et leur redonne courage. Ce sort affecte les 5 cibles les plus proches du mage, plus 2 par NR, en s'éloignant progressivement de lui. Ce sort peut influencer des combattants jusqu'à (Sphère de la pierre x4) mètres, car la portée des harangues porteuses de la détermination de Brorne dépend directement de la puissance du lanceur. Ce sort n'immunise pas à la peur ultérieurement, mais peut relancer dans la bataille une troupe démoralisée. Toute perte ultérieure de moral devra être gérée séparément. Dans le cas d'un effet de peur permanent (comme un sort ou une aura de peur draconique), ce sort est efficace durant un seul tour."
+      "effect": "Ce sort s'utilise lorsqu'une armée est en déroute ou qu'un groupe est effrayé. Le magicien se poste devant les rangs qui battent en retraite et leur redonne courage. Ce sort affecte les 5 cibles les plus proches du mage, plus 2 par NR, en s'éloignant progressivement de lui. Ce sort peut influencer des combattants jusqu'à (Sphère de la pierre x4) mètres, car la portée des harangues porteuses de la détermination de Brorne dépend directement de la puissance du lanceur. Ce sort n'immunise pas à la peur ultérieurement, mais peut relancer dans la bataille une troupe démoralisée. Toute perte ultérieure de moral devra être gérée séparément. Dans le cas d'un effet de peur permanent (comme un sort ou une aura de peur draconique), ce sort est efficace durant un seul tour.",
+      "inGameEffect": "Redonne courage à une troupe en déroute ou à un groupe effrayé : affecte les 5 cibles les plus proches du mage, plus 2 par NR, en s'éloignant progressivement, jusqu'à (Sphère de la pierre × 4) mètres. N'immunise pas à la peur pour la suite — toute perte de moral ultérieure se gère séparément. Contre un effet de peur permanent, comme un sort ou une aura de peur draconique, n'est efficace qu'un seul tour.",
+      "sensoryEffect": "Le magicien se poste devant les rangs qui battent en retraite et les harangue de la détermination de Brorne.",
+      "targets": "5 + 2 par NR",
+      "tags": [
+        "buff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -3568,7 +5388,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 21,
       "cle": "Eclat de cristal (consommé), kata de la Colère de la Terre (Manuel+Don artistique Diff.15), cri aigu",
-      "effect": "Des pieux cristallins longs comme le bras sortent de terre sous les pieds d'une cible à moins de 50 m et infligent 25 + 1D10/NR points de dommages. On ne peut qu'esquiver, avec un malus égal à la moitié de la Sphère de la pierre du lanceur (arrondi à l'inférieur). Si la cible meurt, elle se minéralise et les pieux l'emportent sous terre."
+      "effect": "Des pieux cristallins longs comme le bras sortent de terre sous les pieds d'une cible à moins de 50 m et infligent 25 + 1D10/NR points de dommages. On ne peut qu'esquiver, avec un malus égal à la moitié de la Sphère de la pierre du lanceur (arrondi à l'inférieur). Si la cible meurt, elle se minéralise et les pieux l'emportent sous terre.",
+      "inGameEffect": "Inflige (25 + 1D10 par NR) points de dommages à une cible située à moins de 50 m. Seule l'esquive est possible, avec un malus égal à la moitié de la Sphère de la pierre du lanceur, arrondie à l'inférieur. Si la cible meurt, elle se minéralise et les pieux l'emportent sous terre.",
+      "sensoryEffect": "Des pieux cristallins longs comme le bras sortent de terre sous les pieds de la cible.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3584,7 +5411,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 22,
       "cle": "Emblème de l'Inquisition de taille humaine (un marteau à long manche démesuré et à deux fers perpendiculaires sculptés : voir Livret d'écran p.30), runes de la vérité, de la fidélité, du feu et de la pierre entrelacées en un motif délicat à graver sur l'emblème (Manuel+Don artistique Diff.15), encens des huit Dragons (consommés)",
-      "effect": "Ce sort est un don de Kroryn à son aîné. La cible doit empoigner la barre transversale de l'emblème à pleines mains et jurer fidélité aux Dragons. Si elle a 2 ou plus en Tendance Homme ou Fatalité, elle s'enflamme brutalement et subit des dégâts de feu égaux à 10 par point en Tendance Fatalité ou Homme (la plus haute). Cet enchantement est utilisé par les Inquisiteurs pour ensorceler, durant un Augure, les immenses emblèmes portés en tête des expéditions punitives ou des Croisades (d'où leur nom). Il est déjà arrivé que des suspects soient instantanément carbonisés au contact de la barre, attestant de leur hérésie corruptrice se retournant contre eux. Il est souvent nécessaire de protéger ces emblèmes de la fureur du peuple, qui ose parfois s'attaquer à des Inquisiteurs isolés trop prompts à les brandir..."
+      "effect": "Ce sort est un don de Kroryn à son aîné. La cible doit empoigner la barre transversale de l'emblème à pleines mains et jurer fidélité aux Dragons. Si elle a 2 ou plus en Tendance Homme ou Fatalité, elle s'enflamme brutalement et subit des dégâts de feu égaux à 10 par point en Tendance Fatalité ou Homme (la plus haute). Cet enchantement est utilisé par les Inquisiteurs pour ensorceler, durant un Augure, les immenses emblèmes portés en tête des expéditions punitives ou des Croisades (d'où leur nom). Il est déjà arrivé que des suspects soient instantanément carbonisés au contact de la barre, attestant de leur hérésie corruptrice se retournant contre eux. Il est souvent nécessaire de protéger ces emblèmes de la fureur du peuple, qui ose parfois s'attaquer à des Inquisiteurs isolés trop prompts à les brandir...",
+      "inGameEffect": "La cible doit empoigner à pleines mains la barre transversale de l'emblème et jurer fidélité aux Dragons. Si elle a 2 ou plus en Tendance Homme ou Fatalité, elle subit des dégâts de feu égaux à 10 par point dans la plus haute de ces deux Tendances. Utilisé par les Inquisiteurs pour ensorceler les immenses emblèmes portés en tête des expéditions punitives et des Croisades.",
+      "sensoryEffect": "La cible s'enflamme brutalement ; il est déjà arrivé que des suspects soient instantanément carbonisés au contact de la barre.",
+      "duration": "1",
+      "durationUnit": "augure",
+      "tags": [
+        "attack",
+        "detection",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -3600,7 +5437,18 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 22,
       "cle": "Rune de la pierre (à porter sur les chausses), posture du poirier (à maintenir durant l'incantation, en appui sur un mur ou une paroi: Physique+Acrobatie Diff.15), mantra sourd.",
-      "effect": "Ce sort est sans doute l'un des plus visuels. Le magicien enchante 1+NR paires de chaussures, bottes, chausses, sabots ou même jeux de 4 fers durant une journée. Leur porteur pourra prendre appui sur tout support minéral comme s'il s'agissait du sol, courbant la gravité pour conserver ses appuis. Il peut donc rester fixé à un mur, y prendre appui pour courir ou sauter pendant un combat. S'il réussit un jet de Physique + Acrobatie contre une Difficulté de 15, il peut même prendre le plafond pour appui (durant 1+NR tours, ces NR étant ceux du jet d'Acrobatie). Un adversaire aura une Difficulté supplémentaire de 5 pour toucher le porteur des chaussures et ce dernier aura un bonus de 3 pour toute manœuvre à caractère acrobatique (attaque déroutante, charge, feinte, entrer au corps à corps, mais aussi renverser ou écraser)."
+      "effect": "Ce sort est sans doute l'un des plus visuels. Le magicien enchante 1+NR paires de chaussures, bottes, chausses, sabots ou même jeux de 4 fers durant une journée. Leur porteur pourra prendre appui sur tout support minéral comme s'il s'agissait du sol, courbant la gravité pour conserver ses appuis. Il peut donc rester fixé à un mur, y prendre appui pour courir ou sauter pendant un combat. S'il réussit un jet de Physique + Acrobatie contre une Difficulté de 15, il peut même prendre le plafond pour appui (durant 1+NR tours, ces NR étant ceux du jet d'Acrobatie). Un adversaire aura une Difficulté supplémentaire de 5 pour toucher le porteur des chaussures et ce dernier aura un bonus de 3 pour toute manœuvre à caractère acrobatique (attaque déroutante, charge, feinte, entrer au corps à corps, mais aussi renverser ou écraser).",
+      "inGameEffect": "Enchante (1 + NR) paires de chaussures, bottes, chausses, sabots ou jeux de 4 fers pour une journée. Le porteur prend appui sur tout support minéral comme s'il s'agissait du sol : il reste fixé à un mur, y court ou y saute en plein combat. En réussissant un jet de Physique + Acrobatie contre une Difficulté de 15, il peut même prendre le plafond pour appui, durant (1 + NR) tours comptés sur le jet d'Acrobatie. Un adversaire subit une Difficulté supplémentaire de 5 pour le toucher, et le porteur gagne +3 à toute manœuvre acrobatique — attaque déroutante, charge, feinte, entrée au corps à corps, renversement, écrasement.",
+      "sensoryEffect": "Le porteur courbe la gravité pour conserver ses appuis.",
+      "duration": "1",
+      "durationUnit": "day",
+      "targets": "1 + NR",
+      "tags": [
+        "buff",
+        "movement",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -3616,7 +5464,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "Paroi minérale gravée du sceau du Gardien des Roches (Manuel+Conn. de la magie Diff.15), posture (geste d'écrasement des deux mains), bloc de craie (à réduire en poudre, consommé).",
-      "effect": "Lent à placer, ce sort a des effets fulgurants. Il permet d'ensorceler un pan de mur qui va alors pouvoir se désolidariser et percuter une zone située jusqu'à 30 m de son point d'attache. Le pan balaie la zone si vite qu'il est seulement possible de l'esquiver (même si certains lieux comme des couloirs ne le permettront même pas). Le pan s'anime et reprend sa place dans le même tour. Ce pan pèse plusieurs dizaines, voire centaines de kilos et peut s'animer autant de fois par heure que le score en Sphère de la pierre du lanceur. Au lancement, la mage choisit soit d'animer le mur sur un mot de commande particulier, soit de faire s'animer le mur si un être vivant traverse une zone de déclenchement de 10+5/NR m² sans prononcer le mot de commande. Les cibles frappés subissent 35+3D10 points de dommages et sont jetées à terre (sauf magie ou masse supérieure à 800 kg). Beaucoup de lieux sont ainsi gardés. Les magiciens de Brorne lancent même ce sort sur deux murs opposés qui compressent simultanément les intrus."
+      "effect": "Lent à placer, ce sort a des effets fulgurants. Il permet d'ensorceler un pan de mur qui va alors pouvoir se désolidariser et percuter une zone située jusqu'à 30 m de son point d'attache. Le pan balaie la zone si vite qu'il est seulement possible de l'esquiver (même si certains lieux comme des couloirs ne le permettront même pas). Le pan s'anime et reprend sa place dans le même tour. Ce pan pèse plusieurs dizaines, voire centaines de kilos et peut s'animer autant de fois par heure que le score en Sphère de la pierre du lanceur. Au lancement, la mage choisit soit d'animer le mur sur un mot de commande particulier, soit de faire s'animer le mur si un être vivant traverse une zone de déclenchement de 10+5/NR m² sans prononcer le mot de commande. Les cibles frappés subissent 35+3D10 points de dommages et sont jetées à terre (sauf magie ou masse supérieure à 800 kg). Beaucoup de lieux sont ainsi gardés. Les magiciens de Brorne lancent même ce sort sur deux murs opposés qui compressent simultanément les intrus.",
+      "inGameEffect": "Ensorcelle un pan de mur, qui se désolidarise pour percuter une zone jusqu'à 30 m de son point d'attache, puis reprend sa place dans le même tour. Pesant plusieurs dizaines voire centaines de kilos, il s'anime autant de fois par heure que le score en Sphère de la pierre du lanceur. Au lancement, le mage choisit de l'animer sur un mot de commande, ou automatiquement dès qu'un être vivant traverse une zone de déclenchement de (10 + 5 par NR) m² sans prononcer ce mot. Les cibles frappées subissent (35 + 3D10) points de dommages et sont jetées à terre, sauf magie ou masse supérieure à 800 kg. Le pan balaie la zone si vite qu'on ne peut que l'esquiver — et certains lieux, comme un couloir, ne le permettent même pas.",
+      "tags": [
+        "attack",
+        "place",
+        "combat"
+      ]
     }
   },
   {
@@ -3632,7 +5486,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "Rune des rêves, claquement des doigts désignant un point, regard droit dans les yeux",
-      "effect": "Le magicien désigne du doigt à sa cible quelque chose située à moins de 15 m. Celle-ci doit réussir un jet de Mental+Volonté en Opposition contre le score d'invocation du mage pour éviter de regarder dans la direction indiquée pendant 2 + 1/NR actions. Le meneur de jeu est libre d'imposer des malus appropriés, allant d'un malus de -1 à -3 à l'impossibilité totale d'agir ou de réagir."
+      "effect": "Le magicien désigne du doigt à sa cible quelque chose située à moins de 15 m. Celle-ci doit réussir un jet de Mental+Volonté en Opposition contre le score d'invocation du mage pour éviter de regarder dans la direction indiquée pendant 2 + 1/NR actions. Le meneur de jeu est libre d'imposer des malus appropriés, allant d'un malus de -1 à -3 à l'impossibilité totale d'agir ou de réagir.",
+      "inGameEffect": "La cible doit réussir un jet de Mental + Volonté en opposition contre le score d'invocation du mage pour éviter de regarder la direction désignée, à moins de 15 m, pendant (2 + 1 par NR) actions. Le meneur de jeu impose les malus appropriés, d'un -1 à -3 jusqu'à l'impossibilité totale d'agir ou de réagir.",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3648,7 +5508,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Runes des rêves, souffle, cendres d'encens de Nenya (à souffler au visage de la cible)",
-      "effect": "Ce sort n'est efficace qu'à 5 m, distance à laquelle les cendres sont portées par le souffle. Toutes les couleurs dans le champ de vision de la cible sont inversées. Le résultat est une perte complète des repères et un malus de -3 pour toutes les actions pendant 1 + 1/NR tours, sans compter d'éventuelles incapacités d'action décidées par le meneur."
+      "effect": "Ce sort n'est efficace qu'à 5 m, distance à laquelle les cendres sont portées par le souffle. Toutes les couleurs dans le champ de vision de la cible sont inversées. Le résultat est une perte complète des repères et un malus de -3 pour toutes les actions pendant 1 + 1/NR tours, sans compter d'éventuelles incapacités d'action décidées par le meneur.",
+      "inGameEffect": "Efficace uniquement à 5 m, distance à laquelle les cendres sont portées par le souffle. Malus de -3 à toutes les actions de la cible, sans compter d'éventuelles incapacités décidées par le meneur de jeu.",
+      "sensoryEffect": "Toutes les couleurs dans le champ de vision de la cible sont inversées, ce qui lui fait perdre complètement ses repères.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "illusion",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3664,7 +5534,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 17,
       "cle": "Rune d'œil fermé, doigt accusateur, hurlement de terreur",
-      "effect": "Le mage désigne une cible à moins de 10 m. Celle-ci doit réussir un jet de Mental+Volonté en Opposition contre le score d'incantation du mage. En cas d'échec, elle croit se retrouver au cœur de son pire cauchemar. Ce peut être n'importe quoi, mais toujours ce qu'il y a de pire dans l'esprit de la cible (torture, réminiscence d'une scène atroce, impression de mourir, etc.). A partir de ce moment et pour un tour par point en Sphère des rêves du lanceur, la cible perd conscience de son environnement et réagit comme si son cauchemar se superposait à la réalité. Si la cible échoue à un second jet de Mental+Volonté de Difficulté 15, elle voit alors sa Volonté divisée par deux pour une journée. Si le jet est un échec critique, la victime obtient automatiquement le Désavantage Phobie (1) en rapport avec la scène."
+      "effect": "Le mage désigne une cible à moins de 10 m. Celle-ci doit réussir un jet de Mental+Volonté en Opposition contre le score d'incantation du mage. En cas d'échec, elle croit se retrouver au cœur de son pire cauchemar. Ce peut être n'importe quoi, mais toujours ce qu'il y a de pire dans l'esprit de la cible (torture, réminiscence d'une scène atroce, impression de mourir, etc.). A partir de ce moment et pour un tour par point en Sphère des rêves du lanceur, la cible perd conscience de son environnement et réagit comme si son cauchemar se superposait à la réalité. Si la cible échoue à un second jet de Mental+Volonté de Difficulté 15, elle voit alors sa Volonté divisée par deux pour une journée. Si le jet est un échec critique, la victime obtient automatiquement le Désavantage Phobie (1) en rapport avec la scène.",
+      "inGameEffect": "Cible à moins de 10 m, qui doit réussir un jet de Mental + Volonté en opposition contre le score d'incantation. En cas d'échec, elle perd conscience de son environnement pendant un tour par point en Sphère des rêves du lanceur. Si elle échoue à un second jet de Mental + Volonté de Difficulté 15, sa Volonté est divisée par deux pour une journée ; sur un échec critique, elle obtient automatiquement le Désavantage Phobie (1) en rapport avec la scène.",
+      "sensoryEffect": "La cible croit se retrouver au cœur de son pire cauchemar — torture, réminiscence d'une scène atroce, impression de mourir — et réagit comme s'il se superposait à la réalité.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "illusion",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -3680,7 +5560,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens des rêves (consommé), rire, yeux fermés",
-      "effect": "Ce sort est strictement interdit dans les sanctuaires car il ouvre une brèche à une distance maximale de 10 m, d'où sort un filet de fumée toxique mauve. La zone envahie est de 25 m³. Respirer cette fumée fait perdre momentanément la moitié de ses points d'Intelligence et de ses points de Volonté, mais fait beaucoup rire et donne parfois l'impression de voler. Ce n'est qu'une impression car sitôt les effets dissipés (en 1+1/NR tours), il ne reste qu'un terrible mal de crâne. Ce sort est parfois utilisé pour nuire à la sérénité de réunions importantes. Eviter de respirer cette fumée est très difficile et demande un jet de Mental+Résistance d'une Difficulté de 20 (25 en combat)."
+      "effect": "Ce sort est strictement interdit dans les sanctuaires car il ouvre une brèche à une distance maximale de 10 m, d'où sort un filet de fumée toxique mauve. La zone envahie est de 25 m³. Respirer cette fumée fait perdre momentanément la moitié de ses points d'Intelligence et de ses points de Volonté, mais fait beaucoup rire et donne parfois l'impression de voler. Ce n'est qu'une impression car sitôt les effets dissipés (en 1+1/NR tours), il ne reste qu'un terrible mal de crâne. Ce sort est parfois utilisé pour nuire à la sérénité de réunions importantes. Eviter de respirer cette fumée est très difficile et demande un jet de Mental+Résistance d'une Difficulté de 20 (25 en combat).",
+      "inGameEffect": "Ouvre une brèche à 10 m au maximum, d'où sort une fumée toxique envahissant 25 m³. La respirer fait perdre momentanément la moitié de ses points d'Intelligence et de Volonté. L'éviter demande un jet de Mental + Résistance de Difficulté 20, ou 25 en combat. Une fois les effets dissipés, il ne reste qu'un terrible mal de crâne. Strictement interdit dans les sanctuaires ; parfois utilisé pour nuire à la sérénité de réunions importantes.",
+      "sensoryEffect": "Un filet de fumée mauve s'échappe de la brèche ; elle fait beaucoup rire et donne parfois l'impression de voler.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -3696,7 +5585,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens de Nenya, posture (méditation en tailleur, bras à l'équerre sur les côtés, yeux fermés), cercle runique formé de poudre de nacre",
-      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière violacée qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Nenya (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver ou venir de l'Ether), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Nenya peuvent priver l'invocateur de l'usage de n'importe quelle Sphère ou Discipline pour un jour par tranche d'âge s'ils estiment que sa requête est futile, mais ne feront généralement pas usage de la force. Par contre, ils peuvent décider de s'investir ultérieurement dans la psyché du mage en modifiant ses rêves, en y apportant de subtiles modifications et en orientant son comportement ou sa vie selon ses désirs."
+      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière violacée qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Nenya (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver ou venir de l'Ether), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires en cours à régler). Le magicien doit avoir une bonne raison de demander son aide et un présent pour service rendu n'est jamais superflu. Les dragons de Nenya peuvent priver l'invocateur de l'usage de n'importe quelle Sphère ou Discipline pour un jour par tranche d'âge s'ils estiment que sa requête est futile, mais ne feront généralement pas usage de la force. Par contre, ils peuvent décider de s'investir ultérieurement dans la psyché du mage en modifiant ses rêves, en y apportant de subtiles modifications et en orientant son comportement ou sa vie selon ses désirs.",
+      "inGameEffect": "Attire l'attention du fils de Nenya le plus proche pour lui demander conseil ou solliciter un transport vers une destination précise. Le dragon est de la seconde tranche d'âge + 1 par NR. Il vient par ses propres moyens ou de l'Éther, n'a aucune obligation envers le mage et ne vient pas se battre ; un présent pour service rendu n'est jamais superflu. Les dragons de Nenya peuvent priver l'invocateur de n'importe quelle Sphère ou Discipline pour un jour par tranche d'âge s'ils jugent la requête futile, sans généralement recourir à la force — mais ils peuvent décider de s'investir plus tard dans la psyché du mage, en modifiant ses rêves et en orientant son comportement selon leurs désirs.",
+      "sensoryEffect": "À la fin de la méditation, le mage sort de transe tandis que les runes du cercle émettent des rayons de lumière violacée qui jaillissent vers le ciel.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -3712,7 +5608,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "Poudre de gemme (consommée), farine (consommée)",
-      "effect": "Le magicien fait tomber les poudres de ses mains en les mélangeant. Elles se transforment en un épais brouillard sur un rayon de 5 + 1/NR mètres et sur environ 2 m de haut. Le brouillard se forme en un tour. On ne peut plus voir à plus d'un mètre dans la brume mais le magicien, lui, n'est pas affecté par le sort. Le brouillard persiste autant de tours que le score de Sphère des rêves du lanceur."
+      "effect": "Le magicien fait tomber les poudres de ses mains en les mélangeant. Elles se transforment en un épais brouillard sur un rayon de 5 + 1/NR mètres et sur environ 2 m de haut. Le brouillard se forme en un tour. On ne peut plus voir à plus d'un mètre dans la brume mais le magicien, lui, n'est pas affecté par le sort. Le brouillard persiste autant de tours que le score de Sphère des rêves du lanceur.",
+      "inGameEffect": "Épais brouillard d'un rayon de (5 + 1 par NR) mètres sur environ 2 m de haut, formé en un tour. On n'y voit plus à plus d'un mètre ; le magicien n'est pas affecté. Persiste autant de tours que le score de Sphère des rêves du lanceur.",
+      "sensoryEffect": "Le magicien fait tomber les poudres de ses mains en les mélangeant ; elles se transforment en brouillard.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -3728,7 +5633,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Paillettes d'or (consommées), rune de majesté (à tracer sur la cible avec les paillettes), yeux écarquillés",
-      "effect": "Le magicien enchante la cible (au toucher) qui attire alors l'attention de 5+1/NR personnes dans son entourage. Toutes les attentions sont focalisées sur lui pendant 1 tour complet. Cette fascination lui permet de doubler son Attribut Social sur son prochain jet de Communication ou d'Influence. Ce sort est dangereux en combat car toutes les attaques sont dirigées vers la cible en question. Si le sort n'est pas lancé sur le mage, la cible peut résister en réussissant un jet de Mental+Présence contre le score d'invocation du mage. En cas d'échec à l'incantation, le mage voit son Attribut Social divisé par deux pour le reste de la journée."
+      "effect": "Le magicien enchante la cible (au toucher) qui attire alors l'attention de 5+1/NR personnes dans son entourage. Toutes les attentions sont focalisées sur lui pendant 1 tour complet. Cette fascination lui permet de doubler son Attribut Social sur son prochain jet de Communication ou d'Influence. Ce sort est dangereux en combat car toutes les attaques sont dirigées vers la cible en question. Si le sort n'est pas lancé sur le mage, la cible peut résister en réussissant un jet de Mental+Présence contre le score d'invocation du mage. En cas d'échec à l'incantation, le mage voit son Attribut Social divisé par deux pour le reste de la journée.",
+      "inGameEffect": "La cible, enchantée au toucher, attire l'attention de (5 + 1 par NR) personnes de son entourage pendant 1 tour complet, et double son Attribut Social sur son prochain jet de Communication ou d'Influence. Dangereux en combat : toutes les attaques se dirigent vers elle. Si le sort n'est pas lancé sur le mage, la cible peut résister par un jet de Mental + Présence contre le score d'invocation. En cas d'échec à l'incantation, le mage voit son Attribut Social divisé par deux pour le reste de la journée.",
+      "duration": "1",
+      "durationUnit": "round",
+      "targets": "5 + 1 par NR",
+      "tags": [
+        "buff",
+        "ally",
+        "social"
+      ]
     }
   },
   {
@@ -3744,7 +5658,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Rune du croissant, chant d'appel, danse des étoiles (Danse Diff.15)",
-      "effect": "Le mage ouvre une brèche sur un endroit de Kor où la lune Khyméra est pleine. Il obtient non seulement de la lumière (blafarde) mais aussi un bonus de 4 pour tout sort lancé (par lui ou un autre) dans le rayon de lune. Ce sort affecte une zone de 6+1/NR m de rayon autour du mage. Ce sort dure une heure."
+      "effect": "Le mage ouvre une brèche sur un endroit de Kor où la lune Khyméra est pleine. Il obtient non seulement de la lumière (blafarde) mais aussi un bonus de 4 pour tout sort lancé (par lui ou un autre) dans le rayon de lune. Ce sort affecte une zone de 6+1/NR m de rayon autour du mage. Ce sort dure une heure.",
+      "inGameEffect": "Ouvre une brèche sur un endroit de Kor où la lune Khyméra est pleine : donne de la lumière blafarde et un bonus de 4 pour tout sort lancé dans le rayon de lune, par le mage ou par un autre. Zone de (6 + 1 par NR) m de rayon autour du mage.",
+      "duration": "1",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "ally",
+        "area"
+      ]
     }
   },
   {
@@ -3760,7 +5682,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 17,
       "cle": "Chuchotement (dans le creux de sa main, à rejeter derrière son épaule), rune du bouleversement, petit morceau de tissu (à poser sur le front de la cible, consommé)",
-      "effect": "Ce sort est utilisé pour perdre un poursuivant. Tous les bruits que peut faire le mage (ou la cible enchantée au contact) sont déplacés de manière aléatoire dans une zone de 25+5/NR m² située jusqu'à 25 mètres du porteur. Ce sort dure 1mn par point dans la Sphère des rêves et la zone de \"renvoi\" se déplace avec le porteur pour rester à portée."
+      "effect": "Ce sort est utilisé pour perdre un poursuivant. Tous les bruits que peut faire le mage (ou la cible enchantée au contact) sont déplacés de manière aléatoire dans une zone de 25+5/NR m² située jusqu'à 25 mètres du porteur. Ce sort dure 1mn par point dans la Sphère des rêves et la zone de \"renvoi\" se déplace avec le porteur pour rester à portée.",
+      "inGameEffect": "Tous les bruits que fait le mage — ou la cible enchantée au contact — sont déplacés aléatoirement dans une zone de (25 + 5 par NR) m² située jusqu'à 25 mètres du porteur. La zone de renvoi se déplace avec lui pour rester à portée. Dure 1 minute par point dans la Sphère des rêves. Utilisé pour semer un poursuivant.",
+      "duration": "SPHERE",
+      "durationUnit": "minute",
+      "tags": [
+        "illusion",
+        "self",
+        "exploration"
+      ]
     }
   },
   {
@@ -3776,7 +5706,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Posture (mains ouvrant une brèche imaginaire), chant berçant, encens des rêves (consommé)",
-      "effect": "Ce sort est la première étape avant le Psychonaute. Il permet d'ouvrir une fenêtre sur le rêve d'une cible (au contact) et de l'observer en se promenant dedans sans pouvoir intervenir. Cela permet d'avoir une première approche avant le grand saut. Si la cible n'est pas consentante, elle peut faire un jet de Mental+Présence en Opposition avec le score d'incantation du mage pour résister. Ce sort dure une heure par point dans la Sphère des rêves."
+      "effect": "Ce sort est la première étape avant le Psychonaute. Il permet d'ouvrir une fenêtre sur le rêve d'une cible (au contact) et de l'observer en se promenant dedans sans pouvoir intervenir. Cela permet d'avoir une première approche avant le grand saut. Si la cible n'est pas consentante, elle peut faire un jet de Mental+Présence en Opposition avec le score d'incantation du mage pour résister. Ce sort dure une heure par point dans la Sphère des rêves.",
+      "inGameEffect": "Ouvre une fenêtre sur le rêve d'une cible au contact : le mage s'y promène et l'observe sans pouvoir intervenir. Première étape avant le Psychonaute. Une cible non consentante résiste par un jet de Mental + Présence en opposition avec le score d'incantation. Dure une heure par point dans la Sphère des rêves.",
+      "duration": "SPHERE",
+      "durationUnit": "hour",
+      "tags": [
+        "detection",
+        "ally",
+        "ritual"
+      ]
     }
   },
   {
@@ -3792,7 +5730,18 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 22,
       "cle": "Rune du néant, plume de fluix (consommée), posture (tracer dans le vide les contours d'un passage avec la plume de fluix)",
-      "effect": "Le magicien ouvre un repli dans la réalité pour s'y faufiler. Il peut emmener 1 personne par NR éventuel, qui doit rentrer avec lui. Ce mouvement de repli lui prend une action juste après la fin d'incantation du sort, mais peut se faire à tout moment dans la durée d'effet. Le repli existe durant autant de tours que la Sphère des rêves du lanceur et peut être dans un arbre, dans un mur, dans le vide, etc. Dans le repli, le mage et ses alliés restent conscients de leur entourage, mais ne peuvent directement agir à moins de sortir du refuge. Il est bien sûr possible d'y effectuer des actions d'incantation ou de soin. Les personnages \"réfugiés\" ne sont détectables que sous la forme de silhouettes diaphanes (Mental+Perception Diff.25) et ne peuvent être atteints depuis la réalité."
+      "effect": "Le magicien ouvre un repli dans la réalité pour s'y faufiler. Il peut emmener 1 personne par NR éventuel, qui doit rentrer avec lui. Ce mouvement de repli lui prend une action juste après la fin d'incantation du sort, mais peut se faire à tout moment dans la durée d'effet. Le repli existe durant autant de tours que la Sphère des rêves du lanceur et peut être dans un arbre, dans un mur, dans le vide, etc. Dans le repli, le mage et ses alliés restent conscients de leur entourage, mais ne peuvent directement agir à moins de sortir du refuge. Il est bien sûr possible d'y effectuer des actions d'incantation ou de soin. Les personnages \"réfugiés\" ne sont détectables que sous la forme de silhouettes diaphanes (Mental+Perception Diff.25) et ne peuvent être atteints depuis la réalité.",
+      "inGameEffect": "Ouvre un repli dans la réalité — dans un arbre, dans un mur, dans le vide — où le mage se faufile, avec 1 personne par NR qui doit entrer avec lui. Le repli existe autant de tours que la Sphère des rêves du lanceur ; y entrer prend une action, possible à tout moment de la durée. À l'intérieur, le mage et ses alliés restent conscients de leur entourage mais ne peuvent agir sans sortir, hormis des actions d'incantation ou de soin. Ils ne sont détectables que sur un jet de Mental + Perception de Difficulté 25 et ne peuvent être atteints depuis la réalité.",
+      "sensoryEffect": "Les réfugiés n'apparaissent que sous la forme de silhouettes diaphanes.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "targets": "NR",
+      "tags": [
+        "protection",
+        "movement",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -3808,7 +5757,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "Gouttelette de rosée du jour (consommée), chant des cascades d'Ether (Chant Diff.15), yeux fermés",
-      "effect": "Le mage invoque une petite sirène éthérée qui flotte à côté de lui. Il lui donne un message qu'elle va transmettre à une personne, quelle qu'elle soit, où qu'elle soit, et ce en passant directement par l'Ether. Le mage peut obtenir une réponse immédiate et peut même ensuite renvoyer la sirène pour autant d'allers-retours qu'il a de NR. La sirène étant très rapide, le dialogue est quasiment instantané (1 action de délai par voyage). La sirène doit entreprendre son voyage dès son apparition, sans quoi elle perd toute concentration et se libère du contrôle du mage."
+      "effect": "Le mage invoque une petite sirène éthérée qui flotte à côté de lui. Il lui donne un message qu'elle va transmettre à une personne, quelle qu'elle soit, où qu'elle soit, et ce en passant directement par l'Ether. Le mage peut obtenir une réponse immédiate et peut même ensuite renvoyer la sirène pour autant d'allers-retours qu'il a de NR. La sirène étant très rapide, le dialogue est quasiment instantané (1 action de délai par voyage). La sirène doit entreprendre son voyage dès son apparition, sans quoi elle perd toute concentration et se libère du contrôle du mage.",
+      "inGameEffect": "Transmet un message à une personne, quelle qu'elle soit et où qu'elle soit, en passant directement par l'Éther. Le mage peut obtenir une réponse immédiate et renvoyer la sirène pour autant d'allers-retours qu'il a de NR ; le dialogue est quasiment instantané, avec 1 action de délai par voyage. La sirène doit partir dès son apparition, sans quoi elle perd toute concentration et se libère du contrôle du mage.",
+      "sensoryEffect": "Une petite sirène éthérée flotte à côté du mage.",
+      "tags": [
+        "summoning",
+        "communication",
+        "exploration"
+      ]
     }
   },
   {
@@ -3824,7 +5780,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 22,
       "cle": "Rune de rêve, sentiment d'apaisement, chant lent et profond, posture de méditation",
-      "effect": "Le magicien ouvre une porte sur le rêve d'une cible au contact et peut ainsi y entrer avec d'autres personnes (au maximum une par point en Sphère des rêves). Reportez-vous aux textes sur les voyages oniriques (Les voiles de Nenya et La Colère des Dragons) pour la gestion de ce sort. Il faut cependant toujours garder à l'esprit que si le rêveur se réveille, tous les voyageurs disparaissent en même temps que le rêve se dissout."
+      "effect": "Le magicien ouvre une porte sur le rêve d'une cible au contact et peut ainsi y entrer avec d'autres personnes (au maximum une par point en Sphère des rêves). Reportez-vous aux textes sur les voyages oniriques (Les voiles de Nenya et La Colère des Dragons) pour la gestion de ce sort. Il faut cependant toujours garder à l'esprit que si le rêveur se réveille, tous les voyageurs disparaissent en même temps que le rêve se dissout.",
+      "inGameEffect": "Ouvre une porte sur le rêve d'une cible au contact, où le mage peut entrer avec d'autres personnes — au maximum une par point en Sphère des rêves. Si le rêveur se réveille, tous les voyageurs disparaissent en même temps que le rêve se dissout.",
+      "tags": [
+        "detection",
+        "movement",
+        "ritual"
+      ]
     }
   },
   {
@@ -3840,7 +5802,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Cérémonie de vénération chimérique (Con. de la Magie, Diff 20), polyphonie éthérée (Chant, Diff 20 pour chaque participant), encens de Nenya (consommé)",
-      "effect": "Ce sort extrêmement puissant nécessite souvent la présence de plusieurs magiciens car l'incantation prend la forme d'un chant polyphonique harmonieux, complexe et mélodique qui transporte ses notes jusqu'au domaine éthéré de Nenya. Si la musique sonne juste, la légende veut que le Grand Dragon des Rêves se déplace en personne et bénisse de sa présence les plus folles entreprises. Ainsi, dans une situation désespérée, avant une bataille perdue d'avance, les mages audacieux ne manqueront pas d'invoquer la clémence de la Chimère. Malheureusement, nul n'a jamais pu prouver que ce rituel désespéré était un sort à part entière et possédait des effets fixes et prévisibles, car il dépendrait de la volonté de la Chimère..."
+      "effect": "Ce sort extrêmement puissant nécessite souvent la présence de plusieurs magiciens car l'incantation prend la forme d'un chant polyphonique harmonieux, complexe et mélodique qui transporte ses notes jusqu'au domaine éthéré de Nenya. Si la musique sonne juste, la légende veut que le Grand Dragon des Rêves se déplace en personne et bénisse de sa présence les plus folles entreprises. Ainsi, dans une situation désespérée, avant une bataille perdue d'avance, les mages audacieux ne manqueront pas d'invoquer la clémence de la Chimère. Malheureusement, nul n'a jamais pu prouver que ce rituel désespéré était un sort à part entière et possédait des effets fixes et prévisibles, car il dépendrait de la volonté de la Chimère...",
+      "inGameEffect": "Nécessite souvent plusieurs magiciens, l'incantation prenant la forme d'un chant polyphonique. Nul n'a jamais pu prouver que ce rituel désespéré soit un sort à part entière aux effets fixes et prévisibles : il dépendrait de la seule volonté de la Chimère.",
+      "sensoryEffect": "Le chant transporte ses notes jusqu'au domaine éthéré de Nenya. Si la musique sonne juste, la légende veut que le Grand Dragon des Rêves se déplace en personne et bénisse de sa présence les plus folles entreprises.",
+      "tags": [
+        "summoning",
+        "ritual"
+      ]
     }
   },
   {
@@ -3856,7 +5824,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "Un pinceau de Bonne qualité, des couleurs mélangées avec la poudre de gemmes (consommées), rune de l'art",
-      "effect": "Ce sort permet d'ensorceler un pinceau (ou tout autre objet d'écriture ou de dessin tel qu'un fusain, une plume ou une brosse) dans le but de réaliser une œuvre empreinte de la magnificence de la Chimère. Le pinceau peut être utilisé durant toute une journée après l'enchantement. Le bonus obtenu est de 3+1/NR."
+      "effect": "Ce sort permet d'ensorceler un pinceau (ou tout autre objet d'écriture ou de dessin tel qu'un fusain, une plume ou une brosse) dans le but de réaliser une œuvre empreinte de la magnificence de la Chimère. Le pinceau peut être utilisé durant toute une journée après l'enchantement. Le bonus obtenu est de 3+1/NR.",
+      "inGameEffect": "Ensorcelle un pinceau — ou tout autre objet d'écriture ou de dessin : fusain, plume, brosse — pour réaliser une œuvre empreinte de la magnificence de la Chimère. Bonus de (3 + 1 par NR). Utilisable pendant toute la journée qui suit l'enchantement.",
+      "duration": "1",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -3872,7 +5848,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "Rune de domination, bandeau de soie fine, psaume sourd",
-      "effect": "Le mage enchante un bandeau pour une semaine. Lorsqu'il le ceint et pendant 1 + 1/NR tours, il rend une cible (jusqu'à Sphère x10 m) aveugle et prend le contrôle de ses yeux. Il peut ainsi voir où elle se trouve. Si la cible dort, la magicien verra son rêve. Si la cible meurt durant cet intervalle, le mage est traumatisé et obtient le Désavantage Phobie (3) ou Trouble mental (au choix du meneur). Le bandeau peut être utilisé une fois par jour."
+      "effect": "Le mage enchante un bandeau pour une semaine. Lorsqu'il le ceint et pendant 1 + 1/NR tours, il rend une cible (jusqu'à Sphère x10 m) aveugle et prend le contrôle de ses yeux. Il peut ainsi voir où elle se trouve. Si la cible dort, la magicien verra son rêve. Si la cible meurt durant cet intervalle, le mage est traumatisé et obtient le Désavantage Phobie (3) ou Trouble mental (au choix du meneur). Le bandeau peut être utilisé une fois par jour.",
+      "inGameEffect": "Le bandeau est enchanté pour une semaine et utilisable une fois par jour. Ceint, il rend aveugle une cible située jusqu'à (Sphère × 10) m et donne au mage le contrôle de ses yeux, pendant (1 + 1 par NR) tours : il voit où elle se trouve, ou son rêve si elle dort. Si la cible meurt dans cet intervalle, le mage est traumatisé et obtient le Désavantage Phobie (3) ou Trouble mental, au choix du meneur de jeu.",
+      "duration": "1",
+      "durationUnit": "week",
+      "tags": [
+        "debuff",
+        "detection",
+        "enemy",
+        "object"
+      ]
     }
   },
   {
@@ -3888,7 +5873,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "Peinture blanche, rune de rêve, chant mélodieux",
-      "effect": "Le mage enchante de la peinture blanche qui devient capable de changer de couleur en une seconde et sur un simple mot. Cette peinture est utilisée dans les villes par les voleurs qui veulent se fondre dans la foule. Ils enduisent leurs vêtements du liquide et passent ainsi du vert au rouge au coin de la rue. On peut provoquer 1+1/NR changements de couleur. La peinture reste ensorcelée durant un jour par point en Sphère des rêves."
+      "effect": "Le mage enchante de la peinture blanche qui devient capable de changer de couleur en une seconde et sur un simple mot. Cette peinture est utilisée dans les villes par les voleurs qui veulent se fondre dans la foule. Ils enduisent leurs vêtements du liquide et passent ainsi du vert au rouge au coin de la rue. On peut provoquer 1+1/NR changements de couleur. La peinture reste ensorcelée durant un jour par point en Sphère des rêves.",
+      "inGameEffect": "Enchante de la peinture blanche, capable de changer de couleur en une seconde sur un simple mot, pour (1 + 1 par NR) changements. Reste ensorcelée un jour par point en Sphère des rêves. Utilisée en ville par les voleurs qui enduisent leurs vêtements du liquide et passent du vert au rouge au coin de la rue.",
+      "duration": "SPHERE",
+      "durationUnit": "day",
+      "tags": [
+        "illusion",
+        "object",
+        "urban"
+      ]
     }
   },
   {
@@ -3904,7 +5897,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "Cendres d'encens de Nenya (consommée), mélopée de l'Apaisement Ethéré (Art de la scène : Chant Diff.15), huile de palme (consommée)",
-      "effect": "Ce sort enchante le mélange de cendres et d'huile pour le rendre irisé et scintillant durant une semaine, après quoi il perd tout pouvoir. Passé sur la peau, le baume dégage une odeur particulièrement entêtante capable de plonger le personnage dans une quiétude méditative incroyable. A moins de réussir un jet de Mental+Volonté contre le score d'incantation du mage, la personne portant le baume quitte tout sentiment autre que la concentration, l'ouverture d'esprit et le calme. Ce baume est utilisé pour préparer les cérémonies méditatives de magie, apaiser les élans de certains combattants ou encore créer une ambiance propice à la séduction ou au commerce. Chez les commerçants les plus influents ou les diplomates d'état, il est d'ailleurs traditionnel de se passer du baume sur les mains en signe de bienveillance avec son interlocuteur. Ceci aurait pour effet d'attirer la sagesse de la Chimère... Lorsque ce baume est utilisé, il octroie un bonus de +3 pour toute Compétence de Méditation, Séduction, Diplomatie, mais aussi de Marchandage ou d'Artisanat élémentaire. Ses effets durent dix minutes environ."
+      "effect": "Ce sort enchante le mélange de cendres et d'huile pour le rendre irisé et scintillant durant une semaine, après quoi il perd tout pouvoir. Passé sur la peau, le baume dégage une odeur particulièrement entêtante capable de plonger le personnage dans une quiétude méditative incroyable. A moins de réussir un jet de Mental+Volonté contre le score d'incantation du mage, la personne portant le baume quitte tout sentiment autre que la concentration, l'ouverture d'esprit et le calme. Ce baume est utilisé pour préparer les cérémonies méditatives de magie, apaiser les élans de certains combattants ou encore créer une ambiance propice à la séduction ou au commerce. Chez les commerçants les plus influents ou les diplomates d'état, il est d'ailleurs traditionnel de se passer du baume sur les mains en signe de bienveillance avec son interlocuteur. Ceci aurait pour effet d'attirer la sagesse de la Chimère... Lorsque ce baume est utilisé, il octroie un bonus de +3 pour toute Compétence de Méditation, Séduction, Diplomatie, mais aussi de Marchandage ou d'Artisanat élémentaire. Ses effets durent dix minutes environ.",
+      "inGameEffect": "Le mélange reste enchanté une semaine, après quoi il perd tout pouvoir. Passé sur la peau, et à moins de réussir un jet de Mental + Volonté contre le score d'incantation, il fait quitter à la personne tout sentiment autre que la concentration, l'ouverture d'esprit et le calme. Octroie +3 à toute Compétence de Méditation, Séduction, Diplomatie, Marchandage ou Artisanat élémentaire. Ses effets durent dix minutes environ. Chez les commerçants influents et les diplomates d'état, il est traditionnel de s'en passer sur les mains en signe de bienveillance.",
+      "sensoryEffect": "Le baume est irisé et scintillant, et dégage une odeur particulièrement entêtante qui plonge dans une quiétude méditative incroyable.",
+      "duration": "1",
+      "durationUnit": "week",
+      "tags": [
+        "buff",
+        "object",
+        "social"
+      ]
     }
   },
   {
@@ -3920,7 +5922,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 25,
       "cle": "Runes de rêve (flamme recourbée à la base), mélopée, poudre d'or et un plateau d'acier",
-      "effect": "Le mage saupoudre le plateau de poussière d'or en formant lentement une rune des rêves, ce qui a pour effet de le transformer en une vapeur iridescente qui drape le lanceur en un tour complet. Le magicien est transporté, seul, dans un lieu de son choix (qu'il doit avoir visité depuis moins d'un an) en passant par l'Ether, domaine de Nenya. La vitesse est telle qu'il n'a que quelques visions fugaces du domaine de la Chimère (se référer à La Colère des Dragons pour plus ce détail sur cet environnement). Ce sort est une forme de voyage dérivée des célèbres transferts des Tours d'Onyr et qui préfigure l'accès des mortels à l'Ether."
+      "effect": "Le mage saupoudre le plateau de poussière d'or en formant lentement une rune des rêves, ce qui a pour effet de le transformer en une vapeur iridescente qui drape le lanceur en un tour complet. Le magicien est transporté, seul, dans un lieu de son choix (qu'il doit avoir visité depuis moins d'un an) en passant par l'Ether, domaine de Nenya. La vitesse est telle qu'il n'a que quelques visions fugaces du domaine de la Chimère (se référer à La Colère des Dragons pour plus ce détail sur cet environnement). Ce sort est une forme de voyage dérivée des célèbres transferts des Tours d'Onyr et qui préfigure l'accès des mortels à l'Ether.",
+      "inGameEffect": "Transporte le mage, seul, dans un lieu de son choix qu'il doit avoir visité depuis moins d'un an, en passant par l'Éther. Forme de voyage dérivée des transferts des Tours d'Onyr, qui préfigure l'accès des mortels à l'Éther.",
+      "sensoryEffect": "Le mage saupoudre le plateau de poussière d'or en formant lentement une rune des rêves ; le plateau se transforme en une vapeur iridescente qui le drape en un tour complet. La vitesse est telle qu'il n'a que quelques visions fugaces du domaine de la Chimère.",
+      "tags": [
+        "movement",
+        "self",
+        "ritual"
+      ]
     }
   },
   {
@@ -3936,7 +5945,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 17,
       "cle": "Kata des danses éoliennes, ruban de tissu bleu et blanc brodé d'argent, rune des vents",
-      "effect": "Ce sortilège permet à la cible de rentrer en harmonie avec les éléments aériens afin de tenter une action physique spectaculaire. Après avoir reçu le sort, il peut ajouter sa Coordination à la valeur de n'importe quel jet concernant une Compétence de Physique, qu'il possède ou non cette Compétence. Ce bonus s'applique pour une seule action précise définie lors du lancement du sort. Il n'est donc pas possible de gagner ce bonus pour une action indéterminée. Ce bonus dure 1+NR tours, durée au cours de laquelle il doit être utilisé. Il fonctionne dès que l'action définie est entreprise. Il est ainsi possible d'effectuer des pirouettes prodigieuses, d'escalader avec dextérité les parois les plus dangereuses, ou encore de faire danser sa lame avec une vitesse prodigieuse pour porter un coup fulgurant. Durant toute la durée du sort, le bénéficiaire semble littéralement vibrer d'énergie magique, la réalité étant légèrement distordue au contact de sa peau. Ses cheveux crépitent d'étincelles de pouvoir et ses gestes s'accompagnent de bruissements magiques. Ce sort très employé par les Prodiges et les gladiateurs de renom est souvent interdit lors des tournois ou des joutes."
+      "effect": "Ce sortilège permet à la cible de rentrer en harmonie avec les éléments aériens afin de tenter une action physique spectaculaire. Après avoir reçu le sort, il peut ajouter sa Coordination à la valeur de n'importe quel jet concernant une Compétence de Physique, qu'il possède ou non cette Compétence. Ce bonus s'applique pour une seule action précise définie lors du lancement du sort. Il n'est donc pas possible de gagner ce bonus pour une action indéterminée. Ce bonus dure 1+NR tours, durée au cours de laquelle il doit être utilisé. Il fonctionne dès que l'action définie est entreprise. Il est ainsi possible d'effectuer des pirouettes prodigieuses, d'escalader avec dextérité les parois les plus dangereuses, ou encore de faire danser sa lame avec une vitesse prodigieuse pour porter un coup fulgurant. Durant toute la durée du sort, le bénéficiaire semble littéralement vibrer d'énergie magique, la réalité étant légèrement distordue au contact de sa peau. Ses cheveux crépitent d'étincelles de pouvoir et ses gestes s'accompagnent de bruissements magiques. Ce sort très employé par les Prodiges et les gladiateurs de renom est souvent interdit lors des tournois ou des joutes.",
+      "inGameEffect": "La cible ajoute sa Coordination à n'importe quel jet de Compétence de Physique, qu'elle possède ou non cette Compétence. Le bonus vaut pour une seule action précise, définie au lancement du sort — jamais pour une action indéterminée — et doit être utilisé dans le délai.",
+      "sensoryEffect": "Le bénéficiaire semble vibrer d'énergie magique, la réalité étant légèrement distordue au contact de sa peau ; ses cheveux crépitent d'étincelles et ses gestes s'accompagnent de bruissements magiques.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -3952,7 +5970,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Cercle runique (spirale), position (assis les yeux clos, tête en arrière), chant d'appel aux Vents (Don artistique : Chant Diff. 15)",
-      "effect": "Ce sortilège, utilisable uniquement en extérieur, permet au mage de faire le vide en lui et de laisser son esprit entrer en résonance avec les murmures du vents. Il confère au mage un bonus de 3 + 2/NR à n'importe quelle action basée sur le contact, la télépathie, le lancement d'un sortilège de divination ou visant à « atteindre » un être vivant ou une information. Le seul domaine inaccessible au personnage reste son propre esprit, car la Sphère des vents n'a que peu de prise sur la psyché."
+      "effect": "Ce sortilège, utilisable uniquement en extérieur, permet au mage de faire le vide en lui et de laisser son esprit entrer en résonance avec les murmures du vents. Il confère au mage un bonus de 3 + 2/NR à n'importe quelle action basée sur le contact, la télépathie, le lancement d'un sortilège de divination ou visant à « atteindre » un être vivant ou une information. Le seul domaine inaccessible au personnage reste son propre esprit, car la Sphère des vents n'a que peu de prise sur la psyché.",
+      "inGameEffect": "Bonus de (3 + 2 par NR) à toute action fondée sur le contact, la télépathie, le lancement d'un sortilège de divination, ou visant à « atteindre » un être vivant ou une information. Utilisable uniquement en extérieur. Le seul domaine inaccessible reste le propre esprit du personnage, la Sphère des vents ayant peu de prise sur la psyché.",
+      "sensoryEffect": "Le mage fait le vide en lui et laisse son esprit entrer en résonance avec les murmures du vent.",
+      "tags": [
+        "buff",
+        "detection",
+        "self"
+      ]
     }
   },
   {
@@ -3968,7 +5993,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Encens de Szyl, posture (debout sur une éminence, bras écartés, tête renversée en arrière), cercle de runes des vents formées de plumes",
-      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière blanchâtre qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Szyl (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires à régler). Le magicien doit avoir une raison valable de demander de l'aide, mais il arrive que ce sort soit lancé de manière informelle pour rencontrer un Ailé et l'inviter à une veillée. Les dragons de Szyl peuvent priver l'invocateur de l'usage de sa Sphère des Vents pour une semaine par tranche d'âge s'ils estiment que sa requête est futile, mais ne le font que très rarement. Par contre, il peut arriver qu'ils mettent une volée subite à un impudent s'ils piquent une colère. Souvent peu protocolaires, les dragons des vents aiment les humains qui osent se lancer dans des entreprises audacieuses et ne jugeront pas trop durement un mortel qui leur demande de l'aide face à un défi finalement trop ardu. Les dragons des vents aiment agir vite et n'attendront pas toujours toutes les explications du mage. Ils restent hermétiques à certaines convenances sociales et leur aide pourra parfois mettre le mage en situation délicate (intrusion dans un sancturaire de caste, déranger un notale ou un noble...). Si un dragon des vents se trouve face à une situation qui le mettrait en colère, il fera parfois preuve de témérité, et des difficultés supplémentaires pourront le toucher dans son orgeuil. Si c'est le cas, il se montrera rancunier et prendra à son compte l'affaire qui impliquait le mage. Il n'hésitera pas à impliquer d'autres enfants de Szyl de sa connaissance pour faire triompher son point de vue, quitte à bousculer légèrement les institutions. Les dragons de Szyl ne rechignent pas à transporter des mortels si leur cause leur plaît, mais les conditions de voyage sont souvent difficiles (haute altitude, froid, vitesse excessive). En effet, les dragons des vents considèrent que si un mortel prétend profiter de leur domaine, il doit être prêt à le vivre pleinement..."
+      "effect": "A la fin de la méditation, le mage sort de transe alors que les runes du cercle émettent des rayons de lumière blanchâtre qui jaillissent vers le ciel. Le magicien attire alors l'attention d'un fils de Szyl (le plus proche) pour lui demander conseil ou solliciter un transport personnel vers une destination précise. Le dragon est de la seconde tranche d'âge + 1/NR. Le dragon vient par ses propres moyens (et donc peut mettre un moment à arriver), n'a aucune obligation vis à vis du mage et ne vient pas pour se battre (il a d'ailleurs probablement d'autres affaires à régler). Le magicien doit avoir une raison valable de demander de l'aide, mais il arrive que ce sort soit lancé de manière informelle pour rencontrer un Ailé et l'inviter à une veillée. Les dragons de Szyl peuvent priver l'invocateur de l'usage de sa Sphère des Vents pour une semaine par tranche d'âge s'ils estiment que sa requête est futile, mais ne le font que très rarement. Par contre, il peut arriver qu'ils mettent une volée subite à un impudent s'ils piquent une colère. Souvent peu protocolaires, les dragons des vents aiment les humains qui osent se lancer dans des entreprises audacieuses et ne jugeront pas trop durement un mortel qui leur demande de l'aide face à un défi finalement trop ardu. Les dragons des vents aiment agir vite et n'attendront pas toujours toutes les explications du mage. Ils restent hermétiques à certaines convenances sociales et leur aide pourra parfois mettre le mage en situation délicate (intrusion dans un sancturaire de caste, déranger un notale ou un noble...). Si un dragon des vents se trouve face à une situation qui le mettrait en colère, il fera parfois preuve de témérité, et des difficultés supplémentaires pourront le toucher dans son orgeuil. Si c'est le cas, il se montrera rancunier et prendra à son compte l'affaire qui impliquait le mage. Il n'hésitera pas à impliquer d'autres enfants de Szyl de sa connaissance pour faire triompher son point de vue, quitte à bousculer légèrement les institutions. Les dragons de Szyl ne rechignent pas à transporter des mortels si leur cause leur plaît, mais les conditions de voyage sont souvent difficiles (haute altitude, froid, vitesse excessive). En effet, les dragons des vents considèrent que si un mortel prétend profiter de leur domaine, il doit être prêt à le vivre pleinement...",
+      "inGameEffect": "Attire l'attention du fils de Szyl le plus proche pour lui demander conseil ou solliciter un transport vers une destination précise. Le dragon est de la seconde tranche d'âge + 1 par NR. Il vient par ses propres moyens, peut mettre un moment à arriver, n'a aucune obligation envers le mage et ne vient pas se battre. Les dragons de Szyl peuvent priver l'invocateur de sa Sphère des Vents pour une semaine par tranche d'âge s'ils jugent la requête futile, mais le font très rarement. Ils acceptent volontiers de transporter un mortel dont la cause leur plaît, dans des conditions souvent difficiles (haute altitude, froid, vitesse excessive).",
+      "sensoryEffect": "À la fin de la méditation, le mage sort de transe tandis que les runes du cercle émettent des rayons de lumière blanchâtre qui jaillissent vers le ciel.",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -3984,7 +6016,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 19,
       "cle": "Posture (geste de Garde Majeure, Manuel+Coordination Diff. 15), rune des vents, posture (s'accroupir et se relever)",
-      "effect": "C'est de ce sort que proviennent de nombreuses légendes concernant les prouesses de certains voyageurs illustres. Ce sort attire sur la cible le regard bienveillant des vents qui le protègent alors contre des dangers invisibles. Durant l'heure qui suit le lancement, le bénéficiaire peut à tout moment ressentir un souffle glacé sur la nuque, l'avertissant d'un danger une à deux secondes avant qu'il ne survienne. Il peut s'agir d'un projectile tiré dans son dos, d'un prédateur s'apprêtant à fondre sur lui du ciel ou encore d'un piège sur lequel il va poser le pied... Ce sort n'est efficace que contre les dangers cachés et ne peut interférer avec un adversaire combattu de face ou remplacer un jet de Réaction. Par contre, si ce jet de réaction était raté, le sort se déclencherait instantanément, remplaçant le piètre résultat par un jet réussi, mais avec 0 NR (quelle que soit la Difficulté du jet). Si le personnage obtient sur un de ses Dés d'Initiative un résultat plus élevé que la première action de l'agresseur (qu'il faut alors lancer pour comparer les scores, un piège inerte étant compté à 10 d'Initiative), l'agresseur ou l'effet mis en jeu doit relancer le dé de l'action et utiliser le résultat le plus faible des deux dés (en cas de Tendances ou de dés multiples, l'agresseur ne rejette que le dé qu'il conservait). Ce sort ne fait que prévenir le danger, et ne permet pas systématiquement d'y échapper..."
+      "effect": "C'est de ce sort que proviennent de nombreuses légendes concernant les prouesses de certains voyageurs illustres. Ce sort attire sur la cible le regard bienveillant des vents qui le protègent alors contre des dangers invisibles. Durant l'heure qui suit le lancement, le bénéficiaire peut à tout moment ressentir un souffle glacé sur la nuque, l'avertissant d'un danger une à deux secondes avant qu'il ne survienne. Il peut s'agir d'un projectile tiré dans son dos, d'un prédateur s'apprêtant à fondre sur lui du ciel ou encore d'un piège sur lequel il va poser le pied... Ce sort n'est efficace que contre les dangers cachés et ne peut interférer avec un adversaire combattu de face ou remplacer un jet de Réaction. Par contre, si ce jet de réaction était raté, le sort se déclencherait instantanément, remplaçant le piètre résultat par un jet réussi, mais avec 0 NR (quelle que soit la Difficulté du jet). Si le personnage obtient sur un de ses Dés d'Initiative un résultat plus élevé que la première action de l'agresseur (qu'il faut alors lancer pour comparer les scores, un piège inerte étant compté à 10 d'Initiative), l'agresseur ou l'effet mis en jeu doit relancer le dé de l'action et utiliser le résultat le plus faible des deux dés (en cas de Tendances ou de dés multiples, l'agresseur ne rejette que le dé qu'il conservait). Ce sort ne fait que prévenir le danger, et ne permet pas systématiquement d'y échapper...",
+      "inGameEffect": "Avertit le bénéficiaire d'un danger caché une à deux secondes avant qu'il ne survienne : projectile tiré dans le dos, prédateur fondant du ciel, piège sous le pied. N'agit que contre les dangers cachés, jamais contre un adversaire combattu de face, et ne remplace pas un jet de Réaction — mais un jet de Réaction raté est aussitôt converti en réussite à 0 NR, quelle que soit la Difficulté. Si le personnage obtient sur un de ses Dés d'Initiative un résultat plus élevé que la première action de l'agresseur (un piège inerte comptant 10 d'Initiative), celui-ci relance son dé d'action et garde le plus faible des deux. Le sort prévient le danger sans permettre systématiquement d'y échapper.",
+      "sensoryEffect": "Le bénéficiaire ressent un souffle glacé sur la nuque.",
+      "duration": "1",
+      "durationUnit": "hour",
+      "tags": [
+        "protection",
+        "detection",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -4000,7 +6042,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Broche à cheveux de valeur importante (au moins 1000 df), rune des vents, danse d'harmonie éolienne (Don artistique : Danse Diff. 15)",
-      "effect": "En pratiquant ce rituel, le mage s'attire le regard des énergies élémentaires des Vents qui, tout au long de la journée, lui prodigueront leurs bienfaits. L'Attribut Chance du personnage est multiplié par 2 et le personnage peut obtenir des NR lors de jets où il dépense des Points de Chance. En contrepartie, son Attribut Maîtrise tombe à 0 dès le lancement du sortilège (qu'il soit réussi ou raté)."
+      "effect": "En pratiquant ce rituel, le mage s'attire le regard des énergies élémentaires des Vents qui, tout au long de la journée, lui prodigueront leurs bienfaits. L'Attribut Chance du personnage est multiplié par 2 et le personnage peut obtenir des NR lors de jets où il dépense des Points de Chance. En contrepartie, son Attribut Maîtrise tombe à 0 dès le lancement du sortilège (qu'il soit réussi ou raté).",
+      "inGameEffect": "L'Attribut Chance du personnage est multiplié par 2 et il peut obtenir des NR sur les jets où il dépense des Points de Chance. En contrepartie, son Attribut Maîtrise tombe à 0 dès le lancement, que le sort soit réussi ou raté.",
+      "duration": "1",
+      "durationUnit": "day",
+      "tags": [
+        "buff",
+        "self",
+        "ritual"
+      ]
     }
   },
   {
@@ -4016,7 +6066,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 21,
       "cle": "Objet de Bonne qualité, rune de Szyl, évocation épique d'un « coup de chance » fameux (Conte : Diff.20)",
-      "effect": "Bien souvent, cet enchantement se lance lors des veillées (parfois à l'insu même des mages) lorsque les bardes évoquent avec force les aventures chanceuses de tel ou tel héros. Il permet au personnage de conférer à un objet une réserve de Points de Chance dont il pourra se servir par la suite. Cette réserve est égale à 2 + 2/NR points qui se dépenseront de façon classique - sans pouvoir conférer de NR. Le personnage ne peut puiser dans ces points que lorsqu'il utilise cet objet précis. Une personne ne peut détenir qu'un seul objet à la fois ayant reçu cet enchantement, qui dure une semaine ou tant qu'il reste des Points de Chance dans sa réserve."
+      "effect": "Bien souvent, cet enchantement se lance lors des veillées (parfois à l'insu même des mages) lorsque les bardes évoquent avec force les aventures chanceuses de tel ou tel héros. Il permet au personnage de conférer à un objet une réserve de Points de Chance dont il pourra se servir par la suite. Cette réserve est égale à 2 + 2/NR points qui se dépenseront de façon classique - sans pouvoir conférer de NR. Le personnage ne peut puiser dans ces points que lorsqu'il utilise cet objet précis. Une personne ne peut détenir qu'un seul objet à la fois ayant reçu cet enchantement, qui dure une semaine ou tant qu'il reste des Points de Chance dans sa réserve.",
+      "inGameEffect": "Confère à un objet une réserve de (2 + 2 par NR) Points de Chance, dépensés de façon classique mais sans jamais conférer de NR. Le personnage ne peut y puiser qu'en utilisant cet objet précis, et ne peut détenir qu'un seul objet ainsi enchanté à la fois. Dure une semaine, ou jusqu'à épuisement de la réserve.",
+      "duration": "1",
+      "durationUnit": "week",
+      "tags": [
+        "buff",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -4032,7 +6090,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 28,
       "cle": "Bras écartés, tête rejetée en arrière, hurlement",
-      "effect": "Alors que certains sorts de Magie Invocatoire pourraient créer des effets similaires à celui-ci, l'Œil du cyclone est considéré comme l'un des sortilèges les plus difficiles, les plus nobles et les plus dévastateurs de la Sphère des Vents car le mage puise en lui-même la force magique de créer une véritable tornade élémentaire. Au moment du lancement, le mage (et un cercle de 1m autour de lui) devient l'œil du cyclone, la dernière zone de calme dans une tempête qui se déchaîne au début du tour suivant. Dans un rayon égal à (2 x Sphère des Vents) mètres, des vents violents, des éclairs d'énergie et un sifflement assourdissant ravagent la zone. Tous les êtres et objets d'un poids inférieur à 20kg par degré de Statut du mage s'envolent en tourbillonnant et tous les êtres encore présents sont aveuglés et ballottés, subissant un malus de 3 à toutes leurs actions physiques. De plus, au début de chaque nouveau tour, ils subissent 3D10 points de dommages (imparables et non esquivables, mais comptant l'armure) en raison des objets projetés et des arcs électriques qui tourbillonnent autour du mage. Pour quitter la zone, il faut réussir un jet de Physique + Coordination contre le score d'invocation du mage (sauf pour les personnages emportés par le vent, qui tournoient sans posséder de contrôle sur leur trajectoire et restent toujours dans la zone). Un échec signifie une immobilité, un échec critique indique que le personnage est emporté par les vents. En transe, frénétique, incapable d'effectuer la moindre action, le mage doit se concentrer pour dompter l'énergie libérée. Il doit donc dépenser une grande quantité d'énergie, créant ainsi un effet qui va durer (Sphère des vents) tours. A l'issue de l'effet normal, il est possible de maintenir les effets du sort à raison de deux points de magie par tour supplémentaire. A tout moment, le personnage peut interrompre la tornade, qui se désagrège alors en quelques instants (bien que sa transe lui interdise souvent toute perception cohérente). Les cibles emportées par la tornade retombent alors lourdement de (Sphère des Vents du lanceur) mètres de haut (voir p.194 pour les dommages des chutes)."
+      "effect": "Alors que certains sorts de Magie Invocatoire pourraient créer des effets similaires à celui-ci, l'Œil du cyclone est considéré comme l'un des sortilèges les plus difficiles, les plus nobles et les plus dévastateurs de la Sphère des Vents car le mage puise en lui-même la force magique de créer une véritable tornade élémentaire. Au moment du lancement, le mage (et un cercle de 1m autour de lui) devient l'œil du cyclone, la dernière zone de calme dans une tempête qui se déchaîne au début du tour suivant. Dans un rayon égal à (2 x Sphère des Vents) mètres, des vents violents, des éclairs d'énergie et un sifflement assourdissant ravagent la zone. Tous les êtres et objets d'un poids inférieur à 20kg par degré de Statut du mage s'envolent en tourbillonnant et tous les êtres encore présents sont aveuglés et ballottés, subissant un malus de 3 à toutes leurs actions physiques. De plus, au début de chaque nouveau tour, ils subissent 3D10 points de dommages (imparables et non esquivables, mais comptant l'armure) en raison des objets projetés et des arcs électriques qui tourbillonnent autour du mage. Pour quitter la zone, il faut réussir un jet de Physique + Coordination contre le score d'invocation du mage (sauf pour les personnages emportés par le vent, qui tournoient sans posséder de contrôle sur leur trajectoire et restent toujours dans la zone). Un échec signifie une immobilité, un échec critique indique que le personnage est emporté par les vents. En transe, frénétique, incapable d'effectuer la moindre action, le mage doit se concentrer pour dompter l'énergie libérée. Il doit donc dépenser une grande quantité d'énergie, créant ainsi un effet qui va durer (Sphère des vents) tours. A l'issue de l'effet normal, il est possible de maintenir les effets du sort à raison de deux points de magie par tour supplémentaire. A tout moment, le personnage peut interrompre la tornade, qui se désagrège alors en quelques instants (bien que sa transe lui interdise souvent toute perception cohérente). Les cibles emportées par la tornade retombent alors lourdement de (Sphère des Vents du lanceur) mètres de haut (voir p.194 pour les dommages des chutes).",
+      "inGameEffect": "Dure (Sphère des vents) tours, prolongeables à deux points de magie par tour supplémentaire. Le mage et un cercle d'1 m autour de lui forment l'œil du cyclone ; la tempête se déchaîne au début du tour suivant dans un rayon de (2 × Sphère des Vents) mètres. Tout être ou objet de moins de 20 kg par degré de Statut du mage s'envole en tourbillonnant ; les autres sont aveuglés et ballottés, avec un malus de 3 à toutes leurs actions physiques, et subissent 3D10 points de dommages au début de chaque tour (imparables et non esquivables, armure comptée). Quitter la zone demande un jet de Physique + Coordination contre le score d'invocation du mage — un échec immobilise, un échec critique emporte. En transe, le mage ne peut effectuer aucune action. Il peut interrompre la tornade à tout moment ; les cibles emportées retombent alors de (Sphère des Vents du lanceur) mètres de haut.",
+      "sensoryEffect": "Des vents violents, des éclairs d'énergie et un sifflement assourdissant ravagent la zone.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -4048,7 +6116,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 22,
       "cle": "Kata de la Colère des Ouragans (Manuel+Conn. de la magie Diff. 15), poudre d'un rocher ou cendres d'un arbre détruits par un éclair naturel (consommées), chant rythmique",
-      "effect": "Utilisé lors des combats épiques, ce sortilège très puissant confère au mage la protection, la rapidité et l'efficacité meurtrière des rafales de vent. Durant (Sphère des vents) tours, le personnage est entouré de bourrasques sifflantes et gagne un bonus égal à sa Tendance Dragon à tous ses jets d'Initiative, d'attaque et d'esquive. Il obtient de plus un bonus égal à cette Tendance sur toutes ses attaques physiques à distance, du fait d'un vent porteur. Enfin, il ne peut être touché par des projectiles de taille humaine (hachettes, javelots, flèches, dards, jets d'acide limités, carreaux) à moins que ceux-ci ne soient ensorcelés par un effet ou une Compétence ayant obtenu un score supérieur à son jet d'incantation. Pour chaque NR obtenu, le personnage peut lancer une décharge de foudre infligeant 15+3D10 points de dommages. Pour cela, il doit effectuer un jet de Manuel+Coordination (comptant comme une Attaque, donc utilisant un dé d'action et d'une Difficulté définie par ses actions précédentes du tour). Cette décharge de foudre se condense dans sa main au moment du lancer et ne peut que se parer à l'aide d'un objet ensorcelé. L'armure compte normalement. En contrepartie, pour toute la durée du combat et le reste de la journée, le personnage ne peut plus faire appel aux Tendances et ne lance plus qu'un seul dé, considéré à tous point de vue comme le dé du Dragon. Aucun pouvoir, Avantage ou Privilège ne peut altérer cet effet."
+      "effect": "Utilisé lors des combats épiques, ce sortilège très puissant confère au mage la protection, la rapidité et l'efficacité meurtrière des rafales de vent. Durant (Sphère des vents) tours, le personnage est entouré de bourrasques sifflantes et gagne un bonus égal à sa Tendance Dragon à tous ses jets d'Initiative, d'attaque et d'esquive. Il obtient de plus un bonus égal à cette Tendance sur toutes ses attaques physiques à distance, du fait d'un vent porteur. Enfin, il ne peut être touché par des projectiles de taille humaine (hachettes, javelots, flèches, dards, jets d'acide limités, carreaux) à moins que ceux-ci ne soient ensorcelés par un effet ou une Compétence ayant obtenu un score supérieur à son jet d'incantation. Pour chaque NR obtenu, le personnage peut lancer une décharge de foudre infligeant 15+3D10 points de dommages. Pour cela, il doit effectuer un jet de Manuel+Coordination (comptant comme une Attaque, donc utilisant un dé d'action et d'une Difficulté définie par ses actions précédentes du tour). Cette décharge de foudre se condense dans sa main au moment du lancer et ne peut que se parer à l'aide d'un objet ensorcelé. L'armure compte normalement. En contrepartie, pour toute la durée du combat et le reste de la journée, le personnage ne peut plus faire appel aux Tendances et ne lance plus qu'un seul dé, considéré à tous point de vue comme le dé du Dragon. Aucun pouvoir, Avantage ou Privilège ne peut altérer cet effet.",
+      "inGameEffect": "Dure (Sphère des vents) tours. Bonus égal à la Tendance Dragon sur tous les jets d'Initiative, d'attaque et d'esquive, ainsi que sur toutes les attaques physiques à distance. Le personnage ne peut être touché par un projectile de taille humaine (hachette, javelot, flèche, dard, carreau) à moins qu'il ne soit ensorcelé par un effet ayant obtenu un score supérieur au jet d'incantation. Pour chaque NR, il peut lancer une décharge de foudre de (15 + 3D10) points de dommages, sur un jet de Manuel + Coordination comptant comme une attaque ; elle ne peut être parée qu'avec un objet ensorcelé, l'armure comptant normalement. En contrepartie, pour toute la durée du combat et le reste de la journée, il ne peut plus faire appel aux Tendances et ne lance plus qu'un seul dé, considéré comme le dé du Dragon ; aucun pouvoir, Avantage ou Privilège n'altère cet effet.",
+      "sensoryEffect": "Le personnage est entouré de bourrasques sifflantes ; la décharge de foudre se condense dans sa main au moment du lancer.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4064,7 +6142,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "Un objet personnel symbolique, orage puissant, Danse de la Colère Draconique (Physique+Don artistique: Danse Diff.22, provoque une Blessure légère)",
-      "effect": "Ce sortilège puissant n'est que rarement utilisé, tant la puissance qu'il met en jeu est importante. Il fait appel à la colère de Szyl, un sentiment ancien et violent qui l'habite parfois. Ce sort doit être lancé par une nuit d'orage, lorsque la fureur des cieux est à son paroxysme. Le mage enchante alors un objet personnel lui appartenant ou confié par un compagnon, lui conférant un pouvoir surnaturel afin de causer la perte totale d'un ennemi. Au terme d'une danse épuisante et d'un appel aux forces primitives de la colère, la foudre tombe plusieurs fois sur l'objet sans l'endommager. Le choix de l'objet détermine pour beaucoup le style avec lequel le porteur va exercer sa vengeance. Une arme sera clairement destinée à tuer son ennemi, un éventail de guerre ou une bannière pourra causer la défaite de l'armée ennemie si elle est menée par la cible désignée du Nemésis. De même, un anneau de fiançailles causera l'échec du mariage dans la douleur. Ce sort n'est jamais lancé à la légère. La légende veut que chaque fois que ce sort a été utilisé, l'un des deux protagonistes y a trouvé la défaite, la mort, l'échec ou la ruine. Car d'après les récits anciens, toute vengeance consacrée par une Nemésis verra la fin de l'un et le triomphe de l'autre. Ce sort dure jusqu'à accomplissement de la vengeance. Il n'apporte de puissance qu'à la personne ayant assisté le mage dans son incantation. Lorsque la scène finale arrivera, le personnage ressentira la colère de Szyl l'habiter et lui donner de la force. Il obtient alors un bonus de +5 sur toutes ses actions liées à l'objet servant à l'accomplissement de sa vengeance. Cet effet dure environ une heure (le Mj est libre de réduire ou d'augmenter cette durée pour que le sort soit pleinement actif durant toute la scène). Durant tout ce temps, les yeux du personnage sont parcourus d'éclairs bleutés et le contact de sa peau provoque de minuscules décharges élémentaires accompagnées d'étincelles. Le Mj veillera à ce que l'utilisation de ce sort donne lieu à une scène épique et dans laquelle le personnage porteur sera l'élément central. Ses compagnons ne seront pas à même d'accomplir les mêmes exploits que lui, et s'il le désire, le Mj peut adapter ses descriptions ou les effets du sort pour donner de la grandeur à la scène (immunités, blessures supplémentaires, coups de chance imprévus, ...). Ce sort ne provoque pas forcément la victoire du personnage, mais si sa cause est juste et en accord avec les voies de Szyl, il y a fort à parier que son destin sera glorieux..."
+      "effect": "Ce sortilège puissant n'est que rarement utilisé, tant la puissance qu'il met en jeu est importante. Il fait appel à la colère de Szyl, un sentiment ancien et violent qui l'habite parfois. Ce sort doit être lancé par une nuit d'orage, lorsque la fureur des cieux est à son paroxysme. Le mage enchante alors un objet personnel lui appartenant ou confié par un compagnon, lui conférant un pouvoir surnaturel afin de causer la perte totale d'un ennemi. Au terme d'une danse épuisante et d'un appel aux forces primitives de la colère, la foudre tombe plusieurs fois sur l'objet sans l'endommager. Le choix de l'objet détermine pour beaucoup le style avec lequel le porteur va exercer sa vengeance. Une arme sera clairement destinée à tuer son ennemi, un éventail de guerre ou une bannière pourra causer la défaite de l'armée ennemie si elle est menée par la cible désignée du Nemésis. De même, un anneau de fiançailles causera l'échec du mariage dans la douleur. Ce sort n'est jamais lancé à la légère. La légende veut que chaque fois que ce sort a été utilisé, l'un des deux protagonistes y a trouvé la défaite, la mort, l'échec ou la ruine. Car d'après les récits anciens, toute vengeance consacrée par une Nemésis verra la fin de l'un et le triomphe de l'autre. Ce sort dure jusqu'à accomplissement de la vengeance. Il n'apporte de puissance qu'à la personne ayant assisté le mage dans son incantation. Lorsque la scène finale arrivera, le personnage ressentira la colère de Szyl l'habiter et lui donner de la force. Il obtient alors un bonus de +5 sur toutes ses actions liées à l'objet servant à l'accomplissement de sa vengeance. Cet effet dure environ une heure (le Mj est libre de réduire ou d'augmenter cette durée pour que le sort soit pleinement actif durant toute la scène). Durant tout ce temps, les yeux du personnage sont parcourus d'éclairs bleutés et le contact de sa peau provoque de minuscules décharges élémentaires accompagnées d'étincelles. Le Mj veillera à ce que l'utilisation de ce sort donne lieu à une scène épique et dans laquelle le personnage porteur sera l'élément central. Ses compagnons ne seront pas à même d'accomplir les mêmes exploits que lui, et s'il le désire, le Mj peut adapter ses descriptions ou les effets du sort pour donner de la grandeur à la scène (immunités, blessures supplémentaires, coups de chance imprévus, ...). Ce sort ne provoque pas forcément la victoire du personnage, mais si sa cause est juste et en accord avec les voies de Szyl, il y a fort à parier que son destin sera glorieux...",
+      "inGameEffect": "Doit être lancé par une nuit d'orage. Enchante un objet personnel du mage ou confié par un compagnon afin de causer la perte totale d'un ennemi ; le choix de l'objet détermine la forme de la vengeance (une arme tue, une bannière défait une armée menée par la cible, un anneau de fiançailles brise un mariage). Dure jusqu'à l'accomplissement de la vengeance et ne profite qu'à la personne ayant assisté le mage pendant l'incantation. Lors de la scène finale, elle obtient +5 sur toutes ses actions liées à l'objet, pendant environ une heure — le meneur de jeu ajustant cette durée pour couvrir toute la scène.",
+      "sensoryEffect": "Au terme d'une danse épuisante et d'un appel aux forces primitives de la colère, la foudre tombe plusieurs fois sur l'objet sans l'endommager. Lors de l'accomplissement, les yeux du personnage sont parcourus d'éclairs bleutés et le contact de sa peau provoque de minuscules décharges élémentaires accompagnées d'étincelles.",
+      "tags": [
+        "buff",
+        "object",
+        "combat",
+        "ritual"
+      ]
     }
   },
   {
@@ -4080,7 +6166,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Position (œil fermé, main ouverte, pouce et index formant un cercle), rune de l'ombre, murmure",
-      "effect": "Le mage détermine avec précision l'âge d'un objet. Si ce dernier comporte des parties amovibles ou d'origine différentes, le sort est capable de les différencier. L'objet peut avoir une taille maximale d'un mètre cube. Il est possible de lancer ce sort sur un homme ou un animal (Diff. normale) ou sur une créature élémentaire ou surnaturelle (nécessite 1 NR). Certains dragons peuvent être pris pour cible si le mage obtient 2NR. Ce sort permet de connaître avec précision l'Augure de naissance d'une personne ou l'époque de confection d'un objet rare. Il n'y a pas de limite de temps."
+      "effect": "Le mage détermine avec précision l'âge d'un objet. Si ce dernier comporte des parties amovibles ou d'origine différentes, le sort est capable de les différencier. L'objet peut avoir une taille maximale d'un mètre cube. Il est possible de lancer ce sort sur un homme ou un animal (Diff. normale) ou sur une créature élémentaire ou surnaturelle (nécessite 1 NR). Certains dragons peuvent être pris pour cible si le mage obtient 2NR. Ce sort permet de connaître avec précision l'Augure de naissance d'une personne ou l'époque de confection d'un objet rare. Il n'y a pas de limite de temps.",
+      "inGameEffect": "Détermine avec précision l'âge d'un objet d'un mètre cube au maximum, en différenciant ses parties amovibles ou d'origine différente. Utilisable sur un homme ou un animal à Difficulté normale, sur une créature élémentaire ou surnaturelle avec 1 NR, sur certains dragons avec 2 NR. Donne l'Augure de naissance d'une personne ou l'époque de confection d'un objet rare. Sans limite de temps.",
+      "tags": [
+        "detection",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -4096,7 +6188,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 16,
       "cle": "Gargouillement de gorge, rune de l'ombre, morceau de chitine long d'un pouce (consommé)",
-      "effect": "Le mage enfonce brutalement le morceau de chitine dans son avant-bras. Ce dernier semble alors pousser dans la chair du mage et comprime ses muscles en les rétractant pour dévoiler les os. La chitine forme de nouveaux tendons et s'étire en fines lames. La souffrance est incroyable, mais la griffe obtenue inflige des dommages de FOR+10 au corps à corps. Elle déchire les armures et divise toutes les protections dénuées de métal par deux. Le mage obtient un bonus d'attaque de +1/NR au jet d'incantation. On ne peut parer avec cette griffe qui perdure un tour par point en Ombre."
+      "effect": "Le mage enfonce brutalement le morceau de chitine dans son avant-bras. Ce dernier semble alors pousser dans la chair du mage et comprime ses muscles en les rétractant pour dévoiler les os. La chitine forme de nouveaux tendons et s'étire en fines lames. La souffrance est incroyable, mais la griffe obtenue inflige des dommages de FOR+10 au corps à corps. Elle déchire les armures et divise toutes les protections dénuées de métal par deux. Le mage obtient un bonus d'attaque de +1/NR au jet d'incantation. On ne peut parer avec cette griffe qui perdure un tour par point en Ombre.",
+      "inGameEffect": "La griffe inflige FOR+10 au corps à corps, déchire les armures et divise par deux toute protection dénuée de métal. Bonus d'attaque de +1 par NR au jet d'incantation. On ne peut pas parer avec elle. Perdure un tour par point en Ombre.",
+      "sensoryEffect": "Le mage enfonce le morceau de chitine dans son avant-bras ; celle-ci pousse dans sa chair et comprime ses muscles en les rétractant pour dévoiler les os, puis forme de nouveaux tendons et s'étire en fines lames. La souffrance est incroyable.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4112,7 +6214,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "Morsure de sa propre langue, yeux fermés, main devant les yeux.",
-      "effect": "Le mage se mord la langue et avale son propre sang. En un instant, des vapeurs rouges dansent devant ses yeux clos et dessinent des formes évocatrices. Leur interprétation est immédiate et révèle le sentiment majeur qui anime la cible à cet instant. Pour le mage, il semble s'écouler plusieurs secondes mais à peine une dans la réalité. Si la cible a une Empathie supérieure à la Volonté du mage, ce dernier doit effectuer un jet de Mental+Volonté contre une Difficulté de 15 ou subir un malaise dû au choc en retour. Il est alors déséquilibré et confus et subit un malus de 5 à ses actions pour 5 mn."
+      "effect": "Le mage se mord la langue et avale son propre sang. En un instant, des vapeurs rouges dansent devant ses yeux clos et dessinent des formes évocatrices. Leur interprétation est immédiate et révèle le sentiment majeur qui anime la cible à cet instant. Pour le mage, il semble s'écouler plusieurs secondes mais à peine une dans la réalité. Si la cible a une Empathie supérieure à la Volonté du mage, ce dernier doit effectuer un jet de Mental+Volonté contre une Difficulté de 15 ou subir un malaise dû au choc en retour. Il est alors déséquilibré et confus et subit un malus de 5 à ses actions pour 5 mn.",
+      "inGameEffect": "Révèle le sentiment majeur qui anime la cible à cet instant. Si la cible a une Empathie supérieure à la Volonté du mage, celui-ci doit réussir un jet de Mental + Volonté contre une Difficulté de 15 ou subir un choc en retour : déséquilibré et confus, il subit un malus de 5 à ses actions pendant 5 minutes.",
+      "sensoryEffect": "Le mage se mord la langue et avale son propre sang ; des vapeurs rouges dansent devant ses yeux clos et dessinent des formes évocatrices. Il lui semble s'écouler plusieurs secondes, à peine une dans la réalité.",
+      "tags": [
+        "detection",
+        "enemy",
+        "social"
+      ]
     }
   },
   {
@@ -4128,7 +6237,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Chant murmuré, position (bras écartés, yeux clos), objet personnel ou os du défunt",
-      "effect": "Le mage projette son esprit aux frontières du Gouffre des Ames et tente de retrouver les restes de l'âme errante d'un défunt. L'époque du décès peut être d'un siècle par point en Ombre. Le mage rassemble les effluves de cette âme amnésique et communique télépathiquement avec. Les chances pour que l'âme comprenne ce qu'on lui dit ou réponde à une question sont égales à la Tendance Fatalité du lanceur+1/NR au lancement sur 1D10. Le contact dure une minute par point de Volonté du mage. Ce sort est une variante du dialogue mortuaire, mais infiniment plus dangereuse, bien que plus précise. En cas d'échec au lancement, le mage doit effectuer un jet de Mental+Volonté contre 20 ou perdre son âme, aspirée par le Gouffre. Il meurt alors instantanément."
+      "effect": "Le mage projette son esprit aux frontières du Gouffre des Ames et tente de retrouver les restes de l'âme errante d'un défunt. L'époque du décès peut être d'un siècle par point en Ombre. Le mage rassemble les effluves de cette âme amnésique et communique télépathiquement avec. Les chances pour que l'âme comprenne ce qu'on lui dit ou réponde à une question sont égales à la Tendance Fatalité du lanceur+1/NR au lancement sur 1D10. Le contact dure une minute par point de Volonté du mage. Ce sort est une variante du dialogue mortuaire, mais infiniment plus dangereuse, bien que plus précise. En cas d'échec au lancement, le mage doit effectuer un jet de Mental+Volonté contre 20 ou perdre son âme, aspirée par le Gouffre. Il meurt alors instantanément.",
+      "inGameEffect": "Retrouve l'âme errante d'un défunt mort depuis un siècle au maximum par point en Ombre, et communique télépathiquement avec elle. Les chances qu'elle comprenne ou réponde sont égales à la Tendance Fatalité du lanceur + 1 par NR, sur 1D10. Le contact dure une minute par point de Volonté du mage. Variante du Dialogue mortuaire, plus précise mais infiniment plus dangereuse : en cas d'échec au lancement, le mage doit réussir un jet de Mental + Volonté contre 20 ou voir son âme aspirée par le Gouffre — il meurt alors instantanément.",
+      "sensoryEffect": "Le mage projette son esprit aux frontières du Gouffre des Âmes et rassemble les effluves d'une âme amnésique.",
+      "duration": "VOL",
+      "durationUnit": "minute",
+      "tags": [
+        "summoning",
+        "communication",
+        "ritual"
+      ]
     }
   },
   {
@@ -4144,7 +6262,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "Ovale en forme d'œil de la fatalité à tracer au sol pour délimiter la zone, danse de la vie (dans un sens), danse de la mort (dans l'autre sens)",
-      "effect": "Ce sort permet d'enchanter une zone en y concentrant les forces primales de la vie. L'ovale peut faire jusqu'à 3m de longueur par point en Ombre (environ les deux tiers en largeur). Toutes les créatures à l'intérieur de cette zone lors de la fin de l'incantation sont alors soignées d'une case de blessure (en commençant par les Egratignures). Le mage dispose de plus de 1 case par NR qu'il peut régénérer chez une cible ou plusieurs (toujours en commençant par les plus basses). Tout mort-vivant présent dans le cercle subit un niveau de blessure par NR du mage et devra sortir, ne pensant plus qu'à cela. Toute relation sexuelle dans le cercle est fertile et donnera un ou plusieurs enfants tout à fait normaux. Les champs ainsi bénis verront leur récolte doubler lors de la prochaine moisson. Au dehors du cercle, une surface importante (une bande d'environ la moitié de la largeur) est instantanément drainée de sa force vitale. Les champs deviennent envahis d'herbes rachitiques, la récolte pourrit et les personnes présentes subissent un niveau de blessure (en commençant par les Egratignures). Les morts vivants tombent en poussière et leurs spectres reviendront périodiquement hanter l'endroit."
+      "effect": "Ce sort permet d'enchanter une zone en y concentrant les forces primales de la vie. L'ovale peut faire jusqu'à 3m de longueur par point en Ombre (environ les deux tiers en largeur). Toutes les créatures à l'intérieur de cette zone lors de la fin de l'incantation sont alors soignées d'une case de blessure (en commençant par les Egratignures). Le mage dispose de plus de 1 case par NR qu'il peut régénérer chez une cible ou plusieurs (toujours en commençant par les plus basses). Tout mort-vivant présent dans le cercle subit un niveau de blessure par NR du mage et devra sortir, ne pensant plus qu'à cela. Toute relation sexuelle dans le cercle est fertile et donnera un ou plusieurs enfants tout à fait normaux. Les champs ainsi bénis verront leur récolte doubler lors de la prochaine moisson. Au dehors du cercle, une surface importante (une bande d'environ la moitié de la largeur) est instantanément drainée de sa force vitale. Les champs deviennent envahis d'herbes rachitiques, la récolte pourrit et les personnes présentes subissent un niveau de blessure (en commençant par les Egratignures). Les morts vivants tombent en poussière et leurs spectres reviendront périodiquement hanter l'endroit.",
+      "inGameEffect": "Enchante un ovale de jusqu'à 3 m de longueur par point en Ombre, sur environ deux tiers en largeur. Toute créature à l'intérieur à la fin de l'incantation est soignée d'une case de blessure, en commençant par les Égratignures ; le mage dispose en plus d'une case par NR à répartir sur une ou plusieurs cibles. Tout mort-vivant présent subit un niveau de blessure par NR et doit sortir, ne pensant plus qu'à cela. Toute relation sexuelle dans le cercle est fertile et donne des enfants normaux ; un champ ainsi béni double sa prochaine récolte. À l'extérieur, une bande d'environ la moitié de la largeur est instantanément drainée de sa force vitale : les récoltes pourrissent, les personnes présentes subissent un niveau de blessure, les morts-vivants tombent en poussière et leurs spectres reviennent périodiquement hanter l'endroit.",
+      "tags": [
+        "attack",
+        "healing",
+        "area",
+        "ritual"
+      ]
     }
   },
   {
@@ -4160,7 +6285,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 18,
       "cle": "un objet non ensorcelé de Bonne qualité, sang d'Abomination, rune de l'ombre (tracée avec le sang sur l'objet)",
-      "effect": "Le mage de l'Ombre utilise ce sort pour donner à une créature mort-vivante un bonus de 3+1/NR dans un Attribut et de 2+1/NR dans deux Compétence. Ce bonus perdure aussi longtemps que le mort vivant. L'objet choisi doit être en rapport avec les Compétences augmentées. Chaque mort-vivant ne peut bénéficier que d'un sort de ce type. Si le mort vivant est physiquement séparé de l'objet, le sort est rompu. Les champions de l'ombre enchantés sont souvent chargés de missions spéciales et commandent des hordes de créatures de l'ombre."
+      "effect": "Le mage de l'Ombre utilise ce sort pour donner à une créature mort-vivante un bonus de 3+1/NR dans un Attribut et de 2+1/NR dans deux Compétence. Ce bonus perdure aussi longtemps que le mort vivant. L'objet choisi doit être en rapport avec les Compétences augmentées. Chaque mort-vivant ne peut bénéficier que d'un sort de ce type. Si le mort vivant est physiquement séparé de l'objet, le sort est rompu. Les champions de l'ombre enchantés sont souvent chargés de missions spéciales et commandent des hordes de créatures de l'ombre.",
+      "inGameEffect": "Donne à une créature mort-vivante un bonus de (3 + 1 par NR) dans un Attribut et de (2 + 1 par NR) dans deux Compétences. L'objet choisi doit être en rapport avec les Compétences augmentées, et le sort est rompu si le mort-vivant en est physiquement séparé. Chaque mort-vivant ne peut bénéficier que d'un seul sort de ce type. Le bonus perdure aussi longtemps que le mort-vivant.",
+      "tags": [
+        "buff",
+        "object",
+        "ritual"
+      ]
     }
   },
   {
@@ -4176,7 +6307,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "Miroir, poudre blanche, poudre noire",
-      "effect": "Le mage ensorcelle un miroir pour observer des images s'y étant reflétées auparavant. Il jette deux poignées des poudres sur le miroir et incante. Les poudres s'animent alors et forment une image du reflet passé. Le mage peut reculer dans le temps en fonction de sa concentration à raison d'un tour par mois. Ce sort peut remonter jusqu'à Sphère+1/NR années."
+      "effect": "Le mage ensorcelle un miroir pour observer des images s'y étant reflétées auparavant. Il jette deux poignées des poudres sur le miroir et incante. Les poudres s'animent alors et forment une image du reflet passé. Le mage peut reculer dans le temps en fonction de sa concentration à raison d'un tour par mois. Ce sort peut remonter jusqu'à Sphère+1/NR années.",
+      "inGameEffect": "Ensorcelle un miroir pour observer les images qui s'y sont reflétées. Le mage recule dans le temps au rythme d'un tour par mois, jusqu'à (Sphère + 1 par NR) années.",
+      "sensoryEffect": "Les poudres jetées sur le miroir s'animent et forment une image du reflet passé.",
+      "tags": [
+        "detection",
+        "object",
+        "ritual"
+      ]
     }
   },
   {
@@ -4192,7 +6330,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 21,
       "cle": "Sable noir de Kali (consommé), sang du mage (consommé), rune de l'ombre",
-      "effect": "Le mage verse le sable dans sa main et s'entaille la paume pour l'imbiber de sang. Il porte le mélange à sa bouche et se concentre un instant. Dès l'action suivant la fin de l'incantation, le mage peut faire jaillir de sa bouche de longs tentacules noirâtres semblables à des anguilles. Ces tentacules portent à chacune de leur extrémité une de ses propres dents rendue acérée. Les tentacules font 4 m par point en Ombre et le mage peut s'en servir pour attaquer, enlacer ou se tracter. Les dommages sont de COO+5 et les tentacules se manipulent par un jet de l'Attribut concerné et avec une Compétence égale à la Coordination du mage (pour frapper ou Saisir, Physique+Coordination contre la Difficulté du type d'attaque). Chaque attaque anime plusieurs tentacules et peut toucher 3 cibles proches, plus une par NR. Les tentacules ne peuvent se parer, sauf avec un bouclier. Si une même cible subit plusieurs attaques, le fait d'esquiver ou d'interposer son bouclier vaut pour toutes les attaques. On ne peut ni Charger, ni Parer ni faire d'Attaque brutale. Si un tentacule est touché et que le mage ne parvient pas à esquiver, il subit les dégâts normaux sans armure et le sort est rompu. Le mage a alors la bouche en sang et meurtrie. La résistance des tentacules permet de supporter le poids du mage équipé légèrement (pas d'armure moyenne ou lourde), sans plus et tout dépassement arrache une partie des gencives (Blessure grave automatique). Le sort dure Sphère tours."
+      "effect": "Le mage verse le sable dans sa main et s'entaille la paume pour l'imbiber de sang. Il porte le mélange à sa bouche et se concentre un instant. Dès l'action suivant la fin de l'incantation, le mage peut faire jaillir de sa bouche de longs tentacules noirâtres semblables à des anguilles. Ces tentacules portent à chacune de leur extrémité une de ses propres dents rendue acérée. Les tentacules font 4 m par point en Ombre et le mage peut s'en servir pour attaquer, enlacer ou se tracter. Les dommages sont de COO+5 et les tentacules se manipulent par un jet de l'Attribut concerné et avec une Compétence égale à la Coordination du mage (pour frapper ou Saisir, Physique+Coordination contre la Difficulté du type d'attaque). Chaque attaque anime plusieurs tentacules et peut toucher 3 cibles proches, plus une par NR. Les tentacules ne peuvent se parer, sauf avec un bouclier. Si une même cible subit plusieurs attaques, le fait d'esquiver ou d'interposer son bouclier vaut pour toutes les attaques. On ne peut ni Charger, ni Parer ni faire d'Attaque brutale. Si un tentacule est touché et que le mage ne parvient pas à esquiver, il subit les dégâts normaux sans armure et le sort est rompu. Le mage a alors la bouche en sang et meurtrie. La résistance des tentacules permet de supporter le poids du mage équipé légèrement (pas d'armure moyenne ou lourde), sans plus et tout dépassement arrache une partie des gencives (Blessure grave automatique). Le sort dure Sphère tours.",
+      "inGameEffect": "Fait jaillir de la bouche du mage des tentacules de 4 m par point en Ombre, servant à attaquer, enlacer ou se tracter. Dommages de COO+5 ; ils se manipulent par un jet de l'Attribut concerné avec une Compétence égale à la Coordination du mage. Chaque attaque touche 3 cibles proches, plus une par NR ; elle ne peut être parée qu'au bouclier, et esquiver ou interposer son bouclier vaut pour toutes les attaques d'un même tour. Ni Charge, ni Parade, ni Attaque brutale possibles. Si un tentacule est touché et que le mage ne l'esquive pas, il subit les dégâts sans armure et le sort est rompu, le laissant la bouche en sang. Les tentacules supportent le poids du mage équipé légèrement — jamais en armure moyenne ou lourde — tout dépassement arrachant une partie des gencives, soit une Blessure grave automatique. Dure (Sphère) tours.",
+      "sensoryEffect": "De longs tentacules noirâtres semblables à des anguilles jaillissent de la bouche du mage, portant à chaque extrémité une de ses propres dents rendue acérée.",
+      "duration": "SPHERE",
+      "durationUnit": "round",
+      "targets": "3 + NR",
+      "tags": [
+        "attack",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4208,7 +6356,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "Fléchettes à pointe d'obsidienne, balayages des bras, respiration bloquée",
-      "effect": "Le mage jette la fléchette vers l'ombre de son adversaire, qui n'a pour seule défense que la possibilité d'Esquiver contre une Difficulté de 25 (ce qui représente le fait de comprendre in-extremis que c'est son ombre et non soi même qui est visé). Si l'ombre est touchée, la fléchette se plante (dans tous les supports sauf le métal). Elle ne peut se parer. Elle immobilise la cible durant 30 mn ou tant qu'elle n'est pas ôtée. La victime peut parler, mais tout mouvement est impossible. Ce sort a une portée de 20 m et n'est pas utilisable dans les lieux très sombres, où l'ombre de la cible n'est pas nette. Il ne peut affecter des créatures d'un poids supérieur à (Sphère x10) kg."
+      "effect": "Le mage jette la fléchette vers l'ombre de son adversaire, qui n'a pour seule défense que la possibilité d'Esquiver contre une Difficulté de 25 (ce qui représente le fait de comprendre in-extremis que c'est son ombre et non soi même qui est visé). Si l'ombre est touchée, la fléchette se plante (dans tous les supports sauf le métal). Elle ne peut se parer. Elle immobilise la cible durant 30 mn ou tant qu'elle n'est pas ôtée. La victime peut parler, mais tout mouvement est impossible. Ce sort a une portée de 20 m et n'est pas utilisable dans les lieux très sombres, où l'ombre de la cible n'est pas nette. Il ne peut affecter des créatures d'un poids supérieur à (Sphère x10) kg.",
+      "inGameEffect": "Portée de 20 m. La fléchette est lancée vers l'ombre de l'adversaire, qui n'a pour seule défense qu'une Esquive contre une Difficulté de 25 — comprendre in extremis que c'est son ombre et non lui qui est visée. Ne peut être parée. Touchée, la fléchette se plante dans tout support sauf le métal et immobilise la cible durant 30 minutes, ou tant qu'elle n'est pas ôtée ; la victime peut parler, mais tout mouvement lui est impossible. Inutilisable dans les lieux très sombres, où l'ombre n'est pas nette, et sans effet sur les créatures de plus de (Sphère × 10) kg.",
+      "duration": "30",
+      "durationUnit": "minute",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -4224,7 +6380,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "Mains paumes vers le bas, mouvement rapide des doigts, yeux révulsés",
-      "effect": "Ce sort permet, en réussissant un jet d'Incantation en Opposition contre Mental+Volonté d'une cible, de modifier un de ses sentiments et de le remplacer par un autre durant 1+1/NR mn. La cible ne se rend compte de rien, mais interprète à son gré le sentiment qui l'habite. A la fin du sort, la cible est prise d'un léger malaise et de maux de tête. Elle se souvient de son revirement passager mais sera incapable de l'expliquer. Exemples d'émotions : Peur, haine, amour, envie, passion, dégoût, irritabilité, euphorie, malveillance, fatigue, paresse, vitalité, courage, désespoir..."
+      "effect": "Ce sort permet, en réussissant un jet d'Incantation en Opposition contre Mental+Volonté d'une cible, de modifier un de ses sentiments et de le remplacer par un autre durant 1+1/NR mn. La cible ne se rend compte de rien, mais interprète à son gré le sentiment qui l'habite. A la fin du sort, la cible est prise d'un léger malaise et de maux de tête. Elle se souvient de son revirement passager mais sera incapable de l'expliquer. Exemples d'émotions : Peur, haine, amour, envie, passion, dégoût, irritabilité, euphorie, malveillance, fatigue, paresse, vitalité, courage, désespoir...",
+      "inGameEffect": "Sur un jet d'incantation en opposition contre le Mental + Volonté de la cible, remplace un de ses sentiments par un autre pendant (1 + 1 par NR) minutes — peur, haine, amour, envie, passion, dégoût, irritabilité, euphorie, malveillance, fatigue, paresse, vitalité, courage, désespoir. La cible ne se rend compte de rien et interprète à son gré le sentiment qui l'habite.",
+      "sensoryEffect": "À la fin du sort, la cible est prise d'un léger malaise et de maux de tête ; elle se souvient de son revirement passager mais est incapable de l'expliquer.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "debuff",
+        "enemy",
+        "social"
+      ]
     }
   },
   {
@@ -4240,7 +6405,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Sablier rempli de sable noir (consommé), rune d'ombre sur la cible, cérémonie nocturne à la lueur de Shar",
-      "effect": "Le mage plonge ses mains dans le torse de sa cible mort vivante et lui arrache le reste de son cœur, qu'il jette en direction de Shar pour créer un pont spirituel avec le cœur de Kalimsshar. Il scelle ce lien en plaçant le sablier dans la plaie béante. Le mort-vivant ainsi ensorcelé restera animé jusqu'au premier jour du prochain Augure du Fataliste et se libère ainsi des contraintes d'existences lui étant imposées. Par contre, il tombera en poussière à ce moment quelles que soit l'origine de sa mort-vivance (les sorts dotés d'une Complexité supérieure ou les Faveurs d'un dragon peuvent garantir sa survie au gré du Meneur). S'il se dissipe, il n'est plus possible de l'animer de nouveau."
+      "effect": "Le mage plonge ses mains dans le torse de sa cible mort vivante et lui arrache le reste de son cœur, qu'il jette en direction de Shar pour créer un pont spirituel avec le cœur de Kalimsshar. Il scelle ce lien en plaçant le sablier dans la plaie béante. Le mort-vivant ainsi ensorcelé restera animé jusqu'au premier jour du prochain Augure du Fataliste et se libère ainsi des contraintes d'existences lui étant imposées. Par contre, il tombera en poussière à ce moment quelles que soit l'origine de sa mort-vivance (les sorts dotés d'une Complexité supérieure ou les Faveurs d'un dragon peuvent garantir sa survie au gré du Meneur). S'il se dissipe, il n'est plus possible de l'animer de nouveau.",
+      "inGameEffect": "Le mort-vivant ensorcelé reste animé jusqu'au premier jour du prochain Augure du Fataliste et se libère des contraintes d'existence qui lui étaient imposées. Il tombe en poussière à ce moment, quelle que soit l'origine de sa mort-vivance — un sort de Complexité supérieure ou la Faveur d'un dragon peuvent garantir sa survie, au gré du meneur de jeu. Une fois dissipé, il ne peut plus être animé de nouveau.",
+      "sensoryEffect": "Le mage plonge ses mains dans le torse de la cible, lui arrache le reste de son cœur et le jette en direction de Shar pour créer un pont spirituel avec le cœur de Kalimsshar, puis scelle le lien en plaçant le sablier dans la plaie béante.",
+      "tags": [
+        "buff",
+        "summoning",
+        "ritual"
+      ]
     }
   },
   {
@@ -4256,7 +6428,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 17,
       "cle": "Sablier de sable noir à briser (consommé), sentiment de peur chez la cible (à provoquer), regard fixe",
-      "effect": "Ce sort permet d'altérer la force vitale qui sous-tend l'âme d'un humain pour le faire vieillir. La cible, située à moins de 50m, vieillit de 5+1/NR ans. La cible vieillit visuellement en accéléré, sa pilosité abonde et son visage se creuse instantanément de rides. On ne peut lancer ce sort que deux fois sur la même cible, après quoi l'âme est altérée et peu malléable. Si ce sort modifie l'âge en passant d'une tranche d'âge à une autre, le personnage subit les effets néfastes de cette évolution, mais aucun des effets bénéfiques. On ne peut décéder directement des effets de ce sort, mais l'état dans lequel il laisse la victime peut provoquer son trépas en quelques jours si elle est âgée, affaiblie ou très malade."
+      "effect": "Ce sort permet d'altérer la force vitale qui sous-tend l'âme d'un humain pour le faire vieillir. La cible, située à moins de 50m, vieillit de 5+1/NR ans. La cible vieillit visuellement en accéléré, sa pilosité abonde et son visage se creuse instantanément de rides. On ne peut lancer ce sort que deux fois sur la même cible, après quoi l'âme est altérée et peu malléable. Si ce sort modifie l'âge en passant d'une tranche d'âge à une autre, le personnage subit les effets néfastes de cette évolution, mais aucun des effets bénéfiques. On ne peut décéder directement des effets de ce sort, mais l'état dans lequel il laisse la victime peut provoquer son trépas en quelques jours si elle est âgée, affaiblie ou très malade.",
+      "inGameEffect": "La cible, à moins de 50 m, vieillit de (5 + 1 par NR) ans. Ne peut être lancé que deux fois sur la même cible, après quoi l'âme est altérée et peu malléable. Si le sort fait changer de tranche d'âge, le personnage subit les effets néfastes de cette évolution mais aucun des effets bénéfiques. On ne peut pas mourir directement du sort, mais l'état dans lequel il laisse la victime peut provoquer son trépas en quelques jours si elle est âgée, affaiblie ou très malade.",
+      "sensoryEffect": "La cible vieillit visuellement en accéléré : sa pilosité abonde et son visage se creuse instantanément de rides.",
+      "tags": [
+        "debuff",
+        "enemy",
+        "ritual"
+      ]
     }
   },
   {
@@ -4272,7 +6451,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 22,
       "cle": "Runes de l'Ombre, position (bras tendus, frémissement profond, yeux fermés), deux poignées de poudre d'obsidienne (au moins 40 g au total, consommées)",
-      "effect": "Le mage lève les bras au ciel et les braque vers deux cibles à moins de (Sphère x5)m de lui en lançant la poudre. Celle ci se change en arcs d'énergie pourpre crépitants entre ses mains et ses cibles. Le mage peut alors à son gré interchanger des cases de blessures entre les cibles, qu'elles soient cochées ou non et dans le même niveau de blessure. Il peut décider d'être un des protagonistes. Si une cible est non-consentante, elle peut résister par un jet de Physique+Volonté contre le score d'invocation du mage pour chaque case de blessure. Le sort dure 1+1/NR tours et transfert dure une action complexe par case transférée. Aucune case n'est régénérée par ce processus et les deux cibles subissent des souffrances intenses durant tout le sort, ce qui les oblige à se concentrer pour supporter la douleur. (-2 en Volonté)."
+      "effect": "Le mage lève les bras au ciel et les braque vers deux cibles à moins de (Sphère x5)m de lui en lançant la poudre. Celle ci se change en arcs d'énergie pourpre crépitants entre ses mains et ses cibles. Le mage peut alors à son gré interchanger des cases de blessures entre les cibles, qu'elles soient cochées ou non et dans le même niveau de blessure. Il peut décider d'être un des protagonistes. Si une cible est non-consentante, elle peut résister par un jet de Physique+Volonté contre le score d'invocation du mage pour chaque case de blessure. Le sort dure 1+1/NR tours et transfert dure une action complexe par case transférée. Aucune case n'est régénérée par ce processus et les deux cibles subissent des souffrances intenses durant tout le sort, ce qui les oblige à se concentrer pour supporter la douleur. (-2 en Volonté).",
+      "inGameEffect": "Vise deux cibles à moins de (Sphère × 5) m, le mage pouvant être l'une d'elles. Il échange à son gré des cases de blessure entre elles, cochées ou non, dans le même niveau de blessure. Une cible non consentante résiste par un jet de Physique + Volonté contre le score d'invocation, pour chaque case. Chaque transfert coûte une action complexe. Aucune case n'est régénérée par ce processus, et les deux cibles subissent des souffrances intenses pendant tout le sort, ce qui leur impose -2 en Volonté.",
+      "sensoryEffect": "La poudre lancée se change en arcs d'énergie pourpre crépitant entre les mains du mage et ses cibles.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "targets": "2",
+      "tags": [
+        "debuff",
+        "healing",
+        "combat"
+      ]
     }
   },
   {
@@ -4288,7 +6477,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "Fiole de sang de Moryagorn mélangée à du charbon (consommée), kata de la mygale d'ombre (Physique+Conn. de la magie Diff.15), rictus grimaçant",
-      "effect": "Le mage jette la fiole d'ichor noirâtre aux pieds d'une cible de taille humaine située à moins de 25 m (ou disperse le mélange dans une zone donnée) et exécute une danse complexe. La matière visqueuse s'étire alors en de longs filets d'ombre gluante dont les plus épais ressemblent à des serpents. La cible doit effectuer un jet de Physique+Esquive en Opposition contre le score d'invocation du mage pour ne pas être Saisie. La zone affectée est de 16 m² (2m de rayon)+5 m²/NR et toutes les cibles présentes dans la zone sont affectées. Si un personnage est Saisi, les tentacules ont une Force égale à la Sphère d'ombre du lanceur et s'en libérer demande une action et un jet de Physique+Force contre une Difficulté de Mental+Ombre du mage. Il n'est pas possible de trancher ou détruire physiquement les tentacules d'ombre qui se reforment magiquement. Ce sort dure 3+2/NR tours."
+      "effect": "Le mage jette la fiole d'ichor noirâtre aux pieds d'une cible de taille humaine située à moins de 25 m (ou disperse le mélange dans une zone donnée) et exécute une danse complexe. La matière visqueuse s'étire alors en de longs filets d'ombre gluante dont les plus épais ressemblent à des serpents. La cible doit effectuer un jet de Physique+Esquive en Opposition contre le score d'invocation du mage pour ne pas être Saisie. La zone affectée est de 16 m² (2m de rayon)+5 m²/NR et toutes les cibles présentes dans la zone sont affectées. Si un personnage est Saisi, les tentacules ont une Force égale à la Sphère d'ombre du lanceur et s'en libérer demande une action et un jet de Physique+Force contre une Difficulté de Mental+Ombre du mage. Il n'est pas possible de trancher ou détruire physiquement les tentacules d'ombre qui se reforment magiquement. Ce sort dure 3+2/NR tours.",
+      "inGameEffect": "Zone de 16 m² (2 m de rayon) + 5 m² par NR, à moins de 25 m ; toutes les cibles présentes sont affectées. Chacune doit réussir un jet de Physique + Esquive en opposition contre le score d'invocation pour ne pas être Saisie. Les tentacules ont une Force égale à la Sphère d'ombre du lanceur ; s'en libérer demande une action et un jet de Physique + Force contre une Difficulté de Mental + Ombre du mage. Impossible de les trancher ou de les détruire physiquement : ils se reforment magiquement.",
+      "sensoryEffect": "L'ichor noirâtre jeté au sol s'étire en longs filets d'ombre gluante, dont les plus épais ressemblent à des serpents.",
+      "duration": "3 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -4304,7 +6502,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Runes de l'ombre et des rêves entremêlées (Manuel+Don artistique: Dessin Diff.15), posture de méditation, râles moqueurs",
-      "effect": "Ce sort est semblable au sort Psychonaute des mages des rêves. Il ne s'utilise par contre que sur une cible en proie à un cauchemar. Le ou les intrus (un par point en Sphère de l'ombre au maximum) entrant dans le cauchemar rencontreront toujours des situation désagréables ou dangereuses, vu l'état d'esprit du dormeur. Il est possible de rester dans le cauchemar tant que le dormeur est inconscient. Si les intrus règlent la situation effrayante (comme détruire un monstre hideux et agressif...), ils risquent de transformer le cauchemar en rêve et doivent alors instantanément jeter 1D10 (non modifiable, pas de Tendances) sous leur Volonté. Si ce jet est manqué, ils se dissolvent et disparaissent comme dans le cas d'un réveil inopiné. Si ce jet est réussi, ils sont bannis de l'esprit du dormeur, qui s'éveillera quelques minutes plus tard en se souvenant d'avoir rêvé d'eux."
+      "effect": "Ce sort est semblable au sort Psychonaute des mages des rêves. Il ne s'utilise par contre que sur une cible en proie à un cauchemar. Le ou les intrus (un par point en Sphère de l'ombre au maximum) entrant dans le cauchemar rencontreront toujours des situation désagréables ou dangereuses, vu l'état d'esprit du dormeur. Il est possible de rester dans le cauchemar tant que le dormeur est inconscient. Si les intrus règlent la situation effrayante (comme détruire un monstre hideux et agressif...), ils risquent de transformer le cauchemar en rêve et doivent alors instantanément jeter 1D10 (non modifiable, pas de Tendances) sous leur Volonté. Si ce jet est manqué, ils se dissolvent et disparaissent comme dans le cas d'un réveil inopiné. Si ce jet est réussi, ils sont bannis de l'esprit du dormeur, qui s'éveillera quelques minutes plus tard en se souvenant d'avoir rêvé d'eux.",
+      "inGameEffect": "Semblable au Psychonaute des mages des rêves, mais utilisable uniquement sur une cible en proie à un cauchemar. Les intrus — un par point en Sphère de l'ombre au maximum — y rencontrent toujours des situations désagréables ou dangereuses, vu l'état d'esprit du dormeur, et peuvent rester tant qu'il est inconscient. S'ils règlent la situation effrayante et risquent de transformer le cauchemar en rêve, chacun jette aussitôt 1D10 non modifiable, sans Tendances, sous sa Volonté : raté, il se dissout et disparaît comme lors d'un réveil inopiné ; réussi, il est banni de l'esprit du dormeur, qui s'éveille quelques minutes plus tard en se souvenant d'avoir rêvé de lui.",
+      "tags": [
+        "detection",
+        "movement",
+        "ritual"
+      ]
     }
   },
   {
@@ -4320,7 +6524,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 22,
       "cle": "Rune de l'ombre, longs clous métalliques enduits d'huile noire (consommés), posture (à genoux, yeux fermés)",
-      "effect": "Le mage enfonce les clous le long des os du dos de sa main pour en faire des fléchettes mortelles. Lorsqu'il le désire, le mage peut en une action retirer un clou et le lancer sur une cible située jusqu'à FOR x3 m. Les clous se lancent avec la Compétence Armes de jet, sont considérés comme des dards et offrent un bonus de +1 au toucher par jour complet passés dans le mage (au maximum égal à deux fois le score de Tendance Fatalité au moment du lancement du sort, qui est la durée maximale du sort). Les clous sont indétectables à l'œil nu tant qu'ils sont enfoncés et lors de leur lancement, ils laissent un long sillage de fumée glaciale et noirâtre. Tant qu'il conserve les clous en lui, le mage doit garder cochées autant de cases de blessures que la moitié du nombre de clous (arrondi au supérieur) en commençant par les Egratignures. Ces cases sont impossibles à effacer ou déplacer que ce soit par magie ou par médecine. Une fois le clou retiré, chacune se soigne comme des dommages de corps à corps."
+      "effect": "Le mage enfonce les clous le long des os du dos de sa main pour en faire des fléchettes mortelles. Lorsqu'il le désire, le mage peut en une action retirer un clou et le lancer sur une cible située jusqu'à FOR x3 m. Les clous se lancent avec la Compétence Armes de jet, sont considérés comme des dards et offrent un bonus de +1 au toucher par jour complet passés dans le mage (au maximum égal à deux fois le score de Tendance Fatalité au moment du lancement du sort, qui est la durée maximale du sort). Les clous sont indétectables à l'œil nu tant qu'ils sont enfoncés et lors de leur lancement, ils laissent un long sillage de fumée glaciale et noirâtre. Tant qu'il conserve les clous en lui, le mage doit garder cochées autant de cases de blessures que la moitié du nombre de clous (arrondi au supérieur) en commençant par les Egratignures. Ces cases sont impossibles à effacer ou déplacer que ce soit par magie ou par médecine. Une fois le clou retiré, chacune se soigne comme des dommages de corps à corps.",
+      "inGameEffect": "Le mage enfonce des clous le long des os du dos de sa main. En une action, il en retire un et le lance sur une cible jusqu'à (FOR × 3) m, avec la Compétence Armes de jet ; les clous comptent comme des dards et gagnent +1 au toucher par jour complet passé dans le mage, jusqu'à deux fois le score de Tendance Fatalité au lancement — qui est aussi la durée maximale du sort. Tant qu'il les garde en lui, le mage doit garder cochées autant de cases de blessure que la moitié du nombre de clous, arrondie au supérieur, en commençant par les Égratignures ; ces cases sont impossibles à effacer ou déplacer, par magie comme par médecine, et ne se soignent comme des dommages de corps à corps qu'une fois le clou retiré.",
+      "sensoryEffect": "Les clous sont indétectables à l'œil nu tant qu'ils sont enfoncés ; lancés, ils laissent un long sillage de fumée glaciale et noirâtre.",
+      "tags": [
+        "attack",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4336,7 +6547,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 20,
       "cle": "Rune de l'ombre, cadavres (consommés), sang du mage (causant une Egratignure)",
-      "effect": "Ce sort permet de transformer 1+1/NR cadavres ou squelettes en un serviteurs animés dénués de toute émotivité. Une partie du caractère de chaque défunt est encore perceptible (brutalité, finesse, rébellion,...), mais les mort-vivants sont amnésique, à peine conscient de leur état. Il sont soumis à la volonté du mage et resteront animés jusqu'au prochain jour du Serpent. Le mage subit une Egratignure de plus par NR car plus de sang est nécessaire."
+      "effect": "Ce sort permet de transformer 1+1/NR cadavres ou squelettes en un serviteurs animés dénués de toute émotivité. Une partie du caractère de chaque défunt est encore perceptible (brutalité, finesse, rébellion,...), mais les mort-vivants sont amnésique, à peine conscient de leur état. Il sont soumis à la volonté du mage et resteront animés jusqu'au prochain jour du Serpent. Le mage subit une Egratignure de plus par NR car plus de sang est nécessaire.",
+      "inGameEffect": "Transforme (1 + 1 par NR) cadavres ou squelettes en serviteurs animés dénués de toute émotivité, soumis à la volonté du mage et animés jusqu'au prochain jour du Serpent. Le mage subit une Égratignure de plus par NR, davantage de sang étant nécessaire.",
+      "sensoryEffect": "Une partie du caractère de chaque défunt reste perceptible — brutalité, finesse, rébellion — mais les morts-vivants sont amnésiques et à peine conscients de leur état.",
+      "targets": "1 + 1 par NR",
+      "tags": [
+        "summoning",
+        "ritual"
+      ]
     }
   },
   {
@@ -4352,7 +6570,18 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 17,
       "cle": "Rune de l'ombre, poudre de diamant (au moins dix grammes, consommée), mélopée rapide",
-      "effect": "Le mage étale la poudre de diamant sur son visage en psalmodiant. Il se pare alors d'une allure prestigieuse apte à subjuguer ses interlocuteurs. Il peut influencer 1+1/NR personnes durant une heure. Les cibles affectées considèrent le mage avec intérêt, appréciant son jugement et cherchant instinctivement à lui plaire et à s'en approcher. Le mage peut influencer les avis des cibles, mais les revirements notables demandent un jet de Social+Présence en Opposition contre Mental+Volonté de la victime. Un revirement complet et la négation des convictions profondes est impossible."
+      "effect": "Le mage étale la poudre de diamant sur son visage en psalmodiant. Il se pare alors d'une allure prestigieuse apte à subjuguer ses interlocuteurs. Il peut influencer 1+1/NR personnes durant une heure. Les cibles affectées considèrent le mage avec intérêt, appréciant son jugement et cherchant instinctivement à lui plaire et à s'en approcher. Le mage peut influencer les avis des cibles, mais les revirements notables demandent un jet de Social+Présence en Opposition contre Mental+Volonté de la victime. Un revirement complet et la négation des convictions profondes est impossible.",
+      "inGameEffect": "Influence (1 + 1 par NR) personnes pendant une heure. Les cibles considèrent le mage avec intérêt, apprécient son jugement et cherchent instinctivement à lui plaire et à s'en approcher. Il peut infléchir leurs avis, mais tout revirement notable demande un jet de Social + Présence en opposition contre le Mental + Volonté de la victime ; un revirement complet et la négation de convictions profondes restent impossibles.",
+      "sensoryEffect": "Le mage étale la poudre de diamant sur son visage en psalmodiant et se pare d'une allure prestigieuse.",
+      "duration": "1",
+      "durationUnit": "hour",
+      "targets": "1 + 1 par NR",
+      "tags": [
+        "buff",
+        "illusion",
+        "self",
+        "social"
+      ]
     }
   },
   {
@@ -4368,7 +6597,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "Rune de l'ombre, cercle d'évocation tracé au sang de fluix (Manuel+Conn. de la magie Diff. 15), sang de fluix (consommé)",
-      "effect": "Le mage crée un pont spirituel avec le Gouffre des Ames. Il échange alors l'esprit de sa victime, à vue, avec une âme errante et incomplète. La victime peut résister par un jet de Mental+Volonté contre le score d'incantation du mage si elle possède une Volonté supérieure ou égale à celle du mage d'ombre. Si la victime ne résiste pas, elle subit alors la pire expérience d'Outre Tombe possible tout en restant consciente. Durant ce temps, l'esprit échangée tente de se libérer de ce corps qui la fait souffrir. Le corps est pris de convulsions, se mutile et cherche à se dégrader. Le sort dure 1+2/NR tours. Lors du retour de l'esprit de la victime, cette dernière doit effectuer un jet de Mental+Volonté contre une Difficulté de 15+3 par tour passé hors de son corps. Si ce jet est raté, l'esprit ne peut se réintégrer et deviendra un Esprit tourmenté. L'esprit prisonnier mutilera alors le corps jusqu'à la mort. Si le personnage retrouve son esprit, il aura subi une Egratignure par tour du sort et restera à jamais marqué. Il obtient alors le Désavantage \" Mauvais Souvenir \" et \"Déviance\" (au choix), ce dernier se manifestant dans les semaines suivantes comme un effet secondaire."
+      "effect": "Le mage crée un pont spirituel avec le Gouffre des Ames. Il échange alors l'esprit de sa victime, à vue, avec une âme errante et incomplète. La victime peut résister par un jet de Mental+Volonté contre le score d'incantation du mage si elle possède une Volonté supérieure ou égale à celle du mage d'ombre. Si la victime ne résiste pas, elle subit alors la pire expérience d'Outre Tombe possible tout en restant consciente. Durant ce temps, l'esprit échangée tente de se libérer de ce corps qui la fait souffrir. Le corps est pris de convulsions, se mutile et cherche à se dégrader. Le sort dure 1+2/NR tours. Lors du retour de l'esprit de la victime, cette dernière doit effectuer un jet de Mental+Volonté contre une Difficulté de 15+3 par tour passé hors de son corps. Si ce jet est raté, l'esprit ne peut se réintégrer et deviendra un Esprit tourmenté. L'esprit prisonnier mutilera alors le corps jusqu'à la mort. Si le personnage retrouve son esprit, il aura subi une Egratignure par tour du sort et restera à jamais marqué. Il obtient alors le Désavantage \" Mauvais Souvenir \" et \"Déviance\" (au choix), ce dernier se manifestant dans les semaines suivantes comme un effet secondaire.",
+      "inGameEffect": "Échange l'esprit d'une victime à vue avec une âme errante et incomplète. Elle résiste par un jet de Mental + Volonté contre le score d'incantation si sa Volonté est supérieure ou égale à celle du mage. Sans résistance, elle subit la pire expérience d'Outre-Tombe possible tout en restant consciente. Au retour, elle doit réussir un jet de Mental + Volonté contre une Difficulté de 15 + 3 par tour passé hors de son corps : raté, l'esprit ne peut se réintégrer, devient un Esprit tourmenté et mutile le corps jusqu'à la mort. Si le personnage retrouve son esprit, il a subi une Égratignure par tour du sort et reste marqué à jamais : il obtient le Désavantage « Mauvais Souvenir » ou « Déviance », au choix, ce dernier se manifestant dans les semaines suivantes.",
+      "sensoryEffect": "Le corps est pris de convulsions, se mutile et cherche à se dégrader, tandis que l'esprit échangé tente de se libérer de ce corps qui le fait souffrir.",
+      "duration": "1 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "debuff",
+        "enemy",
+        "ritual"
+      ]
     }
   },
   {
@@ -4384,7 +6623,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 25,
       "cle": "Un os de dragon (consommé), de la terre corrompue de Kali mêlée à un peu d'élément du dragon (consommée), cercle d'invocation spectral (Manuel+Conn. de la magie Diff.15)",
-      "effect": "Le Mage de l'Ombre évoque l'esprit élémentaire du dragon décédé à qui appartient l'os. Le dragon se manifeste sous une forme spectrale, composée d'Ombre et de restes de sa matière élémentaire tutélaire. L'esprit est souvent furieux d'avoir été extirpé du flux élémentaire où il sommeillait et le mage devra effectuer un jet de Mental + Volonté en Opposition contre Volonté + Tranche d'âge du dragon. Ce dernier possède les caractéristiques de sa forme draconique (sauf pour les enfants de Khy). Par NR, le spectre est soumis pour un quart d'heure. Durant ce temps, son corps obéit au mage et agit pour lui. Le dragon reste de toutes façons réticent et refusera d'instruire le mage ou de répondre à ses auestions à moins aue le mage n'effectue un jet similaire pour chaque question. En cas de combat, le dragon dispose de toutes ses factultés et devra les utiliser. Il ne laisse aucune trace et tous ses coups physiques sont portés avec son corps spectral, qui gèle et nécrose les chairs (dommages normaux). Si le mage n'obtient pas de NR à son jet de contrôle initial, le Dragon reste inactif et invective copieusement le mage avant de se dissiper. Il persiste un tour par tranche d'âge. Si le jet est raté, le dragon est libre de toute entrave et agresse le mage tant qu'il persiste. Si le jet est un Echec critique, le dragon dévore l'âme du personnage et emmène son corps dans le flot élémentaire dont il provient. Le mage meurt sans recours."
+      "effect": "Le Mage de l'Ombre évoque l'esprit élémentaire du dragon décédé à qui appartient l'os. Le dragon se manifeste sous une forme spectrale, composée d'Ombre et de restes de sa matière élémentaire tutélaire. L'esprit est souvent furieux d'avoir été extirpé du flux élémentaire où il sommeillait et le mage devra effectuer un jet de Mental + Volonté en Opposition contre Volonté + Tranche d'âge du dragon. Ce dernier possède les caractéristiques de sa forme draconique (sauf pour les enfants de Khy). Par NR, le spectre est soumis pour un quart d'heure. Durant ce temps, son corps obéit au mage et agit pour lui. Le dragon reste de toutes façons réticent et refusera d'instruire le mage ou de répondre à ses auestions à moins aue le mage n'effectue un jet similaire pour chaque question. En cas de combat, le dragon dispose de toutes ses factultés et devra les utiliser. Il ne laisse aucune trace et tous ses coups physiques sont portés avec son corps spectral, qui gèle et nécrose les chairs (dommages normaux). Si le mage n'obtient pas de NR à son jet de contrôle initial, le Dragon reste inactif et invective copieusement le mage avant de se dissiper. Il persiste un tour par tranche d'âge. Si le jet est raté, le dragon est libre de toute entrave et agresse le mage tant qu'il persiste. Si le jet est un Echec critique, le dragon dévore l'âme du personnage et emmène son corps dans le flot élémentaire dont il provient. Le mage meurt sans recours.",
+      "inGameEffect": "Évoque l'esprit élémentaire du dragon décédé à qui appartient l'os, avec les caractéristiques de sa forme draconique — sauf pour les enfants de Khy. Le mage effectue un jet de Mental + Volonté en opposition contre Volonté + Tranche d'âge du dragon : chaque NR soumet le spectre pour un quart d'heure, pendant lequel il obéit et agit pour le mage. Il reste réticent et refuse d'instruire le mage ou de répondre à ses questions, sauf nouveau jet similaire par question. En combat, il dispose de toutes ses facultés et doit les utiliser. Sans NR au jet de contrôle initial, il reste inactif, invective copieusement le mage et se dissipe, persistant un tour par tranche d'âge. Jet raté, il est libre de toute entrave et agresse le mage tant qu'il persiste. Échec critique, il dévore l'âme du personnage et emmène son corps dans le flot élémentaire dont il provient : le mage meurt sans recours.",
+      "sensoryEffect": "Le dragon se manifeste sous une forme spectrale, composée d'Ombre et de restes de sa matière élémentaire tutélaire, souvent furieux d'avoir été extirpé du flux où il sommeillait. Il ne laisse aucune trace et tous ses coups physiques, portés avec son corps spectral, gèlent et nécrosent les chairs.",
+      "tags": [
+        "summoning",
+        "combat",
+        "ritual"
+      ]
     }
   },
   {
@@ -4400,7 +6646,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 27,
       "cle": "Poupée (consommée), goutte de sueur de la victime (consommée), cérémonie d'asservissement (Social + Conn. de la magie Diff. 15)",
-      "effect": "Ce sort, d'une portée de 20m, entraîne la transformation de la cible en mort-vivant. La cible résiste à chaque tour par un jet de Mental + Volonté de diff. 20 pour éviter de perdre virtuellement un point de Volonté. Le sort dure Sphére + 1/NR tours. Si elle arrive virtuellement à 0 en Volonté, la victime devient un mort-vivant asservi (voir ci-dessus) et passe sous le contrôle du nécromancien. Elle perd toute humanité et devient un monstre inexpressif. La malédiction peut être arrêtée si le mage meurt avant la fin de la transformation qui dure un tour complet. Le personnage est mort et injouable. Si le personnage résiste au sort, les points de Volonté 'perdus' sont ignorés et il devient immunisé à ce sortilège"
+      "effect": "Ce sort, d'une portée de 20m, entraîne la transformation de la cible en mort-vivant. La cible résiste à chaque tour par un jet de Mental + Volonté de diff. 20 pour éviter de perdre virtuellement un point de Volonté. Le sort dure Sphére + 1/NR tours. Si elle arrive virtuellement à 0 en Volonté, la victime devient un mort-vivant asservi (voir ci-dessus) et passe sous le contrôle du nécromancien. Elle perd toute humanité et devient un monstre inexpressif. La malédiction peut être arrêtée si le mage meurt avant la fin de la transformation qui dure un tour complet. Le personnage est mort et injouable. Si le personnage résiste au sort, les points de Volonté 'perdus' sont ignorés et il devient immunisé à ce sortilège",
+      "inGameEffect": "Portée de 20 m. La cible résiste chaque tour par un jet de Mental + Volonté de Difficulté 20 pour éviter de perdre virtuellement un point de Volonté. Arrivée virtuellement à 0, elle devient un mort-vivant asservi sous le contrôle du nécromancien, perd toute humanité et devient un monstre inexpressif — le personnage est mort et injouable. La malédiction peut être arrêtée si le mage meurt avant la fin de la transformation, qui dure un tour complet. Si la cible résiste au sort, les points de Volonté « perdus » sont ignorés et elle devient immunisée à ce sortilège.",
+      "tags": [
+        "attack",
+        "enemy",
+        "ritual"
+      ]
     }
   },
   {
@@ -4416,7 +6668,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "Neufs tablettes de matière élémentaire marquées de leur rune, sablier de cristal (détruit), Sang de Moryagorn (consommé)",
-      "effect": "La mage tente de décrypter les mystères du destin par une prédiction. Il brise le sablier et étale le sable, l'asperge de Sang de Moryagorn et y jette les tablettes élémentaires. Selon leurs positions, il détermine la trame du destin. Il peut aloirs avoir une évocation de l'avenir probable d'un personnage, d'un groupe, d'un objet, d'une situation (résumable en deux mots). Il apprend alors l'élément dominant du future de la cible dans une période donnée : avec un jet réussi, le sort indique l'élément dominant de la prochaine année, avec 1 NR, sur les 10 prochaines années et avec 2 NR, sur le prochain siècle. Le sort ne donne que l'élément principal de la période donnée. Il se peut parfois que le sort révèle un avenir lointain, mais plus important alors que le mage recherche des informations proches. Tels sont les mystères du temps. Si un personnage est insatisfait de l'augure, il peut décider de Briser Le Destin. Pour ce faire, comme le destin n'est que potentiel, il doit puiser dans son propre avenir pour changer les choses. Il doit donc dépenser sur le champs des points d'Expérience et énoncer clairement son désir de Briser Le Destin. La dépense varie selon l'importance des faits bouleversés. Mineur: une mauvaise rencontre, un mauvais voyage 10pts / Notable: un mariage, la mort d'un PNJ mineur ou d'un PJ anonyme 20pts / Important: une guerre locale, la mort d'un héros ou d'un PJ célèbre, les plans d'un dragon 30pts / Bouleversement: la mort d'un roi, une guerre d'ampleur, les plans d'un Grand Dragon 40pts. A ce moment, le Maître de Jeu peut mettre en scène l'accomplissement d'une quête au cours de laquelle le personnage aura l'opportunité de réussir à Briser Le Destin, mais où il ne gagnera que la moitiré des points d'Expérience prévus. Ses éventuels compagnons, s'ils n'ont pas décidé de Briser Le Destin, ne sont pas soumis à cette réduction mais ne pourront rien faire pour changer le cours des choses. Ni accomplir de faits héroïques, ni arriver au bon moment pour infléchir l'avenir."
+      "effect": "La mage tente de décrypter les mystères du destin par une prédiction. Il brise le sablier et étale le sable, l'asperge de Sang de Moryagorn et y jette les tablettes élémentaires. Selon leurs positions, il détermine la trame du destin. Il peut aloirs avoir une évocation de l'avenir probable d'un personnage, d'un groupe, d'un objet, d'une situation (résumable en deux mots). Il apprend alors l'élément dominant du future de la cible dans une période donnée : avec un jet réussi, le sort indique l'élément dominant de la prochaine année, avec 1 NR, sur les 10 prochaines années et avec 2 NR, sur le prochain siècle. Le sort ne donne que l'élément principal de la période donnée. Il se peut parfois que le sort révèle un avenir lointain, mais plus important alors que le mage recherche des informations proches. Tels sont les mystères du temps. Si un personnage est insatisfait de l'augure, il peut décider de Briser Le Destin. Pour ce faire, comme le destin n'est que potentiel, il doit puiser dans son propre avenir pour changer les choses. Il doit donc dépenser sur le champs des points d'Expérience et énoncer clairement son désir de Briser Le Destin. La dépense varie selon l'importance des faits bouleversés. Mineur: une mauvaise rencontre, un mauvais voyage 10pts / Notable: un mariage, la mort d'un PNJ mineur ou d'un PJ anonyme 20pts / Important: une guerre locale, la mort d'un héros ou d'un PJ célèbre, les plans d'un dragon 30pts / Bouleversement: la mort d'un roi, une guerre d'ampleur, les plans d'un Grand Dragon 40pts. A ce moment, le Maître de Jeu peut mettre en scène l'accomplissement d'une quête au cours de laquelle le personnage aura l'opportunité de réussir à Briser Le Destin, mais où il ne gagnera que la moitiré des points d'Expérience prévus. Ses éventuels compagnons, s'ils n'ont pas décidé de Briser Le Destin, ne sont pas soumis à cette réduction mais ne pourront rien faire pour changer le cours des choses. Ni accomplir de faits héroïques, ni arriver au bon moment pour infléchir l'avenir.",
+      "inGameEffect": "Donne l'élément dominant de l'avenir probable d'un personnage, d'un groupe, d'un objet ou d'une situation résumable en deux mots : la prochaine année sur un jet réussi, les 10 prochaines années avec 1 NR, le prochain siècle avec 2 NR. Le sort ne livre que l'élément principal de la période, et peut parfois révéler un avenir lointain alors que le mage cherchait des informations proches. Un personnage insatisfait peut Briser Le Destin en dépensant sur-le-champ des points d'Expérience et en énonçant clairement son désir : 10 points pour un fait mineur, 20 pour un fait notable, 30 pour un fait important, 40 pour un bouleversement. Le meneur de jeu met alors en scène une quête où le personnage peut y parvenir, mais où il ne gagne que la moitié des points d'Expérience prévus ; ses compagnons n'ayant pas décidé de Briser Le Destin ne subissent pas cette réduction, mais ne peuvent rien faire pour changer le cours des choses.",
+      "sensoryEffect": "Le mage brise le sablier, étale le sable, l'asperge de Sang de Moryagorn et y jette les tablettes élémentaires ; leurs positions déterminent la trame du destin.",
+      "tags": [
+        "detection",
+        "ritual"
+      ]
     }
   },
   {
@@ -4432,7 +6690,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "cri très fort 'à la garde !', une entaille sur un doigt",
-      "effect": "Le mage crie à l'aide et les forces de l'ordre les plus proches entendent automatiquement ce cri. Elles apprennent instantanément la localisation du mage, sa nature de mage, et ressentent le besoin de se précipiter aussitôt à son aide. Ce sort ne fonctionne que dans les limites d'une cité. Les mages des Cités ayant une réputation sulfureuse, ils n'utiliseront ce sort qu'en dernière extrémité."
+      "effect": "Le mage crie à l'aide et les forces de l'ordre les plus proches entendent automatiquement ce cri. Elles apprennent instantanément la localisation du mage, sa nature de mage, et ressentent le besoin de se précipiter aussitôt à son aide. Ce sort ne fonctionne que dans les limites d'une cité. Les mages des Cités ayant une réputation sulfureuse, ils n'utiliseront ce sort qu'en dernière extrémité.",
+      "inGameEffect": "Les forces de l'ordre les plus proches entendent automatiquement le cri du mage, apprennent instantanément sa localisation et sa nature de mage, et ressentent le besoin de se précipiter à son aide. Ne fonctionne que dans les limites d'une cité. Les mages des Cités ayant une réputation sulfureuse, ils ne l'utilisent qu'en dernière extrémité.",
+      "tags": [
+        "communication",
+        "social",
+        "urban"
+      ]
     }
   },
   {
@@ -4448,7 +6712,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "goutte d'eau, posture pensive, une fenêtre",
-      "effect": "Une pellicule moirée s'étire sur le cadre de la fenêtre. Regarder par cette fenêtre dévoile automatiquement au mage toute illusion visuelle ou mentale située dans son champ visuel. Il peut ensuite retrouver les illusions découvertes grâce à un jet de Mental + Perception de Difficulté 20, en bénéficiant d'un bonus égal aux NR obtenus au lancement."
+      "effect": "Une pellicule moirée s'étire sur le cadre de la fenêtre. Regarder par cette fenêtre dévoile automatiquement au mage toute illusion visuelle ou mentale située dans son champ visuel. Il peut ensuite retrouver les illusions découvertes grâce à un jet de Mental + Perception de Difficulté 20, en bénéficiant d'un bonus égal aux NR obtenus au lancement.",
+      "inGameEffect": "Regarder par la fenêtre dévoile automatiquement au mage toute illusion visuelle ou mentale dans son champ visuel. Il peut ensuite retrouver les illusions découvertes sur un jet de Mental + Perception de Difficulté 20, avec un bonus égal aux NR obtenus au lancement.",
+      "sensoryEffect": "Une pellicule moirée s'étire sur le cadre de la fenêtre.",
+      "tags": [
+        "detection",
+        "object",
+        "urban"
+      ]
     }
   },
   {
@@ -4464,7 +6735,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "chambranle de porte, se taper légèrement le front",
-      "effect": "Le mage désigne une porte à moins de vingt mètres et se tape légèrement le front. La prochaine personne à passer la porte se cognera la tête (quelle que soit sa taille). La victime perd de précieuses secondes à se masser le crâne (une seule si elle porte un casque d'armure moyenne ou lourde). Ce sort sert souvent à se débarrasser de poursuivants ou à se moquer de sa victime en société."
+      "effect": "Le mage désigne une porte à moins de vingt mètres et se tape légèrement le front. La prochaine personne à passer la porte se cognera la tête (quelle que soit sa taille). La victime perd de précieuses secondes à se masser le crâne (une seule si elle porte un casque d'armure moyenne ou lourde). Ce sort sert souvent à se débarrasser de poursuivants ou à se moquer de sa victime en société.",
+      "inGameEffect": "Le mage désigne une porte à moins de vingt mètres. La prochaine personne à la passer s'y cogne la tête, quelle que soit sa taille, et perd de précieuses secondes à se masser le crâne — une seule si elle porte un casque d'armure moyenne ou lourde. Sert souvent à se débarrasser de poursuivants ou à se moquer de sa victime en société.",
+      "sensoryEffect": "Le mage se tape légèrement le front.",
+      "tags": [
+        "debuff",
+        "enemy",
+        "urban"
+      ]
     }
   },
   {
@@ -4480,7 +6758,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "pattes de gecko (consommées), rune de la cité, mains et pieds nus",
-      "effect": "Les pattes de gecko se fondent dans la main du personnage, et ses pieds et mains commencent à ressembler aux doigts de ce lézard. Il peut se déplacer sur les surfaces lisses horizontales ou verticales sans problème, même à l'envers. Ses jets d'Athlétisme liés à l'escalade bénéficient d'un bonus de +10. Ce sort dure (1 + NR) minutes."
+      "effect": "Les pattes de gecko se fondent dans la main du personnage, et ses pieds et mains commencent à ressembler aux doigts de ce lézard. Il peut se déplacer sur les surfaces lisses horizontales ou verticales sans problème, même à l'envers. Ses jets d'Athlétisme liés à l'escalade bénéficient d'un bonus de +10. Ce sort dure (1 + NR) minutes.",
+      "inGameEffect": "Le personnage se déplace sans problème sur les surfaces lisses horizontales ou verticales, même à l'envers. Ses jets d'Athlétisme liés à l'escalade bénéficient d'un bonus de +10.",
+      "sensoryEffect": "Les pattes de gecko se fondent dans la main du personnage ; ses pieds et ses mains commencent à ressembler aux doigts de ce lézard.",
+      "duration": "1 + NR",
+      "durationUnit": "minute",
+      "tags": [
+        "buff",
+        "movement",
+        "self",
+        "exploration"
+      ]
     }
   },
   {
@@ -4496,7 +6784,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "peinture pour bâtiment (cf. Alchimie), rune de l'oubli, sang de dragon des Cités révélé (durable)",
-      "effect": "Le mage doit s'isoler de toute influence extérieure et se concentrer longuement avant de mélanger le sang de dragon à la peinture. Quand le mage repeint les façades d'un édifice avec cette peinture enchantée pour un jour, ce bâtiment devient invisible pour tout autre que lui (en fait, les gens passent sans le remarquer). En cas de soupçons, on peut déceler la supercherie sur un jet de Mental + Perception de Difficulté 35 cette difficulté tombe à 25 pour un dragon, et à 20 pour un dragon des Cités. Les effets de ce sortilège durent 1 cycle."
+      "effect": "Le mage doit s'isoler de toute influence extérieure et se concentrer longuement avant de mélanger le sang de dragon à la peinture. Quand le mage repeint les façades d'un édifice avec cette peinture enchantée pour un jour, ce bâtiment devient invisible pour tout autre que lui (en fait, les gens passent sans le remarquer). En cas de soupçons, on peut déceler la supercherie sur un jet de Mental + Perception de Difficulté 35 cette difficulté tombe à 25 pour un dragon, et à 20 pour un dragon des Cités. Les effets de ce sortilège durent 1 cycle.",
+      "inGameEffect": "Le mage repeint les façades d'un édifice avec cette peinture, enchantée pour un jour. Le bâtiment devient invisible pour tout autre que lui — en fait, les gens passent sans le remarquer. En cas de soupçons, la supercherie se décèle sur un jet de Mental + Perception de Difficulté 35 ; 25 pour un dragon, 20 pour un dragon des Cités.",
+      "duration": "1",
+      "durationUnit": "cycle",
+      "tags": [
+        "illusion",
+        "place",
+        "urban"
+      ]
     }
   },
   {
@@ -4512,7 +6808,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "graviers de soufre (consommés), posture (geste de lancer), cri rageur",
-      "effect": "Le mage lance un projectile de flammes comprimées vers son adversaire jusqu'à 50 m. Le dard est rapide, mais s'esquive et se pare avec un bouclier normalement. Il inflige 15+1D10 points de dommages et peut éventuellement enflammer des matériaux percés au point d'impact (tunique, cheveux, cape...)."
+      "effect": "Le mage lance un projectile de flammes comprimées vers son adversaire jusqu'à 50 m. Le dard est rapide, mais s'esquive et se pare avec un bouclier normalement. Il inflige 15+1D10 points de dommages et peut éventuellement enflammer des matériaux percés au point d'impact (tunique, cheveux, cape...).",
+      "inGameEffect": "Projectile lancé jusqu'à 50 m, infligeant 15 + 1D10 points de dommages. Rapide, mais s'esquive et se pare normalement au bouclier. Peut enflammer les matériaux percés au point d'impact — tunique, cheveux, cape.",
+      "sensoryEffect": "Le mage lance un projectile de flammes comprimées.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -4528,7 +6831,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "lave élémentaire (consommée), dent de dragon gravée d'or, morceau de verre (consommé)",
-      "effect": "Le mage lance la lave vers le ciel, où elle se fond dans les nuages soufrés qui s'accumulent durant toute la durée de l'incantation (charge à lui de la manipuler). Il saisit ensuite le morceau de verre et regarde une zone qu'il fracasse au travers, avant de la brasser avec la dent de dragon. Au tour suivant, une grêle de feu commence à tomber du ciel, touchant une zone de 1200 m² (forme au choix ou cercle de 40 m de diamètre). La grêle dure 10 tours et possède un effet de Barrage de 14+D/NR (voir Viris, p.91). Une cible peut être touchée à chaque tour et la grêle inflige 3D10 points de dommage. À la fin de la grêle, la zone touchée est entièrement dévastée, les bâtiments sont lourdement endommagés ou détruits et un incendie est probable dans les zones naturelles boisées ou les villes."
+      "effect": "Le mage lance la lave vers le ciel, où elle se fond dans les nuages soufrés qui s'accumulent durant toute la durée de l'incantation (charge à lui de la manipuler). Il saisit ensuite le morceau de verre et regarde une zone qu'il fracasse au travers, avant de la brasser avec la dent de dragon. Au tour suivant, une grêle de feu commence à tomber du ciel, touchant une zone de 1200 m² (forme au choix ou cercle de 40 m de diamètre). La grêle dure 10 tours et possède un effet de Barrage de 14+D/NR (voir Viris, p.91). Une cible peut être touchée à chaque tour et la grêle inflige 3D10 points de dommage. À la fin de la grêle, la zone touchée est entièrement dévastée, les bâtiments sont lourdement endommagés ou détruits et un incendie est probable dans les zones naturelles boisées ou les villes.",
+      "inGameEffect": "Au tour suivant l'incantation, une grêle de feu tombe du ciel sur 1200 m² — forme au choix, ou cercle de 40 m de diamètre. Dure 10 tours, avec un effet de Barrage de 14 + D par NR. Une cible peut être touchée à chaque tour, pour 3D10 points de dommages. À la fin, la zone est entièrement dévastée, les bâtiments lourdement endommagés ou détruits, et un incendie est probable dans les zones boisées ou les villes.",
+      "sensoryEffect": "La lave lancée vers le ciel se fond dans les nuages soufrés qui s'accumulent pendant toute l'incantation.",
+      "duration": "10",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -4544,7 +6856,18 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "ennemi vaincu (consommé), danse de colère, cercle runique du feu",
-      "effect": "Ce sort barbare est originaire des sorciers des Lacs Sanglants. En entraînant 1+NR cibles dans une danse guerrière et haineuse, le mage les asperge de gouttelettes de sang. Les cibles sont alors prises d'une transe qui leur confère un bonus de toucher et de dommages égal à leur Volonté. Ce sort dure une demi-heure. Durant cette durée, les cibles ne peuvent effectuer qu'une action de défense (parade ou esquive) par tour, ne peuvent plus avoir un comportement colérique et irascible invivable."
+      "effect": "Ce sort barbare est originaire des sorciers des Lacs Sanglants. En entraînant 1+NR cibles dans une danse guerrière et haineuse, le mage les asperge de gouttelettes de sang. Les cibles sont alors prises d'une transe qui leur confère un bonus de toucher et de dommages égal à leur Volonté. Ce sort dure une demi-heure. Durant cette durée, les cibles ne peuvent effectuer qu'une action de défense (parade ou esquive) par tour, ne peuvent plus avoir un comportement colérique et irascible invivable.",
+      "inGameEffect": "Entraîne (1 + NR) cibles dans une transe qui leur confère un bonus de toucher et de dommages égal à leur Volonté, pendant une demi-heure. Pendant ce temps, elles ne peuvent effectuer qu'une action de défense — parade ou esquive — par tour, et adoptent un comportement colérique et irascible invivable.",
+      "sensoryEffect": "Le mage entraîne ses cibles dans une danse guerrière et haineuse et les asperge de gouttelettes de sang.",
+      "duration": "30",
+      "durationUnit": "minute",
+      "targets": "1 + NR",
+      "tags": [
+        "buff",
+        "debuff",
+        "ally",
+        "combat"
+      ]
     }
   },
   {
@@ -4560,7 +6883,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 15,
       "cle": "rune de feu (ornée, soigneusement tissée ou gravée), chant saccadé aigu",
-      "effect": "Ce sort extrêmement répandu et populaire permet d'ensorceler un objet pour qu'il puisse dispenser la chaleur de Koryn. En lançant un peu de feu élémentaire sur la rune, le mage l'ensorcelle pour un an. L'objet peut alors servir à fournir plus ou moins fort. Un pot chauffé plus ou moins fort. Un pot pourra faire bouillir de l'eau, une couverture sera tiède et une tunique permettra de sortir sous la neige à bras nus. Si l'objet est rendu brûlant et maintenu en contact avec la peau nue durant un tour, il peut en résulter une brûlure moyenne (1 Égratignure, une fois par jour et seulement s'il en reste au moins une à cocher). Il est impossible d'augmenter les dommages d'une arme avec cette rune comme toute utilitaire. Un échec au lancé de ce sort a des effets désastreux et enflamme brutalement toute matière combustible dans un rayon de dix mètres autour du mage."
+      "effect": "Ce sort extrêmement répandu et populaire permet d'ensorceler un objet pour qu'il puisse dispenser la chaleur de Koryn. En lançant un peu de feu élémentaire sur la rune, le mage l'ensorcelle pour un an. L'objet peut alors servir à fournir plus ou moins fort. Un pot chauffé plus ou moins fort. Un pot pourra faire bouillir de l'eau, une couverture sera tiède et une tunique permettra de sortir sous la neige à bras nus. Si l'objet est rendu brûlant et maintenu en contact avec la peau nue durant un tour, il peut en résulter une brûlure moyenne (1 Égratignure, une fois par jour et seulement s'il en reste au moins une à cocher). Il est impossible d'augmenter les dommages d'une arme avec cette rune comme toute utilitaire. Un échec au lancé de ce sort a des effets désastreux et enflamme brutalement toute matière combustible dans un rayon de dix mètres autour du mage.",
+      "inGameEffect": "Ensorcelle un objet pour un an afin qu'il dispense la chaleur de Kroryn, plus ou moins fort : un pot fait bouillir de l'eau, une couverture reste tiède, une tunique permet de sortir sous la neige bras nus. Rendu brûlant et maintenu contre la peau nue pendant un tour, l'objet peut causer une brûlure moyenne — 1 Égratignure, une fois par jour, et seulement s'il en reste au moins une à cocher. Impossible d'augmenter les dommages d'une arme avec cette rune, qui reste utilitaire. Un échec au lancement enflamme brutalement toute matière combustible dans un rayon de dix mètres autour du mage.",
+      "duration": "1",
+      "durationUnit": "year",
+      "tags": [
+        "utility",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -4576,7 +6907,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "brasier, cercle runique du feu, cendres volcaniques à lancer sur la cible (consommées)",
-      "effect": "Le mage se met en transe dans un lieu dépassant les 50°C. À la fin du rituel, il enchante les cendres volcaniques pour une heure. Celles-ci, lancées sur une cible, permettent de se fondre dans un feu et d'y trouver refuge. Il est aussi possible de l'utiliser avec de la lave. La cible se transforme en flammes et se mêle au brasier proche. Elle est alors indétectable normalement, tout en restant consciente de son environnement. Il est réduit à une conscience pure et ne peut parler (bien que la télépathie reste utilisable), ni bouger, ni interagir avec son équipement (qui est dématérialisé). Le sort dure tant que le feu est actif, au maximum 1 heure puis trente minutes par NR. S'il s'éteint et que le personnage est inconscient (en sommeil ou en méditation), il est alors rematérialisé brutalement et subit 1D10 blessures, en commençant par les Égratignures. Le personnage peut mettre fin au sort et se rematérialiser en une action dès qu'il le désire. Dans le brasier, ses points de magie de la sphère du Feu se régénèrent au rythme de 2 par heure et les créatures élémentaires se régénèrent quatre fois plus vite."
+      "effect": "Le mage se met en transe dans un lieu dépassant les 50°C. À la fin du rituel, il enchante les cendres volcaniques pour une heure. Celles-ci, lancées sur une cible, permettent de se fondre dans un feu et d'y trouver refuge. Il est aussi possible de l'utiliser avec de la lave. La cible se transforme en flammes et se mêle au brasier proche. Elle est alors indétectable normalement, tout en restant consciente de son environnement. Il est réduit à une conscience pure et ne peut parler (bien que la télépathie reste utilisable), ni bouger, ni interagir avec son équipement (qui est dématérialisé). Le sort dure tant que le feu est actif, au maximum 1 heure puis trente minutes par NR. S'il s'éteint et que le personnage est inconscient (en sommeil ou en méditation), il est alors rematérialisé brutalement et subit 1D10 blessures, en commençant par les Égratignures. Le personnage peut mettre fin au sort et se rematérialiser en une action dès qu'il le désire. Dans le brasier, ses points de magie de la sphère du Feu se régénèrent au rythme de 2 par heure et les créatures élémentaires se régénèrent quatre fois plus vite.",
+      "inGameEffect": "Les cendres, lancées sur une cible, la transforment en flammes qui se mêlent à un brasier proche — utilisable aussi avec de la lave. Elle devient indétectable normalement tout en restant consciente de son environnement, mais réduite à une conscience pure : elle ne peut ni parler (la télépathie reste utilisable), ni bouger, ni interagir avec son équipement, dématérialisé. Dure tant que le feu est actif, au maximum 1 heure plus trente minutes par NR. Si le feu s'éteint alors que le personnage est inconscient — en sommeil ou en méditation — il est rematérialisé brutalement et subit 1D10 blessures, en commençant par les Égratignures. Il peut mettre fin au sort et se rematérialiser en une action quand il le désire. Dans le brasier, ses points de magie de la Sphère du Feu se régénèrent de 2 par heure, et les créatures élémentaires quatre fois plus vite.",
+      "tags": [
+        "protection",
+        "illusion",
+        "self",
+        "ritual"
+      ]
     }
   },
   {
@@ -4592,7 +6930,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "gants munis de griffes en métal ou katar, chant du métal, position (bras croisés sur la poitrine)",
-      "effect": "Le mage croise ses griffes en finissant son chant. Ces dernières deviennent invisibles et peuvent toucher un adversaire jusqu'à 15 m comme si le mage était engagé au corps à corps avec lui. Les griffes ignorent les armures ne comportant pas de métal et infligent des dommages de base de 10. Le mage doit réussir un jet de Physique+corps à corps pour toucher son adversaire, ce dernier ne pouvant qu'esquiver en anticipant les mouvements du mage. Le sort dure 5+2×NR tours après quoi les griffes redeviennent solides et normales."
+      "effect": "Le mage croise ses griffes en finissant son chant. Ces dernières deviennent invisibles et peuvent toucher un adversaire jusqu'à 15 m comme si le mage était engagé au corps à corps avec lui. Les griffes ignorent les armures ne comportant pas de métal et infligent des dommages de base de 10. Le mage doit réussir un jet de Physique+corps à corps pour toucher son adversaire, ce dernier ne pouvant qu'esquiver en anticipant les mouvements du mage. Le sort dure 5+2×NR tours après quoi les griffes redeviennent solides et normales.",
+      "inGameEffect": "Les griffes deviennent invisibles et touchent un adversaire jusqu'à 15 m comme si le mage était engagé au corps à corps. Elles ignorent les armures ne comportant pas de métal et infligent 10 points de dommages de base. Le mage doit réussir un jet de Physique + Corps à corps pour toucher ; l'adversaire ne peut qu'esquiver, en anticipant ses mouvements. À la fin, les griffes redeviennent solides et normales.",
+      "sensoryEffect": "Le mage croise ses griffes en finissant son chant.",
+      "duration": "5 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4608,7 +6955,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "armure comportant du métal, position (bras écartés, tête renversée), respiration bloquée",
-      "effect": "Tout le métal porté par le mage (arme, armure...) se met à briller violemment d'une lumière éclatante, aveuglant toutes les personnes sur 5 m de rayon comme s'ils regardaient le soleil. Il n'y a aucun dégagement de chaleur, mais la lumière est gênante et oblige à combattre en aveugle, avec les malus appropriés (de -5 à l'impossibilité d'agir, au choix du meneur)."
+      "effect": "Tout le métal porté par le mage (arme, armure...) se met à briller violemment d'une lumière éclatante, aveuglant toutes les personnes sur 5 m de rayon comme s'ils regardaient le soleil. Il n'y a aucun dégagement de chaleur, mais la lumière est gênante et oblige à combattre en aveugle, avec les malus appropriés (de -5 à l'impossibilité d'agir, au choix du meneur).",
+      "inGameEffect": "Tout le métal porté par le mage — arme, armure — se met à briller violemment, aveuglant toutes les personnes dans un rayon de 5 m comme si elles regardaient le soleil. Aucun dégagement de chaleur, mais la lumière oblige à combattre en aveugle, avec les malus appropriés : de -5 jusqu'à l'impossibilité d'agir, au choix du meneur de jeu.",
+      "tags": [
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -4624,7 +6977,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "armure comportant du métal, position (coup du plat de la main), cri aigu",
-      "effect": "Ce sort très puissant est redouté par tous les combattants de Kor. Pour peu qu'il arrive au corps à corps, le mage peut poser sa main sur l'armure métallique visée par un simple jet de Physique + Corps à corps de Difficulté 15. La manœuvre s'esquive normalement mais ne se pare pas. L'armure éclate alors en de multiples fragments acérés qui blessent cruellement son porteur, comme si le métal fuyait le contact du mage. La victime subit 30+1/NR points de dommages sans armure. L'armure perd immédiatement la moitié de son indice de protection"
+      "effect": "Ce sort très puissant est redouté par tous les combattants de Kor. Pour peu qu'il arrive au corps à corps, le mage peut poser sa main sur l'armure métallique visée par un simple jet de Physique + Corps à corps de Difficulté 15. La manœuvre s'esquive normalement mais ne se pare pas. L'armure éclate alors en de multiples fragments acérés qui blessent cruellement son porteur, comme si le métal fuyait le contact du mage. La victime subit 30+1/NR points de dommages sans armure. L'armure perd immédiatement la moitié de son indice de protection",
+      "inGameEffect": "Au corps à corps, le mage pose la main sur une armure métallique sur un jet de Physique + Corps à corps de Difficulté 15. La manœuvre s'esquive normalement mais ne se pare pas. L'armure éclate en fragments acérés : la victime subit (30 + 1 par NR) points de dommages sans armure, et l'armure perd immédiatement la moitié de son indice de protection.",
+      "sensoryEffect": "L'armure éclate en de multiples fragments acérés qui blessent cruellement son porteur, comme si le métal fuyait le contact du mage.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -4640,7 +7000,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "écharpe de Très Bonne facture, position (danse du derviche), chant du métal.",
-      "effect": "Le mage ensorcèle un ruban de tissu large comme la main, long d'environ trois mètres. Généralement porté ballant, il ressemble à une banale écharpe ou à un chèche. En combat, le ruban peut filer en tourbillonnant vers un adversaire en devenant tranchant comme un rasoir : il s'allonge magiquement et peut frapper jusqu'à 20 mètres, provoquant 15+1D10 points de dommages. Il s'esquive ou se pare normalement, mais peut frapper 4 cibles proches. Il est utilisable jusqu'à cinq fois par jour et demande une action du mage pour être guidé."
+      "effect": "Le mage ensorcèle un ruban de tissu large comme la main, long d'environ trois mètres. Généralement porté ballant, il ressemble à une banale écharpe ou à un chèche. En combat, le ruban peut filer en tourbillonnant vers un adversaire en devenant tranchant comme un rasoir : il s'allonge magiquement et peut frapper jusqu'à 20 mètres, provoquant 15+1D10 points de dommages. Il s'esquive ou se pare normalement, mais peut frapper 4 cibles proches. Il est utilisable jusqu'à cinq fois par jour et demande une action du mage pour être guidé.",
+      "inGameEffect": "Ensorcelle un ruban de tissu large comme la main et long d'environ trois mètres, porté ballant comme une banale écharpe ou un chèche. En combat, il s'allonge magiquement et frappe jusqu'à 20 mètres pour 15 + 1D10 points de dommages, et peut atteindre 4 cibles proches. S'esquive ou se pare normalement. Utilisable jusqu'à cinq fois par jour, chaque usage demandant une action du mage pour le guider.",
+      "sensoryEffect": "Le ruban file en tourbillonnant vers l'adversaire en devenant tranchant comme un rasoir.",
+      "targets": "4",
+      "tags": [
+        "attack",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -4656,7 +7024,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "cercle runique du métal complexe, danse du métal, vif argent (consommé)",
-      "effect": "ce sort fut développé par les mages ingénieurs pour les aider dans leurs travaux sulfureux. Une fois le rituel terminé, le mage obtient une petite quantité de vif argent enchanté pour un jour. Versé sur du minerai ou des lingots de métal, il permet de procéder à froid au mélange de métaux normalement difficiles à liquéfier. Ce sort permet de rendre malléable un kilo de métal comme s'il s'agissait de glaise. Il en résulte un bonus de +2 pour travailler ce métal et bien sûr, la possibilité de se passer de forge. Les effets du liquide durent un jour+1/NR. En cas d'échec, le vif argent se transforme en un poison extrêmement volatile occasionnant de violents tremblements au lanceur du sort pendant toute une journée."
+      "effect": "ce sort fut développé par les mages ingénieurs pour les aider dans leurs travaux sulfureux. Une fois le rituel terminé, le mage obtient une petite quantité de vif argent enchanté pour un jour. Versé sur du minerai ou des lingots de métal, il permet de procéder à froid au mélange de métaux normalement difficiles à liquéfier. Ce sort permet de rendre malléable un kilo de métal comme s'il s'agissait de glaise. Il en résulte un bonus de +2 pour travailler ce métal et bien sûr, la possibilité de se passer de forge. Les effets du liquide durent un jour+1/NR. En cas d'échec, le vif argent se transforme en un poison extrêmement volatile occasionnant de violents tremblements au lanceur du sort pendant toute une journée.",
+      "inGameEffect": "Produit une petite quantité de vif-argent enchanté. Versé sur du minerai ou des lingots, il permet de mélanger à froid des métaux normalement difficiles à liquéfier, et rend un kilo de métal malléable comme de la glaise — bonus de +2 pour le travailler, et plus besoin de forge. Les effets du liquide durent un jour + 1 par NR. En cas d'échec, le vif-argent se transforme en un poison extrêmement volatil, occasionnant de violents tremblements au lanceur pendant toute une journée.",
+      "duration": "1 + NR",
+      "durationUnit": "day",
+      "tags": [
+        "creation",
+        "utility",
+        "object"
+      ]
     }
   },
   {
@@ -4672,7 +7048,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "chaîne de métal précieux (consommée), rune du passage brisé, position (un genou à terre, tête baissée, bras écartés)",
-      "effect": "Ce sort permet de sceller un portail élémentaire durable en y apposant le sceau élémentaire de Kezyr. Initialement conçu pour contrer les invasions de créatures éériques, il fonctionne pour tout portail, passage ou tunnel issu de la magie. Le mage doit réussir un jet d'Opposition de Mental+Volonté contre le score d'invocation du lanceur du portail pour le fermer instantanément. Le portail ne peut se rouvrir naturellement avant un cycle. Les portails durables ainsi clos sont toujours référencés par les mages du métal qui se chargent régulièrement de veiller à leur inviolabilité."
+      "effect": "Ce sort permet de sceller un portail élémentaire durable en y apposant le sceau élémentaire de Kezyr. Initialement conçu pour contrer les invasions de créatures éériques, il fonctionne pour tout portail, passage ou tunnel issu de la magie. Le mage doit réussir un jet d'Opposition de Mental+Volonté contre le score d'invocation du lanceur du portail pour le fermer instantanément. Le portail ne peut se rouvrir naturellement avant un cycle. Les portails durables ainsi clos sont toujours référencés par les mages du métal qui se chargent régulièrement de veiller à leur inviolabilité.",
+      "inGameEffect": "Scelle un portail élémentaire durable en y apposant le sceau élémentaire de Kezyr. Conçu contre les invasions de créatures éériques, il fonctionne sur tout portail, passage ou tunnel issu de la magie. Le mage doit réussir un jet d'opposition de Mental + Volonté contre le score d'invocation du lanceur du portail pour le fermer instantanément. Le portail ne peut se rouvrir naturellement avant un cycle. Les portails durables ainsi clos sont toujours référencés par les mages du métal, qui veillent régulièrement à leur inviolabilité.",
+      "duration": "1",
+      "durationUnit": "cycle",
+      "tags": [
+        "protection",
+        "place",
+        "ritual"
+      ]
     }
   },
   {
@@ -4688,7 +7072,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "feuille de laurier (consommée), posture de jet",
-      "effect": "Le mage lance la feuille de laurier vers une cible à moins de 40 m. Ce projectile végétal inflige 5 + 1D10/NR points de dégâts. Si la cible subit au moins une égratignure, un poison contenu dans la feuille lui infligera une autre égratignure à la fin du tour suivant à moins de réussir un jet de Physique+Résistance d'une difficulté de 20."
+      "effect": "Le mage lance la feuille de laurier vers une cible à moins de 40 m. Ce projectile végétal inflige 5 + 1D10/NR points de dégâts. Si la cible subit au moins une égratignure, un poison contenu dans la feuille lui infligera une autre égratignure à la fin du tour suivant à moins de réussir un jet de Physique+Résistance d'une difficulté de 20.",
+      "inGameEffect": "Projectile végétal lancé sur une cible à moins de 40 m, infligeant (5 + 1D10 par NR) points de dégâts. Si la cible subit au moins une Égratignure, le poison contenu dans la feuille lui en inflige une autre à la fin du tour suivant, à moins de réussir un jet de Physique + Résistance de Difficulté 20.",
+      "tags": [
+        "attack",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -4704,7 +7094,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "hurlement bestial, attitude prédatrice",
-      "effect": "le mage convoque 1 + 1/NR prédateurs typiques de la région. Ils apparaissent au début du tour suivant, de derrière un arbre, un rocher, etc. Le mage ne contrôle pas ces prédateurs, qui peuvent s'avérer plutôt affamés."
+      "effect": "le mage convoque 1 + 1/NR prédateurs typiques de la région. Ils apparaissent au début du tour suivant, de derrière un arbre, un rocher, etc. Le mage ne contrôle pas ces prédateurs, qui peuvent s'avérer plutôt affamés.",
+      "inGameEffect": "Convoque (1 + 1 par NR) prédateurs typiques de la région, qui apparaissent au début du tour suivant, de derrière un arbre, un rocher. Le mage ne les contrôle pas, et ils peuvent s'avérer plutôt affamés.",
+      "targets": "1 + 1 par NR",
+      "tags": [
+        "summoning",
+        "combat"
+      ]
     }
   },
   {
@@ -4720,7 +7116,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "un arbre de plus de 20 mètres de haut, rune de Heyra, rune du foyer",
-      "effect": "une fois l'arbre enchanté, le mage peut le façonner et le déplacer à sa guise. Nombre d'Experts de la Nature installent leur logis à l'intérieur des troncs. L'arbre peut se déplacer à la vitesse d'un humain, n'est pas ralenti dans les forêts, et ne peut traverser les étendues infranchissables à pied (montagnes, rivières profondes, lacs de lave etc.). Le mage doit se concentrer pour déplacer ou attaquer avec l'arbre, il peut ainsi effectuer une attaque par tour, par jet de Physique + Corps à corps, infligeant 40 + 1D10/NR points de dégâts et qui peut être esquivée avec une Difficulté +5. Si l'arbre prend feu, il devra être éteint avant 10 tours, sinon l'enchantement prendra fin (et l'arbre continuera certainement à brûler). Ce sort dure un Augure."
+      "effect": "une fois l'arbre enchanté, le mage peut le façonner et le déplacer à sa guise. Nombre d'Experts de la Nature installent leur logis à l'intérieur des troncs. L'arbre peut se déplacer à la vitesse d'un humain, n'est pas ralenti dans les forêts, et ne peut traverser les étendues infranchissables à pied (montagnes, rivières profondes, lacs de lave etc.). Le mage doit se concentrer pour déplacer ou attaquer avec l'arbre, il peut ainsi effectuer une attaque par tour, par jet de Physique + Corps à corps, infligeant 40 + 1D10/NR points de dégâts et qui peut être esquivée avec une Difficulté +5. Si l'arbre prend feu, il devra être éteint avant 10 tours, sinon l'enchantement prendra fin (et l'arbre continuera certainement à brûler). Ce sort dure un Augure.",
+      "inGameEffect": "Une fois l'arbre enchanté, le mage le façonne et le déplace à sa guise — nombre d'Experts de la Nature installent leur logis dans les troncs. L'arbre se déplace à la vitesse d'un humain, n'est pas ralenti en forêt, et ne peut traverser les étendues infranchissables à pied (montagnes, rivières profondes, lacs de lave). Le mage doit se concentrer pour le déplacer ou attaquer : une attaque par tour, sur un jet de Physique + Corps à corps, infligeant (40 + 1D10 par NR) points de dégâts, esquivable avec une Difficulté +5. Si l'arbre prend feu, il doit être éteint avant 10 tours, sinon l'enchantement prend fin — et l'arbre continuera certainement à brûler.",
+      "duration": "1",
+      "durationUnit": "augure",
+      "tags": [
+        "attack",
+        "summoning",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -4736,7 +7141,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "animal, la rune de contrôle, un licol tissé dans le pelage de l'animal (consommé).",
-      "effect": "en passant le licol à l'animal, le mage arrive à l'ensorceler pour en faire son familier. Le mage ne peut contrôler qu'un seul animal, et cela pendant 1 + NR semaines (il peut décider d'arrêter le sort avant que cette durée ne soit écoulée). Tous les ordres donnés à l'animal doivent être proférés de manière intelligible, en sachant que l'animal conserve son intelligence initiale. Ce sort est efficace sur des animaux de moins de 10 kg. Pour chaque multiplicateur de 10 de la masse, le temps d'effet est divisé comme suit : /2 pour 100 kg, /3 pour 1 tonne, /4 pour 10 tonnes. Ce sort ne fonctionne pas sur les dragons ou les créatures draconiques."
+      "effect": "en passant le licol à l'animal, le mage arrive à l'ensorceler pour en faire son familier. Le mage ne peut contrôler qu'un seul animal, et cela pendant 1 + NR semaines (il peut décider d'arrêter le sort avant que cette durée ne soit écoulée). Tous les ordres donnés à l'animal doivent être proférés de manière intelligible, en sachant que l'animal conserve son intelligence initiale. Ce sort est efficace sur des animaux de moins de 10 kg. Pour chaque multiplicateur de 10 de la masse, le temps d'effet est divisé comme suit : /2 pour 100 kg, /3 pour 1 tonne, /4 pour 10 tonnes. Ce sort ne fonctionne pas sur les dragons ou les créatures draconiques.",
+      "inGameEffect": "En passant le licol à un animal, le mage en fait son familier pour (1 + NR) semaines, et peut arrêter le sort avant terme. Il ne peut contrôler qu'un seul animal à la fois. Tous les ordres doivent être proférés de manière intelligible, l'animal conservant son intelligence initiale. Efficace sur les animaux de moins de 10 kg ; au-delà, la durée est divisée par 2 pour 100 kg, par 3 pour 1 tonne, par 4 pour 10 tonnes. Sans effet sur les dragons et les créatures draconiques.",
+      "duration": "1 + NR",
+      "durationUnit": "week",
+      "tags": [
+        "debuff",
+        "summoning",
+        "ritual"
+      ]
     }
   },
   {
@@ -4752,7 +7165,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "un peu d'élément de Nature, simulation de l'éclosion d'une fleur",
-      "effect": "Le mage recrée un petit coin de Nature éphémère, quel que soit l'endroit où il se trouve. La zone transformée le reste tant qu'il ne la quitte pas. Cette zone couvre 5 m²+5 m²/NR et est considérée un site élémentaire de la Nature pour une heure plus dix minutes par NR."
+      "effect": "Le mage recrée un petit coin de Nature éphémère, quel que soit l'endroit où il se trouve. La zone transformée le reste tant qu'il ne la quitte pas. Cette zone couvre 5 m²+5 m²/NR et est considérée un site élémentaire de la Nature pour une heure plus dix minutes par NR.",
+      "inGameEffect": "Recrée un petit coin de Nature éphémère, quel que soit l'endroit. La zone couvre (5 + 5 par NR) m² et compte comme un site élémentaire de la Nature pendant une heure plus dix minutes par NR. Elle le reste tant que le mage ne la quitte pas.",
+      "tags": [
+        "creation",
+        "area",
+        "place"
+      ]
     }
   },
   {
@@ -4768,7 +7187,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 25,
       "cle": "posture accroupie, mains plantées dans la terre, rugissement animal",
-      "effect": "la Nature confie au mage une partie de sa puissance pendant 1+1/NR mn. Avec une réussite normale, il bénéficie d'un bonus de +5 à la caractéristique de son choix. Pour 1 NR, il bénéficie d'un bonus de +10 à la caractéristique de son choix ou d'un dé supplémentaire d'initiative (conservable). Pour 2 NR, il gagne une case supplémentaire par niveau de blessure. Ces cases de blessure supplémentaires sont cochées en premier, et quand le sort prend fin, elles disparaissent, même si elles ont été cochées."
+      "effect": "la Nature confie au mage une partie de sa puissance pendant 1+1/NR mn. Avec une réussite normale, il bénéficie d'un bonus de +5 à la caractéristique de son choix. Pour 1 NR, il bénéficie d'un bonus de +10 à la caractéristique de son choix ou d'un dé supplémentaire d'initiative (conservable). Pour 2 NR, il gagne une case supplémentaire par niveau de blessure. Ces cases de blessure supplémentaires sont cochées en premier, et quand le sort prend fin, elles disparaissent, même si elles ont été cochées.",
+      "inGameEffect": "Avec une réussite normale, bonus de +5 à la caractéristique de son choix. Pour 1 NR, bonus de +10 à la caractéristique de son choix, ou un dé supplémentaire d'initiative, conservable. Pour 2 NR, une case supplémentaire par niveau de blessure : ces cases sont cochées en premier et disparaissent à la fin du sort, même cochées.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4784,7 +7211,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "rune de vie, anneau de bois précieux, une partie de l'animal désiré.",
-      "effect": "En touchant sa cible avec l'anneau ensorcelé depuis moins d'une semaine, le mage la métamorphose en un tour un animal connu de son choix. Si la cible résiste, le sort se résout par un jet d'opposition de Physique+Volonté contre l'incantation du sort. Ce sort dure jusqu'au prochain lever ou coucher du soleil. Les NR définissent la variation de masse de la cible. Pour devenir un animal deux fois plus gros (ou plus petit), un NR est nécessaire, pour quatre fois, deux NR, etc... La cible acquiert toutes les caractéristiques de la cible, à l'exception du Mental, des l'Intelligence et de la Volonté qui restent celle de la cible. Toutefois, seules les capacités spéciales connues du mage sont crées. Il est impossible de métamorphoser en humain ou en dragon et seuls les Experts de la Sphère de la Nature peuvent métamorphoser en créatures draconiques. Il est impossible de lancer ce sort ailleurs que dans un lieu sauvage."
+      "effect": "En touchant sa cible avec l'anneau ensorcelé depuis moins d'une semaine, le mage la métamorphose en un tour un animal connu de son choix. Si la cible résiste, le sort se résout par un jet d'opposition de Physique+Volonté contre l'incantation du sort. Ce sort dure jusqu'au prochain lever ou coucher du soleil. Les NR définissent la variation de masse de la cible. Pour devenir un animal deux fois plus gros (ou plus petit), un NR est nécessaire, pour quatre fois, deux NR, etc... La cible acquiert toutes les caractéristiques de la cible, à l'exception du Mental, des l'Intelligence et de la Volonté qui restent celle de la cible. Toutefois, seules les capacités spéciales connues du mage sont crées. Il est impossible de métamorphoser en humain ou en dragon et seuls les Experts de la Sphère de la Nature peuvent métamorphoser en créatures draconiques. Il est impossible de lancer ce sort ailleurs que dans un lieu sauvage.",
+      "inGameEffect": "En touchant sa cible avec l'anneau, ensorcelé depuis moins d'une semaine, le mage la métamorphose en un tour en un animal connu de son choix. Une cible qui résiste oppose un jet de Physique + Volonté contre l'incantation. Les NR définissent la variation de masse : 1 NR pour un animal deux fois plus gros ou plus petit, 2 NR pour quatre fois. La cible acquiert toutes les caractéristiques de l'animal, sauf le Mental, l'Intelligence et la Volonté, qui restent les siennes ; seules les capacités spéciales connues du mage sont créées. Impossible de métamorphoser en humain ou en dragon, et seuls les Experts de la Sphère de la Nature peuvent métamorphoser en créatures draconiques. Ne peut être lancé que dans un lieu sauvage. Dure jusqu'au prochain lever ou coucher du soleil.",
+      "tags": [
+        "debuff",
+        "illusion",
+        "ritual"
+      ]
     }
   },
   {
@@ -4800,7 +7233,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "désigner sa cible, montrer les crocs, mastiquer un bout de viande fraîche",
-      "effect": "le mage désigne sa cible à moins de 30 mètres et l'imprègne de l'odeur de la proie. Tous les prédateurs situés dans un rayon de 20 mètres autour de la cible se précipitent sur elle pour la dévorer. La cible garde cette odeur pendant 1 + NR tours."
+      "effect": "le mage désigne sa cible à moins de 30 mètres et l'imprègne de l'odeur de la proie. Tous les prédateurs situés dans un rayon de 20 mètres autour de la cible se précipitent sur elle pour la dévorer. La cible garde cette odeur pendant 1 + NR tours.",
+      "inGameEffect": "Le mage désigne une cible à moins de 30 mètres et l'imprègne de l'odeur de la proie. Tous les prédateurs dans un rayon de 20 mètres autour d'elle se précipitent pour la dévorer.",
+      "duration": "1 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -4816,7 +7257,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 20,
       "cle": "yeux exorbités, posture (bras croisés devant le visage), œil de tortue (consommé)",
-      "effect": "L'esprit du mage des océans peut s'ouvrir sur l'infinité de l'eau pour le protéger. Ce sort permet au mage de se prémunir de toutes les tentatives de pénétration psychique (attaques, contrôles, suggestions - psychologie y compris) en masquant son esprit dans la Sphère des Océans. Le mage bénéficie d'un bonus de 5 à tous ses jets de protection mentale et psychologique. Ce sort dure 3+1/NR tours."
+      "effect": "L'esprit du mage des océans peut s'ouvrir sur l'infinité de l'eau pour le protéger. Ce sort permet au mage de se prémunir de toutes les tentatives de pénétration psychique (attaques, contrôles, suggestions - psychologie y compris) en masquant son esprit dans la Sphère des Océans. Le mage bénéficie d'un bonus de 5 à tous ses jets de protection mentale et psychologique. Ce sort dure 3+1/NR tours.",
+      "inGameEffect": "Prémunit le mage de toutes les tentatives de pénétration psychique — attaques, contrôles, suggestions, psychologie comprise — en masquant son esprit dans la Sphère des Océans. Bonus de 5 à tous ses jets de protection mentale et psychologique.",
+      "duration": "3 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4832,7 +7281,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "aigue-marine (consommée), regard fixe vers le ciel, soupir",
-      "effect": "ce sort défensif est la risée des combattants qui l'estiment acte de lâcheté par excellence. Néanmoins, beaucoup de mages des océans lui doivent la vie. Enseigné aux premiers âges de l'homme par Vessyan, un dragon des océans, ce sort n'avait pour seule utilité que de permettre aux mages les plus hardis de se familiariser avec l'élément d'Ozyr. Lorsqu'il exécute ce sort, un mage fait en sorte d'ignorer le prochain coup qui lui sera porté, car son corps explosera en une gerbe d'eau (annule les dommages, seule la chair et les objets liés à la magie des océans sont liquéfiés). Il s'évapore quasi instantanément et se reconstitue à la prochaine pluie. Des mages l'utilisent parfois en combat sous une averse pour réapparaître dans le dos de leur adversaire ou pour prendre la fuite."
+      "effect": "ce sort défensif est la risée des combattants qui l'estiment acte de lâcheté par excellence. Néanmoins, beaucoup de mages des océans lui doivent la vie. Enseigné aux premiers âges de l'homme par Vessyan, un dragon des océans, ce sort n'avait pour seule utilité que de permettre aux mages les plus hardis de se familiariser avec l'élément d'Ozyr. Lorsqu'il exécute ce sort, un mage fait en sorte d'ignorer le prochain coup qui lui sera porté, car son corps explosera en une gerbe d'eau (annule les dommages, seule la chair et les objets liés à la magie des océans sont liquéfiés). Il s'évapore quasi instantanément et se reconstitue à la prochaine pluie. Des mages l'utilisent parfois en combat sous une averse pour réapparaître dans le dos de leur adversaire ou pour prendre la fuite.",
+      "inGameEffect": "Le mage ignore le prochain coup qui lui sera porté : les dommages sont annulés, seules la chair et les objets liés à la magie des océans étant liquéfiés. Il s'évapore quasi instantanément et se reconstitue à la prochaine pluie. Certains mages l'utilisent en combat sous une averse pour réapparaître dans le dos de leur adversaire ou pour prendre la fuite.",
+      "sensoryEffect": "Le corps du mage explose en une gerbe d'eau.",
+      "tags": [
+        "protection",
+        "movement",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4848,7 +7305,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune des océans tracée à la poudre d'or, peau d'anguille de mer (consommée), posture (en équilibre sur un pied)",
-      "effect": "le mage évoque la souplesse du ruisseau et la vivacité du torrent. Il obtient un bonus de +NR en Coordination, +1 en Physique, + 3 en Corps à corps, Esquive et sur toutes les compétences de Mouvement durant 3+2/NR tours. Le mage voit ses yeux devenir entièrement bleus et luminescents, mais doit consacrer autant d'actions à ses attaques qu'à ses défenses. Cela signifie qu'il ne peut effectuer plus de la moitié de ses actions (arrondie au supérieur) en Attaque et que les autres actions doivent être consacrées à la Défense ou aux mouvements de combat."
+      "effect": "le mage évoque la souplesse du ruisseau et la vivacité du torrent. Il obtient un bonus de +NR en Coordination, +1 en Physique, + 3 en Corps à corps, Esquive et sur toutes les compétences de Mouvement durant 3+2/NR tours. Le mage voit ses yeux devenir entièrement bleus et luminescents, mais doit consacrer autant d'actions à ses attaques qu'à ses défenses. Cela signifie qu'il ne peut effectuer plus de la moitié de ses actions (arrondie au supérieur) en Attaque et que les autres actions doivent être consacrées à la Défense ou aux mouvements de combat.",
+      "inGameEffect": "Bonus de +NR en Coordination, +1 en Physique, +3 en Corps à corps, Esquive et sur toutes les compétences de Mouvement. Le mage doit consacrer autant d'actions à ses attaques qu'à ses défenses : il ne peut effectuer plus de la moitié de ses actions, arrondie au supérieur, en Attaque, les autres allant à la Défense ou aux mouvements de combat.",
+      "sensoryEffect": "Les yeux du mage deviennent entièrement bleus et luminescents.",
+      "duration": "3 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4864,7 +7330,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 22,
       "cle": "psaume sourd, posture (bras s'écartant), yeux clos",
-      "effect": "en intensifiant son énergie, le mage crée une aura lumineuse blanche et bleue dans un rayon de 3+NR mètres. L'aura gèle l'eau contenue dans l'humidité ambiante, ralentissant les mouvements des personnes situées dans son périmètre. Les assaillants subissent un malus de 1D à leur Initiative et les dommages des attaques touchant le mage sont réduits de 5+2 par NR."
+      "effect": "en intensifiant son énergie, le mage crée une aura lumineuse blanche et bleue dans un rayon de 3+NR mètres. L'aura gèle l'eau contenue dans l'humidité ambiante, ralentissant les mouvements des personnes situées dans son périmètre. Les assaillants subissent un malus de 1D à leur Initiative et les dommages des attaques touchant le mage sont réduits de 5+2 par NR.",
+      "inGameEffect": "Aura d'un rayon de (3 + NR) mètres. Les assaillants subissent un malus de 1D à leur Initiative, et les dommages des attaques touchant le mage sont réduits de (5 + 2 par NR).",
+      "sensoryEffect": "Une aura lumineuse blanche et bleue gèle l'eau contenue dans l'humidité ambiante, ralentissant les mouvements des personnes présentes.",
+      "tags": [
+        "protection",
+        "debuff",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -4880,7 +7354,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "une paire de chausses (bottes, sandales ou bottes), un peu de liège (consommé), de l'élément des Océans",
-      "effect": "très courant chez les mages des océans, ce sort permet d'ensorceler des chausses pour marcher sur l'eau, quelle que soit la charge transportée. Les bottes conservent leur pouvoir pendant une semaine et permettent de marcher 1+1/NR heures par jour. Il faut une certaine habitude et un jet de Manuel + Coordination d'une Difficulté de 15 pour courir sur les vagues et les rapides sans chuter ou rouler sur le fil de l'eau. Il est à noter que, mage ou pas mage, nombreux sont les enfants d'Ozyr à ne pas apprécier l'emploi de ce sort en mer et à prendre un malin plaisir à soulever le mage pour le laisser retomber de haut sur un plancher d'eau dure..."
+      "effect": "très courant chez les mages des océans, ce sort permet d'ensorceler des chausses pour marcher sur l'eau, quelle que soit la charge transportée. Les bottes conservent leur pouvoir pendant une semaine et permettent de marcher 1+1/NR heures par jour. Il faut une certaine habitude et un jet de Manuel + Coordination d'une Difficulté de 15 pour courir sur les vagues et les rapides sans chuter ou rouler sur le fil de l'eau. Il est à noter que, mage ou pas mage, nombreux sont les enfants d'Ozyr à ne pas apprécier l'emploi de ce sort en mer et à prendre un malin plaisir à soulever le mage pour le laisser retomber de haut sur un plancher d'eau dure...",
+      "inGameEffect": "Ensorcelle des chausses pour marcher sur l'eau, quelle que soit la charge transportée. Les bottes gardent leur pouvoir une semaine et permettent de marcher (1 + 1 par NR) heures par jour. Courir sur les vagues et les rapides sans chuter demande une certaine habitude et un jet de Manuel + Coordination de Difficulté 15. Nombre d'enfants d'Ozyr n'apprécient pas l'emploi de ce sort en mer et prennent un malin plaisir à soulever le mage pour le laisser retomber de haut sur un plancher d'eau dure.",
+      "duration": "1",
+      "durationUnit": "week",
+      "tags": [
+        "movement",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -4896,7 +7378,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "morceau de glace (consommée), posture (frapper sa paume du poing), chant des glaces",
-      "effect": "Le mage ouvre un portail fugace vers une caverne glaciaire garnie de stalactites cristallins. Une partie d'entre eux se détachent et tombent par le portail pour dévaster une zone de 3 m de rayon. Les dommages sont de 20+1D10/NR et il n'est possible de se protéger qu'avec un bouclier. Ce sort peut frapper jusqu'à 25 m et touche toutes les personnes dans la zone."
+      "effect": "Le mage ouvre un portail fugace vers une caverne glaciaire garnie de stalactites cristallins. Une partie d'entre eux se détachent et tombent par le portail pour dévaster une zone de 3 m de rayon. Les dommages sont de 20+1D10/NR et il n'est possible de se protéger qu'avec un bouclier. Ce sort peut frapper jusqu'à 25 m et touche toutes les personnes dans la zone.",
+      "inGameEffect": "Frappe jusqu'à 25 m et touche toutes les personnes dans une zone de 3 m de rayon, pour (20 + 1D10 par NR) points de dommages. On ne peut s'en protéger qu'avec un bouclier.",
+      "sensoryEffect": "Le mage ouvre un portail fugace vers une caverne glaciaire ; des stalactites cristallins s'en détachent et tombent par le portail.",
+      "tags": [
+        "attack",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -4912,7 +7401,18 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "position d'Acrobatie à 15 (buste droit, jambes à l'équerre, en appui sur les mains), regard fixe, mâchoires serrées",
-      "effect": "le mage évoque la stabilité de Brorne et peut marcher, courir et prendre appui sur des surfaces humides ou glissantes comme si elles étaient sèches. Ce sort touche le mage+ NR cibles, si ces dernières sont dans la même posture que lui. Il dure 15 mn et permet par exemple de courir sur de la mousse humide, ou d'escalader un mur par temps de pluie."
+      "effect": "le mage évoque la stabilité de Brorne et peut marcher, courir et prendre appui sur des surfaces humides ou glissantes comme si elles étaient sèches. Ce sort touche le mage+ NR cibles, si ces dernières sont dans la même posture que lui. Il dure 15 mn et permet par exemple de courir sur de la mousse humide, ou d'escalader un mur par temps de pluie.",
+      "inGameEffect": "Le mage et (NR) cibles supplémentaires, si elles adoptent la même posture que lui, marchent, courent et prennent appui sur des surfaces humides ou glissantes comme si elles étaient sèches — courir sur de la mousse humide, escalader un mur par temps de pluie.",
+      "sensoryEffect": "Le mage évoque la stabilité de Brorne.",
+      "duration": "15",
+      "durationUnit": "minute",
+      "targets": "1 + NR",
+      "tags": [
+        "buff",
+        "movement",
+        "ally",
+        "exploration"
+      ]
     }
   },
   {
@@ -4928,7 +7428,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "rune de la pierre à tracer sur les biceps, rugissement de défi",
-      "effect": "le mage devient capable de déplacer la pierre avec une force colossale pendant 3 + NR tours. Il peut tripler sa force pour soulever des pierres, bouger une statue ou soutenir un pilier en chute. En revanche, ce sort n'affecte pas les dommages de mêlée. Les objets déplacés conservent leur masse initiale. Ce sort affecte aussi la terre, le sable ou la glaise."
+      "effect": "le mage devient capable de déplacer la pierre avec une force colossale pendant 3 + NR tours. Il peut tripler sa force pour soulever des pierres, bouger une statue ou soutenir un pilier en chute. En revanche, ce sort n'affecte pas les dommages de mêlée. Les objets déplacés conservent leur masse initiale. Ce sort affecte aussi la terre, le sable ou la glaise.",
+      "inGameEffect": "Le mage triple sa force pour soulever des pierres, bouger une statue ou soutenir un pilier en chute. N'affecte pas les dommages de mêlée, et les objets déplacés conservent leur masse initiale. Fonctionne aussi sur la terre, le sable et la glaise.",
+      "duration": "3 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "buff",
+        "utility",
+        "self"
+      ]
     }
   },
   {
@@ -4944,7 +7452,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "diamant, eau (consommée), récipient",
-      "effect": "le mage lâche le diamant dans le récipient plein d'eau où il semble se dissoudre. Il plonge alors la main dans le récipient et en sort lentement une lame de cristal incolore d'un mètre de long, dure comme du diamant et munie d'une poignée sommaire. Cette arme tranchante a les caractéristiques d'une épée longue, mais avec +3 aux dommages et une résistance Exceptionnelle. Ce sort dure 5+NR tours, après quoi l'épée éclate en échardes de cristal. Il ne reste alors dans la main que le diamant intact."
+      "effect": "le mage lâche le diamant dans le récipient plein d'eau où il semble se dissoudre. Il plonge alors la main dans le récipient et en sort lentement une lame de cristal incolore d'un mètre de long, dure comme du diamant et munie d'une poignée sommaire. Cette arme tranchante a les caractéristiques d'une épée longue, mais avec +3 aux dommages et une résistance Exceptionnelle. Ce sort dure 5+NR tours, après quoi l'épée éclate en échardes de cristal. Il ne reste alors dans la main que le diamant intact.",
+      "inGameEffect": "Produit une lame de cristal incolore d'un mètre de long, munie d'une poignée sommaire. Elle a les caractéristiques d'une épée longue, avec +3 aux dommages et une résistance Exceptionnelle. À la fin du sort, l'épée éclate en échardes de cristal et il ne reste dans la main que le diamant intact.",
+      "sensoryEffect": "Le diamant lâché dans le récipient plein d'eau semble s'y dissoudre ; le mage y plonge la main et en sort lentement la lame.",
+      "duration": "5 + NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "creation",
+        "object",
+        "combat"
+      ]
     }
   },
   {
@@ -4960,7 +7478,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "position (poing fermé brandi vers le ciel, l'autre main à plat sur le sol, un genou à terre), caillou (consommé)",
-      "effect": "Le lanceur transforme sa main levée en pierre pour 5 mn. Avec 1 NR, il transforme aussi son avant-bras et avec 2 NR, son bras entier. Le membre transformé est immunisé à la douleur et se compose entièrement de pierre. Il reste maniable et souple, mais dénué de toucher. La main ne possède aucun bonus d'armure et sert généralement à attraper des objets tranchants ou brûlants. Avec cette main de pierre, il est possible de parer des armes à mains nues, mais les armes de choc ou contondantes infligent leurs dommages normalement."
+      "effect": "Le lanceur transforme sa main levée en pierre pour 5 mn. Avec 1 NR, il transforme aussi son avant-bras et avec 2 NR, son bras entier. Le membre transformé est immunisé à la douleur et se compose entièrement de pierre. Il reste maniable et souple, mais dénué de toucher. La main ne possède aucun bonus d'armure et sert généralement à attraper des objets tranchants ou brûlants. Avec cette main de pierre, il est possible de parer des armes à mains nues, mais les armes de choc ou contondantes infligent leurs dommages normalement.",
+      "inGameEffect": "Transforme la main levée du lanceur en pierre ; avec 1 NR l'avant-bras, avec 2 NR le bras entier. Le membre est immunisé à la douleur, reste maniable et souple mais dénué de toucher, et n'offre aucun bonus d'armure. Sert généralement à attraper des objets tranchants ou brûlants. Permet de parer des armes à mains nues, mais les armes de choc ou contondantes infligent leurs dommages normalement.",
+      "duration": "5",
+      "durationUnit": "minute",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -4976,7 +7502,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 25,
       "cle": "rocher, rune de Brorne, acide (consommé)",
-      "effect": "en versant quelques gouttes d'acide sur la rune gravée sur un rocher, le mage peut y introduire un objet dont le volume n'excède pas la taille du bloc. Ensuite, durant 24 h et dans un rayon de 1+NR km, le lanceur peut dessiner une rune de Brorne sur n'importe quelle surface minérale en contact avec le sol (directement ou par continuité minérale) et y plonger la main pour ressortir l'objet dissimulé, sans se soucier cette fois de la taille du bloc. Durant tout ce temps, l'objet ne subit plus les effets du temps. Il est impossible de cacher une créature vivante, à l'exception des créatures élémentaires de la pierre (gargouilles, lézards mange-pierre, etc...)."
+      "effect": "en versant quelques gouttes d'acide sur la rune gravée sur un rocher, le mage peut y introduire un objet dont le volume n'excède pas la taille du bloc. Ensuite, durant 24 h et dans un rayon de 1+NR km, le lanceur peut dessiner une rune de Brorne sur n'importe quelle surface minérale en contact avec le sol (directement ou par continuité minérale) et y plonger la main pour ressortir l'objet dissimulé, sans se soucier cette fois de la taille du bloc. Durant tout ce temps, l'objet ne subit plus les effets du temps. Il est impossible de cacher une créature vivante, à l'exception des créatures élémentaires de la pierre (gargouilles, lézards mange-pierre, etc...).",
+      "inGameEffect": "Le mage introduit dans un rocher gravé d'une rune un objet dont le volume n'excède pas la taille du bloc. Pendant 24 h et dans un rayon de (1 + NR) km, il peut dessiner une rune de Brorne sur n'importe quelle surface minérale en contact avec le sol, directement ou par continuité minérale, et y plonger la main pour ressortir l'objet — sans se soucier cette fois de la taille du bloc. Pendant tout ce temps, l'objet ne subit plus les effets du temps. Impossible d'y cacher une créature vivante, sauf les créatures élémentaires de la pierre : gargouilles, lézards mange-pierre.",
+      "duration": "24",
+      "durationUnit": "hour",
+      "tags": [
+        "utility",
+        "object",
+        "place"
+      ]
     }
   },
   {
@@ -4992,7 +7526,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 20,
       "cle": "poudre de roche (consommée), rune de la pierre, cible immobile",
-      "effect": "le mage projette la poudre enchantée depuis moins d'une heure sur la cible. Le sort pétrifie la cible consentante en une statue faite de la roche de la poudre utilisée. Sous cette forme, le personnage ne peut plus bouger que ses yeux (qu'il peut fermer pour ressembler à une vraie statue) durant 1+NR heures. Il devient insensible au chaud comme au froid et aux agressions extérieures. Son métabolisme est inexistant, son corps étant considéré comme entièrement minéral. Il n'émet plus d'odeur ou de signes vitaux. Il n'est sensible qu'aux armes contondantes ou de choc, et en subit les dommages sans armure. Le personnage peut mettre fin au sort à son gré, restant conscient de son environnement."
+      "effect": "le mage projette la poudre enchantée depuis moins d'une heure sur la cible. Le sort pétrifie la cible consentante en une statue faite de la roche de la poudre utilisée. Sous cette forme, le personnage ne peut plus bouger que ses yeux (qu'il peut fermer pour ressembler à une vraie statue) durant 1+NR heures. Il devient insensible au chaud comme au froid et aux agressions extérieures. Son métabolisme est inexistant, son corps étant considéré comme entièrement minéral. Il n'émet plus d'odeur ou de signes vitaux. Il n'est sensible qu'aux armes contondantes ou de choc, et en subit les dommages sans armure. Le personnage peut mettre fin au sort à son gré, restant conscient de son environnement.",
+      "inGameEffect": "Pétrifie une cible consentante en une statue faite de la roche de la poudre utilisée, enchantée depuis moins d'une heure. Sous cette forme, le personnage ne peut plus bouger que ses yeux — qu'il peut fermer pour ressembler à une vraie statue. Il devient insensible au chaud, au froid et aux agressions extérieures ; son métabolisme est inexistant, son corps entièrement minéral, et il n'émet plus ni odeur ni signes vitaux. Il n'est sensible qu'aux armes contondantes ou de choc, dont il subit les dommages sans armure. Il reste conscient de son environnement et peut mettre fin au sort à son gré.",
+      "duration": "1 + NR",
+      "durationUnit": "hour",
+      "tags": [
+        "protection",
+        "illusion",
+        "ally",
+        "ritual"
+      ]
     }
   },
   {
@@ -5008,7 +7551,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 25,
       "cle": "miroir (consommé), vocalises dissonantes, posture (mains ouvertes, formant devant le mage des cercles de plus en plus larges)",
-      "effect": "En brisant le miroir, le mage déchire la trame entre la réalité et l'Ether. Il se crée alors une distorsion spiralée qui se résorbe brutalement en aspirant tout objet ou être vivant dans un cercle de 10+5/NR m de rayon autour du mage. Résister à son aspiration nécessite un jet de Physique + Athlétisme (ou Force le cas échéant) contre l'incantation du sort pour ne pas être projeté dans l'Ether (au hasard). Le mage n'est pas aspiré et ses compagnons, s'ils sont prévenus, ont une Difficulté de 15. Le mage peut également utiliser le portail pour se rendre dans l'Ether, mais le sort ne permet pas le voyage inverse."
+      "effect": "En brisant le miroir, le mage déchire la trame entre la réalité et l'Ether. Il se crée alors une distorsion spiralée qui se résorbe brutalement en aspirant tout objet ou être vivant dans un cercle de 10+5/NR m de rayon autour du mage. Résister à son aspiration nécessite un jet de Physique + Athlétisme (ou Force le cas échéant) contre l'incantation du sort pour ne pas être projeté dans l'Ether (au hasard). Le mage n'est pas aspiré et ses compagnons, s'ils sont prévenus, ont une Difficulté de 15. Le mage peut également utiliser le portail pour se rendre dans l'Ether, mais le sort ne permet pas le voyage inverse.",
+      "inGameEffect": "Une distorsion spiralée se résorbe brutalement et aspire tout objet ou être vivant dans un cercle de (10 + 5 par NR) m de rayon autour du mage. Y résister demande un jet de Physique + Athlétisme, ou de Force le cas échéant, contre l'incantation, sous peine d'être projeté au hasard dans l'Éther. Le mage n'est pas aspiré, et ses compagnons prévenus n'affrontent qu'une Difficulté de 15. Le mage peut aussi emprunter le portail pour se rendre dans l'Éther, mais le sort ne permet pas le voyage inverse.",
+      "sensoryEffect": "En brisant le miroir, le mage déchire la trame entre la réalité et l'Éther.",
+      "tags": [
+        "attack",
+        "movement",
+        "area",
+        "combat"
+      ]
     }
   },
   {
@@ -5024,7 +7575,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "voix envoûtante, regard pénétrant, sentiment de la cible (désir)",
-      "effect": "le mage adopte une posture lascive, fixe sa cible du regard tout en lui parlant d'une voix charmeuse. La victime subit alors un envoûtement auquel elle ne peut échapper qu'en réussissant un jet d'Opposition de Mental+Volonté contre l'incantation du sort. Si elle échoue à ce jet, la cible tombe sous le charme du mage et ne peut ni détacher son regard de lui, ni effectuer d'action concrète pendant (5+2/NR) tours. Pendant cette durée, la victime ne peut plus bouger, subjuguée par le mage, mais elle reste consciente de ce qui se passe et garde souvenir de ce qui se passe."
+      "effect": "le mage adopte une posture lascive, fixe sa cible du regard tout en lui parlant d'une voix charmeuse. La victime subit alors un envoûtement auquel elle ne peut échapper qu'en réussissant un jet d'Opposition de Mental+Volonté contre l'incantation du sort. Si elle échoue à ce jet, la cible tombe sous le charme du mage et ne peut ni détacher son regard de lui, ni effectuer d'action concrète pendant (5+2/NR) tours. Pendant cette durée, la victime ne peut plus bouger, subjuguée par le mage, mais elle reste consciente de ce qui se passe et garde souvenir de ce qui se passe.",
+      "inGameEffect": "La victime échappe à l'envoûtement en réussissant un jet d'opposition de Mental + Volonté contre l'incantation. En cas d'échec, elle tombe sous le charme du mage et ne peut ni détacher son regard de lui, ni effectuer d'action concrète. Elle reste consciente de ce qui se passe et en garde le souvenir.",
+      "sensoryEffect": "Le mage adopte une posture lascive, fixe sa cible du regard et lui parle d'une voix charmeuse.",
+      "duration": "5 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "social"
+      ]
     }
   },
   {
@@ -5040,7 +7600,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "cercle de poudre de sommeil, danse tournoyante, chant hypnotique",
-      "effect": "En se plaçant au centre d'un cercle de poudre de sommeil, le mage réunit autour de lui un vortex d'énergie magique qu'il peut utiliser pour le lancement d'un sortilège dans les 4+1/NR heures. Ce sort verra alors, au choix du mage, son coût divisé par deux ou sa portée, sa durée d'effets ou ses dégâts multipliés par deux. Si le sort agit sur la volonté d'une cible, le mage peut choisir d'augmenter la Difficulté du jet de résistance de 5. Pendant la durée de l'incantation, le mage est inconscient de son environnement."
+      "effect": "En se plaçant au centre d'un cercle de poudre de sommeil, le mage réunit autour de lui un vortex d'énergie magique qu'il peut utiliser pour le lancement d'un sortilège dans les 4+1/NR heures. Ce sort verra alors, au choix du mage, son coût divisé par deux ou sa portée, sa durée d'effets ou ses dégâts multipliés par deux. Si le sort agit sur la volonté d'une cible, le mage peut choisir d'augmenter la Difficulté du jet de résistance de 5. Pendant la durée de l'incantation, le mage est inconscient de son environnement.",
+      "inGameEffect": "Réunit autour du mage un vortex d'énergie magique utilisable pour lancer un sortilège dans les (4 + 1 par NR) heures. Ce sort voit alors, au choix du mage, son coût divisé par deux, ou sa portée, sa durée d'effets ou ses dégâts multipliés par deux. S'il agit sur la volonté d'une cible, le mage peut plutôt augmenter de 5 la Difficulté du jet de résistance. Pendant l'incantation, le mage est inconscient de son environnement.",
+      "duration": "4 + 1 par NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "self",
+        "ritual"
+      ]
     }
   },
   {
@@ -5056,7 +7624,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "minute",
       "difficulty": 15,
       "cle": "chandelles parfumées, 1 cristal (consumé), chant hypnotique.",
-      "effect": "tenant le cristal au creux de ses mains, le mage enchante un lieu qu'il a préalablement délimité à l'aide de chandelles parfumées qui doivent brûler tout au long de la cérémonie (l'extinction d'une chandelle n'empêche pas le lancement du sort mais rend ce dernier inefficace). A l'issue de l'incantation, le sort confère au lieu un caractère magique pour (1+1/NR) heures. Pendant cette durée, tout lancement de sort ou usage de Compétences magiques effectué au sein de la zone enchantée se verra gratifié d'un bonus de +5 (le modificateur de milieu continue de s'appliquer)."
+      "effect": "tenant le cristal au creux de ses mains, le mage enchante un lieu qu'il a préalablement délimité à l'aide de chandelles parfumées qui doivent brûler tout au long de la cérémonie (l'extinction d'une chandelle n'empêche pas le lancement du sort mais rend ce dernier inefficace). A l'issue de l'incantation, le sort confère au lieu un caractère magique pour (1+1/NR) heures. Pendant cette durée, tout lancement de sort ou usage de Compétences magiques effectué au sein de la zone enchantée se verra gratifié d'un bonus de +5 (le modificateur de milieu continue de s'appliquer).",
+      "inGameEffect": "Enchante un lieu préalablement délimité par des chandelles parfumées, qui doivent brûler tout au long de la cérémonie — une chandelle éteinte n'empêche pas le lancement mais rend le sort inefficace. Pendant (1 + 1 par NR) heures, tout lancement de sort ou usage de Compétence magique dans la zone reçoit un bonus de +5, le modificateur de milieu continuant de s'appliquer.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "hour",
+      "tags": [
+        "buff",
+        "place",
+        "ritual"
+      ]
     }
   },
   {
@@ -5072,7 +7648,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "pierre (précieuse ou semi-précieuse, consommée), sentiment de la cible (curiosité)",
-      "effect": "le mage montre une pierre à la cible, située à moins de 50m. Si celle-ci échoue à un jet d'opposition de Mental+Volonté contre le score d'incantation, elle devient confuse et perd toute capacité de réflexion pour (1+1/NR) tours. Pendant ce temps, elle reçoit un malus de -5 pour toute action physique et de -3 pour toute activité intellectuelle."
+      "effect": "le mage montre une pierre à la cible, située à moins de 50m. Si celle-ci échoue à un jet d'opposition de Mental+Volonté contre le score d'incantation, elle devient confuse et perd toute capacité de réflexion pour (1+1/NR) tours. Pendant ce temps, elle reçoit un malus de -5 pour toute action physique et de -3 pour toute activité intellectuelle.",
+      "inGameEffect": "Cible à moins de 50 m. Si elle échoue à un jet d'opposition de Mental + Volonté contre le score d'incantation, elle devient confuse et perd toute capacité de réflexion : malus de -5 à toute action physique et de -3 à toute activité intellectuelle.",
+      "sensoryEffect": "Le mage montre une pierre à la cible.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -5088,7 +7673,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 30,
       "cle": "un miroir de taille humaine (consommé), rune des rêves, pierre de rêve (consommée).",
-      "effect": "Durant l'incantation, le mage appose la pierre de rêve sur le front de son reflet. Le reflet se détache alors peu à peu du miroir (qui devient inutilisable) et la pierre de rêve s'enchâsse sur son front. Si le sort est manqué, le mage se retrouve enfermé dans le miroir durant un Augure. S'il est brisé, le mage meurt. Le reflet chimérique dure 1+1/NR Augure. Double parfait du personnage, il peut agir à sa place en toutes circonstances. Les besoins d'un reflet sont les mêmes que ceux d'un être humain. Quand le reflet et son original sont séparés, ils ne peuvent communiquer que par les rêves (sans limite de distance). Nulle communication instantanée n'est possible entre les deux doubles, sauf par magie. De nombreux grands mages utilisent ce sort pour confier leurs responsabilités à leur reflet et continuer leurs quêtes personnelles. Certains mages gardent leur reflet en sécurité, disposant ainsi d'une personne à prévenir en cas de difficulté. Un reflet chimérique ne se bat jamais et n'utilise jamais de sort offensif."
+      "effect": "Durant l'incantation, le mage appose la pierre de rêve sur le front de son reflet. Le reflet se détache alors peu à peu du miroir (qui devient inutilisable) et la pierre de rêve s'enchâsse sur son front. Si le sort est manqué, le mage se retrouve enfermé dans le miroir durant un Augure. S'il est brisé, le mage meurt. Le reflet chimérique dure 1+1/NR Augure. Double parfait du personnage, il peut agir à sa place en toutes circonstances. Les besoins d'un reflet sont les mêmes que ceux d'un être humain. Quand le reflet et son original sont séparés, ils ne peuvent communiquer que par les rêves (sans limite de distance). Nulle communication instantanée n'est possible entre les deux doubles, sauf par magie. De nombreux grands mages utilisent ce sort pour confier leurs responsabilités à leur reflet et continuer leurs quêtes personnelles. Certains mages gardent leur reflet en sécurité, disposant ainsi d'une personne à prévenir en cas de difficulté. Un reflet chimérique ne se bat jamais et n'utilise jamais de sort offensif.",
+      "inGameEffect": "Détache le reflet du mage du miroir, qui devient inutilisable. Double parfait du personnage, le reflet peut agir à sa place en toutes circonstances et a les mêmes besoins qu'un être humain. Séparés, l'original et le reflet ne communiquent que par les rêves, sans limite de distance ; aucune communication instantanée n'est possible entre eux, sauf par magie. Un reflet chimérique ne se bat jamais et n'utilise jamais de sort offensif. Si le sort est manqué, le mage se retrouve enfermé dans le miroir durant un Augure — et meurt si celui-ci est brisé.",
+      "sensoryEffect": "Le mage appose la pierre de rêve sur le front de son reflet ; celui-ci se détache peu à peu du miroir et la pierre s'enchâsse sur son front.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "augure",
+      "tags": [
+        "summoning",
+        "illusion",
+        "ritual"
+      ]
     }
   },
   {
@@ -5104,7 +7698,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 15,
       "cle": "regard fixe, position (mains jointes à la pointe des doigts écartés, index sous le menton)",
-      "effect": "Tout en regardant son interlocuteur droit dans les yeux (moins de 1m), le mage s'interroge sur la véracité de ses propos. Quelques instants plus tard, le mage entend comme un murmure dans le vent qui lui révèle s'il a menti durant les 1+NR minutes précédant son lancement. L'interlocuteur peut essayer de dissimuler son mensonge. Il doit alors réussir un jet d'Opposition de Social+Volonté contre le score d'incantation du mage."
+      "effect": "Tout en regardant son interlocuteur droit dans les yeux (moins de 1m), le mage s'interroge sur la véracité de ses propos. Quelques instants plus tard, le mage entend comme un murmure dans le vent qui lui révèle s'il a menti durant les 1+NR minutes précédant son lancement. L'interlocuteur peut essayer de dissimuler son mensonge. Il doit alors réussir un jet d'Opposition de Social+Volonté contre le score d'incantation du mage.",
+      "inGameEffect": "En regardant son interlocuteur droit dans les yeux, à moins d'1 m, le mage apprend s'il a menti durant les (1 + NR) minutes précédant le lancement. L'interlocuteur peut tenter de dissimuler son mensonge en réussissant un jet d'opposition de Social + Volonté contre le score d'incantation.",
+      "sensoryEffect": "Quelques instants plus tard, le mage entend comme un murmure dans le vent.",
+      "tags": [
+        "detection",
+        "enemy",
+        "social"
+      ]
     }
   },
   {
@@ -5120,7 +7721,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 20,
       "cle": "plume de héron cendré (consommée), danse aérienne",
-      "effect": "une plume d'oie à la main, le mage effectue une rapide danse aérienne. Celle-ci s'achève alors qu'un coussin d'air s'est formé au niveau de ses pieds et sur lequel il peut se déplacer comme si c'était une surface rigide. Il peut ainsi marcher en flottant légèrement au-dessus du sol, ce qui lui permet de ne laisser aucune trace de son passage ou de franchir sans difficulté des obstacles tels que rivières et marais. Le sort peut affecter NR personnes supplémentaires au choix du mage et dure 1 minute. Le mage peut prolonger la durée du sort à raison de 1 point de magie par minute et par personne."
+      "effect": "une plume d'oie à la main, le mage effectue une rapide danse aérienne. Celle-ci s'achève alors qu'un coussin d'air s'est formé au niveau de ses pieds et sur lequel il peut se déplacer comme si c'était une surface rigide. Il peut ainsi marcher en flottant légèrement au-dessus du sol, ce qui lui permet de ne laisser aucune trace de son passage ou de franchir sans difficulté des obstacles tels que rivières et marais. Le sort peut affecter NR personnes supplémentaires au choix du mage et dure 1 minute. Le mage peut prolonger la durée du sort à raison de 1 point de magie par minute et par personne.",
+      "inGameEffect": "Le mage marche en flottant légèrement au-dessus du sol sur un coussin d'air, ce qui lui permet de ne laisser aucune trace de son passage ou de franchir sans difficulté rivières et marais. Affecte NR personnes supplémentaires au choix du mage. Dure 1 minute, prolongeable à raison de 1 point de magie par minute et par personne.",
+      "sensoryEffect": "Une plume d'oie à la main, le mage effectue une rapide danse aérienne.",
+      "duration": "1",
+      "durationUnit": "minute",
+      "targets": "1 + NR",
+      "tags": [
+        "movement",
+        "ally",
+        "exploration"
+      ]
     }
   },
   {
@@ -5136,7 +7747,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "position (chuchoter dans sa main en creux), éventail marqué d'un tourbillon",
-      "effect": "en agitant son éventail pour disperser les mots chuchotés au creux de sa main, le mage crée une faille invisible qui permet de parler (sans le voir) à un interlocuteur situé à moins de 1km de lui, tant qu'il peut le localiser. Le portail reste ouvert 1+1/NR minutes."
+      "effect": "en agitant son éventail pour disperser les mots chuchotés au creux de sa main, le mage crée une faille invisible qui permet de parler (sans le voir) à un interlocuteur situé à moins de 1km de lui, tant qu'il peut le localiser. Le portail reste ouvert 1+1/NR minutes.",
+      "inGameEffect": "Crée une faille invisible permettant de parler, sans le voir, à un interlocuteur situé à moins de 1 km, tant que le mage peut le localiser.",
+      "sensoryEffect": "Le mage agite son éventail pour disperser les mots chuchotés au creux de sa main.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "minute",
+      "tags": [
+        "communication",
+        "exploration"
+      ]
     }
   },
   {
@@ -5152,7 +7771,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "sable (consommé), danse des vents, chant d'appel",
-      "effect": "Prenant une poignée de sable dans chaque main, le mage entame la danse des vents. Tout en laissant s'égrainer lentement le sable, il s'adresse alors aux vents en chantonnant, leur demandant son chemin. Un esprit des vents se matérialise alors et se met à tourbillonner devant le mage, rassemblant le sable en un petit tourbillon qui prend la direction du lieu demandé. Le sable s'éparpille rapidement et le tourbillon disparaît totalement au bout de 2 + 1/NR tours."
+      "effect": "Prenant une poignée de sable dans chaque main, le mage entame la danse des vents. Tout en laissant s'égrainer lentement le sable, il s'adresse alors aux vents en chantonnant, leur demandant son chemin. Un esprit des vents se matérialise alors et se met à tourbillonner devant le mage, rassemblant le sable en un petit tourbillon qui prend la direction du lieu demandé. Le sable s'éparpille rapidement et le tourbillon disparaît totalement au bout de 2 + 1/NR tours.",
+      "inGameEffect": "Le mage demande son chemin aux vents ; un tourbillon de sable prend la direction du lieu demandé, puis s'éparpille et disparaît totalement au bout de (2 + 1 par NR) tours.",
+      "sensoryEffect": "Prenant une poignée de sable dans chaque main, le mage entame la danse des vents en chantonnant ; un esprit des vents se matérialise et tourbillonne devant lui.",
+      "duration": "2 + 1 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "detection",
+        "exploration"
+      ]
     }
   },
   {
@@ -5168,7 +7795,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 22,
       "cle": "1 jarre d'eau (consommée), poudre de cristal (consommée), cri complexe (scansion de plus en plus forte)",
-      "effect": "Le mage s'installe au centre d'un cercle tracé à l'aide de la poudre et appelle les vents par une scansion de plus en plus forte. Un brouillard épais commence alors à s'élever de la jarre et se répand à la vitesse de 30 m par tour. Il s'étend sur un cercle de 40m + 5m/NR de diamètre. Le sort dure jusqu'au matin suivant."
+      "effect": "Le mage s'installe au centre d'un cercle tracé à l'aide de la poudre et appelle les vents par une scansion de plus en plus forte. Un brouillard épais commence alors à s'élever de la jarre et se répand à la vitesse de 30 m par tour. Il s'étend sur un cercle de 40m + 5m/NR de diamètre. Le sort dure jusqu'au matin suivant.",
+      "inGameEffect": "Un brouillard épais s'élève de la jarre et se répand à la vitesse de 30 m par tour, sur un cercle de (40 + 5 par NR) m de diamètre. Dure jusqu'au matin suivant.",
+      "sensoryEffect": "Le mage s'installe au centre d'un cercle tracé à la poudre et appelle les vents par une scansion de plus en plus forte.",
+      "tags": [
+        "debuff",
+        "area",
+        "exploration"
+      ]
     }
   },
   {
@@ -5184,7 +7818,15 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "hour",
       "difficulty": 25,
       "cle": "rune des vents brodée en fil d'or sur la voile (consommée), posture (cérémonie du souffle)",
-      "effect": "une fois la voile du navire ensorcelée, celle-ci se gonfle comme si un vent se levait. Pour contrôler la vitesse du navire, il suffit de déployer plus ou moins les voiles : lorsqu'elles sont amenées, la propulsion cesse, et lorsqu'elles sont complètement déployées, le navire se déplace comme par vent fort (cf. Les versets d'Ozyr p.63-64). Le sort se déclenche en 4 tours et dure (1 + 1/NR) semaines. La rune doit être visible de la proue du navire où la mage effectue l'enchantement, et se consume lors de l'incantation."
+      "effect": "une fois la voile du navire ensorcelée, celle-ci se gonfle comme si un vent se levait. Pour contrôler la vitesse du navire, il suffit de déployer plus ou moins les voiles : lorsqu'elles sont amenées, la propulsion cesse, et lorsqu'elles sont complètement déployées, le navire se déplace comme par vent fort (cf. Les versets d'Ozyr p.63-64). Le sort se déclenche en 4 tours et dure (1 + 1/NR) semaines. La rune doit être visible de la proue du navire où la mage effectue l'enchantement, et se consume lors de l'incantation.",
+      "inGameEffect": "La voile ensorcelée se gonfle comme si un vent se levait. La vitesse se contrôle en déployant plus ou moins les voiles : amenées, la propulsion cesse ; complètement déployées, le navire se déplace comme par vent fort. Le sort se déclenche en 4 tours. La rune, qui se consume lors de l'incantation, doit être visible de la proue du navire où le mage procède à l'enchantement.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "week",
+      "tags": [
+        "movement",
+        "object",
+        "exploration"
+      ]
     }
   },
   {
@@ -5200,7 +7842,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "action",
       "difficulty": 18,
       "cle": "stylet d'obsidienne, position (faire craquer un doigt), feulement rauque",
-      "effect": "en s'ouvrant une veine, le mage de l'ombre peut modeler le sang qui s'en échappe, créant un fouet carmin d'une dizaine de mètres de long qu'il pourra manier comme un fouet redoutable. Ses dommages de base sont de 20 et il s'utilise avec armes articulées. Ce sort ignore les défenses physiques de la victime, mais se pare et s'esquive normalement. Ce sort possède un contrecoup notable : après les 10+2/NR tours où le sort est actif, le bras du mage devient exsangue et paralysé jusqu'au prochain coucher du soleil."
+      "effect": "en s'ouvrant une veine, le mage de l'ombre peut modeler le sang qui s'en échappe, créant un fouet carmin d'une dizaine de mètres de long qu'il pourra manier comme un fouet redoutable. Ses dommages de base sont de 20 et il s'utilise avec armes articulées. Ce sort ignore les défenses physiques de la victime, mais se pare et s'esquive normalement. Ce sort possède un contrecoup notable : après les 10+2/NR tours où le sort est actif, le bras du mage devient exsangue et paralysé jusqu'au prochain coucher du soleil.",
+      "inGameEffect": "Crée un fouet d'une dizaine de mètres de long, aux dommages de base de 20, utilisé avec la Compétence Armes articulées. Ignore les défenses physiques de la victime, mais se pare et s'esquive normalement. Contrecoup notable : passé la durée du sort, le bras du mage devient exsangue et paralysé jusqu'au prochain coucher du soleil.",
+      "sensoryEffect": "En s'ouvrant une veine, le mage modèle le sang qui s'en échappe en un fouet carmin.",
+      "duration": "10 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -5216,7 +7867,17 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "huile de lin, toile d'araignée d'ombre, position (main levée au-dessus de la tête lancée brutalement vers le sol)",
-      "effect": "sortilège effrayant montrant à quelles techniques abjectes sont rompus les mages de l'ombre, la peau de la main se met à couler sur le sol en un flot ininterrompu, immédiatement absorbée par celui-ci et rejaillissant pour agripper fermement les mollets d'un adversaire jusqu'à dix mètres. Les deux belligérants sont alors immobilisés. La cible est incapable de se déplacer à moins de réussir un jet de Physique+Force contre une Difficulté de 25. Si le mage utilise une action pour resserrer sa prise par un jet d'Opposition de Physique+ Sphère d'ombre contre Physique+Résistance de la cible, il peut infliger 10+1D10/NR points de dommages. Le mage subit normalement les dommages infligés à sa main. Si celle-ci est tranchée par une blessure Grave, le mage retire son membre de chair fluide du sol qui se rétracte alors en reconstituant sa main intacte. Ce sort peut fracasser une jambe si une blessure Grave est cochée et même déchirer les veines avec les esquilles d'os, ce qui pourra tuer. Ce sort dure 3+2/NR tours."
+      "effect": "sortilège effrayant montrant à quelles techniques abjectes sont rompus les mages de l'ombre, la peau de la main se met à couler sur le sol en un flot ininterrompu, immédiatement absorbée par celui-ci et rejaillissant pour agripper fermement les mollets d'un adversaire jusqu'à dix mètres. Les deux belligérants sont alors immobilisés. La cible est incapable de se déplacer à moins de réussir un jet de Physique+Force contre une Difficulté de 25. Si le mage utilise une action pour resserrer sa prise par un jet d'Opposition de Physique+ Sphère d'ombre contre Physique+Résistance de la cible, il peut infliger 10+1D10/NR points de dommages. Le mage subit normalement les dommages infligés à sa main. Si celle-ci est tranchée par une blessure Grave, le mage retire son membre de chair fluide du sol qui se rétracte alors en reconstituant sa main intacte. Ce sort peut fracasser une jambe si une blessure Grave est cochée et même déchirer les veines avec les esquilles d'os, ce qui pourra tuer. Ce sort dure 3+2/NR tours.",
+      "inGameEffect": "Agrippe fermement les mollets d'un adversaire jusqu'à dix mètres ; les deux belligérants sont alors immobilisés. La cible ne peut se déplacer qu'en réussissant un jet de Physique + Force contre une Difficulté de 25. En dépensant une action pour resserrer sa prise, sur un jet d'opposition de Physique + Sphère d'ombre contre Physique + Résistance de la cible, le mage inflige (10 + 1D10 par NR) points de dommages. Il subit normalement les dommages infligés à sa main ; tranchée par une blessure Grave, il retire son membre de chair fluide du sol, qui se rétracte en reconstituant sa main intacte. Le sort peut fracasser une jambe si une blessure Grave est cochée, et même déchirer les veines avec les esquilles d'os, ce qui peut tuer.",
+      "sensoryEffect": "La peau de la main du mage coule sur le sol en un flot ininterrompu, immédiatement absorbé par celui-ci, puis rejaillit pour saisir sa cible.",
+      "duration": "3 + 2 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "attack",
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -5232,7 +7893,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "pince de scarabée d'ombre (consommé), position (bras enserrés autour du torse)",
-      "effect": "sortilège horrifique, les impressionnantes élytres composées d'ombres aux reflets nauséeux qui protègent le mage semblent celles d'un insecte gigantesque posé sur lui. À chaque attaque qu'il subit (sauf en cas d'attaques simultanées, où une seule attaque doit être sélectionnée), les élytres le recouvrent instantanément, lui offrant une protection supplémentaire de 5 + 3 par NR contre tout dégât physique. Ce sort dure 1+1/NR heures."
+      "effect": "sortilège horrifique, les impressionnantes élytres composées d'ombres aux reflets nauséeux qui protègent le mage semblent celles d'un insecte gigantesque posé sur lui. À chaque attaque qu'il subit (sauf en cas d'attaques simultanées, où une seule attaque doit être sélectionnée), les élytres le recouvrent instantanément, lui offrant une protection supplémentaire de 5 + 3 par NR contre tout dégât physique. Ce sort dure 1+1/NR heures.",
+      "inGameEffect": "À chaque attaque subie — en cas d'attaques simultanées, une seule doit être sélectionnée — les élytres recouvrent instantanément le mage et lui offrent une protection supplémentaire de (5 + 3 par NR) contre tout dégât physique.",
+      "sensoryEffect": "D'impressionnantes élytres composées d'ombres aux reflets nauséeux semblent celles d'un insecte gigantesque posé sur le mage.",
+      "duration": "1 + 1 par NR",
+      "durationUnit": "hour",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
     }
   },
   {
@@ -5248,7 +7918,16 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 15,
       "cle": "chair d'un cadavre, posture (doigt braqué), bruit de succion",
-      "effect": "le mage désigne une blessure affligeant la cible. Tous les jets de soins affectant la victime seront pénalisés d'un -3, du fait du pus qui commence à suinter de la plaie. Les effets du sort durent 3+1/NR jours. Ce sort ne peut être lancé dans un Site élémentaire, sauf ceux de la Sphère de l'ombre."
+      "effect": "le mage désigne une blessure affligeant la cible. Tous les jets de soins affectant la victime seront pénalisés d'un -3, du fait du pus qui commence à suinter de la plaie. Les effets du sort durent 3+1/NR jours. Ce sort ne peut être lancé dans un Site élémentaire, sauf ceux de la Sphère de l'ombre.",
+      "inGameEffect": "Le mage désigne une blessure affligeant la cible : tous les jets de soins la concernant subissent un malus de -3. Ne peut être lancé dans un Site élémentaire, sauf ceux de la Sphère de l'ombre.",
+      "sensoryEffect": "Du pus commence à suinter de la plaie.",
+      "duration": "3 + 1 par NR",
+      "durationUnit": "day",
+      "tags": [
+        "debuff",
+        "enemy",
+        "combat"
+      ]
     }
   },
   {
@@ -5264,7 +7943,14 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "castTimeUnit": "round",
       "difficulty": 18,
       "cle": "sourire sadique, oreille momifiée (consommée), ricanement",
-      "effect": "destiné à perturber l'équilibre mental d'un individu, ce sort maudit sa victime pour 1 semaine + 1/NR jour. Chaque réalisation de la victime (artisanat, passe d'arme, etc.) envahira son esprit du rire moqueur du mage, lui imposant une pression propre à faire craquer les plus volontaires. Tout jet indiquant un 1 impose alors de lancer deux dés au lieu d'un pour déterminer un éventuel Echec critique. Si l'un des deux dés indique un score supérieur au score de la Compétence, c'est automatiquement un échec critique."
+      "effect": "destiné à perturber l'équilibre mental d'un individu, ce sort maudit sa victime pour 1 semaine + 1/NR jour. Chaque réalisation de la victime (artisanat, passe d'arme, etc.) envahira son esprit du rire moqueur du mage, lui imposant une pression propre à faire craquer les plus volontaires. Tout jet indiquant un 1 impose alors de lancer deux dés au lieu d'un pour déterminer un éventuel Echec critique. Si l'un des deux dés indique un score supérieur au score de la Compétence, c'est automatiquement un échec critique.",
+      "inGameEffect": "Maudit la victime pour 1 semaine + 1 jour par NR. Tout jet indiquant un 1 impose de lancer deux dés au lieu d'un pour déterminer un éventuel Échec critique ; si l'un des deux indique un score supérieur au score de la Compétence, c'est automatiquement un échec critique.",
+      "sensoryEffect": "Chaque réalisation de la victime — artisanat, passe d'armes — envahit son esprit du rire moqueur du mage, lui imposant une pression propre à faire craquer les plus volontaires.",
+      "tags": [
+        "debuff",
+        "enemy",
+        "ritual"
+      ]
     }
   }
 ];

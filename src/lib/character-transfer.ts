@@ -15,7 +15,7 @@
 import { z } from 'zod';
 
 import {
-  EFFECT_UNITS,
+  TIME_UNITS,
   MONEY,
   NUMERIC_KEYS,
   PERMANENT_UNIT,
@@ -143,7 +143,7 @@ const weaponSchema = z.object({
   skillName: str.nullable().optional(),
 });
 
-const CAST_UNITS = EFFECT_UNITS.map((u) => u.key) as [string, ...string[]];
+const UNIT_KEYS = TIME_UNITS.map((u) => u.key) as [string, ...string[]];
 const spellSchema = z.object({
   name: str,
   // Niveau. OPTIONAL (not a version bump, like `cleParfaite`): exports made
@@ -155,7 +155,7 @@ const spellSchema = z.object({
   sphere: str,
   cost: int,
   castTimeAmount: int,
-  castTimeUnit: z.enum(CAST_UNITS),
+  castTimeUnit: z.enum(UNIT_KEYS),
   difficulty: int,
   cle: str,
   // Perfect key. OPTIONAL (not a version bump, like `uuid`): exports made before
@@ -163,6 +163,16 @@ const spellSchema = z.object({
   // to the column default (false).
   cleParfaite: z.boolean().optional(),
   effect: str,
+  // The convenience layer extracted from `effect`. ALL OPTIONAL, same reasoning
+  // as `level` above: exports predating these columns carry none, and a spell
+  // with none renders from `effect` alone. `durationUnit` is only meaningful
+  // next to a `duration`, so it falls back to the column default when absent.
+  inGameEffect: str.optional(),
+  sensoryEffect: str.optional(),
+  duration: str.optional(),
+  durationUnit: z.enum(UNIT_KEYS).optional(),
+  targets: str.optional(),
+  tags: z.array(str).optional(),
 });
 
 // Magic reserve objects. OPTIONAL with a `[]` default (not a version bump, like
@@ -174,8 +184,8 @@ const magicReserveSchema = z.object({
 });
 
 // An effect may also be permanent — a unit spells never have, which is why this
-// is not `CAST_UNITS`.
-const EFFECT_DURATION_UNITS = [...CAST_UNITS, PERMANENT_UNIT] as [string, ...string[]];
+// is not plain `UNIT_KEYS`.
+const EFFECT_DURATION_UNITS = [...UNIT_KEYS, PERMANENT_UNIT] as [string, ...string[]];
 
 const effectSchema = z.object({
   label: str,
