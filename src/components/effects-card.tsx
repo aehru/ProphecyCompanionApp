@@ -10,9 +10,9 @@ import SectionCard from '@/components/ui/section-card';
 import {
   EFFECT_TARGET_LABEL,
   EFFECT_TARGETS,
-  EFFECT_UNIT_LABEL,
-  EFFECT_UNITS,
   PERMANENT_UNIT,
+  TIME_UNIT_LABEL,
+  TIME_UNITS,
 } from '@/constants/prophecy';
 import type { Effect, Skill } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
@@ -55,9 +55,9 @@ export default function EffectsCard({
   const router = useRouter();
 
   // Units that still have at least one active effect — the only ones worth
-  // offering a "time passes" button for. PERMANENT_UNIT is not in EFFECT_UNITS,
+  // offering a "time passes" button for. PERMANENT_UNIT is not in TIME_UNITS,
   // so permanent effects never appear here.
-  const liveUnits = EFFECT_UNITS.filter((u) =>
+  const liveUnits = TIME_UNITS.filter((u) =>
     effects.some((e) => !e.expired && e.durationUnit === u.key),
   );
 
@@ -119,7 +119,7 @@ function EffectRow({
 
   const targetLabel = targetLabelFor(e.target);
   const isPermanent = e.durationUnit === PERMANENT_UNIT;
-  const unitLabel = EFFECT_UNIT_LABEL[e.durationUnit] ?? e.durationUnit;
+  const unitLabel = TIME_UNIT_LABEL[e.durationUnit] ?? e.durationUnit;
   const valueColor = e.value > 0 ? theme.colors.primary : theme.colors.error;
 
   // Duration/state phrase after the target label.
@@ -244,7 +244,7 @@ export function EffectEditor({
       {permanent ? null : (
         <SelectField
           label="Unité"
-          options={EFFECT_UNITS}
+          options={TIME_UNITS}
           value={e.durationUnit}
           onChange={(v) => updateEffect(e.id, { durationUnit: v })}
         />
