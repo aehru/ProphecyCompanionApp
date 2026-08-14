@@ -28,7 +28,7 @@ import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
-import { initiativeDiceCount, rollInitiative, trimInitiativeValues } from '@/lib/dice';
+import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
 import { globalModifier, statModifier, woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
@@ -102,6 +102,7 @@ export default function CharacterFicheScreen() {
   // ones. Sizes the grid, the roll and the per-die writes alike.
   const initCount = initiativeDiceCount(initiativeMax, initBonus);
   const initStored = state?.initiativeValues ?? [];
+  const initIcons = state?.initiativeDiceIcons ?? [];
 
   // Live writers: update local state immediately, persist in the background.
   const setCharValue = (key: string, value: number) => {
@@ -122,25 +123,37 @@ export default function CharacterFicheScreen() {
       clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
     );
 
-  const setInit = (i: number, n: number) => {
-    const next = Array.from({ length: initCount }, (_, j) => (j === i ? n : initStored[j] ?? 0));
-    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
-    updateActualState(numId, { initiativeValues: next });
-  };
-
-  // Losing a die also drops its stored roll, so granting one back shows an empty
-  // slot rather than a stale number.
-  const setInitBonus = (n: number) =>
+  // Editing one die's value leaves the order alone — only a roll re-sorts.
+  const setInit = (i: number, n: number) =>
     persistState({
-      initiativeBonusDice: n,
-      initiativeValues: trimInitiativeValues(initStored, initiativeDiceCount(initiativeMax, n)),
+      initiativeValues: Array.from({ length: initCount }, (_, j) =>
+        j === i ? n : initStored[j] ?? 0,
+      ),
     });
 
-  // Roll every die in play at once: `initCount` plain D10, stored descending.
+  const setInitIcon = (i: number, icon: string) =>
+    persistState({
+      initiativeDiceIcons: Array.from({ length: initCount }, (_, j) =>
+        j === i ? icon : initIcons[j] ?? '',
+      ),
+    });
+
+  // Losing a die also drops its stored roll AND its mark, so granting one back
+  // shows an empty slot rather than a stale number under someone else's icon.
+  const setInitBonus = (n: number) => {
+    const next = initiativeDiceCount(initiativeMax, n);
+    persistState({
+      initiativeBonusDice: n,
+      initiativeValues: trimInitiativeSlots(initStored, next),
+      initiativeDiceIcons: trimInitiativeSlots(initIcons, next),
+    });
+  };
+
+  // Roll every die in play at once: `initCount` plain D10, highest-first, each
+  // mark carried along with its own roll.
   const rollInit = () => {
-    const next = rollInitiative(initCount);
-    setState((p) => (p ? ({ ...p, initiativeValues: next } as ActualState) : p));
-    updateActualState(numId, { initiativeValues: next });
+    const { values, icons } = rollInitiativeWithIcons(initCount, initIcons);
+    persistState({ initiativeValues: values, initiativeDiceIcons: icons });
   };
 
   // New effect starts as a blank +0 on every roll; the editor screen fills it in.
@@ -212,8 +225,10 @@ export default function CharacterFicheScreen() {
             max={initiativeMax}
             bonus={initBonus}
             values={initStored}
+            icons={initIcons}
             wound={wound}
             onSetDie={setInit}
+            onSetIcon={setInitIcon}
             onSetBonus={setInitBonus}
             onRoll={rollInit}
           />
