@@ -155,12 +155,17 @@ function OrderRow({
       <StatusPill online={row.online} />
       {/* Same reading as every other initiative display: the roll is the value,
           the wound malus is the badge. The rank column already conveys order. */}
+      {/* "Dé 2/3": the list ranks every character's dice together, so the index
+          alone doesn't say how many actions this one still has coming. */}
       <StatChip
-        label={`Dé ${row.dieIndex + 1}`}
+        label={`Dé ${row.dieIndex + 1}/${row.dieCount}`}
         value={String(row.raw)}
         modifier={row.malus}
         icon={asDieIcon(icon)}
-        style={row.unusable ? { borderColor: theme.colors.error, borderWidth: 1.5 } : undefined}
+        style={[
+          styles.orderChip,
+          row.unusable ? { borderColor: theme.colors.error, borderWidth: 1.5 } : null,
+        ]}
       />
     </Pressable>
   );
@@ -181,6 +186,9 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   rowUnusable: { opacity: 0.55 },
+  // "Dé 2/3" plus a possible mark needs more room than the chip's 64dp default,
+  // or adjustsFontSizeToFit shrinks the label past reading size.
+  orderChip: { minWidth: 76 },
   rank: { minWidth: 20, textAlign: 'center', fontFamily: 'Cinzel_600SemiBold', fontSize: 15 },
   name: { flex: 1 },
   footer: { gap: 8, paddingTop: 20 },
