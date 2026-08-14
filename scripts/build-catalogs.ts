@@ -165,15 +165,16 @@ function readFormula(
   rec: Record<string, string>,
   col: string,
   errors: RowErrors,
-  // `nr` opts into the NR variable — spell durations and target counts only.
-  { required = false, nr = false } = {},
+  // `nr` / `sphere` opt into the spell variables — durations and target counts
+  // only, never a weapon's damage.
+  { required = false, nr = false, sphere = false } = {},
 ): string | null {
   const raw = (rec[col] ?? '').trim();
   if (raw === '') {
     if (required) errors.push(`${col} : requis`);
     return null;
   }
-  const parsed = parseFormula(raw, { nr });
+  const parsed = parseFormula(raw, { nr, sphere });
   if (!parsed.ok) errors.push(`${col} « ${raw} » : ${parsed.error}`);
   return raw;
 }
@@ -364,8 +365,8 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
 
     const inGameEffect = (rec.effetJeu ?? '').trim();
     const sensoryEffect = (rec.perception ?? '').trim();
-    const duration = readFormula(rec, 'duree', errors, { nr: true }) ?? '';
-    const targets = readFormula(rec, 'cibles', errors, { nr: true }) ?? '';
+    const duration = readFormula(rec, 'duree', errors, { nr: true, sphere: true }) ?? '';
+    const targets = readFormula(rec, 'cibles', errors, { nr: true, sphere: true }) ?? '';
     const tags = readTags(rec, 'tags', errors);
     const durationUnit = readOptionalEnum(
       rec,
