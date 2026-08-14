@@ -5,16 +5,17 @@ import { Button, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SpellDetail from '@/components/spell-detail';
-import ChipSelect from '@/components/ui/chip-select';
+import ChipSelect, { ChipMultiSelect } from '@/components/ui/chip-select';
 import Icon from '@/components/ui/icon';
 import SelectField from '@/components/ui/select-field';
 import {
   CLE_PARFAITE_BONUS,
   DISCIPLINE_LABEL,
   DISCIPLINES,
-  EFFECT_UNITS,
+  SPELL_TAGS,
   SPHERE_LABEL,
   SPHERES,
+  TIME_UNITS,
 } from '@/constants/prophecy';
 import type { Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
@@ -116,6 +117,18 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
   const [name, setName] = useDebouncedText(s.name, (t) => updateSpell(s.id, { name: t }));
   const [cle, setCle] = useDebouncedText(s.cle, (t) => updateSpell(s.id, { cle: t }));
   const [effect, setEffect] = useDebouncedText(s.effect, (t) => updateSpell(s.id, { effect: t }));
+  const [inGameEffect, setInGameEffect] = useDebouncedText(s.inGameEffect, (t) =>
+    updateSpell(s.id, { inGameEffect: t }),
+  );
+  const [sensoryEffect, setSensoryEffect] = useDebouncedText(s.sensoryEffect, (t) =>
+    updateSpell(s.id, { sensoryEffect: t }),
+  );
+  const [duration, setDuration] = useDebouncedText(s.duration, (t) =>
+    updateSpell(s.id, { duration: t }),
+  );
+  const [targets, setTargets] = useDebouncedText(s.targets, (t) =>
+    updateSpell(s.id, { targets: t }),
+  );
 
   const confirmDelete = () =>
     Alert.alert('Supprimer', 'Supprimer ce sortilège ?', [
@@ -193,7 +206,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
             style={styles.castAmount}
           />
           <SelectField
-            options={EFFECT_UNITS}
+            options={TIME_UNITS}
             value={s.castTimeUnit}
             onChange={(k) => updateSpell(s.id, { castTimeUnit: k as Spell['castTimeUnit'] })}
             style={styles.castUnit}
@@ -224,6 +237,60 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
         mode="outlined"
         multiline
         style={styles.effect}
+      />
+
+      {/* Durée / cibles accept the rulebook's own wording — « 1 + NR », « 30 +
+          30 par NR » — so a spell can be typed straight off the page. */}
+      <View style={styles.grid}>
+        <TextInput
+          label="Durée"
+          value={duration}
+          onChangeText={setDuration}
+          placeholder="1 + NR"
+          mode="outlined"
+          dense
+          style={styles.numCol}
+        />
+        <SelectField
+          options={TIME_UNITS}
+          value={s.durationUnit}
+          onChange={(k) => updateSpell(s.id, { durationUnit: k as Spell['durationUnit'] })}
+          style={styles.numCol}
+        />
+        <TextInput
+          label="Cibles"
+          value={targets}
+          onChangeText={setTargets}
+          placeholder="1 + NR"
+          mode="outlined"
+          dense
+          style={styles.numCol}
+        />
+      </View>
+
+      <TextInput
+        label="Effet de jeu"
+        value={inGameEffect}
+        onChangeText={setInGameEffect}
+        mode="outlined"
+        multiline
+        style={styles.effect}
+      />
+
+      <TextInput
+        label="Ce que l'on perçoit"
+        value={sensoryEffect}
+        onChangeText={setSensoryEffect}
+        mode="outlined"
+        multiline
+        style={styles.effect}
+      />
+
+      <ChipMultiSelect
+        label="Tags"
+        options={SPELL_TAGS}
+        values={s.tags}
+        onChange={(next) => updateSpell(s.id, { tags: next })}
       />
 
       <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>
