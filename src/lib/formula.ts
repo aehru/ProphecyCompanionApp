@@ -150,120 +150,138 @@ export function parseFormula(input: string, { nr = false, sphere = false } = {})
   return { ok: true, formula: { terms } };
 }
 
-/**
- * Compute a parsed formula for a character. Caracteristique and flat terms fold
- * into a single static total; dice terms stay symbolic (no RNG — we never roll).
- *
- * `nr` folds NR terms in the same way. Leave it undefined and they stay symbolic
- * too, returned in `nrTerms` — that is the "spell not cast yet" reading, where
- * a durée must still display as « 1 + NR jours ». `sphereValue` does the same
- * for SPHERE terms: return a number to fold it in, or null/undefined to leave it
- * symbolic (a caller that only knows the spell's OWN sphere answers for `null`
- * and declines the named ones).
- */
-export function computeFormula(
-  formula: ParsedFormula,
-  caracValue: (caracKey: string) => number,
-  // Optional per-caractéristique modifier (wound malus + temporary effects),
-  // folded into the carac value BEFORE the multiplier: e.g. FOR 5 with -1 in a
-  // `FOR x2` term gives (5-1)*2 = 8, not 5*2-1 = 9.
-  caracModifier?: (caracKey: string) => number,
-  nr?: number | null,
-  sphereValue?: (sphereKey: string | null) => number | null | undefined,
-): {
-  staticTotal: number;
-  dice: { count: number; sides: number }[];
-  nrTerms: { mult: number }[];
-  sphereTerms: { sphere: string | null; mult: number }[];
-} {
-  let staticTotal = 0;
-  const dice: { count: number; sides: number }[] = [];
-  const nrTerms: { mult: number }[] = [];
-  const sphereTerms: { sphere: string | null; mult: number }[] = [];
-  for (const t of formula.terms) {
-    if (t.kind === 'flat') staticTotal += t.value;
-    else if (t.kind === 'carac') {
-      const base = caracValue(t.carac) + (caracModifier?.(t.carac) ?? 0);
-      staticTotal += base * t.mult;
-    } else if (t.kind === 'nr') {
-      if (nr == null) nrTerms.push({ mult: t.mult });
-      else staticTotal += nr * t.mult;
-    } else if (t.kind === 'sphere') {
-      const v = sphereValue?.(t.sphere);
-      if (v == null) sphereTerms.push({ sphere: t.sphere, mult: t.mult });
-      else staticTotal += v * t.mult;
-    } else dice.push({ count: t.count, sides: t.sides });
-  }
-  return { staticTotal, dice, nrTerms, sphereTerms };
-}
-
-/**
- * Resolve a raw formula string to a display string for a character, e.g.
- * `FOR x2 +3 +1D10` with Force 4 → "11 + 1D10". Returns null for an empty
- * formula. Invalid formulas fall back to the raw string (so a half-typed value
- * still shows something rather than vanishing).
- */
-export function formulaResult(
-  raw: string | null | undefined,
-  caracValue: (caracKey: string) => number,
-  caracModifier?: (caracKey: string) => number,
-): string | null {
-  if (raw == null || raw.trim() === '') return null;
-  const parsed = parseFormula(raw);
-  if (!parsed.ok) return raw.trim();
-  const { staticTotal, dice } = computeFormula(parsed.formula, caracValue, caracModifier);
-  const parts: string[] = [];
-  if (dice.length === 0 || staticTotal !== 0) parts.push(String(staticTotal));
-  for (const d of dice) parts.push(`${d.count}D${d.sides}`);
-  return parts.join(' + ');
-}
-
 /** Sphere key → the accented label a symbolic term prints. */
 const SPHERE_LABEL_BY_KEY: Record<string, string> = Object.fromEntries(
   SPHERES.map((s) => [s.key, s.label]),
 );
 
 /**
- * Resolve a spell formula (a durée or a nombre de cibles) to a display string.
- * Both variables resolve independently, and whichever is still unknown stays
- * symbolic — so a durée reads « 1 + NR jours » before the roll, « Sphère tours »
- * with no character in context, and a plain number once both are known. Returns
- * null for an empty formula; an unparseable one falls back to its raw text, like
- * `formulaResult`.
+ * Everything a formula's variables can be resolved against — ONE bag passed to
+ * `computeFormula`/`formulaResult`, whatever the formula is for. A weapon fills
+ * `carac`, a spell durée fills `nr`/`sphere`, a caller holding both fills both;
+ * the engine never asks what kind of thing it is computing.
+ *
+ * Every resolver may DECLINE — return null/undefined — and the term then stays
+ * symbolic instead of silently counting as zero. That is what lets one function
+ * render « Sphère tours » with no character, « 1 + NR jours » before the roll,
+ * and a plain number once everything is known.
+ */
+export interface FormulaVars {
+  /** A caractéristique's value on the sheet. */
+  carac?: (caracKey: string) => number | null | undefined;
+  /**
+   * Wound malus + temporary effects for a caractéristique, folded into its value
+   * BEFORE the multiplier: FOR 5 with -1 in a `FOR x2` term gives (5-1)*2 = 8,
+   * not 5*2-1 = 9. Only consulted when `carac` answered.
+   */
+  caracModifier?: (caracKey: string) => number;
+  /** The niveau de réussite the player rolled. */
+  nr?: number | null;
+  /** Answers for `null` (the spell's OWN sphere) and/or a named `SPHERES` key. */
+  sphere?: (sphereKey: string | null) => number | null | undefined;
+}
+
+export interface ComputedFormula {
+  /** Every term that reduced to a number, summed. */
+  total: number;
+  /**
+   * Terms left symbolic, in source order: dice always (we never roll), plus any
+   * variable whose resolver declined.
+   */
+  symbolic: FormulaTerm[];
+}
+
+/**
+ * Reduce a parsed formula against `vars`. Terms whose variable resolves fold
+ * into `total`; the rest come back in `symbolic` for the caller to print.
+ */
+export function computeFormula(formula: ParsedFormula, vars: FormulaVars = {}): ComputedFormula {
+  let total = 0;
+  const symbolic: FormulaTerm[] = [];
+  for (const t of formula.terms) {
+    switch (t.kind) {
+      case 'flat':
+        total += t.value;
+        break;
+      case 'carac': {
+        const v = vars.carac?.(t.carac);
+        if (v == null) symbolic.push(t);
+        else total += (v + (vars.caracModifier?.(t.carac) ?? 0)) * t.mult;
+        break;
+      }
+      case 'nr':
+        if (vars.nr == null) symbolic.push(t);
+        else total += vars.nr * t.mult;
+        break;
+      case 'sphere': {
+        const v = vars.sphere?.(t.sphere);
+        if (v == null) symbolic.push(t);
+        else total += v * t.mult;
+        break;
+      }
+      default:
+        symbolic.push(t); // dice — never resolvable, we never roll
+    }
+  }
+  return { total, symbolic };
+}
+
+/** How an unresolved term prints: `FOR × 2`, `Sphère × 2`, `3 × NR`, `1D10`. */
+export function formulaTermLabel(t: FormulaTerm): string {
+  switch (t.kind) {
+    case 'carac':
+      return t.mult === 1 ? t.abbr : `${t.abbr} × ${t.mult}`;
+    case 'nr':
+      return t.mult === 1 ? 'NR' : `${t.mult} × NR`;
+    case 'sphere': {
+      const name = t.sphere == null ? 'Sphère' : `Sphère ${SPHERE_LABEL_BY_KEY[t.sphere]}`;
+      return t.mult === 1 ? name : `${name} × ${t.mult}`;
+    }
+    case 'dice':
+      return `${t.count}D${t.sides}`;
+    default:
+      return String(t.value);
+  }
+}
+
+/**
+ * Resolve a raw formula to a display string — the ONE renderer, weapons and
+ * spells alike. `FOR x2 +3 +1D10` with Force 4 gives "11 + 1D10"; a durée
+ * `SPHERE + 3 par NR` gives "Sphère + 3 × NR", "5 + 3 × NR" or "11" depending on
+ * what `vars` could answer. Returns null for an empty formula; an invalid one
+ * falls back to its raw text, so a half-typed value still shows something rather
+ * than vanishing.
+ *
+ * `parse` opts into the spell variables — the same guard `parseFormula` takes,
+ * so a weapon still rejects `NR`/`SPHERE` as typos.
+ */
+export function formulaResult(
+  raw: string | null | undefined,
+  vars: FormulaVars = {},
+  parse: { nr?: boolean; sphere?: boolean } = {},
+): string | null {
+  if (raw == null || raw.trim() === '') return null;
+  const parsed = parseFormula(raw, parse);
+  if (!parsed.ok) return raw.trim();
+  const { total, symbolic } = computeFormula(parsed.formula, vars);
+
+  const parts: string[] = [];
+  // A lone symbol must not print a leading "0"; a lone `0` still has to show.
+  if (total !== 0 || symbolic.length === 0) parts.push(String(total));
+  for (const t of symbolic) parts.push(formulaTermLabel(t));
+  return parts.join(' + ');
+}
+
+/**
+ * `formulaResult` with both spell variables enabled — a spell's durée or its
+ * nombre de cibles. Same `vars` bag: pass whichever resolvers you hold, and the
+ * rest stays symbolic.
  */
 export function spellFormulaResult(
   raw: string | null | undefined,
-  {
-    nr,
-    sphere,
-  }: {
-    nr?: number | null;
-    /** Answer for `null` (the spell's own sphere); return null to stay symbolic. */
-    sphere?: (sphereKey: string | null) => number | null | undefined;
-  } = {},
+  vars: FormulaVars = {},
 ): string | null {
-  if (raw == null || raw.trim() === '') return null;
-  const parsed = parseFormula(raw, { nr: true, sphere: true });
-  if (!parsed.ok) return raw.trim();
-  const { staticTotal, dice, nrTerms, sphereTerms } = computeFormula(
-    parsed.formula,
-    () => 0,
-    undefined,
-    nr,
-    sphere,
-  );
-
-  const symbolic = nrTerms.length + sphereTerms.length;
-  const parts: string[] = [];
-  // A lone variable must not print a leading "0"; a lone `0` still has to show.
-  if (staticTotal !== 0 || (symbolic === 0 && dice.length === 0)) parts.push(String(staticTotal));
-  for (const t of sphereTerms) {
-    const name = t.sphere == null ? 'Sphère' : `Sphère ${SPHERE_LABEL_BY_KEY[t.sphere]}`;
-    parts.push(t.mult === 1 ? name : `${name} × ${t.mult}`);
-  }
-  for (const t of nrTerms) parts.push(t.mult === 1 ? 'NR' : `${t.mult} × NR`);
-  for (const d of dice) parts.push(`${d.count}D${d.sides}`);
-  return parts.join(' + ');
+  return formulaResult(raw, vars, { nr: true, sphere: true });
 }
 
 export type Prerequisite = { carac: string; abbr: string; min: number };

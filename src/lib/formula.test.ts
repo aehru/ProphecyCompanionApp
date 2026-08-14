@@ -85,61 +85,84 @@ describe('parseFormula', () => {
 });
 
 describe('computeFormula', () => {
-  it('folds carac and flat terms into a static total, keeps dice symbolic', () => {
+  it('folds carac and flat terms into the total, keeps dice symbolic', () => {
     const parsed = parseFormula('FOR x2 +3 +1D10');
     if (!parsed.ok) throw new Error('fixture should parse');
-    const { staticTotal, dice } = computeFormula(parsed.formula, caracValue({ force: 4 }));
-    expect(staticTotal).toBe(11); // 4*2 + 3
-    expect(dice).toEqual([{ count: 1, sides: 10 }]);
+    const { total, symbolic } = computeFormula(parsed.formula, { carac: caracValue({ force: 4 }) });
+    expect(total).toBe(11); // 4*2 + 3
+    expect(symbolic).toEqual([{ kind: 'dice', count: 1, sides: 10 }]);
   });
 
   it('applies the modifier to the carac value BEFORE the multiplier', () => {
     const parsed = parseFormula('FOR x2 +3');
     if (!parsed.ok) throw new Error('fixture should parse');
     // (5 - 1) * 2 + 3 = 11, NOT 5*2 - 1 + 3 = 12.
-    const { staticTotal } = computeFormula(
-      parsed.formula,
-      caracValue({ force: 5 }),
-      () => -1,
-    );
-    expect(staticTotal).toBe(11);
+    const { total } = computeFormula(parsed.formula, {
+      carac: caracValue({ force: 5 }),
+      caracModifier: () => -1,
+    });
+    expect(total).toBe(11);
   });
 
-  it('returns a zero static total for a dice-only formula', () => {
+  it('returns a zero total for a dice-only formula', () => {
     const parsed = parseFormula('1D10');
     if (!parsed.ok) throw new Error('fixture should parse');
-    const { staticTotal, dice } = computeFormula(parsed.formula, caracValue({}));
-    expect(staticTotal).toBe(0);
-    expect(dice).toEqual([{ count: 1, sides: 10 }]);
+    const { total, symbolic } = computeFormula(parsed.formula, { carac: caracValue({}) });
+    expect(total).toBe(0);
+    expect(symbolic).toEqual([{ kind: 'dice', count: 1, sides: 10 }]);
+  });
+
+  it('keeps a carac symbolic when NO resolver is given', () => {
+    // The hole this closes: an absent resolver used to silently count as 0.
+    const parsed = parseFormula('FOR x2 +3');
+    if (!parsed.ok) throw new Error('fixture should parse');
+    const { total, symbolic } = computeFormula(parsed.formula);
+    expect(total).toBe(3);
+    expect(symbolic).toEqual([{ kind: 'carac', carac: 'force', abbr: 'FOR', mult: 2 }]);
   });
 });
 
 describe('formulaResult', () => {
+  const carac = (values: Record<string, number>) => ({ carac: caracValue(values) });
+
   it('returns null for an empty or nullish formula', () => {
-    expect(formulaResult('', caracValue({}))).toBeNull();
-    expect(formulaResult(null, caracValue({}))).toBeNull();
-    expect(formulaResult(undefined, caracValue({}))).toBeNull();
+    expect(formulaResult('', carac({}))).toBeNull();
+    expect(formulaResult(null, carac({}))).toBeNull();
+    expect(formulaResult(undefined, carac({}))).toBeNull();
   });
 
-  it('renders the computed static total plus symbolic dice', () => {
-    expect(formulaResult('FOR x2 +3 +1D10', caracValue({ force: 4 }))).toBe('11 + 1D10');
+  it('renders the computed total plus symbolic dice', () => {
+    expect(formulaResult('FOR x2 +3 +1D10', carac({ force: 4 }))).toBe('11 + 1D10');
   });
 
-  it('omits a zero static total when there is a dice term', () => {
-    expect(formulaResult('1D10', caracValue({}))).toBe('1D10');
+  it('omits a zero total when there is a dice term', () => {
+    expect(formulaResult('1D10', carac({}))).toBe('1D10');
   });
 
-  it('keeps a zero static total when there is no dice term', () => {
-    expect(formulaResult('FOR x0', caracValue({ force: 4 }))).toBe('0');
+  it('keeps a zero total when there is no symbolic term', () => {
+    expect(formulaResult('FOR x0', carac({ force: 4 }))).toBe('0');
   });
 
   it('falls back to the raw string for an invalid formula', () => {
-    expect(formulaResult('  FOR-2  ', caracValue({ force: 4 }))).toBe('FOR-2');
+    expect(formulaResult('  FOR-2  ', carac({ force: 4 }))).toBe('FOR-2');
   });
 
   it('folds the modifier into the rendered result', () => {
     // FOR 5, modifier -1, ×2 → (5-1)*2 = 8.
-    expect(formulaResult('FOR x2', caracValue({ force: 5 }), () => -1)).toBe('8');
+    expect(
+      formulaResult('FOR x2', { carac: caracValue({ force: 5 }), caracModifier: () => -1 }),
+    ).toBe('8');
+  });
+
+  it('renders an unresolved carac by its abbreviation', () => {
+    expect(formulaResult('VOL')).toBe('VOL');
+    expect(formulaResult('FOR x2 +3')).toBe('3 + FOR × 2');
+  });
+
+  it('still rejects the spell variables unless `parse` opts in', () => {
+    expect(formulaResult('1 + NR')).toBe('1 + NR'); // unparseable → raw text
+    expect(formulaResult('1 + NR', {}, { nr: true })).toBe('1 + NR'); // parsed, symbolic
+    expect(formulaResult('1 + NR', { nr: 3 }, { nr: true })).toBe('4');
   });
 });
 
@@ -195,20 +218,20 @@ describe('NR terms', () => {
     }
   });
 
-  it('folds NR into the static total when a value is given', () => {
+  it('folds NR into the total when a value is given', () => {
     const parsed = parseFormula('30 + 30 par NR', { nr: true });
     if (!parsed.ok) throw new Error(parsed.error);
-    const { staticTotal, nrTerms } = computeFormula(parsed.formula, caracValue({}), undefined, 3);
-    expect(staticTotal).toBe(120);
-    expect(nrTerms).toEqual([]);
+    const { total, symbolic } = computeFormula(parsed.formula, { nr: 3 });
+    expect(total).toBe(120);
+    expect(symbolic).toEqual([]);
   });
 
   it('keeps NR symbolic when no value is given', () => {
     const parsed = parseFormula('1 + NR', { nr: true });
     if (!parsed.ok) throw new Error(parsed.error);
-    const { staticTotal, nrTerms } = computeFormula(parsed.formula, caracValue({}));
-    expect(staticTotal).toBe(1);
-    expect(nrTerms).toEqual([{ mult: 1 }]);
+    const { total, symbolic } = computeFormula(parsed.formula);
+    expect(total).toBe(1);
+    expect(symbolic).toEqual([{ kind: 'nr', mult: 1 }]);
   });
 });
 
@@ -255,15 +278,11 @@ describe('SPHERE terms', () => {
     const parsed = parseFormula('SPHERE + SPHERE_FEU', { sphere: true });
     if (!parsed.ok) throw new Error(parsed.error);
     // A caller that only knows the spell's OWN sphere answers for `null`.
-    const { staticTotal, sphereTerms } = computeFormula(
-      parsed.formula,
-      caracValue({}),
-      undefined,
-      undefined,
-      (key) => (key == null ? 4 : null),
-    );
-    expect(staticTotal).toBe(4);
-    expect(sphereTerms).toEqual([{ sphere: 'sphereFeu', mult: 1 }]);
+    const { total, symbolic } = computeFormula(parsed.formula, {
+      sphere: (key) => (key == null ? 4 : null),
+    });
+    expect(total).toBe(4);
+    expect(symbolic).toEqual([{ kind: 'sphere', sphere: 'sphereFeu', mult: 1 }]);
   });
 });
 
