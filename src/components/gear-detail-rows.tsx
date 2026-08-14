@@ -49,7 +49,7 @@ export function FormulaRow({
 }) {
   const theme = useProphecyTheme();
   if (raw == null || raw.trim() === '') return null;
-  const result = formulaResult(raw, caracValue, caracModifier);
+  const result = formulaResult(raw, { carac: caracValue, caracModifier });
   const delta = formulaCaracMod(raw, caracModifier);
   const modColor = delta > 0 ? theme.colors.primary : theme.colors.error;
   return (
