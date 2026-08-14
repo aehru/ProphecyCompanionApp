@@ -66,25 +66,34 @@ const NR_RE = /^NR$/i;
  * is the book's "par", NOT division — the grammar still has no division.
  */
 const NR_MULT_RE = /^(?:NR\s*[x×*]\s*(\d+)|(\d+)\s*(?:[x×*]\s*NR|par\s+NR|\/\s*NR))$/i;
-/** `SPHERE`, `SPHERE_VENTS`, either optionally followed by `x2`. */
-const SPHERE_RE = /^SPH[EÈ]RE(?:_([A-Za-zÀ-ÿ]+))?(?:\s*[x×*]\s*(\d+))?$/i;
+/**
+ * `SPHERE`, `SPHERE_VENTS`, `SPHERE_DES_VENTS`, any optionally followed by `x2`.
+ * The name is captured loosely — separators and articles are sorted out by
+ * `sphereLookupKey`, not by the regex.
+ */
+const SPHERE_RE = /^SPH[EÈ]RE(?:[_ ]([A-Za-zÀ-ÿ_ ]+?))?(?:\s*[x×*]\s*(\d+))?$/i;
+
+/** Lowercase, accents stripped — the one normalization this module folds with. */
+const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+/**
+ * Collapse a sphere spelling to its lookup key, so every plausible way of naming
+ * one lands on the same entry: `VENTS`, `VENT`, `DES_VENTS`, `sphereVents` and
+ * `Vents` all reduce to `vent`. Drops accents, separators, French articles, the
+ * `sphere` prefix and a trailing plural.
+ */
+const sphereLookupKey = (s: string) =>
+  fold(s)
+    .replace(/[_\s]+/g, ' ')
+    .replace(/\b(?:de|des|du|la|le|les|l)\b/g, '')
+    .replace(/[^a-z0-9]/g, '')
+    .replace(/^sphere/, '')
+    .replace(/s$/, '');
 
 /** Accepted sphere spellings → canonical `SPHERES` key. */
-const SPHERE_BY_NAME: Record<string, string> = (() => {
-  const fold = (s: string) =>
-    s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  const out: Record<string, string> = {};
-  for (const s of SPHERES) {
-    const bare = s.key.replace(/^sphere/, '');
-    for (const spelling of [s.key, bare, s.label]) {
-      const f = fold(spelling);
-      out[f] = s.key;
-      // Tolerate the other number: "Vents" written "Vent", "Cites" as "Cite".
-      out[f.replace(/s$/, '')] = s.key;
-    }
-  }
-  return out;
-})();
+const SPHERE_BY_NAME: Record<string, string> = Object.fromEntries(
+  SPHERES.flatMap((s) => [s.key, s.label].map((spelling) => [sphereLookupKey(spelling), s.key])),
+);
 
 /** Parse a formula string into terms. Empty string parses to zero terms. */
 export function parseFormula(input: string, { nr = false, sphere = false } = {}): ParseResult {
@@ -121,12 +130,20 @@ export function parseFormula(input: string, { nr = false, sphere = false } = {})
           terms.push({ kind: 'sphere', sphere: null, mult: Number(mult ?? 1) });
           continue;
         }
-        const canonical =
-          SPHERE_BY_NAME[name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()];
+        const canonical = SPHERE_BY_NAME[sphereLookupKey(name)];
         if (!canonical) return { ok: false, error: `Sphère inconnue : ${name}` };
         terms.push({ kind: 'sphere', sphere: canonical, mult: Number(mult ?? 1) });
         continue;
       }
+    }
+    // Name the real problem before CARAC_RE swallows the word and reports an
+    // unknown caractéristique — a weapon typo would otherwise send the author
+    // hunting for a stat that was never the point.
+    if (!nr && (NR_RE.test(part) || NR_MULT_RE.test(part))) {
+      return { ok: false, error: `NR n'est utilisable que dans une formule de sortilège` };
+    }
+    if (!sphere && SPHERE_RE.test(part)) {
+      return { ok: false, error: `SPHERE n'est utilisable que dans une formule de sortilège` };
     }
     const mult = part.match(CARAC_MULT_RE);
     if (mult) {
@@ -239,7 +256,9 @@ export function formulaTermLabel(t: FormulaTerm): string {
     }
     case 'dice':
       return `${t.count}D${t.sides}`;
-    default:
+    // Never reached — a flat term always folds into the total — but spelled out
+    // so TypeScript flags this switch the day a sixth term kind lands.
+    case 'flat':
       return String(t.value);
   }
 }

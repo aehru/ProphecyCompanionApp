@@ -196,8 +196,7 @@ describe('parsePrerequisites', () => {
 
 describe('NR terms', () => {
   it('rejects NR unless opted in', () => {
-    // Weapons must not accept it: `CARAC_RE` would otherwise match "NR" and
-    // report an unknown caractéristique, so assert the message too.
+    // Weapons must not accept it — see the message assertion in "SPHERE terms".
     const r = parseFormula('1 + NR');
     expect(r.ok).toBe(false);
   });
@@ -236,9 +235,18 @@ describe('NR terms', () => {
 });
 
 describe('SPHERE terms', () => {
-  it('rejects SPHERE unless opted in', () => {
-    expect(parseFormula('SPHERE').ok).toBe(false);
+  it('rejects SPHERE unless opted in, and says why', () => {
+    const r = parseFormula('SPHERE');
+    expect(r.ok).toBe(false);
+    // NOT "caractéristique inconnue" — CARAC_RE matches the bare word, and that
+    // message would send a weapon author hunting for a stat.
+    expect(!r.ok && r.error).toMatch(/sortil[èe]ge/i);
     expect(parseFormula('SPHERE', { nr: true }).ok).toBe(false);
+  });
+
+  it('says the same for NR outside a spell formula', () => {
+    const r = parseFormula('1 + NR');
+    expect(!r.ok && r.error).toMatch(/sortil[èe]ge/i);
   });
 
   it('parses a bare SPHERE as the spell’s own sphere', () => {
@@ -255,8 +263,16 @@ describe('SPHERE terms', () => {
   });
 
   it('accepts a named sphere in any spelling', () => {
-    // Accents, case, the `sphere` prefix and the plural are all optional.
-    for (const raw of ['SPHERE_VENTS', 'SPHERE_VENT', 'sphere_vents', 'SPHERE_sphereVents']) {
+    // Accents, case, separator, French article, the `sphere` prefix and the
+    // plural are all optional — the rulebook says « Sphère des Vents ».
+    for (const raw of [
+      'SPHERE_VENTS',
+      'SPHERE_VENT',
+      'sphere_vents',
+      'SPHERE_DES_VENTS',
+      'SPHERE DES VENTS',
+      'SPHERE_sphereVents',
+    ]) {
       const r = parseFormula(raw, { sphere: true });
       expect(r.ok && r.formula.terms[0], raw).toEqual({
         kind: 'sphere',
@@ -266,6 +282,12 @@ describe('SPHERE terms', () => {
     }
     const accented = parseFormula('SPHÈRE_OCÉANS', { sphere: true });
     expect(accented.ok && accented.formula.terms[0]).toMatchObject({ sphere: 'sphereOceans' });
+    const article = parseFormula('SPHERE_LA_PIERRE x2', { sphere: true });
+    expect(article.ok && article.formula.terms[0]).toEqual({
+      kind: 'sphere',
+      sphere: 'spherePierre',
+      mult: 2,
+    });
   });
 
   it('rejects an unknown sphere', () => {
