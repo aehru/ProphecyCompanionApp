@@ -12,12 +12,23 @@ import { actualStateQuery } from '@/repositories/actual-state';
 import { characterQuery } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
 
+export interface SpellReadings {
+  /** Casting score for a `spells` row or a catalogue preset. */
+  totalFor: (spell: SpellTotalInput) => SpellTotal;
+  /**
+   * A caractéristique's value on the sheet — the `FormulaVars.carac` resolver a
+   * durée needs when the rulebook scales it off a stat (« une minute par point
+   * de Volonté »). Same record the score reads, so the two can't drift.
+   */
+  caracValue: (caracKey: string) => number;
+}
+
 /**
- * Returns a scorer for `characterId`'s spells — call it with a `spells` row or
- * a catalogue preset. Reactive: a sphere edit, a new wound or an expiring
- * effect all re-render the totals.
+ * The character-derived readings a spell needs to be displayed. Reactive: a
+ * sphere edit, a new wound or an expiring effect all re-render whatever reads
+ * them.
  */
-export function useSpellTotal(characterId: number): (spell: SpellTotalInput) => SpellTotal {
+export function useSpellTotal(characterId: number): SpellReadings {
   const { data: charRows } = useLiveQuery(characterQuery(characterId), [characterId]);
   const { data: stateRows } = useLiveQuery(actualStateQuery(characterId), [characterId]);
   const { data: effects } = useLiveQuery(effectsQuery(characterId), [characterId]);
@@ -26,5 +37,8 @@ export function useSpellTotal(characterId: number): (spell: SpellTotalInput) => 
   const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
   const effectList = effects ?? [];
 
-  return (spell) => spellTotal(spell, rec, effectList, wound);
+  return {
+    totalFor: (spell) => spellTotal(spell, rec, effectList, wound),
+    caracValue: (k) => rec[k] ?? 0,
+  };
 }

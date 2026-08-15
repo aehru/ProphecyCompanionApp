@@ -11,9 +11,9 @@ import { asDieIcon } from '@/components/ui/die-icons';
 import StatChip from '@/components/ui/stat-chip';
 import {
   EFFECT_TARGET_LABEL,
-  EFFECT_UNIT_LABEL,
   RESOURCES,
   TENDANCES,
+  TIME_UNIT_LABEL,
 } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { NumRecord, PoolRecord, SharedEffectView } from '@/lib/shared-character-view';
@@ -84,7 +84,7 @@ export function EffectsList({ effects }: { effects: SharedEffectView[] }) {
       {effects.map((e, i) => {
         const v = e.value ?? 0;
         const target = EFFECT_TARGET_LABEL[e.target ?? 'all'] ?? e.target ?? 'Tous les jets';
-        const unit = EFFECT_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
+        const unit = TIME_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
         return (
           <View key={`${e.label}-${i}`} style={styles.effectRow}>
             <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>

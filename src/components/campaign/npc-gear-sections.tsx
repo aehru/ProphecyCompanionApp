@@ -132,7 +132,12 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
         <Section title="Sorts">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {spellList.map((s) => (
-              <SpellCard key={s.id} spell={s} total={spellTotal(s, rec, effectList, wound)} />
+              <SpellCard
+                key={s.id}
+                spell={s}
+                total={spellTotal(s, rec, effectList, wound)}
+                caracValue={(k) => rec[k] ?? 0}
+              />
             ))}
           </View>
         </Section>

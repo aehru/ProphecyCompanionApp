@@ -1,13 +1,13 @@
 import { sql } from 'drizzle-orm';
 import { check, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '@/constants/prophecy';
+import { DISCIPLINES, SPHERES, TIME_UNITS } from '@/constants/prophecy';
 import type { ArmorCategory } from '@/data/armor-constants';
 import { newUuid } from '@/lib/uuid';
 
 type DisciplineKey = (typeof DISCIPLINES)[number]['key'];
 type SphereKey = (typeof SPHERES)[number]['key'];
-type CastUnit = (typeof EFFECT_UNITS)[number]['key'];
+type TimeUnit = (typeof TIME_UNITS)[number]['key'];
 
 /**
  * A Prophecy (2e) character sheet.
@@ -319,6 +319,15 @@ export const weapons = sqliteTable('weapons', {
  * `difficulty` and cast time are display-only for now (no casting/pool
  * interaction yet). `cle` (clé) and `effect` are free text; `cleParfaite` marks
  * a crafted perfect key (+5 to cast).
+ *
+ * `effect` is the rulebook paragraph, verbatim and untouched — it stays the
+ * source of truth. The fields around it (`inGameEffect`, `sensoryEffect`,
+ * `duration`, `targets`, `tags`) are a CONVENIENCE LAYER extracted from it
+ * so the app can show the mechanics apart from the prose, resolve a durée once
+ * NR is known, and filter 300+ spells by what they do. Every one of them is
+ * optional and empty by default: a spell with none renders exactly as it did
+ * before they existed, which is what keeps a partially-filled catalogue
+ * shippable.
  */
 export const spells = sqliteTable('spells', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -333,7 +342,7 @@ export const spells = sqliteTable('spells', {
   sphere: text('sphere').$type<SphereKey>().notNull().default('sphereFeu'),
   cost: integer('cost').notNull().default(0),
   castTimeAmount: integer('cast_time_amount').notNull().default(1),
-  castTimeUnit: text('cast_time_unit').$type<CastUnit>().notNull().default('action'),
+  castTimeUnit: text('cast_time_unit').$type<TimeUnit>().notNull().default('action'),
   difficulty: integer('difficulty').notNull().default(0),
   cle: text('cle').notNull().default(''),
   /**
@@ -343,6 +352,60 @@ export const spells = sqliteTable('spells', {
    */
   cleParfaite: integer('cle_parfaite', { mode: 'boolean' }).notNull().default(false),
   effect: text('effect').notNull().default(''),
+
+  // --- convenience layer, all derived from `effect` (see the doc comment) ----
+
+  /** The mechanical half of `effect`: numbers, durations, restrictions. */
+  inGameEffect: text('in_game_effect').notNull().default(''),
+  /**
+   * What the character and the witnesses actually perceive — named for the
+   * senses, not for the Perception caractéristique, which it has nothing to do
+   * with. Extracted ONLY where `effect` already describes it: most spells say
+   * nothing sensory, and this app does not invent rulebook text, so empty is
+   * the common case (69 of the 136 base-rulebook spells have one).
+   */
+  sensoryEffect: text('sensory_effect').notNull().default(''),
+  /**
+   * How long the spell lasts, as an NR formula (`1 + NR`, `30 + 30 x NR`) —
+   * `lib/formula` with `{ nr: true }`. Symbolic until the player enters the NR
+   * they rolled. Empty = instantaneous, permanent, or not stated.
+   */
+  duration: text('duration').notNull().default(''),
+  /** Unit `duration` counts in — a `TIME_UNITS` key. */
+  durationUnit: text('duration_unit').$type<TimeUnit>().notNull().default('round'),
+  /** How many targets, same NR formula grammar as `duration`. */
+  targets: text('targets').notNull().default(''),
+  /**
+   * What the spell DOES, as `SPELL_TAGS` keys — our taxonomy, not the
+   * rulebook's. Drives the catalogue filter; carries no rules.
+   */
+  tags: text('tags', { mode: 'json' })
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'`),
+
+  // --- provenance: which catalogue entry this row was copied from ------------
+
+  /**
+   * The `SpellPreset.id` slug this spell was picked from, or NULL for a spell
+   * the player wrote themselves. NULLABLE and never inferred: that asymmetry IS
+   * the safety property — a rulebook correction may only ever touch rows that
+   * can prove where they came from, so a hand-made sortilège is untouchable by
+   * construction rather than by a name heuristic that could misfire.
+   *
+   * Rows created before this column exist stay NULL, i.e. read as hand-made.
+   * Deliberate: no backfill ships with this (public beta, a handful of spells
+   * per sheet — re-adding them from the catalogue is the cheaper migration).
+   */
+  presetId: text('preset_id'),
+  /**
+   * The preset's `revision` at the moment this row was copied (see
+   * `lib/preset-revision`). Differs from the catalogue's current revision ⇒ the
+   * entry was corrected since. Nothing acts on that yet; the column exists now
+   * so a later "mettre à jour depuis le catalogue" flow has the history it
+   * cannot reconstruct after the fact.
+   */
+  presetRevision: text('preset_revision'),
 });
 
 /**
@@ -463,7 +526,7 @@ export const effects = sqliteTable('effects', {
   target: text('target').notNull().default('all'),
   // Signed: positive = bonus, negative = malus.
   value: integer('value').notNull().default(0),
-  // One of EFFECT_UNITS: 'action' | 'round' (« Tour ») | 'minute' | 'hour' | 'day',
+  // One of TIME_UNITS: 'action' | 'round' (« Tour ») | 'minute' | 'hour' | 'day',
   // or PERMANENT_UNIT. Plain text on purpose (no CHECK), so adding a unit to the
   // enum never needs a migration.
   durationUnit: text('duration_unit').notNull().default('round'),

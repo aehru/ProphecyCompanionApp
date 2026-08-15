@@ -69,7 +69,7 @@ export default function SpellCatalogModal() {
   const theme = useProphecyTheme();
   // Same score the Magie tab shows — a player picking a spell wants to know
   // what they would cast it at BEFORE adding it.
-  const spellTotalFor = useSpellTotal(numId);
+  const { totalFor: spellTotalFor, caracValue: spellCaracValue } = useSpellTotal(numId);
 
   const [query, setQuery] = useState('');
   // Facets, '' = no filter. 136 spells across 9 spheres / 3 disciplines / 3
@@ -110,7 +110,14 @@ export default function SpellCatalogModal() {
       // report saying only "spell 11 inserted" can't tell a bad generated preset
       // from a bad hand edit. Custom spells have no slug and no line.
       if (preset) log.info('catalog.add', { entity: 'spells', catalogId: preset.id });
-      const row = await createSpell(numId, preset?.data);
+      // Provenance stamped HERE, next to the pick: the slug and the revision it
+      // was copied at are what let a later catalogue correction find this row
+      // again — and their absence is what marks « Sortilège personnalisé » as
+      // the player's own, forever off limits.
+      const row = await createSpell(
+        numId,
+        preset && { ...preset.data, presetId: preset.id, presetRevision: preset.revision },
+      );
       // A blank spell has nothing to read in the catalogue, so it still opens
       // its editor; a preset stays here so the player can pick the next one.
       if (!preset) {
@@ -131,10 +138,11 @@ export default function SpellCatalogModal() {
           sphere: item.sphere,
           cleParfaite: item.preset.data.cleParfaite,
         })}
+        caracValue={spellCaracValue}
         onAdd={add}
       />
     ),
-    [add, spellTotalFor],
+    [add, spellTotalFor, spellCaracValue],
   );
 
   return (
@@ -246,10 +254,12 @@ export default function SpellCatalogModal() {
 const SpellRow = React.memo(function SpellRow({
   entry,
   total,
+  caracValue,
   onAdd,
 }: {
   entry: Entry;
   total: SpellTotal;
+  caracValue: (caracKey: string) => number;
   onAdd: (preset: SpellPreset) => void;
 }) {
   const { preset: p } = entry;
@@ -275,6 +285,7 @@ const SpellRow = React.memo(function SpellRow({
       <SpellDetail
         spell={{ ...p.data, discipline: entry.discipline, sphere: entry.sphere }}
         total={total}
+        caracValue={caracValue}
       />
     </CatalogRow>
   );
