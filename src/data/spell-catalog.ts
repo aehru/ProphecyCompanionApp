@@ -10,8 +10,14 @@ import type { NewSpell } from '@/db/schema';
  * constants) and regenerates `spell-catalog.gen.ts`. Never edit the .gen file.
  */
 export type SpellPreset = {
-  /** Stable slug (used as list key). */
+  /** Stable slug (used as list key, and stored on the rows picked from it). */
   id: string;
+  /**
+   * Fingerprint of `data`, computed by the generator (`lib/preset-revision`).
+   * A picked spell stores the revision it was copied at, so a later catalogue
+   * correction is detectable on the character's row. Never authored by hand.
+   */
+  revision: string;
   data: Omit<NewSpell, 'characterId' | 'id'>;
 };
 

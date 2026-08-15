@@ -383,6 +383,29 @@ export const spells = sqliteTable('spells', {
     .$type<string[]>()
     .notNull()
     .default(sql`'[]'`),
+
+  // --- provenance: which catalogue entry this row was copied from ------------
+
+  /**
+   * The `SpellPreset.id` slug this spell was picked from, or NULL for a spell
+   * the player wrote themselves. NULLABLE and never inferred: that asymmetry IS
+   * the safety property — a rulebook correction may only ever touch rows that
+   * can prove where they came from, so a hand-made sortilège is untouchable by
+   * construction rather than by a name heuristic that could misfire.
+   *
+   * Rows created before this column exist stay NULL, i.e. read as hand-made.
+   * Deliberate: no backfill ships with this (public beta, a handful of spells
+   * per sheet — re-adding them from the catalogue is the cheaper migration).
+   */
+  presetId: text('preset_id'),
+  /**
+   * The preset's `revision` at the moment this row was copied (see
+   * `lib/preset-revision`). Differs from the catalogue's current revision ⇒ the
+   * entry was corrected since. Nothing acts on that yet; the column exists now
+   * so a later "mettre à jour depuis le catalogue" flow has the history it
+   * cannot reconstruct after the fact.
+   */
+  presetRevision: text('preset_revision'),
 });
 
 /**
