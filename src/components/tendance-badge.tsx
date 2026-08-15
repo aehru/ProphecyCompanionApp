@@ -36,7 +36,6 @@ function Chevron({
 }) {
   return (
     <View
-      pointerEvents="none"
       style={[
         styles.chev,
         dir === 1 ? { top: CHEV_INSET } : { bottom: CHEV_INSET },
@@ -203,5 +202,5 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   half: { position: 'absolute', left: 0, right: 0 },
-  chev: { position: 'absolute', alignSelf: 'center' },
+  chev: { position: 'absolute', alignSelf: 'center', pointerEvents: 'none' },
 });
