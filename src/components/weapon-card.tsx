@@ -95,7 +95,7 @@ function WeaponSummary({
   // Collapsed-row subtitle: computed damage + initiative (mêlée / corps à corps).
   // The full breakdown (formula results, prereqs, ranges, creation) is in the
   // expanded detail.
-  const dmg = formulaResult(w.damage, caracValue, caracModifier);
+  const dmg = formulaResult(w.damage, { carac: caracValue, caracModifier });
   const subtitle = [
     w.damage.trim() !== '' ? `Dégâts ${dmg ?? w.damage.trim()}` : null,
     `Init ${fmtSigned(w.initMelee)}/${fmtSigned(w.initCorpsACorps)}`,

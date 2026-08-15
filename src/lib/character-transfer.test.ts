@@ -167,10 +167,14 @@ describe('round-trip', () => {
 
   it('round-trips temporary initiative dice, and imports exports made without them', () => {
     const withBonus = makeBundle();
-    (withBonus.state as unknown as Record<string, number>).initiativeBonusDice = 1;
+    const st = withBonus.state as unknown as Record<string, unknown>;
+    st.initiativeBonusDice = 1;
+    st.initiativeDiceIcons = ['sword', '', 'magic'];
     const r = parseImport(serializeExport(buildExport([withBonus])));
     if (!r.ok) throw new Error(r.error);
-    expect((r.data.characters[0].state as unknown as Record<string, number>).initiativeBonusDice).toBe(1);
+    const back = r.data.characters[0].state as unknown as Record<string, unknown>;
+    expect(back.initiativeBonusDice).toBe(1);
+    expect(back.initiativeDiceIcons).toEqual(['sword', '', 'magic']);
 
     // The base fixture carries no such key — the shape a pre-column export has.
     // It must still import (the column then falls back to its default 0).

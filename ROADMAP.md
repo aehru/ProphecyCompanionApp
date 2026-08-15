@@ -22,6 +22,51 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
+- [ ] **« Lancer le sort » — the cast flow.** The last piece of the spell
+  breakdown layer; everything it needs is already in place. Today a durée renders
+  symbolically (« 1 + NR jours ») because NR belongs to a *cast*, not to a spell:
+  `FormulaVars.nr` is the one resolver nothing fills. An earlier inline "NR
+  obtenu" field on `<SpellDetail>` was **removed on purpose** — the number is
+  worth entering as part of casting, not as a stray field, so don't re-add it
+  standalone.
+  _Agreed flow:_ a button on the spell card opens a `<DsDialog>` showing `total`
+  vs `difficulté` → the player enters the NR they rolled → durée / cibles resolve
+  through `spellFormulaResult` → **two checkboxes, both OFF by default**:
+  ☐ déduire le coût de la réserve, ☐ créer l'effet. Nothing fires on its own; a
+  player who prefers doing it by hand ignores the button entirely.
+  _Why the pieces fit:_ `TIME_UNITS` was merged into one list ([src/constants/prophecy.ts](src/constants/prophecy.ts))
+  precisely so a durée in semaines or cycles can become an `effects` row with no
+  conversion step. 70% of catalogue spells carry a machine-readable `duration`;
+  the rest state it in `inGameEffect` and the dialog should simply not offer the
+  effect checkbox for those.
+  _Open questions:_ **which pool the coût comes from** — `reserveMagiqueCurrent`,
+  the per-sphere current, or a `magic_reserves` row — is a real rules choice, not
+  an implementation detail, and the dialog probably has to ask. And the deferred
+  `bonus` column (« +5 à Discrétion ») was left out on purpose, so the created
+  effect starts from prefilled, editable text rather than a parsed target.
+- [ ] **« Mettre à jour depuis le catalogue » — propagate rulebook corrections
+  to spells players already picked.** The provenance half shipped: a spell copied
+  from the catalogue now stores `spells.preset_id` + `spells.preset_revision`
+  (the preset's content fingerprint, `lib/preset-revision`, computed at build
+  time and baked into `*-catalog.gen.ts`). A row with no `preset_id` is the
+  player's own and must stay untouchable — that asymmetry is the safety
+  property, so **never infer provenance from a name match**.
+  _What's left:_ a pure `planSpellSync(rows, catalog)` (field-level: row empty +
+  preset filled ⇒ fill, both filled and differing ⇒ ask, `cleParfaite` and every
+  in-play value never touched), a preview screen grouped by spell with the
+  player's value vs the catalogue's and "keep mine" as the default, then one
+  transaction. Stamp the current revision on accept **and** on decline, so a
+  declined change doesn't ask again until the entry actually changes.
+  _Agreed non-goals:_ no undo beyond `prophecy.db.bak`; a spell newly added to
+  the catalogue does nothing (the player picks it); a spell removed from the
+  catalogue leaves the row alone.
+  _Deliberately absent:_ **no backfill for rows predating the columns.** They
+  read as hand-made forever. Beta sheets hold a handful of spells and re-adding
+  them is cheaper than a name-matching heuristic that quietly mis-classifies the
+  spells renamed during the rework.
+  _Same gap, not addressed:_ weapons / armor / shields carry no revision at all,
+  so a correction there is unpropagatable by any means. Adding one is the same
+  three lines in the generator, if it ever matters.
 - [ ] **Re-test the catalogue previews on web/desktop after the PWA merge.** The
   expandable preview rows (`<CatalogRow>` + the shared `*Detail` bodies) were
   verified by typecheck, the test suite and a full **web bundle**, but not by
@@ -69,6 +114,13 @@ merge, character detail sheet, join disclaimer, privacy policy.
   maxes inline so the GM doesn't have to leave the table for the full sheet.
 - [ ] **Phase 3 — co-GM.** `share_npcs` publishes the NPCs already; a second GM
   seat needs server-side work (a second gmToken, ownership rules).
+  - [ ] **Per-die icons stay local — revisit for the co-GM.** Each initiative die
+    can carry an icon saying what granted it (off hand, sort, action retardée).
+    Deliberately NOT projected: a GM doesn't need it for a *player's* character,
+    and it would widen the wire for people who never asked. A co-GM reading the
+    host's PNJs is the one case that wants it — at which point the icon key (an
+    enum, never free text) joins the projection and `SHARED_SCHEMA_VERSION` goes
+    to 3. Until then the column is device-local.
 - [x] **Phase 4 — docs.** `docs/campaign-protocol.md` gained a Scope section (the
   relay is optional, the roster is a local-first merge, NPCs are opt-in);
   PRIVACY.md and README describe the serverless table. PRIVACY's permissions

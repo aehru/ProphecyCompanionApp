@@ -1,0 +1,1 @@
+ALTER TABLE `actual_state` ADD `initiative_dice_icons` text DEFAULT '[]' NOT NULL;

@@ -35,9 +35,10 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { DISCIPLINES, EFFECT_UNITS, SPHERES } from '../src/constants/prophecy';
+import { DISCIPLINES, SPELL_TAGS, SPHERES, TIME_UNITS } from '../src/constants/prophecy';
 import { parseCsvTable } from '../src/lib/csv';
 import { parseFormula, parsePrerequisites } from '../src/lib/formula';
+import { presetRevision } from '../src/lib/preset-revision';
 import { ARMOR_CATEGORIES } from '../src/data/armor-constants';
 import {
   CATEGORY_SKILL,
@@ -62,6 +63,16 @@ const WEAPON_COLUMNS = [
 const SPELL_COLUMNS = [
   'id', 'nom', 'niveau', 'complexite', 'discipline', 'sphere', 'cout',
   'tempsIncantation', 'uniteIncantation', 'difficulte', 'cle', 'effet',
+  // Editorial provenance (which rulebook a spell comes from). Declared so the
+  // header check accepts it, then deliberately NOT read: the app catalogue has
+  // no use for it, and the `spells` table has no column to hold it. It lives in
+  // the spreadsheet for the authors, not for the build.
+  'rulebook',
+  // The convenience layer extracted from `effet` (see the `spells` doc comment
+  // in db/schema.ts). ALL OPTIONAL — the catalogue is being filled rulebook by
+  // rulebook, so an empty cell is the normal state, not an error. `effet` itself
+  // stays the source of truth and is never rewritten from these.
+  'effetJeu', 'perception', 'duree', 'dureeUnite', 'cibles', 'tags',
 ];
 const ARMOR_COLUMNS = [
   'id', 'categorie', 'nom', 'defenseMax', 'prerequis', 'diffCreation',
@@ -109,11 +120,19 @@ const matchSphere = matcher(
     [s.key.replace(/^sphere/, ''), s.key],
   ]),
 );
+// One matcher for every duration in the CSV — cast time and spell durée both
+// speak TIME_UNITS, in any casing, singular or plural.
 const matchUnit = matcher(
-  EFFECT_UNITS.flatMap((u): [string, string][] => [
+  TIME_UNITS.flatMap((u): [string, string][] => [
     [u.key, u.key],
     [u.label, u.key],
     [u.plural, u.key],
+  ]),
+);
+const matchTag = matcher(
+  SPELL_TAGS.flatMap((t): [string, string][] => [
+    [t.key, t.key],
+    [t.label, t.key],
   ]),
 );
 
@@ -147,16 +166,73 @@ function readFormula(
   rec: Record<string, string>,
   col: string,
   errors: RowErrors,
-  { required = false } = {},
+  // `nr` / `sphere` opt into the spell variables — durations and target counts
+  // only, never a weapon's damage.
+  { required = false, nr = false, sphere = false } = {},
 ): string | null {
   const raw = (rec[col] ?? '').trim();
   if (raw === '') {
     if (required) errors.push(`${col} : requis`);
     return null;
   }
-  const parsed = parseFormula(raw);
+  const parsed = parseFormula(raw, { nr, sphere });
   if (!parsed.ok) errors.push(`${col} « ${raw} » : ${parsed.error}`);
   return raw;
+}
+
+/**
+ * An enum column that may be left blank. `requiredWhen` makes it mandatory only
+ * in the case that needs it — a `dureeUnite` is meaningless without a `duree`,
+ * and mandatory as soon as there is one.
+ */
+function readOptionalEnum(
+  rec: Record<string, string>,
+  col: string,
+  match: (s: string) => string | null,
+  valid: readonly string[],
+  errors: RowErrors,
+  { requiredWhen = false, fallback = valid[0] } = {},
+): string {
+  const raw = (rec[col] ?? '').trim();
+  if (raw === '') {
+    if (requiredWhen) errors.push(`${col} : requis (valides : ${valid.join(', ')})`);
+    return fallback;
+  }
+  const canonical = match(raw);
+  if (canonical == null) {
+    errors.push(`${col} : « ${raw} » inconnu (valides : ${valid.join(', ')})`);
+    return fallback;
+  }
+  return canonical;
+}
+
+/** Tag key → its rank in SPELL_TAGS, so a tag list can be put in one order. */
+const TAG_ORDER = new Map(SPELL_TAGS.map((t, i) => [t.key as string, i]));
+
+/**
+ * A comma-separated tag list, matched against SPELL_TAGS. Strict like every
+ * other enum here: a tag that is not in the taxonomy is a typo, and silently
+ * dropping it would leave the spell unfindable in the filter it was tagged for.
+ * Duplicates are collapsed rather than rejected — they change nothing.
+ *
+ * Sorted into TAXONOMY order rather than kept in the author's. The editor's
+ * `<ChipMultiSelect>` already normalizes that way, so without this the same tag
+ * set renders in two different orders depending on whether the spell came from
+ * the CSV or from the app — and re-typing a cell would reshuffle the generated
+ * array for no semantic change.
+ */
+function readTags(rec: Record<string, string>, col: string, errors: RowErrors): string[] {
+  const raw = (rec[col] ?? '').trim();
+  if (raw === '') return [];
+  const out = new Set<string>();
+  for (const seg of raw.split(',')) {
+    const label = seg.trim();
+    if (label === '') continue;
+    const canonical = matchTag(label);
+    if (canonical == null) errors.push(`${col} : tag « ${label} » inconnu`);
+    else out.add(canonical);
+  }
+  return [...out].sort((a, b) => (TAG_ORDER.get(a) ?? 0) - (TAG_ORDER.get(b) ?? 0));
 }
 
 function readEnum(
@@ -288,7 +364,7 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
   const seen = new Set<string>();
   const disciplineKeys = DISCIPLINES.map((d) => d.key);
   const sphereKeys = SPHERES.map((s) => s.key);
-  const unitKeys = EFFECT_UNITS.map((u) => u.key);
+  const unitKeys = TIME_UNITS.map((u) => u.key);
   const out: SpellPreset[] = [];
 
   records.forEach((rec, i) => {
@@ -297,22 +373,50 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
     const nom = (rec.nom ?? '').trim();
     if (nom === '') errors.push('nom : requis');
 
-    const preset: SpellPreset = {
-      id,
-      data: {
-        name: nom,
-        level: readInt(rec, 'niveau', errors),
-        complexity: readInt(rec, 'complexite', errors),
-        discipline: readEnum(rec, 'discipline', matchDiscipline, disciplineKeys, errors) as SpellPreset['data']['discipline'],
-        sphere: readEnum(rec, 'sphere', matchSphere, sphereKeys, errors) as SpellPreset['data']['sphere'],
-        cost: readInt(rec, 'cout', errors),
-        castTimeAmount: readInt(rec, 'tempsIncantation', errors),
-        castTimeUnit: readEnum(rec, 'uniteIncantation', matchUnit, unitKeys, errors) as SpellPreset['data']['castTimeUnit'],
-        difficulty: readInt(rec, 'difficulte', errors),
-        cle: (rec.cle ?? '').trim(),
-        effect: (rec.effet ?? '').trim(),
-      },
+    const inGameEffect = (rec.effetJeu ?? '').trim();
+    const sensoryEffect = (rec.perception ?? '').trim();
+    const duration = readFormula(rec, 'duree', errors, { nr: true, sphere: true }) ?? '';
+    const targets = readFormula(rec, 'cibles', errors, { nr: true, sphere: true }) ?? '';
+    const tags = readTags(rec, 'tags', errors);
+    const durationUnit = readOptionalEnum(
+      rec,
+      'dureeUnite',
+      matchUnit,
+      unitKeys,
+      errors,
+      // Only meaningful alongside a durée — and mandatory as soon as there is
+      // one, or "(1 + NR)" would render with no unit at all.
+      { requiredWhen: duration !== '', fallback: 'round' },
+    ) as SpellPreset['data']['durationUnit'];
+
+    const data: SpellPreset['data'] = {
+      name: nom,
+      level: readInt(rec, 'niveau', errors),
+      complexity: readInt(rec, 'complexite', errors),
+      discipline: readEnum(rec, 'discipline', matchDiscipline, disciplineKeys, errors) as SpellPreset['data']['discipline'],
+      sphere: readEnum(rec, 'sphere', matchSphere, sphereKeys, errors) as SpellPreset['data']['sphere'],
+      cost: readInt(rec, 'cout', errors),
+      castTimeAmount: readInt(rec, 'tempsIncantation', errors),
+      castTimeUnit: readEnum(rec, 'uniteIncantation', matchUnit, unitKeys, errors) as SpellPreset['data']['castTimeUnit'],
+      difficulty: readInt(rec, 'difficulte', errors),
+      cle: (rec.cle ?? '').trim(),
+      effect: (rec.effet ?? '').trim(),
+      // The convenience layer is OMITTED when empty rather than written as ""
+      // — every one of these columns has a DB default, and the catalogue is
+      // being filled one rulebook at a time. Emitting them unconditionally
+      // would put six dead keys on all 329 presets and make every unrelated
+      // catalogue diff unreadable. `durationUnit` rides with `duration`: on
+      // its own it says nothing.
+      ...(inGameEffect !== '' && { inGameEffect }),
+      ...(sensoryEffect !== '' && { sensoryEffect }),
+      ...(duration !== '' && { duration, durationUnit }),
+      ...(targets !== '' && { targets }),
+      ...(tags.length > 0 && { tags }),
     };
+
+    // Fingerprint of the payload alone — see lib/preset-revision for what is in
+    // it and why `id` is not.
+    const preset: SpellPreset = { id, revision: presetRevision(data), data };
     if (errors.length) failures.push({ file: 'spells.csv', record: i + 2, name: nom || id, errors });
     else out.push(preset);
   });

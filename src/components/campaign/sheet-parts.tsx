@@ -7,12 +7,13 @@ import { StyleSheet, View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 
 import { TendanceRing } from '@/components/campaign/stat-tiles';
+import { asDieIcon } from '@/components/ui/die-icons';
 import StatChip from '@/components/ui/stat-chip';
 import {
   EFFECT_TARGET_LABEL,
-  EFFECT_UNIT_LABEL,
   RESOURCES,
   TENDANCES,
+  TIME_UNIT_LABEL,
 } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { NumRecord, PoolRecord, SharedEffectView } from '@/lib/shared-character-view';
@@ -83,7 +84,7 @@ export function EffectsList({ effects }: { effects: SharedEffectView[] }) {
       {effects.map((e, i) => {
         const v = e.value ?? 0;
         const target = EFFECT_TARGET_LABEL[e.target ?? 'all'] ?? e.target ?? 'Tous les jets';
-        const unit = EFFECT_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
+        const unit = TIME_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
         return (
           <View key={`${e.label}-${i}`} style={styles.effectRow}>
             <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>
@@ -111,15 +112,22 @@ export function EffectsList({ effects }: { effects: SharedEffectView[] }) {
 /**
  * Rolled dice, read like the player's own sheet: wound malus badged on each,
  * error border once a die is driven to 0 or below (the action is lost).
+ *
+ * `icons` is the per-die mark, and it does NOT come from the projection — marks
+ * never cross the wire. It is read from the LOCAL row, so it is filled for the
+ * GM's own PNJs and empty for a player's character, which is the intended
+ * asymmetry (see docs/campaign-protocol.md §2).
  */
 export function InitiativeChips({
   values,
   max,
   wound,
+  icons = [],
 }: {
   values: number[];
   max: number;
   wound: number;
+  icons?: string[];
 }) {
   const theme = useProphecyTheme();
   if (values.length === 0) {
@@ -137,6 +145,7 @@ export function InitiativeChips({
           label={`Dé ${i + 1}`}
           value={String(val)}
           modifier={wound}
+          icon={asDieIcon(icons[i])}
           style={
             val > 0 && val + wound <= 0
               ? { borderColor: theme.colors.error, borderWidth: 1.5 }

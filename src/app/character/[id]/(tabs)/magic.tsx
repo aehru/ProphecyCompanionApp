@@ -77,7 +77,7 @@ export default function CharacterMagicScreen() {
   const { data: shieldRows } = useLiveQuery(shieldsQuery(numId), [numId]);
   const { data: items } = useLiveQuery(itemsQuery(numId), [numId]);
   const { data: enchantList } = useLiveQuery(enchantsQuery(numId), [numId]);
-  const spellTotalFor = useSpellTotal(numId);
+  const { totalFor: spellTotalFor, caracValue: spellCaracValue } = useSpellTotal(numId);
   const [tab, setTab] = useState(0);
   // Shared by the Réserve and Enchantements tabs: unlocks bullet-tapping plus
   // the reserve-object add/delete controls, same convention across this screen.
@@ -183,7 +183,12 @@ export default function CharacterMagicScreen() {
           ) : (
             <Columns gap={10}>
               {spellList.map((sp) => (
-                <SpellCard key={sp.id} spell={sp} total={spellTotalFor(sp)} />
+                <SpellCard
+                  key={sp.id}
+                  spell={sp}
+                  total={spellTotalFor(sp)}
+                  caracValue={spellCaracValue}
+                />
               ))}
             </Columns>
           )}

@@ -1,26 +1,34 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
-import { Button, Switch, Text, TextInput } from 'react-native-paper';
+import { Button, HelperText, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import SpellDetail from '@/components/spell-detail';
-import ChipSelect from '@/components/ui/chip-select';
+import ChipSelect, { ChipMultiSelect } from '@/components/ui/chip-select';
 import Icon from '@/components/ui/icon';
 import SelectField from '@/components/ui/select-field';
 import {
   CLE_PARFAITE_BONUS,
   DISCIPLINE_LABEL,
   DISCIPLINES,
-  EFFECT_UNITS,
+  SPELL_TAGS,
   SPHERE_LABEL,
   SPHERES,
+  TIME_UNITS,
 } from '@/constants/prophecy';
 import type { Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { parseFormula } from '@/lib/formula';
 import type { SpellTotal } from '@/lib/spell-total';
 import { deleteSpell, updateSpell } from '@/repositories/spells';
+
+/** Validation message for a spell formula field (null = valid or empty). */
+function spellFormulaError(raw: string): string | null {
+  const res = parseFormula(raw, { nr: true, sphere: true });
+  return res.ok ? null : res.error;
+}
 
 /**
  * One spell: a read-only summary that opens the editor in a modal (`spell/[sid]`)
@@ -28,12 +36,22 @@ import { deleteSpell, updateSpell } from '@/repositories/spells';
  * `total` is this character's casting score (see lib/spell-total): shown as a
  * badge on the collapsed row, then broken down in the detail.
  */
-export default function SpellCard({ spell, total }: { spell: Spell; total?: SpellTotal | null }) {
+export default function SpellCard({
+  spell,
+  total,
+  caracValue,
+}: {
+  spell: Spell;
+  total?: SpellTotal | null;
+  /** Passed through to the detail — resolves a durée written against a stat. */
+  caracValue?: (caracKey: string) => number;
+}) {
   const router = useRouter();
   return (
     <SpellSummary
       spell={spell}
       total={total}
+      caracValue={caracValue}
       onEdit={() => router.push(`/character/${spell.characterId}/spell/${spell.id}`)}
     />
   );
@@ -42,10 +60,12 @@ export default function SpellCard({ spell, total }: { spell: Spell; total?: Spel
 function SpellSummary({
   spell: s,
   total,
+  caracValue,
   onEdit,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
+  caracValue?: (caracKey: string) => number;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -101,7 +121,9 @@ function SpellSummary({
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
 
-      {expanded ? <SpellDetail spell={s} total={total} onEdit={onEdit} /> : null}
+      {expanded ? (
+        <SpellDetail spell={s} total={total} caracValue={caracValue} onEdit={onEdit} />
+      ) : null}
     </View>
   );
 }
@@ -116,6 +138,22 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
   const [name, setName] = useDebouncedText(s.name, (t) => updateSpell(s.id, { name: t }));
   const [cle, setCle] = useDebouncedText(s.cle, (t) => updateSpell(s.id, { cle: t }));
   const [effect, setEffect] = useDebouncedText(s.effect, (t) => updateSpell(s.id, { effect: t }));
+  const [inGameEffect, setInGameEffect] = useDebouncedText(s.inGameEffect, (t) =>
+    updateSpell(s.id, { inGameEffect: t }),
+  );
+  const [sensoryEffect, setSensoryEffect] = useDebouncedText(s.sensoryEffect, (t) =>
+    updateSpell(s.id, { sensoryEffect: t }),
+  );
+  const [duration, setDuration] = useDebouncedText(s.duration, (t) =>
+    updateSpell(s.id, { duration: t }),
+  );
+  const [targets, setTargets] = useDebouncedText(s.targets, (t) =>
+    updateSpell(s.id, { targets: t }),
+  );
+
+  // Same parser, same opt-ins as the catalogue build (scripts/build-catalogs).
+  const durationErr = spellFormulaError(duration);
+  const targetsErr = spellFormulaError(targets);
 
   const confirmDelete = () =>
     Alert.alert('Supprimer', 'Supprimer ce sortilège ?', [
@@ -193,7 +231,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
             style={styles.castAmount}
           />
           <SelectField
-            options={EFFECT_UNITS}
+            options={TIME_UNITS}
             value={s.castTimeUnit}
             onChange={(k) => updateSpell(s.id, { castTimeUnit: k as Spell['castTimeUnit'] })}
             style={styles.castUnit}
@@ -224,6 +262,77 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
         mode="outlined"
         multiline
         style={styles.effect}
+      />
+
+      {/* Durée and cibles accept the rulebook's own wording — « 1 + NR », « 30 +
+          30 par NR », « SPHERE x2 » — so a spell can be typed straight off the
+          page. Validated against the same parser the catalogue build runs, or
+          the two authoring surfaces would disagree on what counts as a formula.
+          Amount + unit share one title, exactly like the cast time above. */}
+      <View>
+        <Text style={[styles.fieldLabel, { color: theme.colors.onSurfaceVariant }]}>Durée</Text>
+        <View style={styles.castRow}>
+          <TextInput
+            value={duration}
+            onChangeText={setDuration}
+            placeholder="1 + NR"
+            mode="outlined"
+            dense
+            error={!!durationErr}
+            style={styles.formulaField}
+          />
+          <SelectField
+            options={TIME_UNITS}
+            value={s.durationUnit}
+            onChange={(k) => updateSpell(s.id, { durationUnit: k as Spell['durationUnit'] })}
+            style={styles.castUnit}
+          />
+        </View>
+      </View>
+      {durationErr ? (
+        <HelperText type="error" visible>
+          {durationErr}
+        </HelperText>
+      ) : null}
+
+      <TextInput
+        label="Cibles"
+        value={targets}
+        onChangeText={setTargets}
+        placeholder="1 + NR"
+        mode="outlined"
+        dense
+        error={!!targetsErr}
+      />
+      {targetsErr ? (
+        <HelperText type="error" visible>
+          {targetsErr}
+        </HelperText>
+      ) : null}
+
+      <TextInput
+        label="Effet de jeu"
+        value={inGameEffect}
+        onChangeText={setInGameEffect}
+        mode="outlined"
+        multiline
+        style={styles.effect}
+      />
+
+      <TextInput
+        label="Ce que l'on perçoit"
+        value={sensoryEffect}
+        onChangeText={setSensoryEffect}
+        mode="outlined"
+        multiline
+        style={styles.effect}
+      />
+
+      <ChipMultiSelect
+        label="Tags"
+        options={SPELL_TAGS}
+        values={s.tags}
+        onChange={(next) => updateSpell(s.id, { tags: next })}
       />
 
       <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>
@@ -266,6 +375,9 @@ const styles = StyleSheet.create({
   castRow: { flexDirection: 'row', gap: 12 },
   castAmount: { flexGrow: 0, flexBasis: 90 },
   castUnit: { flexGrow: 1, flexBasis: 120 },
+  // Wider than `castAmount`: this one holds a formula ("30 + 30 par NR"), not a
+  // two-digit count.
+  formulaField: { flexGrow: 1, flexBasis: 150 },
   effect: { minHeight: 72 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   switchMain: { flex: 1, minWidth: 0 },

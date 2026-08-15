@@ -1,11 +1,18 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Button, Chip, Text } from 'react-native-paper';
 
 import { dsIcon } from '@/components/ui/icon';
-import { CLE_PARFAITE_BONUS, EFFECT_UNIT_LABEL, SPHERE_LABEL } from '@/constants/prophecy';
+import {
+  CLE_PARFAITE_BONUS,
+  SPELL_TAG_LABEL,
+  SPHERE_LABEL,
+  TIME_UNIT_LABEL,
+  timeUnitLabel,
+} from '@/constants/prophecy';
 import type { Spell } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { spellFormulaResult } from '@/lib/formula';
 import { spellTotalBreakdown, type SpellTotal, type SpellTotalInput } from '@/lib/spell-total';
 
 /**
@@ -27,6 +34,12 @@ export type SpellView = Partial<
     | 'cleParfaite'
     | 'cle'
     | 'effect'
+    | 'inGameEffect'
+    | 'sensoryEffect'
+    | 'duration'
+    | 'durationUnit'
+    | 'targets'
+    | 'tags'
   >
 >;
 
@@ -37,14 +50,22 @@ export type SpellView = Partial<
  * Pass `onEdit` to add a "Modifier" button (SpellCard does); omit it for a pure
  * view. `total` is the character's casting score (see lib/spell-total); omit it
  * where there is no character in context and the row is skipped.
+ *
+ * The extracted fields (`inGameEffect`, `sensoryEffect`, durée, cibles, tags)
+ * are all optional — the catalogue is being filled one rulebook at a time. A
+ * spell carrying none of them renders exactly the single « Effet » row it
+ * always did.
  */
 export default function SpellDetail({
   spell: s,
   total,
+  caracValue,
   onEdit,
 }: {
   spell: SpellView;
   total?: SpellTotal | null;
+  /** Resolves a durée written against a stat (« une minute par point de Volonté »). */
+  caracValue?: (caracKey: string) => number;
   onEdit?: () => void;
 }) {
   // A crafted clé parfaite makes the spell easier to cast: the roll gains
@@ -55,6 +76,25 @@ export default function SpellDetail({
   const unit = s.castTimeUnit ?? '';
   const cle = (s.cle ?? '').trim();
   const effect = (s.effect ?? '').trim();
+  const inGameEffect = (s.inGameEffect ?? '').trim();
+  const sensoryEffect = (s.sensoryEffect ?? '').trim();
+  const duration = (s.duration ?? '').trim();
+  const targets = (s.targets ?? '').trim();
+  const tags = s.tags ?? [];
+
+  // SPHERE resolves right here — `total.sphere` IS the character's score in the
+  // spell's own sphere, which is the only one the catalogue ever scales off. NR
+  // stays symbolic: it belongs to a cast, not to the spell, and the future
+  // "Lancer le sort" flow is what will pass it. So a durée reads « Sphère tours »
+  // with no character in context and « 6 tours » on a sheet.
+  const vars = {
+    // `total.sphere` IS the character's score in the spell's own sphere, the
+    // only one the catalogue ever scales off — so it costs nothing to resolve.
+    sphere: total ? (key: string | null) => (key == null ? total.sphere : null) : undefined,
+    carac: caracValue,
+  };
+  const durationValue = spellFormulaResult(duration, vars);
+  const targetsValue = spellFormulaResult(targets, vars);
 
   return (
     <View style={styles.detail}>
@@ -64,7 +104,7 @@ export default function SpellDetail({
       <DetailRow label="Coût" value={String(s.cost ?? 0)} />
       <DetailRow
         label="Incantation"
-        value={`${s.castTimeAmount ?? 0} ${EFFECT_UNIT_LABEL[unit] ?? unit}`}
+        value={`${s.castTimeAmount ?? 0} ${TIME_UNIT_LABEL[unit] ?? unit}`}
       />
       <DetailRow label="Difficulté" value={difficulty} />
       {total ? (
@@ -73,14 +113,65 @@ export default function SpellDetail({
           spell={{ discipline: s.discipline ?? '', sphere, cleParfaite: s.cleParfaite }}
         />
       ) : null}
+      {durationValue ? (
+        <DetailRow
+          label="Durée"
+          // The unit agrees with the amount once the formula resolved to a plain
+          // number; while any variable is still symbolic there is nothing to
+          // agree with, so it reads as a plural — « 1 + NR jours ».
+          value={`${durationValue} ${timeUnitLabel(s.durationUnit ?? '', Number(durationValue) || null)}`}
+        />
+      ) : null}
+      {targetsValue ? <DetailRow label="Cibles" value={targetsValue} /> : null}
       {cle !== '' ? <DetailRow label="Clé" value={cle} /> : null}
-      {effect !== '' ? <DetailRow label="Effet" value={effect} /> : null}
+
+      {/* The mechanical half first — it is what a player checks mid-turn. The
+          rulebook paragraph stays below it, always, as the source of truth. */}
+      {inGameEffect !== '' ? <Section title="Effet de jeu" body={inGameEffect} /> : null}
+      {sensoryEffect !== '' ? <Section title="Ce que l'on perçoit" body={sensoryEffect} /> : null}
+      {effect !== '' ? (
+        inGameEffect === '' ? (
+          // Nothing was extracted for this spell: fall back to the one row this
+          // view has always shown.
+          <DetailRow label="Effet" value={effect} />
+        ) : (
+          <Section title="Texte du livre" body={effect} muted />
+        )
+      ) : null}
+
+      {tags.length > 0 ? <TagRow tags={tags} /> : null}
 
       {onEdit ? (
         <Button compact icon={dsIcon('edit')} onPress={onEdit} style={styles.detailEdit}>
           Modifier
         </Button>
       ) : null}
+    </View>
+  );
+}
+
+/** A titled block of prose — one of the extracted halves of `effect`. */
+function Section({ title, body, muted = false }: { title: string; body: string; muted?: boolean }) {
+  const theme = useProphecyTheme();
+  return (
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>{title}</Text>
+      <Text style={[styles.sectionBody, muted ? { color: theme.colors.onSurfaceVariant } : null]}>
+        {body}
+      </Text>
+    </View>
+  );
+}
+
+/** What the spell DOES, as read-only chips — the catalogue filter's vocabulary. */
+function TagRow({ tags }: { tags: string[] }) {
+  return (
+    <View style={styles.tags}>
+      {tags.map((t) => (
+        <Chip key={t} compact mode="outlined">
+          {SPELL_TAG_LABEL[t] ?? t}
+        </Chip>
+      ))}
     </View>
   );
 }
@@ -124,4 +215,8 @@ const styles = StyleSheet.create({
   totalCol: { flex: 1 },
   totalValue: { fontSize: 15, fontWeight: '600' },
   breakdown: { fontSize: 12, marginTop: 1 },
+  section: { gap: 2 },
+  sectionTitle: { fontSize: 12 },
+  sectionBody: { fontSize: 15, lineHeight: 21 },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 2 },
 });
