@@ -25,6 +25,22 @@ const BASE = (process.env.EXPO_BASE_URL ?? '').replace(/\/+$/, '');
 // The explicit scope matters under a subpath: a worker at <base>/sw.js already
 // defaults to <base>/, but stating it keeps the two in step if the file ever
 // moves.
+// Ask the browser to treat this origin's storage as durable.
+//
+// The database lives in OPFS, which is ordinary site data: under storage
+// pressure a browser may evict it, and here that means the user's characters,
+// with no cloud copy and no pre-migration snapshot on web. Granting is at the
+// browser's discretion (Chrome decides from engagement/installation and never
+// prompts; Firefox may ask), and being refused changes nothing — so this is
+// best-effort and deliberately silent.
+const REQUEST_PERSISTENCE = `
+if (navigator.storage && navigator.storage.persist) {
+  navigator.storage.persisted().then(function (already) {
+    if (!already) return navigator.storage.persist();
+  }).catch(function () {});
+}
+`;
+
 const REGISTER_SW = `
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
@@ -63,6 +79,7 @@ export default function Root({ children }: PropsWithChildren) {
             the same contract <TabPage> relies on. Must stay in the head. */}
         <ScrollViewStyleReset />
 
+        <script dangerouslySetInnerHTML={{ __html: REQUEST_PERSISTENCE }} />
         <script dangerouslySetInnerHTML={{ __html: REGISTER_SW }} />
       </head>
       <body>{children}</body>
