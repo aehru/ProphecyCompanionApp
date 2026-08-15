@@ -53,6 +53,18 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # The site IS the delivery channel — there is no store review between this
+      # job and the users. Metro strips types without checking them, so nothing
+      # else would stop a broken build from being published.
+      - name: Test
+        run: bun run test
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
+
+      - name: Lint
+        run: bun run lint
+
       # Served from the root of prophecyapp.aehru.fr (see public/CNAME), so no
       # base URL is needed and every asset path stays root-relative.
       #
