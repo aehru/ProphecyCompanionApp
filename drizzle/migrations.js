@@ -29,6 +29,7 @@ import m0024 from './0024_large_sauron.sql';
 import m0025 from './0025_spooky_post.sql';
 import m0026 from './0026_lame_venus.sql';
 import m0027 from './0027_real_molecule_man.sql';
+import m0028 from './0028_silent_sage.sql';
 
   export default {
     journal,
@@ -60,7 +61,8 @@ m0023,
 m0024,
 m0025,
 m0026,
-m0027
+m0027,
+m0028
     }
   }
   
