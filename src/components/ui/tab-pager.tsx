@@ -11,7 +11,7 @@
 //
 // The pager measures itself (not the window) so it behaves inside a split pane.
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   type LayoutChangeEvent,
@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 
 import SubTabs, { labelKey, type TabLabel } from '@/components/ui/sub-tabs';
+import { USE_NATIVE_DRIVER } from '@/lib/animation';
 
 export default function TabPager({
   labels,
@@ -70,22 +71,63 @@ export default function TabPager({
     [scrollX, width],
   );
 
+  /** Commit the tab the pager has come to rest on. */
+  const settleAt = useCallback(
+    (x: number) => {
+      if (width <= 0) return;
+      const index = Math.round(x / width);
+      if (index !== active && index >= 0 && index < labels.length) onChange(index);
+    },
+    [width, active, labels.length, onChange],
+  );
+
+  // Settle from the scroll stream itself, once the offset stops moving.
+  //
+  // react-native-web emits NEITHER onScrollEndDrag NOR onMomentumScrollEnd — its
+  // ScrollView only ever calls onScroll (see ScrollViewBase), and the other two
+  // are passed down as non-DOM props that never fire. So a trackpad pan moved the
+  // ink bar, which rides the raw offset, while `active` never advanced and the
+  // page was therefore never mounted: the tab looked selected and stayed blank.
+  //
+  // Debouncing the offset covers every input on every platform. On native it just
+  // lands right after the momentum snap, so the handlers below still do the
+  // committing there and this only backstops them.
+  // Watch the offset from an effect rather than from the scroll event: the timer
+  // is then an ordinary local, with no ref to read during render and nothing for
+  // the memo below to capture, so `onScroll` stays the plain Animated.event it
+  // always was. The value fires here on web (JS-driven) and on native alike — an
+  // Animated.Value with a JS listener reports back even when natively driven.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const id = scrollX.addListener(({ value }) => {
+      if (timer) clearTimeout(timer);
+      // Longer than react-native-web's own 100ms scroll-end timeout, so we run
+      // after its final synthetic onScroll rather than racing it.
+      timer = setTimeout(() => settleAt(value), 150);
+    });
+    return () => {
+      scrollX.removeListener(id);
+      if (timer) clearTimeout(timer);
+    };
+  }, [scrollX, settleAt]);
+
   const onScroll = useMemo(
-    () => Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true }),
+    () =>
+      Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+        useNativeDriver: USE_NATIVE_DRIVER,
+      }),
     [scrollX],
   );
 
   const onSettle = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (width <= 0) return;
-    const index = Math.round(e.nativeEvent.contentOffset.x / width);
-    if (index !== active && index >= 0 && index < labels.length) onChange(index);
+    settleAt(e.nativeEvent.contentOffset.x);
   };
 
   /**
-   * A slow drag with no fling emits no momentum event (and web never emits one),
-   * so the release has to settle it. Only when the finger left with (almost) no
-   * velocity, though: settling a real fling here would commit a tab the snap is
-   * still deciding on, and the scroll-to-active effect would then fight it.
+   * A slow drag with no fling emits no momentum event, so the release has to
+   * settle it. Only when the finger left with (almost) no velocity, though:
+   * settling a real fling here would commit a tab the snap is still deciding on,
+   * and the scroll-to-active effect would then fight it.
    */
   const onDragEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (Math.abs(e.nativeEvent.velocity?.x ?? 0) < 0.1) onSettle(e);
