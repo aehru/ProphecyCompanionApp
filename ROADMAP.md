@@ -44,6 +44,29 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   an implementation detail, and the dialog probably has to ask. And the deferred
   `bonus` column (« +5 à Discrétion ») was left out on purpose, so the created
   effect starts from prefilled, editable text rather than a parsed target.
+- [ ] **« Mettre à jour depuis le catalogue » — propagate rulebook corrections
+  to spells players already picked.** The provenance half shipped: a spell copied
+  from the catalogue now stores `spells.preset_id` + `spells.preset_revision`
+  (the preset's content fingerprint, `lib/preset-revision`, computed at build
+  time and baked into `*-catalog.gen.ts`). A row with no `preset_id` is the
+  player's own and must stay untouchable — that asymmetry is the safety
+  property, so **never infer provenance from a name match**.
+  _What's left:_ a pure `planSpellSync(rows, catalog)` (field-level: row empty +
+  preset filled ⇒ fill, both filled and differing ⇒ ask, `cleParfaite` and every
+  in-play value never touched), a preview screen grouped by spell with the
+  player's value vs the catalogue's and "keep mine" as the default, then one
+  transaction. Stamp the current revision on accept **and** on decline, so a
+  declined change doesn't ask again until the entry actually changes.
+  _Agreed non-goals:_ no undo beyond `prophecy.db.bak`; a spell newly added to
+  the catalogue does nothing (the player picks it); a spell removed from the
+  catalogue leaves the row alone.
+  _Deliberately absent:_ **no backfill for rows predating the columns.** They
+  read as hand-made forever. Beta sheets hold a handful of spells and re-adding
+  them is cheaper than a name-matching heuristic that quietly mis-classifies the
+  spells renamed during the rework.
+  _Same gap, not addressed:_ weapons / armor / shields carry no revision at all,
+  so a correction there is unpropagatable by any means. Adding one is the same
+  three lines in the generator, if it ever matters.
 - [ ] **Re-test the catalogue previews on web/desktop after the PWA merge.** The
   expandable preview rows (`<CatalogRow>` + the shared `*Detail` bodies) were
   verified by typecheck, the test suite and a full **web bundle**, but not by
