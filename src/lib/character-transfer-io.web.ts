@@ -47,7 +47,9 @@ export function pickImportText(): Promise<string | null> {
     input.style.display = 'none';
 
     let done = false;
+    let cancelTimer: ReturnType<typeof setTimeout> | null = null;
     const cleanup = () => {
+      if (cancelTimer) clearTimeout(cancelTimer);
       window.removeEventListener('focus', onFocus);
       input.remove();
     };
@@ -67,12 +69,21 @@ export function pickImportText(): Promise<string | null> {
     // Cancelling a file dialog fires `cancel` in current browsers, but not in
     // every one we might be opened in. Without a fallback the promise would
     // never settle and the caller's spinner would hang forever, so treat "focus
-    // came back and no file arrived" as a cancel too. The delay lets `change`
-    // win the race when the user did pick something.
-    const onFocus = () => setTimeout(() => finish(null), 500);
+    // came back and no file arrived" as a cancel too.
+    //
+    // The timer is disarmed the moment `change` reports a file, NOT once the file
+    // has been read: a read slower than the delay (a large file, cold storage)
+    // would otherwise resolve the cancel first and silently discard the import.
+    const onFocus = () => {
+      cancelTimer = setTimeout(() => finish(null), 500);
+    };
 
     input.addEventListener('cancel', () => finish(null));
     input.addEventListener('change', () => {
+      if (cancelTimer) clearTimeout(cancelTimer);
+      cancelTimer = null;
+      window.removeEventListener('focus', onFocus);
+
       const file = input.files?.[0];
       if (!file) return finish(null);
       file.text().then(finish, fail);
