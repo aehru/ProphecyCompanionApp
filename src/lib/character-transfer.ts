@@ -173,6 +173,14 @@ const spellSchema = z.object({
   durationUnit: z.enum(UNIT_KEYS).optional(),
   targets: str.optional(),
   tags: z.array(str).optional(),
+  // Which catalogue entry the spell was picked from, and at which revision.
+  // Both nullable/optional, and carried on BOTH export intents: a round-trip
+  // through a file must not turn a catalogue spell into a hand-made one, which
+  // is exactly what dropping them would do — irreversibly, since nothing
+  // downstream can tell the two apart afterwards. Unlike `uuid` there is no
+  // sharing concern: a preset slug identifies a rulebook entry, not a device.
+  presetId: str.nullable().optional(),
+  presetRevision: str.nullable().optional(),
 });
 
 // Magic reserve objects. OPTIONAL with a `[]` default (not a version bump, like
