@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 import { DISCIPLINES, SPELL_TAGS, SPHERES, TIME_UNITS } from '../src/constants/prophecy';
 import { parseCsvTable } from '../src/lib/csv';
 import { parseFormula, parsePrerequisites } from '../src/lib/formula';
+import { presetRevision } from '../src/lib/preset-revision';
 import { ARMOR_CATEGORIES } from '../src/data/armor-constants';
 import {
   CATEGORY_SKILL,
@@ -388,33 +389,34 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
       { requiredWhen: duration !== '', fallback: 'round' },
     ) as SpellPreset['data']['durationUnit'];
 
-    const preset: SpellPreset = {
-      id,
-      data: {
-        name: nom,
-        level: readInt(rec, 'niveau', errors),
-        complexity: readInt(rec, 'complexite', errors),
-        discipline: readEnum(rec, 'discipline', matchDiscipline, disciplineKeys, errors) as SpellPreset['data']['discipline'],
-        sphere: readEnum(rec, 'sphere', matchSphere, sphereKeys, errors) as SpellPreset['data']['sphere'],
-        cost: readInt(rec, 'cout', errors),
-        castTimeAmount: readInt(rec, 'tempsIncantation', errors),
-        castTimeUnit: readEnum(rec, 'uniteIncantation', matchUnit, unitKeys, errors) as SpellPreset['data']['castTimeUnit'],
-        difficulty: readInt(rec, 'difficulte', errors),
-        cle: (rec.cle ?? '').trim(),
-        effect: (rec.effet ?? '').trim(),
-        // The convenience layer is OMITTED when empty rather than written as ""
-        // — every one of these columns has a DB default, and the catalogue is
-        // being filled one rulebook at a time. Emitting them unconditionally
-        // would put six dead keys on all 329 presets and make every unrelated
-        // catalogue diff unreadable. `durationUnit` rides with `duration`: on
-        // its own it says nothing.
-        ...(inGameEffect !== '' && { inGameEffect }),
-        ...(sensoryEffect !== '' && { sensoryEffect }),
-        ...(duration !== '' && { duration, durationUnit }),
-        ...(targets !== '' && { targets }),
-        ...(tags.length > 0 && { tags }),
-      },
+    const data: SpellPreset['data'] = {
+      name: nom,
+      level: readInt(rec, 'niveau', errors),
+      complexity: readInt(rec, 'complexite', errors),
+      discipline: readEnum(rec, 'discipline', matchDiscipline, disciplineKeys, errors) as SpellPreset['data']['discipline'],
+      sphere: readEnum(rec, 'sphere', matchSphere, sphereKeys, errors) as SpellPreset['data']['sphere'],
+      cost: readInt(rec, 'cout', errors),
+      castTimeAmount: readInt(rec, 'tempsIncantation', errors),
+      castTimeUnit: readEnum(rec, 'uniteIncantation', matchUnit, unitKeys, errors) as SpellPreset['data']['castTimeUnit'],
+      difficulty: readInt(rec, 'difficulte', errors),
+      cle: (rec.cle ?? '').trim(),
+      effect: (rec.effet ?? '').trim(),
+      // The convenience layer is OMITTED when empty rather than written as ""
+      // — every one of these columns has a DB default, and the catalogue is
+      // being filled one rulebook at a time. Emitting them unconditionally
+      // would put six dead keys on all 329 presets and make every unrelated
+      // catalogue diff unreadable. `durationUnit` rides with `duration`: on
+      // its own it says nothing.
+      ...(inGameEffect !== '' && { inGameEffect }),
+      ...(sensoryEffect !== '' && { sensoryEffect }),
+      ...(duration !== '' && { duration, durationUnit }),
+      ...(targets !== '' && { targets }),
+      ...(tags.length > 0 && { tags }),
     };
+
+    // Fingerprint of the payload alone — see lib/preset-revision for what is in
+    // it and why `id` is not.
+    const preset: SpellPreset = { id, revision: presetRevision(data), data };
     if (errors.length) failures.push({ file: 'spells.csv', record: i + 2, name: nom || id, errors });
     else out.push(preset);
   });

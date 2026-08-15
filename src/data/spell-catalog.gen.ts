@@ -5,6 +5,7 @@ import type { SpellPreset } from './spell-catalog';
 export const SPELL_CATALOG_DATA: SpellPreset[] = [
   {
     "id": "cache-cache",
+    "revision": "5ea78d58e905",
     "data": {
       "name": "Cache-cache",
       "level": 1,
@@ -30,6 +31,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "chemin-de-khy",
+    "revision": "19dd1050750e",
     "data": {
       "name": "Chemin de Khy",
       "level": 1,
@@ -56,6 +58,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "cle-audacieuse",
+    "revision": "16696ef98378",
     "data": {
       "name": "Clé audacieuse",
       "level": 1,
@@ -80,6 +83,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "element-du-decor",
+    "revision": "dcc8f612519f",
     "data": {
       "name": "Élément du décor",
       "level": 1,
@@ -106,6 +110,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "flanerie-passagere",
+    "revision": "83e040bbe150",
     "data": {
       "name": "Flânerie passagère",
       "level": 1,
@@ -131,6 +136,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "heureuse-coincidence",
+    "revision": "deba3c5442f7",
     "data": {
       "name": "Heureuse coïncidence",
       "level": 1,
@@ -153,6 +159,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "murmure-melodieux",
+    "revision": "8ea3f19c65e3",
     "data": {
       "name": "Murmure mélodieux",
       "level": 1,
@@ -178,6 +185,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "oeil-indiscret",
+    "revision": "0fe05bd6de3b",
     "data": {
       "name": "Œil indiscret",
       "level": 1,
@@ -203,6 +211,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poudre-descampette",
+    "revision": "65f3488aaebf",
     "data": {
       "name": "Poudre d'escampette",
       "level": 1,
@@ -228,6 +237,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poursuite-de-khy",
+    "revision": "2d32c65f102b",
     "data": {
       "name": "Poursuite de Khy",
       "level": 1,
@@ -253,6 +263,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sourire-enchanteur",
+    "revision": "bbd66785b370",
     "data": {
       "name": "Sourire enchanteur",
       "level": 1,
@@ -277,6 +288,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "temoin-des-ruelles",
+    "revision": "fe088710378f",
     "data": {
       "name": "Témoin des ruelles",
       "level": 1,
@@ -303,6 +315,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-bonne-parole",
+    "revision": "1169777bb6b7",
     "data": {
       "name": "La bonne parole",
       "level": 2,
@@ -328,6 +341,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "plume-de-verite",
+    "revision": "2c9c1637b9db",
     "data": {
       "name": "Plume de vérité",
       "level": 2,
@@ -353,6 +367,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "reflet-trompeur",
+    "revision": "85aebdc3bb95",
     "data": {
       "name": "Reflet trompeur",
       "level": 3,
@@ -378,6 +393,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "bouclier-carmin",
+    "revision": "e3f50e2d7da9",
     "data": {
       "name": "Bouclier carmin",
       "level": 1,
@@ -403,6 +419,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "brise-volcanique",
+    "revision": "849d1997e2af",
     "data": {
       "name": "Brise volcanique",
       "level": 1,
@@ -427,6 +444,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "cachet-brulant",
+    "revision": "c3d28273a9a2",
     "data": {
       "name": "Cachet brûlant",
       "level": 1,
@@ -452,6 +470,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "feux-follets",
+    "revision": "e55048dd113e",
     "data": {
       "name": "Feux follets",
       "level": 1,
@@ -477,6 +496,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "guide-ecarlate",
+    "revision": "4ef4b1c97d62",
     "data": {
       "name": "Guide écarlate",
       "level": 1,
@@ -502,6 +522,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lame-ardente",
+    "revision": "01d968394725",
     "data": {
       "name": "Lame ardente",
       "level": 1,
@@ -526,6 +547,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "loeil-de-pyrite",
+    "revision": "d2a5e8a6ca78",
     "data": {
       "name": "L'œil de Pyrite",
       "level": 1,
@@ -550,6 +572,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "piege-lumineux",
+    "revision": "eb2843472e3b",
     "data": {
       "name": "Piège lumineux",
       "level": 1,
@@ -575,6 +598,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "souffle-ardent",
+    "revision": "7bf07cf94770",
     "data": {
       "name": "Souffle ardent",
       "level": 1,
@@ -600,6 +624,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "feu-interieur",
+    "revision": "0c5133c2811a",
     "data": {
       "name": "Feu intérieur",
       "level": 2,
@@ -626,6 +651,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "cendres-brulantes",
+    "revision": "afb60044d5b8",
     "data": {
       "name": "Cendres brûlantes",
       "level": 3,
@@ -651,6 +677,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "conflagration-ecarlate",
+    "revision": "41a434e0a294",
     "data": {
       "name": "Conflagration écarlate",
       "level": 3,
@@ -675,6 +702,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-main-des-flammes",
+    "revision": "3c64107a8d3a",
     "data": {
       "name": "La main des flammes",
       "level": 3,
@@ -699,6 +727,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sang-de-moryagorn",
+    "revision": "0e0618cde803",
     "data": {
       "name": "Sang de Moryagorn",
       "level": 3,
@@ -724,6 +753,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "torche-eternelle",
+    "revision": "89c6d6f2c243",
     "data": {
       "name": "Torche éternelle",
       "level": 3,
@@ -749,6 +779,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "certitude",
+    "revision": "03d35573ebc7",
     "data": {
       "name": "Certitude",
       "level": 1,
@@ -770,6 +801,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "estampille-de-kezyr",
+    "revision": "f7136eeae058",
     "data": {
       "name": "Estampille de Kezyr",
       "level": 1,
@@ -793,6 +825,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "force-du-forgeron",
+    "revision": "22800b06b2e5",
     "data": {
       "name": "Force du forgeron",
       "level": 1,
@@ -817,6 +850,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "jeu-de-la-gravite",
+    "revision": "da9ed1563768",
     "data": {
       "name": "Jeu de la gravité",
       "level": 1,
@@ -841,6 +875,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lame-brisee",
+    "revision": "652c12749f1e",
     "data": {
       "name": "Lame brisée",
       "level": 1,
@@ -863,6 +898,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lame-du-heros",
+    "revision": "a539ec6a4810",
     "data": {
       "name": "Lame du héros",
       "level": 1,
@@ -888,6 +924,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "mine-merveilleuse",
+    "revision": "49dcae32d3bd",
     "data": {
       "name": "Mine merveilleuse",
       "level": 1,
@@ -909,6 +946,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pas-legers",
+    "revision": "bef0abb24dda",
     "data": {
       "name": "Pas légers",
       "level": 1,
@@ -934,6 +972,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poing-dacier",
+    "revision": "400be7b8cd7c",
     "data": {
       "name": "Poing d'acier",
       "level": 1,
@@ -959,6 +998,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "rideau-dacier",
+    "revision": "16c8b8a90a45",
     "data": {
       "name": "Rideau d'acier",
       "level": 1,
@@ -984,6 +1024,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "acide-de-kezyr",
+    "revision": "abdde1889b8f",
     "data": {
       "name": "Acide de Kezyr",
       "level": 2,
@@ -1008,6 +1049,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "attraction-des-faibles",
+    "revision": "05fde9d21968",
     "data": {
       "name": "Attraction des faibles",
       "level": 2,
@@ -1033,6 +1075,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "globes-de-la-vengeance",
+    "revision": "57849114f838",
     "data": {
       "name": "Globes de la vengeance",
       "level": 2,
@@ -1058,6 +1101,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "serviteur-argente",
+    "revision": "d48415942814",
     "data": {
       "name": "Serviteur argenté",
       "level": 2,
@@ -1083,6 +1127,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "traits-aceres",
+    "revision": "4db81bc0c4c7",
     "data": {
       "name": "Traits acérés",
       "level": 2,
@@ -1106,6 +1151,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "colere-du-metal",
+    "revision": "a9e8af4be9d5",
     "data": {
       "name": "Colère du métal",
       "level": 3,
@@ -1130,6 +1176,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "cercle-sacre",
+    "revision": "c356d95a29cb",
     "data": {
       "name": "Cercle sacré",
       "level": 1,
@@ -1155,6 +1202,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "croissance-animale",
+    "revision": "301915913210",
     "data": {
       "name": "Croissance animale",
       "level": 1,
@@ -1178,6 +1226,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lecorce-dheyra",
+    "revision": "a4514563e316",
     "data": {
       "name": "L'écorce d'Heyra",
       "level": 1,
@@ -1202,6 +1251,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "entraves-verdoyantes",
+    "revision": "f7a0267b1757",
     "data": {
       "name": "Entraves verdoyantes",
       "level": 1,
@@ -1226,6 +1276,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fruits-sauvages",
+    "revision": "f9d57ae21bfe",
     "data": {
       "name": "Fruits sauvages",
       "level": 1,
@@ -1249,6 +1300,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lierre-grimpant",
+    "revision": "d0dc5b18bbd9",
     "data": {
       "name": "Lierre grimpant",
       "level": 1,
@@ -1273,6 +1325,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "parterre-de-fleurs",
+    "revision": "bf0f5c905a1d",
     "data": {
       "name": "Parterre de fleurs",
       "level": 1,
@@ -1297,6 +1350,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "puissance-du-dragon",
+    "revision": "59e0619462eb",
     "data": {
       "name": "Puissance du dragon",
       "level": 1,
@@ -1321,6 +1375,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "regain-denergie",
+    "revision": "af33fd4d606e",
     "data": {
       "name": "Regain d'énergie",
       "level": 1,
@@ -1344,6 +1399,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "vitalite-naturelle",
+    "revision": "f5869077abd6",
     "data": {
       "name": "Vitalité naturelle",
       "level": 1,
@@ -1368,6 +1424,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "colere-de-la-nature",
+    "revision": "071381f6d80a",
     "data": {
       "name": "Colère de la nature",
       "level": 2,
@@ -1394,6 +1451,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "flute-charmeuse",
+    "revision": "f97cb8686f78",
     "data": {
       "name": "Flûte charmeuse",
       "level": 2,
@@ -1418,6 +1476,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "nuee-de-moustiques",
+    "revision": "eab3ea4c3cd5",
     "data": {
       "name": "Nuée de moustiques",
       "level": 2,
@@ -1444,6 +1503,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "remede-naturel",
+    "revision": "3f6597f0e032",
     "data": {
       "name": "Remède naturel",
       "level": 2,
@@ -1468,6 +1528,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "baton-du-tonnerre",
+    "revision": "c294282bd1e8",
     "data": {
       "name": "Bâton du tonnerre",
       "level": 3,
@@ -1493,6 +1554,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "dryade-de-la-fertilite",
+    "revision": "f99b2ef14cac",
     "data": {
       "name": "Dryade de la fertilité",
       "level": 3,
@@ -1519,6 +1581,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "bouclier-dembruns",
+    "revision": "74712e4474e7",
     "data": {
       "name": "Bouclier d'embruns",
       "level": 1,
@@ -1544,6 +1607,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "danse-du-poisson",
+    "revision": "90288c454498",
     "data": {
       "name": "Danse du poisson",
       "level": 1,
@@ -1568,6 +1632,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "grimoire-astucieux",
+    "revision": "f7d8e506ae47",
     "data": {
       "name": "Grimoire astucieux",
       "level": 1,
@@ -1592,6 +1657,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "mal-de-mer",
+    "revision": "5301ed1219a2",
     "data": {
       "name": "Mal de mer",
       "level": 1,
@@ -1617,6 +1683,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "nymphe-nacree",
+    "revision": "637ebd810480",
     "data": {
       "name": "Nymphe nacrée",
       "level": 1,
@@ -1642,6 +1709,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "rumeur-des-vagues",
+    "revision": "832f674aed8e",
     "data": {
       "name": "Rumeur des vagues",
       "level": 1,
@@ -1666,6 +1734,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sapience-singuliere",
+    "revision": "171452b54db3",
     "data": {
       "name": "Sapience singulière",
       "level": 1,
@@ -1687,6 +1756,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "torrent-glace",
+    "revision": "e5c6f9ee337d",
     "data": {
       "name": "Torrent glacé",
       "level": 1,
@@ -1712,6 +1782,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "vision-troublante",
+    "revision": "6faa2751aab0",
     "data": {
       "name": "Vision troublante",
       "level": 1,
@@ -1734,6 +1805,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "cristal-des-profondeurs",
+    "revision": "1f054441d3c3",
     "data": {
       "name": "Cristal des profondeurs",
       "level": 2,
@@ -1759,6 +1831,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "source-vive",
+    "revision": "3074b5a15e26",
     "data": {
       "name": "Source vive",
       "level": 2,
@@ -1782,6 +1855,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fontaine-bienfaisante",
+    "revision": "f9067d014d63",
     "data": {
       "name": "Fontaine bienfaisante",
       "level": 3,
@@ -1807,6 +1881,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fureur-dozyr",
+    "revision": "f17db152a09d",
     "data": {
       "name": "Fureur d'Ozyr",
       "level": 3,
@@ -1833,6 +1908,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "raz-de-maree",
+    "revision": "7b7b86581168",
     "data": {
       "name": "Raz de marée",
       "level": 3,
@@ -1858,6 +1934,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "alteration-de-brorne",
+    "revision": "b7dc98e88f62",
     "data": {
       "name": "Altération de Brorne",
       "level": 1,
@@ -1883,6 +1960,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "arme-de-puissance",
+    "revision": "fd2dc86ec2a4",
     "data": {
       "name": "Arme de puissance",
       "level": 1,
@@ -1907,6 +1985,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "chemin-de-la-terre",
+    "revision": "b4ec09f1730f",
     "data": {
       "name": "Chemin de la terre",
       "level": 1,
@@ -1931,6 +2010,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "crevasse-vertigineuse",
+    "revision": "a014f7fd0828",
     "data": {
       "name": "Crevasse vertigineuse",
       "level": 1,
@@ -1956,6 +2036,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "golem-aile",
+    "revision": "c529fb1d4cef",
     "data": {
       "name": "Golem ailé",
       "level": 1,
@@ -1982,6 +2063,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "graviers-volants",
+    "revision": "3e7fc3a56bab",
     "data": {
       "name": "Graviers volants",
       "level": 1,
@@ -2004,6 +2086,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "peau-dalbatre",
+    "revision": "3a9487d960b7",
     "data": {
       "name": "Peau d'albâtre",
       "level": 1,
@@ -2028,6 +2111,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "armure-de-bravoure",
+    "revision": "ffdc0605385c",
     "data": {
       "name": "Armure de bravoure",
       "level": 2,
@@ -2053,6 +2137,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "armure-de-brorne",
+    "revision": "f67ce7ea27a7",
     "data": {
       "name": "Armure de Brorne",
       "level": 2,
@@ -2078,6 +2163,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "barriere-de-granit",
+    "revision": "6f5e52054865",
     "data": {
       "name": "Barrière de granit",
       "level": 2,
@@ -2102,6 +2188,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "gemmes-de-breloque",
+    "revision": "c6dce4785998",
     "data": {
       "name": "Gemmes de breloque",
       "level": 2,
@@ -2126,6 +2213,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "etendard-de-bravoure",
+    "revision": "29e8ad077366",
     "data": {
       "name": "Étendard de bravoure",
       "level": 3,
@@ -2151,6 +2239,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "montagne-de-nulle-part",
+    "revision": "6f6dfc0e997d",
     "data": {
       "name": "Montagne de nulle part",
       "level": 3,
@@ -2175,6 +2264,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "tornade-de-pierres",
+    "revision": "44e8ebb12fed",
     "data": {
       "name": "Tornade de pierres",
       "level": 3,
@@ -2201,6 +2291,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "tremblement-de-terre",
+    "revision": "9272b6111916",
     "data": {
       "name": "Tremblement de terre",
       "level": 3,
@@ -2226,6 +2317,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "arc-en-ciel-des-passions",
+    "revision": "966294a32add",
     "data": {
       "name": "Arc-en-ciel des passions",
       "level": 1,
@@ -2250,6 +2342,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "blocage-mental",
+    "revision": "3004e5ef14ea",
     "data": {
       "name": "Blocage mental",
       "level": 1,
@@ -2274,6 +2367,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "bouclier-mystique",
+    "revision": "819b329b4bd3",
     "data": {
       "name": "Bouclier mystique",
       "level": 1,
@@ -2298,6 +2392,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "deviation-subtile",
+    "revision": "ea49ac7143db",
     "data": {
       "name": "Déviation subtile",
       "level": 1,
@@ -2322,6 +2417,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "flots-deerie",
+    "revision": "3f1e2d36e459",
     "data": {
       "name": "Flots d'Eerie",
       "level": 1,
@@ -2345,6 +2441,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "grelots-tintants",
+    "revision": "3b9500745377",
     "data": {
       "name": "Grelots tintants",
       "level": 1,
@@ -2370,6 +2467,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "heaume-dauras",
+    "revision": "412f96a67c5f",
     "data": {
       "name": "Heaume d'auras",
       "level": 1,
@@ -2395,6 +2493,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poudre-de-reve",
+    "revision": "ce3d123954c1",
     "data": {
       "name": "Poudre de rêve",
       "level": 1,
@@ -2419,6 +2518,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "puits-de-chance",
+    "revision": "8a254995ce35",
     "data": {
       "name": "Puits de chance",
       "level": 1,
@@ -2440,6 +2540,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "resistance-magique",
+    "revision": "1edde72abc86",
     "data": {
       "name": "Résistance magique",
       "level": 1,
@@ -2465,6 +2566,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sceau-de-maladresse",
+    "revision": "bd0fddab967f",
     "data": {
       "name": "Sceau de maladresse",
       "level": 1,
@@ -2490,6 +2592,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "somme-du-bienheureux",
+    "revision": "a9c62fb55013",
     "data": {
       "name": "Somme du bienheureux",
       "level": 1,
@@ -2514,6 +2617,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "anneau-de-sort",
+    "revision": "8e28144201b0",
     "data": {
       "name": "Anneau de sort",
       "level": 2,
@@ -2538,6 +2642,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "benediction-etheree",
+    "revision": "6628c82ba7ec",
     "data": {
       "name": "Bénédiction éthérée",
       "level": 2,
@@ -2562,6 +2667,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "dechirure-etheree",
+    "revision": "c43b0e3039bb",
     "data": {
       "name": "Déchirure éthérée",
       "level": 2,
@@ -2586,6 +2692,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "receptacle-de-nenya",
+    "revision": "943afde61594",
     "data": {
       "name": "Réceptacle de Nenya",
       "level": 2,
@@ -2611,6 +2718,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "ailes-de-plumes-blanches",
+    "revision": "1813beb2e34f",
     "data": {
       "name": "Ailes de plumes blanches",
       "level": 1,
@@ -2636,6 +2744,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "envol-soudain",
+    "revision": "5eba62db523b",
     "data": {
       "name": "Envol soudain",
       "level": 1,
@@ -2660,6 +2769,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "file-vent",
+    "revision": "6b6b1a5be78f",
     "data": {
       "name": "File vent",
       "level": 1,
@@ -2685,6 +2795,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fleches-de-sang",
+    "revision": "abb7b41d1b66",
     "data": {
       "name": "Flèches de sang",
       "level": 1,
@@ -2709,6 +2820,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "gants-de-legerete",
+    "revision": "78206c5803dd",
     "data": {
       "name": "Gants de légèreté",
       "level": 1,
@@ -2733,6 +2845,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "hache-virevoltante",
+    "revision": "91c7fb45312a",
     "data": {
       "name": "Hache virevoltante",
       "level": 1,
@@ -2757,6 +2870,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "mouvement-invisible",
+    "revision": "fa99a1948628",
     "data": {
       "name": "Mouvement invisible",
       "level": 1,
@@ -2779,6 +2893,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "mur-dair",
+    "revision": "26cedcdc6cce",
     "data": {
       "name": "Mur d'air",
       "level": 1,
@@ -2803,6 +2918,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "nuage-avise",
+    "revision": "35aa6e9642c1",
     "data": {
       "name": "Nuage avisé",
       "level": 1,
@@ -2828,6 +2944,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "plateau-ascensionnel",
+    "revision": "8fce02a2fd2e",
     "data": {
       "name": "Plateau ascensionnel",
       "level": 1,
@@ -2852,6 +2969,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "route-des-vents",
+    "revision": "a078ce24de01",
     "data": {
       "name": "Route des vents",
       "level": 1,
@@ -2877,6 +2995,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "brise-amicale",
+    "revision": "8d743f9f2247",
     "data": {
       "name": "Brise amicale",
       "level": 2,
@@ -2901,6 +3020,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "foudre-de-szyl",
+    "revision": "a031eec8549b",
     "data": {
       "name": "Foudre de Szyl",
       "level": 2,
@@ -2926,6 +3046,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "piege-des-brises",
+    "revision": "7f7b7bda3603",
     "data": {
       "name": "Piège des brises",
       "level": 2,
@@ -2951,6 +3072,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "tornade",
+    "revision": "3c078fde882f",
     "data": {
       "name": "Tornade",
       "level": 3,
@@ -2975,6 +3097,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "chant-de-livrogne",
+    "revision": "b26619c06a3d",
     "data": {
       "name": "Chant de l'ivrogne",
       "level": 1,
@@ -2999,6 +3122,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "danse-du-mouchoir",
+    "revision": "aa7cb5fc4a8d",
     "data": {
       "name": "Danse du mouchoir",
       "level": 1,
@@ -3024,6 +3148,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "dialogue-mortuaire",
+    "revision": "6d8fa2bca5ea",
     "data": {
       "name": "Dialogue mortuaire",
       "level": 1,
@@ -3046,6 +3171,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "frisson-de-la-nuit",
+    "revision": "58b090165d02",
     "data": {
       "name": "Frisson de la nuit",
       "level": 1,
@@ -3071,6 +3197,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "memoire-oublieuse",
+    "revision": "407aef33ef07",
     "data": {
       "name": "Mémoire oublieuse",
       "level": 1,
@@ -3095,6 +3222,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "mur-dombre",
+    "revision": "82d95836b276",
     "data": {
       "name": "Mur d'ombre",
       "level": 1,
@@ -3120,6 +3248,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "nuage-nauseabond",
+    "revision": "d86c49609db7",
     "data": {
       "name": "Nuage nauséabond",
       "level": 1,
@@ -3145,6 +3274,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "eloge-de-la-folie",
+    "revision": "0671bbaff415",
     "data": {
       "name": "Éloge de la folie",
       "level": 2,
@@ -3170,6 +3300,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "globe-tenebreux",
+    "revision": "2bfc277905c1",
     "data": {
       "name": "Globe ténébreux",
       "level": 2,
@@ -3195,6 +3326,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "guerriers-fantomes",
+    "revision": "1f0f0e41f6cc",
     "data": {
       "name": "Guerriers fantômes",
       "level": 2,
@@ -3220,6 +3352,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pacte-de-kalimsshar",
+    "revision": "ab07620283d2",
     "data": {
       "name": "Pacte de Kalimsshar",
       "level": 2,
@@ -3244,6 +3377,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pointe-suintante",
+    "revision": "47afcc5711f0",
     "data": {
       "name": "Pointe suintante",
       "level": 2,
@@ -3268,6 +3402,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "echange-de-la-vie",
+    "revision": "2bb084d3b8de",
     "data": {
       "name": "Échange de la vie",
       "level": 3,
@@ -3292,6 +3427,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "tourbillon-des-abysses",
+    "revision": "03525adc3032",
     "data": {
       "name": "Tourbillon des abysses",
       "level": 3,
@@ -3317,6 +3453,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "linattention",
+    "revision": "30c34570f1e2",
     "data": {
       "name": "L'inattention",
       "level": 1,
@@ -3340,6 +3477,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lombre-des-ruelles",
+    "revision": "fc7ac9a274b6",
     "data": {
       "name": "L'ombre des ruelles",
       "level": 2,
@@ -3367,6 +3505,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-rendez-vous-manque",
+    "revision": "417412cf95a3",
     "data": {
       "name": "Le rendez-vous manqué",
       "level": 2,
@@ -3389,6 +3528,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "laura-draconique",
+    "revision": "0def08553bd8",
     "data": {
       "name": "L'aura draconique",
       "level": 2,
@@ -3415,6 +3555,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lesprit-des-rues",
+    "revision": "61a66d64765b",
     "data": {
       "name": "L'esprit des rues",
       "level": 3,
@@ -3438,6 +3579,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-bague-des-amants",
+    "revision": "cb40b1c426e6",
     "data": {
       "name": "La bague des amants",
       "level": 3,
@@ -3462,6 +3604,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-robe-du-citadin",
+    "revision": "5e89f6a294af",
     "data": {
       "name": "La robe du citadin",
       "level": 3,
@@ -3487,6 +3630,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-seuil",
+    "revision": "bdd22cb6d857",
     "data": {
       "name": "Le Seuil",
       "level": 3,
@@ -3511,6 +3655,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "langue-de-feu",
+    "revision": "af93b5773d7b",
     "data": {
       "name": "Langue de feu",
       "level": 1,
@@ -3535,6 +3680,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "coup-de-tonnerre",
+    "revision": "6664990e6095",
     "data": {
       "name": "Coup de tonnerre",
       "level": 1,
@@ -3560,6 +3706,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fulgurance",
+    "revision": "6c1ecb7e0362",
     "data": {
       "name": "Fulgurance",
       "level": 1,
@@ -3585,6 +3732,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "subjugation",
+    "revision": "ef29b5c42dfa",
     "data": {
       "name": "Subjugation",
       "level": 1,
@@ -3610,6 +3758,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "scintillements",
+    "revision": "4b91ffee287a",
     "data": {
       "name": "Scintillements",
       "level": 1,
@@ -3635,6 +3784,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "espion-igne",
+    "revision": "1ca24419ee77",
     "data": {
       "name": "Espion igné",
       "level": 1,
@@ -3658,6 +3808,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-rugissantes",
+    "revision": "e4a34a4cf5be",
     "data": {
       "name": "Les Rugissantes",
       "level": 1,
@@ -3685,6 +3836,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "coursier-de-feu",
+    "revision": "9a45dc8d0515",
     "data": {
       "name": "Coursier de feu",
       "level": 1,
@@ -3708,6 +3860,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poing-foudroyant",
+    "revision": "fe23d557cec2",
     "data": {
       "name": "Poing foudroyant",
       "level": 2,
@@ -3731,6 +3884,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "comete",
+    "revision": "1071dca2b51b",
     "data": {
       "name": "Comète",
       "level": 2,
@@ -3754,6 +3908,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "immunite-au-feu",
+    "revision": "838942bc8083",
     "data": {
       "name": "Immunité au feu",
       "level": 2,
@@ -3778,6 +3933,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "flash",
+    "revision": "623223c7a9a1",
     "data": {
       "name": "Flash",
       "level": 2,
@@ -3803,6 +3959,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "mur-de-flammes",
+    "revision": "184a90969893",
     "data": {
       "name": "Mur de flammes",
       "level": 2,
@@ -3827,6 +3984,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "dryades",
+    "revision": "e001ac270f47",
     "data": {
       "name": "Dryades",
       "level": 2,
@@ -3852,6 +4010,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "portail-maudit",
+    "revision": "e796aac91714",
     "data": {
       "name": "Portail maudit",
       "level": 2,
@@ -3877,6 +4036,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "esprit-du-sang",
+    "revision": "62ee97c72f26",
     "data": {
       "name": "Esprit du sang",
       "level": 2,
@@ -3903,6 +4063,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "exhorte",
+    "revision": "990e4a82fdbf",
     "data": {
       "name": "Exhorte",
       "level": 3,
@@ -3927,6 +4088,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "phenix",
+    "revision": "6f5d899a92fb",
     "data": {
       "name": "Phénix",
       "level": 3,
@@ -3951,6 +4113,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "runes-de-feu",
+    "revision": "44f0f1bf4f78",
     "data": {
       "name": "Runes de feu",
       "level": 3,
@@ -3975,6 +4138,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "scelle",
+    "revision": "5aa14f0f8ce0",
     "data": {
       "name": "Scellé",
       "level": 3,
@@ -3999,6 +4163,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "foudres-de-kroryn",
+    "revision": "012e11a5bb90",
     "data": {
       "name": "Foudres de Kroryn",
       "level": 3,
@@ -4024,6 +4189,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poudre-de-deshydratation",
+    "revision": "8d5b892a8800",
     "data": {
       "name": "Poudre de déshydratation",
       "level": 3,
@@ -4049,6 +4215,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "bouclier-flamboyant",
+    "revision": "d7e1e5a9e01d",
     "data": {
       "name": "Bouclier flamboyant",
       "level": 3,
@@ -4075,6 +4242,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "eau-de-feu",
+    "revision": "eb5bcb40b0c6",
     "data": {
       "name": "Eau de feu",
       "level": 3,
@@ -4098,6 +4266,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "effigie-de-kroryn",
+    "revision": "657425d36eff",
     "data": {
       "name": "Effigie de Kroryn",
       "level": 3,
@@ -4121,6 +4290,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-refus-de-la-fatalite",
+    "revision": "4bf8920cdbf3",
     "data": {
       "name": "Le refus de la fatalité",
       "level": 1,
@@ -4142,6 +4312,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lame-des-artisans",
+    "revision": "3495209f367c",
     "data": {
       "name": "Lame des artisans",
       "level": 1,
@@ -4165,6 +4336,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "frere-du-metal",
+    "revision": "cfea5e61cc41",
     "data": {
       "name": "Frère du métal",
       "level": 1,
@@ -4187,6 +4359,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-ailes-dairain",
+    "revision": "16bb51501d92",
     "data": {
       "name": "Les ailes d'airain",
       "level": 1,
@@ -4210,6 +4383,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "leclat-de-lunique",
+    "revision": "52db42721b8f",
     "data": {
       "name": "L'éclat de l'unique",
       "level": 2,
@@ -4236,6 +4410,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-creuset-du-metal",
+    "revision": "7a66c9a85051",
     "data": {
       "name": "Le creuset du métal",
       "level": 2,
@@ -4260,6 +4435,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-larmes-de-kezyr",
+    "revision": "c0aeed73d3f7",
     "data": {
       "name": "Les larmes de Kezyr",
       "level": 3,
@@ -4285,6 +4461,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-sceau-de-confiance",
+    "revision": "5ddce366ca3d",
     "data": {
       "name": "Le sceau de confiance",
       "level": 3,
@@ -4309,6 +4486,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-clefs-du-destin",
+    "revision": "e080863f4bee",
     "data": {
       "name": "Les clefs du destin",
       "level": 3,
@@ -4333,6 +4511,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-manteau-de-foudre",
+    "revision": "c4aaf546d142",
     "data": {
       "name": "Le manteau de foudre",
       "level": 3,
@@ -4359,6 +4538,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "memoire-de-la-terre",
+    "revision": "573609567684",
     "data": {
       "name": "Mémoire de la terre",
       "level": 1,
@@ -4382,6 +4562,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "ouverture-des-terres",
+    "revision": "c4e40af900ca",
     "data": {
       "name": "Ouverture des terres",
       "level": 1,
@@ -4404,6 +4585,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-mille-regards-de-la-nature",
+    "revision": "04fac8d9e2c0",
     "data": {
       "name": "Les mille regards de la Nature",
       "level": 1,
@@ -4428,6 +4610,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fontaine-des-ondines",
+    "revision": "3533d8a3b167",
     "data": {
       "name": "Fontaine des Ondines",
       "level": 1,
@@ -4450,6 +4633,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "serviteur-de-heyra",
+    "revision": "0568436367d1",
     "data": {
       "name": "Serviteur de Heyra",
       "level": 1,
@@ -4474,6 +4658,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-yeux-dellorian-dorsac",
+    "revision": "e9ab575ba7a5",
     "data": {
       "name": "Les yeux d'Ellorian Dorsac",
       "level": 1,
@@ -4497,6 +4682,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "coursier-sylvestre",
+    "revision": "d96bec60f1e4",
     "data": {
       "name": "Coursier sylvestre",
       "level": 1,
@@ -4520,6 +4706,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "automne-precoce",
+    "revision": "7427c5bb90dc",
     "data": {
       "name": "Automne précoce",
       "level": 2,
@@ -4544,6 +4731,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "benediction-de-heyra",
+    "revision": "94315ecfed22",
     "data": {
       "name": "Bénédiction de Heyra",
       "level": 2,
@@ -4566,6 +4754,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "transformation-vegetale",
+    "revision": "849661473f17",
     "data": {
       "name": "Transformation végétale",
       "level": 2,
@@ -4590,6 +4779,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lien-primordial",
+    "revision": "9b0035810ff0",
     "data": {
       "name": "Lien primordial",
       "level": 2,
@@ -4614,6 +4804,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "rose-rouge",
+    "revision": "46225824fa3b",
     "data": {
       "name": "Rose rouge",
       "level": 2,
@@ -4640,6 +4831,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-lame-du-chasseur",
+    "revision": "0b736c2c3373",
     "data": {
       "name": "La lame du chasseur",
       "level": 2,
@@ -4662,6 +4854,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "boue-primordiale",
+    "revision": "f28a488640c3",
     "data": {
       "name": "Boue primordiale",
       "level": 2,
@@ -4687,6 +4880,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "refuge-vegetal",
+    "revision": "b3ae757a4f5c",
     "data": {
       "name": "Refuge végétal",
       "level": 3,
@@ -4713,6 +4907,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "marteau-de-chene",
+    "revision": "f485d9437146",
     "data": {
       "name": "Marteau de chêne",
       "level": 3,
@@ -4737,6 +4932,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "appel-des-fenndanns",
+    "revision": "2c4d8c9636e0",
     "data": {
       "name": "Appel des Fenn'danns",
       "level": 3,
@@ -4760,6 +4956,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "justice-de-la-terre",
+    "revision": "ba1955ff1a86",
     "data": {
       "name": "Justice de la terre",
       "level": 3,
@@ -4783,6 +4980,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-baume-de-cameleon",
+    "revision": "58bdb2e01d4b",
     "data": {
       "name": "Le baume de caméléon",
       "level": 3,
@@ -4807,6 +5005,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "baies-de-vitalite",
+    "revision": "fe6b0a377800",
     "data": {
       "name": "Baies de vitalité",
       "level": 3,
@@ -4832,6 +5031,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-chant-sylvestre",
+    "revision": "cbcd3107eb18",
     "data": {
       "name": "Le chant sylvestre",
       "level": 3,
@@ -4857,6 +5057,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "ecaille-de-la-terre",
+    "revision": "a00eaa344a47",
     "data": {
       "name": "Ecaille de la terre",
       "level": 3,
@@ -4882,6 +5083,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-cercles-du-nenuphar",
+    "revision": "addcffc54959",
     "data": {
       "name": "Les cercles du nénuphar",
       "level": 1,
@@ -4906,6 +5108,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "londe",
+    "revision": "7b0d471cb926",
     "data": {
       "name": "L'onde",
       "level": 1,
@@ -4928,6 +5131,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-maree-des-souvenirs",
+    "revision": "f89d3620d03e",
     "data": {
       "name": "La marée des souvenirs",
       "level": 1,
@@ -4953,6 +5157,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "de-leau-a-los",
+    "revision": "929ab8ce036a",
     "data": {
       "name": "De l'eau à l'os",
       "level": 1,
@@ -4975,6 +5180,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "coursier-des-profondeurs",
+    "revision": "3e0cfd9542ca",
     "data": {
       "name": "Coursier des profondeurs",
       "level": 1,
@@ -4998,6 +5204,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "enfant-dozyr",
+    "revision": "577c748b8ad1",
     "data": {
       "name": "Enfant d'Ozyr",
       "level": 2,
@@ -5023,6 +5230,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lesprit-au-dela-du-corps",
+    "revision": "a98ed1381a90",
     "data": {
       "name": "L'esprit, au-delà du corps",
       "level": 2,
@@ -5048,6 +5256,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "de-los-a-la-vie",
+    "revision": "7ac5db6e81db",
     "data": {
       "name": "De l'os à la vie",
       "level": 2,
@@ -5072,6 +5281,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "les-embruns-de-la-maree-mere",
+    "revision": "c9469f11c83e",
     "data": {
       "name": "Les embruns de la Marée-Mère",
       "level": 3,
@@ -5095,6 +5305,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "de-la-vie-a-locean",
+    "revision": "b92fe1643b1a",
     "data": {
       "name": "De la vie à l'océan",
       "level": 3,
@@ -5117,6 +5328,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "equilibre-ultime",
+    "revision": "0b2a17af33c7",
     "data": {
       "name": "Equilibre ultime",
       "level": 3,
@@ -5140,6 +5352,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sceau-dozyr",
+    "revision": "16bc4bb52c40",
     "data": {
       "name": "Sceau d'Ozyr",
       "level": 3,
@@ -5165,6 +5378,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "ecrase-pierre",
+    "revision": "b4943c5771b2",
     "data": {
       "name": "Ecrase pierre",
       "level": 1,
@@ -5188,6 +5402,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "masse",
+    "revision": "4fc075af098b",
     "data": {
       "name": "Masse",
       "level": 1,
@@ -5210,6 +5425,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "billes-de-pierre",
+    "revision": "a2370b3a2782",
     "data": {
       "name": "Billes de pierre",
       "level": 1,
@@ -5235,6 +5451,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "voix-de-la-montagne",
+    "revision": "66086c2c2eff",
     "data": {
       "name": "Voix de la montagne",
       "level": 1,
@@ -5261,6 +5478,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "coursier-mineral",
+    "revision": "3650ec4ca2db",
     "data": {
       "name": "Coursier minéral",
       "level": 1,
@@ -5284,6 +5502,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sentir-le-fatalisme",
+    "revision": "e062ab910caa",
     "data": {
       "name": "Sentir le Fatalisme",
       "level": 2,
@@ -5306,6 +5525,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "rigidite",
+    "revision": "5e687b2e9f71",
     "data": {
       "name": "Rigidité",
       "level": 2,
@@ -5329,6 +5549,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "porte-close",
+    "revision": "9daec20e8eda",
     "data": {
       "name": "Porte close",
       "level": 2,
@@ -5353,6 +5574,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "motivation-des-troupes",
+    "revision": "83c44d33fe7c",
     "data": {
       "name": "Motivation des troupes",
       "level": 3,
@@ -5377,6 +5599,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pieux-mineraux",
+    "revision": "c9ca019d176f",
     "data": {
       "name": "Pieux minéraux",
       "level": 3,
@@ -5400,6 +5623,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "feu-de-brorne",
+    "revision": "1d5a843fed5d",
     "data": {
       "name": "Feu de Brorne",
       "level": 3,
@@ -5426,6 +5650,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "chaussures-minerales",
+    "revision": "1b4ef1fcf30b",
     "data": {
       "name": "Chaussures minérales",
       "level": 3,
@@ -5453,6 +5678,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pierre-tombale",
+    "revision": "e666e501a08b",
     "data": {
       "name": "Pierre tombale",
       "level": 3,
@@ -5475,6 +5701,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "admiration",
+    "revision": "5a54ce4d5684",
     "data": {
       "name": "Admiration",
       "level": 1,
@@ -5497,6 +5724,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "couleurs-de-nenya",
+    "revision": "fe957458067d",
     "data": {
       "name": "Couleurs de Nenya",
       "level": 1,
@@ -5523,6 +5751,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "illusion-cauchemardesque",
+    "revision": "0b26be000b34",
     "data": {
       "name": "Illusion cauchemardesque",
       "level": 1,
@@ -5549,6 +5778,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "brumes-etherees",
+    "revision": "87b390461bb1",
     "data": {
       "name": "Brumes éthérées",
       "level": 1,
@@ -5574,6 +5804,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "coursier-ethere",
+    "revision": "8f52c375633d",
     "data": {
       "name": "Coursier éthéré",
       "level": 1,
@@ -5597,6 +5828,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "brouillard",
+    "revision": "f9f1a93512e1",
     "data": {
       "name": "Brouillard",
       "level": 2,
@@ -5622,6 +5854,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "croisee",
+    "revision": "ceb3d1dff5b6",
     "data": {
       "name": "Croisée",
       "level": 2,
@@ -5647,6 +5880,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "benediction-de-khymera",
+    "revision": "02e83126315d",
     "data": {
       "name": "Bénédiction de Khyméra",
       "level": 2,
@@ -5671,6 +5905,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "chuchotements",
+    "revision": "b5faa6d35861",
     "data": {
       "name": "Chuchotements",
       "level": 2,
@@ -5695,6 +5930,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fenetre-onirique",
+    "revision": "ae58fc5f2fc7",
     "data": {
       "name": "Fenêtre onirique",
       "level": 2,
@@ -5719,6 +5955,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "refuge",
+    "revision": "c1d3ce09d4b3",
     "data": {
       "name": "Refuge",
       "level": 2,
@@ -5746,6 +5983,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sirene",
+    "revision": "d037ed190e99",
     "data": {
       "name": "Sirène",
       "level": 2,
@@ -5769,6 +6007,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "psychonaute",
+    "revision": "19fd879e7605",
     "data": {
       "name": "Psychonaute",
       "level": 3,
@@ -5791,6 +6030,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "voix-de-nenya",
+    "revision": "5ccdc7415676",
     "data": {
       "name": "Voix de Nenya",
       "level": 3,
@@ -5813,6 +6053,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pinceaux",
+    "revision": "c6eb222c3a93",
     "data": {
       "name": "Pinceaux",
       "level": 3,
@@ -5837,6 +6078,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "bandeau-de-vision",
+    "revision": "d2ca7e261516",
     "data": {
       "name": "Bandeau de vision",
       "level": 3,
@@ -5862,6 +6104,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "peinture-multicolore",
+    "revision": "e593f74d53c9",
     "data": {
       "name": "Peinture multicolore",
       "level": 3,
@@ -5886,6 +6129,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "baume-apaisant",
+    "revision": "5c3b8bc654f9",
     "data": {
       "name": "Baume apaisant",
       "level": 3,
@@ -5911,6 +6155,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "chariot-des-reves",
+    "revision": "44d7508438dc",
     "data": {
       "name": "Chariot des rêves",
       "level": 3,
@@ -5934,6 +6179,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "limpulsion",
+    "revision": "6d913d785e00",
     "data": {
       "name": "L'impulsion",
       "level": 1,
@@ -5959,6 +6205,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "conscience",
+    "revision": "0ce3dadbc5f1",
     "data": {
       "name": "Conscience",
       "level": 1,
@@ -5982,6 +6229,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "voyageur-eolien",
+    "revision": "dfbcc926d0a0",
     "data": {
       "name": "Voyageur éolien",
       "level": 1,
@@ -6005,6 +6253,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-sifflement",
+    "revision": "b8942b5e2a41",
     "data": {
       "name": "Le sifflement",
       "level": 2,
@@ -6031,6 +6280,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-bonne-fortune",
+    "revision": "2a80a52f1a07",
     "data": {
       "name": "La bonne fortune",
       "level": 2,
@@ -6055,6 +6305,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "porte-bonheur",
+    "revision": "7715aa3f22b5",
     "data": {
       "name": "Porte-bonheur",
       "level": 2,
@@ -6079,6 +6330,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "loeil-du-cyclone",
+    "revision": "568f232a3379",
     "data": {
       "name": "L'œil du cyclone",
       "level": 3,
@@ -6105,6 +6357,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "orphelin-des-vents",
+    "revision": "4c173fc6577f",
     "data": {
       "name": "Orphelin des vents",
       "level": 3,
@@ -6131,6 +6384,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "nemesis",
+    "revision": "c2609291df91",
     "data": {
       "name": "Nemesis",
       "level": 3,
@@ -6155,6 +6409,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "age",
+    "revision": "09deb9e03bcd",
     "data": {
       "name": "Age",
       "level": 1,
@@ -6177,6 +6432,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "griffe-dos",
+    "revision": "b708fc781b1a",
     "data": {
       "name": "Griffe d'os",
       "level": 1,
@@ -6203,6 +6459,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "revelation",
+    "revision": "ea4c4e99e97a",
     "data": {
       "name": "Révélation",
       "level": 1,
@@ -6226,6 +6483,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "esprit-du-gouffre",
+    "revision": "cc9a707c6437",
     "data": {
       "name": "Esprit du Gouffre",
       "level": 1,
@@ -6251,6 +6509,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "oeil-de-vie",
+    "revision": "8e505e427e6d",
     "data": {
       "name": "Œil de vie",
       "level": 1,
@@ -6274,6 +6533,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "champion-de-lombre",
+    "revision": "c12db03d006e",
     "data": {
       "name": "Champion de l'Ombre",
       "level": 1,
@@ -6296,6 +6556,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "miroir-des-souvenirs",
+    "revision": "615c50a9c443",
     "data": {
       "name": "Miroir des souvenirs",
       "level": 1,
@@ -6319,6 +6580,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "machoire-monstrueuse",
+    "revision": "abfc4c6bb9cc",
     "data": {
       "name": "Mâchoire monstrueuse",
       "level": 2,
@@ -6345,6 +6607,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "dard-de-kalimsshar",
+    "revision": "d8bbb7a0e05d",
     "data": {
       "name": "Dard de Kalimsshar",
       "level": 2,
@@ -6369,6 +6632,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "emotion-controlee",
+    "revision": "a370b33c2c75",
     "data": {
       "name": "Emotion contrôlée",
       "level": 2,
@@ -6394,6 +6658,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-flamme-de-kali",
+    "revision": "4fabc5fd0996",
     "data": {
       "name": "La flamme de Kali",
       "level": 2,
@@ -6417,6 +6682,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "dette-de-kalimsshar",
+    "revision": "e75ad344bb41",
     "data": {
       "name": "Dette de Kalimsshar",
       "level": 2,
@@ -6440,6 +6706,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "flux-vital",
+    "revision": "e48138157f91",
     "data": {
       "name": "Flux vital",
       "level": 2,
@@ -6466,6 +6733,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "etreinte-de-lombre",
+    "revision": "dd30ffb083e0",
     "data": {
       "name": "Etreinte de l'ombre",
       "level": 2,
@@ -6491,6 +6759,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "portail-de-desespoir",
+    "revision": "f8f87b04ac03",
     "data": {
       "name": "Portail de désespoir",
       "level": 2,
@@ -6513,6 +6782,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "echardes-dombre",
+    "revision": "953edf337e03",
     "data": {
       "name": "Echardes d'ombre",
       "level": 2,
@@ -6536,6 +6806,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "servitude-de-lombre",
+    "revision": "8ff042d771c7",
     "data": {
       "name": "Servitude de l'ombre",
       "level": 2,
@@ -6559,6 +6830,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "presence-sulfureuse",
+    "revision": "16540d36fd1a",
     "data": {
       "name": "Présence sulfureuse",
       "level": 3,
@@ -6586,6 +6858,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "vision-traumatique",
+    "revision": "57b8c86ec709",
     "data": {
       "name": "Vision traumatique",
       "level": 3,
@@ -6612,6 +6885,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "rappel-draconique",
+    "revision": "9a7dd813bca5",
     "data": {
       "name": "Rappel draconique",
       "level": 3,
@@ -6635,6 +6909,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "malediction-de-kalimsshar",
+    "revision": "9c54e7e5dc31",
     "data": {
       "name": "Malédiction de Kalimsshar",
       "level": 3,
@@ -6657,6 +6932,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "augure",
+    "revision": "71583a7fe7aa",
     "data": {
       "name": "Augure",
       "level": 3,
@@ -6679,6 +6955,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "au-guet",
+    "revision": "62feaaf2f26f",
     "data": {
       "name": "Au guet !",
       "level": 1,
@@ -6701,6 +6978,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fenetre-des-revelations",
+    "revision": "f6a8c0c9a73e",
     "data": {
       "name": "Fenêtre des révélations",
       "level": 1,
@@ -6724,6 +7002,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poutre-trompeuse",
+    "revision": "f6f7c2183db5",
     "data": {
       "name": "Poutre trompeuse",
       "level": 1,
@@ -6747,6 +7026,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pas-du-gecko",
+    "revision": "a761b43c747d",
     "data": {
       "name": "Pas du gecko",
       "level": 3,
@@ -6773,6 +7053,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "peinture-de-dissimulation",
+    "revision": "98939018b50c",
     "data": {
       "name": "Peinture de dissimulation",
       "level": 3,
@@ -6797,6 +7078,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "dard-de-feu",
+    "revision": "be86d1acd470",
     "data": {
       "name": "Dard de feu",
       "level": 2,
@@ -6820,6 +7102,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "grele-de-feu",
+    "revision": "c5fc2783f95e",
     "data": {
       "name": "Grêle de feu",
       "level": 2,
@@ -6845,6 +7128,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "transe-belgorienne",
+    "revision": "b3087fe8604b",
     "data": {
       "name": "Transe belgorienne",
       "level": 2,
@@ -6872,6 +7156,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "rune-du-feu",
+    "revision": "d78fcbcc6e43",
     "data": {
       "name": "Rune du feu",
       "level": 3,
@@ -6896,6 +7181,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sanctuaire-de-flammes",
+    "revision": "26120b998b3d",
     "data": {
       "name": "Sanctuaire de flammes",
       "level": 3,
@@ -6919,6 +7205,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "griffes-rasoirs",
+    "revision": "1e7ab9c9fbdd",
     "data": {
       "name": "Griffes rasoirs",
       "level": 2,
@@ -6944,6 +7231,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "eclat-insoutenable",
+    "revision": "d0cef9da6fcf",
     "data": {
       "name": "Éclat insoutenable",
       "level": 2,
@@ -6966,6 +7254,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "cisaille-expeditive",
+    "revision": "10f93c652311",
     "data": {
       "name": "Cisaille expéditive",
       "level": 3,
@@ -6989,6 +7278,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "etole-de-laceration",
+    "revision": "f13323f726d0",
     "data": {
       "name": "Etole de lacération",
       "level": 3,
@@ -7013,6 +7303,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "metal-servile",
+    "revision": "ac508d6ff689",
     "data": {
       "name": "Métal servile",
       "level": 3,
@@ -7037,6 +7328,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sceau-de-portail",
+    "revision": "5383a0413e92",
     "data": {
       "name": "Sceau de portail",
       "level": 3,
@@ -7061,6 +7353,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "feuille-aceree",
+    "revision": "b5078c0fcd7b",
     "data": {
       "name": "Feuille acérée",
       "level": 1,
@@ -7083,6 +7376,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "appel-des-predateurs",
+    "revision": "500f178d1688",
     "data": {
       "name": "Appel des prédateurs",
       "level": 3,
@@ -7105,6 +7399,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "arbre-anime",
+    "revision": "da3cde22671f",
     "data": {
       "name": "Arbre animé",
       "level": 3,
@@ -7130,6 +7425,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "controle-danimal",
+    "revision": "42442deb258a",
     "data": {
       "name": "Contrôle d'animal",
       "level": 3,
@@ -7154,6 +7450,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "epanouissement",
+    "revision": "b4fdf99a533e",
     "data": {
       "name": "Epanouissement",
       "level": 3,
@@ -7176,6 +7473,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "force-de-la-nature",
+    "revision": "a9a1722f1705",
     "data": {
       "name": "Force de la nature",
       "level": 3,
@@ -7200,6 +7498,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "metamorphose",
+    "revision": "bb92f20c2a8f",
     "data": {
       "name": "Métamorphose",
       "level": 3,
@@ -7222,6 +7521,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "tu-es-la-proie",
+    "revision": "a2c06f50ca53",
     "data": {
       "name": "Tu es la proie",
       "level": 3,
@@ -7246,6 +7546,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "esprit-du-torrent",
+    "revision": "71e1a0e2f79b",
     "data": {
       "name": "Esprit du torrent",
       "level": 2,
@@ -7270,6 +7571,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "ruse-des-pluies",
+    "revision": "daf6a1f32863",
     "data": {
       "name": "Ruse des pluies",
       "level": 2,
@@ -7294,6 +7596,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "souplesse-de-languille",
+    "revision": "ea2f1e3f5355",
     "data": {
       "name": "Souplesse de l'anguille",
       "level": 2,
@@ -7319,6 +7622,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "aura-de-givre",
+    "revision": "b8cc656e8208",
     "data": {
       "name": "Aura de givre",
       "level": 3,
@@ -7343,6 +7647,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pied-marin",
+    "revision": "2fa2e133cd78",
     "data": {
       "name": "Pied marin",
       "level": 3,
@@ -7367,6 +7672,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pluie-de-glace",
+    "revision": "9fa40c9d44b0",
     "data": {
       "name": "Pluie de glace",
       "level": 3,
@@ -7390,6 +7696,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "stabilite",
+    "revision": "654bf089f673",
     "data": {
       "name": "Stabilité",
       "level": 1,
@@ -7417,6 +7724,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "force-de-brorne",
+    "revision": "93de6c0104cd",
     "data": {
       "name": "Force de Brorne",
       "level": 2,
@@ -7441,6 +7749,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "lame-de-diamant",
+    "revision": "716985194b3e",
     "data": {
       "name": "Lame de diamant",
       "level": 2,
@@ -7467,6 +7776,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "main-de-pierre",
+    "revision": "fb3a6743fe98",
     "data": {
       "name": "Main de pierre",
       "level": 2,
@@ -7491,6 +7801,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "secret-de-brorne",
+    "revision": "0bbc2aad0acd",
     "data": {
       "name": "Secret de Brorne",
       "level": 3,
@@ -7515,6 +7826,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "sentinelle-petrifiee",
+    "revision": "7dac9841f558",
     "data": {
       "name": "Sentinelle pétrifiée",
       "level": 3,
@@ -7540,6 +7852,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "gouffre-dether",
+    "revision": "da144db43bb6",
     "data": {
       "name": "Gouffre d'Ether",
       "level": 1,
@@ -7564,6 +7877,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "prison-de-soie",
+    "revision": "b58e2c6cf9d0",
     "data": {
       "name": "Prison de soie",
       "level": 2,
@@ -7589,6 +7903,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "aura-dether",
+    "revision": "e6011c84b7f7",
     "data": {
       "name": "Aura d'Ether",
       "level": 3,
@@ -7613,6 +7928,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "cercle-de-puissance",
+    "revision": "44e366787623",
     "data": {
       "name": "Cercle de puissance",
       "level": 3,
@@ -7637,6 +7953,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "confusion",
+    "revision": "37b1ef5431dd",
     "data": {
       "name": "Confusion",
       "level": 3,
@@ -7662,6 +7979,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "reflet-chimerique",
+    "revision": "2c022dac7b31",
     "data": {
       "name": "Reflet chimérique",
       "level": 3,
@@ -7687,6 +8005,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "brise-de-verite",
+    "revision": "916508d66521",
     "data": {
       "name": "Brise de vérité",
       "level": 2,
@@ -7710,6 +8029,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "pieds-legers",
+    "revision": "29aa7ead6254",
     "data": {
       "name": "Pieds légers",
       "level": 2,
@@ -7736,6 +8056,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "porte-voix",
+    "revision": "87e03d112a80",
     "data": {
       "name": "Porte-voix",
       "level": 2,
@@ -7760,6 +8081,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "souffle-providentiel",
+    "revision": "6c74aabc69b6",
     "data": {
       "name": "Souffle providentiel",
       "level": 2,
@@ -7784,6 +8106,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "maitre-des-brouillards",
+    "revision": "d38914e26319",
     "data": {
       "name": "Maître des brouillards",
       "level": 3,
@@ -7807,6 +8130,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "vents-favorables",
+    "revision": "4cafe100c424",
     "data": {
       "name": "Vents favorables",
       "level": 3,
@@ -7831,6 +8155,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fouet-de-sang",
+    "revision": "c215e13a7756",
     "data": {
       "name": "Fouet de sang",
       "level": 1,
@@ -7856,6 +8181,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "peau-de-douleur",
+    "revision": "107f5c01f011",
     "data": {
       "name": "Peau de douleur",
       "level": 1,
@@ -7882,6 +8208,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "elytres-de-guerre",
+    "revision": "bf93fa26a55d",
     "data": {
       "name": "Elytres de guerre",
       "level": 3,
@@ -7907,6 +8234,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "faiblesse-de-la-chair",
+    "revision": "ce4e83ab1da3",
     "data": {
       "name": "Faiblesse de la chair",
       "level": 3,
@@ -7932,6 +8260,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "malediction-dementielle",
+    "revision": "c63fe0c117a2",
     "data": {
       "name": "Malédiction démentielle",
       "level": 3,
