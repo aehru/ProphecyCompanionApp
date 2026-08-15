@@ -9,7 +9,6 @@ import { NotoSans_400Regular } from '@expo-google-fonts/noto-sans/400Regular';
 import { NotoSans_500Medium } from '@expo-google-fonts/noto-sans/500Medium';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider } from 'expo-router/react-navigation';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -19,8 +18,9 @@ import { PaperProvider, Text } from 'react-native-paper';
 
 import CampaignLiveIndicator from '@/components/campaign-live-indicator';
 import LogErrorBoundary from '@/components/log-error-boundary';
-import { backupDatabase, clearBackup, restoreDatabase } from '@/db/backup';
-import { db, resetDatabase } from '@/db/client';
+import { clearBackup, restoreDatabase } from '@/db/backup';
+import { closeConnection, db, resetDatabase } from '@/db/client';
+import { useMigrations } from '@/db/use-migrations';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics, log } from '@/lib/log';
@@ -58,10 +58,9 @@ const paperSettings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? ProphecyDarkTheme : ProphecyLightTheme;
-  // Snapshot the DB before migrations touch it. This lazy state initializer runs
-  // during render — i.e. before useMigrations' effect fires — so the backup is
-  // always taken against the pre-migration file. Best-effort; never blocks.
-  useState(backupDatabase);
+  // The pre-migration snapshot is taken inside the connection's own open promise
+  // (see db/client), so it is guaranteed to precede the first query migrations
+  // issue — no ordering to arrange here.
   const { success, error } = useMigrations(db, migrations);
   const [fontsLoaded] = useFonts({
     Cinzel_500Medium,
@@ -79,17 +78,19 @@ export default function RootLayout() {
   useEffect(() => {
     if (!error) return;
     log.error('db.migrate.failed', error, { phase: __DEV__ ? 'dev' : 'prod' });
-    if (!__DEV__) {
-      // Recover the pre-migration snapshot so a failed prod migration doesn't
-      // leave a broken/half-migrated DB. The user's data is preserved for the
-      // next launch (or a future retry/export flow) instead of being wiped.
-      const restored = restoreDatabase();
-      log.warn('db.restore', { restored });
-      setFatal(error.message);
-      return;
-    }
     let cancelled = false;
     (async () => {
+      if (!__DEV__) {
+        // Recover the pre-migration snapshot so a failed prod migration doesn't
+        // leave a broken/half-migrated DB. The user's data is preserved for the
+        // next launch (or a future retry/export flow) instead of being wiped.
+        // The connection must be closed before the file is swapped underneath it.
+        await closeConnection();
+        const restored = restoreDatabase();
+        log.warn('db.restore', { restored });
+        if (!cancelled) setFatal(error.message);
+        return;
+      }
       const tried = await AsyncStorage.getItem(RESET_FLAG);
       if (tried) {
         if (!cancelled) setFatal(error.message);
@@ -97,7 +98,7 @@ export default function RootLayout() {
       }
       await AsyncStorage.setItem(RESET_FLAG, '1');
       log.warn('db.reset', { reason: 'migration-failed' });
-      resetDatabase();
+      await resetDatabase();
       DevSettings.reload();
     })();
     return () => {

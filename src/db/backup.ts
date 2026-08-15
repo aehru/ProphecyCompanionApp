@@ -11,9 +11,9 @@
 // caller reloads the app afterwards so the connection reopens on the good file.
 
 import { File } from 'expo-file-system';
-import { defaultDatabaseDirectory } from 'expo-sqlite';
+import { defaultDatabaseDirectory, type SQLiteDatabase } from 'expo-sqlite';
 
-import { DATABASE_NAME, expoDb } from './client';
+import { DATABASE_NAME } from './database-name';
 
 // `defaultDatabaseDirectory` is a plain OS path (e.g. /data/.../files/SQLite).
 // SQLite's VACUUM INTO wants that raw path; the expo-file-system File API wants
@@ -38,17 +38,21 @@ export function hasBackup(): boolean {
 }
 
 /**
- * Snapshot the live DB to its `.bak` sibling. Best-effort: returns false (and
- * swallows) on any failure — a missing backup only means the restore path is
- * unavailable, it must never block the migration itself.
+ * Snapshot the live DB to its `.bak` sibling. Takes the raw connection rather
+ * than reaching for the `db/client` singleton, so `client` can call this while
+ * it is still opening (that is what guarantees the snapshot precedes the first
+ * query). Best-effort: returns false (and swallows) on any failure — a missing
+ * backup only means the restore path is unavailable, it must never block the
+ * migration itself. On web `expo-file-system` is unavailable, so this always
+ * returns false there.
  */
-export function backupDatabase(): boolean {
+export async function backupDatabase(conn: SQLiteDatabase): Promise<boolean> {
   try {
     const bak = fileIn(BAK_NAME);
     // VACUUM INTO refuses to overwrite, so clear any stale snapshot first.
     if (bak.exists) bak.delete();
     // Single quotes doubled per SQL string-literal escaping.
-    expoDb.execSync(`VACUUM INTO '${bakFsPath.replace(/'/g, "''")}'`);
+    await conn.execAsync(`VACUUM INTO '${bakFsPath.replace(/'/g, "''")}'`);
     return true;
   } catch {
     return false;
@@ -56,19 +60,14 @@ export function backupDatabase(): boolean {
 }
 
 /**
- * Restore the `.bak` snapshot over the live DB after a failed migration. Closes
- * the connection, removes the (possibly half-migrated) DB + its WAL sidecars,
- * then copies the snapshot back. The caller MUST reload the app afterwards —
- * the module-level connection is now closed and must reopen on the restored
- * file. Returns false if there was no backup to restore.
+ * Restore the `.bak` snapshot over the live DB after a failed migration: removes
+ * the (possibly half-migrated) DB + its WAL sidecars, then copies the snapshot
+ * back. The caller MUST have closed the connection first (`closeConnection` in
+ * db/client) and MUST reload the app afterwards, so the connection reopens on
+ * the restored file. Returns false if there was no backup to restore.
  */
 export function restoreDatabase(): boolean {
   if (!hasBackup()) return false;
-  try {
-    expoDb.closeSync();
-  } catch {
-    // already closed — ignore
-  }
   // Drop the live DB and any WAL/SHM sidecars so a stale WAL can't replay over
   // the restored snapshot.
   for (const name of [DATABASE_NAME, `${DATABASE_NAME}-wal`, `${DATABASE_NAME}-shm`]) {

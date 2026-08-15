@@ -1,6 +1,6 @@
 import { asc, eq } from 'drizzle-orm';
 
-import { db } from '@/db/client';
+import { db, transaction } from '@/db/client';
 import { type NewShield, shields } from '@/db/schema';
 import { deleteEnchantsFor } from '@/repositories/enchants';
 import { logWrite } from '@/repositories/log';
@@ -41,7 +41,7 @@ export async function deleteShield(id: number) {
 
 /** Equip one shield, unequipping every other shield of the same character. */
 export async function equipShield(characterId: number, id: number) {
-  await db.transaction(async (tx) => {
+  await transaction(async (tx) => {
     await tx.update(shields).set({ equipped: false }).where(eq(shields.characterId, characterId));
     await tx.update(shields).set({ equipped: true }).where(eq(shields.id, id));
   });
