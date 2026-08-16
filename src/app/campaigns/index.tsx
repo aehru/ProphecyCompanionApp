@@ -159,30 +159,36 @@ export default function CampaignsScreen() {
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           keyExtractor={(c) => String(c.id)}
           renderItem={({ item }) => (
-            <List.Item
+            // The delete button is a SIBLING of the row, not its `right` slot: a
+            // List.Item with onPress renders a real <button> on web, and the slot
+            // renders inside it — a nested <button> is invalid HTML, which React
+            // rejects and which leaves the inner button's clicks undefined.
+            <View
               style={[
                 styles.item,
+                styles.itemRow,
                 {
                   backgroundColor: theme.prophecy.surfaceContainerLow,
                   borderColor: theme.colors.outlineVariant,
                 },
-              ]}
-              title={item.name}
-              description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code ?? 'hors ligne'}`}
-              titleStyle={{ color: theme.colors.onSurface }}
-              descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-              left={(p) => (
-                <List.Icon {...p} icon={item.role === 'gm' ? 'crown' : 'account-group'} />
-              )}
-              right={(p) => (
-                <IconButton
-                  {...p}
-                  icon="delete-outline"
-                  onPress={() => confirmDelete(item.id, item.role, item.serverUrl != null)}
-                />
-              )}
-              onPress={() => router.push(`/campaigns/${item.id}` as Href)}
-            />
+              ]}>
+              <List.Item
+                style={styles.itemMain}
+                title={item.name}
+                description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code ?? 'hors ligne'}`}
+                titleStyle={{ color: theme.colors.onSurface }}
+                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                left={(p) => (
+                  <List.Icon {...p} icon={item.role === 'gm' ? 'crown' : 'account-group'} />
+                )}
+                onPress={() => router.push(`/campaigns/${item.id}` as Href)}
+              />
+              <IconButton
+                icon="delete-outline"
+                accessibilityLabel={`Supprimer ${item.name}`}
+                onPress={() => confirmDelete(item.id, item.role, item.serverUrl != null)}
+              />
+            </View>
           )}
         />
       )}
@@ -278,6 +284,10 @@ const styles = StyleSheet.create({
   // stays tappable.
   listContent: { paddingHorizontal: 16, paddingBottom: 160 },
   item: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
+  // The row and its delete button sit side by side; the row takes the space so
+  // tapping anywhere but the button still opens the campaign.
+  itemRow: { flexDirection: 'row', alignItems: 'center', paddingRight: 4 },
+  itemMain: { flex: 1, minWidth: 0 },
   empty: {
     margin: 16,
     padding: 24,

@@ -137,7 +137,7 @@ export default function CharactersListScreen() {
         Alert.alert('Import impossible', parsed.error);
         return;
       }
-      const { ids, restored } = importCharacters(parsed.data, 'restore');
+      const { ids, restored } = await importCharacters(parsed.data, 'restore');
       const added = ids.length - restored;
       const parts: string[] = [];
       if (restored > 0) {

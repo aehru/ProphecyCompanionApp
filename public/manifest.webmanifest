@@ -1,0 +1,21 @@
+{
+  "name": "Prophecy Companion App",
+  "short_name": "Prophecy",
+  "description": "Compagnon de jeu pour Prophecy 2e : fiches de personnage, inventaire, magie et table de campagne.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1E1F22",
+  "theme_color": "#1E1F22",
+  "icons": [
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

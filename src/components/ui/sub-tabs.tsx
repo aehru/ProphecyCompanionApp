@@ -144,7 +144,6 @@ export default function SubTabs({
 
         {sliding && tabWidth > 0 ? (
           <Animated.View
-            pointerEvents="none"
             style={[
               styles.slidingInk,
               {
@@ -178,5 +177,12 @@ const styles = StyleSheet.create({
   tabRow: { flex: 1, flexDirection: 'row' },
   tab: { flex: 1, alignItems: 'center', paddingTop: 10, gap: 8, paddingHorizontal: 2 },
   tabInk: { height: 2, alignSelf: 'stretch', borderRadius: 2 },
-  slidingInk: { position: 'absolute', bottom: 0, left: 0, height: 2, borderRadius: 2 },
+  slidingInk: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    height: 2,
+    borderRadius: 2,
+    pointerEvents: 'none',
+  },
 });

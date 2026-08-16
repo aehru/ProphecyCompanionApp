@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray } from 'drizzle-orm';
 
-import { db } from '@/db/client';
+import { db, transaction } from '@/db/client';
 import { type EquippedHand, type NewWeapon, weapons } from '@/db/schema';
 import { deleteEnchantsFor } from '@/repositories/enchants';
 import { logWrite } from '@/repositories/log';
@@ -49,7 +49,7 @@ export async function deleteWeapon(id: number) {
  *    allowing dual-wield (one in `'main'`, one in `'off'`).
  */
 export async function equipWeapon(characterId: number, id: number, hand: EquippedHand) {
-  await db.transaction(async (tx) => {
+  await transaction(async (tx) => {
     if (hand === 'both') {
       await tx
         .update(weapons)

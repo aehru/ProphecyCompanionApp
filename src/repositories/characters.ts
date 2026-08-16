@@ -28,9 +28,28 @@ const MAGIC_MAX_TO_CURRENT: [string, string][] = [
   ...SPHERES.map((s) => [`${s.key}Max`, `${s.key}Current`] as [string, string]),
 ];
 
-/** Live query for the character list, newest first. Use with useLiveQuery. */
+/**
+ * Live query for the character list, newest first. Use with useLiveQuery.
+ *
+ * Deliberately a narrow projection rather than `select()`. On web an
+ * illustration IS its bytes — media/web stores a base64 data URL in the column —
+ * so selecting the whole row would drag every portrait, biography and note
+ * through the driver on every refetch, and `useLiveQuery` refetches on every
+ * write to the table. These six columns are the union of what the list rows and
+ * the campaign pickers actually read.
+ */
 export function charactersListQuery() {
-  return db.select().from(characters).orderBy(desc(characters.updatedAt));
+  return db
+    .select({
+      id: characters.id,
+      nom: characters.nom,
+      concept: characters.concept,
+      avatarPath: characters.avatarPath,
+      kind: characters.kind,
+      uuid: characters.uuid,
+    })
+    .from(characters)
+    .orderBy(desc(characters.updatedAt));
 }
 
 /** Live query for one character by local id. Use with useLiveQuery. */
