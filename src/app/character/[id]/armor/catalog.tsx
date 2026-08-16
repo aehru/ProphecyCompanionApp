@@ -1,11 +1,12 @@
-import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Searchbar, Snackbar, Text } from 'react-native-paper';
+import { Searchbar, Text } from 'react-native-paper';
 
 import ArmorDetail from '@/components/armor-detail';
+import CatalogCustomRow from '@/components/catalog-custom-row';
 import CatalogRow from '@/components/catalog-row';
+import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
@@ -15,6 +16,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { log } from '@/lib/log';
+import { fold, foldQuery } from '@/lib/text-fold';
 import { createArmor } from '@/repositories/armor';
 
 /**
@@ -24,18 +26,14 @@ import { createArmor } from '@/repositories/armor';
  */
 export default function ArmorCatalogModal() {
   const numId = useCharacterId();
-  const router = useRouter();
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
-  const [toast, setToast] = useState<{ text: string; armorId: number } | null>(null);
+  const added = useCatalogSnackbar(numId, 'armor');
   const { caracValue } = useCaracReadings(numId);
 
-  const q = query.trim().toLowerCase();
+  const q = foldQuery(query);
   const filtered = useMemo(
-    () =>
-      q === ''
-        ? ARMOR_CATALOG
-        : ARMOR_CATALOG.filter((p) => (p.data.name ?? '').toLowerCase().includes(q)),
+    () => (q === '' ? ARMOR_CATALOG : ARMOR_CATALOG.filter((p) => fold(p.data.name ?? '').includes(q))),
     [q],
   );
 
@@ -46,10 +44,10 @@ export default function ArmorCatalogModal() {
     const row = await createArmor(numId, preset?.data);
     // A blank armor has nothing to read here, so it still opens its editor.
     if (!preset) {
-      router.replace(`/character/${numId}/armor/${row.id}`);
+      added.openEditor(row.id);
       return;
     }
-    setToast({ text: `« ${preset.data.name} » ajoutée.`, armorId: row.id });
+    added.announce(`« ${preset.data.name} » ajoutée.`, row.id);
   };
 
   return (
@@ -64,24 +62,7 @@ export default function ArmorCatalogModal() {
           icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
         />
 
-        <Pressable
-          onPress={() => add()}
-          style={[styles.row, { borderBottomColor: theme.prophecy.borderSoft }]}>
-          <View
-            style={[
-              styles.tile,
-              { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary },
-            ]}>
-            <Icon name="plus" size={22} color={theme.colors.primary} />
-          </View>
-          <View style={styles.main}>
-            <Text style={styles.name}>Armure personnalisée</Text>
-            <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]}>
-              Partir de zéro
-            </Text>
-          </View>
-          <Icon name="chev" size={18} color={theme.colors.onSurfaceVariant} />
-        </Pressable>
+        <CatalogCustomRow label="Armure personnalisée" onPress={() => add()} />
 
         {ARMOR_CATEGORIES.map((cat) => {
           const items = filtered.filter((p) => p.category === cat);
@@ -113,18 +94,7 @@ export default function ArmorCatalogModal() {
         ) : null}
       </KeyboardAwareScrollView>
 
-      <Snackbar
-        visible={toast !== null}
-        onDismiss={() => setToast(null)}
-        duration={3000}
-        action={{
-          label: 'Modifier',
-          onPress: () => {
-            if (toast) router.replace(`/character/${numId}/armor/${toast.armorId}`);
-          },
-        }}>
-        {toast?.text ?? ''}
-      </Snackbar>
+      <CatalogSnackbar state={added} />
     </View>
   );
 }
@@ -132,17 +102,5 @@ export default function ArmorCatalogModal() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 16, gap: 16, paddingBottom: 48 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 10, borderBottomWidth: 1 },
-  tile: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  main: { flex: 1, minWidth: 0 },
-  name: { fontSize: 14, fontWeight: '600' },
-  sub: { fontSize: 12, marginTop: 1 },
   empty: { textAlign: 'center', marginTop: 8 },
 });
