@@ -34,6 +34,7 @@
 // write `SPHERE_VENT` or `SPHERE_Vents` and mean the same thing.
 
 import { CARACTERISTIQUES, SPHERES } from '@/constants/prophecy';
+import { fold } from '@/lib/text-fold';
 
 export type FormulaTerm =
   | { kind: 'carac'; carac: string; abbr: string; mult: number }
@@ -72,9 +73,6 @@ const NR_MULT_RE = /^(?:NR\s*[x×*]\s*(\d+)|(\d+)\s*(?:[x×*]\s*NR|par\s+NR|\/\s
  * `sphereLookupKey`, not by the regex.
  */
 const SPHERE_RE = /^SPH[EÈ]RE(?:[_ ]([A-Za-zÀ-ÿ_ ]+?))?(?:\s*[x×*]\s*(\d+))?$/i;
-
-/** Lowercase, accents stripped — the one normalization this module folds with. */
-const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 /**
  * Collapse a sphere spelling to its lookup key, so every plausible way of naming
