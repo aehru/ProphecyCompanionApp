@@ -4,6 +4,7 @@
 // choice of which sources feed it — lives in lib/spell-total alone.
 
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useMemo } from 'react';
 
 import { asNumRecord } from '@/lib/character-values';
 import { woundMalus } from '@/lib/modifiers';
@@ -33,12 +34,17 @@ export function useSpellTotal(characterId: number): SpellReadings {
   const { data: stateRows } = useLiveQuery(actualStateQuery(characterId), [characterId]);
   const { data: effects } = useLiveQuery(effectsQuery(characterId), [characterId]);
 
-  const rec = asNumRecord(charRows?.[0] ?? {});
-  const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
-  const effectList = effects ?? [];
-
-  return {
-    totalFor: (spell) => spellTotal(spell, rec, effectList, wound),
-    caracValue: (k) => rec[k] ?? 0,
-  };
+  // Memoized down to the query rows, and the returned object with them. Not a
+  // micro-optimisation: the catalogue passes `totalFor` into a `React.memo`'d
+  // row, so a pair of closures rebuilt on every render made the memo a no-op
+  // and re-rendered 300 spells on every keystroke.
+  return useMemo(() => {
+    const rec = asNumRecord(charRows?.[0] ?? {});
+    const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
+    const effectList = effects ?? [];
+    return {
+      totalFor: (spell) => spellTotal(spell, rec, effectList, wound),
+      caracValue: (k) => rec[k] ?? 0,
+    };
+  }, [charRows, stateRows, effects]);
 }

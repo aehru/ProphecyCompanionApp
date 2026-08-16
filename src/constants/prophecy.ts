@@ -136,6 +136,11 @@ export const SPELL_TAG_LABEL: Record<string, string> = Object.fromEntries(
   SPELL_TAGS.map((t) => [t.key, t.label]),
 );
 
+/** Spell tag key → its axis, one of {@link SPELL_TAG_GROUPS}. */
+export const SPELL_TAG_GROUP: Record<string, string> = Object.fromEntries(
+  SPELL_TAGS.map((t) => [t.key, t.group]),
+);
+
 /**
  * Default skill catalogue. Single global list, same for every
  * character. Each skill links to one attribut key.
