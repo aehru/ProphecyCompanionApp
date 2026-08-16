@@ -12,6 +12,7 @@
 //
 // NO framework imports here on purpose (see the module header in `types.ts`).
 
+import { causeChain } from '@/lib/error-chain';
 import type { LogPayload } from './types';
 
 /** Free-text a user typed. Can never be logged, whatever the allow-list says. */
@@ -247,12 +248,22 @@ function redactValue(raw: unknown, depth: number): unknown | typeof DROP {
  * come from the runtime, not from a form field, but they are still truncated —
  * a SQLite constraint error can quote a value, and a stack can be huge.
  */
-export function redactError(e: unknown): { name: string; message: string; stack?: string } {
+export function redactError(e: unknown): {
+  name: string;
+  message: string;
+  stack?: string;
+  causes?: string[];
+} {
   if (e instanceof Error) {
+    // The `cause` chain is kept for the same reason the message is: it comes
+    // from the runtime, and without it a wrapped error reports only its
+    // wrapper. Truncated per link, like everything else here.
+    const causes = causeChain(e).map((c) => truncate(c));
     return {
       name: truncate(e.name || 'Error', 80),
       message: truncate(e.message ?? ''),
       stack: e.stack ? truncate(e.stack, MAX_STACK) : undefined,
+      causes: causes.length > 0 ? causes : undefined,
     };
   }
   return { name: 'NonError', message: truncate(safeString(e)) };
