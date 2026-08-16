@@ -24,6 +24,7 @@ export default function CatalogRow({
   addLabel,
   onAdd,
   alert,
+  badge,
   children,
 }: {
   icon: IconName;
@@ -34,6 +35,12 @@ export default function CatalogRow({
   onAdd: () => void;
   /** Flags the tile in the error colour (an unmet prérequis), like the cards do. */
   alert?: boolean;
+  /**
+   * Small pill after the name — « Déjà ajouté ». A pill, not a fourth item in
+   * the subtitle: the whole point is that it is seen while scanning, and the
+   * subtitle is already four bullets long.
+   */
+  badge?: string;
   children?: React.ReactNode;
 }) {
   const theme = useProphecyTheme();
@@ -64,9 +71,25 @@ export default function CatalogRow({
             <Icon name={icon} size={22} color={alert ? theme.colors.error : theme.colors.primary} />
           </View>
           <View style={styles.main}>
-            <Text style={styles.name} numberOfLines={1}>
-              {name}
-            </Text>
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>
+                {name}
+              </Text>
+              {badge ? (
+                <View
+                  style={[
+                    styles.badge,
+                    {
+                      borderColor: theme.prophecy.borderSoft,
+                      backgroundColor: theme.colors.surfaceVariant,
+                    },
+                  ]}>
+                  <Text style={[styles.badgeText, { color: theme.colors.onSurfaceVariant }]}>
+                    {badge}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
             {subtitle ? (
               <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
                 {subtitle}
@@ -106,7 +129,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   main: { flex: 1, minWidth: 0 },
-  name: { fontSize: 14, fontWeight: '600' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  // shrink, not flex: a long name gives way to the badge rather than pushing it
+  // off the row.
+  name: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  badge: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1 },
+  badgeText: { fontSize: 10, letterSpacing: 0.3 },
   sub: { fontSize: 12, marginTop: 1 },
   add: { margin: 0 },
 });
