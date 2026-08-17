@@ -75,6 +75,9 @@ export function formatEntry(entry: LogEntry): string {
   if (entry.data) parts.push(JSON.stringify(entry.data));
   if (entry.err) {
     parts.push(`${entry.err.name}: ${entry.err.message}`);
+    // The wrapped reason, on its own line — a `Failed query: …` line without it
+    // says what was attempted and nothing about why it failed.
+    for (const cause of entry.err.causes ?? []) parts.push(`\n↳ ${cause}`);
     if (entry.err.stack) parts.push(`\n${entry.err.stack}`);
   }
   return parts.join(' ');

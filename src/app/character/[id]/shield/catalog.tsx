@@ -1,10 +1,11 @@
-import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Searchbar, Snackbar, Text } from 'react-native-paper';
+import { Searchbar, Text } from 'react-native-paper';
 
+import CatalogCustomRow from '@/components/catalog-custom-row';
 import CatalogRow from '@/components/catalog-row';
+import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import ShieldDetail from '@/components/shield-detail';
 import Icon from '@/components/ui/icon';
@@ -14,6 +15,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { log } from '@/lib/log';
+import { fold, foldQuery } from '@/lib/text-fold';
 import { createShield } from '@/repositories/shields';
 
 /**
@@ -23,18 +25,15 @@ import { createShield } from '@/repositories/shields';
  */
 export default function ShieldCatalogModal() {
   const numId = useCharacterId();
-  const router = useRouter();
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
-  const [toast, setToast] = useState<{ text: string; shieldId: number } | null>(null);
+  const added = useCatalogSnackbar(numId, 'shield');
   const { caracValue, caracModifier } = useCaracReadings(numId);
 
-  const q = query.trim().toLowerCase();
+  const q = foldQuery(query);
   const filtered = useMemo(
     () =>
-      q === ''
-        ? SHIELD_CATALOG
-        : SHIELD_CATALOG.filter((p) => (p.data.name ?? '').toLowerCase().includes(q)),
+      q === '' ? SHIELD_CATALOG : SHIELD_CATALOG.filter((p) => fold(p.data.name ?? '').includes(q)),
     [q],
   );
 
@@ -45,10 +44,10 @@ export default function ShieldCatalogModal() {
     const row = await createShield(numId, preset?.data);
     // A blank shield has nothing to read here, so it still opens its editor.
     if (!preset) {
-      router.replace(`/character/${numId}/shield/${row.id}`);
+      added.openEditor(row.id);
       return;
     }
-    setToast({ text: `« ${preset.data.name} » ajouté.`, shieldId: row.id });
+    added.announce(`« ${preset.data.name} » ajouté.`, row.id);
   };
 
   return (
@@ -63,24 +62,7 @@ export default function ShieldCatalogModal() {
           icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
         />
 
-        <Pressable
-          onPress={() => add()}
-          style={[styles.row, { borderBottomColor: theme.prophecy.borderSoft }]}>
-          <View
-            style={[
-              styles.tile,
-              { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary },
-            ]}>
-            <Icon name="plus" size={22} color={theme.colors.primary} />
-          </View>
-          <View style={styles.main}>
-            <Text style={styles.name}>Bouclier personnalisé</Text>
-            <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]}>
-              Partir de zéro
-            </Text>
-          </View>
-          <Icon name="chev" size={18} color={theme.colors.onSurfaceVariant} />
-        </Pressable>
+        <CatalogCustomRow label="Bouclier personnalisé" onPress={() => add()} />
 
         {filtered.map((p) => (
           <CatalogRow
@@ -110,18 +92,7 @@ export default function ShieldCatalogModal() {
         ) : null}
       </KeyboardAwareScrollView>
 
-      <Snackbar
-        visible={toast !== null}
-        onDismiss={() => setToast(null)}
-        duration={3000}
-        action={{
-          label: 'Modifier',
-          onPress: () => {
-            if (toast) router.replace(`/character/${numId}/shield/${toast.shieldId}`);
-          },
-        }}>
-        {toast?.text ?? ''}
-      </Snackbar>
+      <CatalogSnackbar state={added} />
     </View>
   );
 }
@@ -129,17 +100,5 @@ export default function ShieldCatalogModal() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 16, gap: 16, paddingBottom: 48 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 10, borderBottomWidth: 1 },
-  tile: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  main: { flex: 1, minWidth: 0 },
-  name: { fontSize: 14, fontWeight: '600' },
-  sub: { fontSize: 12, marginTop: 1 },
   empty: { textAlign: 'center', marginTop: 8 },
 });

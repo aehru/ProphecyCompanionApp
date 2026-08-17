@@ -23,6 +23,7 @@ import { closeConnection, db, resetDatabase } from '@/db/client';
 import { useMigrations } from '@/db/use-migrations';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
+import { describeError } from '@/lib/error-chain';
 import { initDiagnostics, log } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
 import { backfillCharacterUuids } from '@/repositories/characters';
@@ -88,12 +89,12 @@ export default function RootLayout() {
         await closeConnection();
         const restored = restoreDatabase();
         log.warn('db.restore', { restored });
-        if (!cancelled) setFatal(error.message);
+        if (!cancelled) setFatal(describeError(error));
         return;
       }
       const tried = await AsyncStorage.getItem(RESET_FLAG);
       if (tried) {
-        if (!cancelled) setFatal(error.message);
+        if (!cancelled) setFatal(describeError(error));
         return;
       }
       await AsyncStorage.setItem(RESET_FLAG, '1');

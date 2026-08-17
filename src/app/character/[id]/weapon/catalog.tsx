@@ -1,10 +1,11 @@
-import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Searchbar, Snackbar, Text } from 'react-native-paper';
+import { Searchbar, Text } from 'react-native-paper';
 
+import CatalogCustomRow from '@/components/catalog-custom-row';
 import CatalogRow from '@/components/catalog-row';
+import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon, { type IconName } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
@@ -22,6 +23,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { log } from '@/lib/log';
+import { fold, foldQuery } from '@/lib/text-fold';
 import { createWeapon } from '@/repositories/weapons';
 
 // Ranged families get a compass glyph; everything else is melee (sword).
@@ -42,20 +44,17 @@ const iconFor = (cat: WeaponCategory): IconName =>
  */
 export default function WeaponCatalogModal() {
   const numId = useCharacterId();
-  const router = useRouter();
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
-  const [toast, setToast] = useState<{ text: string; weaponId: number } | null>(null);
+  const added = useCatalogSnackbar(numId, 'weapon');
   // Same readings the Inventaire tab feeds its cards — a player picking a weapon
   // wants to know what it does in THEIR hands before adding it.
   const { caracValue, caracModifier, skillReading } = useCaracReadings(numId);
 
-  const q = query.trim().toLowerCase();
+  const q = foldQuery(query);
   const filtered = useMemo(
     () =>
-      q === ''
-        ? WEAPON_CATALOG
-        : WEAPON_CATALOG.filter((p) => (p.data.name ?? '').toLowerCase().includes(q)),
+      q === '' ? WEAPON_CATALOG : WEAPON_CATALOG.filter((p) => fold(p.data.name ?? '').includes(q)),
     [q],
   );
 
@@ -69,10 +68,10 @@ export default function WeaponCatalogModal() {
     // A blank weapon has nothing to read in the catalogue, so it still opens its
     // editor; a preset stays here so the player can pick the next one.
     if (!preset) {
-      router.replace(`/character/${numId}/weapon/${row.id}`);
+      added.openEditor(row.id);
       return;
     }
-    setToast({ text: `« ${preset.data.name} » ajoutée.`, weaponId: row.id });
+    added.announce(`« ${preset.data.name} » ajoutée.`, row.id);
   };
 
   return (
@@ -87,24 +86,7 @@ export default function WeaponCatalogModal() {
           icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
         />
 
-        <Pressable
-          onPress={() => add()}
-          style={[styles.row, { borderBottomColor: theme.prophecy.borderSoft }]}>
-          <View
-            style={[
-              styles.tile,
-              { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary },
-            ]}>
-            <Icon name="plus" size={22} color={theme.colors.primary} />
-          </View>
-          <View style={styles.main}>
-            <Text style={styles.name}>Arme personnalisée</Text>
-            <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]}>
-              Partir de zéro
-            </Text>
-          </View>
-          <Icon name="chev" size={18} color={theme.colors.onSurfaceVariant} />
-        </Pressable>
+        <CatalogCustomRow label="Arme personnalisée" onPress={() => add()} />
 
         {WEAPON_CATEGORIES.map((cat) => {
           const items = filtered.filter((p) => p.category === cat);
@@ -152,18 +134,7 @@ export default function WeaponCatalogModal() {
         ) : null}
       </KeyboardAwareScrollView>
 
-      <Snackbar
-        visible={toast !== null}
-        onDismiss={() => setToast(null)}
-        duration={3000}
-        action={{
-          label: 'Modifier',
-          onPress: () => {
-            if (toast) router.replace(`/character/${numId}/weapon/${toast.weaponId}`);
-          },
-        }}>
-        {toast?.text ?? ''}
-      </Snackbar>
+      <CatalogSnackbar state={added} />
     </View>
   );
 }
@@ -171,15 +142,6 @@ export default function WeaponCatalogModal() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 16, gap: 16, paddingBottom: 48 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 10, borderBottomWidth: 1 },
-  tile: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   handGroup: { gap: 0 },
   handLabel: {
     fontSize: 11,
@@ -189,8 +151,5 @@ const styles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 2,
   },
-  main: { flex: 1, minWidth: 0 },
-  name: { fontSize: 14, fontWeight: '600' },
-  sub: { fontSize: 12, marginTop: 1 },
   empty: { textAlign: 'center', marginTop: 8 },
 });
