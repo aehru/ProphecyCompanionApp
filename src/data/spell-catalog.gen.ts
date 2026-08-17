@@ -8281,5 +8281,239 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "ritual"
       ]
     }
+  },
+  {
+    "id": "manteau-elementaire-feu",
+    "revision": "9786b06b0fb2",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereFeu",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-vents",
+    "revision": "beb5339253fa",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereVents",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-cites",
+    "revision": "557c82fcaa37",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereCites",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-metal",
+    "revision": "9dc6fc747852",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereMetal",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-nature",
+    "revision": "94e022392f1d",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereNature",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-oceans",
+    "revision": "a3256e804e59",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOceans",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-pierre",
+    "revision": "ac1781bcfaff",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "spherePierre",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-reves",
+    "revision": "13a29be4013f",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereReves",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
+  },
+  {
+    "id": "manteau-elementaire-ombre",
+    "revision": "7350bfcc195f",
+    "data": {
+      "name": "Manteau élémentaire",
+      "level": 1,
+      "complexity": 20,
+      "discipline": "magieInvocatoire",
+      "sphere": "sphereOmbre",
+      "cost": 8,
+      "castTimeAmount": 2,
+      "castTimeUnit": "round",
+      "difficulty": 20,
+      "cle": "un peu de l'élément correspondant, bras croisés et tête rentrée.",
+      "effect": "La mage invoque un peu d'élément et se met dans une posture de défense instinctive. L'élément recouvre tout son corps, selon les caractéristiaues de cet élément. Le manteau procure 10 points d'armure à un personnage sans armure ou rajoute +5 à l'armure d'un personnage s'il en porte déjà une. Ce sort est incompatible avec tout autre sort d'armure. Il dure 10 tours + 5/NR. Le manteau est opaque et inoffensif, et protège son porteur contre l'élément dont il est formé pendant toute la durée du sort. Si un autre sort de cette Sphère agresse le manteau, celui-ci offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de sa nouvelle protection (on considère alors que l'élément du manteau est dispersé par le sort agresseur). Si l'élément n'est pas mû par un sort ou un effet magique précis (comm un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ou la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "inGameEffect": "Procure 10 points d'armure à un personnage sans armure, ou +5 à l'armure de celui qui en porte déjà une. Incompatible avec tout autre sort d'armure. Protège son porteur contre l'élément dont il est formé pendant toute la durée. Si un autre sort de cette Sphère agresse le manteau, il offre une protection doublée, mais se dissout si les dommages infligés par l'élément dépassent le double de cette nouvelle protection — l'élément du manteau est alors dispersé par le sort agresseur. Si l'élément n'est pas mû par un sort ou un effet magique précis (un incendie de forêt ou une grêle violente, mais pas la vague d'un Raz de marée ni la flamme d'un Souffle ardent), le manteau protège complètement le mage.",
+      "sensoryEffect": "Le mage invoque un peu d'élément et se met dans une posture de défense instinctive ; l'élément recouvre tout son corps, selon ses propres caractéristiques. Le manteau est opaque et inoffensif.",
+      "duration": "10 + 5 par NR",
+      "durationUnit": "round",
+      "tags": [
+        "protection",
+        "self",
+        "combat"
+      ]
+    }
   }
 ];
