@@ -1,9 +1,13 @@
 import { sql } from 'drizzle-orm';
 import { check, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-import { DISCIPLINES, SPHERES, TIME_UNITS } from '@/constants/prophecy';
+import { CASTES, type CasteKey, DISCIPLINES, SPHERES, TIME_UNITS } from '@/constants/prophecy';
 import type { ArmorCategory } from '@/data/armor-constants';
 import { newUuid } from '@/lib/uuid';
+
+// The caste list lives in `constants/prophecy` (it carries the accented labels);
+// drizzle's text enum wants a non-empty tuple, which `.map` can't prove.
+const CASTE_KEYS = CASTES.map((c) => c.key) as unknown as readonly [CasteKey, ...CasteKey[]];
 
 type DisciplineKey = (typeof DISCIPLINES)[number]['key'];
 type SphereKey = (typeof SPHERES)[number]['key'];
@@ -36,6 +40,13 @@ export const characters = sqliteTable('characters', {
   // Identity
   nom: text('nom').notNull().default(''),
   concept: text('concept').notNull().default(''),
+
+  // Social order the character belongs to, stored accent-free (see CASTES).
+  // NULLABLE and NULL by default on purpose: « Sans Caste » is a legitimate
+  // choice, and an existing row that predates the column is in exactly that
+  // state — so no backfill is needed and no sentinel string is invented.
+  // A label only: nothing computes from it (see the CASTES doc comment).
+  caste: text('caste', { enum: CASTE_KEYS }),
 
   // What this character IS to its owner: a player character, or an NPC the GM
   // runs at the table. Purely a label — an NPC is a full character row with the
