@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
 import { TableRosterProvider } from '@/components/campaign/table-roster-provider';
@@ -15,8 +16,22 @@ import { campaignQuery } from '@/repositories/campaigns';
  */
 export default function CampaignLayout() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data } = useLiveQuery(campaignQuery(Number(id)), [id]);
+  const { data, updatedAt } = useLiveQuery(campaignQuery(Number(id)), [id]);
   const campaign = data?.[0];
+
+  // Nothing may mount before the row is read: the screens consume the roster
+  // context, and child effects run BEFORE the parent's — so a screen would
+  // resolve its own campaignQuery first and render outside the provider
+  // (« useTableRosterCtx must be used within a TableRosterProvider »).
+  // `updatedAt` is undefined only while the first query is in flight; a missing
+  // row falls through to the stack, whose screens draw their own empty state.
+  if (updatedAt === undefined) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 
   const stack = (
     <Stack screenOptions={{ headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' } }}>
@@ -40,3 +55,7 @@ export default function CampaignLayout() {
   }
   return stack;
 }
+
+const styles = StyleSheet.create({
+  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+});
