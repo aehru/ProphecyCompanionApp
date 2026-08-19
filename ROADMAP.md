@@ -77,6 +77,18 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   row's `Pressable` (that both fire correctly and the tap targets don't overlap),
   and the Snackbar's « Modifier » action.
 
+## Web target
+
+- [ ] **`Alert.alert` is a no-op on web.** react-native-web ships `class Alert { static alert() {} }`,
+  so on the web build every native confirmation and every error popup silently does nothing:
+  the destructive confirms (supprimer un personnage / une table / une arme, relancer
+  l'initiative) never appear, so their `onPress` never runs and the button reads as dead,
+  and the `Alert.alert('Erreur', …)` surfaces (join campaign, `attachServer`) swallow the
+  message. 26 call sites, none platform-guarded. _Fix:_ one `confirm({ title, message,
+  destructive })` helper that keeps `Alert.alert` on native and falls back to a
+  [`<DsDialog>`](src/components/ui/ds-dialog.tsx) (or `window.confirm`) on web, then route
+  every call site through it — the popups are the same three shapes everywhere.
+
 ## Campaign mode
 
 A GM's table is local-first (NPCs, sheets, initiative — no network); the relay
