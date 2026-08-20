@@ -194,6 +194,7 @@ export default function CampaignsScreen() {
               />
               <IconButton
                 icon="delete-outline"
+                testID={`campaign-delete-${item.id}`}
                 accessibilityLabel={`Supprimer ${item.name}`}
                 onPress={() => confirmDelete(item.id, item.role, item.serverUrl != null)}
               />

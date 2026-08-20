@@ -194,7 +194,11 @@ export default function CharactersListScreen() {
       headerLeft: undefined,
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
-          <IconButton icon="account-group" onPress={() => router.push('/campaigns' as Href)} />
+          <IconButton
+            icon="account-group"
+            testID="campaigns-nav"
+            onPress={() => router.push('/campaigns' as Href)}
+          />
           <Menu
             visible={menuOpen}
             onDismiss={() => setMenuOpen(false)}
