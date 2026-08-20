@@ -21,6 +21,8 @@ type AppFabProps = {
    */
   offset?: number;
   style?: StyleProp<ViewStyle>;
+  /** Stable E2E hook — react-native-web renders it as `data-testid`. */
+  testID?: string;
 };
 
 /**
@@ -28,7 +30,15 @@ type AppFabProps = {
  * safe-area handling so every screen's FAB lines up and clears the onscreen
  * navigation bar / gesture area.
  */
-export default function AppFab({ icon, label, onPress, disabled, offset = 0, style }: AppFabProps) {
+export default function AppFab({
+  icon,
+  label,
+  onPress,
+  disabled,
+  offset = 0,
+  style,
+  testID,
+}: AppFabProps) {
   const theme = useProphecyTheme();
   const insets = useSafeAreaInsets();
   // Inside a bottom-tab navigator the tab bar already sits above the safe area,
@@ -46,6 +56,7 @@ export default function AppFab({ icon, label, onPress, disabled, offset = 0, sty
       onPress={onPress}
       disabled={disabled}
       color={theme.colors.onPrimary}
+      testID={testID}
       style={fabStyle}
     />
   ) : (
@@ -54,6 +65,7 @@ export default function AppFab({ icon, label, onPress, disabled, offset = 0, sty
       onPress={onPress}
       disabled={disabled}
       color={theme.colors.onPrimary}
+      testID={testID}
       style={fabStyle}
     />
   );

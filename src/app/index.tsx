@@ -244,11 +244,12 @@ export default function CharactersListScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {loading ? (
-        <View style={styles.loading}>
+        <View testID="characters-loading" style={styles.loading}>
           <ActivityIndicator />
         </View>
       ) : isEmpty ? (
         <View
+          testID="characters-empty"
           style={[
             styles.empty,
             {
@@ -294,7 +295,11 @@ export default function CharactersListScreen() {
       )}
       {/* Creating a character mid-selection makes no sense — the FAB steps out. */}
       {!selection.active && (
-        <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
+        <AppFab
+          icon={dsIcon('plus')}
+          testID="fab-new-character"
+          onPress={() => router.push('/character/new')}
+        />
       )}
 
       <ExportIntentDialog

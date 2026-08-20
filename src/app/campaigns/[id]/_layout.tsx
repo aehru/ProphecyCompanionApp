@@ -26,7 +26,7 @@ export default function CampaignLayout() {
   // `updatedAt` is undefined only while the first query is in flight.
   if (updatedAt === undefined) {
     return (
-      <View style={styles.centered}>
+      <View testID="campaign-loading" style={styles.centered}>
         <ActivityIndicator />
       </View>
     );
@@ -38,7 +38,9 @@ export default function CampaignLayout() {
   if (!campaign) {
     return (
       <View style={styles.centered}>
-        <Text variant="bodyMedium">Campagne introuvable.</Text>
+        <Text testID="campaign-not-found" variant="bodyMedium">
+          Campagne introuvable.
+        </Text>
         <Button mode="text" onPress={() => router.replace('/campaigns' as Href)}>
           Retour aux campagnes
         </Button>

@@ -51,6 +51,7 @@ export default function CharacterListItem({
           borderColor: selected ? theme.colors.primary : theme.colors.outlineVariant,
         },
       ]}
+      testID={`character-row-${character.id}`}
       title={character.nom || 'Sans nom'}
       description={character.concept || undefined}
       titleStyle={{ color: theme.colors.onSurface }}

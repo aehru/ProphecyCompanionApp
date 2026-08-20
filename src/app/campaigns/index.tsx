@@ -139,11 +139,12 @@ export default function CampaignsScreen() {
       </View>
 
       {loading ? (
-        <View style={styles.loading}>
+        <View testID="campaigns-loading" style={styles.loading}>
           <ActivityIndicator />
         </View>
       ) : campaigns.length === 0 ? (
         <View
+          testID="campaigns-empty"
           style={[
             styles.empty,
             {
@@ -181,6 +182,7 @@ export default function CampaignsScreen() {
               ]}>
               <List.Item
                 style={styles.itemMain}
+                testID={`campaign-row-${item.id}`}
                 title={item.name}
                 description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code ?? 'hors ligne'}`}
                 titleStyle={{ color: theme.colors.onSurface }}
@@ -208,6 +210,7 @@ export default function CampaignsScreen() {
           <>
             <Button onPress={cancel}>Annuler</Button>
             <Button
+              testID="dialog-submit"
               mode="contained"
               icon={dialog === 'create' ? 'plus' : 'location-enter'}
               onPress={submit}
@@ -219,7 +222,12 @@ export default function CampaignsScreen() {
         }>
         {dialog === 'create' ? (
           <>
-            <TextInput label="Nom de la table" value={name} onChangeText={setName} />
+            <TextInput
+              testID="field-table-name"
+              label="Nom de la table"
+              value={name}
+              onChangeText={setName}
+            />
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               Table hors ligne : vos PNJ, leur initiative et leurs fiches restent sur cet appareil.
               Vous pourrez y connecter un serveur plus tard pour voir les personnages des joueurs.
@@ -271,8 +279,18 @@ export default function CampaignsScreen() {
         }}
       />
 
-      <AppFab icon="qrcode-scan" onPress={() => setScanning(true)} offset={72} />
-      <AppFab icon={dsIcon('plus')} label="Créer" onPress={() => openDialog('create')} />
+      <AppFab
+        icon="qrcode-scan"
+        testID="fab-scan-qr"
+        onPress={() => setScanning(true)}
+        offset={72}
+      />
+      <AppFab
+        icon={dsIcon('plus')}
+        label="Créer"
+        testID="fab-new-table"
+        onPress={() => openDialog('create')}
+      />
     </View>
   );
 }
