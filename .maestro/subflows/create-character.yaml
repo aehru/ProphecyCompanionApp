@@ -1,0 +1,17 @@
+# Creates one character from the list screen and lands on its Accueil tab.
+# Callers pass NOM.
+appId: fr.aehru.prophecyapp
+---
+- tapOn:
+    id: 'fab-new-character'
+- tapOn:
+    id: 'field-nom'
+- inputText: '${NOM}'
+# Dismiss the keyboard: it covers the save FAB on a short screen.
+- hideKeyboard
+- tapOn:
+    id: 'fab-save-character'
+- extendedWaitUntil:
+    visible:
+      id: 'tab-fiche'
+    timeout: 15000
