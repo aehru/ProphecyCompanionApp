@@ -104,8 +104,23 @@ Specs live in [e2e/](e2e), helpers in [e2e/fixtures.ts](e2e/fixtures.ts). Three 
 
 Each project runs in two viewports (420 and 1280 wide) — [use-layout.ts](src/hooks/use-layout.ts) branches at 600/840 and the campaign roster genuinely splits above it.
 
-**Out of reach here, on purpose:** `Alert.alert` (a no-op on web, so destructive confirmations), the camera/QR join, the share sheet, native tabs and gestures. Those need a device — see [ROADMAP.md](ROADMAP.md).
+**Out of reach here, on purpose:** `Alert.alert` (a no-op on web, so destructive confirmations), the camera/QR join, the share sheet, native tabs and gestures. Those need a device — see below.
 
+### End-to-end (device)
+
+What the web export cannot answer for: `Alert.alert` (a no-op on react-native-web, so **every destructive confirmation in the app**), the native tab bar, the keyboard, and the real expo-sqlite driver on a device filesystem — a different code path from the wasm build, and the one that carries the migrations. Flows live in [.maestro/](.maestro) and run with [Maestro](https://maestro.mobile.dev/): black-box YAML, no instrumentation in the app, and they match the **same `testID`s** the web suite uses.
+
+```bash
+curl -Ls "https://get.maestro.mobile.dev" | bash   # once
+bunx expo run:android --variant release            # a standalone APK; a debug one needs Metro
+maestro test .maestro                              # or one file: maestro test .maestro/smoke.yaml
+```
+
+Four flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (the native alert), `persistence` (kill the app, relaunch, the row is still there).
+
+Two gotchas worth knowing before adding one. **`launchApp: { clearState: true }` wipes the DB**, so a flow that means to test persistence has to relaunch WITHOUT it. And **the character delete alert cannot be driven by text** — its confirm button repeats its own title (« Supprimer »), which no text selector can tell apart; the alert coverage goes through the campaign delete instead, whose button reads « Confirmer ».
+
+CI runs them in [native-e2e.yml](.github/workflows/native-e2e.yml) — **not** per PR (a release APK plus an emulator is ~20 minutes against the web suite's three). Trigger it from the Actions tab, or put the `native-e2e` label on a PR that touches native ground: a dependency bump, a migration, anything under `android/`.
 ## Catalogues (armes / armures / boucliers / sortilèges)
 
 The rulebook catalogues the pickers offer are **authored as spreadsheets**, not hand-written TS. Edit the CSV in Excel (or LibreOffice), then regenerate:
