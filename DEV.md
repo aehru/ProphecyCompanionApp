@@ -86,6 +86,26 @@ Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](s
 
 **Not yet covered:** repository logic — anything importing `@/db/client` pulls in expo-sqlite. Repository tests need the db decoupled from the singleton (inject it) so a better-sqlite3 instance can stand in — see [ROADMAP.md](ROADMAP.md).
 
+### End-to-end (web export)
+
+The unit suites are pure by design, so nothing there can catch a bug that only exists once the tree mounts — a screen rendering outside its provider, an empty state flashing before the first query, a route that no longer resolves. Those all shipped. The E2E suite covers them by driving the **static web export** with [Playwright](https://playwright.dev/): `dist/` is the real router, the real screens and the real expo-sqlite (wasm), served by [scripts/serve-web.ts](scripts/serve-web.ts) exactly the way GitHub Pages serves it — deep links fall back to `404.html` with a real 404, so a broken [postbuild](scripts/postbuild-web.ts) fails here too.
+
+```bash
+bunx playwright install chromium   # once
+bun run build:web                  # the suite tests dist/, so rebuild after any change
+bun run e2e                        # bun run e2e:ui for the picker
+```
+
+Specs live in [e2e/](e2e), helpers in [e2e/fixtures.ts](e2e/fixtures.ts). Three things to know before writing one:
+
+- **Every test asserts the app logged nothing.** An `auto` fixture fails the test on any `console.error` or uncaught throw. That is the assertion that catches the provider-order class of bug: the screen still paints something, so a visual check alone passes while the console carries « useTableRosterCtx must be used within a TableRosterProvider ».
+- **Selectors are `testID`, never French copy.** react-native-web renders `testID` as `data-testid`; `AppFab` takes one and the tab bar sets `tabBarButtonTestID`. Reach for `getByTestId` so a wording change is never a test failure.
+- **Render ORDER needs recording, not polling.** « empty state, then rows » and « rows » look identical once the DOM settles, so `trackRenderOrder` installs a MutationObserver before the bundle runs and the test asserts the sequence.
+
+Each project runs in two viewports (420 and 1280 wide) — [use-layout.ts](src/hooks/use-layout.ts) branches at 600/840 and the campaign roster genuinely splits above it.
+
+**Out of reach here, on purpose:** `Alert.alert` (a no-op on web, so destructive confirmations), the camera/QR join, the share sheet, native tabs and gestures. Those need a device — see [ROADMAP.md](ROADMAP.md).
+
 ## Catalogues (armes / armures / boucliers / sortilèges)
 
 The rulebook catalogues the pickers offer are **authored as spreadsheets**, not hand-written TS. Edit the CSV in Excel (or LibreOffice), then regenerate:
