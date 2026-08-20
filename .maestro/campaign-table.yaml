@@ -15,20 +15,12 @@ tags:
     id: 'campaigns-nav'
 - assertVisible:
     id: 'campaigns-empty'
+- back
 
-- tapOn:
-    id: 'fab-new-table'
-- tapOn:
-    id: 'field-table-name'
-- inputText: 'Table Maestro'
-- hideKeyboard
-- tapOn:
-    id: 'dialog-submit'
-
-- extendedWaitUntil:
-    visible:
-      id: 'open-compagnie'
-    timeout: 15000
+- runFlow:
+    file: subflows/create-table.yaml
+    env:
+      NOM: Table Maestro
 - assertNotVisible:
     id: 'campaign-not-found'
 
