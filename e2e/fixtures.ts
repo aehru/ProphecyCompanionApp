@@ -1,24 +1,6 @@
 import { test as base, expect, type Page } from '@playwright/test';
 
 /**
- * Errors that are not the app's fault and would make every test flaky.
- * Keep this list SHORT — an entry here is a blind spot in every test.
- */
-const IGNORED_ERRORS = [
-  /Download the React DevTools/i,
-  /favicon\.ico/i,
-  // The web export has no native fonts; expo-font falls back and says so.
-  /Failed to load font/i,
-];
-
-/**
- * Every test asserts the app logged nothing on `console.error` and threw
- * nothing uncaught. That single assertion is what catches the class of bug
- * this suite exists for: a screen that mounts outside its provider throws
- * (« useTableRosterCtx must be used within a TableRosterProvider ») while the
- * page still looks half-rendered, so a visual assertion alone would pass.
- */
-/**
  * A deep link answers with 404.html and a real 404, exactly as GitHub Pages
  * does (scripts/serve-web.ts explains why), and the browser logs the status.
  * That one line is expected; a 404 on anything with a FILE EXTENSION is a
@@ -30,6 +12,13 @@ function isSpaFallback(text: string, url: string) {
   return !last.includes('.');
 }
 
+/**
+ * Every test asserts the app logged nothing on `console.error` and threw
+ * nothing uncaught. That single assertion is what catches the class of bug
+ * this suite exists for: a screen that mounts outside its provider throws
+ * (« useTableRosterCtx must be used within a TableRosterProvider ») while the
+ * page still looks half-rendered, so a visual assertion alone would pass.
+ */
 export const test = base.extend<{ appErrors: string[] }>({
   appErrors: [
     async ({ page }, use) => {
@@ -38,7 +27,6 @@ export const test = base.extend<{ appErrors: string[] }>({
       page.on('console', (m) => {
         if (m.type() !== 'error') return;
         const text = m.text();
-        if (IGNORED_ERRORS.some((re) => re.test(text))) return;
         if (isSpaFallback(text, m.location().url)) return;
         errors.push(`console.error: ${text}`);
       });

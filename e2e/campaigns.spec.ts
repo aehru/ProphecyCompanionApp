@@ -27,7 +27,7 @@ test('creates a local table and opens its screens', async ({ page }) => {
 
   await page.goto(`/campaigns/${id}/compagnie`);
   await expect(page.getByTestId('campaign-not-found')).toHaveCount(0);
-  await expect(page.getByText('La Compagnie').first()).toBeVisible();
+  await expect(page.getByTestId('compagnie-screen')).toBeVisible();
 });
 
 test('shows a not-found state for a missing table', async ({ page }) => {

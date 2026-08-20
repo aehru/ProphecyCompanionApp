@@ -5,7 +5,7 @@ import { createCharacter, expect, renderOrder, test, trackRenderOrder } from './
 test('boots on the characters list', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page.getByText('Personnages').first()).toBeVisible();
+  await expect(page.getByTestId('fab-new-character')).toBeVisible();
   // Fresh origin storage: the DB is empty, so the empty state is the end state.
   await expect(page.getByTestId('characters-empty')).toBeVisible();
   await expect(page.getByTestId('characters-loading')).toHaveCount(0);
