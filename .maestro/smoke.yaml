@@ -1,0 +1,40 @@
+# Boot, create a character, open all five tabs.
+#
+# The web suite covers the same ground in 7 seconds; what this run adds is the
+# real thing underneath — the native tab bar (not react-native-web's), the
+# native expo-sqlite driver, the keyboard, and a release bundle that has been
+# through Proguard.
+appId: fr.aehru.prophecyapp
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+
+# Fresh install: the DB is empty, so the empty state is the END state — and it
+# must arrive after the spinner, never instead of it.
+- assertVisible:
+    id: 'characters-empty'
+
+- runFlow:
+    file: subflows/create-character.yaml
+    env:
+      NOM: Kaelen
+
+# Each tab is its own screen with its own queries; a broken one throws on mount.
+- tapOn:
+    id: 'tab-competences'
+- tapOn:
+    id: 'tab-inventaire'
+- tapOn:
+    id: 'tab-magie'
+- tapOn:
+    id: 'tab-fiche'
+- tapOn:
+    id: 'tab-accueil'
+
+# System back from a tab leaves the character outright (backBehavior="none" in
+# the tabs layout) instead of rewinding to Accueil first.
+- back
+- assertVisible:
+    id: 'character-row-1'

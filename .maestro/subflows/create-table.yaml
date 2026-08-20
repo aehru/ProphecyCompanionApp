@@ -1,0 +1,19 @@
+# Creates one local table (no server) from the campaigns list and lands on it.
+# Callers pass NOM.
+appId: fr.aehru.prophecyapp
+---
+- tapOn:
+    id: 'campaigns-nav'
+- tapOn:
+    id: 'fab-new-table'
+- tapOn:
+    id: 'field-table-name'
+- inputText: '${NOM}'
+# Dismiss the keyboard: it covers the dialog's confirm button on a short screen.
+- hideKeyboard
+- tapOn:
+    id: 'dialog-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'open-compagnie'
+    timeout: 15000

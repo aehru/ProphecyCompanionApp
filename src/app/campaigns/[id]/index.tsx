@@ -251,6 +251,7 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
           },
         ]}>
         <Button
+          testID="open-compagnie"
           mode="contained"
           icon="account-group"
           disabled={roster.length === 0}

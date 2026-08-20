@@ -194,7 +194,11 @@ export default function CharactersListScreen() {
       headerLeft: undefined,
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
-          <IconButton icon="account-group" onPress={() => router.push('/campaigns' as Href)} />
+          <IconButton
+            icon="account-group"
+            testID="campaigns-nav"
+            onPress={() => router.push('/campaigns' as Href)}
+          />
           <Menu
             visible={menuOpen}
             onDismiss={() => setMenuOpen(false)}
@@ -244,11 +248,12 @@ export default function CharactersListScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {loading ? (
-        <View style={styles.loading}>
+        <View testID="characters-loading" style={styles.loading}>
           <ActivityIndicator />
         </View>
       ) : isEmpty ? (
         <View
+          testID="characters-empty"
           style={[
             styles.empty,
             {
@@ -294,7 +299,11 @@ export default function CharactersListScreen() {
       )}
       {/* Creating a character mid-selection makes no sense — the FAB steps out. */}
       {!selection.active && (
-        <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
+        <AppFab
+          icon={dsIcon('plus')}
+          testID="fab-new-character"
+          onPress={() => router.push('/character/new')}
+        />
       )}
 
       <ExportIntentDialog

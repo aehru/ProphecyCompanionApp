@@ -29,6 +29,7 @@ export default function CharacterSelectionActions({
     <View style={styles.row}>
       <IconButton
         icon={allSelected ? 'select-off' : 'select-all'}
+        testID="selection-toggle-all"
         size={22}
         style={styles.button}
         accessibilityLabel={allSelected ? 'Tout désélectionner' : 'Tout sélectionner'}
@@ -36,6 +37,7 @@ export default function CharacterSelectionActions({
       />
       <IconButton
         icon="content-copy"
+        testID="selection-duplicate"
         size={22}
         style={styles.button}
         disabled={busy}
@@ -44,6 +46,7 @@ export default function CharacterSelectionActions({
       />
       <IconButton
         icon="export"
+        testID="selection-export"
         size={22}
         style={styles.button}
         disabled={busy}
@@ -52,6 +55,7 @@ export default function CharacterSelectionActions({
       />
       <IconButton
         icon="delete-outline"
+        testID="selection-delete"
         size={22}
         style={styles.button}
         disabled={busy}

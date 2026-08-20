@@ -1,0 +1,29 @@
+# The character survives a full app restart.
+#
+# This is the native expo-sqlite driver on a real device filesystem — a
+# different code path from the wasm build the web suite exercises, and the one
+# that carries the migrations. A dropped `await` in a repository shows up here
+# and nowhere else: the row looks written until the process goes away.
+appId: fr.aehru.prophecyapp
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+
+- runFlow:
+    file: subflows/create-character.yaml
+    env:
+      NOM: Kaelen
+- back
+- assertVisible:
+    id: 'character-row-1'
+
+- stopApp
+# No clearState: the DB from the previous launch is exactly the point.
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: 'character-row-1'
+    timeout: 20000
+- assertVisible: 'Kaelen'

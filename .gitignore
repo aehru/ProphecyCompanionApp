@@ -45,3 +45,9 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Playwright (E2E against the web export)
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright/

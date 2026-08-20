@@ -1,0 +1,34 @@
+# `Alert.alert` — the one confirmation path the web suite CANNOT reach, because
+# Alert is a no-op on react-native-web. Every destructive action in the app goes
+# through one, so nothing about them is covered until a device runs this.
+#
+# The campaign delete is the flow used here rather than the character one on
+# purpose: its confirm button reads « Confirmer », while the character alert has
+# a button whose text repeats its own title (« Supprimer »), which no text
+# selector can tell apart.
+appId: fr.aehru.prophecyapp
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+
+- runFlow:
+    file: subflows/create-table.yaml
+    env:
+      NOM: Table Maestro
+
+- back
+- assertVisible:
+    id: 'campaign-row-1'
+
+- tapOn:
+    id: 'campaign-delete-1'
+# The native dialog, not a Paper one — it draws outside the React tree.
+- assertVisible: 'Supprimer la table ?'
+- tapOn: 'Confirmer'
+
+- extendedWaitUntil:
+    visible:
+      id: 'campaigns-empty'
+    timeout: 15000
