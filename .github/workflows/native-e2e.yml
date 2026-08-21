@@ -43,14 +43,22 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      # android/ is a GENERATED folder and is gitignored — the checkout has no
+      # native project at all, and `working-directory: android` fails outright
+      # without this. app.json plus the config plugins in plugins/ are the source
+      # of truth; prebuild is what turns them into a buildable Gradle project.
+      # `--no-install` because the composite setup already installed with bun.
+      - name: Generate the native project
+        run: bunx expo prebuild --platform android --no-install
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
       # RELEASE, not debug: a debug APK expects Metro to serve the bundle, so it
       # cannot run standalone. Release also embeds the JS and runs Proguard —
       # which is the build the testers actually get. Signing falls back to the
-      # debug key when PROPHECY_UPLOAD_STORE_FILE is absent (android/app/build.gradle),
-      # so this needs no secrets.
+      # debug key when PROPHECY_UPLOAD_STORE_FILE is absent (plugins/withReleaseSigning.js
+      # writes that fallback into the generated build.gradle), so this needs no secrets.
       - name: Build the release APK
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon
