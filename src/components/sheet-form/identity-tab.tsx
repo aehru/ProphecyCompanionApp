@@ -44,6 +44,7 @@ export default function IdentityTab({
     <>
       <SectionCard title="IDENTITÉ">
         <TextInput
+          testID="field-nom"
           label="Nom *"
           value={v.nom}
           onChangeText={(t) => onText('nom', t)}

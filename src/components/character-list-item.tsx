@@ -53,6 +53,7 @@ export default function CharacterListItem({
           borderColor: selected ? theme.colors.primary : theme.colors.outlineVariant,
         },
       ]}
+      testID={`character-row-${character.id}`}
       title={character.nom || 'Sans nom'}
       // The subtitle is the caste chip then the concept, so the badge leads the
       // line. Rendered through the function form (rather than the plain string)

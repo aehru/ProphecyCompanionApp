@@ -120,7 +120,13 @@ export default function CharacterForm({
         {tab === 'magie' ? <MagicTab v={v} chain={chains.magie} setField={setField} /> : null}
       </KeyboardAwareScrollView>
 
-      <AppFab icon="content-save" label={submitLabel} onPress={save} disabled={busy} />
+      <AppFab
+        icon="content-save"
+        label={submitLabel}
+        testID="fab-save-character"
+        onPress={save}
+        disabled={busy}
+      />
       <Snackbar visible={saved} onDismiss={() => setSaved(false)} duration={1500}>
         Enregistré
       </Snackbar>

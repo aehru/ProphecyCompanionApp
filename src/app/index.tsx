@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
 import { IconButton, Menu, Text } from 'react-native-paper';
 
 import CharacterListItem from '@/components/character-list-item';
@@ -30,13 +30,17 @@ export default function CharactersListScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const theme = useProphecyTheme();
-  const { data } = useLiveQuery(charactersListQuery());
+  const { data, updatedAt } = useLiveQuery(charactersListQuery());
   const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [askingIntent, setAskingIntent] = useState(false);
   const { columns } = useLayout();
   const splitWidth = useSplitWidth();
-  const isEmpty = !data || data.length === 0;
+  // `updatedAt` stays undefined until the query has actually run — useLiveQuery
+  // seeds `data` with [], so without it « Aucun personnage » flashes on every
+  // cold start before the rows land.
+  const loading = updatedAt === undefined;
+  const isEmpty = !loading && (!data || data.length === 0);
   const ids = useMemo(() => (data ?? []).map((c) => c.id), [data]);
   const selection = useCharacterSelection(ids);
   const { selectedIds, clear, toggleAll } = selection;
@@ -190,7 +194,11 @@ export default function CharactersListScreen() {
       headerLeft: undefined,
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
-          <IconButton icon="account-group" onPress={() => router.push('/campaigns' as Href)} />
+          <IconButton
+            icon="account-group"
+            testID="campaigns-nav"
+            onPress={() => router.push('/campaigns' as Href)}
+          />
           <Menu
             visible={menuOpen}
             onDismiss={() => setMenuOpen(false)}
@@ -239,8 +247,13 @@ export default function CharactersListScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {isEmpty ? (
+      {loading ? (
+        <View testID="characters-loading" style={styles.loading}>
+          <ActivityIndicator />
+        </View>
+      ) : isEmpty ? (
         <View
+          testID="characters-empty"
           style={[
             styles.empty,
             {
@@ -252,7 +265,7 @@ export default function CharactersListScreen() {
             Aucun personnage
           </Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            Touchez + pour en creer un.
+            Touchez + pour en créer un.
           </Text>
         </View>
       ) : (
@@ -286,7 +299,11 @@ export default function CharactersListScreen() {
       )}
       {/* Creating a character mid-selection makes no sense — the FAB steps out. */}
       {!selection.active && (
-        <AppFab icon={dsIcon('plus')} onPress={() => router.push('/character/new')} />
+        <AppFab
+          icon={dsIcon('plus')}
+          testID="fab-new-character"
+          onPress={() => router.push('/character/new')}
+        />
       )}
 
       <ExportIntentDialog
@@ -302,6 +319,7 @@ export default function CharactersListScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listContent: { padding: 12, paddingBottom: 96 },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   separator: { height: 8 },
   empty: {
     flex: 1,

@@ -38,6 +38,7 @@ export default function CharacterTabsLayout() {
         name="index"
         options={{
           title: 'Accueil',
+          tabBarButtonTestID: 'tab-accueil',
           tabBarIcon: dsIcon('home'),
           // Only Accueil carries a back arrow: a tabs root gets none automatically,
           // and it is the one tab that is a way *in* to the character rather than a
@@ -51,19 +52,35 @@ export default function CharacterTabsLayout() {
       />
       <Tabs.Screen
         name="fiche"
-        options={{ title: 'Fiche', tabBarIcon: dsIcon('scroll') }}
+        options={{
+          title: 'Fiche',
+          tabBarIcon: dsIcon('scroll'),
+          tabBarButtonTestID: 'tab-fiche',
+        }}
       />
       <Tabs.Screen
         name="skills"
-        options={{ title: 'Compétences', tabBarIcon: dsIcon('book') }}
+        options={{
+          title: 'Compétences',
+          tabBarIcon: dsIcon('book'),
+          tabBarButtonTestID: 'tab-competences',
+        }}
       />
       <Tabs.Screen
         name="weapons"
-        options={{ title: 'Inventaire', tabBarIcon: dsIcon('backpack') }}
+        options={{
+          title: 'Inventaire',
+          tabBarIcon: dsIcon('backpack'),
+          tabBarButtonTestID: 'tab-inventaire',
+        }}
       />
       <Tabs.Screen
         name="magic"
-        options={{ title: 'Magie', tabBarIcon: dsIcon('magic') }}
+        options={{
+          title: 'Magie',
+          tabBarIcon: dsIcon('magic'),
+          tabBarButtonTestID: 'tab-magie',
+        }}
       />
     </Tabs>
   );
