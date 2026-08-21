@@ -3,6 +3,7 @@ import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconButton } from 'react-native-paper';
 
+import DiceRollerButton from '@/components/dice-roller-button';
 import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
@@ -33,6 +34,10 @@ export default function CharacterTabsLayout() {
         headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         // `height` on the JS header is the total, status bar included.
         headerStyle: { height: HEADER_HEIGHT + insets.top },
+        // The dice roller reaches every tab from here. The Fiche replaces this
+        // with its own `setOptions` (sheet pencil) and re-adds the button there
+        // — a screen-level headerRight overrides this one wholesale.
+        headerRight: () => <DiceRollerButton />,
       }}>
       <Tabs.Screen
         name="index"

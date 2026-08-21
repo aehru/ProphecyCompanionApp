@@ -6,6 +6,7 @@ import { Button, IconButton, Menu, Text } from 'react-native-paper';
 
 import CharacterListItem from '@/components/character-list-item';
 import CharacterSelectionActions from '@/components/character-selection-actions';
+import DiceRollerButton from '@/components/dice-roller-button';
 import ExportIntentDialog from '@/components/export-intent-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
@@ -193,8 +194,12 @@ export default function CharactersListScreen() {
       title: 'Personnages',
       headerBackVisible: true,
       headerLeft: undefined,
+      // Overrides the root stack's headerRight, so the dice button it puts on
+      // every screen is re-added here. Not in the selection bar above: that one
+      // is contextual and only holds actions on the selected characters.
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
+          <DiceRollerButton />
           <IconButton
             icon="account-group"
             testID="campaigns-nav"
