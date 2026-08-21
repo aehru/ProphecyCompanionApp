@@ -1,0 +1,66 @@
+# Dependency updates. Security alerts are separate and live in the repo's
+# Settings > Advanced Security — this file only schedules *version* updates.
+version: 2
+
+updates:
+  # --- GitHub Actions -----------------------------------------------------
+  # Nothing else watches the `@v4` pins, and a stale action is the cheapest
+  # supply-chain hole to close. Two directories: `/` covers .github/workflows,
+  # but a composite action is only scanned when its own directory is listed —
+  # .github/actions/setup pulls setup-node, setup-bun and cache.
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /.github/actions/setup
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci(deps)
+    groups:
+      actions:
+        patterns: ['*']
+
+  # --- Bun ----------------------------------------------------------------
+  # `bun`, not `npm`: bun.lock is its own ecosystem. Dependabot runs
+  # `bun install` to refresh the lockfile, so the CI's --frozen-lockfile stays
+  # honest.
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+
+    # The Expo SDK 57 family moves as ONE set, through `expo install --fix` —
+    # every version here is pinned by the SDK, not chosen by us. A per-package
+    # bump desyncs the set and breaks the native build, so Dependabot never
+    # touches it; SDK upgrades stay a deliberate manual step.
+    ignore:
+      - dependency-name: expo
+      - dependency-name: expo-*
+      - dependency-name: '@expo/*'
+      - dependency-name: '@expo-google-fonts/*'
+      - dependency-name: babel-preset-expo
+      - dependency-name: eslint-config-expo
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: '@types/react'
+      # react-native and everything orbiting it: reanimated, screens, svg,
+      # gesture-handler, safe-area-context, worklets, keyboard-controller and
+      # -web are all SDK-pinned. react-native-paper and react-native-qrcode-svg
+      # are the collateral — they float on `^` but share the RN peer range, so
+      # they get bumped by hand alongside an SDK move.
+      - dependency-name: react-native
+      - dependency-name: react-native-*
+      - dependency-name: '@react-native-async-storage/*'
+
+    groups:
+      production-dependencies:
+        dependency-type: production
+        patterns: ['*']
+      development-dependencies:
+        dependency-type: development
+        patterns: ['*']
