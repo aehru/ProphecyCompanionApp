@@ -5,6 +5,7 @@ import {
   rollDice,
   rollDie,
   rollInitiativeWithIcons,
+  rollTendances,
   sortInitiativeSlots,
   trimInitiativeSlots,
   type Rng,
@@ -144,5 +145,26 @@ describe('rollInitiativeWithIcons', () => {
 
   it('returns nothing for a count of 0', () => {
     expect(rollInitiativeWithIcons(0, ['sword'])).toEqual({ values: [], icons: [] });
+  });
+});
+
+describe('rollTendances', () => {
+  it('rolls one D10 per tendance, in TENDANCES order', () => {
+    const rolls = rollTendances(seq(0, 0.5, 0.999));
+    expect(rolls).toEqual([
+      { key: 'dragon', value: 1 },
+      { key: 'fatalite', value: 6 },
+      { key: 'homme', value: 10 },
+    ]);
+  });
+
+  it('keeps every die inside a D10', () => {
+    const rng = seq(0, 0.07, 0.31, 0.62, 0.88, 0.9999);
+    for (let i = 0; i < 20; i++) {
+      for (const { value } of rollTendances(rng)) {
+        expect(value).toBeGreaterThanOrEqual(1);
+        expect(value).toBeLessThanOrEqual(10);
+      }
+    }
   });
 });
