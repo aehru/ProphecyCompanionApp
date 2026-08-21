@@ -89,6 +89,47 @@ export function generateNpcName(rng: Rng): string {
   return given;
 }
 
+/** « Garde » + 2 → « Garde #2 ». One place, so the parser below can't drift. */
+export function templatedName(template: string, index: number): string {
+  return `${template.trim()} #${index}`;
+}
+
+/** Matches a name this module numbered — « Garde #3 » → 3. */
+function templateIndex(template: string, name: string): number | null {
+  const trimmed = name.trim();
+  const stem = template.trim();
+  if (!trimmed.startsWith(stem)) return null;
+  const rest = trimmed.slice(stem.length).trim();
+  const m = /^#(\d+)$/.exec(rest);
+  return m ? Number(m[1]) : null;
+}
+
+/**
+ * The next free number in a template's series — « Garde #1 » on an empty table,
+ * « Garde #4 » when three are already out there.
+ *
+ * Continues across generations rather than restarting at 1: a GM who generates
+ * three gardes tonight and two more after the fight gets five distinct names,
+ * which is the only reason the numbers exist. A bare « Garde » with no number
+ * counts as the first of the series, so the next one is #2 and neither shadows
+ * the other. Gaps are not reused (deleting #2 still leads to #4) — same rule as
+ * the spawn numbering in `npc-name`.
+ */
+export function nextTemplateIndex(template: string, taken: readonly string[]): number {
+  const stem = template.trim();
+  if (stem === '') return 1;
+  let highest = 0;
+  for (const name of taken) {
+    if (name.trim() === stem) {
+      highest = Math.max(highest, 1);
+      continue;
+    }
+    const index = templateIndex(stem, name);
+    if (index != null) highest = Math.max(highest, index);
+  }
+  return highest + 1;
+}
+
 /**
  * A name no one at the table already carries. Draws a handful of times, then
  * falls back to the numbering the spawn flow already uses (« Doran 2 ») rather

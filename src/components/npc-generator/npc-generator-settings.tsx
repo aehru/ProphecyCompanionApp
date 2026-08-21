@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
+import { IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import ChipSelect from '@/components/ui/chip-select';
@@ -50,6 +50,10 @@ const INFO = {
   count:
     `Combien de PNJ générer d'un coup, jusqu'à ${MAX_BATCH}. Chacun est tiré séparément : ` +
     'noms et valeurs diffèrent. Pour trois gardes identiques, générez-en un et dupliquez-le.',
+  name:
+    'Laissez vide pour des noms inventés. Sinon, le nom saisi est numéroté : « Garde » donne ' +
+    '« Garde #1 », « Garde #2 »… La numérotation reprend au dernier numéro déjà utilisé, ' +
+    'donc deux lots de gardes ne se marchent pas dessus.',
 } as const;
 
 export default function NpcGeneratorSettings({
@@ -58,11 +62,13 @@ export default function NpcGeneratorSettings({
   variance,
   optionChoice,
   countText,
+  nameTemplate,
   onArchetype,
   onTier,
   onVariance,
   onOptionChoice,
   onCountText,
+  onNameTemplate,
 }: {
   archetypeId: string;
   tier: NpcTier;
@@ -70,11 +76,14 @@ export default function NpcGeneratorSettings({
   optionChoice: string;
   /** Raw text, not a number: a half-typed field must be allowed to be empty. */
   countText: string;
+  /** Blank = invented names. Anything else is numbered (« Garde #1 »). */
+  nameTemplate: string;
   onArchetype: (id: string) => void;
   onTier: (tier: NpcTier) => void;
   onVariance: (variance: NpcVariance) => void;
   onOptionChoice: (choice: string) => void;
   onCountText: (text: string) => void;
+  onNameTemplate: (text: string) => void;
 }) {
   const theme = useProphecyTheme();
   const batch = parseBatch(countText);
@@ -127,6 +136,19 @@ export default function NpcGeneratorSettings({
         onChange={(key) => onVariance(key as NpcVariance)}
         testIDPrefix="npc-variance"
       />
+
+      {/* Optional: a crowd gets a numbered label, everyone else gets a name the
+          generator invents. Placeholder rather than a default value, so the
+          empty field reads as « pas de modèle » and not as a suggestion. */}
+      <View style={styles.count}>
+        <InfoLabel label="Nom (optionnel)" info={INFO.name} testID="npc-name-info" />
+        <TextInput
+          value={nameTemplate}
+          placeholder="Garde"
+          testID="field-npc-name"
+          onChangeText={onNameTemplate}
+        />
+      </View>
 
       {/* A free field rather than a chip row: a GM generating a crowd should not
           be held to the four sizes someone happened to list. The steppers are

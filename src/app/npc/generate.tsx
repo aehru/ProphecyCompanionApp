@@ -43,6 +43,9 @@ export default function GenerateNpcScreen() {
   // Kept as TEXT: the field is free, and a half-typed value has to be allowed
   // to be empty (which reads as zero, i.e. no preview and no way to save).
   const [countText, setCountText] = useState('1');
+  // Blank on purpose: no template means the invented names, which is the right
+  // default for a PNJ a GM will actually name at the table.
+  const [nameTemplate, setNameTemplate] = useState('');
   // A fresh seed per mount — pushing the screen again always rolls anew, with
   // no visible/hidden edge to detect (the dialog needed one).
   const [seed, setSeed] = useState(randomSeed);
@@ -73,6 +76,7 @@ export default function GenerateNpcScreen() {
         optionChoice: optionChoice === RANDOM_CHOICE ? null : optionChoice,
         seed,
         taken,
+        nameTemplate,
       })
     : [];
 
@@ -100,6 +104,7 @@ export default function GenerateNpcScreen() {
               variance={variance}
               optionChoice={optionChoice}
               countText={countText}
+              nameTemplate={nameTemplate}
               onArchetype={(id) => {
                 setArchetypeId(id);
                 // The previous answer belongs to the previous archetype's question.
@@ -109,6 +114,7 @@ export default function GenerateNpcScreen() {
               onVariance={setVariance}
               onOptionChoice={setOptionChoice}
               onCountText={setCountText}
+              onNameTemplate={setNameTemplate}
             />
           </SectionCard>
 

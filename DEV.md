@@ -116,7 +116,7 @@ bunx expo run:android --variant release            # a standalone APK; a debug o
 maestro test .maestro                              # or one file: maestro test .maestro/smoke.yaml
 ```
 
-Five flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (the native alert), `persistence` (kill the app, relaunch, the row is still there), `generate-npc` (the PNJ generator: an « i » panel, a tier chip, a batch of two written in one go).
+Five flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (the native alert), `persistence` (kill the app, relaunch, the row is still there), `generate-npc` (the PNJ generator: an « i » panel, a tier chip, a name template, a batch of two written in one go).
 
 Three gotchas worth knowing before adding one. **`launchApp: { clearState: true }` wipes the DB**, so a flow that means to test persistence has to relaunch WITHOUT it. And **the character delete alert cannot be driven by text** — its confirm button repeats its own title (« Supprimer »), which no text selector can tell apart; the alert coverage goes through the campaign delete instead, whose button reads « Confirmer ». And **`NumberField` selects its whole value on focus**, so a flow typing into one has to `eraseText` first — otherwise the new digits land beside the old ones on a device (they replace them on web).
 

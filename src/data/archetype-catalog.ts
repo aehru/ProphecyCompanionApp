@@ -79,6 +79,10 @@ export type ArchetypePreset = {
   caste: CasteKey | null;
   data: {
     name: string;
+    /**
+     * One line describing the archetype, shown under the picker. NOT written to
+     * the generated character: `characters.concept` belongs to the GM.
+     */
     concept: string;
     stats: ArchetypeStats;
     skills: ArchetypeSkill[];

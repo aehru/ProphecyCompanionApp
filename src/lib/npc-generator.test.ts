@@ -39,11 +39,14 @@ describe('generateNpc', () => {
     expect(generateNpc(combattant, { seed: npc.seed })).toEqual(npc);
   });
 
-  it('marks the row as a PNJ and carries the archetype caste and concept', () => {
+  it('marks the row as a PNJ and carries the archetype caste', () => {
     const npc = generateNpc(erudit, { seed: 'lettre' });
     expect(npc.character.kind).toBe('npc');
     expect(npc.character.caste).toBe('erudit');
-    expect(npc.character.concept).toBe(erudit.data.concept);
+  });
+
+  it('leaves the concept empty — that line is the GM to write', () => {
+    expect(generateNpc(erudit, { seed: 'lettre' }).character.concept).toBeUndefined();
   });
 
   it('derives the wound track from the rolled RÉS + VOL', () => {
@@ -159,6 +162,34 @@ describe('generateNpcs', () => {
   it('returns nothing for a count of zero or less', () => {
     expect(generateNpcs(erudit, 0)).toEqual([]);
     expect(generateNpcs(erudit, -3)).toEqual([]);
+  });
+});
+
+describe('name template', () => {
+  it('numbers a batch from the template instead of inventing names', () => {
+    const batch = generateNpcs(combattant, 3, { seed: 'g', nameTemplate: 'Garde' });
+    expect(batch.map((n) => n.character.nom)).toEqual(['Garde #1', 'Garde #2', 'Garde #3']);
+  });
+
+  it('continues past the gardes already at the table', () => {
+    const batch = generateNpcs(combattant, 2, {
+      seed: 'g',
+      nameTemplate: 'Garde',
+      taken: ['Garde #1', 'Garde #2'],
+    });
+    expect(batch.map((n) => n.character.nom)).toEqual(['Garde #3', 'Garde #4']);
+  });
+
+  it('falls back to invented names when the template is blank', () => {
+    const [npc] = generateNpcs(combattant, 1, { seed: 'g', nameTemplate: '   ' });
+    expect(npc.character.nom).not.toContain('#');
+  });
+
+  it('leaves the rolled stats alone — only the name changes', () => {
+    const plain = generateNpc(combattant, { seed: 'same' });
+    const named = generateNpc(combattant, { seed: 'same', nameTemplate: 'Garde' });
+    expect(named.character.nom).toBe('Garde #1');
+    expect(named.skills).toEqual(plain.skills);
   });
 });
 

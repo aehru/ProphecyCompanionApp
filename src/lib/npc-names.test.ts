@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateGivenName, generateNpcName, uniqueNpcName } from '@/lib/npc-names';
+import {
+  generateGivenName,
+  generateNpcName,
+  nextTemplateIndex,
+  templatedName,
+  uniqueNpcName,
+} from '@/lib/npc-names';
 import { seededRng } from '@/lib/rng';
 
 describe('generateGivenName', () => {
@@ -50,5 +56,32 @@ describe('uniqueNpcName', () => {
     const frozen = () => 0;
     const first = uniqueNpcName(frozen, []);
     expect(uniqueNpcName(frozen, [first])).toBe(`${first} 2`);
+  });
+});
+
+describe('templatedName / nextTemplateIndex', () => {
+  it('numbers a template', () => {
+    expect(templatedName('Garde', 2)).toBe('Garde #2');
+    expect(templatedName('  Garde  ', 1)).toBe('Garde #1');
+  });
+
+  it('starts at one on an empty table', () => {
+    expect(nextTemplateIndex('Garde', [])).toBe(1);
+  });
+
+  it('continues the series already at the table', () => {
+    expect(nextTemplateIndex('Garde', ['Garde #1', 'Garde #2'])).toBe(3);
+  });
+
+  it('counts a bare template as the first of its series', () => {
+    expect(nextTemplateIndex('Garde', ['Garde'])).toBe(2);
+  });
+
+  it('does not reuse a gap', () => {
+    expect(nextTemplateIndex('Garde', ['Garde #1', 'Garde #4'])).toBe(5);
+  });
+
+  it('ignores other series and other names', () => {
+    expect(nextTemplateIndex('Garde', ['Brigand #7', 'Kaelen', 'Gardeur #3'])).toBe(1);
   });
 });

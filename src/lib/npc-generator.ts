@@ -19,7 +19,7 @@ import { DEFAULT_SKILLS } from '@/constants/prophecy';
 import type { ArchetypePreset, ArchetypeStats } from '@/data/archetype-catalog';
 import type { NewCharacter } from '@/db/schema';
 import { initiativeDice, woundBoxes } from '@/lib/creation-rules';
-import { uniqueNpcName } from '@/lib/npc-names';
+import { nextTemplateIndex, templatedName, uniqueNpcName } from '@/lib/npc-names';
 import { jitter, pick, randomSeed, seededRng, type Rng } from '@/lib/rng';
 
 /**
@@ -126,6 +126,13 @@ export type GenerateNpcOptions = {
   seed?: string;
   /** Names already at the table, so the PNJ gets one of their own. */
   taken?: readonly string[];
+  /**
+   * A name to number instead of inventing one: « Garde » gives « Garde #1 »,
+   * « Garde #2 »… Blank (the default) keeps the invented names — a crowd of
+   * gardes wants a label, a named contact wants a name, and only the GM knows
+   * which they are generating.
+   */
+  nameTemplate?: string | null;
 };
 
 const clamp = (n: number, min: number, max?: number) =>
@@ -224,7 +231,9 @@ export function generateNpc(
     optionChoice,
     seed = randomSeed(),
     taken = [],
+    nameTemplate,
   } = options;
+  const template = nameTemplate?.trim() ?? '';
   const rng = seededRng(seed);
   const dials = dialsOf(tier, variance);
 
@@ -235,8 +244,14 @@ export function generateNpc(
     seed,
     archetypeId: archetype.id,
     character: {
-      nom: uniqueNpcName(rng, taken),
-      concept: archetype.data.concept,
+      nom: template
+        ? templatedName(template, nextTemplateIndex(template, taken))
+        : uniqueNpcName(rng, taken),
+      // `concept` is deliberately NOT filled from the archetype: it is the one
+      // line where a GM writes what this PNJ is at their table (« le cousin du
+      // maire », « celui qui a vu le dragon »), and a prefilled « Garde
+      // assermenté » is a placeholder they would have to clear first. The
+      // archetype's own concept stays a description for the picker.
       caste: archetype.caste,
       kind: 'npc',
       ...stats,

@@ -38,6 +38,14 @@ tags:
 - tapOn:
     id: 'reroll-npc'
 
+# A name template: the batch is numbered « Garde #1 », « Garde #2 » instead of
+# getting invented names — which also gives the assertions below real text to
+# look for rather than two opaque row ids.
+- tapOn:
+    id: 'field-npc-name'
+- inputText: 'Garde'
+- hideKeyboard
+
 # Batch size two ways: typed into the free field, then walked back with the
 # stepper. Select-all on focus means the old value has to be erased explicitly,
 # or "3" would land next to the "1" already there.
@@ -53,13 +61,16 @@ tags:
 - tapOn:
     id: 'fab-add-npc'
 
-# Back on the list, with BOTH PNJs written — the ids are sequential from empty.
+# Back on the list, with BOTH PNJs written — the ids are sequential from empty,
+# and the names come from the template.
 - extendedWaitUntil:
     visible:
       id: 'character-row-1'
     timeout: 15000
 - assertVisible:
     id: 'character-row-2'
+- assertVisible: 'Garde #1'
+- assertVisible: 'Garde #2'
 # Two, not three: the stepper's -1 has to reach what actually gets written.
 - assertNotVisible:
     id: 'character-row-3'
