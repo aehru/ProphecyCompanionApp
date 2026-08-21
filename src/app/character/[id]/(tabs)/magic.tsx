@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import EnchantRow from '@/components/magic/enchant-row';
@@ -31,6 +31,7 @@ import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellTotal } from '@/hooks/use-spell-total';
+import { Alert } from '@/lib/alert';
 import { asNumRecord } from '@/lib/character-values';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';

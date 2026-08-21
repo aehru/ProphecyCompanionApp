@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { Button, IconButton, List, Text, TextInput } from 'react-native-paper';
 
 import { QrScannerModal } from '@/components/campaign/qr-scanner';
@@ -10,6 +10,7 @@ import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import {
   campaignsListQuery,
   createLocalTable,

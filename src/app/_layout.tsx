@@ -18,6 +18,7 @@ import { PaperProvider } from 'react-native-paper';
 import CampaignLiveIndicator from '@/components/campaign-live-indicator';
 import DatabaseGate from '@/components/database-gate';
 import LogErrorBoundary from '@/components/log-error-boundary';
+import AlertHost from '@/components/ui/alert-host';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics } from '@/lib/log';
@@ -66,6 +67,10 @@ export default function RootLayout() {
   return (
     <KeyboardProvider>
       <PaperProvider theme={theme} settings={paperSettings}>
+        {/* Above the gate on purpose: an alert raised by the database failure
+            screen has to be able to show. Paper's Portal hoists it to the top
+            regardless of where it sits here. */}
+        <AlertHost />
         <ThemeProvider
           value={colorScheme === 'dark' ? ProphecyNavigationDarkTheme : ProphecyNavigationLightTheme}>
           <DatabaseGate

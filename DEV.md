@@ -104,11 +104,11 @@ Specs live in [e2e/](e2e), helpers in [e2e/fixtures.ts](e2e/fixtures.ts). Three 
 
 Each project runs in two viewports (420 and 1280 wide) — [use-layout.ts](src/hooks/use-layout.ts) branches at 600/840 and the campaign roster genuinely splits above it.
 
-**Out of reach here, on purpose:** `Alert.alert` (a no-op on web, so destructive confirmations), the camera/QR join, the share sheet, native tabs and gestures. Those need a device — see below.
+**Out of reach here, on purpose:** the camera/QR join, the share sheet, native tabs and gestures. Those need a device — see below. Destructive confirmations used to sit in this list; they no longer do, because `@/lib/alert` draws them itself instead of calling react-native-web's no-op `Alert` (see `e2e/alerts.spec.ts`).
 
 ### End-to-end (device)
 
-What the web export cannot answer for: `Alert.alert` (a no-op on react-native-web, so **every destructive confirmation in the app**), the native tab bar, the keyboard, and the real expo-sqlite driver on a device filesystem — a different code path from the wasm build, and the one that carries the migrations. Flows live in [.maestro/](.maestro) and run with [Maestro](https://maestro.mobile.dev/): black-box YAML, no instrumentation in the app, and they match the **same `testID`s** the web suite uses.
+What the web export cannot answer for: the native tab bar, the keyboard, and the real expo-sqlite driver on a device filesystem — a different code path from the wasm build, and the one that carries the migrations. Flows live in [.maestro/](.maestro) and run with [Maestro](https://maestro.mobile.dev/): black-box YAML, no instrumentation in the app, and they match the **same `testID`s** the web suite uses.
 
 ```bash
 curl -Ls "https://get.maestro.mobile.dev" | bash   # once
@@ -116,7 +116,7 @@ bunx expo run:android --variant release            # a standalone APK; a debug o
 maestro test .maestro                              # or one file: maestro test .maestro/smoke.yaml
 ```
 
-Five flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (the native alert), `persistence` (kill the app, relaunch, the row is still there), `generate-npc` (the PNJ generator: an « i » panel, a tier chip, a name template, a batch of two written in one go).
+Five flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (a destructive confirmation on a real device), `persistence` (kill the app, relaunch, the row is still there), `generate-npc` (the PNJ generator: an « i » panel, a tier chip, a name template, a batch of two written in one go).
 
 Three gotchas worth knowing before adding one. **`launchApp: { clearState: true }` wipes the DB**, so a flow that means to test persistence has to relaunch WITHOUT it. And **the character delete alert cannot be driven by text** — its confirm button repeats its own title (« Supprimer »), which no text selector can tell apart; the alert coverage goes through the campaign delete instead, whose button reads « Confirmer ». And **`NumberField` selects its whole value on focus**, so a flow typing into one has to `eraseText` first — otherwise the new digits land beside the old ones on a device (they replace them on web).
 

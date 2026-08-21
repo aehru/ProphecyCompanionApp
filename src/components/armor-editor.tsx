@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -9,6 +9,7 @@ import type { Armor } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { formatDecimal, parseDecimal } from '@/lib/character-values';
 import { deleteArmor, updateArmor } from '@/repositories/armor';
 

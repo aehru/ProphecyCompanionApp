@@ -5,7 +5,9 @@ import { defineConfig, devices } from '@playwright/test';
 // real expo-sqlite (wasm), so these tests cover what the Node unit suites
 // structurally cannot: mounting order, provider nesting, route resolution and
 // the async DB round-trip. It is not a substitute for a device — native tabs,
-// gestures, the share sheet, the camera and `Alert.alert` do not exist here.
+// gestures, the share sheet and the camera do not exist here. Confirmations DO:
+// they go through `@/lib/alert`, which draws a DsDialog rather than calling
+// react-native-web's no-op `Alert` (see e2e/alerts.spec.ts).
 //
 //   bun run build:web && bun run e2e
 

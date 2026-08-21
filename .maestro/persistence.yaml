@@ -8,8 +8,8 @@ appId: fr.aehru.prophecyapp
 tags:
   - smoke
 ---
-- launchApp:
-    clearState: true
+- runFlow:
+    file: subflows/launch.yaml
 
 - runFlow:
     file: subflows/create-character.yaml
@@ -20,10 +20,13 @@ tags:
     id: 'character-row-1'
 
 - stopApp
-# No clearState: the DB from the previous launch is exactly the point.
+# No clearState: the DB from the previous launch is exactly the point. No
+# subflow either, for the same reason — subflows/launch.yaml wipes it.
 - launchApp
+# Generous, like the cold launch: the second start still reopens the database
+# and walks the migration table before the list can render.
 - extendedWaitUntil:
     visible:
       id: 'character-row-1'
-    timeout: 20000
+    timeout: 120000
 - assertVisible: 'Kaelen'

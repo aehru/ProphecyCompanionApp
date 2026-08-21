@@ -1,6 +1,6 @@
 import { BottomTabBarHeightContext } from 'expo-router/js-tabs';
 import React, { useCallback, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SegmentedButtons, Snackbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +13,7 @@ import MagicTab from '@/components/sheet-form/magic-tab';
 import AppFab from '@/components/ui/app-fab';
 import type { Character, NewCharacter } from '@/db/schema';
 import { contentWidth } from '@/hooks/use-layout';
+import { Alert } from '@/lib/alert';
 import { type FormValues, fromFormValues, toFormValues } from '@/lib/character-values';
 
 // In-page tabs to keep the long sheet from scrolling endlessly. Name stays the

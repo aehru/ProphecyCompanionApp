@@ -25,6 +25,26 @@ module.exports = defineConfig([
     },
   },
   {
+    // react-native-web's `Alert` is `class Alert { static alert() {} }` — a
+    // no-op that swallows every confirm and every error message on the web
+    // build. `@/lib/alert` has the same signature and renders a DsDialog on
+    // every platform, so there is never a reason to reach for the original.
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react-native',
+              importNames: ['Alert'],
+              message: "Import { Alert } from '@/lib/alert' — react-native's is a no-op on web.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: [
       'node_modules/*',
       '.expo/*',
