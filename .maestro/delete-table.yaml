@@ -13,8 +13,8 @@ appId: fr.aehru.prophecyapp
 tags:
   - smoke
 ---
-- launchApp:
-    clearState: true
+- runFlow:
+    file: subflows/launch.yaml
 
 - runFlow:
     file: subflows/create-table.yaml
