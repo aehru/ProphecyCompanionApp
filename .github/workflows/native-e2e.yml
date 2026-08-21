@@ -32,19 +32,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup
 
       # The Gradle build needs a JDK; 17 is what AGP 8 expects.
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       # RELEASE, not debug: a debug APK expects Metro to serve the bundle, so it
       # cannot run standalone. Release also embeds the JS and runs Proguard —
@@ -62,7 +62,7 @@ jobs:
 
       # AVD snapshot cache: booting a cold emulator is most of this job's runtime.
       - name: Cache the AVD
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         id: avd-cache
         with:
           path: |
@@ -106,7 +106,7 @@ jobs:
 
       - name: Upload the report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: maestro-report
           path: |
