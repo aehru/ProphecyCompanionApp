@@ -5,9 +5,13 @@
  * so the pure logic (range, count, ordering) stays unit-testable without stubbing
  * Math.random globally.
  */
+import { TENDANCES } from '@/constants/prophecy';
 import type { Rng } from '@/lib/rng';
 
 export type { Rng };
+
+/** A tendance's die, carrying which tendance it was rolled for. */
+export type TendanceRoll = { key: (typeof TENDANCES)[number]['key']; value: number };
 
 /** A single die in [1, sides]. sides < 1 → 1 (a d0 is meaningless). */
 export function rollDie(sides: number, rng: Rng = Math.random): number {
@@ -77,4 +81,16 @@ export function rollInitiativeWithIcons(
   rng: Rng = Math.random,
 ): { values: number[]; icons: string[] } {
   return sortInitiativeSlots(rollDice(count, 10, rng), icons);
+}
+
+/**
+ * One D10 per tendance, in TENDANCES order.
+ *
+ * Prophecy lets a character roll the Dragon, the Fatalité and the Homme dice
+ * together and KEEP whichever result suits the action — so the three are rolled
+ * as one gesture and none of them is "the" result. Nothing is picked here: the
+ * choice happens at the table, and the app has no roll history to record it in.
+ */
+export function rollTendances(rng: Rng = Math.random): TendanceRoll[] {
+  return TENDANCES.map((t) => ({ key: t.key, value: rollDie(10, rng) }));
 }

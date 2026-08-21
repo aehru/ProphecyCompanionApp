@@ -39,6 +39,7 @@ const NumberField = React.memo(function NumberField({
   submitBehavior,
   signed = false,
   decimal = false,
+  maxLength,
   testID,
 }: {
   fieldKey: string;
@@ -56,6 +57,8 @@ const NumberField = React.memo(function NumberField({
   // Allow one decimal separator (e.g. a creation time of 0,5 jour). The comma is
   // what a French keyboard offers, so both `,` and `.` are accepted on input.
   decimal?: boolean;
+  /** Cap the typed value's length — pair it with a narrow `style` width. */
+  maxLength?: number;
   /** Stable E2E hook — react-native-web renders it as `data-testid`. */
   testID?: string;
 }) {
@@ -80,6 +83,7 @@ const NumberField = React.memo(function NumberField({
         ref={setRefs}
         testID={testID}
         value={value}
+        maxLength={maxLength}
         onChangeText={(t) => onChange(fieldKey, sanitizeNumericInput(t, { signed, decimal }))}
         keyboardType={
           signed ? 'numbers-and-punctuation' : decimal ? 'decimal-pad' : 'number-pad'
