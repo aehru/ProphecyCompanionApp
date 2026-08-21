@@ -72,7 +72,11 @@ export default function CharacterFicheScreen() {
         editingSheet ? (
           <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
         ) : (
-          <IconButton icon={dsIcon('edit')} onPress={() => setEditingSheet(true)} />
+          <IconButton
+            testID="edit-sheet"
+            icon={dsIcon('edit')}
+            onPress={() => setEditingSheet(true)}
+          />
         ),
     });
   }, [navigation, char?.nom, editingSheet]);

@@ -13,6 +13,19 @@ function isSpaFallback(text: string, url: string) {
 }
 
 /**
+ * A request to a server that is not there. `e2e/alerts.spec.ts` points the
+ * attach dialog at a dead port on purpose, and the BROWSER logs the refusal —
+ * the app never called `console.error`. Kept narrow: same-origin failures are a
+ * missing asset, and anything with a file extension is one too.
+ */
+function isDeadServer(text: string, url: string, baseURL?: string) {
+  if (!/net::ERR_CONNECTION_REFUSED/.test(text)) return false;
+  if (baseURL && url.startsWith(baseURL)) return false;
+  const last = new URL(url).pathname.split('/').pop() ?? '';
+  return !last.includes('.');
+}
+
+/**
  * Every test asserts the app logged nothing on `console.error` and threw
  * nothing uncaught. That single assertion is what catches the class of bug
  * this suite exists for: a screen that mounts outside its provider throws
@@ -21,13 +34,15 @@ function isSpaFallback(text: string, url: string) {
  */
 export const test = base.extend<{ appErrors: string[] }>({
   appErrors: [
-    async ({ page }, use) => {
+    async ({ page, baseURL }, use) => {
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(`uncaught: ${e.message}`));
       page.on('console', (m) => {
         if (m.type() !== 'error') return;
         const text = m.text();
-        if (isSpaFallback(text, m.location().url)) return;
+        const url = m.location().url;
+        if (isSpaFallback(text, url)) return;
+        if (isDeadServer(text, url, baseURL)) return;
         errors.push(`console.error: ${text}`);
       });
       await use(errors);
