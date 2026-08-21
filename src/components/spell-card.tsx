@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, HelperText, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -20,6 +20,7 @@ import {
 import type { Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { parseFormula } from '@/lib/formula';
 import type { SpellTotal } from '@/lib/spell-total';
 import { deleteSpell, updateSpell } from '@/repositories/spells';

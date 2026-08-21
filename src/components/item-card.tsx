@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -7,6 +7,7 @@ import Icon, { dsIcon } from '@/components/ui/icon';
 import type { Item } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { deleteItem, updateItem } from '@/repositories/items';
 
 /**

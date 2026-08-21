@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Menu, Text } from 'react-native-paper';
 
 import CharacterListItem from '@/components/character-list-item';
@@ -12,6 +12,7 @@ import AppFab from '@/components/ui/app-fab';
 import { useCharacterSelection } from '@/hooks/use-character-selection';
 import { useLayout, useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { type ExportIntent, parseImport } from '@/lib/character-transfer';
 import { pickImportText, shareExport } from '@/lib/character-transfer-io';
 import { sharedCharacterNames } from '@/repositories/campaigns';

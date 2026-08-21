@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -9,6 +9,7 @@ import { dsIcon } from '@/components/ui/icon';
 import type { Armor, Enchant, EnchantTarget, Item, Shield, Spell, Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { deleteEnchant, updateEnchant } from '@/repositories/enchants';
 
 const TARGET_KIND_OPTIONS = [

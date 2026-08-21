@@ -9,7 +9,7 @@
 
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import NpcGeneratorSettings from '@/components/npc-generator/npc-generator-settings';
@@ -21,6 +21,7 @@ import SectionCard from '@/components/ui/section-card';
 import { archetypeById, ARCHETYPE_CATALOG } from '@/data/archetype-catalog';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import {
   generateNpcs,
   parseBatch,

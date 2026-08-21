@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Divider, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -19,6 +19,7 @@ import type { Campaign } from '@/db/schema';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import {
   attachServer,
@@ -202,6 +203,7 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
         dismiss={<Button onPress={() => setAttachUrl(null)}>Annuler</Button>}
         actions={
           <Button
+            testID="dialog-attach-submit"
             mode="contained"
             icon="server-network"
             onPress={submitAttach}
@@ -217,6 +219,7 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
             IP. State still follows through onChangeText, and the dialog
             unmounts when hidden, so each open re-reads the prefill. */}
         <TextInput
+          testID="field-server-url"
           label="Serveur"
           defaultValue={attachUrl ?? ''}
           onChangeText={setAttachUrl}

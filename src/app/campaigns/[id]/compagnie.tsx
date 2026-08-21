@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import React, { useDeferredValue, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Snackbar, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,6 +16,7 @@ import { dsIcon } from '@/components/ui/icon';
 import type { Campaign } from '@/db/schema';
 import { useLayout } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
 import { rollInitiativeFor } from '@/repositories/characters';
