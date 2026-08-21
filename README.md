@@ -10,7 +10,7 @@ during a session: wounds, ressources, initiative, effets, réserve de magie.
 [![CI](https://img.shields.io/github/actions/workflow/status/aehru/ProphecyCompanionApp/ci.yml?branch=dev&label=CI&style=flat-square)](https://github.com/aehru/ProphecyCompanionApp/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/github/v/tag/aehru/ProphecyCompanionApp?label=version&sort=semver&color=c9a227&style=flat-square)](https://github.com/aehru/ProphecyCompanionApp/tags)
 [![License: MIT](https://img.shields.io/github/license/aehru/ProphecyCompanionApp?color=c9a227&style=flat-square)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20Android-8a6d3b?style=flat-square)](#get-the-app)
+[![Platform](https://img.shields.io/badge/platform-iOS%20|%20Android%20|%20Web-8a6d3b?style=flat-square)](#get-the-app)
 [![Offline first](https://img.shields.io/badge/offline--first-no%20account%2C%20no%20cloud-2e7d32?style=flat-square)](PRIVACY.md)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-c9a227?style=flat-square)](DEV.md)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-FF5E5B?logo=kofi&logoColor=white&style=flat-square)](https://ko-fi.com/C6Y524WEUG)
@@ -70,8 +70,55 @@ leaving the campaign erases the server-side copy. Details: [PRIVACY.md](PRIVACY.
 
 <a href="https://play.google.com/store/apps/details?id=fr.aehru.prophecyapp"><img alt="Get it on Google Play" height="60" src="assets/images/google-play-badge.png" /></a>
 
-iOS isn't published yet. Built with Expo for **iOS and Android**; a web build
-exists, but mobile is the primary target.
+iOS isn't published yet. Built with Expo for **iOS and Android**; the web build
+below covers everything else.
+
+### Web / PWA — [prophecyapp.aehru.fr](https://prophecyapp.aehru.fr)
+
+Open the link and it just runs. Install it and it behaves like an app: its own
+icon, no browser chrome, and it works offline (a service worker caches the
+shell — your data was never on a server to begin with).
+
+**Installing it:**
+
+| Browser | How |
+| --- | --- |
+| Chrome / Edge (Android, desktop) | Menu ⋮ → **Installer l'application** / **Ajouter à l'écran d'accueil** |
+| Firefox (Android) | Menu ⋮ → **Ajouter l'application à l'écran d'accueil** |
+| Safari (iOS/iPadOS) | Partager → **Sur l'écran d'accueil** |
+| Safari (macOS) | Fichier → **Ajouter au Dock** |
+
+Once installed, find it where your phone puts apps: the home screen icon it
+just created, and — on Android — the app drawer. On desktop it lands in the
+launcher/Start menu, and Chrome also lists it under `chrome://apps`.
+
+**One window at a time.** Your characters live in the browser's local storage
+(OPFS), and the database file is locked by whichever window opened it first.
+So the installed app and a browser tab on the same site **cannot run together**
+— the second one shows « Base de données verrouillée » and a **Réessayer**
+button. Close the other tabs and retry. On Android the tab keeps running in the
+background after you close it, so force-quit the browser (Paramètres →
+Applications → *votre navigateur* → Forcer l'arrêt) before relaunching from the
+home screen.
+
+**Storage must be allowed.** The app needs the site's storage to be writable and
+to survive:
+
+- **Do not use private / incognito browsing** — storage is wiped on exit, taking
+  your characters with it.
+- Do not set the site's cookies-and-site-data to *block* or *clear on close*
+  (Firefox « Supprimer les cookies et les données à la fermeture », Chrome
+  « Effacer les cookies à la fermeture des fenêtres », Safari's *Prevent
+  cross-site tracking* is fine, its *Remove all website data* is not).
+- Firefox's **Strict** tracking protection is fine for this site; « Toujours
+  utiliser le mode de navigation privée » is not.
+- Space is finite and browsers evict on pressure. **Export your characters
+  regularly** — long-press one in the **Personnages** list to enter selection
+  mode, then *Exporter* → *Sauvegarde*. That file is the real backup.
+
+Nothing leaves the device either way, on web exactly as on mobile: no account,
+no sync, no analytics. The only exception is campaign mode, which you opt into
+per character ([PRIVACY.md](PRIVACY.md)).
 
 Building it yourself (dev build, tooling, contribution guide): **[DEV.md](DEV.md)**.
 
