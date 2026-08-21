@@ -5,7 +5,9 @@
  * so the pure logic (range, count, ordering) stays unit-testable without stubbing
  * Math.random globally.
  */
-export type Rng = () => number;
+import type { Rng } from '@/lib/rng';
+
+export type { Rng };
 
 /** A single die in [1, sides]. sides < 1 → 1 (a d0 is meaningless). */
 export function rollDie(sides: number, rng: Rng = Math.random): number {

@@ -1,0 +1,76 @@
+# The PNJ generator: settings screen → aperçu → two rows on the character list.
+#
+# What only a device can answer for here: the generator writes N characters in a
+# row through `createCharacter` (each one also seeding its `actual_state` and its
+# compétences), on the real expo-sqlite driver. A dropped await in that loop
+# leaves the list short, and the web suite's wasm build takes a different path.
+# The « i » panels are checked too — they are the only explanation the GM gets
+# for what « Niveau » and « Variation » do.
+appId: fr.aehru.prophecyapp
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    id: 'characters-empty'
+
+- tapOn:
+    id: 'generate-npc'
+# The screen is up once its « Relancer » is on it.
+- assertVisible:
+    id: 'reroll-npc'
+
+# The « i » is a toggle: the panel appears, then goes away again.
+- tapOn:
+    id: 'npc-tier-info'
+- assertVisible:
+    id: 'npc-tier-info-panel'
+- tapOn:
+    id: 'npc-tier-info'
+- assertNotVisible:
+    id: 'npc-tier-info-panel'
+
+# A tier chip, then a re-roll: both re-run the generator on the spot.
+- tapOn:
+    id: 'npc-tier-elite'
+- tapOn:
+    id: 'reroll-npc'
+
+# A name template: the batch is numbered « Garde #1 », « Garde #2 » instead of
+# getting invented names — which also gives the assertions below real text to
+# look for rather than two opaque row ids.
+- tapOn:
+    id: 'field-npc-name'
+- inputText: 'Garde'
+- hideKeyboard
+
+# Batch size two ways: typed into the free field, then walked back with the
+# stepper. Select-all on focus means the old value has to be erased explicitly,
+# or "3" would land next to the "1" already there.
+- tapOn:
+    id: 'field-npc-count'
+- eraseText
+- inputText: '3'
+# The keyboard covers the FAB on a short screen.
+- hideKeyboard
+- tapOn:
+    id: 'npc-count-minus'
+
+- tapOn:
+    id: 'fab-add-npc'
+
+# Back on the list, with BOTH PNJs written — the ids are sequential from empty,
+# and the names come from the template.
+- extendedWaitUntil:
+    visible:
+      id: 'character-row-1'
+    timeout: 15000
+- assertVisible:
+    id: 'character-row-2'
+- assertVisible: 'Garde #1'
+- assertVisible: 'Garde #2'
+# Two, not three: the stepper's -1 has to reach what actually gets written.
+- assertNotVisible:
+    id: 'character-row-3'

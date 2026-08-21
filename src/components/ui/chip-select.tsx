@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
+import InfoLabel from '@/components/ui/info-label';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 type Option = { key: string; label: string };
@@ -13,21 +14,24 @@ type Option = { key: string; label: string };
  */
 export default function ChipSelect({
   label,
+  info,
   options,
   value,
   onChange,
+  testIDPrefix,
 }: {
   label?: string;
+  /** What the field does, revealed by the label's « i ». See <InfoLabel>. */
+  info?: string;
   options: readonly Option[];
   value: string;
   onChange: (key: string) => void;
+  /** E2E hook: each chip gets `${testIDPrefix}-${option.key}`. */
+  testIDPrefix?: string;
 }) {
-  const theme = useProphecyTheme();
   return (
     <View style={styles.root}>
-      {label ? (
-        <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>
-      ) : null}
+      {label ? <InfoLabel label={label} info={info} testID={testIDPrefix ? `${testIDPrefix}-info` : undefined} /> : null}
       <View style={styles.chips}>
         {options.map((o) => (
           <Chip
@@ -36,6 +40,7 @@ export default function ChipSelect({
             selected={value === o.key}
             showSelectedCheck={false}
             mode={value === o.key ? 'flat' : 'outlined'}
+            testID={testIDPrefix ? `${testIDPrefix}-${o.key}` : undefined}
             onPress={() => onChange(o.key)}>
             {o.label}
           </Chip>

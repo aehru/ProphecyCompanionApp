@@ -39,6 +39,7 @@ const NumberField = React.memo(function NumberField({
   submitBehavior,
   signed = false,
   decimal = false,
+  testID,
 }: {
   fieldKey: string;
   /** Omit for a compact, label-less field (dense list rows). */
@@ -55,6 +56,8 @@ const NumberField = React.memo(function NumberField({
   // Allow one decimal separator (e.g. a creation time of 0,5 jour). The comma is
   // what a French keyboard offers, so both `,` and `.` are accepted on input.
   decimal?: boolean;
+  /** Stable E2E hook — react-native-web renders it as `data-testid`. */
+  testID?: string;
 }) {
   const theme = useProphecyTheme();
   // Keep our own handle to the native input (to select-all on focus) while still
@@ -75,6 +78,7 @@ const NumberField = React.memo(function NumberField({
       ) : null}
       <TextInput
         ref={setRefs}
+        testID={testID}
         value={value}
         onChangeText={(t) => onChange(fieldKey, sanitizeNumericInput(t, { signed, decimal }))}
         keyboardType={
