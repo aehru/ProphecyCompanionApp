@@ -23,10 +23,14 @@ export default function CasteChip({
   const theme = useProphecyTheme();
   if (!caste) return null;
   return (
-    <View style={[styles.chip, { borderColor: theme.colors.secondary }, style]}>
+    <View
+      testID="caste-chip"
+      style={[styles.chip, { borderColor: theme.colors.secondary }, style]}>
       <Text style={[styles.text, { color: theme.colors.secondary }]} numberOfLines={1}>
-        {/* An unknown key can only come from a hand-edited file — show it raw
-            rather than dropping the row's only caste information. */}
+        {/* An unknown key cannot arrive through the picker or an import —
+            `casteFromInput` folds anything it cannot place to NULL first. Only a
+            raw edit of the database reaches this, and showing it beats dropping
+            the row's only caste information. */}
         {CASTE_LABEL[caste] ?? caste}
       </Text>
     </View>

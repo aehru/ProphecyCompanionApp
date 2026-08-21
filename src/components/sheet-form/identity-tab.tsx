@@ -74,6 +74,7 @@ export default function IdentityTab({
             the player makes, and it is also the state of every sheet that
             predates the field. */}
         <SelectField
+          testID="field-caste"
           label="Caste"
           options={CASTE_OPTIONS}
           value={v.caste ?? ''}
