@@ -22,6 +22,15 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
+- [ ] **Dice roller in context.** The roller is now app-level and reachable
+  from every header ([use-dice-roller.tsx](src/hooks/use-dice-roller.tsx)), but
+  it stays free-form on purpose: XdY plus the tendance trio, knowing nothing
+  about the screen it was opened from. Two follow-ups, agreed but deferred:
+  **prefill from context** (opening it from Compétences seeds the skill total as
+  a modifier, from Inventaire the weapon's damage formula — both readings already
+  exist, through `lib/modifiers` and `lib/formula`), and **per-row roll buttons**
+  on skills and weapons, which save the taps the global roller cannot. Neither
+  should bring back a roll history: results are deliberately forgotten on close.
 - [ ] **« Lancer le sort » — the cast flow.** The last piece of the spell
   breakdown layer; everything it needs is already in place. Today a durée renders
   symbolically (« 1 + NR jours ») because NR belongs to a *cast*, not to a spell:
