@@ -116,9 +116,9 @@ bunx expo run:android --variant release            # a standalone APK; a debug o
 maestro test .maestro                              # or one file: maestro test .maestro/smoke.yaml
 ```
 
-Four flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (the native alert), `persistence` (kill the app, relaunch, the row is still there).
+Five flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (the native alert), `persistence` (kill the app, relaunch, the row is still there), `generate-npc` (the PNJ generator: an « i » panel, a tier chip, a batch of two written in one go).
 
-Two gotchas worth knowing before adding one. **`launchApp: { clearState: true }` wipes the DB**, so a flow that means to test persistence has to relaunch WITHOUT it. And **the character delete alert cannot be driven by text** — its confirm button repeats its own title (« Supprimer »), which no text selector can tell apart; the alert coverage goes through the campaign delete instead, whose button reads « Confirmer ».
+Three gotchas worth knowing before adding one. **`launchApp: { clearState: true }` wipes the DB**, so a flow that means to test persistence has to relaunch WITHOUT it. And **the character delete alert cannot be driven by text** — its confirm button repeats its own title (« Supprimer »), which no text selector can tell apart; the alert coverage goes through the campaign delete instead, whose button reads « Confirmer ». And **`NumberField` selects its whole value on focus**, so a flow typing into one has to `eraseText` first — otherwise the new digits land beside the old ones on a device (they replace them on web).
 
 CI runs them in [native-e2e.yml](.github/workflows/native-e2e.yml) — **not** per PR (a release APK plus an emulator is ~20 minutes against the web suite's three). Trigger it from the Actions tab, or put the `native-e2e` label on a PR that touches native ground: a dependency bump, a migration, anything under `android/`.
 ## Catalogues (armes / armures / boucliers / sortilèges)
