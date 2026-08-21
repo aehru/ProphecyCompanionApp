@@ -1,6 +1,6 @@
 import { eq, inArray } from 'drizzle-orm';
 
-import { db } from '@/db/client';
+import { db, transaction } from '@/db/client';
 import {
   actualState,
   armor,
@@ -119,11 +119,6 @@ export async function exportCharacters(
  * many of those replaced a character this device already had — the import screen
  * reports "restaurés" vs "ajoutés" from it. Wrapped in a transaction so a bad
  * bundle can't leave a half-written character behind.
- *
- * The expo-sqlite driver runs transactions synchronously (it commits as soon as
- * the callback returns), so the body MUST use the sync query methods
- * (`.run()` / `.returning().get()` / `.all()`) — an async callback would commit
- * before the awaited writes ran. Hence this function is synchronous.
  */
 export interface ImportOutcome {
   /** Row ids written, in bundle order. */
@@ -132,17 +127,17 @@ export interface ImportOutcome {
   restored: number;
 }
 
-export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'): ImportOutcome {
+export async function importCharacters(
+  data: ProphecyExport,
+  mode: ImportMode = 'copy',
+): Promise<ImportOutcome> {
   const written: number[] = [];
   let restored = 0;
-  db.transaction((tx) => {
+  await transaction(async (tx) => {
     // Seed the live uuid set once, then keep it current as we write, so two
     // bundles carrying the same uuid in one file don't both try to insert it.
     const existing = new Set(
-      tx
-        .select({ uuid: characters.uuid })
-        .from(characters)
-        .all()
+      (await tx.select({ uuid: characters.uuid }).from(characters))
         .map((r) => r.uuid)
         .filter((u): u is string => u != null),
     );
@@ -158,54 +153,56 @@ export function importCharacters(data: ProphecyExport, mode: ImportMode = 'copy'
 
       let characterId: number;
       if (plan.action === 'replace') {
-        const target = tx
+        const target = await tx
           .select({ id: characters.id })
           .from(characters)
           .where(eq(characters.uuid, plan.uuid))
           .get();
         // Fall back to insert if the row vanished between planning and now.
         if (!target) {
-          characterId = tx
-            .insert(characters)
-            .values({ ...sheet, createdAt: now, updatedAt: now })
-            .returning()
-            .get().id;
+          characterId = (
+            await tx
+              .insert(characters)
+              .values({ ...sheet, createdAt: now, updatedAt: now })
+              .returning()
+              .get()
+          ).id;
         } else {
           characterId = target.id;
           restored++;
           // Overwrite the sheet (keep original createdAt) and rebuild children.
-          tx.update(characters).set({ ...sheet, updatedAt: now }).where(eq(characters.id, characterId)).run();
+          await tx.update(characters).set({ ...sheet, updatedAt: now }).where(eq(characters.id, characterId));
           for (const t of [actualState, skills, armor, weapons, shields, spells, magicReserves, effects]) {
-            tx.delete(t).where(eq(t.characterId, characterId)).run();
+            await tx.delete(t).where(eq(t.characterId, characterId));
           }
         }
       } else {
-        characterId = tx
-          .insert(characters)
-          .values({ ...sheet, createdAt: now, updatedAt: now })
-          .returning()
-          .get().id;
+        characterId = (
+          await tx
+            .insert(characters)
+            .values({ ...sheet, createdAt: now, updatedAt: now })
+            .returning()
+            .get()
+        ).id;
       }
 
-      tx.insert(actualState)
-        .values({ ...(b.state as Partial<NewActualState>), characterId })
-        .run();
+      await tx.insert(actualState).values({ ...(b.state as Partial<NewActualState>), characterId });
 
       const link = <T extends Record<string, unknown>>(rows: T[]) =>
         rows.map((r) => ({ ...r, characterId }));
 
-      if (b.skills.length) tx.insert(skills).values(link(b.skills) as NewSkill[]).run();
-      if (b.armor.length) tx.insert(armor).values(link(b.armor) as NewArmor[]).run();
-      if (b.weapons.length) tx.insert(weapons).values(link(b.weapons) as NewWeapon[]).run();
+      if (b.skills.length) await tx.insert(skills).values(link(b.skills) as NewSkill[]);
+      if (b.armor.length) await tx.insert(armor).values(link(b.armor) as NewArmor[]);
+      if (b.weapons.length) await tx.insert(weapons).values(link(b.weapons) as NewWeapon[]);
       const shieldRows = b.shields ?? [];
-      if (shieldRows.length) tx.insert(shields).values(link(shieldRows) as NewShield[]).run();
-      if (b.spells.length) tx.insert(spells).values(link(b.spells) as NewSpell[]).run();
+      if (shieldRows.length) await tx.insert(shields).values(link(shieldRows) as NewShield[]);
+      if (b.spells.length) await tx.insert(spells).values(link(b.spells) as NewSpell[]);
       // Reserve objects are recharged on a copy, kept as-is on a restore.
       const reserves = planMagicReserves(b.magicReserves ?? [], effective);
       if (reserves.length) {
-        tx.insert(magicReserves).values(link(reserves) as NewMagicReserve[]).run();
+        await tx.insert(magicReserves).values(link(reserves) as NewMagicReserve[]);
       }
-      if (b.effects.length) tx.insert(effects).values(link(b.effects) as NewEffect[]).run();
+      if (b.effects.length) await tx.insert(effects).values(link(b.effects) as NewEffect[]);
 
       existing.add(plan.uuid);
       written.push(characterId);
@@ -241,7 +238,7 @@ export async function duplicateCharacter(id: number): Promise<number | null> {
   const sheet = bundle.character as { nom?: string };
   sheet.nom = `${sheet.nom || 'Sans nom'} (copie)`;
 
-  const [newId] = importCharacters(exp, 'copy').ids;
+  const [newId] = (await importCharacters(exp, 'copy')).ids;
 
   // Media: copy the files (not just the paths — each character owns its folder,
   // and deleting one character removes its whole media dir).

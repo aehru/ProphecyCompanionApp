@@ -10,6 +10,37 @@ export const TENDANCES = [
 /** Number of "puces" slots shown for a tendance subnumber (0–10). */
 export const MAX_PUCES = 10;
 
+/**
+ * Castes — the social order a character was born into. Purely an identity label
+ * here: nothing in the app derives a stat, a bonus or a catalogue filter from
+ * it, so it sits next to `concept` rather than in the rules layer.
+ *
+ * Stored as the accent-free `key` on `characters.caste`, rendered with accents.
+ * NULL is a MEANINGFUL value, not a missing one: « Sans Caste » is a real
+ * choice a player makes, which is why there is no `sansCaste` entry in the list
+ * (an enum member would let a row be both NULL and "none").
+ */
+export const CASTES = [
+  { key: 'artisan', label: 'Artisan' },
+  { key: 'combattant', label: 'Combattant' },
+  { key: 'commercant', label: 'Commerçant' },
+  { key: 'erudit', label: 'Érudit' },
+  { key: 'mage', label: 'Mage' },
+  { key: 'prodige', label: 'Prodige' },
+  { key: 'protecteur', label: 'Protecteur' },
+  { key: 'voyageur', label: 'Voyageur' },
+] as const;
+
+export type CasteKey = (typeof CASTES)[number]['key'];
+
+/** What a NULL caste is called on screen. */
+export const SANS_CASTE_LABEL = 'Sans Caste';
+
+/** Caste key → display label (accents restored). */
+export const CASTE_LABEL: Record<string, string> = Object.fromEntries(
+  CASTES.map((c) => [c.key, c.label]),
+);
+
 export const CARACTERISTIQUES = [
   { key: 'force', abbr: 'FOR', label: 'Force' },
   { key: 'resistance', abbr: 'RES', label: 'Résistance' },
@@ -134,6 +165,11 @@ export type SpellTag = (typeof SPELL_TAGS)[number]['key'];
 /** Spell tag key → display label (accented). */
 export const SPELL_TAG_LABEL: Record<string, string> = Object.fromEntries(
   SPELL_TAGS.map((t) => [t.key, t.label]),
+);
+
+/** Spell tag key → its axis, one of {@link SPELL_TAG_GROUPS}. */
+export const SPELL_TAG_GROUP: Record<string, string> = Object.fromEntries(
+  SPELL_TAGS.map((t) => [t.key, t.group]),
 );
 
 /**

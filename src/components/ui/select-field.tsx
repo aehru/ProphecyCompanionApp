@@ -22,6 +22,7 @@ export default function SelectField({
   value,
   onChange,
   style,
+  testID,
 }: {
   /** Omit for a label-less field (when a neighbour already titles the row). */
   label?: string;
@@ -29,6 +30,8 @@ export default function SelectField({
   value: string;
   onChange: (key: string) => void;
   style?: ViewStyle;
+  /** Stable E2E hook. Each option also gets `<testID>-option-<key>`. */
+  testID?: string;
 }) {
   const theme = useProphecyTheme();
   const [open, setOpen] = useState(false);
@@ -45,6 +48,7 @@ export default function SelectField({
         anchor={
           <Pressable
             accessibilityRole="button"
+            testID={testID}
             accessibilityLabel={label}
             accessibilityValue={{ text: current?.label }}
             onPress={() => setOpen(true)}
@@ -62,6 +66,7 @@ export default function SelectField({
         {options.map((o) => (
           <Menu.Item
             key={o.key}
+            testID={testID ? `${testID}-option-${o.key}` : undefined}
             title={o.label}
             titleStyle={o.key === value ? { color: theme.colors.primary } : undefined}
             trailingIcon={

@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
+import { USE_NATIVE_DRIVER } from '@/lib/animation';
 
 const STATUS_LABEL = {
   online: 'Diffusion en cours',
@@ -39,7 +40,7 @@ export default function CampaignLiveIndicator() {
       return;
     }
     const loop = Animated.loop(
-      Animated.timing(pulse, { toValue: 1, duration: 1600, useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 1, duration: 1600, useNativeDriver: USE_NATIVE_DRIVER }),
     );
     loop.start();
     return () => loop.stop();
@@ -53,9 +54,7 @@ export default function CampaignLiveIndicator() {
   };
 
   return (
-    <View
-      pointerEvents="box-none"
-      style={[styles.wrap, { left: insets.left + 16, bottom: insets.bottom + 76 }]}>
+    <View style={[styles.wrap, { left: insets.left + 16, bottom: insets.bottom + 76 }]}>
       <Menu
         visible={menuOpen}
         onDismiss={() => setMenuOpen(false)}
@@ -108,7 +107,7 @@ export default function CampaignLiveIndicator() {
 
 const SIZE = 48;
 const styles = StyleSheet.create({
-  wrap: { position: 'absolute', zIndex: 1000, elevation: 8 },
+  wrap: { position: 'absolute', zIndex: 1000, elevation: 8, pointerEvents: 'box-none' },
   ring: { position: 'absolute', width: SIZE, height: SIZE, borderRadius: SIZE / 2 },
   btn: {
     width: SIZE,

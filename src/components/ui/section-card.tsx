@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import Icon, { type IconName } from '@/components/ui/icon';
@@ -36,18 +36,27 @@ export default function SectionCard({
 /**
  * The header row on its own — for a virtualized list, where the section's rows
  * are items rather than children (`SectionList`'s `renderSectionHeader`).
+ *
+ * Pass `onPress` to make it a **disclosure**: the whole row becomes the tap
+ * target (a 16px chevron alone is a miss on a phone) and a chevron appears at
+ * the end, pointing right when folded and down when `expanded`.
  */
 export function SectionHeader({
   title,
   helper,
   icon,
+  expanded,
+  onPress,
 }: {
   title: string;
   helper?: string;
   icon?: IconName;
+  /** Only meaningful with `onPress`; drives the chevron and the a11y state. */
+  expanded?: boolean;
+  onPress?: () => void;
 }) {
   const theme = useProphecyTheme();
-  return (
+  const row = (
     <View style={styles.header}>
       {icon ? <Icon name={icon} size={15} color={theme.colors.secondary} /> : null}
       <Text variant="titleSmall" style={[styles.title, { color: theme.colors.primary }]}>
@@ -59,7 +68,23 @@ export function SectionHeader({
           {helper}
         </Text>
       ) : null}
+      {onPress ? (
+        <View style={[styles.chevron, expanded ? styles.chevronOpen : null]}>
+          <Icon name="chev" size={16} color={theme.colors.onSurfaceVariant} />
+        </View>
+      ) : null}
     </View>
+  );
+
+  if (!onPress) return row;
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ expanded }}
+      accessibilityHint="Replie ou déplie cette section">
+      {row}
+    </Pressable>
   );
 }
 
@@ -70,4 +95,7 @@ const styles = StyleSheet.create({
   // Fills the row to the right of the title (and helper, if any).
   rule: { flex: 1, height: 1 },
   helper: { flexShrink: 0, fontSize: 12 },
+  // Rotated rather than a second glyph, so the fold reads as one motion.
+  chevron: { flexShrink: 0 },
+  chevronOpen: { transform: [{ rotate: '90deg' }] },
 });

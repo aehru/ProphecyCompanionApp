@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
+import CasteChip from '@/components/caste-chip';
 import DiceRollerFab from '@/components/dice-roller-fab';
 import TendancesCircles from '@/components/tendances-circles';
 import { characterFallback } from '@/components/ui/character-gate';
@@ -95,11 +96,19 @@ export default function CharacterDashboardScreen() {
             <Text variant="headlineSmall" style={{ color: theme.colors.onSurface }} numberOfLines={1}>
               {char.nom || 'Sans nom'}
             </Text>
-            {char.concept ? (
-              <View style={[styles.conceptChip, { borderColor: theme.prophecy.border }]}>
-                <Text style={[styles.conceptText, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
-                  {char.concept}
-                </Text>
+            {/* Caste then concept — the closed set before the free text, same
+                order as the list rows. Independent chips, so an empty one
+                simply doesn't render. */}
+            {char.concept || char.caste ? (
+              <View style={styles.chips}>
+                <CasteChip caste={char.caste} />
+                {char.concept ? (
+                  <View style={[styles.conceptChip, { borderColor: theme.prophecy.border }]}>
+                    <Text style={[styles.conceptText, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
+                      {char.concept}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
             ) : null}
           </View>
@@ -199,8 +208,10 @@ const styles = StyleSheet.create({
   },
   avatarImg: { width: '100%', height: '100%' },
   identityText: { flex: 1, gap: 6 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   conceptChip: {
     alignSelf: 'flex-start',
+    flexShrink: 1,
     borderWidth: 1,
     borderRadius: 999,
     paddingHorizontal: 12,

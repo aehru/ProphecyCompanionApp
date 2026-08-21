@@ -198,13 +198,11 @@ function DieIconDialog({
       visible={visible}
       onDismiss={onDismiss}
       title="Marquer le dé"
+      dismiss={<Button onPress={onDismiss}>Annuler</Button>}
       actions={
-        <>
-          <Button onPress={onDismiss}>Annuler</Button>
-          <Button mode="contained" icon={dsIcon('close')} onPress={() => onPick('')}>
-            Aucun
-          </Button>
-        </>
+        <Button mode="contained" icon={dsIcon('close')} onPress={() => onPick('')}>
+          Aucun
+        </Button>
       }>
       <Text style={{ color: theme.colors.onSurfaceVariant }}>
         À quoi sert ce dé ? Le repère est un simple mémo : l’app n’y attache

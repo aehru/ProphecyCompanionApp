@@ -1,6 +1,6 @@
 import { and, asc, eq, isNull } from 'drizzle-orm';
 
-import { db } from '@/db/client';
+import { db, transaction } from '@/db/client';
 import { effects, type Skill, skills } from '@/db/schema';
 import { skillTarget } from '@/lib/modifiers';
 import { logWrite } from '@/repositories/log';
@@ -26,22 +26,20 @@ export function specName(motherName: string, label: string): string {
  * may allow a specialization without the base skill, so a mother-less spec simply
  * becomes standalone (shown under a "non acquise" ghost header) rather than being
  * deleted. Removing a spec is always an explicit action (deleteSpecialization).
- *
- * Runs in a sync transaction (see CLAUDE.md: an async tx callback commits early).
  */
 export async function replaceSkills(characterId: number, rows: SkillInput[]) {
   const keep = rows
     .map((r) => ({ name: r.name.trim(), attribut: r.attribut, value: r.value }))
     .filter((r) => r.name !== '' && r.value > 0);
 
-  await db.transaction((tx) => {
+  await transaction(async (tx) => {
     // Base skills only — parentName IS NULL. Specialization rows are never wiped
     // by the base save, so live spec edits can't be clobbered by a flush.
-    tx.delete(skills).where(and(eq(skills.characterId, characterId), isNull(skills.parentName))).run();
+    await tx.delete(skills).where(and(eq(skills.characterId, characterId), isNull(skills.parentName)));
     if (keep.length > 0) {
-      tx.insert(skills)
-        .values(keep.map((r) => ({ characterId, name: r.name, attribut: r.attribut, value: r.value })))
-        .run();
+      await tx
+        .insert(skills)
+        .values(keep.map((r) => ({ characterId, name: r.name, attribut: r.attribut, value: r.value })));
     }
   });
   // Count only — a skill name can be a player-typed specialization label.
@@ -81,14 +79,13 @@ export async function updateSkillValue(id: number, value: number) {
 export async function renameSpecialization(spec: Skill, newLabel: string) {
   if (spec.parentName == null) return;
   const newName = specName(spec.parentName, newLabel);
-  await db.transaction((tx) => {
-    tx.update(skills).set({ specLabel: newLabel, name: newName }).where(eq(skills.id, spec.id)).run();
+  await transaction(async (tx) => {
+    await tx.update(skills).set({ specLabel: newLabel, name: newName }).where(eq(skills.id, spec.id));
     if (newName !== spec.name) {
-      tx
+      await tx
         .update(effects)
         .set({ target: skillTarget(newName) })
-        .where(and(eq(effects.characterId, spec.characterId), eq(effects.target, skillTarget(spec.name))))
-        .run();
+        .where(and(eq(effects.characterId, spec.characterId), eq(effects.target, skillTarget(spec.name))));
     }
   });
   logWrite('skills', 'update', { skillId: spec.id, phase: 'rename-spec' });
@@ -96,12 +93,11 @@ export async function renameSpecialization(spec: Skill, newLabel: string) {
 
 /** Delete a specialization and any effect that targeted it. */
 export async function deleteSpecialization(spec: Skill) {
-  await db.transaction((tx) => {
-    tx.delete(skills).where(eq(skills.id, spec.id)).run();
-    tx
+  await transaction(async (tx) => {
+    await tx.delete(skills).where(eq(skills.id, spec.id));
+    await tx
       .delete(effects)
-      .where(and(eq(effects.characterId, spec.characterId), eq(effects.target, skillTarget(spec.name))))
-      .run();
+      .where(and(eq(effects.characterId, spec.characterId), eq(effects.target, skillTarget(spec.name))));
   });
   logWrite('skills', 'delete', { characterId: spec.characterId, skillId: spec.id });
 }

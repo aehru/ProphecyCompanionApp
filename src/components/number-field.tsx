@@ -6,6 +6,23 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { sanitizeNumericInput } from '@/lib/character-values';
 
 /**
+ * Select a text input's whole value, whatever the ref actually is. On native the
+ * handle is an RN TextInput and exposes `setSelection`; react-native-web hands
+ * back the DOM `<input>`, which only knows `setSelectionRange` — calling
+ * `setSelection` there throws.
+ */
+function selectAll(el: TextInput | null, length: number) {
+  if (!el) return;
+  const native = el as TextInput & { setSelection?: (start: number, end: number) => void };
+  if (typeof native.setSelection === 'function') {
+    native.setSelection(0, length);
+    return;
+  }
+  const dom = el as unknown as { setSelectionRange?: (start: number, end: number) => void };
+  dom.setSelectionRange?.(0, length);
+}
+
+/**
  * Lightweight numeric field (plain RN TextInput) — far cheaper to mount than
  * Paper's outlined TextInput, so ~20 of them don't jank the screen transition.
  * Memoized so editing one field doesn't re-render its siblings.
@@ -22,6 +39,8 @@ const NumberField = React.memo(function NumberField({
   submitBehavior,
   signed = false,
   decimal = false,
+  maxLength,
+  testID,
 }: {
   fieldKey: string;
   /** Omit for a compact, label-less field (dense list rows). */
@@ -38,6 +57,10 @@ const NumberField = React.memo(function NumberField({
   // Allow one decimal separator (e.g. a creation time of 0,5 jour). The comma is
   // what a French keyboard offers, so both `,` and `.` are accepted on input.
   decimal?: boolean;
+  /** Cap the typed value's length — pair it with a narrow `style` width. */
+  maxLength?: number;
+  /** Stable E2E hook — react-native-web renders it as `data-testid`. */
+  testID?: string;
 }) {
   const theme = useProphecyTheme();
   // Keep our own handle to the native input (to select-all on focus) while still
@@ -58,7 +81,9 @@ const NumberField = React.memo(function NumberField({
       ) : null}
       <TextInput
         ref={setRefs}
+        testID={testID}
         value={value}
+        maxLength={maxLength}
         onChangeText={(t) => onChange(fieldKey, sanitizeNumericInput(t, { signed, decimal }))}
         keyboardType={
           signed ? 'numbers-and-punctuation' : decimal ? 'decimal-pad' : 'number-pad'
@@ -67,9 +92,9 @@ const NumberField = React.memo(function NumberField({
         onSubmitEditing={onSubmitEditing}
         submitBehavior={submitBehavior}
         // Select the whole value on entry so the next keystroke overwrites it.
-        // Deferred a frame: a synchronous setSelection in onFocus gets clobbered
-        // by the cursor-to-end that focus applies on Android.
-        onFocus={() => requestAnimationFrame(() => innerRef.current?.setSelection(0, value.length))}
+        // Deferred a frame: a synchronous selection in onFocus gets clobbered by
+        // the cursor-to-end that focus applies on Android.
+        onFocus={() => requestAnimationFrame(() => selectAll(innerRef.current, value.length))}
         style={[styles.input, { borderColor: theme.colors.outline, color: theme.colors.onSurface }]}
       />
     </View>

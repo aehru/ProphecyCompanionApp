@@ -86,6 +86,41 @@ Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](s
 
 **Not yet covered:** repository logic — anything importing `@/db/client` pulls in expo-sqlite. Repository tests need the db decoupled from the singleton (inject it) so a better-sqlite3 instance can stand in — see [ROADMAP.md](ROADMAP.md).
 
+### End-to-end (web export)
+
+The unit suites are pure by design, so nothing there can catch a bug that only exists once the tree mounts — a screen rendering outside its provider, an empty state flashing before the first query, a route that no longer resolves. Those all shipped. The E2E suite covers them by driving the **static web export** with [Playwright](https://playwright.dev/): `dist/` is the real router, the real screens and the real expo-sqlite (wasm), served by [scripts/serve-web.ts](scripts/serve-web.ts) exactly the way GitHub Pages serves it — deep links fall back to `404.html` with a real 404, so a broken [postbuild](scripts/postbuild-web.ts) fails here too.
+
+```bash
+bunx playwright install chromium   # once
+bun run build:web                  # the suite tests dist/, so rebuild after any change
+bun run e2e                        # bun run e2e:ui for the picker
+```
+
+Specs live in [e2e/](e2e), helpers in [e2e/fixtures.ts](e2e/fixtures.ts). Three things to know before writing one:
+
+- **Every test asserts the app logged nothing.** An `auto` fixture fails the test on any `console.error` or uncaught throw. That is the assertion that catches the provider-order class of bug: the screen still paints something, so a visual check alone passes while the console carries « useTableRosterCtx must be used within a TableRosterProvider ».
+- **Selectors are `testID`, never French copy.** react-native-web renders `testID` as `data-testid`; `AppFab` takes one and the tab bar sets `tabBarButtonTestID`. Reach for `getByTestId` so a wording change is never a test failure.
+- **Render ORDER needs recording, not polling.** « empty state, then rows » and « rows » look identical once the DOM settles, so `trackRenderOrder` installs a MutationObserver before the bundle runs and the test asserts the sequence.
+
+Each project runs in two viewports (420 and 1280 wide) — [use-layout.ts](src/hooks/use-layout.ts) branches at 600/840 and the campaign roster genuinely splits above it.
+
+**Out of reach here, on purpose:** `Alert.alert` (a no-op on web, so destructive confirmations), the camera/QR join, the share sheet, native tabs and gestures. Those need a device — see below.
+
+### End-to-end (device)
+
+What the web export cannot answer for: `Alert.alert` (a no-op on react-native-web, so **every destructive confirmation in the app**), the native tab bar, the keyboard, and the real expo-sqlite driver on a device filesystem — a different code path from the wasm build, and the one that carries the migrations. Flows live in [.maestro/](.maestro) and run with [Maestro](https://maestro.mobile.dev/): black-box YAML, no instrumentation in the app, and they match the **same `testID`s** the web suite uses.
+
+```bash
+curl -Ls "https://get.maestro.mobile.dev" | bash   # once
+bunx expo run:android --variant release            # a standalone APK; a debug one needs Metro
+maestro test .maestro                              # or one file: maestro test .maestro/smoke.yaml
+```
+
+Five flows: `smoke` (create a character, cycle the five tabs, system back), `campaign-table` (create a local table, then a deep link onto a missing one — the cold-mount repro), `delete-table` (the native alert), `persistence` (kill the app, relaunch, the row is still there), `generate-npc` (the PNJ generator: an « i » panel, a tier chip, a name template, a batch of two written in one go).
+
+Three gotchas worth knowing before adding one. **`launchApp: { clearState: true }` wipes the DB**, so a flow that means to test persistence has to relaunch WITHOUT it. And **the character delete alert cannot be driven by text** — its confirm button repeats its own title (« Supprimer »), which no text selector can tell apart; the alert coverage goes through the campaign delete instead, whose button reads « Confirmer ». And **`NumberField` selects its whole value on focus**, so a flow typing into one has to `eraseText` first — otherwise the new digits land beside the old ones on a device (they replace them on web).
+
+CI runs them in [native-e2e.yml](.github/workflows/native-e2e.yml) — **not** per PR (a release APK plus an emulator is ~20 minutes against the web suite's three). Trigger it from the Actions tab, or put the `native-e2e` label on a PR that touches native ground: a dependency bump, a migration, anything under `android/`.
 ## Catalogues (armes / armures / boucliers / sortilèges)
 
 The rulebook catalogues the pickers offer are **authored as spreadsheets**, not hand-written TS. Edit the CSV in Excel (or LibreOffice), then regenerate:

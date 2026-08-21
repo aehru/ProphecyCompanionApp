@@ -118,7 +118,9 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   const openEntry = selected ? (roster.find((e) => e.charId === selected.charId) ?? null) : null;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      testID="compagnie-screen"
+      style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* A local table has no server to report on — the chip would just say
           "hors ligne" forever and read as a fault. */}
       <View style={styles.statusRow}>

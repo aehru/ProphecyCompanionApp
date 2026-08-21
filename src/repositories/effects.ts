@@ -1,6 +1,6 @@
 import { and, asc, eq, gt, sql } from 'drizzle-orm';
 
-import { db } from '@/db/client';
+import { db, transaction } from '@/db/client';
 import { effects, type NewEffect } from '@/db/schema';
 import { logWrite } from '@/repositories/log';
 
@@ -44,7 +44,7 @@ export async function deleteEffect(id: number) {
  * expired. Effects of other units are untouched.
  */
 export async function tickUnit(characterId: number, unit: string) {
-  await db.transaction(async (tx) => {
+  await transaction(async (tx) => {
     await tx
       .update(effects)
       .set({ durationRemaining: sql`${effects.durationRemaining} - 1` })

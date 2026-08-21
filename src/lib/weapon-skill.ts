@@ -12,6 +12,7 @@
 
 import { ATTRIBUT_LABEL, ATTRIBUTS, DEFAULT_SKILLS } from '@/constants/prophecy';
 import { skillModifier, type ModifierSource } from '@/lib/modifiers';
+import { fold } from '@/lib/text-fold';
 
 /** The bits of a `skills` row this module reads. */
 export interface WeaponSkillSource {
@@ -161,18 +162,8 @@ export function specializationsOf(
     .sort((x, y) => compareName(x.specLabel ?? x.name, y.specLabel ?? y.name));
 }
 
-/**
- * Accent- and case-insensitive fold, so « Équitation » sorts and matches under
- * E. Deliberately not `localeCompare`: it depends on the JS engine's Intl data,
- * which differs between Hermes and the Node test runner.
- */
-function fold(s: string): string {
-  return s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase();
-}
-
+// Sorted on the shared fold — « Équitation » lands under E — and compared with
+// `<` rather than `localeCompare`, which reads engine-dependent Intl data.
 function compareName(a: string, b: string): number {
   const fa = fold(a);
   const fb = fold(b);

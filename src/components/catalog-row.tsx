@@ -24,6 +24,7 @@ export default function CatalogRow({
   addLabel,
   onAdd,
   alert,
+  badge,
   children,
 }: {
   icon: IconName;
@@ -34,6 +35,12 @@ export default function CatalogRow({
   onAdd: () => void;
   /** Flags the tile in the error colour (an unmet prérequis), like the cards do. */
   alert?: boolean;
+  /**
+   * Small pill after the name — « Déjà ajouté ». A pill, not a fourth item in
+   * the subtitle: the whole point is that it is seen while scanning, and the
+   * subtitle is already four bullets long.
+   */
+  badge?: string;
   children?: React.ReactNode;
 }) {
   const theme = useProphecyTheme();
@@ -41,33 +48,56 @@ export default function CatalogRow({
 
   return (
     <View style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
-      <Pressable
-        style={styles.itemRow}
-        accessibilityRole="button"
-        accessibilityState={{ expanded }}
-        accessibilityHint="Affiche le détail de cette entrée"
-        onPress={() => setExpanded((e) => !e)}>
-        <View
-          style={[
-            styles.tile,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: alert ? theme.colors.error : theme.prophecy.borderSoft,
-              borderWidth: alert ? 1.5 : 1,
-            },
-          ]}>
-          <Icon name={icon} size={22} color={alert ? theme.colors.error : theme.colors.primary} />
-        </View>
-        <View style={styles.main}>
-          <Text style={styles.name} numberOfLines={1}>
-            {name}
-          </Text>
-          {subtitle ? (
-            <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
-              {subtitle}
-            </Text>
-          ) : null}
-        </View>
+      {/* The disclosure and the add button are SIBLINGS, not nested. On web a
+          Pressable with accessibilityRole="button" renders a real <button>, and so
+          does Paper's IconButton — one inside the other is invalid HTML, which
+          React rejects and which leaves the inner button's clicks undefined. */}
+      <View style={styles.itemRow}>
+        <Pressable
+          style={styles.disclosure}
+          accessibilityRole="button"
+          accessibilityState={{ expanded }}
+          accessibilityHint="Affiche le détail de cette entrée"
+          onPress={() => setExpanded((e) => !e)}>
+          <View
+            style={[
+              styles.tile,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: alert ? theme.colors.error : theme.prophecy.borderSoft,
+                borderWidth: alert ? 1.5 : 1,
+              },
+            ]}>
+            <Icon name={icon} size={22} color={alert ? theme.colors.error : theme.colors.primary} />
+          </View>
+          <View style={styles.main}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>
+                {name}
+              </Text>
+              {badge ? (
+                <View
+                  style={[
+                    styles.badge,
+                    {
+                      borderColor: theme.prophecy.borderSoft,
+                      backgroundColor: theme.colors.surfaceVariant,
+                    },
+                  ]}>
+                  <Text style={[styles.badgeText, { color: theme.colors.onSurfaceVariant }]}>
+                    {badge}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+            {subtitle ? (
+              <Text style={[styles.sub, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
+                {subtitle}
+              </Text>
+            ) : null}
+          </View>
+        </Pressable>
+
         {/* The add button, not a chevron: the row itself is the disclosure. */}
         <IconButton
           icon={dsIcon('plus')}
@@ -77,7 +107,7 @@ export default function CatalogRow({
           onPress={onAdd}
           style={styles.add}
         />
-      </Pressable>
+      </View>
 
       {expanded ? children : null}
     </View>
@@ -87,6 +117,9 @@ export default function CatalogRow({
 const styles = StyleSheet.create({
   item: { borderBottomWidth: 1 },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 6 },
+  // Fills the row so tapping anywhere but the + still toggles the detail, which
+  // is what the single Pressable used to give for free.
+  disclosure: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 13 },
   tile: {
     width: 44,
     height: 44,
@@ -96,7 +129,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   main: { flex: 1, minWidth: 0 },
-  name: { fontSize: 14, fontWeight: '600' },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  // shrink, not flex: a long name gives way to the badge rather than pushing it
+  // off the row.
+  name: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
+  badge: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 1 },
+  badgeText: { fontSize: 10, letterSpacing: 0.3 },
   sub: { fontSize: 12, marginTop: 1 },
   add: { margin: 0 },
 });

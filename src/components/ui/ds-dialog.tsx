@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { Platform, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useKeyboardState } from 'react-native-keyboard-controller';
 import { Dialog, Portal } from 'react-native-paper';
 
@@ -27,6 +27,13 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
  *
  * — i.e. the cap is what makes the shift sufficient. Overflow then scrolls
  * inside the cap rather than disappearing.
+ *
+ * The actions row is TWO slots, not one list: `dismiss` sits far left, `actions`
+ * far right. Paper stacks everything to the right, which puts « Annuler » right
+ * next to the button that commits — one thumb-width apart, on the side of the
+ * screen the thumb is already reaching for. Splitting them also frees the right
+ * side to hold TWO real actions (the dice roller's « Tendances » + « Lancer »)
+ * without the row reading as three equal choices.
  */
 // Breathing room around the dialog, and a floor so it never collapses to a sliver.
 const MARGIN = 48;
@@ -39,12 +46,16 @@ export default function DsDialog({
   visible,
   onDismiss,
   title,
+  dismiss,
   actions,
   children,
 }: {
   visible: boolean;
   onDismiss: () => void;
   title?: React.ReactNode;
+  /** The way out (« Annuler », « Fermer ») — pinned to the left of the row. */
+  dismiss?: React.ReactNode;
+  /** What the dialog is FOR — one or two buttons, pinned to the right. */
   actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
@@ -52,14 +63,6 @@ export default function DsDialog({
   const { height } = useWindowDimensions();
   const keyboardHeight = useKeyboardState((s) => s.height);
   const maxHeight = Math.max(height - keyboardHeight - MARGIN - SHADOW_MARGIN * 2, MIN_HEIGHT);
-
-  // Paper's Dialog.Actions clones every child to inject `compact`/`uppercase`,
-  // and cloning a Fragment with those throws. Unwrap one level so callers can
-  // still group their buttons in a <>…</>.
-  const actionButtons =
-    React.isValidElement(actions) && actions.type === React.Fragment
-      ? (actions.props as { children?: React.ReactNode }).children
-      : actions;
 
   return (
     <Portal>
@@ -82,7 +85,15 @@ export default function DsDialog({
             {children}
           </ScrollView>
         </Dialog.ScrollArea>
-        {actions ? <Dialog.Actions>{actionButtons}</Dialog.Actions> : null}
+        {/* Hand-rolled rather than Paper's Dialog.Actions: that one clones every
+            child to inject `compact`/`uppercase`, which rules out wrapping the
+            buttons in the two grouping Views the split layout needs. */}
+        {dismiss || actions ? (
+          <View style={styles.actions}>
+            <View style={styles.actionsSide}>{dismiss}</View>
+            <View style={[styles.actionsSide, styles.actionsEnd]}>{actions}</View>
+          </View>
+        ) : null}
       </Dialog>
     </Portal>
   );
@@ -96,4 +107,17 @@ const styles = StyleSheet.create({
   scrollArea: { paddingHorizontal: 0, borderTopWidth: 0, borderBottomWidth: 0 },
   // Matches what Dialog.Content gave us: 24 side padding, 16 between fields.
   content: { paddingHorizontal: 24, paddingBottom: 8, gap: 16 },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  // Both sides shrink before a long label overflows the dialog; the right side
+  // packs its one-or-two buttons against the edge.
+  actionsSide: { flexDirection: 'row', alignItems: 'center', flexShrink: 1, gap: 8 },
+  actionsEnd: { justifyContent: 'flex-end' },
 });

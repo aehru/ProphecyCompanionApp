@@ -8,6 +8,15 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 type IconSource = NonNullable<React.ComponentProps<typeof FAB>['icon']>;
 
+/**
+ * How much weight the button carries. `secondary` is for the FAB STACKED above
+ * the primary one: a second gold block reads as a second main action, which is
+ * exactly what it is not. It takes the DS tonal surface + gold hairline instead
+ * — the same treatment as the outlined buttons in the page body — while keeping
+ * the 56dp target, the 18px radius and the position, so only the weight changes.
+ */
+export type AppFabVariant = 'primary' | 'secondary';
+
 type AppFabProps = {
   icon: IconSource;
   label?: string;
@@ -21,6 +30,9 @@ type AppFabProps = {
    */
   offset?: number;
   style?: StyleProp<ViewStyle>;
+  /** Stable E2E hook — react-native-web renders it as `data-testid`. */
+  testID?: string;
+  variant?: AppFabVariant;
 };
 
 /**
@@ -28,7 +40,16 @@ type AppFabProps = {
  * safe-area handling so every screen's FAB lines up and clears the onscreen
  * navigation bar / gesture area.
  */
-export default function AppFab({ icon, label, onPress, disabled, offset = 0, style }: AppFabProps) {
+export default function AppFab({
+  icon,
+  label,
+  onPress,
+  disabled,
+  offset = 0,
+  style,
+  testID,
+  variant = 'primary',
+}: AppFabProps) {
   const theme = useProphecyTheme();
   const insets = useSafeAreaInsets();
   // Inside a bottom-tab navigator the tab bar already sits above the safe area,
@@ -36,16 +57,28 @@ export default function AppFab({ icon, label, onPress, disabled, offset = 0, sty
   // double-count and float it too high. Only apply the inset off-tabs.
   const inTabBar = React.useContext(BottomTabBarHeightContext) != null;
   const bottom = 16 + offset + (inTabBar ? 0 : insets.bottom);
+  const secondary = variant === 'secondary';
   // Paper's FAB props are a union — label-present and label-absent are distinct
   // variants, so branch with inline props instead of passing `label={undefined}`.
-  const fabStyle = [styles.fab, { bottom, backgroundColor: theme.colors.primary }, style];
+  const fabStyle = [
+    styles.fab,
+    { bottom, backgroundColor: theme.colors.primary },
+    secondary && {
+      backgroundColor: theme.prophecy.surfaceContainerLow,
+      borderWidth: 1,
+      borderColor: theme.prophecy.border,
+    },
+    style,
+  ];
+  const contentColor = secondary ? theme.colors.primary : theme.colors.onPrimary;
   return label ? (
     <FAB
       icon={icon}
       label={label}
       onPress={onPress}
       disabled={disabled}
-      color={theme.colors.onPrimary}
+      color={contentColor}
+      testID={testID}
       style={fabStyle}
     />
   ) : (
@@ -53,7 +86,8 @@ export default function AppFab({ icon, label, onPress, disabled, offset = 0, sty
       icon={icon}
       onPress={onPress}
       disabled={disabled}
-      color={theme.colors.onPrimary}
+      color={contentColor}
+      testID={testID}
       style={fabStyle}
     />
   );

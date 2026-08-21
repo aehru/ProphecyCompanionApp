@@ -33,17 +33,15 @@ export default function ReserveObjectDialog({
       visible={draft !== null}
       onDismiss={onDismiss}
       title={creating ? 'Nouvel objet' : 'Modifier l’objet'}
+      dismiss={<Button onPress={onDismiss}>Annuler</Button>}
       actions={
-        <>
-          <Button onPress={onDismiss}>Annuler</Button>
-          <Button
-            mode="contained"
-            icon={dsIcon(creating ? 'plus' : 'check')}
-            onPress={onSave}
-            disabled={!draft?.nom.trim()}>
-            {creating ? 'Ajouter' : 'Enregistrer'}
-          </Button>
-        </>
+        <Button
+          mode="contained"
+          icon={dsIcon(creating ? 'plus' : 'check')}
+          onPress={onSave}
+          disabled={!draft?.nom.trim()}>
+          {creating ? 'Ajouter' : 'Enregistrer'}
+        </Button>
       }>
       <TextInput
         label="Nom de l’objet"

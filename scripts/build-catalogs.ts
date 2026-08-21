@@ -35,7 +35,14 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { DISCIPLINES, SPELL_TAGS, SPHERES, TIME_UNITS } from '../src/constants/prophecy';
+import {
+  CASTES,
+  DEFAULT_SKILLS,
+  DISCIPLINES,
+  SPELL_TAGS,
+  SPHERES,
+  TIME_UNITS,
+} from '../src/constants/prophecy';
 import { parseCsvTable } from '../src/lib/csv';
 import { parseFormula, parsePrerequisites } from '../src/lib/formula';
 import { presetRevision } from '../src/lib/preset-revision';
@@ -46,6 +53,11 @@ import {
   WEAPON_CATEGORIES,
   WEAPON_HANDS,
 } from '../src/data/weapon-constants';
+import type {
+  ArchetypeOption,
+  ArchetypePreset,
+  ArchetypeSkill,
+} from '../src/data/archetype-catalog';
 import type { ArmorPreset } from '../src/data/armor-catalog';
 import type { ShieldPreset } from '../src/data/shield-catalog';
 import type { WeaponPreset } from '../src/data/weapon-catalog';
@@ -81,6 +93,19 @@ const ARMOR_COLUMNS = [
 const SHIELD_COLUMNS = [
   'id', 'nom', 'degats', 'prerequis', 'diffCreation',
   'tempsCreation', 'defenseMax', 'encombrement', 'special',
+];
+const ARCHETYPE_COLUMNS = [
+  'id', 'nom', 'caste', 'concept',
+  // Caractéristiques, then attributs — the CSV uses the sheet's short names.
+  'for', 'res', 'int', 'vol', 'coo', 'per', 'pre', 'emp',
+  'physique', 'mental', 'manuel', 'social',
+  // Pools only: the wound track and the initiative dice are DERIVED from the
+  // rolled caractéristiques (lib/creation-rules), never authored.
+  'maitrise', 'chance',
+  // « Compétence 3, Autre 2 » — names matched against DEFAULT_SKILLS.
+  'competences',
+  // The single pre-generation choice, all three blank when there is none.
+  'optionLabel', 'optionValeur', 'optionChoix',
 ];
 
 // --- loose matching ---------------------------------------------------------
@@ -135,6 +160,20 @@ const matchTag = matcher(
     [t.label, t.key],
   ]),
 );
+const matchCaste = matcher(
+  CASTES.flatMap((c): [string, string][] => [
+    [c.key, c.key],
+    [c.label, c.key],
+  ]),
+);
+
+/**
+ * Folded compétence name → its catalogue entry. An archetype names its
+ * compétences the way the sheet prints them (« Éloquence », « Équitation »),
+ * while DEFAULT_SKILLS stores some of them accent-free — folding is what lets
+ * the spreadsheet stay readable without the two drifting.
+ */
+const SKILL_BY_FOLDED = new Map(DEFAULT_SKILLS.map((s) => [fold(s.name), s]));
 
 // --- per-field validators ---------------------------------------------------
 
@@ -483,6 +522,140 @@ function buildShields(failures: Failure[]): ShieldPreset[] {
   return out;
 }
 
+/**
+ * « Artisanat 3, Estimation 2 » → resolved compétences, attribut included.
+ *
+ * Strict like every other enum here: an unknown compétence is a typo, and
+ * writing it through would put a skill on the sheet that no roll can ever find
+ * (effects and weapons target a skill BY NAME). The attribut is resolved at
+ * build time so the generator never has to look one up.
+ */
+function readSkillList(
+  rec: Record<string, string>,
+  col: string,
+  errors: RowErrors,
+): ArchetypeSkill[] {
+  const raw = (rec[col] ?? '').trim();
+  if (raw === '') return [];
+  const out: ArchetypeSkill[] = [];
+  const seen = new Set<string>();
+  for (const seg of raw.split(',')) {
+    const text = seg.trim();
+    if (text === '') continue;
+    const m = /^(.+?)\s+(\d+)$/.exec(text);
+    if (!m) {
+      errors.push(`${col} : « ${text} » attendu sous la forme « Nom 3 »`);
+      continue;
+    }
+    const skill = SKILL_BY_FOLDED.get(fold(m[1]));
+    if (!skill) {
+      errors.push(`${col} : compétence « ${m[1].trim()} » inconnue`);
+      continue;
+    }
+    if (seen.has(skill.name)) {
+      errors.push(`${col} : compétence « ${skill.name} » en double`);
+      continue;
+    }
+    seen.add(skill.name);
+    out.push({ name: skill.name, attribut: skill.attribut, value: Number(m[2]) });
+  }
+  return out;
+}
+
+/** Label → key, for an option's stable list key. */
+const slugify = (s: string) => fold(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+/**
+ * The row's single pre-generation choice, or null when the three columns are
+ * blank. Half-filled is an ERROR rather than a silent null: an author who typed
+ * the choices and forgot the label meant to offer a choice.
+ */
+function readOption(rec: Record<string, string>, errors: RowErrors): ArchetypeOption | null {
+  const label = (rec.optionLabel ?? '').trim();
+  const rawValue = (rec.optionValeur ?? '').trim();
+  const rawChoices = (rec.optionChoix ?? '').trim();
+  // "0" counts as blank for the value: an empty numeric cell often comes back
+  // from Excel as a zero, and no option means no rating.
+  if (label === '' && rawChoices === '' && (rawValue === '' || rawValue === '0')) return null;
+
+  if (label === '') errors.push('optionLabel : requis dès qu\'une option est définie');
+  const value = readInt(rec, 'optionValeur', errors);
+  const choices: string[] = [];
+  for (const seg of rawChoices.split('|')) {
+    const name = seg.trim();
+    if (name === '') continue;
+    const skill = SKILL_BY_FOLDED.get(fold(name));
+    if (!skill) errors.push(`optionChoix : compétence « ${name} » inconnue`);
+    else if (choices.includes(skill.name)) errors.push(`optionChoix : « ${skill.name} » en double`);
+    else choices.push(skill.name);
+  }
+  if (choices.length < 2) errors.push('optionChoix : au moins deux compétences séparées par « | »');
+  return { key: slugify(label), label, value, choices };
+}
+
+function buildArchetypes(failures: Failure[]): ArchetypePreset[] {
+  const records = readTable('archetypes.csv', ARCHETYPE_COLUMNS, failures);
+  const seen = new Set<string>();
+  const casteKeys = CASTES.map((c) => c.key);
+  const out: ArchetypePreset[] = [];
+
+  records.forEach((rec, i) => {
+    const errors: RowErrors = [];
+    const id = readSlug(rec, seen, errors);
+    const nom = (rec.nom ?? '').trim();
+    if (nom === '') errors.push('nom : requis');
+
+    // Blank is « Sans Caste » — NULL is a meaningful value on `characters.caste`,
+    // so an empty cell is a choice, not a missing one.
+    const rawCaste = (rec.caste ?? '').trim();
+    let caste: ArchetypePreset['caste'] = null;
+    if (rawCaste !== '') {
+      const canonical = matchCaste(rawCaste);
+      if (canonical == null) {
+        errors.push(`caste : « ${rawCaste} » inconnue (valides : ${casteKeys.join(', ')})`);
+      } else {
+        caste = canonical as ArchetypePreset['caste'];
+      }
+    }
+
+    const skills = readSkillList(rec, 'competences', errors);
+    if (skills.length === 0) errors.push('competences : au moins une compétence attendue');
+
+    const preset: ArchetypePreset = {
+      id,
+      caste,
+      data: {
+        name: nom,
+        concept: (rec.concept ?? '').trim(),
+        stats: {
+          force: readInt(rec, 'for', errors),
+          resistance: readInt(rec, 'res', errors),
+          intelligence: readInt(rec, 'int', errors),
+          volonte: readInt(rec, 'vol', errors),
+          coordination: readInt(rec, 'coo', errors),
+          perception: readInt(rec, 'per', errors),
+          presence: readInt(rec, 'pre', errors),
+          empathie: readInt(rec, 'emp', errors),
+          physique: readInt(rec, 'physique', errors),
+          mental: readInt(rec, 'mental', errors),
+          manuel: readInt(rec, 'manuel', errors),
+          social: readInt(rec, 'social', errors),
+          maitriseMax: readInt(rec, 'maitrise', errors),
+          chanceMax: readInt(rec, 'chance', errors),
+        },
+        skills,
+        option: readOption(rec, errors),
+      },
+    };
+    if (errors.length) {
+      failures.push({ file: 'archetypes.csv', record: i + 2, name: nom || id, errors });
+    } else {
+      out.push(preset);
+    }
+  });
+  return out;
+}
+
 // --- codegen ----------------------------------------------------------------
 
 function render(sourceCsv: string, typeName: string, typeImport: string, constName: string, data: unknown[]) {
@@ -504,16 +677,29 @@ export type GeneratedFile = { file: string; content: string };
 export function generateCatalogs(): {
   failures: Failure[];
   files: GeneratedFile[];
-  counts: { weapons: number; spells: number; armor: number; shields: number };
+  counts: {
+    weapons: number;
+    spells: number;
+    armor: number;
+    shields: number;
+    archetypes: number;
+  };
 } {
   const failures: Failure[] = [];
   const weapons = buildWeapons(failures);
   const spells = buildSpells(failures);
   const armor = buildArmor(failures);
   const shields = buildShields(failures);
+  const archetypes = buildArchetypes(failures);
   return {
     failures,
-    counts: { weapons: weapons.length, spells: spells.length, armor: armor.length, shields: shields.length },
+    counts: {
+      weapons: weapons.length,
+      spells: spells.length,
+      armor: armor.length,
+      shields: shields.length,
+      archetypes: archetypes.length,
+    },
     files: [
       {
         file: 'weapon-catalog.gen.ts',
@@ -530,6 +716,16 @@ export function generateCatalogs(): {
       {
         file: 'shield-catalog.gen.ts',
         content: render('shield.csv', 'ShieldPreset', './shield-catalog', 'SHIELD_CATALOG_DATA', shields),
+      },
+      {
+        file: 'archetype-catalog.gen.ts',
+        content: render(
+          'archetypes.csv',
+          'ArchetypePreset',
+          './archetype-catalog',
+          'ARCHETYPE_CATALOG_DATA',
+          archetypes,
+        ),
       },
     ],
   };
@@ -592,7 +788,8 @@ function main() {
 
   for (const f of files) writeFileSync(generatedPath(f.file), f.content, 'utf8');
   console.log(
-    `OK : ${counts.weapons} armes, ${counts.spells} sortilèges, ${counts.armor} armures, ${counts.shields} boucliers.`,
+    `OK : ${counts.weapons} armes, ${counts.spells} sortilèges, ${counts.armor} armures, ` +
+      `${counts.shields} boucliers, ${counts.archetypes} archétypes.`,
   );
 }
 

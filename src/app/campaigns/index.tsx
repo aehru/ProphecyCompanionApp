@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
 import { Button, IconButton, List, Text, TextInput } from 'react-native-paper';
 
 import { QrScannerModal } from '@/components/campaign/qr-scanner';
@@ -22,7 +22,7 @@ type DialogKind = 'create' | 'join' | null;
 export default function CampaignsScreen() {
   const router = useRouter();
   const theme = useProphecyTheme();
-  const { data } = useLiveQuery(campaignsListQuery());
+  const { data, updatedAt } = useLiveQuery(campaignsListQuery());
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
@@ -31,6 +31,9 @@ export default function CampaignsScreen() {
   const [scanning, setScanning] = useState(false);
 
   const campaigns = data ?? [];
+  // Same reason as the characters list: `data` starts at [], so « Aucune table »
+  // would flash before the first query returns.
+  const loading = updatedAt === undefined;
   // Abort handle for the in-flight create; "Annuler" cancels the request too.
   const abortRef = useRef<AbortController | null>(null);
 
@@ -135,8 +138,13 @@ export default function CampaignsScreen() {
         </Text>
       </View>
 
-      {campaigns.length === 0 ? (
+      {loading ? (
+        <View testID="campaigns-loading" style={styles.loading}>
+          <ActivityIndicator />
+        </View>
+      ) : campaigns.length === 0 ? (
         <View
+          testID="campaigns-empty"
           style={[
             styles.empty,
             {
@@ -159,30 +167,38 @@ export default function CampaignsScreen() {
           ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           keyExtractor={(c) => String(c.id)}
           renderItem={({ item }) => (
-            <List.Item
+            // The delete button is a SIBLING of the row, not its `right` slot: a
+            // List.Item with onPress renders a real <button> on web, and the slot
+            // renders inside it — a nested <button> is invalid HTML, which React
+            // rejects and which leaves the inner button's clicks undefined.
+            <View
               style={[
                 styles.item,
+                styles.itemRow,
                 {
                   backgroundColor: theme.prophecy.surfaceContainerLow,
                   borderColor: theme.colors.outlineVariant,
                 },
-              ]}
-              title={item.name}
-              description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code ?? 'hors ligne'}`}
-              titleStyle={{ color: theme.colors.onSurface }}
-              descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-              left={(p) => (
-                <List.Icon {...p} icon={item.role === 'gm' ? 'crown' : 'account-group'} />
-              )}
-              right={(p) => (
-                <IconButton
-                  {...p}
-                  icon="delete-outline"
-                  onPress={() => confirmDelete(item.id, item.role, item.serverUrl != null)}
-                />
-              )}
-              onPress={() => router.push(`/campaigns/${item.id}` as Href)}
-            />
+              ]}>
+              <List.Item
+                style={styles.itemMain}
+                testID={`campaign-row-${item.id}`}
+                title={item.name}
+                description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code ?? 'hors ligne'}`}
+                titleStyle={{ color: theme.colors.onSurface }}
+                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+                left={(p) => (
+                  <List.Icon {...p} icon={item.role === 'gm' ? 'crown' : 'account-group'} />
+                )}
+                onPress={() => router.push(`/campaigns/${item.id}` as Href)}
+              />
+              <IconButton
+                icon="delete-outline"
+                testID={`campaign-delete-${item.id}`}
+                accessibilityLabel={`Supprimer ${item.name}`}
+                onPress={() => confirmDelete(item.id, item.role, item.serverUrl != null)}
+              />
+            </View>
           )}
         />
       )}
@@ -191,22 +207,26 @@ export default function CampaignsScreen() {
         visible={dialog !== null}
         onDismiss={cancel}
         title={dialog === 'create' ? 'Nouvelle table' : 'Rejoindre une campagne'}
+        dismiss={<Button onPress={cancel}>Annuler</Button>}
         actions={
-          <>
-            <Button onPress={cancel}>Annuler</Button>
-            <Button
-              mode="contained"
-              icon={dialog === 'create' ? 'plus' : 'location-enter'}
-              onPress={submit}
-              disabled={!canSubmit || busy}
-              loading={busy}>
-              {dialog === 'create' ? 'Créer' : 'Rejoindre'}
-            </Button>
-          </>
+          <Button
+            testID="dialog-submit"
+            mode="contained"
+            icon={dialog === 'create' ? 'plus' : 'location-enter'}
+            onPress={submit}
+            disabled={!canSubmit || busy}
+            loading={busy}>
+            {dialog === 'create' ? 'Créer' : 'Rejoindre'}
+          </Button>
         }>
         {dialog === 'create' ? (
           <>
-            <TextInput label="Nom de la table" value={name} onChangeText={setName} />
+            <TextInput
+              testID="field-table-name"
+              label="Nom de la table"
+              value={name}
+              onChangeText={setName}
+            />
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               Table hors ligne : vos PNJ, leur initiative et leurs fiches restent sur cet appareil.
               Vous pourrez y connecter un serveur plus tard pour voir les personnages des joueurs.
@@ -258,8 +278,18 @@ export default function CampaignsScreen() {
         }}
       />
 
-      <AppFab icon="qrcode-scan" onPress={() => setScanning(true)} offset={72} />
-      <AppFab icon={dsIcon('plus')} label="Créer" onPress={() => openDialog('create')} />
+      <AppFab
+        icon="qrcode-scan"
+        testID="fab-scan-qr"
+        onPress={() => setScanning(true)}
+        offset={72}
+      />
+      <AppFab
+        icon={dsIcon('plus')}
+        label="Créer"
+        testID="fab-new-table"
+        onPress={() => openDialog('create')}
+      />
     </View>
   );
 }
@@ -277,7 +307,12 @@ const styles = StyleSheet.create({
   // Clears the stacked FABs (scan sits above "Créer") so the last campaign row
   // stays tappable.
   listContent: { paddingHorizontal: 16, paddingBottom: 160 },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   item: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
+  // The row and its delete button sit side by side; the row takes the space so
+  // tapping anywhere but the button still opens the campaign.
+  itemRow: { flexDirection: 'row', alignItems: 'center', paddingRight: 4 },
+  itemMain: { flex: 1, minWidth: 0 },
   empty: {
     margin: 16,
     padding: 24,

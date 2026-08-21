@@ -9,9 +9,13 @@ import NumberField from '@/components/number-field';
 import type { ChainMap } from '@/components/sheet-form/field-chain';
 import { formStyles } from '@/components/sheet-form/form-styles';
 import SectionCard from '@/components/ui/section-card';
-import { TENDANCES } from '@/constants/prophecy';
+import SelectField from '@/components/ui/select-field';
+import { CASTES, SANS_CASTE_LABEL, TENDANCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { FormValues } from '@/lib/character-values';
+
+// The empty key IS « Sans Caste » — it round-trips to a NULL column.
+const CASTE_OPTIONS = [{ key: '', label: SANS_CASTE_LABEL }, ...CASTES];
 
 export default function IdentityTab({
   v,
@@ -40,6 +44,7 @@ export default function IdentityTab({
     <>
       <SectionCard title="IDENTITÉ">
         <TextInput
+          testID="field-nom"
           label="Nom *"
           value={v.nom}
           onChangeText={(t) => onText('nom', t)}
@@ -64,6 +69,16 @@ export default function IdentityTab({
           returnKeyType="next"
           blurOnSubmit={false}
           onSubmitEditing={() => focus(TENDANCES[0].key)}
+        />
+        {/* « Sans Caste » is the first option, not a clear button: it is a choice
+            the player makes, and it is also the state of every sheet that
+            predates the field. */}
+        <SelectField
+          testID="field-caste"
+          label="Caste"
+          options={CASTE_OPTIONS}
+          value={v.caste ?? ''}
+          onChange={(key) => onText('caste', key)}
         />
       </SectionCard>
 

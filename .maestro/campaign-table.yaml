@@ -1,0 +1,34 @@
+# The campaign subtree — the tab that broke twice in two days.
+#
+# Both halves are regressions: the layout has to resolve the campaign row before
+# any screen mounts (a child effect runs BEFORE its parent's, so a screen used to
+# read the roster context before the provider existed), and a row that is not
+# there has to end in a not-found state rather than an endless spinner.
+appId: fr.aehru.prophecyapp
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+
+- tapOn:
+    id: 'campaigns-nav'
+- assertVisible:
+    id: 'campaigns-empty'
+- back
+
+- runFlow:
+    file: subflows/create-table.yaml
+    env:
+      NOM: Table Maestro
+- assertNotVisible:
+    id: 'campaign-not-found'
+
+# A deep link is the cold-mount repro: nothing is warm, the layout resolves its
+# query while the screen below is already mounting. Same entry point as the QR
+# join, minus the camera.
+- openLink: 'prophecyapp://campaigns/999999'
+- extendedWaitUntil:
+    visible:
+      id: 'campaign-not-found'
+    timeout: 15000

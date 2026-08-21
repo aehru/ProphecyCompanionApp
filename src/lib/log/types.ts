@@ -47,6 +47,12 @@ export interface LoggedError {
   name: string;
   message: string;
   stack?: string;
+  /**
+   * The `cause` chain, nearest first. Present because the outer message is
+   * often ceremony — Drizzle reports `Failed query: <SQL>` and puts the real
+   * driver error underneath.
+   */
+  causes?: string[];
 }
 
 /** What a caller passes; every key is filtered by {@link redactPayload}. */
