@@ -4,7 +4,6 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import CasteChip from '@/components/caste-chip';
-import DiceRollerFab from '@/components/dice-roller-fab';
 import TendancesCircles from '@/components/tendances-circles';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
@@ -75,7 +74,6 @@ export default function CharacterDashboardScreen() {
   };
 
   return (
-    <View style={styles.root}>
     <ScrollView style={styles.root} contentContainerStyle={[styles.container, splitWidth]}>
       {/* Hero card: identity + tendances ring gauges (replacing health/magic). */}
       <View style={[styles.hero, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border }]}>
@@ -165,8 +163,6 @@ export default function CharacterDashboardScreen() {
         </SectionCard>
       </Columns>
     </ScrollView>
-      <DiceRollerFab />
-    </View>
   );
 }
 

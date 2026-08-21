@@ -424,8 +424,10 @@ They are set to `warn` in [eslint.config.js](../eslint.config.js) with a
 marker, not a resolution.** `reactCompiler` is already on in app.json, so these
 are worth fixing for real — `react-hooks/globals` in particular flags a
 module-level variable reassigned during render in
-[dice-roller-fab.tsx](../src/components/dice-roller-fab.tsx), which is a genuine
-latent bug rather than a style nit.
+`dice-roller-fab.tsx`, which is a genuine latent bug rather than a style nit.
+That one is now fixed for real: the roller moved above navigation as
+[dice-roller-dialog.tsx](../src/components/dice-roller-dialog.tsx) and its
+module-level `lastSides` lives in the provider's state.
 
 ### Housekeeping done along the way
 

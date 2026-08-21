@@ -7,6 +7,7 @@ import { IconButton, Text } from 'react-native-paper';
 
 import CharacterForm from '@/components/character-form';
 import ConditionsCard from '@/components/conditions-card';
+import DiceRollerButton from '@/components/dice-roller-button';
 import EffectsCard from '@/components/effects-card';
 import ArmorSection from '@/components/fiche/armor-section';
 import HealthSection from '@/components/fiche/health-section';
@@ -66,18 +67,24 @@ export default function CharacterFicheScreen() {
   const [editingSheet, setEditingSheet] = useState(false);
   const splitWidth = useSplitWidth();
 
+  // This replaces the tabs layout's headerRight wholesale, so the dice button
+  // it puts on every other tab has to be re-added here, left of the pencil.
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () =>
-        editingSheet ? (
-          <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
-        ) : (
-          <IconButton
-            testID="edit-sheet"
-            icon={dsIcon('edit')}
-            onPress={() => setEditingSheet(true)}
-          />
-        ),
+      headerRight: () => (
+        <View style={styles.headerActions}>
+          <DiceRollerButton />
+          {editingSheet ? (
+            <IconButton icon={dsIcon('close')} onPress={() => setEditingSheet(false)} />
+          ) : (
+            <IconButton
+              testID="edit-sheet"
+              icon={dsIcon('edit')}
+              onPress={() => setEditingSheet(true)}
+            />
+          )}
+        </View>
+      ),
     });
   }, [navigation, char?.nom, editingSheet]);
 
@@ -279,4 +286,6 @@ export default function CharacterFicheScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   container: { padding: 12, gap: 12, paddingBottom: 160 },
+  // Two header icons side by side; IconButton brings its own spacing.
+  headerActions: { flexDirection: 'row', alignItems: 'center' },
 });
