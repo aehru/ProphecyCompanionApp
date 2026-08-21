@@ -346,6 +346,37 @@ describe('parseImport validation', () => {
     expect(r.ok && r.data.characters[0].armor[0].encombrementMalus).toBe(0);
   });
 
+  it('accepts a character without caste (export predating the column)', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    expect(r.ok).toBe(true);
+    // Absent, not null: the column defaults to NULL, which IS « Sans Caste ».
+    expect(r.ok && r.data.characters[0].character.caste).toBeUndefined();
+  });
+
+  it('carries a caste through parse', () => {
+    const b = makeBundle();
+    const exp = buildExport([{ ...b, character: { ...b.character, caste: 'erudit' } }]);
+    const r = parseImport(serializeExport(exp));
+    expect(r.ok && r.data.characters[0].character.caste).toBe('erudit');
+  });
+
+  it('folds a hand-written caste onto its key, and drops one it cannot place', () => {
+    // Why casteFromInput sits in the schema rather than at the call site: a
+    // backup edited by hand says « Érudit », not `erudit`. An unrecognized one
+    // imports as « Sans Caste » — losing a label must never cost the sheet.
+    const b = makeBundle();
+    const withCaste = (caste: string) =>
+      buildExport([
+        { ...b, character: { ...b.character, caste } as CharacterBundle['character'] },
+      ]);
+
+    const accented = parseImport(serializeExport(withCaste('Érudit')));
+    expect(accented.ok && accented.data.characters[0].character.caste).toBe('erudit');
+
+    const unknown = parseImport(serializeExport(withCaste('Chevalier')));
+    expect(unknown.ok).toBe(true);
+    expect(unknown.ok && unknown.data.characters[0].character.caste).toBeNull();
+  });
   it('carries an explicit uuid through parse', () => {
     const exp = buildExport([makeBundle({ character: { ...makeBundle().character, uuid: 'abc-123' } })]);
     const r = parseImport(serializeExport(exp));
