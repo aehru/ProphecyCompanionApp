@@ -77,12 +77,8 @@ export default function WeaponSkillField({ weapon: w }: { weapon: Weapon }) {
         visible={open}
         onDismiss={close}
         title={mother ? 'Spécialisation' : 'Compétence'}
-        actions={
-          <>
-            <Button onPress={close}>Annuler</Button>
-            {mother ? <Button onPress={() => setMother(null)}>Retour</Button> : null}
-          </>
-        }>
+        dismiss={<Button onPress={close}>Annuler</Button>}
+        actions={mother ? <Button onPress={() => setMother(null)}>Retour</Button> : null}>
         {mother ? (
           <View style={styles.list}>
             <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>

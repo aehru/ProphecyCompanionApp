@@ -47,7 +47,7 @@ export default function ExportIntentDialog({
       onDismiss={onDismiss}
       title={`Exporter ${count} personnage${count > 1 ? 's' : ''}`}
       // The two rows ARE the confirming actions — only the way out belongs here.
-      actions={<Button onPress={onDismiss}>Annuler</Button>}>
+      dismiss={<Button onPress={onDismiss}>Annuler</Button>}>
       {CHOICES.map((c) => (
         <Pressable
           key={c.intent}

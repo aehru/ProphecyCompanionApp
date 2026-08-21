@@ -316,21 +316,18 @@ export default function SpellCatalogModal() {
         visible={filterDialog}
         onDismiss={() => setFilterDialog(false)}
         title="Filtrer les sortilèges"
+        dismiss={
+          <Button disabled={filterCount === 0} onPress={() => setCriteria(NO_FILTERS)}>
+            Réinitialiser
+          </Button>
+        }
+        // Not « Appliquer » — the list narrowed as the chips were tapped. Naming
+        // the count is what makes closing the dialog feel like the result of the
+        // filtering rather than a separate step.
         actions={
-          <>
-            <Button disabled={filterCount === 0} onPress={() => setCriteria(NO_FILTERS)}>
-              Réinitialiser
-            </Button>
-            {/* Not « Appliquer » — the list narrowed as the chips were tapped.
-                Naming the count is what makes closing the dialog feel like the
-                result of the filtering rather than a separate step. */}
-            <Button
-              mode="contained"
-              icon={dsIcon('check')}
-              onPress={() => setFilterDialog(false)}>
-              {resultLabel}
-            </Button>
-          </>
+          <Button mode="contained" icon={dsIcon('check')} onPress={() => setFilterDialog(false)}>
+            {resultLabel}
+          </Button>
         }>
         {filterPanel({ autoFocus: true })}
       </DsDialog>

@@ -207,19 +207,17 @@ export default function CampaignsScreen() {
         visible={dialog !== null}
         onDismiss={cancel}
         title={dialog === 'create' ? 'Nouvelle table' : 'Rejoindre une campagne'}
+        dismiss={<Button onPress={cancel}>Annuler</Button>}
         actions={
-          <>
-            <Button onPress={cancel}>Annuler</Button>
-            <Button
-              testID="dialog-submit"
-              mode="contained"
-              icon={dialog === 'create' ? 'plus' : 'location-enter'}
-              onPress={submit}
-              disabled={!canSubmit || busy}
-              loading={busy}>
-              {dialog === 'create' ? 'Créer' : 'Rejoindre'}
-            </Button>
-          </>
+          <Button
+            testID="dialog-submit"
+            mode="contained"
+            icon={dialog === 'create' ? 'plus' : 'location-enter'}
+            onPress={submit}
+            disabled={!canSubmit || busy}
+            loading={busy}>
+            {dialog === 'create' ? 'Créer' : 'Rejoindre'}
+          </Button>
         }>
         {dialog === 'create' ? (
           <>

@@ -59,13 +59,11 @@ export default function AddSkillDialog({
       visible={visible}
       onDismiss={onDismiss}
       title="Nouvelle compétence"
+      dismiss={<Button onPress={onDismiss}>Annuler</Button>}
       actions={
-        <>
-          <Button onPress={onDismiss}>Annuler</Button>
-          <Button mode="contained" icon={dsIcon('plus')} disabled={!canAdd} onPress={submit}>
-            Ajouter
-          </Button>
-        </>
+        <Button mode="contained" icon={dsIcon('plus')} disabled={!canAdd} onPress={submit}>
+          Ajouter
+        </Button>
       }>
       <TextInput
         label="Nom"
