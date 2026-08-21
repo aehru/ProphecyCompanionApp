@@ -28,6 +28,7 @@ describe('catalogues (data-src/*.csv)', () => {
     expect(counts.spells).toBeGreaterThan(0);
     expect(counts.armor).toBeGreaterThan(0);
     expect(counts.shields).toBeGreaterThan(0);
+    expect(counts.archetypes).toBeGreaterThan(0);
   });
 
   // Line endings are ignored on purpose — `core.autocrlf=true` gives Windows
