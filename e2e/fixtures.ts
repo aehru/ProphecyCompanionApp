@@ -70,10 +70,33 @@ export function renderOrder(page: Page): Promise<string[]> {
   return page.evaluate(() => (window as unknown as { __renderOrder: string[] }).__renderOrder ?? []);
 }
 
-/** Create a character from the list screen and return its route id. */
-export async function createCharacter(page: Page, nom: string): Promise<string> {
+/**
+ * Create a character from the list screen and return its route id. `caste` is
+ * the stored KEY (`erudit`), not the accented label the picker shows.
+ */
+export async function createCharacter(
+  page: Page,
+  nom: string,
+  caste?: string,
+): Promise<string> {
   await page.getByTestId('fab-new-character').click();
   await page.getByTestId('field-nom').fill(nom);
+  if (caste) {
+    // The stack push has to be OVER before the dropdown accepts a press: while
+    // the transition runs, the outgoing list screen still owns the touch
+    // responder and a tap on the anchor is dropped (text fields are unaffected,
+    // which is why only this one needs the wait). There is no DOM signal for it
+    // — the list screen stays mounted underneath — so the settle is a delay,
+    // paired with an assertion that the menu ACTUALLY opened. A stuck anchor
+    // fails the test; it can never pass by luck.
+    const option = page.getByTestId(`field-caste-option-${caste}`);
+    await expect(async () => {
+      await page.waitForTimeout(600);
+      await page.getByTestId('field-caste').click();
+      await expect(option).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 20_000 });
+    await option.click();
+  }
   await page.getByTestId('fab-save-character').click();
   await page.waitForURL(/\/character\/\d+/);
   return page.url().match(/\/character\/(\d+)/)![1];
