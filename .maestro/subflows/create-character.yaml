@@ -9,6 +9,11 @@ appId: fr.aehru.prophecyapp
 - inputText: '${NOM}'
 # Dismiss the keyboard: it covers the save FAB on a short screen.
 - hideKeyboard
+# The caste picker is a dropdown: the anchor opens it, the option commits.
+- tapOn:
+    id: 'field-caste'
+- tapOn:
+    id: 'field-caste-option-erudit'
 - tapOn:
     id: 'fab-save-character'
 - extendedWaitUntil:

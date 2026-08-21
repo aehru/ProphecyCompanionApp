@@ -35,8 +35,8 @@ const MAGIC_MAX_TO_CURRENT: [string, string][] = [
  * illustration IS its bytes — media/web stores a base64 data URL in the column —
  * so selecting the whole row would drag every portrait, biography and note
  * through the driver on every refetch, and `useLiveQuery` refetches on every
- * write to the table. These six columns are the union of what the list rows and
- * the campaign pickers actually read.
+ * write to the table. These seven columns are the union of what the list rows
+ * and the campaign pickers actually read.
  */
 export function charactersListQuery() {
   return db
@@ -44,6 +44,7 @@ export function charactersListQuery() {
       id: characters.id,
       nom: characters.nom,
       concept: characters.concept,
+      caste: characters.caste,
       avatarPath: characters.avatarPath,
       kind: characters.kind,
       uuid: characters.uuid,

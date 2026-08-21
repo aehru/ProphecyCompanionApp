@@ -1,5 +1,6 @@
 import { DEFAULT_SKILLS, NUMERIC_KEYS } from '@/constants/prophecy';
 import type { Character, NewCharacter, Skill } from '@/db/schema';
+import { casteFromInput } from '@/lib/caste';
 import type { SkillInput } from '@/repositories/skills';
 
 export type FormValues = Record<string, string>;
@@ -63,6 +64,9 @@ export function toFormValues(c?: Partial<Character> | null): FormValues {
   const v: FormValues = {
     nom: (src.nom as string) ?? '',
     concept: (src.concept as string) ?? '',
+    // The form speaks strings only, so a NULL caste (« Sans Caste ») is '' here
+    // and becomes NULL again in `fromFormValues`.
+    caste: (src.caste as string) ?? '',
     biographie: (src.biographie as string) ?? '',
   };
   for (const k of NUMERIC_KEYS) v[k] = src[k] != null ? String(src[k]) : '';
@@ -113,6 +117,7 @@ export function fromFormValues(v: FormValues): Partial<NewCharacter> {
   const out: Record<string, unknown> = {
     nom: v.nom.trim(),
     concept: v.concept.trim(),
+    caste: casteFromInput(v.caste),
     biographie: v.biographie.trim(),
   };
   for (const k of NUMERIC_KEYS) {

@@ -4,9 +4,10 @@
 import { Image } from 'expo-image';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Checkbox, List } from 'react-native-paper';
+import { Checkbox, List, Text } from 'react-native-paper';
 
 import { OwnerBadge } from '@/components/campaign/roster-badges';
+import CasteChip from '@/components/caste-chip';
 import Icon from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { mediaUri } from '@/lib/media';
@@ -16,6 +17,7 @@ export interface ListedCharacter {
   id: number;
   nom: string | null;
   concept: string | null;
+  caste: string | null;
   avatarPath: string | null;
   kind: string | null;
 }
@@ -53,9 +55,28 @@ export default function CharacterListItem({
       ]}
       testID={`character-row-${character.id}`}
       title={character.nom || 'Sans nom'}
-      description={character.concept || undefined}
+      // The subtitle is the caste chip then the concept, so the badge leads the
+      // line. Rendered through the function form (rather than the plain string)
+      // because a chip is a view — `undefined` when there is neither, which is
+      // what keeps the row at its one-line height.
+      description={
+        character.caste || character.concept
+          ? () => (
+              <View style={styles.subtitle}>
+                <CasteChip caste={character.caste} />
+                {character.concept ? (
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurfaceVariant, flexShrink: 1 }}
+                    numberOfLines={1}>
+                    {character.concept}
+                  </Text>
+                ) : null}
+              </View>
+            )
+          : undefined
+      }
       titleStyle={{ color: theme.colors.onSurface }}
-      descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
       // In selection mode the checkbox takes the avatar's slot rather than a
       // slot of its own — same row height, no layout shift on entering the mode.
       left={(p) =>
@@ -99,6 +120,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
   },
+  subtitle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
   // maxWidth only binds a lone item on the last row — without it, it stretches
   // across both columns. flex:1 still wins for a full row (gap makes it < 50%).
   itemInGrid: { flex: 1, maxWidth: '50%' },

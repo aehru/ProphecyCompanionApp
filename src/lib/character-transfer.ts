@@ -23,6 +23,7 @@ import {
   SPHERES,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
+import { casteFromInput } from '@/lib/caste';
 
 /** Bumped on any breaking change to the bundle shape. Import rejects mismatches. */
 export const SCHEMA_VERSION = 1;
@@ -47,6 +48,11 @@ const characterSchema = z.object({
   uuid: str.optional(),
   nom: str,
   concept: str,
+  // Caste. OPTIONAL and nullable (not a version bump): exports made before the
+  // column existed have no such field and import as « Sans Caste », the column
+  // default. Parsed through `casteFromInput` so a hand-edited file written
+  // « Érudit » still lands on the key instead of being dropped.
+  caste: str.nullable().transform(casteFromInput).optional(),
   biographie: str,
   // PC vs NPC. OPTIONAL (not a version bump): exports made before the column
   // existed have no such field and import as a player character, the column

@@ -46,6 +46,26 @@ test('opens every character tab', async ({ page }) => {
   }
 });
 
+test('carries a picked caste to the fiche and the list row', async ({ page }) => {
+  await page.goto('/');
+  const id = await createCharacter(page, 'Kaelen', 'erudit');
+
+  // One component renders the chip in both places, so both are walked. Stored
+  // accent-free and rendered WITH accents is the app-wide convention, and the
+  // one thing a caste round-trip can quietly get wrong.
+  //
+  // Loaded fresh rather than asserted where the save left us: a pushed screen
+  // leaves the list mounted underneath, chip and all, and two chips on one page
+  // is not what this is measuring.
+  await page.goto(`/character/${id}`);
+  await expect(page.getByTestId('caste-chip')).toHaveText('Érudit');
+
+  await page.goto('/');
+  await expect(
+    page.getByTestId(`character-row-${id}`).getByTestId('caste-chip'),
+  ).toHaveText('Érudit');
+});
+
 test('survives a reload deep on a character tab', async ({ page }) => {
   // The SPA fallback (dist/404.html, scripts/postbuild-web.ts): dynamic routes
   // export as literal `[id]` directories, so nothing on disk answers this URL.
