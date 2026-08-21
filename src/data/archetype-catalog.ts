@@ -1,6 +1,8 @@
 import type { NewCharacter } from '@/db/schema';
 import type { CasteKey } from '@/constants/prophecy';
 
+import { ARCHETYPE_CATALOG_DATA } from './archetype-catalog.gen';
+
 /**
  * The stat block an archetype carries, at the « standard » tier. Keys are the
  * `characters` columns so a generated NPC is a plain patch on the table — the
@@ -85,3 +87,14 @@ export type ArchetypePreset = {
 };
 
 export { ARCHETYPE_CATALOG_DATA as ARCHETYPE_CATALOG } from './archetype-catalog.gen';
+
+const BY_ID = new Map(ARCHETYPE_CATALOG_DATA.map((a) => [a.id, a]));
+
+/**
+ * One archetype by id, falling back to the first — a picker's value can only go
+ * stale by an id leaving the CSV, and a screen with no archetype at all has
+ * nothing to show. Shared so the screen and its controls resolve it the same way.
+ */
+export function archetypeById(id: string): ArchetypePreset | undefined {
+  return BY_ID.get(id) ?? ARCHETYPE_CATALOG_DATA[0];
+}

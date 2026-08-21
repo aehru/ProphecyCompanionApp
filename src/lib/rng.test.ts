@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { chance, hashSeed, jitter, pick, pickSome, randomInt, seededRng } from '@/lib/rng';
+import { chance, hashSeed, jitter, pick, randomInt, seededRng } from '@/lib/rng';
 
 // The point of this module is reproducibility: the generator's tests are only
 // worth anything if the same seed replays the same NPC.
@@ -51,21 +51,16 @@ describe('randomInt', () => {
   });
 });
 
-describe('pick / pickSome', () => {
+describe('pick', () => {
   it('returns undefined on an empty list', () => {
     expect(pick(seededRng('x'), [])).toBeUndefined();
   });
 
-  it('keeps list order and never repeats an item', () => {
-    const items = ['a', 'b', 'c', 'd', 'e'];
-    const got = pickSome(seededRng('some'), items, 3);
-    expect(got).toHaveLength(3);
-    expect(new Set(got).size).toBe(3);
-    expect(got).toEqual(items.filter((i) => got.includes(i)));
-  });
-
-  it('caps at the list length', () => {
-    expect(pickSome(seededRng('cap'), ['a', 'b'], 9)).toEqual(['a', 'b']);
+  it('eventually reaches every item', () => {
+    const rng = seededRng('spread');
+    const items = ['a', 'b', 'c'];
+    const seen = new Set(Array.from({ length: 60 }, () => pick(rng, items)));
+    expect(seen.size).toBe(items.length);
   });
 });
 

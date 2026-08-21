@@ -59,6 +59,39 @@ const STAT_MIN = 1;
 const STAT_MAX = 10;
 const SKILL_MIN = 1;
 
+/** The caractéristiques and attributs a tier/variance actually rolls. */
+const ROLLED_STATS = [
+  'force', 'resistance', 'intelligence', 'volonte', 'coordination',
+  'perception', 'presence', 'empathie', 'physique', 'mental', 'manuel', 'social',
+] as const;
+
+/**
+ * Ceiling on one batch. Not a rule — a guard: the aperçu renders every PNJ, and
+ * a GM who types 500 would freeze the screen before ever tapping « Ajouter ».
+ */
+export const MAX_BATCH = 20;
+
+/** Typed batch size → the number to generate. Blank/junk reads as 0 (no batch). */
+export function parseBatch(text: string): number {
+  const n = parseInt(text, 10);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(MAX_BATCH, n);
+}
+
+/**
+ * What a batch field keeps as the user types. A value past the ceiling is
+ * rewritten to it rather than accepted and quietly ignored — a field reading 50
+ * above an aperçu of 20 is the app lying about what it will write. Blank stays
+ * blank: mid-typing is a legitimate state.
+ */
+export function clampBatchText(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed === '') return '';
+  const n = parseInt(trimmed, 10);
+  if (!Number.isFinite(n)) return '';
+  return n > MAX_BATCH ? String(MAX_BATCH) : trimmed;
+}
+
 export type GeneratedSkill = { name: string; attribut: string; value: number };
 
 /** What one generated PNJ is, before anything touches the DB. */
@@ -73,6 +106,13 @@ export type GeneratedNpc = {
   /** The resolved archetype choice, for the preview line (« Arme : Armes de choc »). */
   choice: { label: string; skill: string } | null;
 };
+
+/**
+ * « No answer » to an archetype's option — what a picker sends for « Au hasard ».
+ * Lives with the contract it belongs to (`optionChoice`) rather than in the
+ * component that happens to render the chip.
+ */
+export const RANDOM_CHOICE = '';
 
 export type GenerateNpcOptions = {
   tier?: NpcTier;
@@ -91,8 +131,14 @@ export type GenerateNpcOptions = {
 const clamp = (n: number, min: number, max?: number) =>
   Math.min(max ?? Number.MAX_SAFE_INTEGER, Math.max(min, n));
 
-const tierOf = (key: NpcTier) => NPC_TIERS.find((t) => t.key === key) ?? NPC_TIERS[1];
-const varianceOf = (key: NpcVariance) => NPC_VARIANCES.find((v) => v.key === key) ?? NPC_VARIANCES[1];
+/** The two dials, resolved once per PNJ and passed down as plain numbers. */
+type Dials = { stat: number; skill: number; statSpread: number; skillSpread: number };
+
+function dialsOf(tier: NpcTier, variance: NpcVariance): Dials {
+  const t = NPC_TIERS.find((x) => x.key === tier) ?? NPC_TIERS[1];
+  const v = NPC_VARIANCES.find((x) => x.key === variance) ?? NPC_VARIANCES[1];
+  return { stat: t.stat, skill: t.skill, statSpread: v.stat, skillSpread: v.skill };
+}
 
 /** Roll one authored number: base, shifted by tier, nudged by variance. */
 function roll(rng: Rng, base: number, delta: number, spread: number, min: number, max?: number) {
@@ -105,21 +151,16 @@ function roll(rng: Rng, base: number, delta: number, spread: number, min: number
  * maîtrise and chance) shifted by tier alone, since jittering them makes a PNJ
  * that is randomly lucky for no reason a GM could explain.
  */
-function rollStats(rng: Rng, stats: ArchetypeStats, tier: NpcTier, variance: NpcVariance) {
-  const t = tierOf(tier);
-  const v = varianceOf(variance);
-  const statKeys = [
-    'force', 'resistance', 'intelligence', 'volonte', 'coordination',
-    'perception', 'presence', 'empathie', 'physique', 'mental', 'manuel', 'social',
-  ] as const;
-
-  const out = {} as Record<(typeof statKeys)[number], number>;
-  for (const key of statKeys) out[key] = roll(rng, stats[key], t.stat, v.stat, STAT_MIN, STAT_MAX);
+function rollStats(rng: Rng, stats: ArchetypeStats, d: Dials) {
+  const out = {} as Record<(typeof ROLLED_STATS)[number], number>;
+  for (const key of ROLLED_STATS) {
+    out[key] = roll(rng, stats[key], d.stat, d.statSpread, STAT_MIN, STAT_MAX);
+  }
 
   return {
     ...out,
-    maitriseMax: clamp(stats.maitriseMax + t.stat, 0),
-    chanceMax: clamp(stats.chanceMax + t.stat, 0),
+    maitriseMax: clamp(stats.maitriseMax + d.stat, 0),
+    chanceMax: clamp(stats.chanceMax + d.stat, 0),
     // Derived from the caractéristiques that were just rolled, not from the
     // archetype — the rulebook's own table (lib/creation-rules).
     initiativeMax: initiativeDice(out.coordination, out.perception),
@@ -136,16 +177,13 @@ function rollStats(rng: Rng, stats: ArchetypeStats, tier: NpcTier, variance: Npc
 function rollSkills(
   rng: Rng,
   archetype: ArchetypePreset,
-  tier: NpcTier,
-  variance: NpcVariance,
+  d: Dials,
   optionChoice: string | null | undefined,
 ): { skills: GeneratedSkill[]; choice: GeneratedNpc['choice'] } {
-  const t = tierOf(tier);
-  const v = varianceOf(variance);
   const skills = archetype.data.skills.map((s) => ({
     name: s.name,
     attribut: s.attribut,
-    value: roll(rng, s.value, t.skill, v.skill, SKILL_MIN),
+    value: roll(rng, s.value, d.skill, d.skillSpread, SKILL_MIN),
   }));
 
   const option = archetype.data.option;
@@ -155,16 +193,14 @@ function rollSkills(
     optionChoice && option.choices.includes(optionChoice)
       ? optionChoice
       : (pick(rng, option.choices) ?? option.choices[0]);
-  const value = roll(rng, option.value, t.skill, v.skill, SKILL_MIN);
+  const value = roll(rng, option.value, d.skill, d.skillSpread, SKILL_MIN);
   const existing = skills.find((s) => s.name === chosen);
   if (existing) {
     existing.value = Math.max(existing.value, value);
   } else {
-    // The attribut comes from the archetype's own list when the compétence is
-    // there, and otherwise from the catalogue entry the generator baked into the
-    // option — which is why `choices` holds DEFAULT_SKILLS names and nothing else.
-    const known = archetype.data.skills.find((s) => s.name === chosen);
-    skills.push({ name: chosen, attribut: known?.attribut ?? attributOf(chosen), value });
+    // Not on the archetype, so the attribut comes from the catalogue — which is
+    // why `choices` holds DEFAULT_SKILLS names and nothing else.
+    skills.push({ name: chosen, attribut: attributOf(chosen), value });
   }
   return { skills, choice: { label: option.label, skill: chosen } };
 }
@@ -190,9 +226,10 @@ export function generateNpc(
     taken = [],
   } = options;
   const rng = seededRng(seed);
+  const dials = dialsOf(tier, variance);
 
-  const stats = rollStats(rng, archetype.data.stats, tier, variance);
-  const { skills, choice } = rollSkills(rng, archetype, tier, variance, optionChoice);
+  const stats = rollStats(rng, archetype.data.stats, dials);
+  const { skills, choice } = rollSkills(rng, archetype, dials, optionChoice);
 
   return {
     seed,

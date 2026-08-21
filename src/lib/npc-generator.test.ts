@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import { ARCHETYPE_CATALOG } from '@/data/archetype-catalog';
 import { initiativeDice, woundBoxes } from '@/lib/creation-rules';
-import { generateNpc, generateNpcs, NPC_TIERS } from '@/lib/npc-generator';
+import {
+  clampBatchText,
+  generateNpc,
+  generateNpcs,
+  MAX_BATCH,
+  NPC_TIERS,
+  parseBatch,
+} from '@/lib/npc-generator';
 
 const byId = (id: string) => {
   const found = ARCHETYPE_CATALOG.find((a) => a.id === id);
@@ -152,5 +159,41 @@ describe('generateNpcs', () => {
   it('returns nothing for a count of zero or less', () => {
     expect(generateNpcs(erudit, 0)).toEqual([]);
     expect(generateNpcs(erudit, -3)).toEqual([]);
+  });
+});
+
+describe('parseBatch', () => {
+  it('reads a typed size', () => {
+    expect(parseBatch('3')).toBe(3);
+    expect(parseBatch(' 12 ')).toBe(12);
+  });
+
+  it('reads blank or junk as nothing to generate', () => {
+    expect(parseBatch('')).toBe(0);
+    expect(parseBatch('abc')).toBe(0);
+    expect(parseBatch('-2')).toBe(0);
+  });
+
+  it('never exceeds the ceiling', () => {
+    expect(parseBatch('500')).toBe(MAX_BATCH);
+  });
+});
+
+describe('clampBatchText', () => {
+  it('leaves a value inside the ceiling exactly as typed', () => {
+    expect(clampBatchText('7')).toBe('7');
+  });
+
+  it('rewrites a value past the ceiling, rather than ignoring it', () => {
+    expect(clampBatchText('50')).toBe(String(MAX_BATCH));
+  });
+
+  it('keeps a blank field blank — mid-typing is legitimate', () => {
+    expect(clampBatchText('')).toBe('');
+    expect(clampBatchText('   ')).toBe('');
+  });
+
+  it('drops junk instead of freezing it in the field', () => {
+    expect(clampBatchText('abc')).toBe('');
   });
 });

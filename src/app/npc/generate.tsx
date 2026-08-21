@@ -12,19 +12,22 @@ import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
-import NpcGeneratorSettings, {
-  parseBatch,
-  RANDOM_CHOICE,
-} from '@/components/npc-generator/npc-generator-settings';
+import NpcGeneratorSettings from '@/components/npc-generator/npc-generator-settings';
 import NpcPreviewCard from '@/components/npc-generator/npc-preview-card';
 import AppFab from '@/components/ui/app-fab';
 import Columns from '@/components/ui/columns';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
-import { ARCHETYPE_CATALOG } from '@/data/archetype-catalog';
+import { archetypeById, ARCHETYPE_CATALOG } from '@/data/archetype-catalog';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { generateNpcs, type NpcTier, type NpcVariance } from '@/lib/npc-generator';
+import {
+  generateNpcs,
+  parseBatch,
+  RANDOM_CHOICE,
+  type NpcTier,
+  type NpcVariance,
+} from '@/lib/npc-generator';
 import { randomSeed } from '@/lib/rng';
 import { characterNames, saveGeneratedNpcs } from '@/repositories/npc-generator';
 
@@ -62,7 +65,7 @@ export default function GenerateNpcScreen() {
   }, []);
 
   const count = parseBatch(countText);
-  const archetype = ARCHETYPE_CATALOG.find((a) => a.id === archetypeId) ?? ARCHETYPE_CATALOG[0];
+  const archetype = archetypeById(archetypeId);
   const preview = archetype
     ? generateNpcs(archetype, count, {
         tier,

@@ -62,21 +62,6 @@ export function pick<T>(rng: Rng, items: readonly T[]): T | undefined {
   return items[Math.floor(rng() * items.length)];
 }
 
-/**
- * `count` distinct items, in list order (not pick order) — a Fisher-Yates over a
- * copy, sliced. Order is kept so a generated skill list reads in its authored
- * sequence instead of shuffling on every re-roll.
- */
-export function pickSome<T>(rng: Rng, items: readonly T[], count: number): T[] {
-  const n = Math.max(0, Math.min(Math.floor(count), items.length));
-  const idx = items.map((_, i) => i);
-  for (let i = idx.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [idx[i], idx[j]] = [idx[j], idx[i]];
-  }
-  return idx.slice(0, n).sort((a, b) => a - b).map((i) => items[i]);
-}
-
 /** True with probability `p` (clamped to [0, 1]). */
 export function chance(rng: Rng, p: number): boolean {
   return rng() < Math.min(1, Math.max(0, p));

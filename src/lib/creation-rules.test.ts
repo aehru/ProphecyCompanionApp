@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { initiativeDice, totalWoundBoxes, woundBoxes } from '@/lib/creation-rules';
+import { initiativeDice, woundBoxes } from '@/lib/creation-rules';
 
 // The rulebook gives the wound track as a band table on RÉS + VOL. These cases
 // walk every band boundary, since an off-by-one there is invisible on a sheet
@@ -65,12 +65,5 @@ describe('initiativeDice', () => {
 
   it('clamps above the table instead of inventing a sixth die', () => {
     expect(initiativeDice(10, 10)).toBe(5);
-  });
-});
-
-describe('totalWoundBoxes', () => {
-  it('sums every level', () => {
-    expect(totalWoundBoxes(woundBoxes(0, 0))).toBe(6);
-    expect(totalWoundBoxes(woundBoxes(10, 10))).toBe(13);
   });
 });

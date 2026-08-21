@@ -15,43 +15,22 @@ import NumberField from '@/components/number-field';
 import ChipSelect from '@/components/ui/chip-select';
 import { dsIcon } from '@/components/ui/icon';
 import InfoLabel from '@/components/ui/info-label';
-import { ARCHETYPE_CATALOG } from '@/data/archetype-catalog';
+import { archetypeById, ARCHETYPE_CATALOG } from '@/data/archetype-catalog';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { NPC_TIERS, NPC_VARIANCES, type NpcTier, type NpcVariance } from '@/lib/npc-generator';
+import {
+  clampBatchText,
+  MAX_BATCH,
+  NPC_TIERS,
+  NPC_VARIANCES,
+  parseBatch,
+  RANDOM_CHOICE,
+  type NpcTier,
+  type NpcVariance,
+} from '@/lib/npc-generator';
 
 const ARCHETYPE_OPTIONS = ARCHETYPE_CATALOG.map((a) => ({ key: a.id, label: a.data.name }));
 const TIER_OPTIONS = NPC_TIERS.map((t) => ({ key: t.key, label: t.label }));
 const VARIANCE_OPTIONS = NPC_VARIANCES.map((v) => ({ key: v.key, label: v.label }));
-
-/** Sentinel for « let the generator choose » — an empty answer to the option. */
-export const RANDOM_CHOICE = '';
-
-/**
- * Ceiling on one batch. Not a rule — a guard: the aperçu renders every PNJ, and
- * a GM who types 500 would freeze the screen before ever tapping « Ajouter ».
- */
-export const MAX_BATCH = 20;
-
-/** Typed batch size → the number the generator gets. Blank/junk reads as 0 (no preview). */
-export function parseBatch(text: string): number {
-  const n = parseInt(text, 10);
-  if (!Number.isFinite(n) || n < 0) return 0;
-  return Math.min(MAX_BATCH, n);
-}
-
-/**
- * What the field keeps as the GM types. A value past the ceiling is rewritten to
- * it rather than accepted and quietly ignored — a field reading 50 above an
- * aperçu of 20 is the app lying about what it will write. Blank stays blank:
- * mid-typing is a legitimate state.
- */
-export function clampBatchText(text: string): string {
-  const trimmed = text.trim();
-  if (trimmed === '') return '';
-  const n = parseInt(trimmed, 10);
-  if (!Number.isFinite(n)) return '';
-  return n > MAX_BATCH ? String(MAX_BATCH) : trimmed;
-}
 
 const INFO = {
   archetype:
@@ -99,7 +78,7 @@ export default function NpcGeneratorSettings({
 }) {
   const theme = useProphecyTheme();
   const batch = parseBatch(countText);
-  const archetype = ARCHETYPE_CATALOG.find((a) => a.id === archetypeId);
+  const archetype = archetypeById(archetypeId);
   const option = archetype?.data.option ?? null;
 
   return (
