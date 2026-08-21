@@ -8,7 +8,7 @@ runs:
     # ^22.13.0, ^24.3.0 or ^25. Pin it instead of inheriting whatever the runner
     # image happens to ship, so an image bump can't break the build.
     - name: Setup Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: 22
 
@@ -19,7 +19,7 @@ runs:
 
     # Cache Bun's global install cache, keyed on the lockfile.
     - name: Cache Bun dependencies
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.bun/install/cache
         key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
