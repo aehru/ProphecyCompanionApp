@@ -156,6 +156,7 @@ export default function RootLayout() {
                   <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
                   {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
                   <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
+                  <Stack.Screen name="npc/generate" options={{ title: 'Générer un PNJ' }} />
                   <Stack.Screen name="diagnostics" options={{ title: 'Diagnostic' }} />
                   <Stack.Screen name="privacy" options={{ title: 'Confidentialité' }} />
                 </Stack>

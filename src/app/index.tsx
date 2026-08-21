@@ -2,7 +2,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
-import { IconButton, Menu, Text } from 'react-native-paper';
+import { Button, IconButton, Menu, Text } from 'react-native-paper';
 
 import CharacterListItem from '@/components/character-list-item';
 import CharacterSelectionActions from '@/components/character-selection-actions';
@@ -247,6 +247,20 @@ export default function CharactersListScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* Above the list rather than behind the FAB: generating a PNJ is a GM
+          tool, not the way a player creates their character. It steps out
+          during a selection, like the FAB. A full GM menu will take it over. */}
+      {!selection.active && (
+        <View style={[styles.tools, splitWidth]}>
+          <Button
+            mode="outlined"
+            icon={dsIcon('dice')}
+            testID="generate-npc"
+            onPress={() => router.push('/npc/generate')}>
+            Générer un PNJ
+          </Button>
+        </View>
+      )}
       {loading ? (
         <View testID="characters-loading" style={styles.loading}>
           <ActivityIndicator />
@@ -318,6 +332,7 @@ export default function CharactersListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  tools: { paddingHorizontal: 12, paddingTop: 12, alignItems: 'center' },
   listContent: { padding: 12, paddingBottom: 96 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   separator: { height: 8 },
