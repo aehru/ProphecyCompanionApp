@@ -22,6 +22,7 @@ import {
   type SQLiteDatabase,
 } from 'expo-sqlite';
 
+import { isStorageLockError } from '@/lib/storage-lock';
 import { backupDatabase } from './backup';
 import { DATABASE_NAME } from './database-name';
 import * as schema from './schema';
@@ -30,6 +31,33 @@ export { DATABASE_NAME };
 
 let handle: Promise<SQLiteDatabase> | null = null;
 let closing: Promise<void> | null = null;
+
+/**
+ * Backoff between open attempts while another window holds the storage lock, in
+ * ms. Short and finite on purpose: the usual case is a browser tab dying moments
+ * after the installed app launched, and a user staring at a spinner deserves an
+ * answer — even a bad one — rather than an unbounded wait.
+ */
+const LOCK_RETRY_DELAYS = [300, 700, 1500, 3000];
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Open the database, retrying while the exclusive OPFS lock is held by another
+ * window of the same origin (web only — native has no such lock and always
+ * returns on the first attempt). Any OTHER failure is rethrown immediately:
+ * retrying a genuinely broken database only delays the error screen.
+ */
+async function openWithRetry(): Promise<SQLiteDatabase> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await openDatabaseAsync(DATABASE_NAME, { enableChangeListener: true });
+    } catch (error) {
+      if (attempt >= LOCK_RETRY_DELAYS.length || !isStorageLockError(error)) throw error;
+      await sleep(LOCK_RETRY_DELAYS[attempt]);
+    }
+  }
+}
 
 /**
  * Open (once) the app's connection. `enableChangeListener` powers Drizzle's
@@ -47,7 +75,7 @@ export async function connection(): Promise<SQLiteDatabase> {
 
   if (!handle) {
     const open = (async () => {
-      const conn = await openDatabaseAsync(DATABASE_NAME, { enableChangeListener: true });
+      const conn = await openWithRetry();
       await backupDatabase(conn);
       return conn;
     })();
