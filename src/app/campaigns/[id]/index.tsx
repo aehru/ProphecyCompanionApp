@@ -161,19 +161,17 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
         visible={kickTarget != null}
         onDismiss={() => setKickTarget(null)}
         title="Retirer de la Compagnie ?"
+        dismiss={<Button onPress={() => setKickTarget(null)}>Annuler</Button>}
         actions={
-          <>
-            <Button onPress={() => setKickTarget(null)}>Annuler</Button>
-            <Button
-              mode="contained"
-              icon="account-remove-outline"
-              onPress={() => {
-                if (kickTarget) kick(kickTarget.charId);
-                setKickTarget(null);
-              }}>
-              Retirer
-            </Button>
-          </>
+          <Button
+            mode="contained"
+            icon="account-remove-outline"
+            onPress={() => {
+              if (kickTarget) kick(kickTarget.charId);
+              setKickTarget(null);
+            }}>
+            Retirer
+          </Button>
         }>
         <Text variant="bodyMedium">
           « {String(kickTarget?.character.nom ?? 'Sans nom')} » sera retiré du serveur. Si son
@@ -185,13 +183,11 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
         visible={npcName != null}
         onDismiss={() => setNpcName(null)}
         title="Nouveau PNJ"
+        dismiss={<Button onPress={() => setNpcName(null)}>Annuler</Button>}
         actions={
-          <>
-            <Button onPress={() => setNpcName(null)}>Annuler</Button>
-            <Button mode="contained" icon={dsIcon('plus')} onPress={submitNpc}>
-              Créer
-            </Button>
-          </>
+          <Button mode="contained" icon={dsIcon('plus')} onPress={submitNpc}>
+            Créer
+          </Button>
         }>
         <TextInput label="Nom" value={npcName ?? ''} onChangeText={setNpcName} autoFocus />
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -203,18 +199,16 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
         visible={attachUrl != null}
         onDismiss={() => setAttachUrl(null)}
         title="Connecter un serveur"
+        dismiss={<Button onPress={() => setAttachUrl(null)}>Annuler</Button>}
         actions={
-          <>
-            <Button onPress={() => setAttachUrl(null)}>Annuler</Button>
-            <Button
-              mode="contained"
-              icon="server-network"
-              onPress={submitAttach}
-              disabled={busy || (attachUrl ?? '').trim().length === 0}
-              loading={busy}>
-              Connecter
-            </Button>
-          </>
+          <Button
+            mode="contained"
+            icon="server-network"
+            onPress={submitAttach}
+            disabled={busy || (attachUrl ?? '').trim().length === 0}
+            loading={busy}>
+            Connecter
+          </Button>
         }>
         {/* `defaultValue`, NOT `value`: a controlled TextInput writes the JS
             string back into the native field on the first keystroke, which
