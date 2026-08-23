@@ -7,7 +7,7 @@
 // `lib/npc-generator`, and the only state kept here is what the GM chose plus
 // the current seed — which is what makes « Relancer » one line.
 
-import { useRouter } from 'expo-router';
+import { type Href, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
@@ -85,9 +85,14 @@ export default function GenerateNpcScreen() {
     setBusy(true);
     try {
       await saveGeneratedNpcs(preview);
-      // Back to the list: a batch has no single sheet to land on, and the PNJs
-      // are already there behind us (the list is a live query).
-      router.back();
+      // To the character LIST, not back: a batch has no single sheet to land on,
+      // and the list is where the PNJs actually appear (it is a live query, so
+      // they are already there). `back()` would do it only when the generator was
+      // opened from the list, and it is reached from Campagnes now — the GM would
+      // return to a screen showing nothing they just made.
+      // Cast: see fiche.tsx — the typed-routes generator omits `/` for a root
+      // index inside a group.
+      router.dismissTo('/' as Href);
     } catch (e) {
       Alert.alert('Génération impossible', e instanceof Error ? e.message : String(e));
       setBusy(false);
