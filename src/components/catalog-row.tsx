@@ -12,7 +12,8 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
  * **Tapping the row previews**, it does not add: browsing the rulebook is what
  * the catalogue is mostly used for, and adding-then-deleting was the only way
  * to read a spell's effect before. The **`+` on the right adds** — so picking a
- * known entry is still one tap, and the preview is opt-in.
+ * known entry is still one tap, and the preview is opt-in. With no `onAdd` the
+ * `+` is gone entirely and the row is pure reference.
  *
  * `children` is the detail body, rendered only while expanded — the very same
  * `*Detail` component the Fiche shows, so the numbers a player reads here are
@@ -36,8 +37,13 @@ export default function CatalogRow({
   name: string;
   subtitle?: string;
   /** Accessibility label for the add button, e.g. « Ajouter Épée courte ». */
-  addLabel: string;
-  onAdd: () => void;
+  addLabel?: string;
+  /**
+   * Omitted when the catalogue is being **browsed** rather than picked from —
+   * the same list read outside any character, where there is nothing to add to.
+   * The row then previews and nothing else.
+   */
+  onAdd?: () => void;
   /** Flags the tile in the error colour (an unmet prérequis), like the cards do. */
   alert?: boolean;
   /**
@@ -114,14 +120,16 @@ export default function CatalogRow({
         </Pressable>
 
         {/* The add button, not a chevron: the row itself is the disclosure. */}
-        <IconButton
-          icon={dsIcon('plus')}
-          size={22}
-          iconColor={theme.colors.primary}
-          accessibilityLabel={addLabel}
-          onPress={onAdd}
-          style={styles.add}
-        />
+        {onAdd ? (
+          <IconButton
+            icon={dsIcon('plus')}
+            size={22}
+            iconColor={theme.colors.primary}
+            accessibilityLabel={addLabel}
+            onPress={onAdd}
+            style={styles.add}
+          />
+        ) : null}
       </View>
 
       {expanded && children ? (
