@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
+import { Button, IconButton, Text } from 'react-native-paper';
 
+import { useCatalogScroll } from '@/components/catalog-scroll';
 import Icon, { dsIcon, type IconName } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
@@ -15,7 +16,11 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
  *
  * `children` is the detail body, rendered only while expanded — the very same
  * `*Detail` component the Fiche shows, so the numbers a player reads here are
- * the numbers they will get.
+ * the numbers they will get. It ends with its own « Replier »: a rulebook entry
+ * is routinely taller than the screen, and the row that opened it is then far
+ * enough above that closing it again meant scrolling back for the tap. That
+ * button also scrolls the row back to the top of the screen — see
+ * {@link useCatalogScroll} for why the row cannot do that alone.
  */
 export default function CatalogRow({
   icon,
@@ -45,9 +50,19 @@ export default function CatalogRow({
 }) {
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
+  const rowRef = useRef<View>(null);
+  const { rowToTop } = useCatalogScroll();
+
+  const collapse = () => {
+    setExpanded(false);
+    // Next frame, not now: the detail has to be gone before the scroller knows
+    // its new (shorter) content height, otherwise a row near the end of the
+    // list scrolls to an offset that no longer exists and gets clamped short.
+    requestAnimationFrame(() => rowToTop(rowRef.current));
+  };
 
   return (
-    <View style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
+    <View ref={rowRef} style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
       {/* The disclosure and the add button are SIBLINGS, not nested. On web a
           Pressable with accessibilityRole="button" renders a real <button>, and so
           does Paper's IconButton — one inside the other is invalid HTML, which
@@ -109,7 +124,27 @@ export default function CatalogRow({
         />
       </View>
 
-      {expanded ? children : null}
+      {expanded && children ? (
+        <>
+          {children}
+          <Button
+            mode="text"
+            compact
+            onPress={collapse}
+            // No up chevron in the DS set — the right one, quarter-turned the
+            // other way (select-field does the same trick pointing down).
+            icon={({ size, color }) => (
+              <View style={styles.collapseIcon}>
+                <Icon name="chev" size={size} color={color} />
+              </View>
+            )}
+            accessibilityHint="Replie le détail de cette entrée"
+            style={styles.collapse}
+            labelStyle={styles.collapseLabel}>
+            Replier
+          </Button>
+        </>
+      ) : null}
     </View>
   );
 }
@@ -137,4 +172,7 @@ const styles = StyleSheet.create({
   badgeText: { fontSize: 10, letterSpacing: 0.3 },
   sub: { fontSize: 12, marginTop: 1 },
   add: { margin: 0 },
+  collapse: { alignSelf: 'center', marginTop: 2, marginBottom: 8 },
+  collapseLabel: { fontSize: 12 },
+  collapseIcon: { transform: [{ rotate: '-90deg' }] },
 });
