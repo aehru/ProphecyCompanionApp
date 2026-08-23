@@ -5,6 +5,7 @@ import { Searchbar, Text } from 'react-native-paper';
 
 import CatalogCustomRow from '@/components/catalog-custom-row';
 import CatalogRow from '@/components/catalog-row';
+import { CatalogScrollProvider, useCatalogScrollHost } from '@/components/catalog-scroll';
 import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon, { type IconName } from '@/components/ui/icon';
@@ -50,6 +51,8 @@ export default function WeaponCatalogModal() {
   // Same readings the Inventaire tab feeds its cards — a player picking a weapon
   // wants to know what it does in THEIR hands before adding it.
   const { caracValue, caracModifier, skillReading } = useCaracReadings(numId);
+  // Lets a row's « Replier » put itself back at the top of the screen.
+  const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
 
   const q = foldQuery(query);
   const filtered = useMemo(
@@ -75,67 +78,71 @@ export default function WeaponCatalogModal() {
   };
 
   return (
-    <View style={styles.root}>
-      <KeyboardAwareScrollView
-        contentContainerStyle={[styles.container, contentWidth]}
-        bottomOffset={24}>
-        <Searchbar
-          placeholder="Rechercher une arme"
-          value={query}
-          onChangeText={setQuery}
-          icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
-        />
+    <CatalogScrollProvider value={catalogScroll}>
+      <View style={styles.root}>
+        <KeyboardAwareScrollView
+          ref={scrollRef}
+          onScroll={onScroll}
+          contentContainerStyle={[styles.container, contentWidth]}
+          bottomOffset={24}>
+          <Searchbar
+            placeholder="Rechercher une arme"
+            value={query}
+            onChangeText={setQuery}
+            icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
+          />
 
-        <CatalogCustomRow label="Arme personnalisée" onPress={() => add()} />
+          <CatalogCustomRow label="Arme personnalisée" onPress={() => add()} />
 
-        {WEAPON_CATEGORIES.map((cat) => {
-          const items = filtered.filter((p) => p.category === cat);
-          if (items.length === 0) return null;
-          return (
-            <SectionCard key={cat} title={cat} icon={iconFor(cat)}>
-              {WEAPON_HANDS.map((hand) => {
-                const handItems = items.filter((p) => p.hands === hand);
-                if (handItems.length === 0) return null;
-                return (
-                  <View key={hand} style={styles.handGroup}>
-                    <Text style={[styles.handLabel, { color: theme.colors.onSurfaceVariant }]}>
-                      {hand}
-                    </Text>
-                    {handItems.map((p) => (
-                      <CatalogRow
-                        key={p.id}
-                        icon={iconFor(cat)}
-                        name={p.data.name ?? ''}
-                        subtitle={[p.data.damage, p.data.prerequisites]
-                          .filter((s) => s && s.trim() !== '')
-                          .join(' · ')}
-                        addLabel={`Ajouter ${p.data.name}`}
-                        alert={prerequisitesUnmet(p.data.prerequisites, caracValue)}
-                        onAdd={() => add(p)}>
-                        <WeaponDetail
-                          weapon={p.data}
-                          caracValue={caracValue}
-                          caracModifier={caracModifier}
-                          skill={skillReading(p.data.skillName)}
-                        />
-                      </CatalogRow>
-                    ))}
-                  </View>
-                );
-              })}
-            </SectionCard>
-          );
-        })}
+          {WEAPON_CATEGORIES.map((cat) => {
+            const items = filtered.filter((p) => p.category === cat);
+            if (items.length === 0) return null;
+            return (
+              <SectionCard key={cat} title={cat} icon={iconFor(cat)}>
+                {WEAPON_HANDS.map((hand) => {
+                  const handItems = items.filter((p) => p.hands === hand);
+                  if (handItems.length === 0) return null;
+                  return (
+                    <View key={hand} style={styles.handGroup}>
+                      <Text style={[styles.handLabel, { color: theme.colors.onSurfaceVariant }]}>
+                        {hand}
+                      </Text>
+                      {handItems.map((p) => (
+                        <CatalogRow
+                          key={p.id}
+                          icon={iconFor(cat)}
+                          name={p.data.name ?? ''}
+                          subtitle={[p.data.damage, p.data.prerequisites]
+                            .filter((s) => s && s.trim() !== '')
+                            .join(' · ')}
+                          addLabel={`Ajouter ${p.data.name}`}
+                          alert={prerequisitesUnmet(p.data.prerequisites, caracValue)}
+                          onAdd={() => add(p)}>
+                          <WeaponDetail
+                            weapon={p.data}
+                            caracValue={caracValue}
+                            caracModifier={caracModifier}
+                            skill={skillReading(p.data.skillName)}
+                          />
+                        </CatalogRow>
+                      ))}
+                    </View>
+                  );
+                })}
+              </SectionCard>
+            );
+          })}
 
-        {filtered.length === 0 ? (
-          <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
-            Aucune arme ne correspond.
-          </Text>
-        ) : null}
-      </KeyboardAwareScrollView>
+          {filtered.length === 0 ? (
+            <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
+              Aucune arme ne correspond.
+            </Text>
+          ) : null}
+        </KeyboardAwareScrollView>
 
-      <CatalogSnackbar state={added} />
-    </View>
+        <CatalogSnackbar state={added} />
+      </View>
+    </CatalogScrollProvider>
   );
 }
 

@@ -19,6 +19,7 @@ import { Button, Text } from 'react-native-paper';
 
 import CatalogCustomRow from '@/components/catalog-custom-row';
 import CatalogRow from '@/components/catalog-row';
+import { CatalogScrollProvider, useCatalogScrollHost } from '@/components/catalog-scroll';
 import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import SpellDetail from '@/components/spell-detail';
 import SpellFilterPanel from '@/components/spell-catalog-filters';
@@ -124,6 +125,12 @@ export default function SpellCatalogModal() {
   // The header has scrolled off; the FAB stands in for it.
   const [stuck, setStuck] = useState(false);
   const [filterDialog, setFilterDialog] = useState(false);
+  // Lets a row's « Replier » put itself back at the top of the screen.
+  const {
+    scrollRef,
+    onScroll: trackScroll,
+    value: catalogScroll,
+  } = useCatalogScrollHost();
 
   // Re-sectioning the catalogue is the expensive half of a keystroke; deferring
   // it keeps the Searchbar and the chips responsive while the list catches up.
@@ -192,11 +199,16 @@ export default function SpellCatalogModal() {
     headerHeight.current = e.nativeEvent.layout.height;
   }, []);
   // Only the CROSSING is state — setting the raw offset would re-render the
-  // whole list on every frame of a scroll.
-  const onScroll = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const past = e.nativeEvent.contentOffset.y > headerHeight.current;
-    setStuck((s) => (s === past ? s : past));
-  }, []);
+  // whole list on every frame of a scroll. `trackScroll` keeps the raw offset
+  // in a ref for the same reason; a row's « Replier » reads it once.
+  const onScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      trackScroll(e);
+      const past = e.nativeEvent.contentOffset.y > headerHeight.current;
+      setStuck((s) => (s === past ? s : past));
+    },
+    [trackScroll],
+  );
 
   const add = useCallback(
     async (preset?: SpellPreset) => {
@@ -264,76 +276,79 @@ export default function SpellCatalogModal() {
   );
 
   return (
-    <View style={styles.root}>
-      <SectionList
-        sections={sections}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        renderSectionHeader={renderSectionHeader}
-        // Rows are cheap but numerous, and they can't be measured ahead
-        // (expanding one shows the whole rulebook entry), so no getItemLayout —
-        // a smaller window and smaller batches are what keep a fling smooth.
-        initialNumToRender={12}
-        maxToRenderPerBatch={12}
-        updateCellsBatchingPeriod={50}
-        windowSize={7}
-        // The headers are transparent (a title + a hairline rule), so pinning one
-        // over scrolling rows would just overlap them.
-        stickySectionHeadersEnabled={false}
-        // A tap must reach the row on the first press even with the search
-        // keyboard up, instead of being eaten by the dismiss.
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        onScroll={onScroll}
-        scrollEventThrottle={32}
-        contentContainerStyle={CONTAINER_STYLE}
-        ListHeaderComponent={
-          // An element, not a component: an inline component type would remount
-          // on every render and the Searchbar would lose focus mid-word.
-          <View style={styles.header} onLayout={onHeaderLayout}>
-            {filterPanel()}
-            <CatalogCustomRow label="Sortilège personnalisé" onPress={() => add()} />
-          </View>
-        }
-        ListEmptyComponent={
-          <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
-            Aucun sortilège ne correspond.
-          </Text>
-        }
-      />
-
-      {/* Only once the real header is gone: while it is on screen the FAB would
-          just cover the rows it duplicates. */}
-      {stuck ? (
-        <AppFab
-          icon={dsIcon('filter')}
-          label={filterCount > 0 ? `Filtres (${filterCount})` : 'Filtres'}
-          onPress={() => setFilterDialog(true)}
+    <CatalogScrollProvider value={catalogScroll}>
+      <View style={styles.root}>
+        <SectionList
+          ref={scrollRef}
+          sections={sections}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
+          // Rows are cheap but numerous, and they can't be measured ahead
+          // (expanding one shows the whole rulebook entry), so no getItemLayout —
+          // a smaller window and smaller batches are what keep a fling smooth.
+          initialNumToRender={12}
+          maxToRenderPerBatch={12}
+          updateCellsBatchingPeriod={50}
+          windowSize={7}
+          // The headers are transparent (a title + a hairline rule), so pinning one
+          // over scrolling rows would just overlap them.
+          stickySectionHeadersEnabled={false}
+          // A tap must reach the row on the first press even with the search
+          // keyboard up, instead of being eaten by the dismiss.
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          onScroll={onScroll}
+          scrollEventThrottle={32}
+          contentContainerStyle={CONTAINER_STYLE}
+          ListHeaderComponent={
+            // An element, not a component: an inline component type would remount
+            // on every render and the Searchbar would lose focus mid-word.
+            <View style={styles.header} onLayout={onHeaderLayout}>
+              {filterPanel()}
+              <CatalogCustomRow label="Sortilège personnalisé" onPress={() => add()} />
+            </View>
+          }
+          ListEmptyComponent={
+            <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
+              Aucun sortilège ne correspond.
+            </Text>
+          }
         />
-      ) : null}
 
-      <DsDialog
-        visible={filterDialog}
-        onDismiss={() => setFilterDialog(false)}
-        title="Filtrer les sortilèges"
-        dismiss={
-          <Button disabled={filterCount === 0} onPress={() => setCriteria(NO_FILTERS)}>
-            Réinitialiser
-          </Button>
-        }
-        // Not « Appliquer » — the list narrowed as the chips were tapped. Naming
-        // the count is what makes closing the dialog feel like the result of the
-        // filtering rather than a separate step.
-        actions={
-          <Button mode="contained" icon={dsIcon('check')} onPress={() => setFilterDialog(false)}>
-            {resultLabel}
-          </Button>
-        }>
-        {filterPanel({ autoFocus: true })}
-      </DsDialog>
+        {/* Only once the real header is gone: while it is on screen the FAB would
+            just cover the rows it duplicates. */}
+        {stuck ? (
+          <AppFab
+            icon={dsIcon('filter')}
+            label={filterCount > 0 ? `Filtres (${filterCount})` : 'Filtres'}
+            onPress={() => setFilterDialog(true)}
+          />
+        ) : null}
 
-      <CatalogSnackbar state={added} />
-    </View>
+        <DsDialog
+          visible={filterDialog}
+          onDismiss={() => setFilterDialog(false)}
+          title="Filtrer les sortilèges"
+          dismiss={
+            <Button disabled={filterCount === 0} onPress={() => setCriteria(NO_FILTERS)}>
+              Réinitialiser
+            </Button>
+          }
+          // Not « Appliquer » — the list narrowed as the chips were tapped. Naming
+          // the count is what makes closing the dialog feel like the result of the
+          // filtering rather than a separate step.
+          actions={
+            <Button mode="contained" icon={dsIcon('check')} onPress={() => setFilterDialog(false)}>
+              {resultLabel}
+            </Button>
+          }>
+          {filterPanel({ autoFocus: true })}
+        </DsDialog>
+
+        <CatalogSnackbar state={added} />
+      </View>
+    </CatalogScrollProvider>
   );
 }
 

@@ -6,6 +6,7 @@ import { Searchbar, Text } from 'react-native-paper';
 import ArmorDetail from '@/components/armor-detail';
 import CatalogCustomRow from '@/components/catalog-custom-row';
 import CatalogRow from '@/components/catalog-row';
+import { CatalogScrollProvider, useCatalogScrollHost } from '@/components/catalog-scroll';
 import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon from '@/components/ui/icon';
@@ -30,6 +31,8 @@ export default function ArmorCatalogModal() {
   const [query, setQuery] = useState('');
   const added = useCatalogSnackbar(numId, 'armor');
   const { caracValue } = useCaracReadings(numId);
+  // Lets a row's « Replier » put itself back at the top of the screen.
+  const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
 
   const q = foldQuery(query);
   const filtered = useMemo(
@@ -51,51 +54,55 @@ export default function ArmorCatalogModal() {
   };
 
   return (
-    <View style={styles.root}>
-      <KeyboardAwareScrollView
-        contentContainerStyle={[styles.container, contentWidth]}
-        bottomOffset={24}>
-        <Searchbar
-          placeholder="Rechercher une armure"
-          value={query}
-          onChangeText={setQuery}
-          icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
-        />
+    <CatalogScrollProvider value={catalogScroll}>
+      <View style={styles.root}>
+        <KeyboardAwareScrollView
+          ref={scrollRef}
+          onScroll={onScroll}
+          contentContainerStyle={[styles.container, contentWidth]}
+          bottomOffset={24}>
+          <Searchbar
+            placeholder="Rechercher une armure"
+            value={query}
+            onChangeText={setQuery}
+            icon={({ size, color }) => <Icon name="search" size={size} color={color} />}
+          />
 
-        <CatalogCustomRow label="Armure personnalisée" onPress={() => add()} />
+          <CatalogCustomRow label="Armure personnalisée" onPress={() => add()} />
 
-        {ARMOR_CATEGORIES.map((cat) => {
-          const items = filtered.filter((p) => p.category === cat);
-          if (items.length === 0) return null;
-          return (
-            <SectionCard key={cat} title={cat} icon="shield">
-              {items.map((p) => (
-                <CatalogRow
-                  key={p.id}
-                  icon="shield"
-                  name={p.data.name ?? ''}
-                  subtitle={[`Défense ${p.data.defenseMax}`, p.data.prerequisites]
-                    .filter((s) => s && String(s).trim() !== '')
-                    .join(' · ')}
-                  addLabel={`Ajouter ${p.data.name}`}
-                  alert={prerequisitesUnmet(p.data.prerequisites, caracValue)}
-                  onAdd={() => add(p)}>
-                  <ArmorDetail armor={p.data} caracValue={caracValue} />
-                </CatalogRow>
-              ))}
-            </SectionCard>
-          );
-        })}
+          {ARMOR_CATEGORIES.map((cat) => {
+            const items = filtered.filter((p) => p.category === cat);
+            if (items.length === 0) return null;
+            return (
+              <SectionCard key={cat} title={cat} icon="shield">
+                {items.map((p) => (
+                  <CatalogRow
+                    key={p.id}
+                    icon="shield"
+                    name={p.data.name ?? ''}
+                    subtitle={[`Défense ${p.data.defenseMax}`, p.data.prerequisites]
+                      .filter((s) => s && String(s).trim() !== '')
+                      .join(' · ')}
+                    addLabel={`Ajouter ${p.data.name}`}
+                    alert={prerequisitesUnmet(p.data.prerequisites, caracValue)}
+                    onAdd={() => add(p)}>
+                    <ArmorDetail armor={p.data} caracValue={caracValue} />
+                  </CatalogRow>
+                ))}
+              </SectionCard>
+            );
+          })}
 
-        {filtered.length === 0 ? (
-          <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
-            Aucune armure ne correspond.
-          </Text>
-        ) : null}
-      </KeyboardAwareScrollView>
+          {filtered.length === 0 ? (
+            <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
+              Aucune armure ne correspond.
+            </Text>
+          ) : null}
+        </KeyboardAwareScrollView>
 
-      <CatalogSnackbar state={added} />
-    </View>
+        <CatalogSnackbar state={added} />
+      </View>
+    </CatalogScrollProvider>
   );
 }
 
