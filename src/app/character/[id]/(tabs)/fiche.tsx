@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { useNavigation, useRouter } from 'expo-router';
+import { type Href, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
@@ -192,7 +192,10 @@ export default function CharacterFicheScreen() {
           await deleteCharacter(numId);
           // Straight back to the character list — back() would land on whatever
           // screen came before (possibly another page of the deleted character).
-          router.dismissTo('/');
+          // Cast because the typed-routes generator does not emit `/` for a root
+          // index that sits inside a group ((root), the tab navigator); it lists
+          // `/index` instead. The route is real — the web export builds it.
+          router.dismissTo('/' as Href);
         }}
       />
     );
