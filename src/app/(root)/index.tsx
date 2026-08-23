@@ -194,17 +194,13 @@ export default function CharactersListScreen() {
       title: 'Personnages',
       headerBackVisible: true,
       headerLeft: undefined,
-      // Overrides the root stack's headerRight, so the dice button it puts on
-      // every screen is re-added here. Not in the selection bar above: that one
-      // is contextual and only holds actions on the selected characters.
+      // Overrides the tab navigator's headerRight, so the dice button it puts on
+      // every tab is re-added here. Not in the selection bar above: that one is
+      // contextual and only holds actions on the selected characters.
+      // No campaigns button any more — « Campagnes » is a tab of its own.
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
           <DiceRollerButton />
-          <IconButton
-            icon="account-group"
-            testID="campaigns-nav"
-            onPress={() => router.push('/campaigns' as Href)}
-          />
           <Menu
             visible={menuOpen}
             onDismiss={() => setMenuOpen(false)}
