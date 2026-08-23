@@ -12,7 +12,7 @@ tags:
     file: subflows/launch.yaml
 
 - tapOn:
-    id: 'campaigns-nav'
+    id: 'tab-campagnes'
 - assertVisible:
     id: 'campaigns-empty'
 - back
