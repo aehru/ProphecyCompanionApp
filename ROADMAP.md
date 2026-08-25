@@ -22,15 +22,19 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
-- [ ] **Dice roller in context.** The roller is now app-level and reachable
-  from every header ([use-dice-roller.tsx](src/hooks/use-dice-roller.tsx)), but
-  it stays free-form on purpose: XdY plus the tendance trio, knowing nothing
-  about the screen it was opened from. Two follow-ups, agreed but deferred:
-  **prefill from context** (opening it from Compétences seeds the skill total as
-  a modifier, from Inventaire the weapon's damage formula — both readings already
-  exist, through `lib/modifiers` and `lib/formula`), and **per-row roll buttons**
-  on skills and weapons, which save the taps the global roller cannot. Neither
-  should bring back a roll history: results are deliberately forgotten on close.
+- [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
+  opens the roller against it and rolls a D10 at once, with the difficulté
+  prefilled at 15, « Confirmer » for a 10 or a 1, and the tendance trio selectable
+  so the kept die becomes the roll. The rules live in [lib/roll.ts](src/lib/roll.ts)
+  and the header button still opens the free-form roller — context arrives ONLY by
+  tapping a value and dies with the dialog, like the results.
+  _Remaining:_ the same tap on **caractéristiques / attributs** (Fiche), on a
+  **weapon's attack total** (already resolved through `lib/weapon-skill`, so it
+  reuses the skill path exactly) and on a **spell total**; plus the UI that builds
+  a multi-part context (MEN + VOL, optionally + a tendance die) — `RollContext.parts`
+  is already a list precisely so that needs no type change. Whatever gets added
+  must name its own `confirm` value: no rule says which part of a sum a 10 is
+  confirmed against. Still no roll history — results are forgotten on close.
 - [ ] **« Lancer le sort » — the cast flow.** The last piece of the spell
   breakdown layer; everything it needs is already in place. Today a durée renders
   symbolically (« 1 + NR jours ») because NR belongs to a *cast*, not to a spell:
