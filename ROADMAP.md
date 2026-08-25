@@ -48,9 +48,14 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   — the very component a spell's score uses, so the two rows can't drift — and
   the badge IS the roll button: it rolls, the row around it still expands. The
   GM's NPC weapon cards roll the same way, being the GM's own local rows.
-  _Remaining:_ the same tap on a **spell total** (the badge is already there,
-  waiting only for a `SpellTotal` → `RollContext` builder and a decision on which
-  number confirms); the stat tiles on the dashboard, which stay a reading for
+  **Spells** roll from the same badge, through `spellRollContext`: the score's
+  terms each become a part (sphère, discipline, wound, clé), the difficulté
+  prefills from `spells.difficulty` — falling back to 15 when the spell carries
+  none — and **the discipline is what confirms** a 10 or a 1.
+  For gear the badge is the ONLY roll button: an expanded card shows its
+  breakdown as a reading and offers no second control, since two ways to make one
+  roll on one card is a question the player shouldn't have to answer.
+  _Remaining:_ the stat tiles on the dashboard, which stay a reading for
   now; plus the UI that builds
   a multi-part context (MEN + VOL, optionally + a tendance die) — `RollContext.parts`
   is already a list precisely so that needs no type change. Whatever gets added
