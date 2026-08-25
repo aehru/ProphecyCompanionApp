@@ -28,9 +28,22 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   so the kept die becomes the roll. The rules live in [lib/roll.ts](src/lib/roll.ts)
   and the header button still opens the free-form roller — context arrives ONLY by
   tapping a value and dies with the dialog, like the results.
-  _Remaining:_ the same tap on **caractéristiques / attributs** (Fiche), on a
-  **weapon's attack total** (already resolved through `lib/weapon-skill`, so it
-  reuses the skill path exactly) and on a **spell total**; plus the UI that builds
+  Done too for **caractéristiques and attributs**: tapping a tile on the Fiche
+  rolls it, adding the modifier the tile's badge deliberately doesn't show in
+  full (the wound malus is badged once per character, not per stat). Every
+  context is built in [lib/roll-context.ts](src/lib/roll-context.ts) so the
+  confirm rule lives in one place. **An attribut confirms on itself** — the rule
+  names the compétence or the caractéristique, and a bare attribut roll has
+  neither.
+  A test can throw **several D10** — a « Dés » field plus a Garder / Sommer
+  toggle, since effects grant both readings and the sheet models neither yet.
+  `RollContext.dice` / `.diceMode` are the hooks for when traits land («&nbsp;2 dés
+  sur tout ce qui touche au MENTAL&nbsp;»): the builder will set them and no screen
+  will learn the rule twice.
+  _Remaining:_ the same tap on a **weapon's attack total** (already resolved
+  through `lib/weapon-skill`, so it reuses the skill path exactly) and on a
+  **spell total**; the stat tiles on the dashboard, which stay a reading for now;
+  plus the UI that builds
   a multi-part context (MEN + VOL, optionally + a tendance die) — `RollContext.parts`
   is already a list precisely so that needs no type change. Whatever gets added
   must name its own `confirm` value: no rule says which part of a sum a 10 is
