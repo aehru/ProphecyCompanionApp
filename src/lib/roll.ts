@@ -123,6 +123,11 @@ export function singleThrow(die: number): RollThrow {
   return { dice: [die], mode: 'keep', keptIndex: 0 };
 }
 
+/** The kept die, or null while a `keep` throw is still waiting to be picked. */
+function keptDie(t: RollThrow): number | null {
+  return t.keptIndex == null ? null : (t.dice[t.keptIndex] ?? null);
+}
+
 /**
  * The die the RULES read — the one a 10 or a 1 is about.
  *
@@ -131,8 +136,7 @@ export function singleThrow(die: number): RollThrow {
  * face, and 7 + 3 is not a 10.
  */
 export function naturalDie(t: RollThrow): number | null {
-  if (t.mode === 'sum') return t.dice[0] ?? null;
-  return t.keptIndex == null ? null : (t.dice[t.keptIndex] ?? null);
+  return t.mode === 'sum' ? (t.dice[0] ?? null) : keptDie(t);
 }
 
 /** True for the dice that are along for the ride and cannot crit or fumble. */
@@ -143,8 +147,7 @@ export function isNeutralDie(t: RollThrow, index: number): boolean {
 
 /** What the dice contribute to the total, or null while a `keep` awaits its pick. */
 export function throwTotal(t: RollThrow): number | null {
-  if (t.mode === 'sum') return t.dice.reduce((sum, d) => sum + d, 0);
-  return t.keptIndex == null ? null : (t.dice[t.keptIndex] ?? null);
+  return t.mode === 'sum' ? t.dice.reduce((sum, d) => sum + d, 0) : keptDie(t);
 }
 
 export interface RollResult {
