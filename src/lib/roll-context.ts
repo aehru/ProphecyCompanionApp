@@ -2,9 +2,10 @@
  * Turning a thing on the sheet into something you can roll.
  *
  * PURE, and the ONLY place a {@link RollContext} is built. The point is
- * `confirm`: the rule says a 10 or a 1 is read against **the compétence or the
- * caractéristique** — never a total, never a tendance die — and a rule restated
- * at four call sites is a rule that drifts at three of them.
+ * `confirm`: a 10 or a 1 is read against the character's own score in whatever
+ * is being tested — **the compétence, the caractéristique, or the discipline
+ * when casting** — never a total, never a sphère, never a tendance die. A rule
+ * restated at five call sites is a rule that drifts at four of them.
  *
  * The other half is what goes into `parts`, which is not the same question. A
  * skill's TOT already carries its modifier (wound + effects are folded in by
@@ -12,8 +13,10 @@
  * beside it — so a stat roll has to add that modifier itself, or the total would
  * silently ignore a wound.
  */
+import { DISCIPLINE_LABEL, SPHERE_LABEL } from '@/constants/prophecy';
 import { totalModifier, type ModifierSource } from '@/lib/modifiers';
-import type { RollContext } from '@/lib/roll';
+import { DEFAULT_DIFFICULTY, type RollContext } from '@/lib/roll';
+import type { SpellTotal } from '@/lib/spell-total';
 import type { WeaponSkillReading } from '@/lib/weapon-skill';
 
 /** What a modifier part is called when it makes the sum. */
@@ -65,6 +68,49 @@ export function weaponRollContext(
   return {
     ...skillRollContext({ name: skill.name, total: skill.total, value: skill.value }),
     label: name === '' ? skill.name : name,
+  };
+}
+
+/**
+ * Casting a spell: the score from `lib/spell-total`, read against the spell's
+ * own difficulté.
+ *
+ * **The discipline confirms.** A 10 or a 1 is read against the mage's score in
+ * the kind of magic the spell belongs to — Invocatoire, Instinctive,
+ * Sorcellerie — not against the casting total, and not against the sphère. That
+ * is `total.discipline`, the same stat `spellTotal` already pulled off the sheet.
+ *
+ * Every term becomes its own part, matching `spellTotalBreakdown` so the verdict
+ * line reads like the card: « 7 +4 (Feu) +3 (Sorcellerie) −2 +5 (clé) ». The two
+ * stats always appear even at 0 (a sphère of 0 is information); the modifier and
+ * the clé only when they apply.
+ *
+ * **The clé parfaite counts ONCE, here in the total.** It is the same +5 seen
+ * from either side of the roll, and `SpellDetail` shows it as a lowered
+ * difficulté — so the difficulté carried here is the spell's RAW number. Taking
+ * both would apply it twice.
+ */
+export function spellRollContext(
+  spell: { name: string; discipline: string; sphere: string; difficulty?: number | null },
+  total: SpellTotal,
+): RollContext {
+  const name = spell.name.trim();
+  const sphereLabel = SPHERE_LABEL[spell.sphere] ?? spell.sphere;
+  const disciplineLabel = DISCIPLINE_LABEL[spell.discipline] ?? spell.discipline;
+  const difficulty = spell.difficulty ?? 0;
+  return {
+    label: name === '' ? 'Incantation' : name,
+    parts: [
+      { label: sphereLabel, value: total.sphere },
+      { label: disciplineLabel, value: total.discipline },
+      ...(total.modifier !== 0 ? [{ label: MODIFIER_LABEL, value: total.modifier }] : []),
+      ...(total.cle !== 0 ? [{ label: 'Clé parfaite', value: total.cle }] : []),
+    ],
+    confirm: total.discipline,
+    confirmLabel: disciplineLabel,
+    // A spell that never got its difficulté filled in would otherwise open the
+    // roller at 0, which every roll clears — fall back to the usual default.
+    difficulty: difficulty > 0 ? difficulty : DEFAULT_DIFFICULTY,
   };
 }
 

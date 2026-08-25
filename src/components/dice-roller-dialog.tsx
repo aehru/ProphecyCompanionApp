@@ -91,7 +91,7 @@ export default function DiceRollerDialog({
   onDismiss: () => void;
 }) {
   const [count, setCount] = useState('1');
-  const [difficulty, setDifficulty] = useState(String(DEFAULT_DIFFICULTY));
+  const [difficulty, setDifficulty] = useState(String(context?.difficulty ?? DEFAULT_DIFFICULTY));
   // How many D10 a test throws, and what several of them mean. Both start from
   // the context so a trait can one day grant « 2 dés, sommés » without any
   // screen learning the rule; today nothing on the sheet models one, so they are

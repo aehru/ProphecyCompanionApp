@@ -75,6 +75,12 @@ export interface RollContext {
   dice?: number;
   /** Whether those extra dice are alternatives or addends. Same story as `dice`. */
   diceMode?: DiceMode;
+  /**
+   * What the difficulté field starts at, when the thing being rolled knows its
+   * own — a spell carries one on the sheet. Everything else opens at
+   * {@link DEFAULT_DIFFICULTY}, and the GM can always overrule the field.
+   */
+  difficulty?: number;
 }
 
 /** The difficulté a test starts at when the GM hasn't said otherwise. */

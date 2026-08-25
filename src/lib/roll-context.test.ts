@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { contextValue, resolveRoll, singleThrow } from './roll';
-import { skillRollContext, statRollContext, weaponRollContext } from './roll-context';
+import { DEFAULT_DIFFICULTY, contextValue, resolveRoll, singleThrow } from './roll';
+import {
+  skillRollContext,
+  spellRollContext,
+  statRollContext,
+  weaponRollContext,
+} from './roll-context';
+import { spellTotal } from './spell-total';
 import type { WeaponSkillReading } from './weapon-skill';
 
 describe('skillRollContext', () => {
@@ -107,5 +113,60 @@ describe('weaponRollContext', () => {
     // value 0: no reroll is strictly under it, every reroll is strictly over.
     const untrained = weaponRollContext('Arc', { ...resolved, value: 0, total: 10, trained: false })!;
     expect(untrained.confirm).toBe(0);
+  });
+});
+
+describe('spellRollContext', () => {
+  const spell = {
+    name: 'Boule de feu',
+    discipline: 'sorcellerie',
+    sphere: 'sphereFeu',
+    difficulty: 18,
+  };
+  // Sphère du Feu 4, Sorcellerie 3 on the sheet.
+  const rec = { sphereFeuMax: 4, sorcellerie: 3 };
+
+  it('confirms on the DISCIPLINE, not on the total or the sphère', () => {
+    const ctx = spellRollContext(spell, spellTotal(spell, rec));
+    expect(ctx).toMatchObject({ confirm: 3, confirmLabel: 'Sorcellerie' });
+    expect(contextValue(ctx)).toBe(7);
+  });
+
+  it('spells every term out, the two stats even at zero', () => {
+    const ctx = spellRollContext(spell, spellTotal(spell, { sorcellerie: 3 }));
+    expect(ctx.parts).toEqual([
+      { label: 'Feu', value: 0 },
+      { label: 'Sorcellerie', value: 3 },
+    ]);
+  });
+
+  it('adds the wound and the clé parfaite as their own parts', () => {
+    const total = spellTotal({ ...spell, cleParfaite: true }, rec, [], -2);
+    const ctx = spellRollContext(spell, total);
+    expect(ctx.parts).toEqual([
+      { label: 'Feu', value: 4 },
+      { label: 'Sorcellerie', value: 3 },
+      { label: 'Modificateur', value: -2 },
+      { label: 'Clé parfaite', value: 5 },
+    ]);
+    expect(contextValue(ctx)).toBe(10);
+  });
+
+  it('leaves the difficulté RAW when a clé is crafted — the +5 is in the total', () => {
+    // Counting the clé here as well would apply the same bonus twice.
+    const ctx = spellRollContext(spell, spellTotal({ ...spell, cleParfaite: true }, rec));
+    expect(ctx.difficulty).toBe(18);
+  });
+
+  it('falls back to the usual difficulté when the spell carries none', () => {
+    const ctx = spellRollContext({ ...spell, difficulty: 0 }, spellTotal(spell, rec));
+    expect(ctx.difficulty).toBe(DEFAULT_DIFFICULTY);
+  });
+
+  it('names the roll after the spell, or says what it is', () => {
+    expect(spellRollContext(spell, spellTotal(spell, rec)).label).toBe('Boule de feu');
+    expect(spellRollContext({ ...spell, name: '  ' }, spellTotal(spell, rec)).label).toBe(
+      'Incantation',
+    );
   });
 });
