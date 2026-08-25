@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import Icon, { type IconName } from '@/components/ui/icon';
@@ -22,6 +22,8 @@ export default function StatChip({
   modifier,
   icon,
   style,
+  onPress,
+  accessibilityLabel,
 }: {
   label: string;
   value: string;
@@ -29,16 +31,26 @@ export default function StatChip({
   /** Optional glyph in the label row — e.g. what an initiative die is for. */
   icon?: IconName;
   style?: StyleProp<ViewStyle>;
+  /** Makes the whole tile a button — the fiche rolls the stat with it. */
+  onPress?: () => void;
+  accessibilityLabel?: string;
 }) {
   const theme = useProphecyTheme();
   const showMod = modifier != null && modifier !== 0;
+  // A Pressable in both cases: with no handler it is inert and announces
+  // nothing, so a tile that does nothing stays a tile rather than a dead button.
   return (
-    <View
-      style={[
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={onPress ? accessibilityLabel : undefined}
+      style={({ pressed }) => [
         styles.chip,
         {
           borderColor: theme.prophecy.borderSoft,
           backgroundColor: theme.colors.surfaceVariant,
+          opacity: pressed ? 0.7 : 1,
         },
         style,
       ]}>
@@ -66,7 +78,7 @@ export default function StatChip({
           </Text>
         ) : null}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
