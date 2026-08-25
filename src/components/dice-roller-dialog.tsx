@@ -95,16 +95,17 @@ export default function DiceRollerDialog({
   // How many D10 a test throws, and what several of them mean. Both start from
   // the context so a trait can one day grant « 2 dés, sommés » without any
   // screen learning the rule; today nothing on the sheet models one, so they are
-  // the player's to set.
-  const [dice, setDice] = useState(String(context?.dice ?? DEFAULT_DICE));
-  const [mode, setMode] = useState<DiceMode>(context?.diceMode ?? 'keep');
+  // the player's to set. Defaulted ONCE — the field and the opening throw have
+  // to agree, and reading `context` twice is how they would stop agreeing.
+  const initialDice = context?.dice ?? DEFAULT_DICE;
+  const initialMode = context?.diceMode ?? 'keep';
+  const [dice, setDice] = useState(String(initialDice));
+  const [mode, setMode] = useState<DiceMode>(initialMode);
   // A tap on a value is a request to roll, so a contextual dialog opens with its
   // dice already thrown. Seeded in the initializer rather than in an effect: an
   // effect would render the empty state first and then set state from it.
   const [state, setState] = useState<RollState>(() =>
-    context
-      ? { ...EMPTY, roll: throwFor(context.dice ?? DEFAULT_DICE, context.diceMode ?? 'keep') }
-      : EMPTY,
+    context ? { ...EMPTY, roll: throwFor(initialDice, initialMode) } : EMPTY,
   );
 
   const rollNow = () =>
@@ -141,7 +142,10 @@ export default function DiceRollerDialog({
     setState(EMPTY);
   };
   const setDiceSafe = (t: string) => {
-    setDice(t);
+    // Clamp what is TYPED, not just what is thrown: a field reading « 9 » that
+    // rolls MAX_DICE dice is the app lying about what it did. An empty field is
+    // left empty so it can be retyped.
+    setDice(t === '' ? t : String(diceCount(Number(t))));
     setState(EMPTY);
   };
   const setModeSafe = (m: DiceMode) => {
