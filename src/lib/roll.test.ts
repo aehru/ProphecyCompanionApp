@@ -5,6 +5,7 @@ import {
   DEFAULT_DIFFICULTY,
   awaitsConfirmation,
   contextValue,
+  readDice,
   diceCount,
   isNeutralDie,
   MAX_DICE,
@@ -52,32 +53,32 @@ describe('needsConfirmation', () => {
 
 describe('awaitsConfirmation', () => {
   it('is owed while a 10 or a 1 has no reroll yet', () => {
-    expect(awaitsConfirmation(singleThrow(10), null)).toBe(true);
-    expect(awaitsConfirmation(singleThrow(1), null)).toBe(true);
+    expect(awaitsConfirmation(singleThrow(10), skill)).toBe(true);
+    expect(awaitsConfirmation(singleThrow(1), skill)).toBe(true);
   });
 
   it('is settled once the reroll is made, whatever it came up', () => {
-    expect(awaitsConfirmation(singleThrow(10), 2)).toBe(false);
-    expect(awaitsConfirmation(singleThrow(1), 9)).toBe(false);
+    expect(awaitsConfirmation(singleThrow(10), skill, [2])).toBe(false);
+    expect(awaitsConfirmation(singleThrow(1), skill, [9])).toBe(false);
   });
 
   it('is never owed on an ordinary die, or before anything is rolled', () => {
-    expect(awaitsConfirmation(singleThrow(7), null)).toBe(false);
-    expect(awaitsConfirmation(null, null)).toBe(false);
+    expect(awaitsConfirmation(singleThrow(7), skill)).toBe(false);
+    expect(awaitsConfirmation(null, skill)).toBe(false);
   });
 
   it('waits for the pick before asking to confirm a kept 10', () => {
     const t: RollThrow = { dice: [10, 4], mode: 'keep', keptIndex: null };
-    expect(awaitsConfirmation(t, null)).toBe(false);
-    expect(awaitsConfirmation({ ...t, keptIndex: 0 }, null)).toBe(true);
-    // Keeping the OTHER die drops the question entirely.
-    expect(awaitsConfirmation({ ...t, keptIndex: 1 }, null)).toBe(false);
+    expect(awaitsConfirmation(t, skill)).toBe(false);
+    expect(awaitsConfirmation({ ...t, keptIndex: 0 }, skill)).toBe(true);
+    // Keeping the OTHER die drops the question entirely — on an ordinary roll.
+    expect(awaitsConfirmation({ ...t, keptIndex: 1 }, skill)).toBe(false);
   });
 });
 
 /** resolveRoll returns null only for an unsettled throw; these all settle. */
 const read = (t: RollThrow, difficulty = DEFAULT_DIFFICULTY, confirmDie: number | null = null) =>
-  resolveRoll(t, skill, difficulty, confirmDie)!;
+  resolveRoll(t, skill, difficulty, [confirmDie])!;
 
 describe('resolveRoll', () => {
   it('counts one NR per full step of 5 above the difficulté', () => {
@@ -183,8 +184,13 @@ describe('several dice at once', () => {
   });
 
   it('reads crit off whichever die was KEPT, not the first thrown', () => {
+    // The reroll belongs to the die that asked for it — index 1 here, so it is
+    // the second slot of `confirms` that carries it.
     const t: RollThrow = { dice: [4, 10], mode: 'keep', keptIndex: 1 };
-    expect(read(t, DEFAULT_DIFFICULTY, 2)).toMatchObject({ natural: 10, critical: true });
+    expect(resolveRoll(t, skill, DEFAULT_DIFFICULTY, [null, 2])).toMatchObject({
+      natural: 10,
+      critical: true,
+    });
   });
 });
 
@@ -225,5 +231,119 @@ describe('diceCount', () => {
 
   it('falls back to one die on a field that holds no number yet', () => {
     expect(diceCount(NaN)).toBe(1);
+  });
+});
+
+/**
+ * Casting: Boule de feu, Sorcellerie 3 — the discipline is what a reroll answers
+ * to. The trio is a `keep` throw whose dice carry tendances.
+ */
+const cast: RollContext = {
+  label: 'Boule de feu',
+  parts: [{ label: 'Sorcellerie', value: 3 }],
+  confirm: 3,
+  kind: 'cast',
+};
+
+/** The trio, in TENDANCES order: dragon, fatalite, homme. */
+const trio = (dice: number[], keptIndex: number | null): RollThrow => ({
+  dice,
+  mode: 'keep',
+  keptIndex,
+  tendances: ['dragon', 'fatalite', 'homme'],
+});
+
+const verdicts = (t: RollThrow, ctx: RollContext, confirms: (number | null)[] = []) =>
+  resolveRoll(t, ctx, DEFAULT_DIFFICULTY, confirms)?.verdicts ?? [];
+
+describe('casting — Miracle and Contrecoup', () => {
+  it('names the kept die’s extremes Miracle and Contrecoup', () => {
+    expect(verdicts(trio([10, 4, 4], 0), cast, [2])).toEqual(['miracle']);
+    expect(verdicts(trio([1, 4, 4], 0), cast, [8])).toEqual(['contrecoup']);
+  });
+
+  it('grants NO +5 for a Miracle — magic buys a name, not five points', () => {
+    const r = resolveRoll(trio([10, 4, 4], 0), cast, DEFAULT_DIFFICULTY, [2])!;
+    expect(r).toMatchObject({ bonus: 0, critical: false, total: 13 });
+    expect(r.verdicts).toEqual(['miracle']);
+  });
+
+  it('keeps the ordinary names, and the +5, for a roll that is not a cast', () => {
+    const ordinary = { ...cast, kind: 'ordinary' as const };
+    const r = resolveRoll(trio([10, 4, 4], 0), ordinary, DEFAULT_DIFFICULTY, [2])!;
+    expect(r).toMatchObject({ critical: true, bonus: CRIT_BONUS });
+    expect(r.verdicts).toEqual(['critique']);
+  });
+
+  it('backlashes on a DISCARDED 10 that confirms — ignoring the fluctuation', () => {
+    // Dragon 10 left on the table, Homme kept: the reroll confirms → Contrecoup.
+    expect(verdicts(trio([10, 4, 5], 2), cast, [2])).toEqual(['contrecoup']);
+  });
+
+  it('backlashes on a discarded 10 or 1 of ANY tendance', () => {
+    expect(verdicts(trio([5, 10, 4], 0), cast, [null, 2])).toEqual(['contrecoup']);
+    expect(verdicts(trio([5, 4, 1], 0), cast, [null, null, 8])).toEqual(['contrecoup']);
+  });
+
+  it('leaves a discarded extreme alone until its reroll is made', () => {
+    expect(verdicts(trio([10, 4, 5], 2), cast)).toEqual([]);
+    expect(awaitsConfirmation(trio([10, 4, 5], 2), cast)).toBe(true);
+  });
+
+  it('makes a DISCARDED fluctuation 1 an automatic Contrecoup, with no reroll', () => {
+    const t = trio([1, 4, 5], 2);
+    expect(verdicts(t, cast)).toEqual(['contrecoup']);
+    // Nothing to confirm: the backlash already happened.
+    expect(awaitsConfirmation(t, cast)).toBe(false);
+    expect(readDice(t, cast)[0]).toMatchObject({ automatic: true, verdict: 'contrecoup' });
+  });
+
+  it('asks for a reroll on a KEPT fluctuation 1 instead of firing outright', () => {
+    const t = trio([1, 4, 5], 0);
+    expect(verdicts(t, cast)).toEqual([]);
+    expect(awaitsConfirmation(t, cast)).toBe(true);
+    expect(verdicts(t, cast, [2])).toEqual([]);
+    expect(verdicts(t, cast, [8])).toEqual(['contrecoup']);
+  });
+
+  it('moves the fluctuation to the Fatalité for a spell of the Ombre', () => {
+    const ombre = { ...cast, fluctuation: 'fatalite' as const };
+    // Discarded Fatalité 1 fires outright…
+    expect(verdicts(trio([5, 1, 4], 0), ombre)).toEqual(['contrecoup']);
+    // …while the Dragon becomes an ordinary die, rerolling like any other.
+    expect(verdicts(trio([1, 5, 4], 1), ombre)).toEqual([]);
+    expect(verdicts(trio([1, 5, 4], 1), ombre, [8])).toEqual(['contrecoup']);
+  });
+
+  it('announces every outcome the throw produced', () => {
+    // Homme 10 kept and confirmed (Miracle) while a discarded Fatalité 1 also
+    // confirms (Contrecoup).
+    expect(verdicts(trio([4, 1, 10], 2), cast, [null, 8, 2])).toEqual(['contrecoup', 'miracle']);
+  });
+
+  it('says nothing at all before a die is kept', () => {
+    const t = trio([1, 10, 4], null);
+    expect(resolveRoll(t, cast, DEFAULT_DIFFICULTY)).toBeNull();
+    expect(awaitsConfirmation(t, cast)).toBe(false);
+  });
+});
+
+describe('casting without the tendances', () => {
+  it('leaves discarded dice inert — the fluctuation was never invoked', () => {
+    // Same faces as the trio cases above, minus the tendances: keeping the 5
+    // discards a 10 and a 1, and neither says anything.
+    const plain: RollThrow = { dice: [10, 1, 5], mode: 'keep', keptIndex: 2 };
+    expect(verdicts(plain, cast)).toEqual([]);
+    expect(awaitsConfirmation(plain, cast)).toBe(false);
+  });
+
+  it('still reads the kept die as a cast', () => {
+    const plain: RollThrow = { dice: [4, 10], mode: 'keep', keptIndex: 1 };
+    expect(verdicts(plain, cast, [null, 2])).toEqual(['miracle']);
+  });
+
+  it('leaves a summed cast to its first die alone', () => {
+    const summed: RollThrow = { dice: [10, 1], mode: 'sum', keptIndex: null };
+    expect(verdicts(summed, cast, [2])).toEqual(['miracle']);
   });
 });

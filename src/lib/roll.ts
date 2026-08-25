@@ -13,16 +13,21 @@
  *
  * Usually one die, sometimes several: an effect may let you throw two and keep
  * the better, another may let you add them up (see {@link DiceMode}). Whatever
- * the count, **exactly one die can crit or fumble** — the one kept, or the FIRST
- * thrown when summing; the rest are neutral however they land. Without that rule
- * a handful of dice would make a critique a formality.
+ * the count, one die carries the roll — the one kept, or the FIRST thrown when
+ * summing; the rest are neutral however they land.
  *
  * A 10 and a 1 each call for ONE reroll, never a cascade, and the reroll never
  * adds to the die: it only decides whether the result is confirmed. A confirmed
  * 10 is a critique worth +5, i.e. exactly one more NR. A confirmed 1 is an échec
  * critique — a FLAG, not an arithmetic penalty: the total stands as rolled and
  * what it costs is the GM's business, not the app's.
+ *
+ * **Casting is a different kind of roll** ({@link RollKind}). See
+ * {@link readDice} for the whole of it; the two headlines are that magic names
+ * its extremes Miracle and Contrecoup, and that it gets **no +5** — a confirmed
+ * 10 while casting is a Miracle and nothing arithmetic.
  */
+import type { TendanceKey } from '@/constants/prophecy';
 
 /**
  * What several dice mean. Both exist because effects grant both: one may let you
@@ -33,6 +38,18 @@
  * - `sum` — the dice add up into one bigger die.
  */
 export type DiceMode = 'keep' | 'sum';
+
+/**
+ * Ordinary roll, or a spell being cast.
+ *
+ * Casting differs in three ways and nowhere else: its extremes are called
+ * Miracle and Contrecoup, it gets no critique bonus, and — ONLY when cast on the
+ * tendance trio — the dice left on the table can bite back. See {@link readDice}.
+ */
+export type RollKind = 'ordinary' | 'cast';
+
+/** What one die turned out to mean, once its confirmation is in. */
+export type DieVerdict = 'critique' | 'fumble' | 'miracle' | 'contrecoup';
 
 /** One term of a roll's context: a stat, a skill total, a tendance die kept. */
 export interface RollPart {
@@ -49,13 +66,13 @@ export interface RollPart {
  * never has to change again.
  *
  * `confirm` is separate on purpose, and it is NOT the sum. The confirmation die
- * is read against **the compétence, or the caractéristique** — never a total,
- * never an attribut, never a tendance die. A skill roll confirms on the points
- * bought, not on its TOT: a 12 can't be undercut by a D10, so confirming there
- * would make every 10 a critique. On a MEN + VOL + Dragon test it is VOL — the
- * caractéristique — that the reroll answers to. The number therefore does not
- * follow from `parts` (a skill's TOT is in the sum while its points are not), so
- * the caller states it and the engine never has to guess.
+ * is read against **the compétence, the caractéristique, or the discipline** —
+ * never a total, never a sphère, never a tendance die. A skill roll confirms on
+ * the points bought, not on its TOT: a 12 can't be undercut by a D10, so
+ * confirming there would make every 10 a critique. On a MEN + VOL + Dragon test
+ * it is VOL — the caractéristique — that the reroll answers to. The number
+ * therefore does not follow from `parts` (a skill's TOT is in the sum while its
+ * points are not), so the caller states it and the engine never has to guess.
  */
 export interface RollContext {
   /** What is being rolled, as the player would say it: « Équitation ». */
@@ -65,6 +82,14 @@ export interface RollContext {
   confirm: number;
   /** What that number is, for the explanation line: « Compétence ». */
   confirmLabel?: string;
+  /** Ordinary unless this is a spell being cast. Default `'ordinary'`. */
+  kind?: RollKind;
+  /**
+   * Which tendance carries the fluctuation rule when casting on the trio — the
+   * Dragon, except for a spell of the Sphère de l'Ombre, where the Fatalité
+   * takes its place and the Dragon becomes an ordinary die. Default `'dragon'`.
+   */
+  fluctuation?: TendanceKey;
   /**
    * How many D10 to throw. Some traits grant a second die on a whole family of
    * rolls, « 2 dés sur tout ce qui touche au MENTAL »; nothing on the sheet
@@ -87,7 +112,7 @@ export interface RollContext {
 export const DEFAULT_DIFFICULTY = 15;
 /** How far above the difficulté one NR costs. */
 export const NR_STEP = 5;
-/** What a confirmed critique adds — one NR's worth. */
+/** What a confirmed critique adds — one NR's worth. Never granted to a cast. */
 export const CRIT_BONUS = NR_STEP;
 /** Prophecy rolls a D10 and nothing else. */
 export const DIE_SIDES = 10;
@@ -106,16 +131,17 @@ export function diceCount(input: number): number {
 /**
  * One throw of the dice, before the rules read it.
  *
- * **Index 0 is not just the first die, it is the only one that can crit or
- * fumble.** When several dice are thrown at once the others are neutral,
- * whatever they come up — otherwise a fistful of dice would turn a critique into
- * a formality. That makes the throw ORDER meaningful: nothing may sort `dice`.
+ * `tendances` is set only when the throw IS the trio — one tendance per die, in
+ * the same order. It is what tells a cast whether the fluctuation rules apply at
+ * all: they belong to the tendances, not to having several dice. Throw ORDER is
+ * meaningful (index 0 carries a sum), so nothing may sort `dice`.
  */
 export interface RollThrow {
   dice: number[];
   mode: DiceMode;
   /** `keep` only: which die stands. null until the player has chosen. */
   keptIndex: number | null;
+  tendances?: TendanceKey[];
 }
 
 /** The one-die throw every ordinary test is. */
@@ -126,6 +152,11 @@ export function singleThrow(die: number): RollThrow {
 /** The kept die, or null while a `keep` throw is still waiting to be picked. */
 function keptDie(t: RollThrow): number | null {
   return t.keptIndex == null ? null : (t.dice[t.keptIndex] ?? null);
+}
+
+/** True for the die that carries the roll: the one kept, or the first summed. */
+function isNatural(t: RollThrow, index: number): boolean {
+  return t.mode === 'sum' ? index === 0 : t.keptIndex === index;
 }
 
 /**
@@ -139,15 +170,138 @@ export function naturalDie(t: RollThrow): number | null {
   return t.mode === 'sum' ? (t.dice[0] ?? null) : keptDie(t);
 }
 
-/** True for the dice that are along for the ride and cannot crit or fumble. */
+/** True for the dice that are along for the ride and cannot carry the roll. */
 export function isNeutralDie(t: RollThrow, index: number): boolean {
   if (t.dice.length < 2) return false;
-  return t.mode === 'sum' ? index > 0 : t.keptIndex !== index;
+  return !isNatural(t, index);
 }
 
 /** What the dice contribute to the total, or null while a `keep` awaits its pick. */
 export function throwTotal(t: RollThrow): number | null {
   return t.mode === 'sum' ? t.dice.reduce((sum, d) => sum + d, 0) : keptDie(t);
+}
+
+/** True when the die calls for a confirmation reroll: a 10 or a 1. */
+export function needsConfirmation(die: number): boolean {
+  return die === DIE_SIDES || die === 1;
+}
+
+/** What one die of a throw came to mean. */
+export interface DieReading {
+  index: number;
+  value: number;
+  /** This is the die carrying the roll (kept, or first when summing). */
+  natural: boolean;
+  tendance?: TendanceKey;
+  /** A reroll is owed on this die and hasn't been made yet. */
+  awaiting: boolean;
+  /** Fired with no reroll at all — the discarded fluctuation die on a 1. */
+  automatic: boolean;
+  /** The reroll made for THIS die, once it has been made. */
+  confirmDie: number | null;
+  verdict: DieVerdict | null;
+}
+
+/** A 10 is confirmed by a reroll landing STRICTLY under the confirm value. */
+function confirmsHigh(reroll: number | null, confirm: number): boolean {
+  return reroll != null && reroll < confirm;
+}
+
+/** A 1 is confirmed by a reroll landing STRICTLY over it. */
+function confirmsLow(reroll: number | null, confirm: number): boolean {
+  return reroll != null && reroll > confirm;
+}
+
+/**
+ * Read every die of a throw. `confirms` holds each die's reroll, by the same
+ * index — a die with none yet is `null`, or simply absent.
+ *
+ * **The die carrying the roll**, whatever the kind: a confirmed 10 is a critique
+ * (a *Miracle* while casting), a confirmed 1 an échec critique (a *Contrecoup*).
+ *
+ * **The dice left on the table matter ONLY when casting on the tendance trio.**
+ * The tendances ARE the fluctuation of magic, and failing to channel a very good
+ * or very bad one has consequences; a spell rolled on plain dice — one or five,
+ * kept or summed — never invokes that power, so its discarded dice stay inert
+ * like any other roll's. On the trio, a discarded 10 or 1 rerolls and a
+ * confirmation means **Contrecoup** — the 10 included, since the backlash is for
+ * ignoring the fluctuation, not for rolling badly. One case skips the reroll
+ * entirely: the **fluctuation die showing 1 while discarded** is a Contrecoup
+ * outright.
+ *
+ * Nothing resolves while a `keep` throw has no pick: until the player chooses,
+ * no die is discarded and the question of what was ignored has no answer.
+ */
+export function readDice(
+  t: RollThrow,
+  ctx: RollContext,
+  confirms: readonly (number | null)[] = [],
+): DieReading[] {
+  const cast = ctx.kind === 'cast';
+  const fluctuation = ctx.fluctuation ?? 'dragon';
+  const trio = t.tendances != null && t.tendances.length === t.dice.length;
+  const pending = t.mode === 'keep' && t.keptIndex == null;
+
+  return t.dice.map((value, index) => {
+    const tendance = t.tendances?.[index];
+    const base: DieReading = {
+      index,
+      value,
+      natural: isNatural(t, index),
+      tendance,
+      awaiting: false,
+      automatic: false,
+      confirmDie: confirms[index] ?? null,
+      verdict: null,
+    };
+    if (pending) return base;
+    // A discarded die is inert unless this is a cast on the trio — the whole of
+    // the "ignoring a fluctuation costs you" rule lives behind this one guard.
+    if (!base.natural && (!cast || !trio)) return base;
+    // …and the one case that never gets to reroll.
+    if (!base.natural && value === 1 && tendance === fluctuation) {
+      return { ...base, automatic: true, verdict: 'contrecoup' };
+    }
+
+    // Every remaining die takes the SAME test — a 10 rerolls under the confirm
+    // value, a 1 rerolls over it — and differs only in what a confirmation is
+    // called. Discarding is always a Contrecoup, whichever face caused it.
+    const [high, low]: [DieVerdict, DieVerdict] = !base.natural
+      ? ['contrecoup', 'contrecoup']
+      : cast
+        ? ['miracle', 'contrecoup']
+        : ['critique', 'fumble'];
+
+    const reroll = base.confirmDie;
+    if (value === DIE_SIDES) {
+      return {
+        ...base,
+        awaiting: reroll == null,
+        verdict: confirmsHigh(reroll, ctx.confirm) ? high : null,
+      };
+    }
+    if (value === 1) {
+      return {
+        ...base,
+        awaiting: reroll == null,
+        verdict: confirmsLow(reroll, ctx.confirm) ? low : null,
+      };
+    }
+    return base;
+  });
+}
+
+/**
+ * True while any die of the throw is still owed its confirmation. Here rather
+ * than in the dialog because "is this roll finished" is a rule, and the UI
+ * should not be the second place that knows it.
+ */
+export function awaitsConfirmation(
+  t: RollThrow | null,
+  ctx: RollContext,
+  confirms: readonly (number | null)[] = [],
+): boolean {
+  return t != null && readDice(t, ctx, confirms).some((r) => r.awaiting);
 }
 
 export interface RollResult {
@@ -159,13 +313,15 @@ export interface RollResult {
   natural: number;
   /** The dice's share of the total — the sum, or the kept die alone. */
   diceTotal: number;
-  /** The reroll, once it has been made. null = not rolled (or not called for). */
-  confirmDie: number | null;
-  /** A 10 confirmed by a reroll STRICTLY under `confirm`. */
+  /** Every die's reading, the discarded ones a cast can act on included. */
+  readings: DieReading[];
+  /** What the throw produced, deduplicated, in die order. Often empty. */
+  verdicts: DieVerdict[];
+  /** The roll-carrying die confirmed a 10. Never on a cast — that is a Miracle. */
   critical: boolean;
-  /** A 1 confirmed by a reroll STRICTLY over `confirm`. */
+  /** The roll-carrying die confirmed a 1. Never on a cast — that is a Contrecoup. */
   fumble: boolean;
-  /** CRIT_BONUS on a confirmed critique, else 0. */
+  /** CRIT_BONUS on a confirmed critique, else 0. A cast never earns it. */
   bonus: number;
   total: number;
   difficulty: number;
@@ -179,47 +335,30 @@ export function contextValue(ctx: RollContext): number {
   return ctx.parts.reduce((sum, p) => sum + p.value, 0);
 }
 
-/** True when the die calls for a confirmation reroll: a 10 or a 1. */
-export function needsConfirmation(die: number): boolean {
-  return die === DIE_SIDES || die === 1;
-}
-
-/**
- * True while a roll is still owed its confirmation — the die the rules read
- * asked for a reroll and it hasn't been made. Here rather than in the dialog
- * because "is this roll finished" is a rule, and the UI should not be the second
- * place that knows it.
- */
-export function awaitsConfirmation(t: RollThrow | null, confirmDie: number | null): boolean {
-  if (t == null || confirmDie != null) return false;
-  const die = naturalDie(t);
-  return die != null && needsConfirmation(die);
-}
-
 /**
  * Read a throw against a context and a difficulté.
  *
  * Returns null while the throw isn't settled — a `keep` whose die hasn't been
  * picked has no result yet, and saying so here keeps the UI from having to know
- * why. Otherwise safe to call at any point: `confirmDie` is null until the
- * player asks for the reroll, an unconfirmed 10 is simply a 10, and editing the
- * difficulté re-reads the same dice rather than rolling new ones — the verdict
- * moves, the dice don't.
+ * why. Otherwise safe to call at any point: a die with no reroll yet is simply
+ * unconfirmed, and editing the difficulté re-reads the same dice rather than
+ * rolling new ones — the verdict moves, the dice don't.
  */
 export function resolveRoll(
   t: RollThrow,
   ctx: RollContext,
   difficulty: number,
-  confirmDie: number | null = null,
+  confirms: readonly (number | null)[] = [],
 ): RollResult | null {
   const diceTotal = throwTotal(t);
   const natural = naturalDie(t);
   if (diceTotal == null || natural == null) return null;
 
-  // Read off the natural die, never the sum: 7 + 3 is a total of 10 and not a
-  // face of 10, and only a face can be confirmed.
-  const critical = natural === DIE_SIDES && confirmDie != null && confirmDie < ctx.confirm;
-  const fumble = natural === 1 && confirmDie != null && confirmDie > ctx.confirm;
+  const readings = readDice(t, ctx, confirms);
+  const verdicts = [...new Set(readings.map((r) => r.verdict).filter((v) => v != null))];
+  const critical = verdicts.includes('critique');
+  const fumble = verdicts.includes('fumble');
+  // Magic buys no bonus: a Miracle is a name, not five points.
   const bonus = critical ? CRIT_BONUS : 0;
   const total = diceTotal + contextValue(ctx) + bonus;
   const success = total >= difficulty;
@@ -229,7 +368,8 @@ export function resolveRoll(
     keptIndex: t.keptIndex,
     natural,
     diceTotal,
-    confirmDie,
+    readings,
+    verdicts,
     critical,
     fumble,
     bonus,
