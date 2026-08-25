@@ -19,13 +19,14 @@ import TabPager from '@/components/ui/tab-pager';
 import { ATTRIBUTS } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
-import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSkillGroups } from '@/hooks/use-skill-groups';
 import { useSkillsDraft } from '@/hooks/use-skills-draft';
 import { asNumRecord } from '@/lib/character-values';
 import { woundMalus } from '@/lib/modifiers';
+import { skillRollContext } from '@/lib/roll-context';
 import type { SkillScope } from '@/lib/skill-grouping';
 import { effectsQuery } from '@/repositories/effects';
 import {
@@ -86,19 +87,10 @@ export default function CharacterSkillsScreen() {
     wound,
   });
 
-  // Tapping a TOT rolls against that skill. The context carries BOTH numbers the
-  // rules need and they are not the same one: the TOT is what the die adds to,
-  // while a 10 or a 1 is confirmed against the compétence's own points — a total
-  // of 12 could never be undercut by a D10 (see lib/roll).
+  // Tapping a TOT rolls against that skill — see lib/roll-context for why the
+  // total and the confirmation number are not the same one.
   const rollSkill = useCallback(
-    (skill: SkillLineData) => {
-      openRoller({
-        label: skill.name,
-        parts: [{ label: skill.name, value: skill.total }],
-        confirm: skill.value,
-        confirmLabel: 'Compétence',
-      });
-    },
+    (skill: SkillLineData) => openRoller(skillRollContext(skill)),
     [openRoller],
   );
 
