@@ -55,6 +55,10 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   For gear the badge is the ONLY roll button: an expanded card shows its
   breakdown as a reading and offers no second control, since two ways to make one
   roll on one card is a question the player shouldn't have to answer.
+  A **cast** follows the magic rules on top: Miracle / Contrecoup naming, no +5,
+  and on the tendance trio the discarded dice can backlash — see the `readDice`
+  paragraph in [CLAUDE.md](CLAUDE.md). Each die owing a reroll gets its own
+  « Confirmer » row, because which die produced which outcome is the whole point.
   _Remaining:_ the stat tiles on the dashboard, which stay a reading for
   now; plus the UI that builds
   a multi-part context (MEN + VOL, optionally + a tendance die) — `RollContext.parts`
