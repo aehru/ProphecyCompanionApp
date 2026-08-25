@@ -40,10 +40,18 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   `RollContext.dice` / `.diceMode` are the hooks for when traits land («&nbsp;2 dés
   sur tout ce qui touche au MENTAL&nbsp;»): the builder will set them and no screen
   will learn the rule twice.
-  _Remaining:_ the same tap on a **weapon's attack total** (already resolved
-  through `lib/weapon-skill`, so it reuses the skill path exactly) and on a
-  **spell total**; the stat tiles on the dashboard, which stay a reading for now;
-  plus the UI that builds
+  Done for **weapons** as well: the attack total in a weapon's detail is the roll
+  button, going through `weaponRollContext` — an attack IS its compétence's roll,
+  so the weapon only names it. A weapon with no compétence linked, or naming one
+  that no longer exists, has no total and stays unrollable.
+  The attack total rides on the collapsed row as a [`<TotalBadge>`](src/components/ui/total-badge.tsx)
+  — the very component a spell's score uses, so the two rows can't drift — and
+  the badge IS the roll button: it rolls, the row around it still expands. The
+  GM's NPC weapon cards roll the same way, being the GM's own local rows.
+  _Remaining:_ the same tap on a **spell total** (the badge is already there,
+  waiting only for a `SpellTotal` → `RollContext` builder and a decision on which
+  number confirms); the stat tiles on the dashboard, which stay a reading for
+  now; plus the UI that builds
   a multi-part context (MEN + VOL, optionally + a tendance die) — `RollContext.parts`
   is already a list precisely so that needs no type change. Whatever gets added
   must name its own `confirm` value: no rule says which part of a sum a 10 is
