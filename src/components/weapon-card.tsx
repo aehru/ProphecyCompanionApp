@@ -171,7 +171,6 @@ function WeaponSummary({
           caracValue={caracValue}
           caracModifier={caracModifier}
           skill={skill}
-          onRoll={onRoll}
           equip={{ hands: w.hands, equippedHand: w.equippedHand, onToggle: toggleHand }}
           onEdit={onEdit}
         />

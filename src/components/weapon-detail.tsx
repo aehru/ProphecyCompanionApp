@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { Button, IconButton, Text } from 'react-native-paper';
 
 import {
@@ -10,7 +10,7 @@ import {
   type CaracModifier,
   type CaracValue,
 } from '@/components/gear-detail-rows';
-import Icon, { dsIcon } from '@/components/ui/icon';
+import { dsIcon } from '@/components/ui/icon';
 import type { Weapon } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formatDecimal } from '@/lib/character-values';
@@ -66,7 +66,6 @@ export default function WeaponDetail({
   skill,
   equip,
   onEdit,
-  onRoll,
 }: {
   weapon: WeaponView;
   caracValue?: CaracValue;
@@ -74,13 +73,11 @@ export default function WeaponDetail({
   skill?: WeaponSkillReading;
   equip?: WeaponEquip;
   onEdit?: () => void;
-  /** Rolls the attack. Absent on a catalogue preview — there is no sheet to roll. */
-  onRoll?: () => void;
 }) {
   const theme = useProphecyTheme();
   return (
     <View style={styles.detail}>
-      {skill ? <SkillRow skill={skill} onRoll={onRoll} /> : null}
+      {skill ? <SkillRow skill={skill} /> : null}
 
       <FormulaRow
         label="Dégâts"
@@ -153,10 +150,10 @@ export default function WeaponDetail({
  * no points still shows its total, tagged « non acquise » so the player knows
  * they are rolling on the attribut alone.
  *
- * The total is the roll button when the caller gives one: an attack IS this
- * compétence's roll, so there is nothing to put a second control next to.
+ * A reading, not a control: the roll lives on the collapsed row's badge, and
+ * offering it twice on one card would only ask the player which one to press.
  */
-function SkillRow({ skill, onRoll }: { skill: WeaponSkillReading; onRoll?: () => void }) {
+function SkillRow({ skill }: { skill: WeaponSkillReading }) {
   const theme = useProphecyTheme();
 
   if (skill.status === 'unset') {
@@ -195,18 +192,7 @@ function SkillRow({ skill, onRoll }: { skill: WeaponSkillReading; onRoll?: () =>
           ) : null}
         </View>
         <View style={styles.resultRow}>
-          {onRoll ? (
-            <Pressable
-              onPress={onRoll}
-              accessibilityRole="button"
-              accessibilityLabel={`Lancer ${skill.name}, total ${skill.total}`}
-              style={({ pressed }) => [rollStyles.button, { opacity: pressed ? 0.7 : 1 }]}>
-              <Icon name="dice" size={14} color={theme.colors.primary} />
-              <Text style={[styles.result, { color: theme.colors.primary }]}>= {skill.total}</Text>
-            </Pressable>
-          ) : (
-            <Text style={[styles.result, { color: theme.colors.primary }]}>= {skill.total}</Text>
-          )}
+          <Text style={[styles.result, { color: theme.colors.primary }]}>= {skill.total}</Text>
           <Text style={[styles.breakdown, { color: theme.colors.onSurfaceVariant }]}>
             ({skill.attributLabel} {skill.attributValue} + {skill.value})
           </Text>
@@ -226,8 +212,3 @@ export function fmtSigned(n: number) {
   return n > 0 ? `+${n}` : String(n);
 }
 
-const rollStyles = StyleSheet.create({
-  // The die sits INSIDE the tap target with the total, so the affordance and the
-  // number it rolls read as one control.
-  button: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-});
