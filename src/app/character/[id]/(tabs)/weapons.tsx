@@ -17,13 +17,15 @@ import TabPage from '@/components/ui/tab-page';
 import TabPager from '@/components/ui/tab-pager';
 import WeaponCard from '@/components/weapon-card';
 import { MONEY } from '@/constants/prophecy';
-import type { ActualState } from '@/db/schema';
+import type { ActualState, Weapon } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { weaponRollContext } from '@/lib/roll-context';
 import { weaponSkillReading } from '@/lib/weapon-skill';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
@@ -48,6 +50,7 @@ export default function CharacterWeaponsScreen() {
   const [tab, setTab] = useState(0);
   const [itemQuery, setItemQuery] = useState('');
   const splitWidth = useSplitWidth();
+  const { open: openRoller } = useDiceRoller();
   // Keyboard "next" wiring for the ARGENT fields (self-contained here — money
   // is the only chained field group left on this screen).
   const moneyRefs = useRef<Record<string, RNTextInput | null>>({});
@@ -89,6 +92,19 @@ export default function CharacterWeaponsScreen() {
   const skillList = skills ?? [];
   const caracModifier = (caracKey: string) => totalModifier(caracKey, effectList, wound);
 
+  // One place that knows what a weapon's compétence resolves against — the card
+  // reads it and the roll re-reads it, and the two must not drift apart.
+  const skillOf = (w: Weapon) =>
+    weaponSkillReading(w.skillName, skillList, rec, effectList, wound);
+
+  // An attack is its compétence's roll. Nothing happens when the weapon has no
+  // compétence linked, or names one that no longer exists — the card already
+  // says so, and there is no total to roll (see lib/roll-context).
+  const rollWeapon = (w: Weapon) => {
+    const ctx = weaponRollContext(w.name, skillOf(w));
+    if (ctx) openRoller(ctx);
+  };
+
   const setStateValue = (key: string, value: number) => {
     setState((p) => (p ? ({ ...p, [key]: value } as ActualState) : p));
     updateActualState(numId, { [key]: value } as Partial<ActualState>);
@@ -126,8 +142,9 @@ export default function CharacterWeaponsScreen() {
                   weapon={w}
                   caracValue={(k) => rec[k] ?? 0}
                   caracModifier={caracModifier}
-                  skill={weaponSkillReading(w.skillName, skillList, rec, effectList, wound)}
+                  skill={skillOf(w)}
                   enchanted={isEnchanted('weapon', w.id)}
+                  onRoll={() => rollWeapon(w)}
                 />
               ))}
             </Columns>

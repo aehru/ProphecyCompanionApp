@@ -11,6 +11,7 @@ import {
 import Icon from '@/components/ui/icon';
 import WeaponDetail, { fmtSigned } from '@/components/weapon-detail';
 import type { Weapon } from '@/db/schema';
+import TotalBadge from '@/components/ui/total-badge';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult } from '@/lib/formula';
 import type { WeaponSkillReading } from '@/lib/weapon-skill';
@@ -28,6 +29,7 @@ export default function WeaponCard({
   caracModifier,
   skill,
   enchanted,
+  onRoll,
 }: {
   weapon: Weapon;
   caracValue: CaracValue;
@@ -41,6 +43,8 @@ export default function WeaponCard({
   skill?: WeaponSkillReading;
   /** This weapon has at least one enchant bound to it (see the Magie tab). */
   enchanted?: boolean;
+  /** Rolls this weapon's attack. Omitted where the card is only a reading. */
+  onRoll?: () => void;
 }) {
   const router = useRouter();
   return (
@@ -50,6 +54,7 @@ export default function WeaponCard({
       caracModifier={caracModifier}
       skill={skill}
       enchanted={enchanted}
+      onRoll={onRoll}
       onEdit={() => router.push(`/character/${weapon.characterId}/weapon/${weapon.id}`)}
     />
   );
@@ -61,6 +66,7 @@ function WeaponSummary({
   caracModifier,
   skill,
   enchanted,
+  onRoll,
   onEdit,
 }: {
   weapon: Weapon;
@@ -68,6 +74,7 @@ function WeaponSummary({
   caracModifier?: CaracModifier;
   skill?: WeaponSkillReading;
   enchanted?: boolean;
+  onRoll?: () => void;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -136,17 +143,6 @@ function WeaponSummary({
                 {subtitle}
               </Text>
             ) : null}
-            {/* Collapsed: the attack total alone. The breakdown (which
-                compétence, which attribut) is one tap away in the detail. */}
-            {skill?.status === 'ok' ? (
-              <View style={styles.skillChip}>
-                <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>·</Text>
-                <Icon name="sword" size={12} color={theme.colors.onSurfaceVariant} />
-                <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>
-                  {skill.total}
-                </Text>
-              </View>
-            ) : null}
             {equippedLabel ? (
               <Text style={[styles.itemSub, { color: theme.colors.primary }]}>
                 · Équipée ({equippedLabel})
@@ -154,6 +150,18 @@ function WeaponSummary({
             ) : null}
           </View>
         </View>
+        {/* The attack total, in the same badge a spell's score uses — and the
+            roll button when the caller gives one. The breakdown (which
+            compétence, which attribut) is one tap away in the detail. */}
+        {skill?.status === 'ok' ? (
+          <TotalBadge
+            value={skill.total}
+            onPress={onRoll}
+            accessibilityLabel={
+              onRoll ? `Lancer ${skill.name}, total ${skill.total}` : `Total d'attaque ${skill.total}`
+            }
+          />
+        ) : null}
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
 
@@ -163,6 +171,7 @@ function WeaponSummary({
           caracValue={caracValue}
           caracModifier={caracModifier}
           skill={skill}
+          onRoll={onRoll}
           equip={{ hands: w.hands, equippedHand: w.equippedHand, onToggle: toggleHand }}
           onEdit={onEdit}
         />
@@ -189,5 +198,4 @@ const styles = StyleSheet.create({
   enchantBadge: { alignItems: 'center', justifyContent: 'center' },
   subRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 1 },
   itemSub: { fontSize: 12 },
-  skillChip: { flexDirection: 'row', alignItems: 'center', gap: 2 },
 });
