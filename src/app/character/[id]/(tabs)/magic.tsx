@@ -186,15 +186,20 @@ export default function CharacterMagicScreen() {
             </Text>
           ) : (
             <Columns gap={10}>
-              {spellList.map((sp) => (
-                <SpellCard
-                  key={sp.id}
-                  spell={sp}
-                  total={spellTotalFor(sp)}
-                  caracValue={spellCaracValue}
-                  onRoll={() => openRoller(spellRollContext(sp, spellTotalFor(sp)))}
-                />
-              ))}
+              {spellList.map((sp) => {
+                // Once per card: the badge shows this score and the roll uses
+                // it, and the two must not drift apart.
+                const total = spellTotalFor(sp);
+                return (
+                  <SpellCard
+                    key={sp.id}
+                    spell={sp}
+                    total={total}
+                    caracValue={spellCaracValue}
+                    onRoll={() => openRoller(spellRollContext(sp, total))}
+                  />
+                );
+              })}
             </Columns>
           )}
         </TabPage>

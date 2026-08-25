@@ -149,15 +149,19 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       {spellList.length > 0 ? (
         <Section title="Sorts">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
-            {spellList.map((s) => (
-              <SpellCard
-                key={s.id}
-                spell={s}
-                total={spellTotal(s, rec, effectList, wound)}
-                caracValue={(k) => rec[k] ?? 0}
-                onRoll={() => openRoller(spellRollContext(s, spellTotal(s, rec, effectList, wound)))}
-              />
-            ))}
+            {spellList.map((s) => {
+              // Same score for the badge and for the roll — see the weapons above.
+              const total = spellTotal(s, rec, effectList, wound);
+              return (
+                <SpellCard
+                  key={s.id}
+                  spell={s}
+                  total={total}
+                  caracValue={(k) => rec[k] ?? 0}
+                  onRoll={() => openRoller(spellRollContext(s, total))}
+                />
+              );
+            })}
           </View>
         </Section>
       ) : null}
