@@ -19,6 +19,7 @@ import {
 } from '@/constants/prophecy';
 import type { Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
+import TotalBadge from '@/components/ui/total-badge';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { parseFormula } from '@/lib/formula';
@@ -107,17 +108,11 @@ function SpellSummary({
             </Text>
           ) : null}
         </View>
-        {/* The score is the number a player needs at a glance, so it stays on
-            the collapsed row rather than waiting for the expand. */}
         {total ? (
-          <View
+          <TotalBadge
+            value={total.total}
             accessibilityLabel={`Total d'incantation ${total.total}`}
-            style={[
-              styles.totalBadge,
-              { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
-            ]}>
-            <Text style={[styles.totalValue, { color: theme.colors.primary }]}>{total.total}</Text>
-          </View>
+          />
         ) : null}
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
@@ -359,16 +354,6 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
   keyBadge: { alignItems: 'center', justifyContent: 'center' },
-  totalBadge: {
-    minWidth: 34,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 9,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  totalValue: { fontSize: 15, fontWeight: '700' },
   itemSub: { fontSize: 12, marginTop: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   numCol: { flexGrow: 1, flexBasis: 120, minWidth: 120 },
