@@ -22,7 +22,7 @@ import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
-import { weaponRollContext } from '@/lib/roll-context';
+import { spellRollContext, weaponRollContext } from '@/lib/roll-context';
 import { spellTotal } from '@/lib/spell-total';
 import { weaponSkillReading } from '@/lib/weapon-skill';
 import { actualStateQuery } from '@/repositories/actual-state';
@@ -155,6 +155,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
                 spell={s}
                 total={spellTotal(s, rec, effectList, wound)}
                 caracValue={(k) => rec[k] ?? 0}
+                onRoll={() => openRoller(spellRollContext(s, spellTotal(s, rec, effectList, wound)))}
               />
             ))}
           </View>

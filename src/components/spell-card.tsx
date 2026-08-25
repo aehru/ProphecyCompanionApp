@@ -42,11 +42,14 @@ export default function SpellCard({
   spell,
   total,
   caracValue,
+  onRoll,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   /** Passed through to the detail — resolves a durée written against a stat. */
   caracValue?: (caracKey: string) => number;
+  /** Rolls the incantation. Omitted where the card is only a reading. */
+  onRoll?: () => void;
 }) {
   const router = useRouter();
   return (
@@ -54,6 +57,7 @@ export default function SpellCard({
       spell={spell}
       total={total}
       caracValue={caracValue}
+      onRoll={onRoll}
       onEdit={() => router.push(`/character/${spell.characterId}/spell/${spell.id}`)}
     />
   );
@@ -63,11 +67,13 @@ function SpellSummary({
   spell: s,
   total,
   caracValue,
+  onRoll,
   onEdit,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   caracValue?: (caracKey: string) => number;
+  onRoll?: () => void;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -108,10 +114,18 @@ function SpellSummary({
             </Text>
           ) : null}
         </View>
+        {/* The score is the number a player needs at a glance, so it stays on
+            the collapsed row — and it is the roll button: it casts, the row
+            around it still expands. */}
         {total ? (
           <TotalBadge
             value={total.total}
-            accessibilityLabel={`Total d'incantation ${total.total}`}
+            onPress={onRoll}
+            accessibilityLabel={
+              onRoll
+                ? `Lancer ${s.name}, total ${total.total}`
+                : `Total d'incantation ${total.total}`
+            }
           />
         ) : null}
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />

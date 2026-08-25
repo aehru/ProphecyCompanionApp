@@ -28,11 +28,13 @@ import type {
 } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellTotal } from '@/hooks/use-spell-total';
 import { Alert } from '@/lib/alert';
 import { asNumRecord } from '@/lib/character-values';
+import { spellRollContext } from '@/lib/roll-context';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { createEnchant, enchantsQuery } from '@/repositories/enchants';
@@ -79,6 +81,7 @@ export default function CharacterMagicScreen() {
   const { data: items } = useLiveQuery(itemsQuery(numId), [numId]);
   const { data: enchantList } = useLiveQuery(enchantsQuery(numId), [numId]);
   const { totalFor: spellTotalFor, caracValue: spellCaracValue } = useSpellTotal(numId);
+  const { open: openRoller } = useDiceRoller();
   const [tab, setTab] = useState(0);
   // Shared by the Réserve and Enchantements tabs: unlocks bullet-tapping plus
   // the reserve-object add/delete controls, same convention across this screen.
@@ -189,6 +192,7 @@ export default function CharacterMagicScreen() {
                   spell={sp}
                   total={spellTotalFor(sp)}
                   caracValue={spellCaracValue}
+                  onRoll={() => openRoller(spellRollContext(sp, spellTotalFor(sp)))}
                 />
               ))}
             </Columns>
