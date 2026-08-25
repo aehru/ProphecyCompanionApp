@@ -14,6 +14,7 @@
  */
 import { totalModifier, type ModifierSource } from '@/lib/modifiers';
 import type { RollContext } from '@/lib/roll';
+import type { WeaponSkillReading } from '@/lib/weapon-skill';
 
 /** What a modifier part is called when it makes the sum. */
 const MODIFIER_LABEL = 'Modificateur';
@@ -36,6 +37,34 @@ export function skillRollContext(skill: {
     parts: [{ label: skill.name, value: skill.total }],
     confirm: skill.value,
     confirmLabel: 'Compétence',
+  };
+}
+
+/**
+ * An attack with a weapon — which is a compétence roll, so it goes through
+ * {@link skillRollContext} rather than repeating its rule.
+ *
+ * Returns null unless the weapon's compétence actually resolved: a weapon with
+ * no skill linked, or one naming a compétence that no longer exists, has no
+ * total to roll and the card says so instead (see `lib/weapon-skill`).
+ *
+ * The weapon NAMES the roll while the compétence carries the number — « Épée
+ * longue » is what the player is doing, « Corps à corps 14 » is what it is worth.
+ *
+ * A weapon whose compétence is untrained resolves with `value: 0`, so its
+ * `confirm` is 0: no reroll can land strictly under it, and any reroll lands
+ * strictly over. An untrained attack therefore cannot crit and always confirms
+ * its fumble — which is what "non acquise" should feel like.
+ */
+export function weaponRollContext(
+  weaponName: string,
+  skill: WeaponSkillReading,
+): RollContext | null {
+  if (skill.status !== 'ok') return null;
+  const name = weaponName.trim();
+  return {
+    ...skillRollContext({ name: skill.name, total: skill.total, value: skill.value }),
+    label: name === '' ? skill.name : name,
   };
 }
 

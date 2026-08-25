@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { contextValue, resolveRoll, singleThrow } from './roll';
-import { skillRollContext, statRollContext } from './roll-context';
+import { skillRollContext, statRollContext, weaponRollContext } from './roll-context';
+import type { WeaponSkillReading } from './weapon-skill';
 
 describe('skillRollContext', () => {
   const ctx = skillRollContext({ name: 'Équitation', total: 12, value: 3 });
@@ -70,5 +71,41 @@ describe('statRollContext', () => {
   it('feeds the engine a total a wound actually moved', () => {
     const ctx = statRollContext({ ...base, effects: [], wound: -3 });
     expect(resolveRoll(singleThrow(8), ctx, 10)).toMatchObject({ total: 10, success: true, nr: 0 });
+  });
+});
+
+describe('weaponRollContext', () => {
+  const resolved: WeaponSkillReading = {
+    status: 'ok',
+    name: 'Corps à corps',
+    attribut: 'physique',
+    attributLabel: 'Physique',
+    attributValue: 9,
+    value: 4,
+    bonus: 1,
+    total: 14,
+    trained: true,
+  };
+
+  it('rolls the compétence, but names the roll after the weapon', () => {
+    const ctx = weaponRollContext('Épée longue', resolved)!;
+    expect(ctx.label).toBe('Épée longue');
+    expect(ctx.parts).toEqual([{ label: 'Corps à corps', value: 14 }]);
+    expect(ctx).toMatchObject({ confirm: 4, confirmLabel: 'Compétence' });
+  });
+
+  it('falls back to the compétence when the weapon has no name', () => {
+    expect(weaponRollContext('   ', resolved)!.label).toBe('Corps à corps');
+  });
+
+  it('has nothing to roll when the compétence did not resolve', () => {
+    expect(weaponRollContext('Arc', { status: 'unset' })).toBeNull();
+    expect(weaponRollContext('Arc', { status: 'unknown', name: 'Tir' })).toBeNull();
+  });
+
+  it('cannot crit and always confirms its fumble when untrained', () => {
+    // value 0: no reroll is strictly under it, every reroll is strictly over.
+    const untrained = weaponRollContext('Arc', { ...resolved, value: 0, total: 10, trained: false })!;
+    expect(untrained.confirm).toBe(0);
   });
 });
