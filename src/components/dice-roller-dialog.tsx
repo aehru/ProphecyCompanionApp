@@ -1,164 +1,159 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, Menu, Text } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 
-import NumberField from '@/components/number-field';
-import { TendanceDiceRow } from '@/components/tendance-die';
+import RollContextBody from '@/components/roll-context-body';
+import RollFreeformBody from '@/components/roll-freeform-body';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { rollDice, rollTendances, type TendanceRoll } from '@/lib/dice';
+import type { TendanceKey } from '@/constants/prophecy';
+import { rollDice, rollDie, rollTendances, type TendanceRoll } from '@/lib/dice';
+import {
+  DEFAULT_DIFFICULTY,
+  DIE_SIDES,
+  resolveRoll,
+  type RollContext,
+  type RollResult,
+} from '@/lib/roll';
 
 /**
- * Free-form dice roller — roll any XdY, independent of any character stat
- * (initiative has its own roll on the weapons tab). Prophecy is D10-heavy, so
- * the die picker defaults to 10.
+ * The dice roller, in its two shapes.
  *
- * Alongside it sits the tendance roll — one D10 per tendance, the rulebook's
- * "roll all three, keep the one that suits your action". A separate result, not
- * a preset of the XdY roller: the two never show at once, and « Tendances » sits
- * next to « Lancer » on the right of the actions row because both are things the
- * dialog DOES, unlike « Fermer ».
+ * WITHOUT a context it is the free-form roller it has always been: any XdY, plus
+ * the tendance trio as a reading. WITH one — a skill's TOT, a stat, a sum of
+ * both — it becomes a TEST: the XdY picker gives way to a difficulté and a
+ * verdict, because Prophecy tests a D10 and nothing else.
+ *
+ * Both buttons stay in both shapes. « Lancer » rolls the one die, « Tendances »
+ * rolls all three and, in context, the player keeps the one they invoke — that
+ * kept die IS the roll, and it is what a 10 or a 1 is confirmed on.
+ *
+ * This component owns the dice and nothing else draws them: the two bodies are
+ * presentational, so there is exactly one place where a die is rolled and one
+ * place where the rules read it (`lib/roll`).
  *
  * The dialog only exists while open — `DiceRollerProvider` mounts it on demand —
- * so count and results start fresh on every open, matching the "no roll history"
+ * so everything here starts fresh on every open, matching the "no roll history"
  * decision. The one thing that outlives an open is the die size, which the
  * provider holds: reopening the roller keeps the die you picked (for the session,
  * not across restarts).
  */
-const SIDES = [4, 6, 8, 10, 12, 20];
+
+/**
+ * Everything one throw put on the table. ONE state, not five: every transition
+ * below names the whole next table, so a new roll cannot leave a stale die, an
+ * orphaned confirmation or a kept tendance behind it — which is exactly what
+ * five independent setters and a "remember to clear first" helper allowed.
+ */
+interface RollState {
+  /** The die the reading rests on — null while a trio is waiting to be kept. */
+  die: number | null;
+  confirmDie: number | null;
+  /** Which tendance was kept, for the row's selected ring. */
+  kept: TendanceKey | null;
+  tendances: TendanceRoll[] | null;
+  /** The free-form XdY throw; never set in context (a test is one D10). */
+  freeform: number[] | null;
+}
+
+const EMPTY: RollState = {
+  die: null,
+  confirmDie: null,
+  kept: null,
+  tendances: null,
+  freeform: null,
+};
 
 export default function DiceRollerDialog({
   sides,
+  context,
   onSidesChange,
   onDismiss,
 }: {
   sides: number;
+  /** What the roll is made against, or null for the free-form roller. */
+  context?: RollContext | null;
   /** Lifted so the picked die survives closing and reopening the dialog. */
   onSidesChange: (sides: number) => void;
   onDismiss: () => void;
 }) {
-  const theme = useProphecyTheme();
-  const [sidesMenu, setSidesMenu] = useState(false);
-  const [count, setCount] = useState(1);
-  const [result, setResult] = useState<number[] | null>(null);
-  const [tendances, setTendances] = useState<TendanceRoll[] | null>(null);
+  const [count, setCount] = useState('1');
+  const [difficulty, setDifficulty] = useState(String(DEFAULT_DIFFICULTY));
+  // A tap on a value is a request to roll, so a contextual dialog opens with its
+  // die already rolled. Seeded in the initializer rather than in an effect: an
+  // effect would render the empty state first and then set state from it.
+  const [roll, setRoll] = useState<RollState>(() =>
+    context ? { ...EMPTY, die: rollDie(DIE_SIDES) } : EMPTY,
+  );
 
-  // The two rolls own the same result area, so each one clears the other.
-  const clearResults = () => {
-    setResult(null);
-    setTendances(null);
-  };
+  const rollNow = () =>
+    setRoll(
+      context
+        ? { ...EMPTY, die: rollDie(DIE_SIDES) }
+        : { ...EMPTY, freeform: rollDice(Math.max(1, parseInt(count, 10) || 1), sides) },
+    );
+  const rollTendance = () => setRoll({ ...EMPTY, tendances: rollTendances() });
+  /** Keeping a tendance die makes it THE die; the other two are discarded. */
+  const keepTendance = (r: TendanceRoll) =>
+    setRoll((s) => ({ ...s, kept: r.key, die: r.value, confirmDie: null }));
+  const confirm = () => setRoll((s) => ({ ...s, confirmDie: rollDie(DIE_SIDES) }));
+
+  // Changing what you are about to roll clears what you rolled: the dice on
+  // screen must never belong to a different question than the one on display.
   const pickSides = (s: number) => {
     onSidesChange(s);
-    clearResults();
-    setSidesMenu(false);
+    setRoll(EMPTY);
   };
   const setCountSafe = (t: string) => {
-    setCount(Math.max(1, parseInt(t, 10) || 1));
-    clearResults();
-  };
-  const roll = () => {
-    setTendances(null);
-    setResult(rollDice(count, sides));
-  };
-  const rollTendance = () => {
-    setResult(null);
-    setTendances(rollTendances());
+    setCount(t);
+    setRoll(EMPTY);
   };
 
-  const total = result ? result.reduce((a, b) => a + b, 0) : 0;
+  // Read on every render rather than stored: editing the difficulté has to move
+  // the verdict WITHOUT touching the dice.
+  const result: RollResult | null =
+    context && roll.die != null && difficulty.trim() !== ''
+      ? resolveRoll(roll.die, context, Number(difficulty), roll.confirmDie)
+      : null;
 
   return (
     <DsDialog
       visible
       onDismiss={onDismiss}
-      title="Lancer les dés"
+      title={context ? 'Jet de dés' : 'Lancer les dés'}
       dismiss={<Button onPress={onDismiss}>Fermer</Button>}
       actions={
         <>
           <Button mode="outlined" icon={dsIcon('dragon')} onPress={rollTendance}>
             Tendances
           </Button>
-          <Button mode="contained" icon={dsIcon('dice')} onPress={roll}>
+          <Button mode="contained" icon={dsIcon('dice')} onPress={rollNow}>
             Lancer
           </Button>
         </>
       }>
-      <View style={styles.countRow}>
-        <NumberField
-          fieldKey="count"
-          value={String(count)}
-          onChange={(_, t) => setCountSafe(t)}
-          maxLength={2}
-          style={styles.countField}
+      {context ? (
+        <RollContextBody
+          context={context}
+          difficulty={difficulty}
+          onDifficulty={setDifficulty}
+          die={roll.die}
+          confirmDie={roll.confirmDie}
+          tendances={roll.tendances}
+          selectedKey={roll.kept}
+          onSelectTendance={keepTendance}
+          onConfirm={confirm}
+          result={result}
         />
-        <Text variant="titleLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-          ×
-        </Text>
-        <Menu
-          visible={sidesMenu}
-          onDismiss={() => setSidesMenu(false)}
-          anchor={
-            <Button
-              mode="outlined"
-              icon={dsIcon('chev')}
-              contentStyle={styles.sidesAnchorContent}
-              onPress={() => setSidesMenu(true)}>
-              {`D${sides}`}
-            </Button>
-          }>
-          {SIDES.map((s) => (
-            <Menu.Item key={s} title={`D${s}`} onPress={() => pickSides(s)} />
-          ))}
-        </Menu>
-      </View>
-      {tendances ? <TendanceDiceRow rolls={tendances} /> : null}
-      {result ? (
-        <View style={styles.results}>
-          <View style={styles.dice}>
-            {result.map((v, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.die,
-                  {
-                    borderColor: theme.prophecy.border,
-                    backgroundColor: theme.colors.surfaceVariant,
-                  },
-                ]}>
-                <Text style={[styles.dieText, { color: theme.colors.onSurface }]}>{v}</Text>
-              </View>
-            ))}
-          </View>
-          {result.length > 1 ? (
-            <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
-              Total : {total}
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
+      ) : (
+        <RollFreeformBody
+          count={count}
+          onCount={setCountSafe}
+          sides={sides}
+          onPickSides={pickSides}
+          result={roll.freeform}
+          tendances={roll.tendances}
+        />
+      )}
     </DsDialog>
   );
 }
-
-const styles = StyleSheet.create({
-  countRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
-  // Two digits wide — a dice count is never more, and the width freed here is
-  // what lets « 2 × D10 » read as one centred phrase instead of a stretched form.
-  countField: { flexGrow: 0, flexBasis: 'auto', width: 56, minWidth: 0 },
-  // Chevron trailing the "D10" label instead of leading it.
-  sidesAnchorContent: { flexDirection: 'row-reverse' },
-  results: { alignItems: 'center', gap: 10 },
-  dice: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
-  die: {
-    minWidth: 40,
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  dieText: { fontFamily: 'Cinzel_600SemiBold', fontSize: 18 },
-});

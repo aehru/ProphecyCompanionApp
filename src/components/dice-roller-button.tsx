@@ -16,5 +16,5 @@ import { useDiceRoller } from '@/hooks/use-dice-roller';
  */
 export default function DiceRollerButton() {
   const { open } = useDiceRoller();
-  return <IconButton testID="dice-roller" icon={dsIcon('dice')} onPress={open} />;
+  return <IconButton testID="dice-roller" icon={dsIcon('dice')} onPress={() => open()} />;
 }

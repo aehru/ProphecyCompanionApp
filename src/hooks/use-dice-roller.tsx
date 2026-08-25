@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import DiceRollerDialog from '@/components/dice-roller-dialog';
+import type { RollContext } from '@/lib/roll';
 
 /**
  * App-level dice roller. The roller used to be a FAB on the character's Accueil
@@ -15,13 +16,19 @@ import DiceRollerDialog from '@/components/dice-roller-dialog';
  * D20 once holds for the session (it is not persisted — an app restart is back
  * to D10, Prophecy's usual die).
  *
- * Deliberately context-free for now: it rolls XdY and the tendance trio, and
- * knows nothing about the screen it was opened from. Prefilling from a skill
- * total or a weapon's damage formula is on the roadmap.
+ * `open()` takes an optional {@link RollContext}: tapping a skill's TOT opens the
+ * roller AGAINST that skill and rolls a D10 at once, while the header button
+ * passes nothing and gets the free-form roller it always was. The context is not
+ * kept — reopening from a header is always contextless, like the results, and
+ * unlike the die size.
  */
 interface DiceRollerContext {
-  /** Open the roller. Reopening it resets the count and clears the last result. */
-  open: () => void;
+  /**
+   * Open the roller. Reopening it resets the count and clears the last result.
+   * With a `context`, the roller opens against it and rolls a D10 immediately —
+   * a tap on a value is a request to roll, not to fill a form.
+   */
+  open: (context?: RollContext) => void;
 }
 
 const Ctx = createContext<DiceRollerContext | null>(null);
@@ -35,8 +42,12 @@ export function useDiceRoller(): DiceRollerContext {
 export function DiceRollerProvider({ children }: { children: React.ReactNode }) {
   const [visible, setVisible] = useState(false);
   const [sides, setSides] = useState(10);
+  const [context, setContext] = useState<RollContext | null>(null);
 
-  const open = useCallback(() => setVisible(true), []);
+  const open = useCallback((ctx?: RollContext) => {
+    setContext(ctx ?? null);
+    setVisible(true);
+  }, []);
   // The value is read by every header button in the tree, so keep it stable —
   // `open` never changes, and the dialog's own state lives below this line.
   const value = useMemo(() => ({ open }), [open]);
@@ -47,6 +58,7 @@ export function DiceRollerProvider({ children }: { children: React.ReactNode }) 
       {visible ? (
         <DiceRollerDialog
           sides={sides}
+          context={context}
           onSidesChange={setSides}
           onDismiss={() => setVisible(false)}
         />
