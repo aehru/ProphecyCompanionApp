@@ -38,7 +38,9 @@ export type ShieldView = Partial<
 /**
  * Read-only shield detail rows — extracted out of ShieldCard's expand so the
  * catalogue can preview a preset with its damage formula resolved against this
- * character. `onEdit` adds the « Modifier » button; a preview omits it.
+ * character. `onEdit` adds the « Modifier » button; a preview omits it, and a
+ * catalogue browsed with no character omits `caracValue` too — the dégâts then
+ * stay symbolic.
  */
 export default function ShieldDetail({
   shield: s,
@@ -47,7 +49,7 @@ export default function ShieldDetail({
   onEdit,
 }: {
   shield: ShieldView;
-  caracValue: CaracValue;
+  caracValue?: CaracValue;
   caracModifier?: CaracModifier;
   onEdit?: () => void;
 }) {

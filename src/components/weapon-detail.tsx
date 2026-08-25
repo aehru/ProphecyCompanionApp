@@ -54,7 +54,10 @@ export type WeaponEquip = {
  * {@link SpellDetail} already does for spells.
  *
  * `onEdit` adds the « Modifier » button and `equip` the hand buttons; a preview
- * passes neither.
+ * passes neither. A catalogue browsed with no character in context passes no
+ * `caracValue` or `skill` either: the dégâts and portées stay symbolic and the
+ * compétence line is skipped, since both are readings of a sheet that is not
+ * there.
  */
 export default function WeaponDetail({
   weapon: w,
@@ -65,7 +68,7 @@ export default function WeaponDetail({
   onEdit,
 }: {
   weapon: WeaponView;
-  caracValue: CaracValue;
+  caracValue?: CaracValue;
   caracModifier?: CaracModifier;
   skill?: WeaponSkillReading;
   equip?: WeaponEquip;

@@ -2,7 +2,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
-import { Button, IconButton, Menu, Text } from 'react-native-paper';
+import { IconButton, Menu, Text } from 'react-native-paper';
 
 import CharacterListItem from '@/components/character-list-item';
 import CharacterSelectionActions from '@/components/character-selection-actions';
@@ -194,17 +194,13 @@ export default function CharactersListScreen() {
       title: 'Personnages',
       headerBackVisible: true,
       headerLeft: undefined,
-      // Overrides the root stack's headerRight, so the dice button it puts on
-      // every screen is re-added here. Not in the selection bar above: that one
-      // is contextual and only holds actions on the selected characters.
+      // Overrides the tab navigator's headerRight, so the dice button it puts on
+      // every tab is re-added here. Not in the selection bar above: that one is
+      // contextual and only holds actions on the selected characters.
+      // No campaigns button any more — « Campagnes » is a tab of its own.
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
           <DiceRollerButton />
-          <IconButton
-            icon="account-group"
-            testID="campaigns-nav"
-            onPress={() => router.push('/campaigns' as Href)}
-          />
           <Menu
             visible={menuOpen}
             onDismiss={() => setMenuOpen(false)}
@@ -253,20 +249,6 @@ export default function CharactersListScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Above the list rather than behind the FAB: generating a PNJ is a GM
-          tool, not the way a player creates their character. It steps out
-          during a selection, like the FAB. A full GM menu will take it over. */}
-      {!selection.active && (
-        <View style={[styles.tools, splitWidth]}>
-          <Button
-            mode="outlined"
-            icon={dsIcon('dice')}
-            testID="generate-npc"
-            onPress={() => router.push('/npc/generate')}>
-            Générer un PNJ
-          </Button>
-        </View>
-      )}
       {loading ? (
         <View testID="characters-loading" style={styles.loading}>
           <ActivityIndicator />
@@ -338,7 +320,6 @@ export default function CharactersListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  tools: { paddingHorizontal: 12, paddingTop: 12, alignItems: 'center' },
   listContent: { padding: 12, paddingBottom: 96 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   separator: { height: 8 },

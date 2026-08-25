@@ -95,14 +95,17 @@ export default function RootLayout() {
                         // own headers), and the two settings screens opt out.
                         headerRight: () => <DiceRollerButton />,
                       }}>
-                      <Stack.Screen name="index" options={{ title: 'Personnages' }} />
+                      {/* (root) is the bottom-tab navigator — Personnages, Catalogues,
+                          Campagnes — and draws its own headers. Everything below is
+                          pushed ON TOP of it, which is what puts a character's or a
+                          campaign's own chrome in the tab bar's place. */}
+                      <Stack.Screen name="(root)" options={{ headerShown: false }} />
                       <Stack.Screen
                         name="character/new"
                         options={{ title: 'Nouveau personnage', presentation: 'modal' }}
                       />
                       {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
                       <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
-                      <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
                       {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
                       <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
                       {/* No dice on the two settings screens: nothing there is played. */}

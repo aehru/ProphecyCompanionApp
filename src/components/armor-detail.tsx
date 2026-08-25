@@ -24,7 +24,8 @@ export type ArmorView = Partial<
 /**
  * Read-only armor detail rows — extracted out of ArmorCard's expand so the
  * catalogue can preview a preset with its prérequis checked against this
- * character. `onEdit` adds the « Modifier » button; a preview omits it.
+ * character. `onEdit` adds the « Modifier » button; a preview omits it, and a
+ * catalogue browsed with no character omits `caracValue` too.
  */
 export default function ArmorDetail({
   armor: a,
@@ -32,7 +33,7 @@ export default function ArmorDetail({
   onEdit,
 }: {
   armor: ArmorView;
-  caracValue: CaracValue;
+  caracValue?: CaracValue;
   onEdit?: () => void;
 }) {
   return (
