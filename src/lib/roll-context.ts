@@ -22,6 +22,9 @@ import type { WeaponSkillReading } from '@/lib/weapon-skill';
 /** What a modifier part is called when it makes the sum. */
 const MODIFIER_LABEL = 'Modificateur';
 
+/** The one sphère whose fluctuation is the Fatalité rather than the Dragon. */
+const OMBRE_SPHERE = 'sphereOmbre';
+
 /**
  * A compétence: the TOT is what the die adds to, the points bought are what a
  * 10 is confirmed against. Those are deliberately two different numbers — a TOT
@@ -89,6 +92,12 @@ export function weaponRollContext(
  * from either side of the roll, and `SpellDetail` shows it as a lowered
  * difficulté — so the difficulté carried here is the spell's RAW number. Taking
  * both would apply it twice.
+ *
+ * `kind: 'cast'` is what turns the roll into magic: Miracle and Contrecoup
+ * instead of critique and échec critique, no +5, and — on the tendance trio
+ * only — consequences for the dice left on the table (see `lib/roll` readDice).
+ * The **Sphère de l'Ombre moves the fluctuation to the Fatalité**; every other
+ * sphere answers to the Dragon.
  */
 export function spellRollContext(
   spell: { name: string; discipline: string; sphere: string; difficulty?: number | null },
@@ -100,6 +109,8 @@ export function spellRollContext(
   const difficulty = spell.difficulty ?? 0;
   return {
     label: name === '' ? 'Incantation' : name,
+    kind: 'cast',
+    fluctuation: spell.sphere === OMBRE_SPHERE ? 'fatalite' : 'dragon',
     parts: [
       { label: sphereLabel, value: total.sphere },
       { label: disciplineLabel, value: total.discipline },
