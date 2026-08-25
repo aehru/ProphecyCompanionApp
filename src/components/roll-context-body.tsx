@@ -13,7 +13,9 @@ import type { TendanceRoll } from '@/lib/dice';
 import {
   awaitsConfirmation,
   contextValue,
+  diceCount,
   isNeutralDie,
+  naturalDie,
   type DiceMode,
   type RollContext,
   type RollResult,
@@ -73,7 +75,11 @@ export default function RollContextBody({
   result: RollResult | null;
 }) {
   const theme = useProphecyTheme();
-  const natural = result?.natural ?? null;
+  // Read off the THROW, not off `result`: the result is withheld while the
+  // difficulté field is empty, and whether a 10 wants confirming has nothing to
+  // do with the difficulté. Taking it from the result hid « Confirmer » the
+  // moment the field was cleared.
+  const natural = roll ? naturalDie(roll) : null;
   // Several dice, none kept yet: the throw is a question, not an answer.
   const choosing = roll != null && roll.mode === 'keep' && roll.keptIndex == null;
 
@@ -109,8 +115,10 @@ export default function RollContextBody({
         />
       </View>
       {/* Only worth asking with more than one die — and it has to be asked, since
-          effects grant both readings and nothing on the sheet says which. */}
-      {dice !== '1' ? (
+          effects grant both readings and nothing on the sheet says which. Read
+          through diceCount, so an emptied field counts as the one die it throws
+          rather than showing a toggle over nothing. */}
+      {diceCount(Number(dice)) > 1 ? (
         <ChipSelect
           label="Plusieurs dés"
           info="Garder : un seul dé compte, celui que vous choisissez. Sommer : les dés s’additionnent. Dans les deux cas, seul le premier dé (ou celui gardé) peut être un critique ou un échec critique."
