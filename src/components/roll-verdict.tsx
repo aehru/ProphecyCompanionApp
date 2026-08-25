@@ -36,6 +36,14 @@ export default function RollVerdict({
   // but the player still rolled one and the GM may care.
   const color = r.fumble || !r.success ? theme.colors.error : theme.colors.primary;
 
+  // Magic's own outcomes, named on their own line. Several can land at once — a
+  // Miracle on the kept die while a discarded one backlashes — and the reading
+  // states all of them rather than picking a winner: what a miraculous backlash
+  // means at the table is the GM's to settle, not the app's.
+  const spellNotes = r.verdicts
+    .filter((v) => v === 'miracle' || v === 'contrecoup')
+    .map((v) => (v === 'miracle' ? 'Miracle' : 'Contrecoup'));
+
   // The dice come first, spelled out when several were summed — « 4 + 6 + 3 »
   // shows where a 13 came from, which a lone total cannot. A KEPT die is printed
   // alone: the dice it beat are on screen above and never entered the sum.
@@ -56,6 +64,17 @@ export default function RollVerdict({
       {r.critical && !r.fumble ? (
         <Text variant="labelMedium" style={{ color: theme.colors.primary }}>
           Critique confirmé
+        </Text>
+      ) : null}
+      {spellNotes.length > 0 ? (
+        <Text
+          variant="labelMedium"
+          style={{
+            // A Contrecoup anywhere in the throw tints the line, even beside a
+            // Miracle: the backlash is the half a player must not miss.
+            color: spellNotes.includes('Contrecoup') ? theme.colors.error : theme.colors.primary,
+          }}>
+          {spellNotes.join(' · ')}
         </Text>
       ) : null}
       <Text style={[styles.sum, { color: theme.colors.onSurfaceVariant }]}>

@@ -1,21 +1,20 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import RollConfirmations from '@/components/roll-confirmations';
 import RollVerdict from '@/components/roll-verdict';
 import { TendanceDiceRow } from '@/components/tendance-die';
 import ChipSelect from '@/components/ui/chip-select';
 import DieChip from '@/components/ui/die-chip';
-import { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { TendanceRoll } from '@/lib/dice';
 import {
-  awaitsConfirmation,
   contextValue,
   diceCount,
   isNeutralDie,
-  naturalDie,
+  readDice,
   type DiceMode,
   type RollContext,
   type RollResult,
@@ -51,7 +50,7 @@ export default function RollContextBody({
   onDifficulty,
   roll,
   tendances,
-  confirmDie,
+  confirms,
   onKeep,
   onConfirm,
   result,
@@ -68,18 +67,22 @@ export default function RollContextBody({
   roll: RollThrow | null;
   /** The same dice as `roll`, carrying their colours, when it came from the trio. */
   tendances: TendanceRoll[] | null;
-  confirmDie: number | null;
+  /** Each die's reroll, by the same index — a cast on the trio can owe three. */
+  confirms: (number | null)[];
   onKeep: (index: number) => void;
-  onConfirm: () => void;
+  onConfirm: (index: number) => void;
   /** Null until the throw settles — a `keep` has no reading before its pick. */
   result: RollResult | null;
 }) {
   const theme = useProphecyTheme();
   // Read off the THROW, not off `result`: the result is withheld while the
-  // difficulté field is empty, and whether a 10 wants confirming has nothing to
+  // difficulté field is empty, and whether a die wants confirming has nothing to
   // do with the difficulté. Taking it from the result hid « Confirmer » the
   // moment the field was cleared.
-  const natural = roll ? naturalDie(roll) : null;
+  // The result already read every die; re-reading only for the case it withholds
+  // (an empty difficulté field) keeps the rows and the verdict describing the
+  // very same reading, and skips a second pass on every other render.
+  const readings = result?.readings ?? (roll ? readDice(roll, ctx, confirms) : []);
   // Several dice, none kept yet: the throw is a question, not an answer.
   const choosing = roll != null && roll.mode === 'keep' && roll.keptIndex == null;
 
@@ -129,8 +132,8 @@ export default function RollContextBody({
       ) : null}
 
       {/* The throw: coloured d10s when it came from the trio, plain chips
-          otherwise. Either way the confirmation die follows on its own row —
-          it belongs to no mode and never counts toward the total. */}
+          otherwise. The confirmation rerolls live below, one row per die that
+          owes one — a cast on the trio can owe three at once. */}
       {roll && tendances ? (
         <TendanceDiceRow
           rolls={tendances}
@@ -153,12 +156,6 @@ export default function RollContextBody({
           ))}
         </View>
       ) : null}
-      {confirmDie != null ? (
-        <View style={styles.dice}>
-          <DieChip value={confirmDie} size={DIE_SIZE} muted />
-        </View>
-      ) : null}
-
       {choosing ? (
         <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
           {tendances
@@ -167,18 +164,7 @@ export default function RollContextBody({
         </Text>
       ) : null}
 
-      {awaitsConfirmation(roll, confirmDie) && natural != null ? (
-        <View style={styles.confirmRow}>
-          <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
-            {natural === 10
-              ? `Un 10 : relancez, sous ${ctx.confirm} c’est un critique.`
-              : `Un 1 : relancez, au-dessus de ${ctx.confirm} c’est un échec critique.`}
-          </Text>
-          <Button mode="outlined" icon={dsIcon('dice')} onPress={onConfirm}>
-            Confirmer
-          </Button>
-        </View>
-      ) : null}
+      <RollConfirmations readings={readings} context={ctx} onConfirm={onConfirm} />
 
       {result ? <RollVerdict result={result} context={ctx} /> : null}
     </View>
@@ -192,6 +178,5 @@ const styles = StyleSheet.create({
   narrowField: { flexGrow: 0, flexBasis: 'auto', width: 48, minWidth: 0 },
   difficultyField: { flexGrow: 0, flexBasis: 'auto', width: 72, minWidth: 0 },
   dice: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
-  confirmRow: { alignItems: 'center', gap: 8 },
   hint: { fontSize: 12, textAlign: 'center' },
 });

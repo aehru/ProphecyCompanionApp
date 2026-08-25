@@ -50,18 +50,25 @@ import {
 interface RollState {
   /** The contextual throw and how it reads — see `lib/roll` RollThrow. */
   roll: RollThrow | null;
-  /**
-   * The trio as it was rolled, when the throw came from it — same dice as
-   * `roll.dice`, in the same order, plus the colour each belongs to. Keeping one
-   * is therefore the same `keptIndex` whichever way the dice are drawn.
-   */
-  tendances: TendanceRoll[] | null;
-  confirmDie: number | null;
+  /** Each die's confirmation reroll, by the same index — a cast can owe three. */
+  confirms: (number | null)[];
   /** The free-form XdY throw; never set in context (a test is D10s only). */
   freeform: number[] | null;
 }
 
-const EMPTY: RollState = { roll: null, tendances: null, confirmDie: null, freeform: null };
+const EMPTY: RollState = { roll: null, confirms: [], freeform: null };
+
+/**
+ * The trio as the dice rows want it — value plus colour, in throw order.
+ *
+ * DERIVED, never stored: `RollThrow.tendances` already carries the keys because
+ * the rules need them, and keeping a second parallel array of the same dice is
+ * how the two would come to disagree about which die is which.
+ */
+function tendanceRolls(t: RollThrow | null): TendanceRoll[] | null {
+  if (t?.tendances == null) return null;
+  return t.tendances.map((key, i) => ({ key, value: t.dice[i] }));
+}
 
 /**
  * Throw `n` D10 for a test. A single die needs no choosing, so it is kept on the
@@ -118,18 +125,32 @@ export default function DiceRollerDialog({
     const trio = rollTendances();
     // The trio is a `keep` throw whose dice happen to have colours: same shape,
     // same keptIndex, so nothing downstream needs a tendance special case.
+    // The throw carries the tendances themselves: on a cast they decide what a
+    // discarded die costs (see lib/roll readDice).
     setState({
       ...EMPTY,
-      roll: { dice: trio.map((t) => t.value), mode: 'keep', keptIndex: null },
-      tendances: trio,
+      roll: {
+        dice: trio.map((t) => t.value),
+        mode: 'keep',
+        keptIndex: null,
+        tendances: trio.map((t) => t.key),
+      },
     });
   };
-  /** Keeping a die settles the throw; the others stay on screen but stop counting. */
+  /**
+   * Keeping a die settles the throw. Every confirmation is dropped: which dice
+   * were discarded just changed, and on a cast that is exactly what decides
+   * which of them owed a reroll.
+   */
   const keep = (index: number) =>
-    setState((s) =>
-      s.roll ? { ...s, roll: { ...s.roll, keptIndex: index }, confirmDie: null } : s,
-    );
-  const confirm = () => setState((s) => ({ ...s, confirmDie: rollDie(DIE_SIDES) }));
+    setState((s) => (s.roll ? { ...s, roll: { ...s.roll, keptIndex: index }, confirms: [] } : s));
+  /** Reroll ONE die's confirmation — a cast can owe several, one per die. */
+  const confirm = (index: number) =>
+    setState((s) => {
+      const confirms = [...s.confirms];
+      confirms[index] = rollDie(DIE_SIDES);
+      return { ...s, confirms };
+    });
 
   // Changing what you are about to roll clears what you rolled: the dice on
   // screen must never belong to a different question than the one on display.
@@ -158,7 +179,7 @@ export default function DiceRollerDialog({
   // while a `keep` throw is still waiting to be picked from.
   const result: RollResult | null =
     context && state.roll != null && difficulty.trim() !== ''
-      ? resolveRoll(state.roll, context, Number(difficulty), state.confirmDie)
+      ? resolveRoll(state.roll, context, Number(difficulty), state.confirms)
       : null;
 
   return (
@@ -187,8 +208,8 @@ export default function DiceRollerDialog({
           difficulty={difficulty}
           onDifficulty={setDifficulty}
           roll={state.roll}
-          tendances={state.tendances}
-          confirmDie={state.confirmDie}
+          tendances={tendanceRolls(state.roll)}
+          confirms={state.confirms}
           onKeep={keep}
           onConfirm={confirm}
           result={result}
@@ -200,7 +221,7 @@ export default function DiceRollerDialog({
           sides={sides}
           onPickSides={pickSides}
           result={state.freeform}
-          tendances={state.tendances}
+          tendances={tendanceRolls(state.roll)}
         />
       )}
     </DsDialog>
