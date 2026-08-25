@@ -5,8 +5,7 @@ import RollContextBody from '@/components/roll-context-body';
 import RollFreeformBody from '@/components/roll-freeform-body';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
-import type { TendanceKey } from '@/constants/prophecy';
-import { rollDice, rollDie, rollTendances } from '@/lib/dice';
+import { rollDice, rollDie, rollTendances, type TendanceRoll } from '@/lib/dice';
 import {
   DEFAULT_DICE,
   DEFAULT_DIFFICULTY,
@@ -52,11 +51,11 @@ interface RollState {
   /** The contextual throw and how it reads — see `lib/roll` RollThrow. */
   roll: RollThrow | null;
   /**
-   * Which tendance each die of `roll` belongs to, in the same order, when the
-   * throw came from the trio. Parallel to `roll.dice` rather than a second list
-   * of dice, so keeping one is the same `keptIndex` in both cases.
+   * The trio as it was rolled, when the throw came from it — same dice as
+   * `roll.dice`, in the same order, plus the colour each belongs to. Keeping one
+   * is therefore the same `keptIndex` whichever way the dice are drawn.
    */
-  tendances: TendanceKey[] | null;
+  tendances: TendanceRoll[] | null;
   confirmDie: number | null;
   /** The free-form XdY throw; never set in context (a test is D10s only). */
   freeform: number[] | null;
@@ -111,7 +110,7 @@ export default function DiceRollerDialog({
   const rollNow = () =>
     setState(
       context
-        ? { ...EMPTY, roll: throwFor(diceCount(Number(dice)), mode) }
+        ? { ...EMPTY, roll: throwFor(Number(dice), mode) }
         : { ...EMPTY, freeform: rollDice(Math.max(1, parseInt(count, 10) || 1), sides) },
     );
   const rollTendance = () => {
@@ -121,7 +120,7 @@ export default function DiceRollerDialog({
     setState({
       ...EMPTY,
       roll: { dice: trio.map((t) => t.value), mode: 'keep', keptIndex: null },
-      tendances: trio.map((t) => t.key),
+      tendances: trio,
     });
   };
   /** Keeping a die settles the throw; the others stay on screen but stop counting. */
@@ -197,11 +196,7 @@ export default function DiceRollerDialog({
           sides={sides}
           onPickSides={pickSides}
           result={state.freeform}
-          tendances={
-            state.tendances && state.roll
-              ? state.roll.dice.map((value, i) => ({ key: state.tendances![i], value }))
-              : null
-          }
+          tendances={state.tendances}
         />
       )}
     </DsDialog>

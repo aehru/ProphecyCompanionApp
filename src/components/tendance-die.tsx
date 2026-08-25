@@ -131,22 +131,23 @@ export default function TendanceDie({
  */
 export function TendanceDiceRow({
   rolls,
-  selectedKey,
+  selectedIndex,
   onSelect,
 }: {
   rolls: readonly TendanceRoll[];
-  selectedKey?: TendanceRoll['key'] | null;
-  onSelect?: (roll: TendanceRoll) => void;
+  /** Addressed by POSITION, not by tendance: it is a `RollThrow.keptIndex`. */
+  selectedIndex?: number | null;
+  onSelect?: (index: number) => void;
 }) {
   return (
     <View style={styles.row}>
-      {rolls.map((roll) => (
+      {rolls.map((roll, i) => (
         <TendanceDie
           key={roll.key}
           roll={roll}
-          selected={selectedKey === roll.key}
-          dimmed={selectedKey != null && selectedKey !== roll.key}
-          onSelect={onSelect ? () => onSelect(roll) : undefined}
+          selected={selectedIndex === i}
+          dimmed={selectedIndex != null && selectedIndex !== i}
+          onSelect={onSelect ? () => onSelect(i) : undefined}
         />
       ))}
     </View>

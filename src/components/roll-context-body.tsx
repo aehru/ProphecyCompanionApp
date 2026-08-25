@@ -8,8 +8,8 @@ import { TendanceDiceRow } from '@/components/tendance-die';
 import ChipSelect from '@/components/ui/chip-select';
 import DieChip from '@/components/ui/die-chip';
 import { dsIcon } from '@/components/ui/icon';
-import type { TendanceKey } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import type { TendanceRoll } from '@/lib/dice';
 import {
   awaitsConfirmation,
   contextValue,
@@ -36,6 +36,9 @@ const MODES: { key: DiceMode; label: string }[] = [
   { key: 'sum', label: 'Sommer' },
 ];
 
+/** Bigger than the free-form roller's: these dice are the point of the screen. */
+const DIE_SIZE = 44;
+
 export default function RollContextBody({
   context: ctx,
   dice,
@@ -61,8 +64,8 @@ export default function RollContextBody({
   onDifficulty: (text: string) => void;
   /** What was thrown, or null before the first roll. */
   roll: RollThrow | null;
-  /** Set when the throw came from the trio: the tendance of each die, in order. */
-  tendances: TendanceKey[] | null;
+  /** The same dice as `roll`, carrying their colours, when it came from the trio. */
+  tendances: TendanceRoll[] | null;
   confirmDie: number | null;
   onKeep: (index: number) => void;
   onConfirm: () => void;
@@ -117,33 +120,34 @@ export default function RollContextBody({
         />
       ) : null}
 
-      {tendances && roll ? (
+      {/* The throw: coloured d10s when it came from the trio, plain chips
+          otherwise. Either way the confirmation die follows on its own row —
+          it belongs to no mode and never counts toward the total. */}
+      {roll && tendances ? (
         <TendanceDiceRow
-          rolls={roll.dice.map((value, i) => ({ key: tendances[i], value }))}
-          selectedKey={roll.keptIndex == null ? null : tendances[roll.keptIndex]}
-          onSelect={(r) => onKeep(tendances.indexOf(r.key))}
+          rolls={tendances}
+          selectedIndex={roll.keptIndex}
+          onSelect={onKeep}
         />
       ) : null}
-
       {roll && !tendances ? (
         <View style={styles.dice}>
           {roll.dice.map((value, i) => (
             <DieChip
               key={i}
               value={value}
-              size={44}
+              size={DIE_SIZE}
               neutral={isNeutralDie(roll, i)}
               selected={roll.mode === 'keep' && roll.dice.length > 1 && roll.keptIndex === i}
               onPress={roll.dice.length > 1 ? () => onKeep(i) : undefined}
               accessibilityLabel={`Garder le dé ${i + 1} : ${value}`}
             />
           ))}
-          {confirmDie != null ? <DieChip value={confirmDie} size={44} muted /> : null}
         </View>
       ) : null}
-      {tendances && confirmDie != null ? (
+      {confirmDie != null ? (
         <View style={styles.dice}>
-          <DieChip value={confirmDie} size={44} muted />
+          <DieChip value={confirmDie} size={DIE_SIZE} muted />
         </View>
       ) : null}
 
