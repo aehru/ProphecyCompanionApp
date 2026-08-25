@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -19,22 +19,45 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 export default function DieChip({
   value,
   muted,
+  neutral,
+  selected,
+  onPress,
+  accessibilityLabel,
   size = 40,
 }: {
   value: number;
   muted?: boolean;
+  /**
+   * A die that cannot crit or fumble — every die of a throw but the one the
+   * rules read (see `lib/roll` `isNeutralDie`). Drawn paler so « which die is
+   * the 10 that counts » is answered by looking, not by remembering.
+   */
+  neutral?: boolean;
+  /** The kept die of a `keep` throw: ringed, and never neutral. */
+  selected?: boolean;
+  onPress?: () => void;
+  accessibilityLabel?: string;
   size?: number;
 }) {
   const theme = useProphecyTheme();
   return (
-    <View
-      style={[
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityState={onPress ? { selected: !!selected } : undefined}
+      accessibilityLabel={onPress ? accessibilityLabel : undefined}
+      style={({ pressed }) => [
         styles.die,
         {
           minWidth: size,
           height: size,
-          borderColor: theme.prophecy.border,
+          borderColor: selected ? theme.colors.primary : theme.prophecy.border,
+          borderWidth: selected ? 2 : 1,
           backgroundColor: muted ? 'transparent' : theme.colors.surfaceVariant,
+          // The neutral dice step back rather than disappear: they still count
+          // toward a sum, they just cannot be the die that crits.
+          opacity: pressed ? 0.7 : neutral ? 0.5 : 1,
         },
       ]}>
       <Text
@@ -47,13 +70,12 @@ export default function DieChip({
         ]}>
         {value}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   die: {
-    borderWidth: 1,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',

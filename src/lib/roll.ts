@@ -1,15 +1,21 @@
 /**
- * The Prophecy test: one D10 against a difficulté, read in NR.
+ * The Prophecy test: D10 against a difficulté, read in NR.
  *
  * PURE (no React, no DB) like the other engines — the whole rule set is here so
  * a disagreement at the table can be settled by reading one file.
  *
  * The rules, in the order they apply:
  *
- *   total   = die + Σ context parts (+ CRIT_BONUS on a confirmed 10)
+ *   total   = the dice's share + Σ context parts (+ CRIT_BONUS on a confirmed 10)
  *   réussite when total ≥ difficulté
  *   NR      = one per full step of 5 ABOVE the difficulté — 15 succeeds at 0 NR,
  *             20 is 1 NR, 25 is 2 NR
+ *
+ * Usually one die, sometimes several: an effect may let you throw two and keep
+ * the better, another may let you add them up (see {@link DiceMode}). Whatever
+ * the count, **exactly one die can crit or fumble** — the one kept, or the FIRST
+ * thrown when summing; the rest are neutral however they land. Without that rule
+ * a handful of dice would make a critique a formality.
  *
  * A 10 and a 1 each call for ONE reroll, never a cascade, and the reroll never
  * adds to the die: it only decides whether the result is confirmed. A confirmed
@@ -17,6 +23,16 @@
  * critique — a FLAG, not an arithmetic penalty: the total stands as rolled and
  * what it costs is the GM's business, not the app's.
  */
+
+/**
+ * What several dice mean. Both exist because effects grant both: one may let you
+ * throw two and keep the better, another may let you add them together.
+ *
+ * - `keep` — the extras are alternatives; the player picks the one that stands.
+ *   The tendance trio is this mode with three coloured dice.
+ * - `sum` — the dice add up into one bigger die.
+ */
+export type DiceMode = 'keep' | 'sum';
 
 /** One term of a roll's context: a stat, a skill total, a tendance die kept. */
 export interface RollPart {
@@ -49,6 +65,16 @@ export interface RollContext {
   confirm: number;
   /** What that number is, for the explanation line: « Compétence ». */
   confirmLabel?: string;
+  /**
+   * How many D10 to throw. Some traits grant a second die on a whole family of
+   * rolls, « 2 dés sur tout ce qui touche au MENTAL »; nothing on the sheet
+   * models those yet, so this is only the starting value of a field the player
+   * can change. It is here so that when traits do land, the builder sets it and
+   * no screen has to learn the rule twice.
+   */
+  dice?: number;
+  /** Whether those extra dice are alternatives or addends. Same story as `dice`. */
+  diceMode?: DiceMode;
 }
 
 /** The difficulté a test starts at when the GM hasn't said otherwise. */
@@ -60,8 +86,70 @@ export const CRIT_BONUS = NR_STEP;
 /** Prophecy rolls a D10 and nothing else. */
 export const DIE_SIDES = 10;
 
+/** A test is one die unless something grants more. */
+export const DEFAULT_DICE = 1;
+/** A sane ceiling for the dice field — a test is never a fistful. */
+export const MAX_DICE = 5;
+
+/** Clamp whatever was typed into the dice field to a throwable count. */
+export function diceCount(input: number): number {
+  if (!Number.isFinite(input)) return DEFAULT_DICE;
+  return Math.min(MAX_DICE, Math.max(DEFAULT_DICE, Math.floor(input)));
+}
+
+/**
+ * One throw of the dice, before the rules read it.
+ *
+ * **Index 0 is not just the first die, it is the only one that can crit or
+ * fumble.** When several dice are thrown at once the others are neutral,
+ * whatever they come up — otherwise a fistful of dice would turn a critique into
+ * a formality. That makes the throw ORDER meaningful: nothing may sort `dice`.
+ */
+export interface RollThrow {
+  dice: number[];
+  mode: DiceMode;
+  /** `keep` only: which die stands. null until the player has chosen. */
+  keptIndex: number | null;
+}
+
+/** The one-die throw every ordinary test is. */
+export function singleThrow(die: number): RollThrow {
+  return { dice: [die], mode: 'keep', keptIndex: 0 };
+}
+
+/**
+ * The die the RULES read — the one a 10 or a 1 is about.
+ *
+ * In `sum` it is always the first die thrown; in `keep` it is the one kept, so
+ * there is none until the player picks. Never the sum itself: a 10 means the
+ * face, and 7 + 3 is not a 10.
+ */
+export function naturalDie(t: RollThrow): number | null {
+  if (t.mode === 'sum') return t.dice[0] ?? null;
+  return t.keptIndex == null ? null : (t.dice[t.keptIndex] ?? null);
+}
+
+/** True for the dice that are along for the ride and cannot crit or fumble. */
+export function isNeutralDie(t: RollThrow, index: number): boolean {
+  if (t.dice.length < 2) return false;
+  return t.mode === 'sum' ? index > 0 : t.keptIndex !== index;
+}
+
+/** What the dice contribute to the total, or null while a `keep` awaits its pick. */
+export function throwTotal(t: RollThrow): number | null {
+  if (t.mode === 'sum') return t.dice.reduce((sum, d) => sum + d, 0);
+  return t.keptIndex == null ? null : (t.dice[t.keptIndex] ?? null);
+}
+
 export interface RollResult {
-  die: number;
+  /** Every die thrown, in throw order. */
+  dice: number[];
+  mode: DiceMode;
+  keptIndex: number | null;
+  /** The die the rules read: first thrown, or the one kept. */
+  natural: number;
+  /** The dice's share of the total — the sum, or the kept die alone. */
+  diceTotal: number;
   /** The reroll, once it has been made. null = not rolled (or not called for). */
   confirmDie: number | null;
   /** A 10 confirmed by a reroll STRICTLY under `confirm`. */
@@ -88,35 +176,50 @@ export function needsConfirmation(die: number): boolean {
 }
 
 /**
- * True while a roll is still owed its confirmation — the die asked for a reroll
- * and it hasn't been made. Here rather than in the dialog because "is this roll
- * finished" is a rule, and the UI should not be the second place that knows it.
+ * True while a roll is still owed its confirmation — the die the rules read
+ * asked for a reroll and it hasn't been made. Here rather than in the dialog
+ * because "is this roll finished" is a rule, and the UI should not be the second
+ * place that knows it.
  */
-export function awaitsConfirmation(die: number | null, confirmDie: number | null): boolean {
-  return die != null && confirmDie == null && needsConfirmation(die);
+export function awaitsConfirmation(t: RollThrow | null, confirmDie: number | null): boolean {
+  if (t == null || confirmDie != null) return false;
+  const die = naturalDie(t);
+  return die != null && needsConfirmation(die);
 }
 
 /**
- * Read a die against a context and a difficulté.
+ * Read a throw against a context and a difficulté.
  *
- * `confirmDie` is null until the player asks for the reroll — an unconfirmed 10
- * is simply a 10, which is why this is safe to call before confirming and again
- * after. Editing the difficulté re-reads the same dice rather than rolling new
- * ones: the verdict moves, the dice don't.
+ * Returns null while the throw isn't settled — a `keep` whose die hasn't been
+ * picked has no result yet, and saying so here keeps the UI from having to know
+ * why. Otherwise safe to call at any point: `confirmDie` is null until the
+ * player asks for the reroll, an unconfirmed 10 is simply a 10, and editing the
+ * difficulté re-reads the same dice rather than rolling new ones — the verdict
+ * moves, the dice don't.
  */
 export function resolveRoll(
-  die: number,
+  t: RollThrow,
   ctx: RollContext,
   difficulty: number,
   confirmDie: number | null = null,
-): RollResult {
-  const critical = die === DIE_SIDES && confirmDie != null && confirmDie < ctx.confirm;
-  const fumble = die === 1 && confirmDie != null && confirmDie > ctx.confirm;
+): RollResult | null {
+  const diceTotal = throwTotal(t);
+  const natural = naturalDie(t);
+  if (diceTotal == null || natural == null) return null;
+
+  // Read off the natural die, never the sum: 7 + 3 is a total of 10 and not a
+  // face of 10, and only a face can be confirmed.
+  const critical = natural === DIE_SIDES && confirmDie != null && confirmDie < ctx.confirm;
+  const fumble = natural === 1 && confirmDie != null && confirmDie > ctx.confirm;
   const bonus = critical ? CRIT_BONUS : 0;
-  const total = die + contextValue(ctx) + bonus;
+  const total = diceTotal + contextValue(ctx) + bonus;
   const success = total >= difficulty;
   return {
-    die,
+    dice: t.dice,
+    mode: t.mode,
+    keptIndex: t.keptIndex,
+    natural,
+    diceTotal,
     confirmDie,
     critical,
     fumble,

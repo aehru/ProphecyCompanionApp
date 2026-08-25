@@ -6,13 +6,17 @@ import RollFreeformBody from '@/components/roll-freeform-body';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import type { TendanceKey } from '@/constants/prophecy';
-import { rollDice, rollDie, rollTendances, type TendanceRoll } from '@/lib/dice';
+import { rollDice, rollDie, rollTendances } from '@/lib/dice';
 import {
+  DEFAULT_DICE,
   DEFAULT_DIFFICULTY,
   DIE_SIDES,
+  diceCount,
   resolveRoll,
+  type DiceMode,
   type RollContext,
   type RollResult,
+  type RollThrow,
 } from '@/lib/roll';
 
 /**
@@ -45,23 +49,34 @@ import {
  * five independent setters and a "remember to clear first" helper allowed.
  */
 interface RollState {
-  /** The die the reading rests on — null while a trio is waiting to be kept. */
-  die: number | null;
+  /** The contextual throw and how it reads — see `lib/roll` RollThrow. */
+  roll: RollThrow | null;
+  /**
+   * Which tendance each die of `roll` belongs to, in the same order, when the
+   * throw came from the trio. Parallel to `roll.dice` rather than a second list
+   * of dice, so keeping one is the same `keptIndex` in both cases.
+   */
+  tendances: TendanceKey[] | null;
   confirmDie: number | null;
-  /** Which tendance was kept, for the row's selected ring. */
-  kept: TendanceKey | null;
-  tendances: TendanceRoll[] | null;
-  /** The free-form XdY throw; never set in context (a test is one D10). */
+  /** The free-form XdY throw; never set in context (a test is D10s only). */
   freeform: number[] | null;
 }
 
-const EMPTY: RollState = {
-  die: null,
-  confirmDie: null,
-  kept: null,
-  tendances: null,
-  freeform: null,
-};
+const EMPTY: RollState = { roll: null, tendances: null, confirmDie: null, freeform: null };
+
+/**
+ * Throw `n` D10 for a test. A single die needs no choosing, so it is kept on the
+ * spot — that is what makes the ordinary one-die roll show its verdict straight
+ * away while a handful waits for a pick.
+ */
+function throwFor(n: number, mode: DiceMode): RollThrow {
+  const count = diceCount(n);
+  return {
+    dice: rollDice(count, DIE_SIDES),
+    mode,
+    keptIndex: mode === 'keep' && count === 1 ? 0 : null,
+  };
+}
 
 export default function DiceRollerDialog({
   sides,
@@ -78,41 +93,69 @@ export default function DiceRollerDialog({
 }) {
   const [count, setCount] = useState('1');
   const [difficulty, setDifficulty] = useState(String(DEFAULT_DIFFICULTY));
+  // How many D10 a test throws, and what several of them mean. Both start from
+  // the context so a trait can one day grant « 2 dés, sommés » without any
+  // screen learning the rule; today nothing on the sheet models one, so they are
+  // the player's to set.
+  const [dice, setDice] = useState(String(context?.dice ?? DEFAULT_DICE));
+  const [mode, setMode] = useState<DiceMode>(context?.diceMode ?? 'keep');
   // A tap on a value is a request to roll, so a contextual dialog opens with its
-  // die already rolled. Seeded in the initializer rather than in an effect: an
+  // dice already thrown. Seeded in the initializer rather than in an effect: an
   // effect would render the empty state first and then set state from it.
-  const [roll, setRoll] = useState<RollState>(() =>
-    context ? { ...EMPTY, die: rollDie(DIE_SIDES) } : EMPTY,
+  const [state, setState] = useState<RollState>(() =>
+    context
+      ? { ...EMPTY, roll: throwFor(context.dice ?? DEFAULT_DICE, context.diceMode ?? 'keep') }
+      : EMPTY,
   );
 
   const rollNow = () =>
-    setRoll(
+    setState(
       context
-        ? { ...EMPTY, die: rollDie(DIE_SIDES) }
+        ? { ...EMPTY, roll: throwFor(diceCount(Number(dice)), mode) }
         : { ...EMPTY, freeform: rollDice(Math.max(1, parseInt(count, 10) || 1), sides) },
     );
-  const rollTendance = () => setRoll({ ...EMPTY, tendances: rollTendances() });
-  /** Keeping a tendance die makes it THE die; the other two are discarded. */
-  const keepTendance = (r: TendanceRoll) =>
-    setRoll((s) => ({ ...s, kept: r.key, die: r.value, confirmDie: null }));
-  const confirm = () => setRoll((s) => ({ ...s, confirmDie: rollDie(DIE_SIDES) }));
+  const rollTendance = () => {
+    const trio = rollTendances();
+    // The trio is a `keep` throw whose dice happen to have colours: same shape,
+    // same keptIndex, so nothing downstream needs a tendance special case.
+    setState({
+      ...EMPTY,
+      roll: { dice: trio.map((t) => t.value), mode: 'keep', keptIndex: null },
+      tendances: trio.map((t) => t.key),
+    });
+  };
+  /** Keeping a die settles the throw; the others stay on screen but stop counting. */
+  const keep = (index: number) =>
+    setState((s) =>
+      s.roll ? { ...s, roll: { ...s.roll, keptIndex: index }, confirmDie: null } : s,
+    );
+  const confirm = () => setState((s) => ({ ...s, confirmDie: rollDie(DIE_SIDES) }));
 
   // Changing what you are about to roll clears what you rolled: the dice on
   // screen must never belong to a different question than the one on display.
   const pickSides = (s: number) => {
     onSidesChange(s);
-    setRoll(EMPTY);
+    setState(EMPTY);
   };
   const setCountSafe = (t: string) => {
     setCount(t);
-    setRoll(EMPTY);
+    setState(EMPTY);
+  };
+  const setDiceSafe = (t: string) => {
+    setDice(t);
+    setState(EMPTY);
+  };
+  const setModeSafe = (m: DiceMode) => {
+    setMode(m);
+    setState(EMPTY);
   };
 
   // Read on every render rather than stored: editing the difficulté has to move
-  // the verdict WITHOUT touching the dice.
+  // the verdict WITHOUT touching the dice. resolveRoll returns null on its own
+  // while a `keep` throw is still waiting to be picked from.
   const result: RollResult | null =
-    context && roll.die != null && difficulty.trim() !== ''
-      ? resolveRoll(roll.die, context, Number(difficulty), roll.confirmDie)
+    context && state.roll != null && difficulty.trim() !== ''
+      ? resolveRoll(state.roll, context, Number(difficulty), state.confirmDie)
       : null;
 
   return (
@@ -134,13 +177,16 @@ export default function DiceRollerDialog({
       {context ? (
         <RollContextBody
           context={context}
+          dice={dice}
+          onDice={setDiceSafe}
+          mode={mode}
+          onMode={setModeSafe}
           difficulty={difficulty}
           onDifficulty={setDifficulty}
-          die={roll.die}
-          confirmDie={roll.confirmDie}
-          tendances={roll.tendances}
-          selectedKey={roll.kept}
-          onSelectTendance={keepTendance}
+          roll={state.roll}
+          tendances={state.tendances}
+          confirmDie={state.confirmDie}
+          onKeep={keep}
           onConfirm={confirm}
           result={result}
         />
@@ -150,8 +196,12 @@ export default function DiceRollerDialog({
           onCount={setCountSafe}
           sides={sides}
           onPickSides={pickSides}
-          result={roll.freeform}
-          tendances={roll.tendances}
+          result={state.freeform}
+          tendances={
+            state.tendances && state.roll
+              ? state.roll.dice.map((value, i) => ({ key: state.tendances![i], value }))
+              : null
+          }
         />
       )}
     </DsDialog>

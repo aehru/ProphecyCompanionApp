@@ -36,8 +36,14 @@ export default function RollVerdict({
   // but the player still rolled one and the GM may care.
   const color = r.fumble || !r.success ? theme.colors.error : theme.colors.primary;
 
+  // The dice come first, spelled out when several were summed — « 4 + 6 + 3 »
+  // shows where a 13 came from, which a lone total cannot. A KEPT die is printed
+  // alone: the dice it beat are on screen above and never entered the sum.
+  const diceTerm =
+    r.mode === 'sum' && r.dice.length > 1 ? r.dice.join(' + ') : `${r.diceTotal}`;
+
   const terms = [
-    `${r.die}`,
+    diceTerm,
     ...ctx.parts.map((p) => `${term(p.value)} (${p.label})`),
     r.critical ? `+${r.bonus} (critique)` : null,
   ].filter(Boolean);

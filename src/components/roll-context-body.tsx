@@ -5,11 +5,20 @@ import { Button, Text } from 'react-native-paper';
 import NumberField from '@/components/number-field';
 import RollVerdict from '@/components/roll-verdict';
 import { TendanceDiceRow } from '@/components/tendance-die';
+import ChipSelect from '@/components/ui/chip-select';
 import DieChip from '@/components/ui/die-chip';
 import { dsIcon } from '@/components/ui/icon';
+import type { TendanceKey } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import type { TendanceRoll } from '@/lib/dice';
-import { awaitsConfirmation, contextValue, type RollContext, type RollResult } from '@/lib/roll';
+import {
+  awaitsConfirmation,
+  contextValue,
+  isNeutralDie,
+  type DiceMode,
+  type RollContext,
+  type RollResult,
+  type RollThrow,
+} from '@/lib/roll';
 
 /**
  * The body of a roll made AGAINST something — a skill's total, a stat, a sum of
@@ -17,42 +26,53 @@ import { awaitsConfirmation, contextValue, type RollContext, type RollResult } f
  * « Lancer » / « Tendances » buttons in the actions row.
  *
  * The order on screen is the order of the gesture: what you are rolling against,
- * the difficulté you are rolling at, the dice, then the reading. The difficulté
- * sits ABOVE the dice on purpose — it is the one number a player edits after
- * seeing the result (the GM says « non, 20 »), and re-reading the same dice
- * against it must not look like a reroll.
+ * how you are rolling it, the dice, then the reading. The controls sit ABOVE the
+ * dice on purpose — the difficulté is the one number a player edits after seeing
+ * the result (the GM says « non, 20 »), and re-reading the same dice against it
+ * must not look like a reroll.
  */
+const MODES: { key: DiceMode; label: string }[] = [
+  { key: 'keep', label: 'Garder' },
+  { key: 'sum', label: 'Sommer' },
+];
+
 export default function RollContextBody({
   context: ctx,
+  dice,
+  onDice,
+  mode,
+  onMode,
   difficulty,
   onDifficulty,
-  die,
-  confirmDie,
+  roll,
   tendances,
-  selectedKey,
-  onSelectTendance,
+  confirmDie,
+  onKeep,
   onConfirm,
   result,
 }: {
   context: RollContext;
   /** Held as text, not a number: an empty field must stay empty while typing. */
+  dice: string;
+  onDice: (text: string) => void;
+  mode: DiceMode;
+  onMode: (mode: DiceMode) => void;
   difficulty: string;
   onDifficulty: (text: string) => void;
-  /** The die the roll rests on — null while a tendance trio awaits its pick. */
-  die: number | null;
+  /** What was thrown, or null before the first roll. */
+  roll: RollThrow | null;
+  /** Set when the throw came from the trio: the tendance of each die, in order. */
+  tendances: TendanceKey[] | null;
   confirmDie: number | null;
-  tendances: TendanceRoll[] | null;
-  selectedKey: TendanceRoll['key'] | null;
-  onSelectTendance: (roll: TendanceRoll) => void;
+  onKeep: (index: number) => void;
   onConfirm: () => void;
-  /** Null until a die is settled, or while the difficulté field is empty. */
+  /** Null until the throw settles — a `keep` has no reading before its pick. */
   result: RollResult | null;
 }) {
   const theme = useProphecyTheme();
-  const chips = [
-    die != null && !tendances ? { key: 'die', value: die, muted: false } : null,
-    confirmDie != null ? { key: 'confirm', value: confirmDie, muted: true } : null,
-  ].filter((c) => c != null);
+  const natural = result?.natural ?? null;
+  // Several dice, none kept yet: the throw is a question, not an answer.
+  const choosing = roll != null && roll.mode === 'keep' && roll.keptIndex == null;
 
   return (
     <View style={styles.wrap}>
@@ -67,7 +87,15 @@ export default function RollContextBody({
         </Text>
       </View>
 
-      <View style={styles.difficulty}>
+      <View style={styles.controls}>
+        <NumberField
+          fieldKey="dice"
+          label="Dés"
+          value={dice}
+          onChange={(_, t) => onDice(t)}
+          maxLength={1}
+          style={styles.narrowField}
+        />
         <NumberField
           fieldKey="difficulty"
           label="Difficulté"
@@ -77,35 +105,60 @@ export default function RollContextBody({
           style={styles.difficultyField}
         />
       </View>
-
-      {tendances ? (
-        <TendanceDiceRow
-          rolls={tendances}
-          selectedKey={selectedKey}
-          onSelect={onSelectTendance}
+      {/* Only worth asking with more than one die — and it has to be asked, since
+          effects grant both readings and nothing on the sheet says which. */}
+      {dice !== '1' ? (
+        <ChipSelect
+          label="Plusieurs dés"
+          info="Garder : un seul dé compte, celui que vous choisissez. Sommer : les dés s’additionnent. Dans les deux cas, seul le premier dé (ou celui gardé) peut être un critique ou un échec critique."
+          options={MODES}
+          value={mode}
+          onChange={(k) => onMode(k as DiceMode)}
         />
       ) : null}
-      {tendances && selectedKey == null ? (
-        <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
-          Gardez le dé de la tendance que vous invoquez.
-        </Text>
+
+      {tendances && roll ? (
+        <TendanceDiceRow
+          rolls={roll.dice.map((value, i) => ({ key: tendances[i], value }))}
+          selectedKey={roll.keptIndex == null ? null : tendances[roll.keptIndex]}
+          onSelect={(r) => onKeep(tendances.indexOf(r.key))}
+        />
       ) : null}
 
-      {/* One row for the dice that are still on the table. The kept die is drawn
-          here ONLY when it didn't come from the trio — a tendance die is already
-          on screen in its own colours, and drawing it twice reads as two rolls. */}
-      {chips.length > 0 ? (
+      {roll && !tendances ? (
         <View style={styles.dice}>
-          {chips.map((c) => (
-            <DieChip key={c.key} value={c.value} muted={c.muted} size={44} />
+          {roll.dice.map((value, i) => (
+            <DieChip
+              key={i}
+              value={value}
+              size={44}
+              neutral={isNeutralDie(roll, i)}
+              selected={roll.mode === 'keep' && roll.dice.length > 1 && roll.keptIndex === i}
+              onPress={roll.dice.length > 1 ? () => onKeep(i) : undefined}
+              accessibilityLabel={`Garder le dé ${i + 1} : ${value}`}
+            />
           ))}
+          {confirmDie != null ? <DieChip value={confirmDie} size={44} muted /> : null}
+        </View>
+      ) : null}
+      {tendances && confirmDie != null ? (
+        <View style={styles.dice}>
+          <DieChip value={confirmDie} size={44} muted />
         </View>
       ) : null}
 
-      {awaitsConfirmation(die, confirmDie) ? (
+      {choosing ? (
+        <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
+          {tendances
+            ? 'Gardez le dé de la tendance que vous invoquez.'
+            : 'Gardez le dé qui compte.'}
+        </Text>
+      ) : null}
+
+      {awaitsConfirmation(roll, confirmDie) && natural != null ? (
         <View style={styles.confirmRow}>
           <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
-            {die === 10
+            {natural === 10
               ? `Un 10 : relancez, sous ${ctx.confirm} c’est un critique.`
               : `Un 1 : relancez, au-dessus de ${ctx.confirm} c’est un échec critique.`}
           </Text>
@@ -123,9 +176,10 @@ export default function RollContextBody({
 const styles = StyleSheet.create({
   wrap: { gap: 12 },
   header: { alignItems: 'center', gap: 2 },
-  difficulty: { alignItems: 'center' },
+  controls: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', gap: 12 },
+  narrowField: { flexGrow: 0, flexBasis: 'auto', width: 48, minWidth: 0 },
   difficultyField: { flexGrow: 0, flexBasis: 'auto', width: 72, minWidth: 0 },
-  dice: { flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  dice: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
   confirmRow: { alignItems: 'center', gap: 8 },
   hint: { fontSize: 12, textAlign: 'center' },
 });
