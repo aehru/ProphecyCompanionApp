@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, IconButton } from 'react-native-paper';
 
+import type { SkillLineData } from '@/components/campaign/skill-groups-view';
 import AddSkillDialog from '@/components/skills/add-skill-dialog';
 import SkillsEditList from '@/components/skills/skills-edit-list';
 import SkillsReadPage from '@/components/skills/skills-read-page';
@@ -18,6 +19,7 @@ import TabPager from '@/components/ui/tab-pager';
 import { ATTRIBUTS } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSkillGroups } from '@/hooks/use-skill-groups';
@@ -59,6 +61,7 @@ export default function CharacterSkillsScreen() {
   const { char, state } = useCharacterState(numId, { reloadOnFocus: true });
   const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
+  const { open: openRoller } = useDiceRoller();
   const [editing, setEditing] = useEditToggle(navigation);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
@@ -82,6 +85,22 @@ export default function CharacterSkillsScreen() {
     effects: effectList,
     wound,
   });
+
+  // Tapping a TOT rolls against that skill. The context carries BOTH numbers the
+  // rules need and they are not the same one: the TOT is what the die adds to,
+  // while a 10 or a 1 is confirmed against the compétence's own points — a total
+  // of 12 could never be undercut by a D10 (see lib/roll).
+  const rollSkill = useCallback(
+    (skill: SkillLineData) => {
+      openRoller({
+        label: skill.name,
+        parts: [{ label: skill.name, value: skill.total }],
+        confirm: skill.value,
+        confirmLabel: 'Compétence',
+      });
+    },
+    [openRoller],
+  );
 
   const clearFocus = useCallback(() => setPendingFocus(null), []);
   const closeSearch = useCallback(() => {
@@ -155,6 +174,7 @@ export default function CharacterSkillsScreen() {
             <SkillsReadPage
               group={pageGroups.find((g) => g.key === attr.key)}
               attrVal={rec[attr.key] ?? 0}
+              onRoll={rollSkill}
             />
           )}
       </TabPage>
