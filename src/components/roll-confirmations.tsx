@@ -6,7 +6,7 @@ import DieChip from '@/components/ui/die-chip';
 import { dsIcon } from '@/components/ui/icon';
 import { TENDANCE_BY_KEY } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import type { DieReading, RollContext } from '@/lib/roll';
+import type { DieReading, DieVerdict, RollContext } from '@/lib/roll';
 
 /**
  * The dice that still have something to say, one row each.
@@ -40,7 +40,7 @@ export default function RollConfirmations({
           <View style={styles.text}>
             <Text style={[styles.title, { color: theme.colors.onSurface }]}>{dieName(r)}</Text>
             <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
-              {explain(r, ctx)}
+              {explain(r, ctx.confirm)}
             </Text>
           </View>
           {r.confirmDie != null ? <DieChip value={r.confirmDie} size={34} muted /> : null}
@@ -65,29 +65,33 @@ function dieName(r: DieReading): string {
   return `${label} ${r.value}`;
 }
 
-/** What this die is waiting for, or what it turned out to mean. */
-function explain(r: DieReading, ctx: RollContext): string {
-  const cast = ctx.kind === 'cast';
+/** The French for each outcome. The only thing this file knows about them. */
+const VERDICT: Record<DieVerdict, string> = {
+  critique: 'critique',
+  fumble: 'échec critique',
+  miracle: 'miracle',
+  contrecoup: 'contrecoup',
+};
+
+/**
+ * What this die is waiting for, or what it turned out to mean.
+ *
+ * Which outcome is at stake comes from the reading's `potential` — the engine
+ * settled that from kept/discarded and ordinary/cast, and working it out a
+ * second time here is how the screen would come to disagree with the rules.
+ */
+function explain(r: DieReading, confirm: number): string {
   if (r.automatic) return 'Écarté : contrecoup automatique.';
-  if (r.verdict === 'miracle') return 'Miracle confirmé.';
-  if (r.verdict === 'contrecoup') return 'Contrecoup confirmé.';
-  if (r.verdict === 'critique') return 'Critique confirmé.';
-  if (r.verdict === 'fumble') return 'Échec critique confirmé.';
+  if (r.verdict) return `${capitalize(VERDICT[r.verdict])} confirmé.`;
   if (r.confirmDie != null) return 'Non confirmé.';
-  // Still awaiting: say what the reroll has to do, and what it would cost.
-  const outcome = r.natural
-    ? r.value === 1
-      ? cast
-        ? 'un contrecoup'
-        : 'un échec critique'
-      : cast
-        ? 'un miracle'
-        : 'un critique'
-    : 'un contrecoup';
+  if (r.potential == null) return '';
+  const outcome = `un ${VERDICT[r.potential]}`;
   return r.value === 1
-    ? `Relancez : au-dessus de ${ctx.confirm}, c’est ${outcome}.`
-    : `Relancez : sous ${ctx.confirm}, c’est ${outcome}.`;
+    ? `Relancez : au-dessus de ${confirm}, c’est ${outcome}.`
+    : `Relancez : sous ${confirm}, c’est ${outcome}.`;
 }
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const styles = StyleSheet.create({
   wrap: { gap: 8 },
