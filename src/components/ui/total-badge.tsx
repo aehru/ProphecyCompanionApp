@@ -32,6 +32,11 @@ export default function TotalBadge({
     <Pressable
       onPress={onPress}
       disabled={!onPress}
+      // The badge is ~34×24 — comfortably readable, well under a thumb. The slop
+      // buys back a real touch target without growing the row. Kept modest, and
+      // NOT applied to the skills table's TOT badge: rows there are 10dp apart,
+      // where overlapping slop would roll the neighbouring compétence.
+      hitSlop={onPress ? { top: 10, bottom: 10, left: 8, right: 8 } : undefined}
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => [

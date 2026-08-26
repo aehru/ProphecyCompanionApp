@@ -123,6 +123,10 @@ export default function DiceRollerDialog({
     );
   const rollTendance = () => {
     const trio = rollTendances();
+    // The trio is always kept-from, never summed: leaving the toggle on
+    // « Sommer » would have it contradict the three dice it sits above, and the
+    // hint underneath telling the player to keep one.
+    setMode('keep');
     // The trio is a `keep` throw whose dice happen to have colours: same shape,
     // same keptIndex, so nothing downstream needs a tendance special case.
     // The throw carries the tendances themselves: on a cast they decide what a
