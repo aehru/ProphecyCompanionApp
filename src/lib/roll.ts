@@ -199,6 +199,14 @@ export interface DieReading {
   automatic: boolean;
   /** The reroll made for THIS die, once it has been made. */
   confirmDie: number | null;
+  /**
+   * What a confirmation on this die WOULD produce — null on a face that asks for
+   * nothing. Exposed so the UI can say « sous 3, c'est un miracle » without
+   * working out from natural/kept/cast which name applies: that is the rule, and
+   * it is settled here.
+   */
+  potential: DieVerdict | null;
+  /** What it actually produced: `potential` once the reroll confirmed it. */
   verdict: DieVerdict | null;
 }
 
@@ -252,6 +260,7 @@ export function readDice(
       awaiting: false,
       automatic: false,
       confirmDie: confirms[index] ?? null,
+      potential: null,
       verdict: null,
     };
     if (pending) return base;
@@ -260,7 +269,7 @@ export function readDice(
     if (!base.natural && (!cast || !trio)) return base;
     // …and the one case that never gets to reroll.
     if (!base.natural && value === 1 && tendance === fluctuation) {
-      return { ...base, automatic: true, verdict: 'contrecoup' };
+      return { ...base, automatic: true, potential: 'contrecoup', verdict: 'contrecoup' };
     }
 
     // Every remaining die takes the SAME test — a 10 rerolls under the confirm
@@ -273,21 +282,11 @@ export function readDice(
         : ['critique', 'fumble'];
 
     const reroll = base.confirmDie;
-    if (value === DIE_SIDES) {
-      return {
-        ...base,
-        awaiting: reroll == null,
-        verdict: confirmsHigh(reroll, ctx.confirm) ? high : null,
-      };
-    }
-    if (value === 1) {
-      return {
-        ...base,
-        awaiting: reroll == null,
-        verdict: confirmsLow(reroll, ctx.confirm) ? low : null,
-      };
-    }
-    return base;
+    const potential = value === DIE_SIDES ? high : value === 1 ? low : null;
+    if (potential == null) return base;
+    const confirmed =
+      value === DIE_SIDES ? confirmsHigh(reroll, ctx.confirm) : confirmsLow(reroll, ctx.confirm);
+    return { ...base, potential, awaiting: reroll == null, verdict: confirmed ? potential : null };
   });
 }
 

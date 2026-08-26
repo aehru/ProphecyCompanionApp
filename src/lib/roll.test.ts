@@ -347,3 +347,32 @@ describe('casting without the tendances', () => {
     expect(verdicts(summed, cast, [2])).toEqual(['miracle']);
   });
 });
+
+describe('what a die is waiting for', () => {
+  it('names the outcome a confirmation would produce, before it is made', () => {
+    // The screen reads this instead of working out kept/discarded × cast again.
+    expect(readDice(singleThrow(10), cast)[0]).toMatchObject({
+      potential: 'miracle',
+      verdict: null,
+      awaiting: true,
+    });
+    expect(readDice(singleThrow(10), skill)[0]).toMatchObject({ potential: 'critique' });
+    expect(readDice(trio([4, 10, 5], 0), cast)[1]).toMatchObject({ potential: 'contrecoup' });
+  });
+
+  it('leaves potential empty on a face that asks for nothing', () => {
+    expect(readDice(singleThrow(7), cast)[0]).toMatchObject({ potential: null, awaiting: false });
+  });
+
+  it('promotes potential to verdict once the reroll confirms it', () => {
+    expect(readDice(singleThrow(10), cast, [2])[0]).toMatchObject({
+      potential: 'miracle',
+      verdict: 'miracle',
+    });
+    // A reroll that fails to confirm leaves the potential standing, unrealised.
+    expect(readDice(singleThrow(10), cast, [9])[0]).toMatchObject({
+      potential: 'miracle',
+      verdict: null,
+    });
+  });
+});
