@@ -10,12 +10,17 @@ appId: fr.aehru.prophecyapp
 tags:
   - smoke
 ---
-- launchApp:
-    clearState: true
+- runFlow:
+    file: subflows/launch.yaml
 
 - assertVisible:
     id: 'characters-empty'
 
+# The generator lives on the Campagnes tab: it is GM work, not the way a player
+# creates their character. Saving lands back on the character list all the same,
+# which is where the PNJs are written.
+- tapOn:
+    id: 'tab-campagnes'
 - tapOn:
     id: 'generate-npc'
 # The screen is up once its « Relancer » is on it.

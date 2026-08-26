@@ -8,8 +8,8 @@ appId: fr.aehru.prophecyapp
 tags:
   - smoke
 ---
-- launchApp:
-    clearState: true
+- runFlow:
+    file: subflows/launch.yaml
 
 # Fresh install: the DB is empty, so the empty state is the END state — and it
 # must arrive after the spinner, never instead of it.

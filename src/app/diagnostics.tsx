@@ -1,6 +1,6 @@
 import { type Href, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import LevelSwitcher from '@/components/diagnostics/level-switcher';
@@ -10,6 +10,7 @@ import SectionCard from '@/components/ui/section-card';
 import { contentWidth } from '@/hooks/use-layout';
 import { useLogTail } from '@/hooks/use-log-tail';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { APP_VERSION, log, setLogLevel, SESSION_ID, type LogEntry, type LogLevel } from '@/lib/log';
 import { copyDiagnostics, shareDiagnostics } from '@/lib/log/share';
 

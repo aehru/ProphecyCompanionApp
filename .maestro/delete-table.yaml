@@ -1,17 +1,20 @@
-# `Alert.alert` — the one confirmation path the web suite CANNOT reach, because
-# Alert is a no-op on react-native-web. Every destructive action in the app goes
-# through one, so nothing about them is covered until a device runs this.
+# A destructive confirmation, end to end on a device.
 #
-# The campaign delete is the flow used here rather than the character one on
-# purpose: its confirm button reads « Confirmer », while the character alert has
-# a button whose text repeats its own title (« Supprimer »), which no text
-# selector can tell apart.
+# It used to be the ONLY place these were testable: `Alert.alert` is a no-op on
+# react-native-web, so the web suite could not reach a single one. Since the
+# switch to `@/lib/alert` (a DsDialog on every platform) `e2e/alerts.spec.ts`
+# covers the same shape in the browser — this flow now guards the OTHER half:
+# that the dialog still draws, still takes a tap and still runs its handler on a
+# real device, over the real sqlite driver.
+#
+# The campaign delete rather than the character one: it is the shape with the
+# most to lose (the row, the notes, and the server-side purge) in one tap.
 appId: fr.aehru.prophecyapp
 tags:
   - smoke
 ---
-- launchApp:
-    clearState: true
+- runFlow:
+    file: subflows/launch.yaml
 
 - runFlow:
     file: subflows/create-table.yaml
@@ -24,9 +27,14 @@ tags:
 
 - tapOn:
     id: 'campaign-delete-1'
-# The native dialog, not a Paper one — it draws outside the React tree.
+# `alert-destructive` / `alert-cancel` are stamped by the alert host, so the
+# selector no longer depends on French copy — which also settles the old snag
+# that a character's confirm button repeats its own title (« Supprimer »).
 - assertVisible: 'Supprimer la table ?'
-- tapOn: 'Confirmer'
+- assertVisible:
+    id: 'alert-cancel'
+- tapOn:
+    id: 'alert-destructive'
 
 - extendedWaitUntil:
     visible:

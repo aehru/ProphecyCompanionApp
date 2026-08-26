@@ -1,0 +1,18 @@
+# Cold launch on a wiped install, held until the app is actually usable.
+#
+# `launchApp` returns as soon as the process starts, which on a fresh install is
+# nowhere near ready: the first launch runs EVERY migration behind the database
+# gate's spinner, on top of the dex/AOT pass a just-installed release APK pays
+# once. On a CI emulator that overruns Maestro's default ~17s wait, and the flow
+# fails on its first element with nothing actually wrong.
+#
+# The list's FAB is the readiness signal — it is on the home screen whether or
+# not the database has any characters in it.
+appId: fr.aehru.prophecyapp
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: 'fab-new-character'
+    timeout: 120000

@@ -115,7 +115,12 @@ export default function IdentityTab({
       </SectionCard>
 
       {onDelete ? (
-        <Button mode="outlined" textColor={theme.colors.error} onPress={onDelete} disabled={busy}>
+        <Button
+          testID="delete-character"
+          mode="outlined"
+          textColor={theme.colors.error}
+          onPress={onDelete}
+          disabled={busy}>
           Supprimer
         </Button>
       ) : null}

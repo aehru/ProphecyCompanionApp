@@ -1,6 +1,7 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-import { Alert } from 'react-native';
+
+import { Alert } from '@/lib/alert';
 
 /**
  * Character illustrations (avatar head + full portrait).

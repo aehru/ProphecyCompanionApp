@@ -22,6 +22,15 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
+- [ ] **Dice roller in context.** The roller is now app-level and reachable
+  from every header ([use-dice-roller.tsx](src/hooks/use-dice-roller.tsx)), but
+  it stays free-form on purpose: XdY plus the tendance trio, knowing nothing
+  about the screen it was opened from. Two follow-ups, agreed but deferred:
+  **prefill from context** (opening it from Compétences seeds the skill total as
+  a modifier, from Inventaire the weapon's damage formula — both readings already
+  exist, through `lib/modifiers` and `lib/formula`), and **per-row roll buttons**
+  on skills and weapons, which save the taps the global roller cannot. Neither
+  should bring back a roll history: results are deliberately forgotten on close.
 - [ ] **« Lancer le sort » — the cast flow.** The last piece of the spell
   breakdown layer; everything it needs is already in place. Today a durée renders
   symbolically (« 1 + NR jours ») because NR belongs to a *cast*, not to a spell:
@@ -79,15 +88,24 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 
 ## Web target
 
-- [ ] **`Alert.alert` is a no-op on web.** react-native-web ships `class Alert { static alert() {} }`,
-  so on the web build every native confirmation and every error popup silently does nothing:
-  the destructive confirms (supprimer un personnage / une table / une arme, relancer
-  l'initiative) never appear, so their `onPress` never runs and the button reads as dead,
-  and the `Alert.alert('Erreur', …)` surfaces (join campaign, `attachServer`) swallow the
-  message. 26 call sites, none platform-guarded. _Fix:_ one `confirm({ title, message,
-  destructive })` helper that keeps `Alert.alert` on native and falls back to a
-  [`<DsDialog>`](src/components/ui/ds-dialog.tsx) (or `window.confirm`) on web, then route
-  every call site through it — the popups are the same three shapes everywhere.
+- [x] **`Alert.alert` is a no-op on web.** react-native-web ships `class Alert { static alert() {} }`,
+  so on the web build every confirmation and every error popup silently did nothing: the
+  destructive confirms (supprimer un personnage / une table / une arme, relancer
+  l'initiative) never appeared, so their `onPress` never ran and the button read as dead,
+  and the `Alert.alert('Erreur', …)` surfaces (join campaign, `attachServer`) swallowed the
+  message.
+  _Shipped:_ [`@/lib/alert`](src/lib/alert.ts) — react-native's exact signature, so each of
+  the 26 call sites changed **one import line**. It renders a
+  [`<DsDialog>`](src/components/ui/ds-dialog.tsx) on **every** platform rather than
+  platform-splitting: a `Platform.OS` branch leaves one half that the other platform's
+  developer never exercises, which is how the web half rotted unnoticed in the first place.
+  The queue + the button split are pure and unit-tested; `<AlertHost>` renders them under
+  `<PaperProvider>`; an ESLint `no-restricted-imports` rule blocks the react-native `Alert`
+  from creeping back; `e2e/alerts.spec.ts` proves the confirm on the real web export.
+  _Traded away, knowingly:_ iOS's free destructive-red (re-applied as `colors.error`) and the
+  OS alert's focus trap / VoiceOver announcement — Paper's `Portal` sets the roles but is not
+  equal to a native alert. **If a screen ever needs an alert over react-native's `Modal`**
+  (only `qr-scanner.tsx` uses one), it will not show: that is a real window, not a portal.
 
 ## Campaign mode
 

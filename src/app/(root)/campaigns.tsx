@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { Button, IconButton, List, Text, TextInput } from 'react-native-paper';
 
 import { QrScannerModal } from '@/components/campaign/qr-scanner';
@@ -10,6 +10,7 @@ import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import {
   campaignsListQuery,
   createLocalTable,
@@ -116,6 +117,17 @@ export default function CampaignsScreen() {
       <View style={styles.actions}>
         <Button mode="outlined" icon="location-enter" onPress={() => openDialog('join')}>
           Rejoindre avec un code
+        </Button>
+        {/* Here rather than on the character list: generating a PNJ is GM work,
+            not the way a player creates their character. The PNJ lands in the
+            character list all the same — it is a full character row (kind =
+            'npc'), and any table can then pick it up. */}
+        <Button
+          mode="outlined"
+          icon={dsIcon('dice')}
+          testID="generate-npc"
+          onPress={() => router.push('/npc/generate')}>
+          Générer un PNJ
         </Button>
       </View>
 

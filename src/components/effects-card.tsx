@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, Checkbox, Icon, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -17,6 +17,7 @@ import {
 import type { Effect, Skill } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { fmtSignedMod, isSkillTarget, skillTarget, skillTargetName } from '@/lib/modifiers';
 import { deleteEffect, tickUnit, updateEffect } from '@/repositories/effects';
 

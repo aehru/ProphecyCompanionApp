@@ -4,8 +4,7 @@
 // Empty selection simply means nothing is shared (the old "Ne rien partager"
 // row is gone).
 
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Checkbox, Text } from 'react-native-paper';
 
 import { PlayerAvatar } from '@/components/campaign/roster-badges';
@@ -55,8 +54,12 @@ export default function CharacterPickList({
         const nom = c.nom || 'Sans nom';
         const checked = shared.has(c.id);
         return (
-          <View
+          <Pressable
             key={c.id}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked }}
+            accessibilityLabel={nom}
+            onPress={() => onToggle(c, !checked)}
             style={[
               styles.row,
               {
@@ -69,11 +72,10 @@ export default function CharacterPickList({
               style={{ flex: 1, fontFamily: 'Cinzel_600SemiBold', color: theme.colors.onSurface }}>
               {nom}
             </Text>
-            <Checkbox
-              status={checked ? 'checked' : 'unchecked'}
-              onPress={() => onToggle(c, !checked)}
-            />
-          </View>
+            <View style={styles.box}>
+              <Checkbox status={checked ? 'checked' : 'unchecked'} />
+            </View>
+          </Pressable>
         );
       })}
     </View>
@@ -89,5 +91,6 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     borderWidth: StyleSheet.hairlineWidth,
   },
+  box: { pointerEvents: 'none' },
   empty: { padding: 20, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
 });

@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text } from 'react-native-paper';
 
 import { TableRosterProvider } from '@/components/campaign/table-roster-provider';
+import DiceRollerButton from '@/components/dice-roller-button';
 import { campaignQuery } from '@/repositories/campaigns';
 
 /**
@@ -49,7 +50,13 @@ export default function CampaignLayout() {
   }
 
   const stack = (
-    <Stack screenOptions={{ headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' } }}>
+    <Stack
+      screenOptions={{
+        headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+        // A GM rolls more than anyone — the Salon and the Compagnie carry the
+        // roller like every other screen.
+        headerRight: () => <DiceRollerButton />,
+      }}>
       {/* Salon is the nested stack's root, so it needs an explicit back to the
           campaigns list (a nested initial route draws no back arrow itself). */}
       <Stack.Screen

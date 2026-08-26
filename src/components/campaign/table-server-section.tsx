@@ -40,7 +40,7 @@ export default function TableServerSection({
           Aucun serveur connecté. Connectez-en un pour voir les personnages de vos joueurs en direct
           — le reste de la table fonctionne sans.
         </Text>
-        <Button mode="outlined" icon="server-network" onPress={onAttach}>
+        <Button testID="attach-server" mode="outlined" icon="server-network" onPress={onAttach}>
           Connecter un serveur
         </Button>
       </View>

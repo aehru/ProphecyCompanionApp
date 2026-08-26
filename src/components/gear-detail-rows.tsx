@@ -6,7 +6,15 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult, parseFormula, parsePrerequisites } from '@/lib/formula';
 import { fmtSignedMod } from '@/lib/modifiers';
 
-/** A caractéristique's value on the sheet. */
+/**
+ * A caractéristique's value on the sheet.
+ *
+ * Every row that takes one takes it **optionally**: the same views render a
+ * catalogue entry browsed with no character in context, where there is no sheet
+ * to read. Absent, a formula keeps its carac terms symbolic (« 3 + FOR × 2 »,
+ * which the engine already does for any resolver that declines) and a prérequis
+ * is printed as neither met nor unmet — unknown is not a failure.
+ */
 export type CaracValue = (caracKey: string) => number;
 /**
  * Net wound + temporary-effect modifier for a caractéristique. Folded into the
@@ -44,7 +52,7 @@ export function FormulaRow({
 }: {
   label: string;
   raw: string | null | undefined;
-  caracValue: CaracValue;
+  caracValue?: CaracValue;
   caracModifier?: CaracModifier;
 }) {
   const theme = useProphecyTheme();
@@ -80,13 +88,17 @@ export function FormulaRow({
   );
 }
 
-/** Prérequis, each green when the character meets it and red when they don't. */
+/**
+ * Prérequis, each green when the character meets it and red when they don't —
+ * and neutral with no character to check them against, which is a third state
+ * rather than a failure (see {@link CaracValue}).
+ */
 export function PrerequisitesRow({
   raw,
   caracValue,
 }: {
   raw: string | null | undefined;
-  caracValue: CaracValue;
+  caracValue?: CaracValue;
 }) {
   const theme = useProphecyTheme();
   const prereqs = parsePrerequisites(raw ?? '');
@@ -98,14 +110,14 @@ export function PrerequisitesRow({
       </Text>
       <View style={gearDetailStyles.prereqWrap}>
         {prereqs.map((p) => {
-          const met = caracValue(p.carac) >= p.min;
+          const met = caracValue && caracValue(p.carac) >= p.min;
+          const color = !caracValue
+            ? theme.colors.onSurface
+            : met
+              ? theme.colors.primary
+              : theme.colors.error;
           return (
-            <Text
-              key={p.carac}
-              style={[
-                gearDetailStyles.prereq,
-                { color: met ? theme.colors.primary : theme.colors.error },
-              ]}>
+            <Text key={p.carac} style={[gearDetailStyles.prereq, { color }]}>
               {p.abbr} {p.min}
             </Text>
           );
@@ -115,11 +127,16 @@ export function PrerequisitesRow({
   );
 }
 
-/** True when any prérequis of `raw` is out of the character's reach. */
+/**
+ * True when any prérequis of `raw` is out of the character's reach. False with
+ * no character: this drives the red alert tile in the catalogue, and flagging
+ * every entry as unreachable while browsing the rulebook would be a lie.
+ */
 export function prerequisitesUnmet(
   raw: string | null | undefined,
-  caracValue: CaracValue,
+  caracValue?: CaracValue,
 ): boolean {
+  if (!caracValue) return false;
   return parsePrerequisites(raw ?? '').some((p) => caracValue(p.carac) < p.min);
 }
 

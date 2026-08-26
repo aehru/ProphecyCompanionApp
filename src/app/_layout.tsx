@@ -17,8 +17,11 @@ import { PaperProvider } from 'react-native-paper';
 
 import CampaignLiveIndicator from '@/components/campaign-live-indicator';
 import DatabaseGate from '@/components/database-gate';
+import DiceRollerButton from '@/components/dice-roller-button';
 import LogErrorBoundary from '@/components/log-error-boundary';
+import AlertHost from '@/components/ui/alert-host';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
+import { DiceRollerProvider } from '@/hooks/use-dice-roller';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
@@ -66,6 +69,10 @@ export default function RootLayout() {
   return (
     <KeyboardProvider>
       <PaperProvider theme={theme} settings={paperSettings}>
+        {/* Above the gate on purpose: an alert raised by the database failure
+            screen has to be able to show. Paper's Portal hoists it to the top
+            regardless of where it sits here. */}
+        <AlertHost />
         <ThemeProvider
           value={colorScheme === 'dark' ? ProphecyNavigationDarkTheme : ProphecyNavigationLightTheme}>
           <DatabaseGate
@@ -76,25 +83,46 @@ export default function RootLayout() {
               {/* Catches render-time throws the global handler never sees, and puts
                   the stack in the diagnostic log instead of a blank screen. */}
               <LogErrorBoundary>
-                <View style={styles.root}>
-                  <Stack screenOptions={{ headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' } }}>
-                    <Stack.Screen name="index" options={{ title: 'Personnages' }} />
-                    <Stack.Screen
-                      name="character/new"
-                      options={{ title: 'Nouveau personnage', presentation: 'modal' }}
-                    />
-                    {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
-                    <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
-                    <Stack.Screen name="campaigns/index" options={{ title: 'Campagnes' }} />
-                    {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
-                    <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
-                    <Stack.Screen name="diagnostics" options={{ title: 'Diagnostic' }} />
-                    <Stack.Screen name="privacy" options={{ title: 'Confidentialité' }} />
-                  </Stack>
-                  {/* Floating overlay — shows on every screen while a campaign is live. */}
-                  <CampaignLiveIndicator />
-                  <RouteBreadcrumbs />
-                </View>
+                {/* Above the Stack: the roller opens from any screen's header and
+                    its dialog outlives navigation (see use-dice-roller). */}
+                <DiceRollerProvider>
+                  <View style={styles.root}>
+                    <Stack
+                      screenOptions={{
+                        headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+                        // Every screen in this stack carries the dice button; the
+                        // nested navigators below set their own (they draw their
+                        // own headers), and the two settings screens opt out.
+                        headerRight: () => <DiceRollerButton />,
+                      }}>
+                      {/* (root) is the bottom-tab navigator — Personnages, Catalogues,
+                          Campagnes — and draws its own headers. Everything below is
+                          pushed ON TOP of it, which is what puts a character's or a
+                          campaign's own chrome in the tab bar's place. */}
+                      <Stack.Screen name="(root)" options={{ headerShown: false }} />
+                      <Stack.Screen
+                        name="character/new"
+                        options={{ title: 'Nouveau personnage', presentation: 'modal' }}
+                      />
+                      {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
+                      <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
+                      {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
+                      <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
+                      {/* No dice on the two settings screens: nothing there is played. */}
+                      <Stack.Screen
+                        name="diagnostics"
+                        options={{ title: 'Diagnostic', headerRight: undefined }}
+                      />
+                      <Stack.Screen
+                        name="privacy"
+                        options={{ title: 'Confidentialité', headerRight: undefined }}
+                      />
+                    </Stack>
+                    {/* Floating overlay — shows on every screen while a campaign is live. */}
+                    <CampaignLiveIndicator />
+                    <RouteBreadcrumbs />
+                  </View>
+                </DiceRollerProvider>
               </LogErrorBoundary>
             </CampaignLiveProvider>
           </DatabaseGate>

@@ -110,15 +110,30 @@ jobs:
           disable-animations: true
           script: |
             adb install -r android/app/build/outputs/apk/release/app-release.apk
-            maestro test .maestro --format junit --output maestro-report.xml
+            maestro test .maestro --format junit --output maestro-report.xml || FAILED=1
+            # The view hierarchy of whatever is on screen when the run ends. It
+            # is the only thing that answers "the element was not found — was it
+            # named differently, or was the app not even up?", and it costs
+            # nothing to take.
+            maestro hierarchy > maestro-hierarchy.txt 2>&1 || true
+            exit ${FAILED:-0}
+
+      # `upload-artifact` does NOT expand `~`, so Maestro's own output (per-flow
+      # logs and screenshots, under $HOME) has to be copied into the workspace
+      # first or it silently uploads nothing — which is what happened on the run
+      # that had five flows fail with no evidence to look at.
+      - name: Collect the Maestro output
+        if: always()
+        run: |
+          mkdir -p maestro-output
+          cp -r "$HOME/.maestro/tests" maestro-output/ 2>/dev/null || true
+          cp maestro-report.xml maestro-hierarchy.txt maestro-output/ 2>/dev/null || true
 
       - name: Upload the report
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: maestro-report
-          path: |
-            maestro-report.xml
-            ~/.maestro/tests/**
+          path: maestro-output/
           retention-days: 7
           if-no-files-found: ignore
