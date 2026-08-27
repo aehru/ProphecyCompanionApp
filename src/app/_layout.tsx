@@ -11,9 +11,10 @@ import { ThemeProvider } from 'expo-router/react-navigation';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, useColorScheme, View } from 'react-native';
+import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { PaperProvider } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CampaignLiveIndicator from '@/components/campaign-live-indicator';
 import DatabaseGate from '@/components/database-gate';
@@ -44,6 +45,26 @@ function RouteBreadcrumbs() {
 installCapture();
 void initDiagnostics();
 
+// The same 56 the two Tabs navigators pin, for the same reason — but this stack
+// needs it on WEB only. There, expo-router's Stack falls back to the JS header,
+// whose non-iOS default is 64 (elements/Header/getDefaultHeaderHeight), so every
+// pushed screen — Diagnostic, Confidentialité, À propos — stood 8dp taller than
+// the tab screen it came from. Native needs nothing: its toolbar is already 56
+// (Android actionBarSize) / 44 (iOS).
+const HEADER_HEIGHT = 56;
+
+/**
+ * `height` is absent from native-stack's `headerStyle` type on purpose — a
+ * native toolbar's height belongs to the OS, which is why only `backgroundColor`
+ * is read there. The JS header the web build falls back to *does* read it. The
+ * cast is that seam between the two implementations, and the Platform gate keeps
+ * a prop that means nothing on native from being sent there at all.
+ */
+const webHeaderStyle = (topInset: number) =>
+  Platform.OS === 'web'
+    ? ({ height: HEADER_HEIGHT + topInset } as { backgroundColor?: never })
+    : undefined;
+
 // react-native-paper resolves its default icons through @expo/vector-icons.
 const paperSettings = {
   icon: ({ name, color, size }: { name: string; color?: string; size: number }) => (
@@ -54,6 +75,8 @@ const paperSettings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? ProphecyDarkTheme : ProphecyLightTheme;
+  // Safe above the Stack: expo-router's own root mounts <SafeAreaProvider>.
+  const insets = useSafeAreaInsets();
   const [fontsLoaded] = useFonts({
     Cinzel_500Medium,
     Cinzel_600SemiBold,
@@ -90,6 +113,8 @@ export default function RootLayout() {
                     <Stack
                       screenOptions={{
                         headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+                        // `height` on the JS header is the total, status bar included.
+                        headerStyle: webHeaderStyle(insets.top),
                         // Every screen in this stack carries the dice button; the
                         // nested navigators below set their own (they draw their
                         // own headers), and the two settings screens opt out.
@@ -116,6 +141,10 @@ export default function RootLayout() {
                       <Stack.Screen
                         name="privacy"
                         options={{ title: 'Confidentialité', headerRight: undefined }}
+                      />
+                      <Stack.Screen
+                        name="about"
+                        options={{ title: 'À propos', headerRight: undefined }}
                       />
                     </Stack>
                     {/* Floating overlay — shows on every screen while a campaign is live. */}
