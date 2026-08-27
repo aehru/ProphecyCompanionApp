@@ -5,13 +5,13 @@
  * so the pure logic (range, count, ordering) stays unit-testable without stubbing
  * Math.random globally.
  */
-import { TENDANCES } from '@/constants/prophecy';
+import { TENDANCES, type TendanceKey } from '@/constants/prophecy';
 import type { Rng } from '@/lib/rng';
 
 export type { Rng };
 
 /** A tendance's die, carrying which tendance it was rolled for. */
-export type TendanceRoll = { key: (typeof TENDANCES)[number]['key']; value: number };
+export type TendanceRoll = { key: TendanceKey; value: number };
 
 /** A single die in [1, sides]. sides < 1 → 1 (a d0 is meaningless). */
 export function rollDie(sides: number, rng: Rng = Math.random): number {

@@ -149,6 +149,9 @@ export default function WeaponDetail({
  * state (nothing to alarm about), a dangling one is an error, and a skill with
  * no points still shows its total, tagged « non acquise » so the player knows
  * they are rolling on the attribut alone.
+ *
+ * A reading, not a control: the roll lives on the collapsed row's badge, and
+ * offering it twice on one card would only ask the player which one to press.
  */
 function SkillRow({ skill }: { skill: WeaponSkillReading }) {
   const theme = useProphecyTheme();
@@ -208,3 +211,4 @@ function SkillRow({ skill }: { skill: WeaponSkillReading }) {
 export function fmtSigned(n: number) {
   return n > 0 ? `+${n}` : String(n);
 }
+

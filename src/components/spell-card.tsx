@@ -19,6 +19,7 @@ import {
 } from '@/constants/prophecy';
 import type { Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
+import TotalBadge from '@/components/ui/total-badge';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { parseFormula } from '@/lib/formula';
@@ -41,11 +42,14 @@ export default function SpellCard({
   spell,
   total,
   caracValue,
+  onRoll,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   /** Passed through to the detail — resolves a durée written against a stat. */
   caracValue?: (caracKey: string) => number;
+  /** Rolls the incantation. Omitted where the card is only a reading. */
+  onRoll?: () => void;
 }) {
   const router = useRouter();
   return (
@@ -53,6 +57,7 @@ export default function SpellCard({
       spell={spell}
       total={total}
       caracValue={caracValue}
+      onRoll={onRoll}
       onEdit={() => router.push(`/character/${spell.characterId}/spell/${spell.id}`)}
     />
   );
@@ -62,11 +67,13 @@ function SpellSummary({
   spell: s,
   total,
   caracValue,
+  onRoll,
   onEdit,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   caracValue?: (caracKey: string) => number;
+  onRoll?: () => void;
   onEdit: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -108,16 +115,18 @@ function SpellSummary({
           ) : null}
         </View>
         {/* The score is the number a player needs at a glance, so it stays on
-            the collapsed row rather than waiting for the expand. */}
+            the collapsed row — and it is the roll button: it casts, the row
+            around it still expands. */}
         {total ? (
-          <View
-            accessibilityLabel={`Total d'incantation ${total.total}`}
-            style={[
-              styles.totalBadge,
-              { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft },
-            ]}>
-            <Text style={[styles.totalValue, { color: theme.colors.primary }]}>{total.total}</Text>
-          </View>
+          <TotalBadge
+            value={total.total}
+            onPress={onRoll}
+            accessibilityLabel={
+              onRoll
+                ? `Lancer ${s.name}, total ${total.total}`
+                : `Total d'incantation ${total.total}`
+            }
+          />
         ) : null}
         <Icon name={expanded ? 'arrowup' : 'chev'} size={18} color={theme.colors.onSurfaceVariant} />
       </Pressable>
@@ -359,16 +368,6 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   itemName: { fontSize: 14, fontWeight: '600', flexShrink: 1 },
   keyBadge: { alignItems: 'center', justifyContent: 'center' },
-  totalBadge: {
-    minWidth: 34,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 9,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  totalValue: { fontSize: 15, fontWeight: '700' },
   itemSub: { fontSize: 12, marginTop: 1 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   numCol: { flexGrow: 1, flexBasis: 120, minWidth: 120 },

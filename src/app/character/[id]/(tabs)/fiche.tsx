@@ -26,11 +26,13 @@ import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
 import { globalModifier, statModifier, woundMalus } from '@/lib/modifiers';
+import { statRollContext } from '@/lib/roll-context';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
@@ -41,6 +43,14 @@ import { skillsQuery } from '@/repositories/skills';
 // Caractéristique tiles are labelled by their abbreviation, not their full name.
 // Built once at module load: the catalogue is static.
 const CARAC_TILES = CARACTERISTIQUES.map((c) => ({ key: c.key, label: c.abbr }));
+
+// Both catalogues by column key, for the roller: the dialog titles a roll with
+// the full name the tile has no room for (« Volonté », not « VOL »), and keeps
+// the abbreviation for the sum. Attributs have no short form and use neither.
+const STAT_LABELS: Record<string, { label: string; abbr?: string }> = {
+  ...Object.fromEntries(CARACTERISTIQUES.map((c) => [c.key, { label: c.label, abbr: c.abbr }])),
+  ...Object.fromEntries(ATTRIBUTS.map((a) => [a.key, { label: a.label }])),
+};
 
 /**
  * The full character sheet ("Fiche") — every stat, editable. The dashboard
@@ -61,6 +71,7 @@ export default function CharacterFicheScreen() {
   const { data: shieldRows } = useLiveQuery(shieldsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
   const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
+  const { open: openRoller } = useDiceRoller();
   // Tab-level live edit: one FAB flips every card between read and edit.
   const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).
@@ -107,6 +118,24 @@ export default function CharacterFicheScreen() {
   // both tiles would show the same malus twice; a tile carries only its own.
   const wound = woundMalus(stRec);
   const global = globalModifier(effectList, wound);
+  // Tapping a tile rolls that stat: the value plus everything modifying it
+  // (wound + effects, which the tile's own badge deliberately does NOT show in
+  // full), read against a difficulté. See lib/roll-context for the confirm rule.
+  const rollStat = (key: string, kind: 'caracteristique' | 'attribut') => {
+    const stat = STAT_LABELS[key];
+    openRoller(
+      statRollContext({
+        key,
+        label: stat?.label ?? key,
+        abbr: stat?.abbr,
+        value: rec[key] ?? 0,
+        kind,
+        effects: effectList,
+        wound,
+      }),
+    );
+  };
+
   const initiativeMax = rec.initiativeMax ?? 0;
   const initBonus = stRec.initiativeBonusDice ?? 0;
   // How many dice are actually in play this turn — sheet max plus the temporary
@@ -225,6 +254,7 @@ export default function CharacterFicheScreen() {
             stats={ATTRIBUTS}
             valueOf={(k) => num(rec[k])}
             modifierOf={(k) => statModifier(k, effectList)}
+            onRoll={(k) => rollStat(k, 'attribut')}
           />
 
           <StatGrid
@@ -233,6 +263,7 @@ export default function CharacterFicheScreen() {
             stats={CARAC_TILES}
             valueOf={(k) => num(rec[k])}
             modifierOf={(k) => statModifier(k, effectList)}
+            onRoll={(k) => rollStat(k, 'caracteristique')}
           />
 
           <InitiativeSection

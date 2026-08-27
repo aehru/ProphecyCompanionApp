@@ -17,9 +17,12 @@ import Section from '@/components/campaign/sheet-section';
 import ShieldCard from '@/components/shield-card';
 import SpellCard from '@/components/spell-card';
 import WeaponCard from '@/components/weapon-card';
+import type { Weapon } from '@/db/schema';
+import { useDiceRoller } from '@/hooks/use-dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { spellRollContext, weaponRollContext } from '@/lib/roll-context';
 import { spellTotal } from '@/lib/spell-total';
 import { weaponSkillReading } from '@/lib/weapon-skill';
 import { actualStateQuery } from '@/repositories/actual-state';
@@ -34,6 +37,7 @@ import { weaponsQuery } from '@/repositories/weapons';
 
 export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   const theme = useProphecyTheme();
+  const { open: openRoller } = useDiceRoller();
   const { data: charRows } = useLiveQuery(characterByUuidQuery(charUuid), [charUuid]);
   const char = charRows?.[0] ?? null;
   // 0 matches nothing — keeps the hook order stable while the character loads
@@ -78,6 +82,19 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   const isEnchanted = (kind: 'weapon' | 'armor' | 'shield', id: number) =>
     enchantedKeys.has(`${kind}:${id}`);
 
+  // One place that knows what a weapon's compétence resolves against — the card
+  // reads it and the roll re-reads it, and the two must not drift apart.
+  const skillOf = (w: Weapon) =>
+    weaponSkillReading(w.skillName, skillList, rec, effectList, wound);
+
+  // The GM rolls an NPC's attacks from here — these are their own characters,
+  // living in this device's DB, so it is the same roll the player's Inventaire
+  // makes. A weapon with no compétence linked has no total and stays unrollable.
+  const rollWeapon = (w: Weapon) => {
+    const ctx = weaponRollContext(w.name, skillOf(w));
+    if (ctx) openRoller(ctx);
+  };
+
   return (
     <>
       {weaponList.length > 0 ? (
@@ -89,8 +106,9 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
                 weapon={w}
                 caracValue={caracValue}
                 caracModifier={caracModifier}
-                skill={weaponSkillReading(w.skillName, skillList, rec, effectList, wound)}
+                skill={skillOf(w)}
                 enchanted={isEnchanted('weapon', w.id)}
+                onRoll={() => rollWeapon(w)}
               />
             ))}
           </View>
@@ -131,14 +149,19 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       {spellList.length > 0 ? (
         <Section title="Sorts">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
-            {spellList.map((s) => (
-              <SpellCard
-                key={s.id}
-                spell={s}
-                total={spellTotal(s, rec, effectList, wound)}
-                caracValue={(k) => rec[k] ?? 0}
-              />
-            ))}
+            {spellList.map((s) => {
+              // Same score for the badge and for the roll — see the weapons above.
+              const total = spellTotal(s, rec, effectList, wound);
+              return (
+                <SpellCard
+                  key={s.id}
+                  spell={s}
+                  total={total}
+                  caracValue={(k) => rec[k] ?? 0}
+                  onRoll={() => openRoller(spellRollContext(s, total))}
+                />
+              );
+            })}
           </View>
         </Section>
       ) : null}

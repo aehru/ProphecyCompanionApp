@@ -22,15 +22,49 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
-- [ ] **Dice roller in context.** The roller is now app-level and reachable
-  from every header ([use-dice-roller.tsx](src/hooks/use-dice-roller.tsx)), but
-  it stays free-form on purpose: XdY plus the tendance trio, knowing nothing
-  about the screen it was opened from. Two follow-ups, agreed but deferred:
-  **prefill from context** (opening it from Compétences seeds the skill total as
-  a modifier, from Inventaire the weapon's damage formula — both readings already
-  exist, through `lib/modifiers` and `lib/formula`), and **per-row roll buttons**
-  on skills and weapons, which save the taps the global roller cannot. Neither
-  should bring back a roll history: results are deliberately forgotten on close.
+- [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
+  opens the roller against it and rolls a D10 at once, with the difficulté
+  prefilled at 15, « Confirmer » for a 10 or a 1, and the tendance trio selectable
+  so the kept die becomes the roll. The rules live in [lib/roll.ts](src/lib/roll.ts)
+  and the header button still opens the free-form roller — context arrives ONLY by
+  tapping a value and dies with the dialog, like the results.
+  Done too for **caractéristiques and attributs**: tapping a tile on the Fiche
+  rolls it, adding the modifier the tile's badge deliberately doesn't show in
+  full (the wound malus is badged once per character, not per stat). Every
+  context is built in [lib/roll-context.ts](src/lib/roll-context.ts) so the
+  confirm rule lives in one place. **An attribut confirms on itself** — the rule
+  names the compétence or the caractéristique, and a bare attribut roll has
+  neither.
+  A test can throw **several D10** — a « Dés » field plus a Garder / Sommer
+  toggle, since effects grant both readings and the sheet models neither yet.
+  `RollContext.dice` / `.diceMode` are the hooks for when traits land («&nbsp;2 dés
+  sur tout ce qui touche au MENTAL&nbsp;»): the builder will set them and no screen
+  will learn the rule twice.
+  Done for **weapons** as well: the attack total in a weapon's detail is the roll
+  button, going through `weaponRollContext` — an attack IS its compétence's roll,
+  so the weapon only names it. A weapon with no compétence linked, or naming one
+  that no longer exists, has no total and stays unrollable.
+  The attack total rides on the collapsed row as a [`<TotalBadge>`](src/components/ui/total-badge.tsx)
+  — the very component a spell's score uses, so the two rows can't drift — and
+  the badge IS the roll button: it rolls, the row around it still expands. The
+  GM's NPC weapon cards roll the same way, being the GM's own local rows.
+  **Spells** roll from the same badge, through `spellRollContext`: the score's
+  terms each become a part (sphère, discipline, wound, clé), the difficulté
+  prefills from `spells.difficulty` — falling back to 15 when the spell carries
+  none — and **the discipline is what confirms** a 10 or a 1.
+  For gear the badge is the ONLY roll button: an expanded card shows its
+  breakdown as a reading and offers no second control, since two ways to make one
+  roll on one card is a question the player shouldn't have to answer.
+  A **cast** follows the magic rules on top: Miracle / Contrecoup naming, no +5,
+  and on the tendance trio the discarded dice can backlash — see the `readDice`
+  paragraph in [CLAUDE.md](CLAUDE.md). Each die owing a reroll gets its own
+  « Confirmer » row, because which die produced which outcome is the whole point.
+  _Remaining:_ the stat tiles on the dashboard, which stay a reading for
+  now; plus the UI that builds
+  a multi-part context (MEN + VOL, optionally + a tendance die) — `RollContext.parts`
+  is already a list precisely so that needs no type change. Whatever gets added
+  must name its own `confirm` value: no rule says which part of a sum a 10 is
+  confirmed against. Still no roll history — results are forgotten on close.
 - [ ] **« Lancer le sort » — the cast flow.** The last piece of the spell
   breakdown layer; everything it needs is already in place. Today a durée renders
   symbolically (« 1 + NR jours ») because NR belongs to a *cast*, not to a spell:

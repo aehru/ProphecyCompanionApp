@@ -7,6 +7,20 @@ export const TENDANCES = [
   { key: 'homme', label: 'Homme', color: '#FFFFFF', textColor: '#000000', border: '#9E9E9E' },
 ] as const;
 
+export type TendanceKey = (typeof TENDANCES)[number]['key'];
+
+/**
+ * Tendance key → its entry, so the four components that draw one tendance stop
+ * re-scanning the list (`TENDANCES.find(x => x.key === k)!`) on every render —
+ * and stop each carrying their own non-null assertion. Same shape as
+ * {@link ATTRIBUT_LABEL} below.
+ */
+export const TENDANCE_BY_KEY: Record<TendanceKey, (typeof TENDANCES)[number]> =
+  Object.fromEntries(TENDANCES.map((t) => [t.key, t])) as Record<
+    TendanceKey,
+    (typeof TENDANCES)[number]
+  >;
+
 /** Number of "puces" slots shown for a tendance subnumber (0–10). */
 export const MAX_PUCES = 10;
 

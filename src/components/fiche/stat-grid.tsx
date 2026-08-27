@@ -17,12 +17,15 @@ export default function StatGrid({
   stats,
   valueOf,
   modifierOf,
+  onRoll,
 }: {
   title: string;
   icon?: IconName;
   stats: readonly { key: string; label: string }[];
   valueOf: (key: string) => string;
   modifierOf: (key: string) => number;
+  /** Tapping a tile rolls that stat. Omitted where a grid is just a reading. */
+  onRoll?: (key: string) => void;
 }) {
   return (
     <SectionCard title={title} icon={icon}>
@@ -34,6 +37,8 @@ export default function StatGrid({
             value={valueOf(s.key)}
             modifier={modifierOf(s.key)}
             style={styles.col4}
+            onPress={onRoll ? () => onRoll(s.key) : undefined}
+            accessibilityLabel={`Lancer ${s.label}, ${valueOf(s.key)}`}
           />
         ))}
       </View>

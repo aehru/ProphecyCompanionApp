@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Polygon } from 'react-native-svg';
 
-import { TENDANCES } from '@/constants/prophecy';
+import { TENDANCE_BY_KEY } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { TendanceRoll } from '@/lib/dice';
 
@@ -66,11 +66,24 @@ const LOWER_OPACITY = 0.72;
  * Fatalité green, Homme white — which is why they come from `TENDANCES` and
  * not from the theme.
  */
-export default function TendanceDie({ roll }: { roll: TendanceRoll }) {
+export default function TendanceDie({
+  roll,
+  selected,
+  dimmed,
+  onSelect,
+}: {
+  roll: TendanceRoll;
+  /** The die the player kept — ringed, and the only one at full strength. */
+  selected?: boolean;
+  /** Another die was kept: this one steps back rather than disappearing. */
+  dimmed?: boolean;
+  /** Omitted for a contextless roll, where there is nothing to keep. */
+  onSelect?: () => void;
+}) {
   const theme = useProphecyTheme();
-  const t = TENDANCES.find((x) => x.key === roll.key)!;
+  const t = TENDANCE_BY_KEY[roll.key];
 
-  return (
+  const die = (
     <View style={styles.unit}>
       <View style={{ width: SIZE, height: SIZE }}>
         <Svg width={SIZE} height={SIZE} viewBox="0 0 512 512">
@@ -91,21 +104,61 @@ export default function TendanceDie({ roll }: { roll: TendanceRoll }) {
       <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>{t.label}</Text>
     </View>
   );
+
+  if (!onSelect) return die;
+  return (
+    <Pressable
+      onPress={onSelect}
+      accessibilityRole="button"
+      accessibilityState={{ selected: !!selected }}
+      accessibilityLabel={`Garder ${t.label} : ${roll.value}`}
+      style={[
+        styles.pick,
+        dimmed && styles.dimmed,
+        selected && { borderColor: t.border, backgroundColor: theme.colors.surfaceVariant },
+      ]}>
+      {die}
+    </Pressable>
+  );
 }
 
-/** The three tendance dice as one row — the whole result of a tendance roll. */
-export function TendanceDiceRow({ rolls }: { rolls: readonly TendanceRoll[] }) {
+/**
+ * The three tendance dice as one row — the whole result of a tendance roll.
+ *
+ * `onSelect` is what turns the row from a reading into a choice: with a context
+ * attached the player KEEPS one die and it becomes the roll, so the three have
+ * to be tappable. Without one there is nothing to keep and they stay a display.
+ */
+export function TendanceDiceRow({
+  rolls,
+  selectedIndex,
+  onSelect,
+}: {
+  rolls: readonly TendanceRoll[];
+  /** Addressed by POSITION, not by tendance: it is a `RollThrow.keptIndex`. */
+  selectedIndex?: number | null;
+  onSelect?: (index: number) => void;
+}) {
   return (
     <View style={styles.row}>
-      {rolls.map((roll) => (
-        <TendanceDie key={roll.key} roll={roll} />
+      {rolls.map((roll, i) => (
+        <TendanceDie
+          key={roll.key}
+          roll={roll}
+          selected={selectedIndex === i}
+          dimmed={selectedIndex != null && selectedIndex !== i}
+          onSelect={onSelect ? () => onSelect(i) : undefined}
+        />
       ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 14 },
+  row: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', gap: 10 },
+  // A transparent border at rest so keeping a die doesn't shift the row.
+  pick: { borderWidth: 1, borderColor: 'transparent', borderRadius: 12, padding: 4 },
+  dimmed: { opacity: 0.45 },
   unit: { alignItems: 'center', gap: 4 },
   // Inlined rather than spreading StyleSheet.absoluteFillObject, which RN 0.85 dropped.
   center: {
