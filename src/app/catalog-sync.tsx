@@ -1,20 +1,16 @@
-import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useNavigation, useRouter } from 'expo-router';
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import SpellSyncCard, { fillSummary } from '@/components/catalog/spell-sync-card';
 import SectionCard from '@/components/ui/section-card';
 import { dsIcon } from '@/components/ui/icon';
-import type { SpellPreset } from '@/data/spell-catalog';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
 import { Alert } from '@/lib/alert';
-import { planEntries, planSpellSync, type SpellSyncPlan } from '@/lib/spell-sync';
-import { applySpellSync, catalogueSpellsQuery } from '@/repositories/spell-sync';
-
-const EMPTY_PLAN: SpellSyncPlan = { auto: [], conflicts: [] };
+import { applySpellSync } from '@/repositories/spell-sync';
 
 /**
  * « Mettre à jour depuis le catalogue » — one sweep over every character on the
@@ -42,46 +38,13 @@ export default function CatalogSyncScreen() {
     navigation.setOptions({ title: 'Mise à jour des sorts', headerRight: () => null });
   }, [navigation]);
 
-  /**
-   * The catalogue is loaded on arrival, never at import time: evaluating
-   * `spell-catalog.gen` costs ~139ms (338 spells of rulebook prose) and every
-   * route module is required when the router builds its tree — a screen nobody
-   * opens would pay it at launch. Same reasoning as the Catalogues tab's `lazy`.
-   */
-  const [catalog, setCatalog] = useState<readonly SpellPreset[] | null>(null);
-  useEffect(() => {
-    let alive = true;
-    import('@/data/spell-catalog').then((m) => {
-      if (alive) setCatalog(m.SPELL_CATALOG);
-    });
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const { data: rows } = useLiveQuery(catalogueSpellsQuery(), []);
-
-  /** charId → nom, so a card can say whose sheet it is about. */
-  const nameById = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const r of rows ?? []) map.set(r.spell.characterId, r.characterNom);
-    return map;
-  }, [rows]);
-
-  const plan = useMemo(() => {
-    if (!catalog || !rows) return EMPTY_PLAN;
-    return planSpellSync(
-      rows.map((r) => r.spell),
-      catalog,
-    );
-  }, [rows, catalog]);
+  // The same plan the Catalogues banner counts — assembled once, in the hook,
+  // so the two can never disagree about how much there is to do.
+  const { plan, entries, nameById, loading } = useSpellSyncPlan();
 
   /** Spell ids whose conflicts the player chose to take from the catalogue. */
   const [accepted, setAccepted] = useState<ReadonlySet<number>>(new Set());
   const [busy, setBusy] = useState(false);
-
-  const entries = useMemo(() => planEntries(plan), [plan]);
-  const loading = !catalog || !rows;
 
   if (loading) {
     return (
