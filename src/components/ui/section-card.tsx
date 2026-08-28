@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
@@ -13,22 +13,44 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
  * borders/fills; only the section wrapper is flat. Pass `icon` to add the DS
  * leading glyph; omit it for a plain title + rule. `helper` is a small trailing
  * note (e.g. an edit hint).
+ *
+ * Pass `collapsible` to turn the header into a disclosure — the same one
+ * `SectionHeader` already draws for the spell catalogue's groups, so a folded
+ * section looks identical wherever it appears. With `defaultExpanded={false}`
+ * the section starts folded: for a block that is occasionally useful but always
+ * in the way otherwise. The state is the card's own; a caller that needs to
+ * drive the fold from outside should use `<SectionHeader>` directly.
  */
 export default function SectionCard({
   title,
   children,
   helper,
   icon,
+  collapsible = false,
+  defaultExpanded = true,
 }: {
   title: string;
   helper?: string;
   icon?: IconName;
+  collapsible?: boolean;
+  /** Only read when `collapsible`; a plain section is always open. */
+  defaultExpanded?: boolean;
   children: React.ReactNode;
 }) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
   return (
     <View style={styles.section}>
-      <SectionHeader title={title} helper={helper} icon={icon} />
-      {children}
+      <SectionHeader
+        title={title}
+        helper={helper}
+        icon={icon}
+        // Both undefined unless collapsible: `onPress` is what turns the header
+        // into a button and puts the chevron there.
+        expanded={collapsible ? expanded : undefined}
+        onPress={collapsible ? () => setExpanded((open) => !open) : undefined}
+      />
+      {!collapsible || expanded ? children : null}
     </View>
   );
 }
