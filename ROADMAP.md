@@ -87,19 +87,26 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   an implementation detail, and the dialog probably has to ask. And the deferred
   `bonus` column (« +5 à Discrétion ») was left out on purpose, so the created
   effect starts from prefilled, editable text rather than a parsed target.
-- [ ] **« Mettre à jour depuis le catalogue » — propagate rulebook corrections
-  to spells players already picked.** The provenance half shipped: a spell copied
-  from the catalogue now stores `spells.preset_id` + `spells.preset_revision`
-  (the preset's content fingerprint, `lib/preset-revision`, computed at build
-  time and baked into `*-catalog.gen.ts`). A row with no `preset_id` is the
-  player's own and must stay untouchable — that asymmetry is the safety
-  property, so **never infer provenance from a name match**.
-  _What's left:_ a pure `planSpellSync(rows, catalog)` (field-level: row empty +
-  preset filled ⇒ fill, both filled and differing ⇒ ask, `cleParfaite` and every
-  in-play value never touched), a preview screen grouped by spell with the
-  player's value vs the catalogue's and "keep mine" as the default, then one
-  transaction. Stamp the current revision on accept **and** on decline, so a
-  declined change doesn't ask again until the entry actually changes.
+- [x] **« Mettre à jour depuis le catalogue » — propagate rulebook corrections
+  to spells players already picked.** Provenance (`spells.preset_id` +
+  `preset_revision`, the preset's content fingerprint from `lib/preset-revision`)
+  is the signal; a row with no `preset_id` is the player's own and is never a
+  candidate — that asymmetry is the safety property, and provenance is **never
+  inferred from a name match**. `planSpellSync(rows, presets)`
+  ([lib/spell-sync.ts](src/lib/spell-sync.ts), pure + tested) splits the
+  difference two ways: a column the sheet left EMPTY that the catalogue now
+  fills is applied without a question (nothing of the player's is at stake),
+  while two values that disagree are a conflict. The decision is **per
+  sortilège, not per column** — a spell is read as one paragraph, and "my effect
+  but their durée" is a state nobody can check afterwards. `cleParfaite` and
+  every in-play value stay outside it. The current revision is stamped on
+  decline as well as on accept, so a refused change stops being offered until
+  the entry actually moves again.
+  The sweep is **app-wide** ([catalog-sync.tsx](src/app/catalog-sync.tsx),
+  reached from the Catalogues tab's overflow): a correction lands for every
+  sheet at once, and a GM holding a dozen NPCs would otherwise walk the same
+  dialog a dozen times. One transaction for the whole plan
+  ([repositories/spell-sync.ts](src/repositories/spell-sync.ts)).
   _Agreed non-goals:_ no undo beyond `prophecy.db.bak`; a spell newly added to
   the catalogue does nothing (the player picks it); a spell removed from the
   catalogue leaves the row alone.
