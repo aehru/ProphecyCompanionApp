@@ -1,21 +1,19 @@
 import type { MD3Theme } from 'react-native-paper';
 
+import type { GreatDragonKey } from '@/constants/prophecy';
+
 /**
  * Prophecy — accent themes for the nine Great Dragons (eight caste-patrons + Kalimsshar).
  * Each carries the four primary roles for light and dark, generated from a
  * single HCT hue per dragon's elemental sphere. Use to recolour the app's
  * primary based on a character's draconic allegiance.
  */
-export type DragonKey =
-  | 'kroryn'
-  | 'heyra'
-  | 'nenya'
-  | 'kezyr'
-  | 'brorne'
-  | 'khy'
-  | 'szyl'
-  | 'ozyr'
-  | 'kalimsshar';
+/**
+ * Re-exported from `constants/prophecy`, where the nine dragons are declared:
+ * the same list also drives a spell's « Mage de … » restriction, and two copies
+ * of it would drift.
+ */
+export type DragonKey = GreatDragonKey;
 
 export type DragonAccent = {
   name: string;
