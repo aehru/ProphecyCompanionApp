@@ -5,6 +5,7 @@ import { Button, Chip, Text } from 'react-native-paper';
 import { dsIcon } from '@/components/ui/icon';
 import {
   CLE_PARFAITE_BONUS,
+  dragonMageLabel,
   SPELL_TAG_LABEL,
   SPHERE_LABEL,
   TIME_UNIT_LABEL,
@@ -27,6 +28,7 @@ export type SpellView = Partial<
     | 'complexity'
     | 'discipline'
     | 'sphere'
+    | 'dragonOnly'
     | 'cost'
     | 'castTimeAmount'
     | 'castTimeUnit'
@@ -73,6 +75,9 @@ export default function SpellDetail({
   const base = s.difficulty ?? 0;
   const difficulty = s.cleParfaite ? `${base - CLE_PARFAITE_BONUS} (base ${base})` : String(base);
   const sphere = s.sphere ?? '';
+  // Which dragon it reads as is the SPHÈRE's business — the row only says that
+  // it is restricted at all.
+  const dragonMage = s.dragonOnly ? dragonMageLabel(sphere) : null;
   const unit = s.castTimeUnit ?? '';
   const cle = (s.cle ?? '').trim();
   const effect = (s.effect ?? '').trim();
@@ -101,6 +106,8 @@ export default function SpellDetail({
       <DetailRow label="Niveau" value={String(s.level ?? 0)} />
       <DetailRow label="Complexité" value={String(s.complexity ?? 0)} />
       <DetailRow label="Sphère" value={SPHERE_LABEL[sphere] ?? sphere} />
+      {/* Only the handful of sortilèges sworn to one dragon carry this. */}
+      {dragonMage ? <DetailRow label="Réservé" value={dragonMage} /> : null}
       <DetailRow label="Coût" value={String(s.cost ?? 0)} />
       <DetailRow
         label="Incantation"

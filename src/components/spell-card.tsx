@@ -11,6 +11,7 @@ import SelectField from '@/components/ui/select-field';
 import {
   CLE_PARFAITE_BONUS,
   DISCIPLINE_LABEL,
+  dragonMageLabel,
   DISCIPLINES,
   SPELL_TAGS,
   SPHERE_LABEL,
@@ -79,7 +80,15 @@ function SpellSummary({
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
 
-  const subtitle = [`Niv. ${s.level}`, DISCIPLINE_LABEL[s.discipline], SPHERE_LABEL[s.sphere]]
+  // The draconic restriction rides in the subtitle rather than as a badge of
+  // its own: it is the same kind of fact as the sphère, and only a handful of
+  // sortilèges carry one.
+  const subtitle = [
+    `Niv. ${s.level}`,
+    DISCIPLINE_LABEL[s.discipline],
+    SPHERE_LABEL[s.sphere],
+    s.dragonOnly ? dragonMageLabel(s.sphere) : '',
+  ]
     .filter(Boolean)
     .join(' · ');
 
