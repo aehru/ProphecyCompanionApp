@@ -85,6 +85,11 @@ const SPELL_COLUMNS = [
   // rulebook, so an empty cell is the normal state, not an error. `effet` itself
   // stays the source of truth and is never rewritten from these.
   'effetJeu', 'perception', 'duree', 'dureeUnite', 'cibles', 'tags',
+  // Draconic restriction — reserved to a mage sworn to the dragon who patrons
+  // the spell's own sphère, rather than open to the whole sphère. A flag and not
+  // a dragon's name: the pairing is one-to-one, so the sphère already says which
+  // one. Optional like the rest — an empty cell is the common case.
+  'reserveDragon',
 ];
 const ARMOR_COLUMNS = [
   'id', 'categorie', 'nom', 'defenseMax', 'prerequis', 'diffCreation',
@@ -243,6 +248,25 @@ function readOptionalEnum(
     return fallback;
   }
   return canonical;
+}
+
+/**
+ * A yes/no cell. Accepts everything a French spreadsheet actually holds for one
+ * — « oui », « x », « X », « 1 », « vrai », « true » — and their negatives, in
+ * any casing or accenting. Blank is false: an unfilled column is the normal
+ * state while the catalogue is being tagged rulebook by rulebook. Anything else
+ * is a typo and fails the build rather than reading as false, which would
+ * silently drop the flag off the spell it was written for.
+ */
+const TRUE_CELLS = new Set(['oui', 'o', 'x', '1', 'vrai', 'true', 'yes']);
+const FALSE_CELLS = new Set(['', 'non', 'n', '0', 'faux', 'false', 'no']);
+
+function readFlag(rec: Record<string, string>, col: string, errors: RowErrors): boolean {
+  const raw = fold(rec[col] ?? '');
+  if (TRUE_CELLS.has(raw)) return true;
+  if (FALSE_CELLS.has(raw)) return false;
+  errors.push(`${col} : « ${rec[col]} » n'est ni oui ni non (laisser vide = non)`);
+  return false;
 }
 
 /** Tag key → its rank in SPELL_TAGS, so a tag list can be put in one order. */
@@ -417,6 +441,8 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
     const duration = readFormula(rec, 'duree', errors, { nr: true, sphere: true }) ?? '';
     const targets = readFormula(rec, 'cibles', errors, { nr: true, sphere: true }) ?? '';
     const tags = readTags(rec, 'tags', errors);
+    // Empty is the norm — only a handful of sortilèges are sworn to one dragon.
+    const dragonOnly = readFlag(rec, 'reserveDragon', errors);
     const durationUnit = readOptionalEnum(
       rec,
       'dureeUnite',
@@ -451,6 +477,7 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
       ...(duration !== '' && { duration, durationUnit }),
       ...(targets !== '' && { targets }),
       ...(tags.length > 0 && { tags }),
+      ...(dragonOnly && { dragonOnly }),
     };
 
     // Fingerprint of the payload alone — see lib/preset-revision for what is in
