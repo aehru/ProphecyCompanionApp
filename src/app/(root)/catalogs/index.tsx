@@ -3,9 +3,11 @@ import { Suspense, lazy, useEffect, useLayoutEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { IconButton, Menu } from 'react-native-paper';
 
+import CatalogSyncBanner from '@/components/catalog/catalog-sync-banner';
 import DiceRollerButton from '@/components/dice-roller-button';
 import type { TabLabel } from '@/components/ui/sub-tabs';
 import TabPager from '@/components/ui/tab-pager';
+import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
 
 /**
  * Each catalogue is loaded the first time its tab is opened, never before.
@@ -125,8 +127,21 @@ export default function CatalogsScreen() {
     });
   }, [navigation, router, menuOpen]);
 
+  // Gated on `ready` for the same reason the catalogues themselves are: the
+  // plan needs `spell-catalog.gen`, and paying its ~139ms during the navigation
+  // is exactly what this screen goes out of its way to avoid. Once idle it is a
+  // module-cached import the Sortilèges page is loading anyway.
+  const { entries } = useSpellSyncPlan(ready);
+
   return (
     <View style={styles.root}>
+      {/* Only while a correction is actually waiting — see CatalogSyncBanner. */}
+      {entries.length > 0 ? (
+        <CatalogSyncBanner
+          count={entries.length}
+          onPress={() => router.push('/catalog-sync' as Href)}
+        />
+      ) : null}
       <TabPager
         labels={TABS}
         active={tab}
