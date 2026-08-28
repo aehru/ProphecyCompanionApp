@@ -38,7 +38,7 @@ export default function CatalogSyncBanner({
           {count} sortilège{plural} à mettre à jour
         </Text>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Le catalogue a changé depuis qu'{count > 1 ? 'ils ont' : 'il a'} été copié
+          Le catalogue a changé depuis qu’{count > 1 ? 'ils ont' : 'il a'} été copié
           {plural} sur une fiche.
         </Text>
       </View>
