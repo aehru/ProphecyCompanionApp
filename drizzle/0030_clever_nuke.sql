@@ -1,0 +1,1 @@
+ALTER TABLE `spells` ADD `dragon_only` integer DEFAULT false NOT NULL;

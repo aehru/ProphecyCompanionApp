@@ -1,0 +1,264 @@
+// Propagating a rulebook correction into the spells players already picked.
+//
+// The provenance half already ships: a spell copied from the catalogue carries
+// `presetId` (which entry) and `presetRevision` (the entry's content fingerprint
+// at the moment it was copied, `lib/preset-revision`). When `data-src/spells.csv`
+// is corrected the regenerated preset gets a different revision, and the two stop
+// matching — that inequality is the whole signal this module reads.
+//
+// THE SAFETY PROPERTY: a row with no `presetId` is the player's own writing and
+// is never touched, by anything, ever. Provenance is recorded at pick time and
+// NEVER inferred — no name matching, not even as a fallback, because a
+// heuristic that is right 95% of the time silently rewrites the other 5% of
+// someone's homebrew.
+//
+// Two kinds of difference, deliberately not treated alike:
+//   - the row's column is EMPTY and the catalogue now has a value (a
+//     `dragonOnly` restriction authored after the spell was picked, a `duration`
+//     extracted in a later pass). Nothing of the player's is at stake, so it is a FILL and
+//     needs no question.
+//   - both sides hold a value and they differ. That is a CONFLICT: the player
+//     may have edited the row on purpose, and the catalogue may equally have
+//     been fixed. One decision per sortilège — the player keeps theirs or takes
+//     the catalogue's whole entry.
+//
+// In-play values are outside all of this: `cleParfaite` is crafted at the table,
+// not printed in a rulebook, and the catalogue has no opinion on it.
+//
+// PURE — no DB, no catalogue import (the presets are passed in) — so it unit-
+// tests in plain Node like the other `lib/` engines. Applying a settled plan is
+// `repositories/spell-sync`.
+
+import type { Spell } from '@/db/schema';
+import type { SpellPreset } from '@/data/spell-catalog';
+
+/**
+ * The columns the catalogue owns, i.e. everything a pick copies off a preset.
+ *
+ * `cleParfaite` is absent on purpose (in-play, see the header) and so are the
+ * provenance columns themselves: `presetRevision` is what the sync *stamps*, not
+ * something it compares.
+ */
+export const SYNC_COLUMNS = [
+  'name',
+  'level',
+  'complexity',
+  'discipline',
+  'sphere',
+  'dragonOnly',
+  'cost',
+  'castTimeAmount',
+  'castTimeUnit',
+  'difficulty',
+  'cle',
+  'effect',
+  'inGameEffect',
+  'sensoryEffect',
+  'duration',
+  'durationUnit',
+  'targets',
+  'tags',
+] as const;
+
+export type SyncColumn = (typeof SYNC_COLUMNS)[number];
+
+/** A column's value on either side of the comparison. */
+export type SyncValue = string | number | boolean | string[];
+
+/**
+ * What the catalogue holds for a column the preset OMITS. The generator drops
+ * every optional field that is empty rather than writing `""` on all 338 rows,
+ * so an absent key means "the DB default", not "unknown" — and comparing
+ * `undefined` against the row's `''` would report a difference on every spell.
+ */
+const CATALOG_DEFAULTS: Record<SyncColumn, SyncValue> = {
+  name: '',
+  level: 1,
+  complexity: 0,
+  discipline: '',
+  sphere: '',
+  dragonOnly: false,
+  cost: 0,
+  castTimeAmount: 1,
+  castTimeUnit: 'action',
+  difficulty: 0,
+  cle: '',
+  effect: '',
+  inGameEffect: '',
+  sensoryEffect: '',
+  duration: '',
+  durationUnit: 'round',
+  targets: '',
+  tags: [],
+};
+
+/** One differing column, as the preview screen prints it. */
+export type SpellSyncChange = {
+  column: SyncColumn;
+  /** What the sheet holds today. */
+  mine: SyncValue;
+  /** What the catalogue says now. */
+  theirs: SyncValue;
+};
+
+/** One spell whose catalogue entry has moved since it was picked. */
+export type SpellSyncEntry = {
+  spellId: number;
+  characterId: number;
+  /** The name the SHEET shows — the row the player has to recognize. */
+  name: string;
+  presetId: string;
+  /**
+   * The revision to stamp once this entry is settled. Written on decline as
+   * well as on accept, so a change the player refused stops being offered until
+   * the catalogue entry actually moves again.
+   */
+  revision: string;
+  /** Columns empty on the sheet that the catalogue fills in. Never asked about. */
+  fills: Partial<Record<SyncColumn, SyncValue>>;
+  /** Columns where both sides speak and disagree. One decision for all of them. */
+  conflicts: SpellSyncChange[];
+};
+
+/**
+ * The rows this module needs. Structural rather than the whole `Spell` so a test
+ * can build one by hand without a database.
+ */
+export type SpellSyncRow = Pick<
+  Spell,
+  'id' | 'characterId' | 'presetId' | 'presetRevision' | SyncColumn
+>;
+
+export type SpellSyncPlan = {
+  /** Fills and/or a plain re-stamp: nothing to decide, applied as-is. */
+  auto: SpellSyncEntry[];
+  /** Carries at least one conflict, so the player answers for this sortilège. */
+  conflicts: SpellSyncEntry[];
+};
+
+/**
+ * "The sheet says nothing here": '' and [], and `false` — the only boolean in
+ * the set is `dragonOnly`, which no editor writes, so an unset one is always the
+ * column default rather than a choice the player made. A NUMBER is never empty:
+ * a cost of 0 is authored, and nothing can tell it from a cost nobody filled in.
+ */
+function isEmpty(v: SyncValue): boolean {
+  if (Array.isArray(v)) return v.length === 0;
+  return v === '' || v === false;
+}
+
+function same(a: SyncValue, b: SyncValue): boolean {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    const x = Array.isArray(a) ? a : [];
+    const y = Array.isArray(b) ? b : [];
+    // The generator already sorts tags into taxonomy order, but a row edited by
+    // hand carries whatever order the editor left — and a reordered set is not
+    // a correction.
+    return x.length === y.length && [...x].sort().join(' ') === [...y].sort().join(' ');
+  }
+  return a === b;
+}
+
+/**
+ * Work out what a catalogue update would do to the spells on the sheets.
+ *
+ * `presets` is the whole `SPELL_CATALOG`; `rows` may span every character (the
+ * sweep is app-wide) or just one. A row is considered only when it names a
+ * preset that still exists AND its stamped revision differs from that preset's
+ * current one — so the common case costs one map lookup and one string compare
+ * per spell, and a catalogue that has not moved produces an empty plan.
+ */
+export function planSpellSync(
+  rows: readonly SpellSyncRow[],
+  presets: readonly SpellPreset[],
+): SpellSyncPlan {
+  const byId = new Map(presets.map((p) => [p.id, p]));
+  const auto: SpellSyncEntry[] = [];
+  const conflicts: SpellSyncEntry[] = [];
+
+  for (const row of rows) {
+    // No slug ⇒ the player wrote it. Untouchable, and not a name to look up.
+    if (!row.presetId) continue;
+    const preset = byId.get(row.presetId);
+    // A spell dropped from the catalogue leaves its rows alone: the sheet is
+    // still a valid spell, it simply has no upstream any more.
+    if (!preset) continue;
+    // Already at this revision — including a row picked before the fingerprint
+    // existed, whose NULL revision reads as "not this one" and so is examined.
+    if (row.presetRevision === preset.revision) continue;
+
+    const entry: SpellSyncEntry = {
+      spellId: row.id,
+      characterId: row.characterId,
+      name: row.name,
+      presetId: row.presetId,
+      revision: preset.revision,
+      fills: {},
+      conflicts: [],
+    };
+
+    for (const column of SYNC_COLUMNS) {
+      // The unit is meaningless on its own — « 3 » in no unit is not a durée —
+      // so it rides with `duration` below instead of being compared apart.
+      if (column === 'durationUnit') continue;
+
+      const mine = (row[column] ?? CATALOG_DEFAULTS[column]) as SyncValue;
+      const theirs = (preset.data[column] ?? CATALOG_DEFAULTS[column]) as SyncValue;
+      if (same(mine, theirs)) {
+        // Same durée, different unit: that IS a correction (« 3 tours » became
+        // « 3 minutes »), and it is the one case where the unit stands alone.
+        if (column === 'duration' && !isEmpty(mine)) {
+          const myUnit = row.durationUnit ?? CATALOG_DEFAULTS.durationUnit;
+          const theirUnit = preset.data.durationUnit ?? CATALOG_DEFAULTS.durationUnit;
+          if (myUnit !== theirUnit) {
+            entry.conflicts.push({ column: 'durationUnit', mine: myUnit, theirs: theirUnit });
+          }
+        }
+        continue;
+      }
+
+      if (isEmpty(mine) && !isEmpty(theirs)) {
+        entry.fills[column] = theirs;
+        // A durée arrives with the unit it counts in or it reads as raw digits.
+        if (column === 'duration') {
+          entry.fills.durationUnit = preset.data.durationUnit ?? CATALOG_DEFAULTS.durationUnit;
+        }
+        continue;
+      }
+
+      // Both sides speak (or the catalogue is CLEARING a value the sheet holds,
+      // which is equally the player's to refuse).
+      entry.conflicts.push({ column, mine, theirs });
+      if (column === 'duration') {
+        const myUnit = row.durationUnit ?? CATALOG_DEFAULTS.durationUnit;
+        const theirUnit = preset.data.durationUnit ?? CATALOG_DEFAULTS.durationUnit;
+        if (myUnit !== theirUnit) {
+          entry.conflicts.push({ column: 'durationUnit', mine: myUnit, theirs: theirUnit });
+        }
+      }
+    }
+
+    // An entry with neither is still emitted: the revision moved over a column
+    // the row already happens to match, and re-stamping is what stops the sweep
+    // from re-examining it for ever.
+    (entry.conflicts.length > 0 ? conflicts : auto).push(entry);
+  }
+
+  return { auto, conflicts };
+}
+
+/** Every entry of a plan, conflicts last — the order the preview screen reads. */
+export function planEntries(plan: SpellSyncPlan): SpellSyncEntry[] {
+  return [...plan.auto, ...plan.conflicts];
+}
+
+/**
+ * The patch to write for one entry. `accepted` decides only the conflicts: the
+ * fills go in either way (they overwrite nothing), and the revision is stamped
+ * either way (see `SpellSyncEntry.revision`).
+ */
+export function syncPatch(entry: SpellSyncEntry, accepted: boolean): Record<string, unknown> {
+  const patch: Record<string, unknown> = { ...entry.fills, presetRevision: entry.revision };
+  if (accepted) for (const c of entry.conflicts) patch[c.column] = c.theirs;
+  return patch;
+}

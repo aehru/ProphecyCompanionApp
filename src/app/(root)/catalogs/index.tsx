@@ -1,8 +1,13 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { type Href, useNavigation, useRouter } from 'expo-router';
+import { Suspense, lazy, useEffect, useLayoutEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { IconButton, Menu } from 'react-native-paper';
 
+import CatalogSyncBanner from '@/components/catalog/catalog-sync-banner';
+import DiceRollerButton from '@/components/dice-roller-button';
 import type { TabLabel } from '@/components/ui/sub-tabs';
 import TabPager from '@/components/ui/tab-pager';
+import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
 
 /**
  * Each catalogue is loaded the first time its tab is opened, never before.
@@ -56,6 +61,9 @@ const TABS: readonly TabLabel[] = [
  * sortilèges), and a second scroller around it would fight both.
  */
 export default function CatalogsScreen() {
+  const navigation = useNavigation();
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [tab, setTab] = useState(0);
   /**
    * Whether the first catalogue may start loading. The pager's strip paints
@@ -91,8 +99,49 @@ export default function CatalogsScreen() {
     return () => clearTimeout(id);
   }, []);
 
+  // Overrides the tab navigator's headerRight, so the dice button it puts on
+  // every tab is re-added here — same shape as Personnages. The sweep lives on
+  // THIS tab and not on a character's Magie: a rulebook correction lands for
+  // every sheet at once, and walking a dozen NPCs one by one is the thing it is
+  // there to avoid.
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={styles.headerActions}>
+          <DiceRollerButton />
+          <Menu
+            visible={menuOpen}
+            onDismiss={() => setMenuOpen(false)}
+            anchor={<IconButton icon="dots-vertical" onPress={() => setMenuOpen(true)} />}>
+            <Menu.Item
+              leadingIcon="sync"
+              onPress={() => {
+                setMenuOpen(false);
+                router.push('/catalog-sync' as Href);
+              }}
+              title="Mettre à jour les fiches…"
+            />
+          </Menu>
+        </View>
+      ),
+    });
+  }, [navigation, router, menuOpen]);
+
+  // Gated on `ready` for the same reason the catalogues themselves are: the
+  // plan needs `spell-catalog.gen`, and paying its ~139ms during the navigation
+  // is exactly what this screen goes out of its way to avoid. Once idle it is a
+  // module-cached import the Sortilèges page is loading anyway.
+  const { entries } = useSpellSyncPlan(ready);
+
   return (
     <View style={styles.root}>
+      {/* Only while a correction is actually waiting — see CatalogSyncBanner. */}
+      {entries.length > 0 ? (
+        <CatalogSyncBanner
+          count={entries.length}
+          onPress={() => router.push('/catalog-sync' as Href)}
+        />
+      ) : null}
       <TabPager
         labels={TABS}
         active={tab}
@@ -127,6 +176,7 @@ export default function CatalogsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  headerActions: { flexDirection: 'row' },
   strip: { marginHorizontal: 12, marginTop: 8 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   firstLoad: {

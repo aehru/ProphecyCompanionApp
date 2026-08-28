@@ -351,6 +351,22 @@ export const spells = sqliteTable('spells', {
   complexity: integer('complexity').notNull().default(0),
   discipline: text('discipline').$type<DisciplineKey>().notNull().default('sorcellerie'),
   sphere: text('sphere').$type<SphereKey>().notNull().default('sphereFeu'),
+  /**
+   * Draconic restriction: this sortilège is open only to a mage sworn to the
+   * dragon who patrons its sphère (« Mage de Kroryn » for a Sphère du Feu
+   * spell), rather than to everyone who knows the sphère.
+   *
+   * A BOOLEAN and not the dragon's name: the nine dragons pair one-to-one with
+   * the nine sphères (`GREAT_DRAGONS`), so the name is already implied by
+   * `sphere` — storing it too could only repeat it or contradict it. Which
+   * dragon it reads as comes from `dragonMageLabel(sphere)`.
+   *
+   * Informative: the app shows it and never blocks a pick on it. Whether a
+   * character is sworn to that dragon is not something the sheet records, and
+   * the GM rules on it either way. Catalogue-authored only — no editor writes
+   * it, which is why the sync treats `false` as "nothing recorded yet".
+   */
+  dragonOnly: integer('dragon_only', { mode: 'boolean' }).notNull().default(false),
   cost: integer('cost').notNull().default(0),
   castTimeAmount: integer('cast_time_amount').notNull().default(1),
   castTimeUnit: text('cast_time_unit').$type<TimeUnit>().notNull().default('action'),

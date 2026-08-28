@@ -25,7 +25,7 @@ import AppFab from '@/components/ui/app-fab';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import { SectionHeader } from '@/components/ui/section-card';
-import { DISCIPLINE_LABEL, SPHERES } from '@/constants/prophecy';
+import { DISCIPLINE_LABEL, dragonMageLabel, SPHERES } from '@/constants/prophecy';
 import { SPELL_CATALOG, type SpellPreset } from '@/data/spell-catalog';
 import type { SpellReadings } from '@/hooks/use-spell-total';
 import { contentWidth } from '@/hooks/use-layout';
@@ -341,6 +341,9 @@ const SpellRow = React.memo(function SpellRow({
   const sub = [
     p.data.level ? `Niv. ${p.data.level}` : null,
     DISCIPLINE_LABEL[entry.discipline],
+    // Whether the sphère alone is enough decides the pick, so it belongs on the
+    // row and not only in the preview below it.
+    p.data.dragonOnly ? dragonMageLabel(entry.sphere) : null,
     `Diff. ${p.data.difficulty}`,
     total ? `Total ${total.total}` : null,
   ]

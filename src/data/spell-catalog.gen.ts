@@ -3528,7 +3528,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "laura-draconique",
-    "revision": "0def08553bd8",
+    "revision": "74d6a998ffc2",
     "data": {
       "name": "L'aura draconique",
       "level": 2,
@@ -3550,7 +3550,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "illusion",
         "self",
         "social"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -3630,7 +3631,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-seuil",
-    "revision": "bdd22cb6d857",
+    "revision": "6c6c5bde0abe",
     "data": {
       "name": "Le Seuil",
       "level": 3,
@@ -3650,7 +3651,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "movement",
         "place",
         "urban"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -3732,7 +3734,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "subjugation",
-    "revision": "ef29b5c42dfa",
+    "revision": "fca4dab5acb4",
     "data": {
       "name": "Subjugation",
       "level": 1,
@@ -3753,7 +3755,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "debuff",
         "enemy",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -3860,7 +3863,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "poing-foudroyant",
-    "revision": "fe23d557cec2",
+    "revision": "22c3daa64e3f",
     "data": {
       "name": "Poing foudroyant",
       "level": 2,
@@ -3879,7 +3882,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "attack",
         "enemy",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -3908,7 +3912,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "immunite-au-feu",
-    "revision": "838942bc8083",
+    "revision": "a4a4984c5aa4",
     "data": {
       "name": "Immunité au feu",
       "level": 2,
@@ -3928,7 +3932,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "protection",
         "ally",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -4163,7 +4168,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "foudres-de-kroryn",
-    "revision": "012e11a5bb90",
+    "revision": "b19689f29472",
     "data": {
       "name": "Foudres de Kroryn",
       "level": 3,
@@ -4184,7 +4189,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "buff",
         "object",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -4242,7 +4248,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "eau-de-feu",
-    "revision": "eb5bcb40b0c6",
+    "revision": "a1830517e727",
     "data": {
       "name": "Eau de feu",
       "level": 3,
@@ -4261,12 +4267,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "creation",
         "area",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
     "id": "effigie-de-kroryn",
-    "revision": "657425d36eff",
+    "revision": "5bcd45026242",
     "data": {
       "name": "Effigie de Kroryn",
       "level": 3,
@@ -4285,12 +4292,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "area",
         "object",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
     "id": "le-refus-de-la-fatalite",
-    "revision": "4bf8920cdbf3",
+    "revision": "b1a6c8be4faf",
     "data": {
       "name": "Le refus de la fatalité",
       "level": 1,
@@ -4307,7 +4315,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "tags": [
         "utility",
         "self"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -4410,7 +4419,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "le-creuset-du-metal",
-    "revision": "7a66c9a85051",
+    "revision": "a205d53c190e",
     "data": {
       "name": "Le creuset du métal",
       "level": 2,
@@ -4430,7 +4439,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "buff",
         "creation",
         "object"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -4754,7 +4764,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "transformation-vegetale",
-    "revision": "849661473f17",
+    "revision": "5f25a5769b5e",
     "data": {
       "name": "Transformation végétale",
       "level": 2,
@@ -4774,7 +4784,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "utility",
         "object",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -4932,7 +4943,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "appel-des-fenndanns",
-    "revision": "2c4d8c9636e0",
+    "revision": "5294f950cd25",
     "data": {
       "name": "Appel des Fenn'danns",
       "level": 3,
@@ -4951,7 +4962,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "summoning",
         "communication",
         "ritual"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -5204,7 +5216,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "enfant-dozyr",
-    "revision": "577c748b8ad1",
+    "revision": "14fabc0d5a95",
     "data": {
       "name": "Enfant d'Ozyr",
       "level": 2,
@@ -5225,7 +5237,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "buff",
         "ally",
         "exploration"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -5378,7 +5391,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "ecrase-pierre",
-    "revision": "b4943c5771b2",
+    "revision": "f9ca7a09b731",
     "data": {
       "name": "Ecrase pierre",
       "level": 1,
@@ -5397,7 +5410,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "utility",
         "object",
         "exploration"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -5451,7 +5465,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "voix-de-la-montagne",
-    "revision": "66086c2c2eff",
+    "revision": "57a1b6aca010",
     "data": {
       "name": "Voix de la montagne",
       "level": 1,
@@ -5473,7 +5487,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "debuff",
         "area",
         "social"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -5623,7 +5638,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "feu-de-brorne",
-    "revision": "1d5a843fed5d",
+    "revision": "2c66bb870754",
     "data": {
       "name": "Feu de Brorne",
       "level": 3,
@@ -5645,7 +5660,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "detection",
         "object",
         "social"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -5930,7 +5946,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "fenetre-onirique",
-    "revision": "ae58fc5f2fc7",
+    "revision": "1b26fbaaa990",
     "data": {
       "name": "Fenêtre onirique",
       "level": 2,
@@ -5950,12 +5966,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "detection",
         "ally",
         "ritual"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
     "id": "refuge",
-    "revision": "c1d3ce09d4b3",
+    "revision": "b65ecd401798",
     "data": {
       "name": "Refuge",
       "level": 2,
@@ -5978,7 +5995,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "movement",
         "ally",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -6007,7 +6025,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "psychonaute",
-    "revision": "19fd879e7605",
+    "revision": "bcbd5846d8c1",
     "data": {
       "name": "Psychonaute",
       "level": 3,
@@ -6025,12 +6043,13 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "detection",
         "movement",
         "ritual"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
     "id": "voix-de-nenya",
-    "revision": "5ccdc7415676",
+    "revision": "a5d4accee4a9",
     "data": {
       "name": "Voix de Nenya",
       "level": 3,
@@ -6048,7 +6067,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
       "tags": [
         "summoning",
         "ritual"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -6078,7 +6098,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "bandeau-de-vision",
-    "revision": "d2ca7e261516",
+    "revision": "0c3d0dbaa890",
     "data": {
       "name": "Bandeau de vision",
       "level": 3,
@@ -6099,7 +6119,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "detection",
         "enemy",
         "object"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -6280,7 +6301,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "la-bonne-fortune",
-    "revision": "2a80a52f1a07",
+    "revision": "a439eb3acb78",
     "data": {
       "name": "La bonne fortune",
       "level": 2,
@@ -6300,7 +6321,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "buff",
         "self",
         "ritual"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -6330,7 +6352,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "loeil-du-cyclone",
-    "revision": "568f232a3379",
+    "revision": "fada7cfb82dc",
     "data": {
       "name": "L'œil du cyclone",
       "level": 3,
@@ -6352,7 +6374,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "debuff",
         "area",
         "combat"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {
@@ -6384,7 +6407,7 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
   },
   {
     "id": "nemesis",
-    "revision": "c2609291df91",
+    "revision": "1d35a1c0e980",
     "data": {
       "name": "Nemesis",
       "level": 3,
@@ -6404,7 +6427,8 @@ export const SPELL_CATALOG_DATA: SpellPreset[] = [
         "object",
         "combat",
         "ritual"
-      ]
+      ],
+      "dragonOnly": true
     }
   },
   {

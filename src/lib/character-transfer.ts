@@ -159,6 +159,10 @@ const spellSchema = z.object({
   complexity: int,
   discipline: str,
   sphere: str,
+  // Draconic restriction — reserved to the mage of this sphère's own dragon.
+  // OPTIONAL, same reasoning as `level`: exports predating the column carry
+  // none, and `false` — a spell the whole sphère may cast — is the default.
+  dragonOnly: z.boolean().optional(),
   cost: int,
   castTimeAmount: int,
   castTimeUnit: z.enum(UNIT_KEYS),
