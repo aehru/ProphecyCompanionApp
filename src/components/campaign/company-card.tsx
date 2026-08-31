@@ -48,6 +48,7 @@ export default function CompanyCard({
 
   return (
     <Pressable
+      testID={`roster-card-${entry.charId}`}
       onPress={onPress}
       style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft }]}>
       <View style={styles.cardHead}>
