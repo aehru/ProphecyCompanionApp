@@ -15,6 +15,7 @@ import InitiativeSection from '@/components/fiche/initiative-section';
 import ResourcesSection from '@/components/fiche/resources-section';
 import ShieldSection from '@/components/fiche/shield-section';
 import StatGrid from '@/components/fiche/stat-grid';
+import XpSection from '@/components/fiche/xp-section';
 import GlobalModifierRow from '@/components/global-modifier-row';
 import TendancesTriangle from '@/components/tendances-triangle';
 import AppFab from '@/components/ui/app-fab';
@@ -157,6 +158,11 @@ export default function CharacterFicheScreen() {
     setState((p) => (p ? ({ ...p, ...patch } as ActualState) : p));
     updateActualState(numId, patch);
   };
+  // XP is typed, not stepped, and the two counters are what gets stored: a
+  // negative award or a negative spend is meaningless, so both clamp at 0 —
+  // while their difference (the disponible) is free to go negative. See lib/xp.
+  const setXp = (key: string, text: string) => setStateValue(key, clamp(Number(text) || 0, 0));
+
   const adjustRes = (key: string, delta: number) =>
     setStateValue(
       `${key}Current`,
@@ -297,6 +303,8 @@ export default function CharacterFicheScreen() {
             onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
             editing={editing}
           />
+
+          <XpSection valueOf={(k) => stRec[k] ?? 0} onChange={setXp} editing={editing} />
 
           {state ? (
             <ConditionsCard state={state} editing={editing} onPersist={persistState} />
