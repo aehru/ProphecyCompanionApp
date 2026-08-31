@@ -18,7 +18,7 @@ import ShieldCard from '@/components/shield-card';
 import SpellCard from '@/components/spell-card';
 import WeaponCard from '@/components/weapon-card';
 import type { Weapon } from '@/db/schema';
-import { useDiceRoller } from '@/hooks/use-dice-roller';
+import { openRoller } from '@/lib/dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
@@ -37,7 +37,6 @@ import { weaponsQuery } from '@/repositories/weapons';
 
 export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   const theme = useProphecyTheme();
-  const { open: openRoller } = useDiceRoller();
   const { data: charRows } = useLiveQuery(characterByUuidQuery(charUuid), [charUuid]);
   const char = charRows?.[0] ?? null;
   // 0 matches nothing — keeps the hook order stable while the character loads
@@ -98,7 +97,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   return (
     <>
       {weaponList.length > 0 ? (
-        <Section title="Armes">
+        <Section testID="npc-gear-weapons" title="Armes">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {weaponList.map((w) => (
               <WeaponCard
@@ -116,7 +115,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       ) : null}
 
       {armorList.length > 0 ? (
-        <Section title="Armures">
+        <Section testID="npc-gear-armors" title="Armures">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {armorList.map((a) => (
               <ArmorCard
@@ -131,7 +130,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       ) : null}
 
       {shieldList.length > 0 ? (
-        <Section title="Boucliers">
+        <Section testID="npc-gear-shields" title="Boucliers">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {shieldList.map((s) => (
               <ShieldCard
@@ -147,7 +146,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       ) : null}
 
       {spellList.length > 0 ? (
-        <Section title="Sorts">
+        <Section testID="npc-gear-spells" title="Sorts">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {spellList.map((s) => {
               // Same score for the badge and for the roll — see the weapons above.
