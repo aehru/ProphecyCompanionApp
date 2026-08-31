@@ -20,7 +20,6 @@ import type {
   ActualState,
   Armor,
   Enchant,
-  EnchantTarget,
   Item,
   MagicReserve,
   Shield,
@@ -34,6 +33,7 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellTotal } from '@/hooks/use-spell-total';
 import { Alert } from '@/lib/alert';
 import { asNumRecord } from '@/lib/character-values';
+import { findTarget, firstTarget, isTargetEquipped } from '@/lib/enchant-targets';
 import { spellRollContext } from '@/lib/roll-context';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
@@ -106,15 +106,13 @@ export default function CharacterMagicScreen() {
   const shieldList: Shield[] = shieldRows ?? [];
   const itemList: Item[] = items ?? [];
   const enchants: Enchant[] = enchantList ?? [];
+  // EVERY row, unknown sources included: EnchantRow resolves its own source
+  // through this list. The Sorts tab shows only what the character can cast —
+  // an enchant's source is on the object, not in the spellbook.
   const spellList = spells ?? [];
+  const knownSpells = spellList.filter((sp) => sp.known);
 
-  const targetListFor = (kind: EnchantTarget) =>
-    kind === 'weapon' ? weaponList : kind === 'armor' ? armorList : kind === 'shield' ? shieldList : itemList;
-
-  const targetOf = (e: Enchant) => targetListFor(e.targetType).find((o) => o.id === e.targetId);
-
-  const isEquipped = (kind: EnchantTarget, o: Weapon | Armor | Shield | Item) =>
-    kind === 'weapon' ? (o as Weapon).equippedHand != null : (o as Armor | Shield | Item).equipped;
+  const lists = { weapons: weaponList, armor: armorList, shields: shieldList, items: itemList };
 
   // Reserve objects: each is its own pool, so saving only writes nom/max —
   // `current` is driven by the bullets (and clamped by the repository).
@@ -136,19 +134,11 @@ export default function CharacterMagicScreen() {
   // New enchant starts blank on the first object the character owns (any
   // kind) — the editor screen lets the player fix the target, add a name, a
   // linked spell or free effect text, and a charge count.
-  const firstTarget: { type: EnchantTarget; id: number } | null = weaponList[0]
-    ? { type: 'weapon', id: weaponList[0].id }
-    : armorList[0]
-      ? { type: 'armor', id: armorList[0].id }
-      : shieldList[0]
-        ? { type: 'shield', id: shieldList[0].id }
-        : itemList[0]
-          ? { type: 'item', id: itemList[0].id }
-          : null;
+  const target0 = firstTarget(lists);
 
   const addEnchant = async () => {
-    if (!firstTarget) return;
-    const row = await createEnchant(numId, firstTarget.type, firstTarget.id, {
+    if (!target0) return;
+    const row = await createEnchant(numId, target0.type, target0.id, {
       name: '',
       effect: '',
       usesMax: 1,
@@ -180,13 +170,13 @@ export default function CharacterMagicScreen() {
     if (index === SPELLS_TAB) {
       return (
         <TabPage>
-          {spellList.length === 0 ? (
+          {knownSpells.length === 0 ? (
             <Text style={{ color: theme.colors.onSurfaceVariant }}>
               Aucun sortilège. Ajoutez-en un avec le bouton « Sort ».
             </Text>
           ) : (
             <Columns gap={10}>
-              {spellList.map((sp) => {
+              {knownSpells.map((sp) => {
                 // Once per card: the badge shows this score and the roll uses
                 // it, and the two must not drift apart.
                 const total = spellTotalFor(sp);
@@ -210,20 +200,20 @@ export default function CharacterMagicScreen() {
         {enchants.length === 0 ? (
           <Text style={{ color: theme.colors.onSurfaceVariant }}>
             Aucun enchantement.{' '}
-            {firstTarget
+            {target0
               ? 'Ajoutez-en un avec le bouton « Enchantement ».'
               : 'Ajoutez d’abord une arme, une armure, un bouclier ou un objet à enchanter.'}
           </Text>
         ) : (
           <Columns gap={10}>
             {enchants.map((e) => {
-              const target = targetOf(e);
+              const target = findTarget(e, lists);
               return (
                 <EnchantRow
                   key={e.id}
                   enchant={e}
                   target={target}
-                  equipped={target ? isEquipped(e.targetType, target) : false}
+                  equipped={target ? isTargetEquipped(e.targetType, target) : false}
                   editing={editing}
                   spells={spellList}
                   onOpen={() => router.push(`/character/${numId}/enchant/${e.id}`)}
@@ -247,7 +237,7 @@ export default function CharacterMagicScreen() {
         />
       ) : tab === ENCHANTS_TAB ? (
         <>
-          <AppFab icon={dsIcon('plus')} onPress={addEnchant} disabled={!firstTarget} offset={72} />
+          <AppFab icon={dsIcon('plus')} onPress={addEnchant} disabled={!target0} offset={72} />
           <AppFab icon={editing ? dsIcon('check') : dsIcon('edit')} onPress={() => setEditing((e) => !e)} />
         </>
       ) : (

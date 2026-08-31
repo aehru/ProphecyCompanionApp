@@ -32,7 +32,7 @@ import { effectsQuery } from '@/repositories/effects';
 import { enchantsQuery } from '@/repositories/enchants';
 import { shieldsQuery } from '@/repositories/shields';
 import { skillsQuery } from '@/repositories/skills';
-import { spellsQuery } from '@/repositories/spells';
+import { knownSpellsQuery } from '@/repositories/spells';
 import { weaponsQuery } from '@/repositories/weapons';
 
 export default function NpcGearSections({ charUuid }: { charUuid: string }) {
@@ -47,7 +47,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   const { data: weapons } = useLiveQuery(weaponsQuery(localId), [localId]);
   const { data: armors } = useLiveQuery(armorQuery(localId), [localId]);
   const { data: shields } = useLiveQuery(shieldsQuery(localId), [localId]);
-  const { data: spells } = useLiveQuery(spellsQuery(localId), [localId]);
+  const { data: spells } = useLiveQuery(knownSpellsQuery(localId), [localId]);
   const { data: effects } = useLiveQuery(effectsQuery(localId), [localId]);
   const { data: enchants } = useLiveQuery(enchantsQuery(localId), [localId]);
   // Local rows again: an NPC's attack total needs its compétences, which the

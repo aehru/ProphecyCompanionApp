@@ -89,6 +89,13 @@ export default function CharacterLayout() {
           title: "Modifier l'enchantement",
         }}
       />
+      <Stack.Screen
+        name="enchant/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Sort de l’enchantement',
+        }}
+      />
     </Stack>
   );
 }
