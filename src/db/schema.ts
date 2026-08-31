@@ -149,6 +149,16 @@ export const actualState = sqliteTable('actual_state', {
   maitriseCurrent: integer('maitrise_current').notNull().default(0),
   chanceCurrent: integer('chance_current').notNull().default(0),
 
+  // Expérience — two counters, not a balance. `xpTotal` is what the character
+  // has ever been awarded, `xpSpent` what has gone into raising things; the
+  // disponible is derived (lib/xp), never stored, so the two can't drift.
+  // Deliberately NOT in RESOURCES: those are a sheet max with a live current,
+  // while XP has no max at all. Spending is manual — the app knows no cost
+  // table — and the disponible MAY go negative: a GM lets a player buy on
+  // credit, and refusing to record that would just push it off the app.
+  xpTotal: integer('xp_total').notNull().default(0),
+  xpSpent: integer('xp_spent').notNull().default(0),
+
   // Magic — current reserve + per-sphere current (maxes live on the character)
   reserveMagiqueCurrent: integer('reserve_magique_current').notNull().default(0),
   sphereCitesCurrent: integer('sphere_cites_current').notNull().default(0),
