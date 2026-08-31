@@ -34,10 +34,15 @@ function isOrphanSkill(target: string, skills: Skill[]): boolean {
 
 /**
  * Temporary bonuses/maluses for the résumé tab. Each row is a summary that opens
- * the full editor (`effect/[eid]` modal) on tap — adding is done from the tab's
- * second FAB, so the card itself never spawns empty rows. The tab edit toggle
- * only exposes the per-unit "time passes" controls (tick a unit's effects −1);
- * it does NOT add delete/edit controls, since editing lives on the editor screen.
+ * the full editor (`effect/[eid]` modal) on tap. The tab edit toggle only
+ * exposes the per-unit "time passes" controls (tick a unit's effects −1); it
+ * does NOT add delete/edit controls, since editing lives on the editor screen.
+ *
+ * Adding lives in the card, at the top, rather than on a FAB: this card is
+ * reused by the GM's NPC editor, which is a scrolled sheet with no FAB of its
+ * own — so a FAB left the GM reading « ajoutez-en un » next to a button that
+ * only existed on the Fiche. `onAdd` is NOT gated on `editing`: the FAB it
+ * replaces was always live, and the GM side passes `editing` permanently on.
  *
  * `permanent` effects never tick or expire; effects targeting a skill by name
  * that no longer exists are flagged as orphaned (they simply stop applying).
@@ -46,11 +51,14 @@ export default function EffectsCard({
   effects,
   skills,
   editing,
+  onAdd,
 }: {
   effects: Effect[];
   // Character's owned skills — used to flag orphaned skill targets.
   skills: Skill[];
   editing: boolean;
+  /** Omit to render the card read-only (no way to create an effect). */
+  onAdd?: () => void;
 }) {
   const theme = useProphecyTheme();
   const router = useRouter();
@@ -64,10 +72,14 @@ export default function EffectsCard({
 
   return (
     <SectionCard title="EFFETS" icon="fire">
+      {onAdd ? (
+        <Button mode="outlined" icon={dsIcon('plus')} onPress={onAdd}>
+          Ajouter un effet
+        </Button>
+      ) : null}
+
       {effects.length === 0 ? (
-        <Text style={{ color: theme.colors.onSurfaceVariant }}>
-          Aucun effet. Ajoutez-en un avec le bouton « Effet ».
-        </Text>
+        <Text style={{ color: theme.colors.onSurfaceVariant }}>Aucun effet.</Text>
       ) : (
         effects.map((e) => (
           <EffectRow

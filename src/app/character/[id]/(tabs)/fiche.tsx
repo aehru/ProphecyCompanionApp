@@ -291,7 +291,12 @@ export default function CharacterFicheScreen() {
             editing={editing}
           />
 
-          <EffectsCard effects={effectList} skills={skills ?? []} editing={editing} />
+          <EffectsCard
+            effects={effectList}
+            skills={skills ?? []}
+            editing={editing}
+            onAdd={addEffect}
+          />
 
           {equippedArmor ? <ArmorSection armor={equippedArmor} editing={editing} /> : null}
           {equippedShield ? <ShieldSection shield={equippedShield} editing={editing} /> : null}
@@ -316,7 +321,6 @@ export default function CharacterFicheScreen() {
         </Columns>
       </KeyboardAwareScrollView>
 
-      <AppFab icon="fire" onPress={addEffect} offset={72} />
       <AppFab
         icon={editing ? dsIcon('check') : dsIcon('edit')}
         onPress={() => setEditing((e) => !e)}

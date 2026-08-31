@@ -1,4 +1,5 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
@@ -15,7 +16,7 @@ import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } fro
 import { woundMalus } from '@/lib/modifiers';
 import { actualStateQuery, updateActualState } from '@/repositories/actual-state';
 import { characterByUuidQuery } from '@/repositories/characters';
-import { effectsQuery } from '@/repositories/effects';
+import { createEffect, effectsQuery } from '@/repositories/effects';
 import { skillsQuery } from '@/repositories/skills';
 
 /**
@@ -36,6 +37,7 @@ import { skillsQuery } from '@/repositories/skills';
  */
 export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
   const theme = useProphecyTheme();
+  const router = useRouter();
   // `updatedAt` is undefined until a query has actually run. useLiveQuery seeds
   // `data` with [] and fetches in an effect, so without this an empty result is
   // indistinguishable from "not loaded yet" — and the not-found message below
@@ -134,7 +136,23 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
         editing
       />
       <ConditionsCard state={state} editing onPersist={persistState} />
-      <EffectsCard effects={effects ?? []} skills={skills ?? []} editing />
+      <EffectsCard
+        effects={effects ?? []}
+        skills={skills ?? []}
+        editing
+        onAdd={async () => {
+          // Same blank +0 the Fiche creates, and the same editor screen — which
+          // is a character route, so this leaves the campaign screen exactly as
+          // tapping an existing effect row already does.
+          const row = await createEffect(localId, {
+            target: 'all',
+            value: 0,
+            durationUnit: 'round',
+            durationRemaining: 1,
+          });
+          router.push(`/character/${localId}/effect/${row.id}`);
+        }}
+      />
     </View>
   );
 }
