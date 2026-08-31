@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm';
+import { asc, eq, inArray } from 'drizzle-orm';
 
 import { db, transaction } from '@/db/client';
 import {
@@ -6,15 +6,20 @@ import {
   armor,
   characters,
   effects,
+  enchants,
+  items,
   magicReserves,
   shields,
   skills,
   spells,
   weapons,
+  type EnchantTarget,
   type NewActualState,
   type NewArmor,
   type NewCharacter,
   type NewEffect,
+  type NewEnchant,
+  type NewItem,
   type NewMagicReserve,
   type NewShield,
   type NewSkill,
@@ -28,13 +33,17 @@ import {
   CHARACTER_FIELDS,
   type CharacterBundle,
   EFFECT_FIELDS,
+  ENCHANT_FIELDS,
   type ExportIntent,
   forSharing,
   type ImportMode,
+  ITEM_FIELDS,
+  linkEnchant,
   MAGIC_RESERVE_FIELDS,
   planImport,
   planMagicReserves,
   type ProphecyExport,
+  resolveEnchantLinks,
   SHIELD_FIELDS,
   SKILL_FIELDS,
   SPELL_FIELDS,
@@ -44,6 +53,19 @@ import {
 import { copyMedia } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
 import { logWrite } from '@/repositories/log';
+
+/**
+ * The four tables an enchant can be bound to, keyed the way the row stores it.
+ * A polymorphic pointer has no FK to follow, so the mapping has to be written
+ * down somewhere — here, once, rather than as a switch at each use.
+ */
+const GEAR_TABLES = { weapon: weapons, armor, shield: shields, item: items } as const;
+type GearTable = (typeof GEAR_TABLES)[EnchantTarget] | typeof spells;
+
+/** Row id → its position in the array, the form a link takes inside a bundle. */
+function positions(rows: { id: number }[]): Map<number, number> {
+  return new Map(rows.map((r, i) => [r.id, i]));
+}
 
 /** Copy only the listed keys off a DB row (drops id / FK / timestamps / media). */
 function pick(row: Record<string, unknown>, fields: string[]): Record<string, unknown> {
@@ -72,15 +94,33 @@ export async function exportCharacters(
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {
     const [st] = await db.select().from(actualState).where(eq(actualState.characterId, c.id));
-    const [sk, ar, wp, sh, sp, mr, ef] = await Promise.all([
-      db.select().from(skills).where(eq(skills.characterId, c.id)),
-      db.select().from(armor).where(eq(armor.characterId, c.id)),
-      db.select().from(weapons).where(eq(weapons.characterId, c.id)),
-      db.select().from(shields).where(eq(shields.characterId, c.id)),
-      db.select().from(spells).where(eq(spells.characterId, c.id)),
-      db.select().from(magicReserves).where(eq(magicReserves.characterId, c.id)),
-      db.select().from(effects).where(eq(effects.characterId, c.id)),
+    // Ordered by id, all of them: an enchant's target and its source spell ride
+    // along as POSITIONS in these arrays (see `enchantSchema`), so export and
+    // import have to agree on the order — `asc(id)` is that agreement, and it is
+    // the order the importer re-inserts in.
+    const [sk, ar, wp, sh, it, sp, mr, en, ef] = await Promise.all([
+      db.select().from(skills).where(eq(skills.characterId, c.id)).orderBy(asc(skills.id)),
+      db.select().from(armor).where(eq(armor.characterId, c.id)).orderBy(asc(armor.id)),
+      db.select().from(weapons).where(eq(weapons.characterId, c.id)).orderBy(asc(weapons.id)),
+      db.select().from(shields).where(eq(shields.characterId, c.id)).orderBy(asc(shields.id)),
+      db.select().from(items).where(eq(items.characterId, c.id)).orderBy(asc(items.id)),
+      db.select().from(spells).where(eq(spells.characterId, c.id)).orderBy(asc(spells.id)),
+      db
+        .select()
+        .from(magicReserves)
+        .where(eq(magicReserves.characterId, c.id))
+        .orderBy(asc(magicReserves.id)),
+      db.select().from(enchants).where(eq(enchants.characterId, c.id)).orderBy(asc(enchants.id)),
+      db.select().from(effects).where(eq(effects.characterId, c.id)).orderBy(asc(effects.id)),
     ]);
+
+    const gearIndex: Record<EnchantTarget, Map<number, number>> = {
+      weapon: positions(wp),
+      armor: positions(ar),
+      shield: positions(sh),
+      item: positions(it),
+    };
+    const spellIndex = positions(sp);
 
     bundles.push({
       character: pick(c, CHARACTER_FIELDS),
@@ -90,8 +130,15 @@ export async function exportCharacters(
       armor: ar.map((r) => pick(r, ARMOR_FIELDS)),
       weapons: wp.map((r) => pick(r, WEAPON_FIELDS)),
       shields: sh.map((r) => pick(r, SHIELD_FIELDS)),
+      items: it.map((r) => pick(r, ITEM_FIELDS)),
       spells: sp.map((r) => pick(r, SPELL_FIELDS)),
       magicReserves: mr.map((r) => pick(r, MAGIC_RESERVE_FIELDS)),
+      // An enchant whose target vanished has nothing to be bound to on the far
+      // side, so it is dropped rather than exported dangling.
+      enchants: en.flatMap((r) => {
+        const links = linkEnchant(r, gearIndex, spellIndex);
+        return links ? [{ ...pick(r, ENCHANT_FIELDS), ...links }] : [];
+      }),
       effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
     } as CharacterBundle);
   }
@@ -172,7 +219,21 @@ export async function importCharacters(
           restored++;
           // Overwrite the sheet (keep original createdAt) and rebuild children.
           await tx.update(characters).set({ ...sheet, updatedAt: now }).where(eq(characters.id, characterId));
-          for (const t of [actualState, skills, armor, weapons, shields, spells, magicReserves, effects]) {
+          for (const t of [
+            actualState,
+            skills,
+            armor,
+            weapons,
+            shields,
+            items,
+            // Before `spells`: `sourceSpellId` is the one REAL foreign key here
+            // (`on delete set null`), so dropping the spells first would make
+            // SQLite rewrite every enchant row a statement before deleting it.
+            enchants,
+            spells,
+            magicReserves,
+            effects,
+          ]) {
             await tx.delete(t).where(eq(t.characterId, characterId));
           }
         }
@@ -196,6 +257,8 @@ export async function importCharacters(
       if (b.weapons.length) await tx.insert(weapons).values(link(b.weapons) as NewWeapon[]);
       const shieldRows = b.shields ?? [];
       if (shieldRows.length) await tx.insert(shields).values(link(shieldRows) as NewShield[]);
+      const itemRows = b.items ?? [];
+      if (itemRows.length) await tx.insert(items).values(link(itemRows) as NewItem[]);
       if (b.spells.length) await tx.insert(spells).values(link(b.spells) as NewSpell[]);
       // Reserve objects are recharged on a copy, kept as-is on a restore.
       const reserves = planMagicReserves(b.magicReserves ?? [], effective);
@@ -203,6 +266,41 @@ export async function importCharacters(
         await tx.insert(magicReserves).values(link(reserves) as NewMagicReserve[]);
       }
       if (b.effects.length) await tx.insert(effects).values(link(b.effects) as NewEffect[]);
+
+      // Enchants LAST: their target and their source spell travelled as
+      // positions in the arrays just written (see `enchantSchema`), so the fresh
+      // ids only exist now. Read back in insertion order — `asc(id)` on an
+      // autoincrement key IS that order, and it is the order they were exported
+      // in. An index that resolves to nothing (a hand-edited file) drops the
+      // enchant instead of binding it to whatever sits at that position.
+      const enchantRows = b.enchants ?? [];
+      if (enchantRows.length) {
+        const newIds = async (t: GearTable) =>
+          (
+            await tx
+              .select({ id: t.id })
+              .from(t)
+              .where(eq(t.characterId, characterId))
+              .orderBy(asc(t.id))
+          ).map((r) => r.id);
+        // Only the kinds actually pointed at: an enchanted sword costs one
+        // read-back, not four, and a bundle with no linked sortilège costs none.
+        const gearIds: Partial<Record<EnchantTarget, number[]>> = {};
+        for (const kind of new Set(enchantRows.map((e) => e.targetType as EnchantTarget))) {
+          gearIds[kind] = await newIds(GEAR_TABLES[kind]);
+        }
+        const spellIds = enchantRows.some((e) => e.sourceSpellIndex != null)
+          ? await newIds(spells)
+          : [];
+
+        const rows = enchantRows.flatMap((e) => {
+          const links = resolveEnchantLinks(e, gearIds, spellIds);
+          if (!links) return [];
+          const { targetIndex: _t, sourceSpellIndex: _s, ...cols } = e;
+          return [{ ...cols, characterId, ...links }];
+        });
+        if (rows.length) await tx.insert(enchants).values(rows as NewEnchant[]);
+      }
 
       existing.add(plan.uuid);
       written.push(characterId);
