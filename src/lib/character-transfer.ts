@@ -85,6 +85,11 @@ const stateSchema = z.object({
   initiativeDiceIcons: z.array(str).optional(),
   conditions: str,
   notes: str,
+  // Expérience (total awarded / total spent). OPTIONAL for the same reason as
+  // the initiative keys above: exports predating the columns have no such key
+  // and import at the column default 0.
+  xpTotal: int.optional(),
+  xpSpent: int.optional(),
 });
 
 const skillSchema = z.object({
