@@ -117,6 +117,33 @@ export async function createCharacter(
   return page.url().match(/\/character\/(\d+)/)![1];
 }
 
+/**
+ * Create a PNJ from a table's salon and return its character route id. The NPC
+ * joins the table on creation (`createNpc` → `setMember`), so it is on the
+ * Compagnie's roster straight away.
+ */
+export async function createNpc(page: Page, campaignId: string, nom: string): Promise<string> {
+  await page.goto(`/campaigns/${campaignId}`);
+  await page.getByTestId('new-npc').click();
+  await page.getByTestId('field-npc-name').fill(nom);
+  await page.getByTestId('dialog-npc-submit').click();
+  await page.waitForURL(/\/character\/\d+/);
+  return page.url().match(/\/character\/(\d+)/)![1];
+}
+
+/**
+ * Add a catalogue weapon to a character, through the picker's `+` — which names
+ * itself « Ajouter <arme> ». A CATALOGUE weapon, not a blank one, because only
+ * a preset carries the `skillName` that gives the card a total and a roll.
+ */
+export async function addCatalogWeapon(page: Page, characterId: string, name: string) {
+  await page.goto(`/character/${characterId}/weapon/catalog`);
+  await page.getByLabel(`Ajouter ${name}`).click();
+  // The toast is the insert's acknowledgement: wait for it, or navigating away
+  // races the async write.
+  await expect(page.getByText(`« ${name} » ajoutée.`)).toBeVisible();
+}
+
 /** Create a local table (no server) from the campaigns screen, return its id. */
 export async function createLocalTable(page: Page, name: string): Promise<string> {
   await page.getByTestId('fab-new-table').click();
