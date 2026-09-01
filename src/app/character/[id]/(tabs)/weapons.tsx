@@ -20,7 +20,7 @@ import { MONEY } from '@/constants/prophecy';
 import type { ActualState, Weapon } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
-import { useDiceRoller } from '@/hooks/use-dice-roller';
+import { openRoller } from '@/lib/dice-roller';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
@@ -50,7 +50,6 @@ export default function CharacterWeaponsScreen() {
   const [tab, setTab] = useState(0);
   const [itemQuery, setItemQuery] = useState('');
   const splitWidth = useSplitWidth();
-  const { open: openRoller } = useDiceRoller();
   // Keyboard "next" wiring for the ARGENT fields (self-contained here — money
   // is the only chained field group left on this screen).
   const moneyRefs = useRef<Record<string, RNTextInput | null>>({});

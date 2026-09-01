@@ -19,10 +19,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CampaignLiveIndicator from '@/components/campaign-live-indicator';
 import DatabaseGate from '@/components/database-gate';
 import DiceRollerButton from '@/components/dice-roller-button';
+import DiceRollerHost from '@/components/dice-roller-host';
 import LogErrorBoundary from '@/components/log-error-boundary';
 import AlertHost from '@/components/ui/alert-host';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
-import { DiceRollerProvider } from '@/hooks/use-dice-roller';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
@@ -96,6 +96,11 @@ export default function RootLayout() {
             screen has to be able to show. Paper's Portal hoists it to the top
             regardless of where it sits here. */}
         <AlertHost />
+        {/* Beside the alerts, and for the same reason: both are Portals mounted
+            only WHILE open, so they land on top of whatever dialog or bottom
+            sheet is already up — the GM's character sheet included. A provider
+            could not do that job at all (see lib/dice-roller). */}
+        <DiceRollerHost />
         <ThemeProvider
           value={colorScheme === 'dark' ? ProphecyNavigationDarkTheme : ProphecyNavigationLightTheme}>
           <DatabaseGate
@@ -106,52 +111,48 @@ export default function RootLayout() {
               {/* Catches render-time throws the global handler never sees, and puts
                   the stack in the diagnostic log instead of a blank screen. */}
               <LogErrorBoundary>
-                {/* Above the Stack: the roller opens from any screen's header and
-                    its dialog outlives navigation (see use-dice-roller). */}
-                <DiceRollerProvider>
-                  <View style={styles.root}>
-                    <Stack
-                      screenOptions={{
-                        headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
-                        // `height` on the JS header is the total, status bar included.
-                        headerStyle: webHeaderStyle(insets.top),
-                        // Every screen in this stack carries the dice button; the
-                        // nested navigators below set their own (they draw their
-                        // own headers), and the two settings screens opt out.
-                        headerRight: () => <DiceRollerButton />,
-                      }}>
-                      {/* (root) is the bottom-tab navigator — Personnages, Catalogues,
-                          Campagnes — and draws its own headers. Everything below is
-                          pushed ON TOP of it, which is what puts a character's or a
-                          campaign's own chrome in the tab bar's place. */}
-                      <Stack.Screen name="(root)" options={{ headerShown: false }} />
-                      <Stack.Screen
-                        name="character/new"
-                        options={{ title: 'Nouveau personnage', presentation: 'modal' }}
-                      />
-                      {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
-                      <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
-                      {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
-                      <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
-                      {/* No dice on the two settings screens: nothing there is played. */}
-                      <Stack.Screen
-                        name="diagnostics"
-                        options={{ title: 'Diagnostic', headerRight: undefined }}
-                      />
-                      <Stack.Screen
-                        name="privacy"
-                        options={{ title: 'Confidentialité', headerRight: undefined }}
-                      />
-                      <Stack.Screen
-                        name="about"
-                        options={{ title: 'À propos', headerRight: undefined }}
-                      />
-                    </Stack>
-                    {/* Floating overlay — shows on every screen while a campaign is live. */}
-                    <CampaignLiveIndicator />
-                    <RouteBreadcrumbs />
-                  </View>
-                </DiceRollerProvider>
+                <View style={styles.root}>
+                  <Stack
+                    screenOptions={{
+                      headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
+                      // `height` on the JS header is the total, status bar included.
+                      headerStyle: webHeaderStyle(insets.top),
+                      // Every screen in this stack carries the dice button; the
+                      // nested navigators below set their own (they draw their
+                      // own headers), and the two settings screens opt out.
+                      headerRight: () => <DiceRollerButton />,
+                    }}>
+                    {/* (root) is the bottom-tab navigator — Personnages, Catalogues,
+                        Campagnes — and draws its own headers. Everything below is
+                        pushed ON TOP of it, which is what puts a character's or a
+                        campaign's own chrome in the tab bar's place. */}
+                    <Stack.Screen name="(root)" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="character/new"
+                      options={{ title: 'Nouveau personnage', presentation: 'modal' }}
+                    />
+                    {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
+                    <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
+                    {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
+                    <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
+                    {/* No dice on the two settings screens: nothing there is played. */}
+                    <Stack.Screen
+                      name="diagnostics"
+                      options={{ title: 'Diagnostic', headerRight: undefined }}
+                    />
+                    <Stack.Screen
+                      name="privacy"
+                      options={{ title: 'Confidentialité', headerRight: undefined }}
+                    />
+                    <Stack.Screen
+                      name="about"
+                      options={{ title: 'À propos', headerRight: undefined }}
+                    />
+                  </Stack>
+                  {/* Floating overlay — shows on every screen while a campaign is live. */}
+                  <CampaignLiveIndicator />
+                  <RouteBreadcrumbs />
+                </View>
               </LogErrorBoundary>
             </CampaignLiveProvider>
           </DatabaseGate>

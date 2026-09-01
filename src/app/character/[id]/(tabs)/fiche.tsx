@@ -27,7 +27,7 @@ import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
 import type { ActualState, Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
-import { useDiceRoller } from '@/hooks/use-dice-roller';
+import { openRoller } from '@/lib/dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
@@ -72,7 +72,6 @@ export default function CharacterFicheScreen() {
   const { data: shieldRows } = useLiveQuery(shieldsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
   const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
-  const { open: openRoller } = useDiceRoller();
   // Tab-level live edit: one FAB flips every card between read and edit.
   const [editing, setEditing] = useEditToggle(navigation);
   // The header pencil opens the full sheet form (identity + maximums).

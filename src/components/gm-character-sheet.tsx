@@ -122,7 +122,10 @@ export function GmSheetBody({
   return (
     <>
         {embedded ? null : <View style={styles.handle} />}
-        <View style={styles.titleRow}>
+        {/* Names the sheet for the e2e suite. On the title row rather than a
+            wrapper: the body is a fragment (the bottom sheet and the side pane
+            each own their container), and this row is in both. */}
+        <View testID="gm-sheet" style={styles.titleRow}>
           <PlayerAvatar nom={String(c.nom ?? 'Sans nom')} online={entry.online} size={48} />
           <View style={{ flex: 1 }}>
             <Text variant="headlineSmall" style={{ color: theme.colors.onSurface }}>
