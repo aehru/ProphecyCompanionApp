@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
-import { Menu, Text } from 'react-native-paper';
+import { Divider, Menu, Text, TextInput } from 'react-native-paper';
 
-import Icon from '@/components/ui/icon';
+import Icon, { dsIcon } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 type Option = { key: string; label: string };
@@ -15,6 +15,14 @@ type Option = { key: string; label: string };
  * Use it over {@link ChipSelect} when the options are many (spheres) or when the
  * field must stay one line tall; chips stay the better read for 2–4 options that
  * deserve to be visible at once.
+ *
+ * `searchable` puts a filter box at the top of the open menu — for the lists a
+ * character grows without limit (an effect's target is every stat PLUS every
+ * skill they own, 40+ rows). It scrolls with the options rather than staying
+ * pinned: Paper's Menu has no header slot, and the alternative was a second
+ * dialog stacked over the first. Taps are handled through the keyboard
+ * (`keyboardShouldPersistTaps`), so picking an option while typing takes one
+ * tap, not two.
  */
 export default function SelectField({
   label,
@@ -22,6 +30,7 @@ export default function SelectField({
   value,
   onChange,
   style,
+  searchable = false,
   testID,
 }: {
   /** Omit for a label-less field (when a neighbour already titles the row). */
@@ -30,12 +39,24 @@ export default function SelectField({
   value: string;
   onChange: (key: string) => void;
   style?: ViewStyle;
+  /** Add a filter box above the options. Worth it past ~15 rows. */
+  searchable?: boolean;
   /** Stable E2E hook. Each option also gets `<testID>-option-<key>`. */
   testID?: string;
 }) {
   const theme = useProphecyTheme();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const current = options.find((o) => o.key === value);
+
+  // Every open starts from the full list — a stale filter would look like a
+  // menu that has lost most of its options.
+  const close = () => {
+    setOpen(false);
+    setQuery('');
+  };
+  const q = query.trim().toLowerCase();
+  const shown = q ? options.filter((o) => o.label.toLowerCase().includes(q)) : options;
 
   return (
     <View style={[styles.field, style]}>
@@ -44,7 +65,8 @@ export default function SelectField({
       ) : null}
       <Menu
         visible={open}
-        onDismiss={() => setOpen(false)}
+        onDismiss={close}
+        keyboardShouldPersistTaps="handled"
         anchor={
           <Pressable
             accessibilityRole="button"
@@ -63,7 +85,31 @@ export default function SelectField({
           </Pressable>
         }
         anchorPosition="bottom">
-        {options.map((o) => (
+        {searchable ? (
+          <>
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Rechercher…"
+              dense
+              mode="outlined"
+              autoCorrect={false}
+              testID={testID ? `${testID}-search` : undefined}
+              left={<TextInput.Icon icon={dsIcon('search')} />}
+              right={
+                query ? <TextInput.Icon icon={dsIcon('close')} onPress={() => setQuery('')} /> : undefined
+              }
+              style={styles.search}
+            />
+            <Divider />
+          </>
+        ) : null}
+        {searchable && shown.length === 0 ? (
+          <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
+            Aucun résultat.
+          </Text>
+        ) : null}
+        {shown.map((o) => (
           <Menu.Item
             key={o.key}
             testID={testID ? `${testID}-option-${o.key}` : undefined}
@@ -75,7 +121,7 @@ export default function SelectField({
                 : undefined
             }
             onPress={() => {
-              setOpen(false);
+              close();
               if (o.key !== value) onChange(o.key);
             }}
           />
@@ -99,5 +145,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   value: { flex: 1, fontSize: 16 },
+  // Menu.Item is 48dp tall with 12dp side padding — match it so the filter box
+  // reads as part of the same list.
+  search: { marginHorizontal: 12, marginBottom: 4 },
+  empty: { paddingHorizontal: 16, paddingVertical: 12 },
   caret: { transform: [{ rotate: '90deg' }] },
 });
