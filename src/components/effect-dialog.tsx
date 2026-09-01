@@ -156,6 +156,9 @@ export default function EffectDialog({
         value={draft.target}
         onChange={(v) => set('target', v)}
         searchable
+        // inline, like the Unite beside it: a floating Paper Menu does not open
+        // inside a dialog's Portal. See SelectField.
+        inline
         testID="effect-target"
       />
 
@@ -182,6 +185,7 @@ export default function EffectDialog({
               options={TIME_UNITS}
               value={draft.durationUnit}
               onChange={(v) => set('durationUnit', v)}
+              inline
             />
           </>
         )}
@@ -218,7 +222,11 @@ export default function EffectDialog({
 }
 
 const styles = StyleSheet.create({
-  fieldRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'flex-end' },
+  // Tops, not bottoms: every field here carries a label, so aligning the tops
+  // lines them up the same way — and it is what keeps Valeur and Durée in place
+  // when the Unité expands its list, instead of being shoved to the bottom of a
+  // suddenly 400dp-tall row.
+  fieldRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'flex-start' },
   valueField: { flexBasis: 90, flexGrow: 0 },
   checkbox: { paddingHorizontal: 0 },
 });
