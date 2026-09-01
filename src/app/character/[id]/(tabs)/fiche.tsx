@@ -37,7 +37,7 @@ import { statRollContext } from '@/lib/roll-context';
 import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
-import { createEffect, effectsQuery } from '@/repositories/effects';
+import { effectsQuery } from '@/repositories/effects';
 import { shieldsQuery } from '@/repositories/shields';
 import { skillsQuery } from '@/repositories/skills';
 
@@ -201,17 +201,6 @@ export default function CharacterFicheScreen() {
     persistState({ initiativeValues: values, initiativeDiceIcons: icons });
   };
 
-  // New effect starts as a blank +0 on every roll; the editor screen fills it in.
-  const addEffect = async () => {
-    const row = await createEffect(numId, {
-      target: 'all',
-      value: 0,
-      durationUnit: 'round',
-      durationRemaining: 1,
-    });
-    router.push(`/character/${numId}/effect/${row.id}`);
-  };
-
   if (editingSheet) {
     return (
       <CharacterForm
@@ -291,10 +280,10 @@ export default function CharacterFicheScreen() {
           />
 
           <EffectsCard
+            characterId={numId}
             effects={effectList}
             skills={skills ?? []}
             editing={editing}
-            onAdd={addEffect}
           />
 
           {equippedArmor ? <ArmorSection armor={equippedArmor} editing={editing} /> : null}
