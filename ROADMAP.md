@@ -165,12 +165,13 @@ merge, character detail sheet, join disclaimer, privacy policy.
   for its own NPCs on top of the projection: armes (damage formulas resolved
   with the wound/effects modifier), armures, boucliers, sorts. Remote players
   stay projection-limited by protocol.
-- [x] **Adding a bonus/malus to a PNJ from the table.** The add control moved off
-  the Fiche's "Effet" FAB and into `<EffectsCard>` itself (top of the card, via
-  `onAdd`), so both callers get it: the Fiche and `<NpcInPlayEditor>`. Still
-  routes out to the `effect/[eid]` editor screen — the same place tapping an
-  existing row has always gone. _Left to do:_ open `<EffectEditor>` in a
-  `<DsDialog>` instead, so the GM never leaves the table screen.
+- [x] **Adding a bonus/malus to a PNJ from the table.** Creating AND editing an
+  effect now happen in [`<EffectDialog>`](src/components/effect-dialog.tsx), owned
+  by `<EffectsCard>` — so both callers (the Fiche, `<NpcInPlayEditor>`) get the
+  same surface and the GM never leaves the campaign screen. The `effect/[eid]`
+  modal route is gone with it. The dialog **drafts**: nothing is written until
+  « Enregistrer », where the old flow inserted a blank row up front and left a +0
+  effect behind whenever the editor was backed out of.
 - [ ] **A quick-created PNJ has no wound boxes and no initiative dice.**
   `createNpc` ([src/repositories/campaigns.ts](src/repositories/campaigns.ts))
   builds the character with a name only, so every `*Max` column keeps its `0`
