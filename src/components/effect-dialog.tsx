@@ -109,8 +109,10 @@ export default function EffectDialog({
       target: draft.target,
       ...timing,
       // A permanent effect never expires, and giving a spent one a fresh
-      // duration is how it gets renewed — either way it comes back active.
-      expired: false,
+      // duration is how it gets renewed. A saved 0 is NOT a renewal, so an
+      // already-expired effect stays expired — otherwise re-reading a dead
+      // effect and closing on « Enregistrer » would quietly put it back in play.
+      expired: draft.permanent || amount > 0 ? false : (effect?.expired ?? false),
     };
     if (effect) await updateEffect(effect.id, data);
     else await createEffect(characterId, data);
@@ -189,7 +191,16 @@ export default function EffectDialog({
         label="Permanent (toujours actif)"
         position="leading"
         status={draft.permanent ? 'checked' : 'unchecked'}
-        onPress={() => set('permanent', !draft.permanent)}
+        // Leaving Permanent hands back a duration of ONE, not the 0 a permanent
+        // row stores: an effect that is over the moment time passes is nobody's
+        // intent, and the field is right there to change.
+        onPress={() =>
+          setDraft((d) => ({
+            ...d,
+            permanent: !d.permanent,
+            amount: !d.permanent || parseSigned(d.amount) > 0 ? d.amount : '1',
+          }))
+        }
         style={styles.checkbox}
       />
 

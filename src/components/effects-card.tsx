@@ -88,7 +88,7 @@ export default function EffectsCard({
                 mode="outlined"
                 compact
                 icon="clock-minus-outline"
-                onPress={() => tickUnit(effects[0].characterId, u.key)}>
+                onPress={() => tickUnit(characterId, u.key)}>
                 {u.label} −1
               </Button>
             ))}
