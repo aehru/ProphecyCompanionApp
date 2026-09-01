@@ -28,6 +28,19 @@ module.exports = () => {
 
   return {
     ...app.expo,
+    // `bun run web` sets WEB_OUTPUT=single. The dev server otherwise renders
+    // every route on the server first (output: "static"), and that server graph
+    // cannot be bundled: expo-sqlite chooses its web implementation with a
+    // RUNTIME `typeof window === 'undefined'` check, so Metro walks the browser
+    // branch too, that branch spawns a web worker, and Expo's serializer asserts
+    // on a worker chunk the server environment never emits —
+    // « Worker chunk not found for: …/expo-sqlite/web/worker.ts ».
+    //
+    // Only the DEV server is switched; `bun run build:web` still exports the
+    // per-route static HTML, which is what ships and what the e2e suite runs
+    // against. The cost is that dev renders as a plain SPA — fine, since nothing
+    // in the app depends on the server pass.
+    web: { ...app.expo.web, ...(process.env.WEB_OUTPUT ? { output: process.env.WEB_OUTPUT } : {}) },
     experiments: {
       ...app.expo.experiments,
       ...(raw ? { baseUrl: `/${raw}` } : {}),
