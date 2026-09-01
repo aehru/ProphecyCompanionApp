@@ -62,10 +62,11 @@ test('opens a PNJ sheet from the roster and rolls from inside it', async ({ page
   await addCatalogWeapon(page, charId, 'Épée courte');
 
   await page.goto(`/campaigns/${tableId}/compagnie`);
-  // Keyed by the portable uuid, which the test has no way to know.
-  const card = page.getByTestId(/^roster-card-/).first();
-  await expect(card).toBeVisible();
-  await card.click();
+  // Keyed by the portable uuid, which the test has no way to know. The HEAD is
+  // what opens the sheet — the card's body is made of roll targets.
+  const open = page.getByTestId(/^roster-open-/).first();
+  await expect(open).toBeVisible();
+  await open.click();
 
   // Both window classes reach the same body: a bottom sheet below 840dp (the
   // Portal — the phone project), a side pane above it (the tablet project).
@@ -77,4 +78,42 @@ test('opens a PNJ sheet from the roster and rolls from inside it', async ({ page
   // own dice button can never stand in for it.
   await weapons.getByLabel(/^Lancer /).first().click();
   await expect(page.getByTestId('dice-roller-dialog')).toBeVisible();
+});
+
+test('rolls a roster character without opening its sheet', async ({ page }) => {
+  // The card's body is the GM's quick roll: a stat tile and a compétence's TOT
+  // both throw, off the projection alone (lib/campaign-roll) — no sheet, and
+  // nothing written to the character.
+  await page.goto('/campaigns');
+  const tableId = await createLocalTable(page, 'Table E2E');
+  await createNpc(page, tableId, 'Garde');
+  await page.goto(`/campaigns/${tableId}/compagnie`);
+
+  const card = page.getByTestId(/^roster-card-/).first();
+  await expect(card).toBeVisible();
+  await card.getByLabel(/^Lancer Volonté/).click();
+  await expect(page.getByTestId('dice-roller-dialog')).toBeVisible();
+});
+
+test('rolls a stat and a free-form throw from inside the sheet', async ({ page }) => {
+  // Two roll paths a Portal-hosted sheet used to have neither of: the stat tiles
+  // (read-only numbers until now) and the sheet's own dice button, which exists
+  // because the header's is behind the phone's full-screen Modal.
+  await page.goto('/campaigns');
+  const tableId = await createLocalTable(page, 'Table E2E');
+  await createNpc(page, tableId, 'Garde');
+  await page.goto(`/campaigns/${tableId}/compagnie`);
+  await page.getByTestId(/^roster-open-/).first().click();
+
+  const sheet = page.getByTestId('gm-sheet');
+  await expect(sheet).toBeVisible();
+
+  await sheet.getByTestId('sheet-dice-roller').click();
+  const dialog = page.getByTestId('dice-roller-dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Fermer' }).click();
+  await expect(dialog).toHaveCount(0);
+
+  await sheet.getByLabel(/^Lancer Perception/).click();
+  await expect(dialog).toBeVisible();
 });
