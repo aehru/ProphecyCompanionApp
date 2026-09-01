@@ -8,12 +8,11 @@ import EffectsCard from '@/components/effects-card';
 import HealthSection from '@/components/fiche/health-section';
 import InitiativeSection from '@/components/fiche/initiative-section';
 import ResourcesSection from '@/components/fiche/resources-section';
-import type { ActualState } from '@/db/schema';
+import { useInPlayWriters } from '@/hooks/use-in-play-writers';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { asNumRecord, clamp } from '@/lib/character-values';
-import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
+import { asNumRecord } from '@/lib/character-values';
 import { woundMalus } from '@/lib/modifiers';
-import { actualStateQuery, updateActualState } from '@/repositories/actual-state';
+import { actualStateQuery } from '@/repositories/actual-state';
 import { characterByUuidQuery } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
 import { skillsQuery } from '@/repositories/skills';
@@ -53,6 +52,14 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
   const { data: effects } = useLiveQuery(effectsQuery(localId), [localId]);
   const { data: skills } = useLiveQuery(skillsQuery(localId), [localId]);
   const state = stateRows?.[0] ?? null;
+  // No `mirror`: this screen reads through useLiveQuery, so a local copy would
+  // only fight the refresh. See the hook. Above the guards below, like the
+  // queries it reads from — it tolerates a character that has not loaded.
+  const { setStateValue, persistState, adjustRes, refillRes, initiative } = useInPlayWriters({
+    characterId: localId,
+    char,
+    state,
+  });
 
   if (!charLoaded || (char && !stateLoaded)) {
     return <ActivityIndicator style={styles.loading} />;
@@ -69,57 +76,10 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
 
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
-  const initMax = rec.initiativeMax ?? 0;
-  const initBonus = stRec.initiativeBonusDice ?? 0;
-  const initCount = initiativeDiceCount(initMax, initBonus);
-  const initStored = state.initiativeValues ?? [];
-  const initIcons = state.initiativeDiceIcons ?? [];
-
-  const setStateValue = (key: string, value: number) =>
-    updateActualState(localId, { [key]: value } as Partial<ActualState>);
-  const persistState = (patch: Partial<ActualState>) => updateActualState(localId, patch);
-  const adjustRes = (key: string, delta: number) =>
-    setStateValue(
-      `${key}Current`,
-      clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
-    );
-  const setInit = (i: number, n: number) =>
-    persistState({
-      initiativeValues: Array.from({ length: initCount }, (_, j) =>
-        j === i ? n : initStored[j] ?? 0,
-      ),
-    });
-  const setInitIcon = (i: number, icon: string) =>
-    persistState({
-      initiativeDiceIcons: Array.from({ length: initCount }, (_, j) =>
-        j === i ? icon : initIcons[j] ?? '',
-      ),
-    });
 
   return (
     <View style={styles.root}>
-      <InitiativeSection
-        max={initMax}
-        bonus={initBonus}
-        values={initStored}
-        icons={initIcons}
-        wound={woundMalus(stRec)}
-        onSetDie={setInit}
-        onSetIcon={setInitIcon}
-        onSetBonus={(n) => {
-          // Dropping a die drops its stored roll and its mark — see the Fiche.
-          const next = initiativeDiceCount(initMax, n);
-          persistState({
-            initiativeBonusDice: n,
-            initiativeValues: trimInitiativeSlots(initStored, next),
-            initiativeDiceIcons: trimInitiativeSlots(initIcons, next),
-          });
-        }}
-        onRoll={() => {
-          const { values, icons } = rollInitiativeWithIcons(initCount, initIcons);
-          persistState({ initiativeValues: values, initiativeDiceIcons: icons });
-        }}
-      />
+      <InitiativeSection {...initiative} wound={woundMalus(stRec)} />
       <HealthSection
         maxOf={(k) => rec[k] ?? 0}
         currentOf={(k) => stRec[k] ?? 0}
@@ -130,7 +90,7 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
         currentOf={(k) => stRec[k] ?? 0}
         maxOf={(k) => rec[k] ?? 0}
         adjust={adjustRes}
-        onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
+        onRefill={refillRes}
         editing
       />
       <ConditionsCard state={state} editing onPersist={persistState} />

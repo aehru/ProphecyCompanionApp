@@ -17,7 +17,6 @@ import { dsIcon } from '@/components/ui/icon';
 import TabPage from '@/components/ui/tab-page';
 import TabPager from '@/components/ui/tab-pager';
 import type {
-  ActualState,
   Armor,
   Enchant,
   Item,
@@ -27,6 +26,7 @@ import type {
 } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useInPlayWriters } from '@/hooks/use-in-play-writers';
 import { openRoller } from '@/lib/dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -35,7 +35,6 @@ import { Alert } from '@/lib/alert';
 import { asNumRecord } from '@/lib/character-values';
 import { findTarget, firstTarget, isTargetEquipped } from '@/lib/enchant-targets';
 import { spellRollContext } from '@/lib/roll-context';
-import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { createEnchant, enchantsQuery } from '@/repositories/enchants';
 import { itemsQuery } from '@/repositories/items';
@@ -73,6 +72,10 @@ export default function CharacterMagicScreen() {
     ensure: true,
     reloadOnFocus: true,
   });
+
+  // Live writes go through the shared writers (local copy first, DB after) —
+  // see hooks/use-in-play-writers.
+  const { setStateValue } = useInPlayWriters({ characterId: numId, char, state, mirror: setState });
   const { data: spells } = useLiveQuery(spellsQuery(numId), [numId]);
   const { data: reserves } = useLiveQuery(magicReservesQuery(numId), [numId]);
   const { data: weapons } = useLiveQuery(weaponsQuery(numId), [numId]);
@@ -93,11 +96,6 @@ export default function CharacterMagicScreen() {
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
 
-  // Live writer: update local state immediately, persist in the background.
-  const setStateValue = (key: string, value: number) => {
-    setState((p) => (p ? ({ ...p, [key]: value } as ActualState) : p));
-    updateActualState(numId, { [key]: value } as Partial<ActualState>);
-  };
 
   const objects: MagicReserve[] = reserves ?? [];
   const weaponList: Weapon[] = weapons ?? [];

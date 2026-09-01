@@ -17,9 +17,10 @@ import TabPage from '@/components/ui/tab-page';
 import TabPager from '@/components/ui/tab-pager';
 import WeaponCard from '@/components/weapon-card';
 import { MONEY } from '@/constants/prophecy';
-import type { ActualState, Weapon } from '@/db/schema';
+import type { Weapon } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useInPlayWriters } from '@/hooks/use-in-play-writers';
 import { openRoller } from '@/lib/dice-roller';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -27,7 +28,6 @@ import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
 import { weaponRollContext } from '@/lib/roll-context';
 import { weaponSkillReading } from '@/lib/weapon-skill';
-import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { enchantsQuery } from '@/repositories/enchants';
 import { effectsQuery } from '@/repositories/effects';
@@ -55,6 +55,10 @@ export default function CharacterWeaponsScreen() {
   const moneyRefs = useRef<Record<string, RNTextInput | null>>({});
   // ensure: money (dracs) lives on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
+
+  // Live writes go through the shared writers (local copy first, DB after) —
+  // see hooks/use-in-play-writers.
+  const { setStateValue } = useInPlayWriters({ characterId: numId, char, state, mirror: setState });
   const { data: weapons } = useLiveQuery(weaponsQuery(numId), [numId]);
   const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
   const { data: shields } = useLiveQuery(shieldsQuery(numId), [numId]);
@@ -104,10 +108,6 @@ export default function CharacterWeaponsScreen() {
     if (ctx) openRoller(ctx);
   };
 
-  const setStateValue = (key: string, value: number) => {
-    setState((p) => (p ? ({ ...p, [key]: value } as ActualState) : p));
-    updateActualState(numId, { [key]: value } as Partial<ActualState>);
-  };
 
   const moneyKeys: string[] = MONEY.map((m) => m.key);
   const moneyChain = (key: string) => {

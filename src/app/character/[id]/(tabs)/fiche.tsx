@@ -24,17 +24,16 @@ import Columns from '@/components/ui/columns';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
-import type { ActualState, Character } from '@/db/schema';
+import type { Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useInPlayWriters } from '@/hooks/use-in-play-writers';
 import { openRoller } from '@/lib/dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
-import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
 import { globalModifier, statModifier, woundMalus } from '@/lib/modifiers';
 import { statRollContext } from '@/lib/roll-context';
-import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
@@ -77,6 +76,15 @@ export default function CharacterFicheScreen() {
   // The header pencil opens the full sheet form (identity + maximums).
   const [editingSheet, setEditingSheet] = useState(false);
   const splitWidth = useSplitWidth();
+  // Every live write, shared with the GM's in-play editor. `mirror` is what
+  // makes a long-pressed stepper repeat smoothly here: the local copy moves
+  // first, the DB catches up.
+  const { setStateValue, persistState, adjustRes, refillRes, initiative } = useInPlayWriters({
+    characterId: numId,
+    char,
+    state,
+    mirror: setState,
+  });
 
   // This replaces the tabs layout's headerRight wholesale, so the dice button
   // it puts on every other tab has to be re-added here, left of the pencil.
@@ -136,70 +144,17 @@ export default function CharacterFicheScreen() {
     );
   };
 
-  const initiativeMax = rec.initiativeMax ?? 0;
-  const initBonus = stRec.initiativeBonusDice ?? 0;
-  // How many dice are actually in play this turn — sheet max plus the temporary
-  // ones. Sizes the grid, the roll and the per-die writes alike.
-  const initCount = initiativeDiceCount(initiativeMax, initBonus);
-  const initStored = state?.initiativeValues ?? [];
-  const initIcons = state?.initiativeDiceIcons ?? [];
-
-  // Live writers: update local state immediately, persist in the background.
+  // Live writer for the sheet itself (tendances): same local-first shape as the
+  // state writers the hook owns, but the row is `characters`.
   const setCharValue = (key: string, value: number) => {
     setChar((p) => (p ? ({ ...p, [key]: value } as Character) : p));
     updateCharacter(numId, { [key]: value } as Partial<Character>);
   };
-  const setStateValue = (key: string, value: number) => {
-    setState((p) => (p ? ({ ...p, [key]: value } as ActualState) : p));
-    updateActualState(numId, { [key]: value } as Partial<ActualState>);
-  };
-  const persistState = (patch: Partial<ActualState>) => {
-    setState((p) => (p ? ({ ...p, ...patch } as ActualState) : p));
-    updateActualState(numId, patch);
-  };
+
   // XP is typed, not stepped, and the two counters are what gets stored: a
   // negative award or a negative spend is meaningless, so both clamp at 0 —
   // while their difference (the disponible) is free to go negative. See lib/xp.
   const setXp = (key: string, text: string) => setStateValue(key, clamp(Number(text) || 0, 0));
-
-  const adjustRes = (key: string, delta: number) =>
-    setStateValue(
-      `${key}Current`,
-      clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
-    );
-
-  // Editing one die's value leaves the order alone — only a roll re-sorts.
-  const setInit = (i: number, n: number) =>
-    persistState({
-      initiativeValues: Array.from({ length: initCount }, (_, j) =>
-        j === i ? n : initStored[j] ?? 0,
-      ),
-    });
-
-  const setInitIcon = (i: number, icon: string) =>
-    persistState({
-      initiativeDiceIcons: Array.from({ length: initCount }, (_, j) =>
-        j === i ? icon : initIcons[j] ?? '',
-      ),
-    });
-
-  // Losing a die also drops its stored roll AND its mark, so granting one back
-  // shows an empty slot rather than a stale number under someone else's icon.
-  const setInitBonus = (n: number) => {
-    const next = initiativeDiceCount(initiativeMax, n);
-    persistState({
-      initiativeBonusDice: n,
-      initiativeValues: trimInitiativeSlots(initStored, next),
-      initiativeDiceIcons: trimInitiativeSlots(initIcons, next),
-    });
-  };
-
-  // Roll every die in play at once: `initCount` plain D10, highest-first, each
-  // mark carried along with its own roll.
-  const rollInit = () => {
-    const { values, icons } = rollInitiativeWithIcons(initCount, initIcons);
-    persistState({ initiativeValues: values, initiativeDiceIcons: icons });
-  };
 
   if (editingSheet) {
     return (
@@ -260,17 +215,7 @@ export default function CharacterFicheScreen() {
             onRoll={(k) => rollStat(k, 'caracteristique')}
           />
 
-          <InitiativeSection
-            max={initiativeMax}
-            bonus={initBonus}
-            values={initStored}
-            icons={initIcons}
-            wound={wound}
-            onSetDie={setInit}
-            onSetIcon={setInitIcon}
-            onSetBonus={setInitBonus}
-            onRoll={rollInit}
-          />
+          <InitiativeSection {...initiative} wound={wound} />
 
           <HealthSection
             maxOf={(k) => rec[k] ?? 0}
@@ -293,7 +238,7 @@ export default function CharacterFicheScreen() {
             currentOf={(k) => stRec[k] ?? 0}
             maxOf={(k) => rec[k] ?? 0}
             adjust={adjustRes}
-            onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
+            onRefill={refillRes}
             editing={editing}
           />
 
