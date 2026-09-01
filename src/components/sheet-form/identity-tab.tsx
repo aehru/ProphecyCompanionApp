@@ -79,6 +79,7 @@ export default function IdentityTab({
           options={CASTE_OPTIONS}
           value={v.caste ?? ''}
           onChange={(key) => onText('caste', key)}
+          inline
         />
       </SectionCard>
 
