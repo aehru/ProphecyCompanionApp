@@ -33,7 +33,7 @@ import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { asNumRecord, clamp, num, txt } from '@/lib/character-values';
 import { globalModifier, statModifier, woundMalus } from '@/lib/modifiers';
-import { statRollContext } from '@/lib/roll-context';
+import { STAT_LABELS, statRollContext } from '@/lib/roll-context';
 import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
@@ -43,14 +43,6 @@ import { skillsQuery } from '@/repositories/skills';
 // Caractéristique tiles are labelled by their abbreviation, not their full name.
 // Built once at module load: the catalogue is static.
 const CARAC_TILES = CARACTERISTIQUES.map((c) => ({ key: c.key, label: c.abbr }));
-
-// Both catalogues by column key, for the roller: the dialog titles a roll with
-// the full name the tile has no room for (« Volonté », not « VOL »), and keeps
-// the abbreviation for the sum. Attributs have no short form and use neither.
-const STAT_LABELS: Record<string, { label: string; abbr?: string }> = {
-  ...Object.fromEntries(CARACTERISTIQUES.map((c) => [c.key, { label: c.label, abbr: c.abbr }])),
-  ...Object.fromEntries(ATTRIBUTS.map((a) => [a.key, { label: a.label }])),
-};
 
 /**
  * The full character sheet ("Fiche") — every stat, editable. The dashboard
