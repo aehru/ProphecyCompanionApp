@@ -21,20 +21,27 @@ export function armorItemQuery(id: number) {
  * undamaged piece), unless explicitly supplied.
  */
 export async function createArmor(characterId: number, data: Partial<NewArmor> = {}) {
-  const existing = await db
-    .select({ id: armor.id })
-    .from(armor)
-    .where(eq(armor.characterId, characterId))
-    .limit(1);
-  const [row] = await db
-    .insert(armor)
-    .values({
-      characterId,
-      defenseCurrent: data.defenseMax ?? 0,
-      ...data,
-      equipped: existing.length === 0,
-    })
-    .returning();
+  // "Is this the first one?" is read and acted on in one transaction: two
+  // catalogue taps in quick succession would otherwise both see an empty
+  // wardrobe and both insert themselves equipped, which the Fiche renders as
+  // whichever `find` reaches first.
+  const row = await transaction(async (tx) => {
+    const existing = await tx
+      .select({ id: armor.id })
+      .from(armor)
+      .where(eq(armor.characterId, characterId))
+      .limit(1);
+    return tx
+      .insert(armor)
+      .values({
+        characterId,
+        defenseCurrent: data.defenseMax ?? 0,
+        ...data,
+        equipped: existing.length === 0,
+      })
+      .returning()
+      .get();
+  });
   logWrite('armor', 'insert', { characterId, armorId: row?.id });
   return row;
 }

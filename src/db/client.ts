@@ -169,6 +169,9 @@ export type Tx = Parameters<Parameters<typeof dbDirect.transaction>[0]>[0];
  */
 export type Executor = typeof db | Tx;
 
+/** Set while a `transaction()` body is running — see the nesting guard below. */
+let inTransaction = false;
+
 /**
  * Run `body` in a transaction that owns the connection for its whole duration:
  * it takes the queue once, and its own statements go straight through on
@@ -177,9 +180,33 @@ export type Executor = typeof db | Tx;
  *
  * ALWAYS use this instead of `db.transaction` directly — that one would take the
  * queue per statement and deadlock against itself.
+ *
+ * **Transactions do not nest.** The outer one holds the queue for its whole
+ * body, so an inner `transaction()` would wait on a queue that cannot drain
+ * until it returns — a deadlock, and a silent one: the app would simply stop
+ * writing. A repository function that is BOTH a public entry point and a step
+ * inside someone else's transaction therefore takes an optional {@link Executor}
+ * and opens a transaction only when it wasn't given one (`setMember`,
+ * `updateCharacter`). The guard here turns the mistake into an immediate error
+ * naming the fix, rather than a hang nobody can diagnose from a bug report.
  */
 export function transaction<T>(body: (tx: Tx) => Promise<T>): Promise<T> {
-  return enqueue(() => dbDirect.transaction(body));
+  if (inTransaction) {
+    return Promise.reject(
+      new Error(
+        'transaction() cannot nest: the outer one holds the queue until it returns, so this ' +
+          'would wait forever. Pass the `tx` down as an Executor instead.',
+      ),
+    );
+  }
+  return enqueue(async () => {
+    inTransaction = true;
+    try {
+      return await dbDirect.transaction(body);
+    } finally {
+      inTransaction = false;
+    }
+  });
 }
 
 /**

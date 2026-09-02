@@ -1,6 +1,6 @@
 import { and, eq, inArray } from 'drizzle-orm';
 
-import { db } from '@/db/client';
+import { db, transaction, type Executor } from '@/db/client';
 import { campaigns, campaignShares, characters, gmNotes, type Campaign } from '@/db/schema';
 import { CampaignSocket } from '@/lib/campaign-client';
 import {
@@ -286,24 +286,36 @@ export function membersQuery(campaignId: number) {
   return db.select().from(campaignShares).where(eq(campaignShares.campaignId, campaignId));
 }
 
-/** Add/remove one character from one table. */
+/**
+ * Add/remove one character from one table.
+ *
+ * Adding is a read-modify-write (there is no unique constraint on the pair), so
+ * it runs in a transaction — two taps racing would otherwise both find no row
+ * and both insert one, putting the character on the roster twice.
+ *
+ * `x` joins a caller's transaction instead of opening a second one, which would
+ * deadlock — `spawnNpc` needs that. See `transaction()` in db/client.
+ */
 export async function setMember(
   campaignId: number,
   characterId: number,
   member: boolean,
+  x?: Executor,
 ): Promise<void> {
+  if (!x) return transaction((tx) => setMember(campaignId, characterId, member, tx));
+
   const where = and(
     eq(campaignShares.campaignId, campaignId),
     eq(campaignShares.characterId, characterId),
   );
   if (!member) {
-    await db.delete(campaignShares).where(where);
+    await x.delete(campaignShares).where(where);
     logWrite('campaign_shares', 'delete', { campaignId, characterId });
     return;
   }
-  const existing = await db.select().from(campaignShares).where(where).limit(1);
+  const existing = await x.select().from(campaignShares).where(where).limit(1);
   if (existing.length === 0) {
-    await db.insert(campaignShares).values({ campaignId, characterId });
+    await x.insert(campaignShares).values({ campaignId, characterId });
     logWrite('campaign_shares', 'insert', { campaignId, characterId });
   }
 }
@@ -340,13 +352,23 @@ export async function spawnNpc(
   // Read the names before duplicating, so the copy's own "(copie)" name can't
   // confuse the numbering.
   const taken = await db.select({ nom: characters.nom }).from(characters);
+  // NOT inside the transaction below: `duplicateCharacter` runs the import in
+  // one of its own, and transactions cannot nest (db/client rejects it rather
+  // than deadlocking). So the copy exists before the naming starts — if the
+  // rest fails, what is left is an ordinary « … (copie) » in the character list,
+  // visible and deletable, not a torn row.
   const id = await duplicateCharacter(source.id);
   if (id == null) return null;
   const nom = nextNpcName(source.nom, taken.map((r) => r.nom));
-  // `kind` explicitly: the source may be a player character the GM borrowed as
-  // a stand-in, and a spawn is always an NPC.
-  await updateCharacter(id, { nom, kind: 'npc' });
-  await setMember(campaignId, id, true);
+  // Naming and joining the table ARE one step: a spawn that landed on the roster
+  // still called « … (copie) », or renamed but on no table, is a copy the GM has
+  // to finish by hand mid-fight.
+  await transaction(async (tx) => {
+    // `kind` explicitly: the source may be a player character the GM borrowed as
+    // a stand-in, and a spawn is always an NPC.
+    await updateCharacter(id, { nom, kind: 'npc' }, tx);
+    await setMember(campaignId, id, true, tx);
+  });
   logWrite('characters', 'insert', { campaignId, characterId: id, kind: 'npc', reason: 'spawn' });
   return { id, nom };
 }
@@ -362,13 +384,18 @@ export async function upsertGmNote(
   charUuid: string,
   body: string,
 ): Promise<void> {
-  const where = and(eq(gmNotes.campaignId, campaignId), eq(gmNotes.charUuid, charUuid));
-  const existing = await db.select().from(gmNotes).where(where).limit(1);
-  if (existing.length > 0) {
-    await db.update(gmNotes).set({ body, updatedAt: new Date() }).where(where);
-  } else {
-    await db.insert(gmNotes).values({ campaignId, charUuid, body, updatedAt: new Date() });
-  }
+  // Read-modify-write with no unique constraint behind it: saving twice in quick
+  // succession (the sheet saves on close as well as on the button) would insert
+  // a second note and the GM would read whichever came back first.
+  await transaction(async (tx) => {
+    const where = and(eq(gmNotes.campaignId, campaignId), eq(gmNotes.charUuid, charUuid));
+    const existing = await tx.select().from(gmNotes).where(where).limit(1);
+    if (existing.length > 0) {
+      await tx.update(gmNotes).set({ body, updatedAt: new Date() }).where(where);
+    } else {
+      await tx.insert(gmNotes).values({ campaignId, charUuid, body, updatedAt: new Date() });
+    }
+  });
   // The note body is the GM's own prose — length only, never content.
   logWrite('gm_notes', 'update', { campaignId, charUuid, length: body.length });
 }
