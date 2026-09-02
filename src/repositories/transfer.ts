@@ -87,9 +87,15 @@ export async function exportCharacters(
   ids?: number[],
   intent: ExportIntent = 'backup',
 ): Promise<ProphecyExport> {
-  const rows = ids
-    ? await db.select().from(characters).where(inArray(characters.id, ids))
-    : await db.select().from(characters);
+  // An EMPTY id list is not "everything": `inArray(id, [])` is invalid SQL, and
+  // `undefined` is the only thing that means the whole roster. Same guard
+  // `sharedCharacterNames` and `useCharacterProjections` already carry.
+  const rows =
+    ids === undefined
+      ? await db.select().from(characters)
+      : ids.length === 0
+        ? []
+        : await db.select().from(characters).where(inArray(characters.id, ids));
 
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {

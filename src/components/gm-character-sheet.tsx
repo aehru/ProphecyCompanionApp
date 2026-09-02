@@ -125,7 +125,9 @@ export function GmSheetBody({
 
   return (
     <>
-        {embedded ? null : <View style={styles.handle} />}
+        {embedded ? null : (
+          <View style={[styles.handle, { backgroundColor: theme.colors.outlineVariant }]} />
+        )}
         <View style={styles.titleRow}>
           <PlayerAvatar nom={String(c.nom ?? 'Sans nom')} online={entry.online} size={48} />
           <View style={{ flex: 1 }}>
@@ -298,14 +300,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     maxHeight: '88%',
   },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#8888',
-    marginBottom: 8,
-  },
+  // Colour comes from the theme at the call site — nothing here is hardcoded.
+  handle: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 8 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   body: { gap: 18, paddingVertical: 12 },
   // In a pane the sheet has a real height to fill; in the modal it hugs.
