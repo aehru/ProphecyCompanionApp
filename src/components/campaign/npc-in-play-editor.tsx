@@ -8,6 +8,7 @@ import EffectsCard from '@/components/effects-card';
 import HealthSection from '@/components/fiche/health-section';
 import InitiativeSection from '@/components/fiche/initiative-section';
 import ResourcesSection from '@/components/fiche/resources-section';
+import type { Character } from '@/db/schema';
 import { useInPlayWriters } from '@/hooks/use-in-play-writers';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
@@ -34,7 +35,6 @@ import { skillsQuery } from '@/repositories/skills';
  * campaign pushes it on the usual debounce and a paused one syncs on resume.
  */
 export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
-  const theme = useProphecyTheme();
   // `updatedAt` is undefined until a query has actually run. useLiveQuery seeds
   // `data` with [] and fetches in an effect, so without this an empty result is
   // indistinguishable from "not loaded yet" — and the not-found message below
@@ -44,8 +44,28 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
     [charUuid],
   );
   const char = charRows?.[0] ?? null;
-  // 0 matches nothing — keeps the hook order stable while the character loads.
-  const localId = char?.id ?? 0;
+
+  if (!charLoaded) return <ActivityIndicator style={styles.loading} />;
+  // The PNJ is shared from another device: the projection is all we have.
+  if (!char) return <NotOnThisDevice />;
+  // The three state queries hang off the LOCAL id, so they mount only once the
+  // uuid has resolved to one — running them against `id = 0` while it loads was
+  // three round-trips that could never match. Hooks can't be conditional, hence
+  // the split; the same one <NpcGearSections> makes.
+  return <EditorBody char={char} />;
+}
+
+function NotOnThisDevice() {
+  const theme = useProphecyTheme();
+  return (
+    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+      Ce personnage n’existe pas sur cet appareil — modification impossible.
+    </Text>
+  );
+}
+
+function EditorBody({ char }: { char: Character }) {
+  const localId = char.id;
   const { data: stateRows, updatedAt: stateLoaded } = useLiveQuery(actualStateQuery(localId), [
     localId,
   ]);
@@ -54,25 +74,17 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
   const state = stateRows?.[0] ?? null;
   // No `mirror`: this screen reads through useLiveQuery, so a local copy would
   // only fight the refresh. See the hook. Above the guards below, like the
-  // queries it reads from — it tolerates a character that has not loaded.
+  // queries it reads from — it tolerates a state row that has not loaded.
   const { setStateValue, persistState, adjustRes, refillRes, initiative } = useInPlayWriters({
     characterId: localId,
     char,
     state,
   });
 
-  if (!charLoaded || (char && !stateLoaded)) {
-    return <ActivityIndicator style={styles.loading} />;
-  }
-
-  // The PNJ is shared from another device: the projection is all we have.
-  if (!char || !state) {
-    return (
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-        Ce personnage n’existe pas sur cet appareil — modification impossible.
-      </Text>
-    );
-  }
+  if (!stateLoaded) return <ActivityIndicator style={styles.loading} />;
+  // A character row with no `actual_state` is the same dead end as one that
+  // isn't here at all: there is nothing in play to edit.
+  if (!state) return <NotOnThisDevice />;
 
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
