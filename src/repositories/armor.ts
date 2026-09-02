@@ -45,8 +45,13 @@ export async function updateArmor(id: number, data: Partial<NewArmor>) {
 }
 
 export async function deleteArmor(id: number) {
-  await deleteEnchantsFor('armor', id);
-  await db.delete(armor).where(eq(armor.id, id));
+  // One transaction: the enchants bound to this piece have no FK to cascade
+  // through, so dropping them is a separate statement — and half of it landing
+  // would leave the armour wearing nothing.
+  await transaction(async (tx) => {
+    await deleteEnchantsFor('armor', id, tx);
+    await tx.delete(armor).where(eq(armor.id, id));
+  });
   logWrite('armor', 'delete', { armorId: id });
 }
 

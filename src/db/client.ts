@@ -159,6 +159,17 @@ const dbDirect = drizzle(execute, { schema });
 export type Tx = Parameters<Parameters<typeof dbDirect.transaction>[0]>[0];
 
 /**
+ * Whatever can run statements: the app-facing `db`, or a `transaction()` handle.
+ *
+ * A repository helper that another repository calls MID-transaction takes one of
+ * these and defaults to `db`, so the same function works standalone and as a
+ * step inside someone else's transaction. Without it a helper would open its own
+ * statements on the queue while the caller holds it — see `deleteEnchantsFor`,
+ * which every gear delete has to run before dropping its row.
+ */
+export type Executor = typeof db | Tx;
+
+/**
  * Run `body` in a transaction that owns the connection for its whole duration:
  * it takes the queue once, and its own statements go straight through on
  * `dbDirect`. Nothing else can slip between the BEGIN and the COMMIT, so a

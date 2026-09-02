@@ -34,8 +34,12 @@ export async function updateShield(id: number, data: Partial<NewShield>) {
 }
 
 export async function deleteShield(id: number) {
-  await deleteEnchantsFor('shield', id);
-  await db.delete(shields).where(eq(shields.id, id));
+  // See deleteArmor: the enchant purge is a separate statement with no FK to
+  // cascade through, so it has to share the row's transaction.
+  await transaction(async (tx) => {
+    await deleteEnchantsFor('shield', id, tx);
+    await tx.delete(shields).where(eq(shields.id, id));
+  });
   logWrite('shields', 'delete', { shieldId: id });
 }
 
