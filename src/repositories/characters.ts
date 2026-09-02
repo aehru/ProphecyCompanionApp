@@ -1,7 +1,7 @@
 import { desc, eq, inArray, isNull } from 'drizzle-orm';
 
 import { SPHERES } from '@/constants/prophecy';
-import { db } from '@/db/client';
+import { db, transaction } from '@/db/client';
 import { actualState, characters, type NewActualState, type NewCharacter } from '@/db/schema';
 import { initiativeDiceCount, rollInitiativeWithIcons } from '@/lib/dice';
 import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
@@ -16,10 +16,16 @@ import { logWrite } from '@/repositories/log';
  */
 export async function backfillCharacterUuids(): Promise<void> {
   const rows = await db.select({ id: characters.id }).from(characters).where(isNull(characters.uuid));
-  for (const r of rows) {
-    await db.update(characters).set({ uuid: newUuid() }).where(eq(characters.id, r.id));
-  }
-  if (rows.length > 0) logWrite('characters', 'update', { count: rows.length, phase: 'uuid-backfill' });
+  if (rows.length === 0) return;
+  // One transaction rather than N queued statements: this runs on every launch
+  // right after the migrations, and a half-backfilled roster would leave some
+  // characters without a campaign identity until the next start.
+  await transaction(async (tx) => {
+    for (const r of rows) {
+      await tx.update(characters).set({ uuid: newUuid() }).where(eq(characters.id, r.id));
+    }
+  });
+  logWrite('characters', 'update', { count: rows.length, phase: 'uuid-backfill' });
 }
 
 /** Magic pools whose current value should follow their max when the max changes. */
@@ -115,23 +121,30 @@ export async function createCharacter(data: Partial<NewCharacter>) {
   // Magic reserve defaults to Volonté when the form left it blank (rulebook);
   // an explicit form value wins. Never re-syncs if Volonté later changes.
   const reserve = data.reserveMagiqueMax || data.volonte || 0;
-  const [row] = await db
-    .insert(characters)
-    .values({ ...data, reserveMagiqueMax: reserve, createdAt: now, updatedAt: now })
-    .returning();
-  // Spheres start full (current = max), matching the reserve/resource pools.
-  const rowRec = row as unknown as Record<string, number>;
-  const sphereCurrents = Object.fromEntries(
-    SPHERES.map((s) => [`${s.key}Current`, rowRec[`${s.key}Max`] ?? 0]),
-  ) as Partial<NewActualState>;
-  // Every character gets a matching state row. Pools start full so a fresh
-  // character isn't created empty.
-  await db.insert(actualState).values({
-    characterId: row.id,
-    maitriseCurrent: row.maitriseMax,
-    chanceCurrent: row.chanceMax,
-    reserveMagiqueCurrent: row.reserveMagiqueMax,
-    ...sphereCurrents,
+  // Both rows or neither: the sheet/state split is 1:1 by construction, and a
+  // `characters` row whose `actual_state` never landed is a character with no
+  // wounds, no pools and no initiative — a shape nothing else in the app expects.
+  const row = await transaction(async (tx) => {
+    const created = await tx
+      .insert(characters)
+      .values({ ...data, reserveMagiqueMax: reserve, createdAt: now, updatedAt: now })
+      .returning()
+      .get();
+    // Spheres start full (current = max), matching the reserve/resource pools.
+    const rowRec = created as unknown as Record<string, number>;
+    const sphereCurrents = Object.fromEntries(
+      SPHERES.map((s) => [`${s.key}Current`, rowRec[`${s.key}Max`] ?? 0]),
+    ) as Partial<NewActualState>;
+    // Every character gets a matching state row. Pools start full so a fresh
+    // character isn't created empty.
+    await tx.insert(actualState).values({
+      characterId: created.id,
+      maitriseCurrent: created.maitriseMax,
+      chanceCurrent: created.chanceMax,
+      reserveMagiqueCurrent: created.reserveMagiqueMax,
+      ...sphereCurrents,
+    });
+    return created;
   });
   logWrite('characters', 'insert', { characterId: row.id, uuid: row.uuid ?? undefined, kind: row.kind });
   return row;
