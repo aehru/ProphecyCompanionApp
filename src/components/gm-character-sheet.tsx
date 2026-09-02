@@ -81,7 +81,10 @@ export function GmSheetBody({
   const [editing, setEditing] = useState(canEdit && startEditing);
 
   const c = entry?.character;
-  const attr = nums(c?.attributs);
+  // Memoized like its three siblings below, and for the same reason: it feeds
+  // the `groups` memo, so a fresh object per render made that memo a no-op and
+  // re-grouped every skill on every render.
+  const attr = useMemo(() => nums(c?.attributs), [c?.attributs]);
   const skills = useMemo(() => skillsOf(c?.skills), [c?.skills]);
   const effectRows = useMemo(() => effectsOf(c?.effects), [c?.effects]);
   // Wound boxes aren't surfaced as a section, but the malus applies to EVERY

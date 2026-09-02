@@ -98,7 +98,9 @@ export default function CharacterFicheScreen() {
         </View>
       ),
     });
-  }, [navigation, char?.nom, editingSheet]);
+    // No `char?.nom`: the header title belongs to the tabs layout, and this
+    // effect only ever swaps the right-hand buttons.
+  }, [navigation, editingSheet]);
 
   // Leaving the tab also closes the full sheet form (the hook handles `editing`).
   useEffect(
