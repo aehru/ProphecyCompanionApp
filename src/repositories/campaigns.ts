@@ -121,9 +121,9 @@ export async function setShareNpcs(campaignId: number, share: boolean): Promise<
     .from(characters)
     .innerJoin(campaignShares, eq(campaignShares.characterId, characters.id))
     .where(eq(campaignShares.campaignId, campaignId));
-  for (const r of rows) {
-    if (r.uuid) unshareFromServer(campaign, r.uuid).catch(() => {});
-  }
+  // One socket for the whole table, not one per PNJ.
+  const uuids = rows.map((r) => r.uuid).filter((u): u is string => u != null);
+  unshareManyFromServer(campaign, uuids).catch(() => {});
 }
 
 /**
@@ -179,11 +179,38 @@ export async function updateCampaignName(id: number, name: string): Promise<void
  * members, and a charId-less hello has no presence side effect.
  */
 export function unshareFromServer(campaign: Campaign, charUuid: string): Promise<void> {
-  // A table with no relay attached has nothing to purge.
+  return unshareManyFromServer(campaign, [charUuid]);
+}
+
+/** How long to wait on an unreachable server before giving up the purge. */
+const UNSHARE_TIMEOUT_MS = 4000;
+
+/**
+ * The same purge for SEVERAL characters, over ONE socket.
+ *
+ * One connection and N frames, not N connections: the frames are processed in
+ * order behind the same `welcome`, so the batch costs exactly what a single
+ * unshare costs. Leaving a campaign used to open a socket per character and
+ * await each in turn — eight characters against an unreachable relay meant
+ * eight four-second timeouts in series before the local row would go.
+ */
+export function unshareManyFromServer(
+  campaign: Campaign,
+  charUuids: readonly string[],
+): Promise<void> {
+  // A table with no relay attached has nothing to purge, and neither has an
+  // empty list — don't open a socket to say nothing.
   const { serverUrl, code } = campaign;
-  if (!serverUrl || !code) return Promise.resolve();
+  if (!serverUrl || !code || charUuids.length === 0) return Promise.resolve();
   return new Promise((resolve) => {
+    let done = false;
+    // The timeout is cleared on the happy path: it used to outlive the resolve,
+    // holding the socket closure for four more seconds and closing it twice.
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const finish = (socket: CampaignSocket) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
       socket.close();
       resolve();
     };
@@ -191,10 +218,10 @@ export function unshareFromServer(campaign: Campaign, charUuid: string): Promise
       serverUrl,
       hello: playerHello(code),
       onMessage: (msg) => {
-        // welcome = the hello was accepted; the unshare right behind it will be
+        // welcome = the hello was accepted; the unshares right behind it will be
         // processed in order — safe to close.
         if (msg.type === 'welcome') {
-          socket.send(unshareMsg(charUuid));
+          for (const uuid of charUuids) socket.send(unshareMsg(uuid));
           finish(socket);
         } else if (msg.type === 'error') {
           finish(socket);
@@ -203,7 +230,7 @@ export function unshareFromServer(campaign: Campaign, charUuid: string): Promise
     });
     socket.connect();
     // Unreachable server: don't block the leave flow.
-    setTimeout(() => finish(socket), 4000);
+    timer = setTimeout(() => finish(socket), UNSHARE_TIMEOUT_MS);
   });
 }
 
@@ -241,9 +268,10 @@ export async function deleteCampaign(id: number): Promise<void> {
         .select({ uuid: characters.uuid })
         .from(characters)
         .where(inArray(characters.id, shares.map((s) => s.characterId)));
-      for (const r of rows) {
-        if (r.uuid) await unshareFromServer(campaign, r.uuid);
-      }
+      // One socket, every unshare on it: leaving a campaign is a user waiting on
+      // a purge, and a per-character connection made that wait linear in the
+      // roster when the relay is unreachable.
+      await unshareManyFromServer(campaign, rows.map((r) => r.uuid).filter((u): u is string => u != null));
     }
   }
   await db.delete(campaigns).where(eq(campaigns.id, id));
