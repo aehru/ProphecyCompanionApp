@@ -67,6 +67,25 @@ function positions(rows: { id: number }[]): Map<number, number> {
   return new Map(rows.map((r, i) => [r.id, i]));
 }
 
+/**
+ * Bucket child rows by their character, PRESERVING the order they arrived in.
+ *
+ * That order is load-bearing: an enchant's target and its source spell ride
+ * along as positions into these arrays, so the sibling lists must come out
+ * exactly as `asc(id)` produced them. Grouping a single ordered result set keeps
+ * each character's rows in their relative order, which is the same sequence a
+ * per-character `WHERE characterId = ? ORDER BY id` would have given.
+ */
+function byCharacter<T extends { characterId: number }>(rows: T[]): Map<number, T[]> {
+  const map = new Map<number, T[]>();
+  for (const row of rows) {
+    const list = map.get(row.characterId);
+    if (list) list.push(row);
+    else map.set(row.characterId, [row]);
+  }
+  return map;
+}
+
 /** Copy only the listed keys off a DB row (drops id / FK / timestamps / media). */
 function pick(row: Record<string, unknown>, fields: string[]): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -97,28 +116,64 @@ export async function exportCharacters(
         ? []
         : await db.select().from(characters).where(inArray(characters.id, ids));
 
-  const bundles: CharacterBundle[] = [];
-  for (const c of rows) {
-    const [st] = await db.select().from(actualState).where(eq(actualState.characterId, c.id));
-    // Ordered by id, all of them: an enchant's target and its source spell ride
-    // along as POSITIONS in these arrays (see `enchantSchema`), so export and
-    // import have to agree on the order — `asc(id)` is that agreement, and it is
-    // the order the importer re-inserts in.
-    const [sk, ar, wp, sh, it, sp, mr, en, ef] = await Promise.all([
-      db.select().from(skills).where(eq(skills.characterId, c.id)).orderBy(asc(skills.id)),
-      db.select().from(armor).where(eq(armor.characterId, c.id)).orderBy(asc(armor.id)),
-      db.select().from(weapons).where(eq(weapons.characterId, c.id)).orderBy(asc(weapons.id)),
-      db.select().from(shields).where(eq(shields.characterId, c.id)).orderBy(asc(shields.id)),
-      db.select().from(items).where(eq(items.characterId, c.id)).orderBy(asc(items.id)),
-      db.select().from(spells).where(eq(spells.characterId, c.id)).orderBy(asc(spells.id)),
+  if (rows.length === 0) {
+    logWrite('characters', 'update', { count: 0, phase: 'export', mode: intent });
+    const empty = buildExport([]);
+    return intent === 'share' ? forSharing(empty) : empty;
+  }
+
+  // TEN queries for the whole envelope, not ten PER CHARACTER. Every statement
+  // takes its turn in the client's queue (see db/client), so a full backup used
+  // to be `10 × N` serialized round-trips — 500 of them for fifty characters,
+  // each prepared and finalized on its own.
+  //
+  // Ordered by id, all of them: an enchant's target and its source spell ride
+  // along as POSITIONS in these arrays (see `enchantSchema`), so export and
+  // import have to agree on the order — `asc(id)` is that agreement, and it is
+  // the order the importer re-inserts in. Bucketing one ordered result set per
+  // character preserves it exactly (see `byCharacter`).
+  const charIds = rows.map((c) => c.id);
+  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, effectRows] =
+    await Promise.all([
+      db.select().from(actualState).where(inArray(actualState.characterId, charIds)),
+      db.select().from(skills).where(inArray(skills.characterId, charIds)).orderBy(asc(skills.id)),
+      db.select().from(armor).where(inArray(armor.characterId, charIds)).orderBy(asc(armor.id)),
+      db.select().from(weapons).where(inArray(weapons.characterId, charIds)).orderBy(asc(weapons.id)),
+      db.select().from(shields).where(inArray(shields.characterId, charIds)).orderBy(asc(shields.id)),
+      db.select().from(items).where(inArray(items.characterId, charIds)).orderBy(asc(items.id)),
+      db.select().from(spells).where(inArray(spells.characterId, charIds)).orderBy(asc(spells.id)),
       db
         .select()
         .from(magicReserves)
-        .where(eq(magicReserves.characterId, c.id))
+        .where(inArray(magicReserves.characterId, charIds))
         .orderBy(asc(magicReserves.id)),
-      db.select().from(enchants).where(eq(enchants.characterId, c.id)).orderBy(asc(enchants.id)),
-      db.select().from(effects).where(eq(effects.characterId, c.id)).orderBy(asc(effects.id)),
+      db.select().from(enchants).where(inArray(enchants.characterId, charIds)).orderBy(asc(enchants.id)),
+      db.select().from(effects).where(inArray(effects.characterId, charIds)).orderBy(asc(effects.id)),
     ]);
+
+  const stateByChar = new Map(stateRows.map((s) => [s.characterId, s]));
+  const skillsByChar = byCharacter(skillRows);
+  const armorByChar = byCharacter(armorRows);
+  const weaponsByChar = byCharacter(weaponRows);
+  const shieldsByChar = byCharacter(shieldRows);
+  const itemsByChar = byCharacter(itemRows);
+  const spellsByChar = byCharacter(spellRows);
+  const reservesByChar = byCharacter(reserveRows);
+  const enchantsByChar = byCharacter(enchantRows);
+  const effectsByChar = byCharacter(effectRows);
+
+  const bundles: CharacterBundle[] = [];
+  for (const c of rows) {
+    const st = stateByChar.get(c.id);
+    const sk = skillsByChar.get(c.id) ?? [];
+    const ar = armorByChar.get(c.id) ?? [];
+    const wp = weaponsByChar.get(c.id) ?? [];
+    const sh = shieldsByChar.get(c.id) ?? [];
+    const it = itemsByChar.get(c.id) ?? [];
+    const sp = spellsByChar.get(c.id) ?? [];
+    const mr = reservesByChar.get(c.id) ?? [];
+    const en = enchantsByChar.get(c.id) ?? [];
+    const ef = effectsByChar.get(c.id) ?? [];
 
     const gearIndex: Record<EnchantTarget, Map<number, number>> = {
       weapon: positions(wp),
