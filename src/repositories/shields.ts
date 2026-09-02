@@ -51,9 +51,3 @@ export async function equipShield(characterId: number, id: number) {
   });
   logWrite('shields', 'update', { characterId, shieldId: id }, { equipped: true });
 }
-
-/** Unequip a shield. */
-export async function unequipShield(id: number) {
-  await db.update(shields).set({ equipped: false }).where(eq(shields.id, id));
-  logWrite('shields', 'update', { shieldId: id }, { equipped: false });
-}
