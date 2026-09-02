@@ -37,6 +37,7 @@ import { STAT_LABELS, statRollContext } from '@/lib/roll-context';
 import { armorQuery } from '@/repositories/armor';
 import { deleteCharacter, updateCharacter } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
+import { detachWrite } from '@/repositories/log';
 import { shieldsQuery } from '@/repositories/shields';
 import { skillsQuery } from '@/repositories/skills';
 
@@ -140,7 +141,9 @@ export default function CharacterFicheScreen() {
   // state writers the hook owns, but the row is `characters`.
   const setCharValue = (key: string, value: number) => {
     setChar((p) => (p ? ({ ...p, [key]: value } as Character) : p));
-    updateCharacter(numId, { [key]: value } as Partial<Character>);
+    detachWrite('characters', updateCharacter(numId, { [key]: value } as Partial<Character>), {
+      characterId: numId,
+    });
   };
 
   // XP is typed, not stepped, and the two counters are what gets stored: a
