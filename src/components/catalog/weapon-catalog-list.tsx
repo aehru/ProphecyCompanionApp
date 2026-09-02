@@ -10,17 +10,12 @@ import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon, { type IconName } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import WeaponDetail from '@/components/weapon-detail';
-import {
-  WEAPON_CATALOG,
-  WEAPON_CATEGORIES,
-  WEAPON_HANDS,
-  type WeaponCategory,
-  type WeaponPreset,
-} from '@/data/weapon-catalog';
+import { WEAPON_CATALOG, type WeaponCategory, type WeaponPreset } from '@/data/weapon-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { fold, foldQuery } from '@/lib/text-fold';
+import { foldQuery } from '@/lib/text-fold';
+import { buildWeaponIndex, groupWeapons } from '@/lib/weapon-grouping';
 
 // Ranged families get a compass glyph; everything else is melee (sword).
 const RANGED_CATEGORIES: WeaponCategory[] = [
@@ -31,57 +26,9 @@ const RANGED_CATEGORIES: WeaponCategory[] = [
 const iconFor = (cat: WeaponCategory): IconName =>
   RANGED_CATEGORIES.includes(cat) ? 'compass' : 'sword';
 
-/**
- * Search index, built once at module load — folding 77 names on every keystroke
- * is pure garbage. Same reasoning (and same shape) as the spell catalogue's
- * INDEX; this list is short enough not to need its virtualization, but not
- * short enough to re-derive from scratch per render.
- */
-const INDEX = WEAPON_CATALOG.map((preset) => ({ preset, search: fold(preset.data.name ?? '') }));
-
-interface HandGroup {
-  hand: (typeof WEAPON_HANDS)[number];
-  items: WeaponPreset[];
-}
-interface CategoryGroup {
-  category: WeaponCategory;
-  icon: IconName;
-  hands: HandGroup[];
-}
-
-/**
- * Group the matching presets by category then handedness in ONE pass.
- *
- * The nested `map`+`filter` this replaces walked the whole catalogue
- * `categories × hands` times (20 passes) on every render — including every
- * keystroke, since the search box re-renders the list.
- */
-function groupWeapons(query: string): { groups: CategoryGroup[]; total: number } {
-  const buckets = new Map<WeaponCategory, Map<string, WeaponPreset[]>>();
-  let total = 0;
-  for (const entry of INDEX) {
-    if (query !== '' && !entry.search.includes(query)) continue;
-    total++;
-    let byHand = buckets.get(entry.preset.category);
-    if (!byHand) buckets.set(entry.preset.category, (byHand = new Map()));
-    const list = byHand.get(entry.preset.hands);
-    if (list) list.push(entry.preset);
-    else byHand.set(entry.preset.hands, [entry.preset]);
-  }
-  // Emitted in the catalogue's declared order, not in insertion order: the
-  // category and handedness sequences are a property of the taxonomy.
-  const groups: CategoryGroup[] = [];
-  for (const category of WEAPON_CATEGORIES) {
-    const byHand = buckets.get(category);
-    if (!byHand) continue;
-    const hands = WEAPON_HANDS.flatMap((hand) => {
-      const items = byHand.get(hand);
-      return items ? [{ hand, items }] : [];
-    });
-    if (hands.length > 0) groups.push({ category, icon: iconFor(category), hands });
-  }
-  return { groups, total };
-}
+// Folded once at module load: the catalogue is static, and re-deriving it per
+// keystroke is the cost lib/weapon-grouping exists to remove.
+const INDEX = buildWeaponIndex(WEAPON_CATALOG);
 
 /**
  * The weapon catalogue itself — search, grouping and rows, with no idea whose
@@ -113,7 +60,7 @@ export default function WeaponCatalogList({
   // keeps the Searchbar responsive while the list catches up — same treatment
   // the spell catalogue gives its own filtering.
   const applied = useDeferredValue(foldQuery(query));
-  const { groups, total } = useMemo(() => groupWeapons(applied), [applied]);
+  const { groups, total } = useMemo(() => groupWeapons(INDEX, applied), [applied]);
 
   return (
     <CatalogScrollProvider value={catalogScroll}>
@@ -131,20 +78,25 @@ export default function WeaponCatalogList({
 
         {onAdd ? <CatalogCustomRow label="Arme personnalisée" onPress={() => onAdd()} /> : null}
 
-        {groups.map((group) => (
-          <SectionCard key={group.category} title={group.category} icon={group.icon}>
-            {group.hands.map(({ hand, items }) => (
-              <View key={hand} style={styles.handGroup}>
-                <Text style={[styles.handLabel, { color: theme.colors.onSurfaceVariant }]}>
-                  {hand}
-                </Text>
-                {items.map((p) => (
-                  <WeaponRow key={p.id} preset={p} icon={group.icon} readings={readings} onAdd={onAdd} />
-                ))}
-              </View>
-            ))}
-          </SectionCard>
-        ))}
+        {groups.map((group) => {
+          // The glyph is a UI fact, resolved here rather than in the grouping —
+          // lib/weapon-grouping stays free of anything the screen decides.
+          const icon = iconFor(group.category);
+          return (
+            <SectionCard key={group.category} title={group.category} icon={icon}>
+              {group.hands.map(({ hand, items }) => (
+                <View key={hand} style={styles.handGroup}>
+                  <Text style={[styles.handLabel, { color: theme.colors.onSurfaceVariant }]}>
+                    {hand}
+                  </Text>
+                  {items.map((p) => (
+                    <WeaponRow key={p.id} preset={p} icon={icon} readings={readings} onAdd={onAdd} />
+                  ))}
+                </View>
+              ))}
+            </SectionCard>
+          );
+        })}
 
         {total === 0 ? (
           <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
