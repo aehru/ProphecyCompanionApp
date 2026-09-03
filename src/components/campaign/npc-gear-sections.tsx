@@ -17,7 +17,7 @@ import Section from '@/components/campaign/sheet-section';
 import ShieldCard from '@/components/shield-card';
 import SpellCard from '@/components/spell-card';
 import WeaponCard from '@/components/weapon-card';
-import type { Weapon } from '@/db/schema';
+import type { Character, Weapon } from '@/db/schema';
 import { openRoller } from '@/lib/dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
@@ -36,12 +36,20 @@ import { knownSpellsQuery } from '@/repositories/spells';
 import { weaponsQuery } from '@/repositories/weapons';
 
 export default function NpcGearSections({ charUuid }: { charUuid: string }) {
-  const theme = useProphecyTheme();
   const { data: charRows } = useLiveQuery(characterByUuidQuery(charUuid), [charUuid]);
   const char = charRows?.[0] ?? null;
-  // 0 matches nothing — keeps the hook order stable while the character loads
-  // (and forever, for a character that only exists on a player's phone).
-  const localId = char?.id ?? 0;
+  // The eight gear queries live in a child mounted only once the uuid RESOLVES.
+  // Hooks can't be conditional, so keeping them here meant running all eight
+  // against `id = 0` — eight round-trips that match nothing on every open, and
+  // eight standing subscriptions forever for a character that only exists on a
+  // player's phone. Same split, for the same reason, as <LiveBroadcaster>.
+  if (!char) return null;
+  return <GearBody char={char} />;
+}
+
+function GearBody({ char }: { char: Character }) {
+  const theme = useProphecyTheme();
+  const localId = char.id;
   const { data: stateRows } = useLiveQuery(actualStateQuery(localId), [localId]);
   const { data: weapons } = useLiveQuery(weaponsQuery(localId), [localId]);
   const { data: armors } = useLiveQuery(armorQuery(localId), [localId]);
@@ -53,7 +61,6 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   // wire projection would carry but the GM's own characters never travel.
   const { data: skills } = useLiveQuery(skillsQuery(localId), [localId]);
 
-  if (!char) return null;
   const weaponList = weapons ?? [];
   const armorList = armors ?? [];
   const shieldList = shields ?? [];

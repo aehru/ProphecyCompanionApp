@@ -1,6 +1,6 @@
 import { asc, eq } from 'drizzle-orm';
 
-import { db } from '@/db/client';
+import { db, transaction } from '@/db/client';
 import { items, type NewItem } from '@/db/schema';
 import { deleteEnchantsFor } from '@/repositories/enchants';
 import { logWrite } from '@/repositories/log';
@@ -22,7 +22,11 @@ export async function updateItem(id: number, data: Partial<NewItem>) {
 }
 
 export async function deleteItem(id: number) {
-  await deleteEnchantsFor('item', id);
-  await db.delete(items).where(eq(items.id, id));
+  // See deleteArmor: the enchant purge is a separate statement with no FK to
+  // cascade through, so it has to share the row's transaction.
+  await transaction(async (tx) => {
+    await deleteEnchantsFor('item', id, tx);
+    await tx.delete(items).where(eq(items.id, id));
+  });
   logWrite('items', 'delete', { itemId: id });
 }

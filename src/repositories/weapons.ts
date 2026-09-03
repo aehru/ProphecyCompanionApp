@@ -35,8 +35,12 @@ export async function updateWeapon(id: number, data: Partial<NewWeapon>) {
 }
 
 export async function deleteWeapon(id: number) {
-  await deleteEnchantsFor('weapon', id);
-  await db.delete(weapons).where(eq(weapons.id, id));
+  // See deleteArmor: the enchant purge is a separate statement with no FK to
+  // cascade through, so it has to share the row's transaction.
+  await transaction(async (tx) => {
+    await deleteEnchantsFor('weapon', id, tx);
+    await tx.delete(weapons).where(eq(weapons.id, id));
+  });
   logWrite('weapons', 'delete', { weaponId: id });
 }
 

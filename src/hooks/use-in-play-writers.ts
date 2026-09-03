@@ -2,6 +2,7 @@ import type { ActualState, Character } from '@/db/schema';
 import { asNumRecord, clamp } from '@/lib/character-values';
 import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
 import { updateActualState } from '@/repositories/actual-state';
+import { detachWrite } from '@/repositories/log';
 
 /**
  * Mirror a write into a local copy of the row, for a screen that holds one.
@@ -42,9 +43,12 @@ export function useInPlayWriters({
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
 
+  // Optimistic by design: the mirror moves first, the row catches up. The write
+  // is therefore never awaited, so `detachWrite` is what keeps a failure from
+  // being an unhandled rejection nobody can see afterwards.
   const persistState = (patch: Partial<ActualState>) => {
     mirror?.((p) => (p ? ({ ...p, ...patch } as ActualState) : p));
-    updateActualState(characterId, patch);
+    detachWrite('actual_state', updateActualState(characterId, patch), { characterId });
   };
   const setStateValue = (key: string, value: number) =>
     persistState({ [key]: value } as Partial<ActualState>);

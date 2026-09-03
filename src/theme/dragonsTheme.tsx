@@ -1,5 +1,3 @@
-import type { MD3Theme } from 'react-native-paper';
-
 import type { GreatDragonKey } from '@/constants/prophecy';
 
 /**
@@ -178,13 +176,3 @@ export const DragonAccents: Record<DragonKey, DragonAccent> = {
     },
   },
 };
-
-/** Merge a dragon's accent onto a base Paper theme (swaps the primary group). */
-export function withDragon(
-  base: MD3Theme,
-  dragon: DragonKey,
-  scheme: 'light' | 'dark',
-): MD3Theme {
-  const a = DragonAccents[dragon][scheme];
-  return { ...base, colors: { ...base.colors, ...a } };
-}
