@@ -137,6 +137,7 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
         cost: 2,
         description: 'Peur irraisonnée.',
         inGameEffect: 'Difficulté augmentée de 5 face à la peur choisie.',
+        evolving: true,
         note: 'les araignées',
         presetId: 'phobie',
         presetRevision: 'abc123def456',
@@ -409,6 +410,7 @@ describe('parseImport validation', () => {
         cost: 2,
         description: 'Peur irraisonnée.',
         inGameEffect: 'Difficulté augmentée de 5 face à la peur choisie.',
+        evolving: true,
         // The player's own note and the rulebook paragraph travel apart, so a
         // later catalogue correction can rewrite one without touching the other.
         note: 'les araignées',

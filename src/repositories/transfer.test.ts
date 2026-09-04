@@ -113,6 +113,7 @@ describe('export → import round trip', () => {
       cost: 3,
       description: 'Peur irraisonnée.',
       inGameEffect: 'Difficulté augmentée de 5.',
+      evolving: true,
       note: 'les araignées',
       presetId: 'phobie',
       presetRevision: 'abc123def456',
@@ -122,7 +123,7 @@ describe('export → import round trip', () => {
     const { ids } = await importCharacters(await exportCharacters([character.id]), 'copy');
     const rows = harness.raw
       .prepare(
-        'SELECT kind, name, cost, in_game_effect, note, preset_id FROM traits WHERE character_id = ? ORDER BY id',
+        'SELECT kind, name, cost, in_game_effect, evolving, note, preset_id FROM traits WHERE character_id = ? ORDER BY id',
       )
       .all(ids[0]);
     expect(rows).toEqual([
@@ -131,10 +132,21 @@ describe('export → import round trip', () => {
         name: 'Phobie',
         cost: 3,
         in_game_effect: 'Difficulté augmentée de 5.',
+        // The rulebook's asterisk survives the round trip: a Phobie that can be
+        // overcome must not come back permanent.
+        evolving: 1,
         note: 'les araignées',
         preset_id: 'phobie',
       },
-      { kind: 'avantage', name: 'Fortune', cost: 2, in_game_effect: '', note: '', preset_id: null },
+      {
+        kind: 'avantage',
+        name: 'Fortune',
+        cost: 2,
+        in_game_effect: '',
+        evolving: 0,
+        note: '',
+        preset_id: null,
+      },
     ]);
   });
 

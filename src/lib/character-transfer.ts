@@ -280,6 +280,10 @@ const traitSchema = z.object({
   // `inGameEffect`): exports predating the column carry none, and an entry
   // without one renders its paragraph alone.
   inGameEffect: str.optional(),
+  // The rulebook's asterisk. OPTIONAL, same reasoning as `inGameEffect`: an
+  // export predating the column carries none, and `false` — permanent — is the
+  // column default.
+  evolving: z.boolean().optional(),
   note: str,
   // Provenance, carried on BOTH export intents for the same reason as a spell's:
   // a round trip through a file must not turn a catalogue entry into a hand
