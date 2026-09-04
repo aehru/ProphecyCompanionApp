@@ -27,6 +27,13 @@ import {
 import SubTabs, { labelKey, type TabLabel } from '@/components/ui/sub-tabs';
 import { USE_NATIVE_DRIVER } from '@/lib/animation';
 
+/**
+ * How far off a page boundary an offset may sit and still count as resting.
+ * Generous enough for the sub-pixel drift a smooth scroll leaves behind, far
+ * tighter than the half-page a mid-flight scroll sits at.
+ */
+const SNAP_TOLERANCE = 0.05;
+
 export default function TabPager({
   labels,
   active,
@@ -71,11 +78,23 @@ export default function TabPager({
     [scrollX, width],
   );
 
-  /** Commit the tab the pager has come to rest on. */
+  /**
+   * Commit the tab the pager has come to rest on.
+   *
+   * An offset that is not ON a page boundary is not a resting place, so it
+   * commits nothing: `pagingEnabled` always snaps, which means a mid-page value
+   * can only ever be a scroll still in flight. Without that guard a programmatic
+   * scroll that STALLS — the tapped page is lazy, and evaluating its catalogue
+   * blocks the thread long enough for the debounce below to fire mid-animation —
+   * settles on whichever page it happens to be passing over, which calls
+   * `onChange` back to the tab the user just left and then scrolls there. The
+   * tap looked like it did nothing at all.
+   */
   const settleAt = useCallback(
     (x: number) => {
       if (width <= 0) return;
       const index = Math.round(x / width);
+      if (Math.abs(x - index * width) > width * SNAP_TOLERANCE) return;
       if (index !== active && index >= 0 && index < labels.length) onChange(index);
     },
     [width, active, labels.length, onChange],
