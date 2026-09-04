@@ -232,6 +232,13 @@
       "when": 1788206833262,
       "tag": "0032_remarkable_annihilus",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1788511026981,
+      "tag": "0033_mature_christian_walker",
+      "breakpoints": true
     }
   ]
 }
