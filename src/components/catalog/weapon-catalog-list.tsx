@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useDeferredValue, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Searchbar, Text } from 'react-native-paper';
@@ -10,17 +10,12 @@ import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon, { type IconName } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import WeaponDetail from '@/components/weapon-detail';
-import {
-  WEAPON_CATALOG,
-  WEAPON_CATEGORIES,
-  WEAPON_HANDS,
-  type WeaponCategory,
-  type WeaponPreset,
-} from '@/data/weapon-catalog';
+import { WEAPON_CATALOG, type WeaponCategory, type WeaponPreset } from '@/data/weapon-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { fold, foldQuery } from '@/lib/text-fold';
+import { foldQuery } from '@/lib/text-fold';
+import { buildWeaponIndex, groupWeapons } from '@/lib/weapon-grouping';
 
 // Ranged families get a compass glyph; everything else is melee (sword).
 const RANGED_CATEGORIES: WeaponCategory[] = [
@@ -30,6 +25,10 @@ const RANGED_CATEGORIES: WeaponCategory[] = [
 ];
 const iconFor = (cat: WeaponCategory): IconName =>
   RANGED_CATEGORIES.includes(cat) ? 'compass' : 'sword';
+
+// Folded once at module load: the catalogue is static, and re-deriving it per
+// keystroke is the cost lib/weapon-grouping exists to remove.
+const INDEX = buildWeaponIndex(WEAPON_CATALOG);
 
 /**
  * The weapon catalogue itself — search, grouping and rows, with no idea whose
@@ -57,12 +56,11 @@ export default function WeaponCatalogList({
   // Lets a row's « Replier » put itself back at the top of the screen.
   const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
 
-  const q = foldQuery(query);
-  const filtered = useMemo(
-    () =>
-      q === '' ? WEAPON_CATALOG : WEAPON_CATALOG.filter((p) => fold(p.data.name ?? '').includes(q)),
-    [q],
-  );
+  // Re-grouping the catalogue is the expensive half of a keystroke; deferring it
+  // keeps the Searchbar responsive while the list catches up — same treatment
+  // the spell catalogue gives its own filtering.
+  const applied = useDeferredValue(foldQuery(query));
+  const { groups, total } = useMemo(() => groupWeapons(INDEX, applied), [applied]);
 
   return (
     <CatalogScrollProvider value={catalogScroll}>
@@ -80,46 +78,27 @@ export default function WeaponCatalogList({
 
         {onAdd ? <CatalogCustomRow label="Arme personnalisée" onPress={() => onAdd()} /> : null}
 
-        {WEAPON_CATEGORIES.map((cat) => {
-          const items = filtered.filter((p) => p.category === cat);
-          if (items.length === 0) return null;
+        {groups.map((group) => {
+          // The glyph is a UI fact, resolved here rather than in the grouping —
+          // lib/weapon-grouping stays free of anything the screen decides.
+          const icon = iconFor(group.category);
           return (
-            <SectionCard key={cat} title={cat} icon={iconFor(cat)}>
-              {WEAPON_HANDS.map((hand) => {
-                const handItems = items.filter((p) => p.hands === hand);
-                if (handItems.length === 0) return null;
-                return (
-                  <View key={hand} style={styles.handGroup}>
-                    <Text style={[styles.handLabel, { color: theme.colors.onSurfaceVariant }]}>
-                      {hand}
-                    </Text>
-                    {handItems.map((p) => (
-                      <CatalogRow
-                        key={p.id}
-                        icon={iconFor(cat)}
-                        name={p.data.name ?? ''}
-                        subtitle={[p.data.damage, p.data.prerequisites]
-                          .filter((s) => s && s.trim() !== '')
-                          .join(' · ')}
-                        addLabel={`Ajouter ${p.data.name}`}
-                        alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
-                        onAdd={onAdd && (() => onAdd(p))}>
-                        <WeaponDetail
-                          weapon={p.data}
-                          caracValue={readings?.caracValue}
-                          caracModifier={readings?.caracModifier}
-                          skill={readings?.skillReading(p.data.skillName)}
-                        />
-                      </CatalogRow>
-                    ))}
-                  </View>
-                );
-              })}
+            <SectionCard key={group.category} title={group.category} icon={icon}>
+              {group.hands.map(({ hand, items }) => (
+                <View key={hand} style={styles.handGroup}>
+                  <Text style={[styles.handLabel, { color: theme.colors.onSurfaceVariant }]}>
+                    {hand}
+                  </Text>
+                  {items.map((p) => (
+                    <WeaponRow key={p.id} preset={p} icon={icon} readings={readings} onAdd={onAdd} />
+                  ))}
+                </View>
+              ))}
             </SectionCard>
           );
         })}
 
-        {filtered.length === 0 ? (
+        {total === 0 ? (
           <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
             Aucune arme ne correspond.
           </Text>
@@ -128,6 +107,46 @@ export default function WeaponCatalogList({
     </CatalogScrollProvider>
   );
 }
+
+/**
+ * One catalogue row. Memoized because its props are not free: `skillReading`
+ * scans the character's compétences and folds the wound + effect modifiers, and
+ * `prerequisitesUnmet` parses a formula — both once per row. Without the memo
+ * every keystroke in the search box paid that for all 77 weapons, whether or
+ * not the row's detail was even open.
+ *
+ * The memo only holds while `readings` keeps its identity, which is why
+ * `useCaracReadings` returns a memoized object.
+ */
+const WeaponRow = React.memo(function WeaponRow({
+  preset: p,
+  icon,
+  readings,
+  onAdd,
+}: {
+  preset: WeaponPreset;
+  icon: IconName;
+  /** Absent when the catalogue is browsed with no character in context. */
+  readings?: CaracReadings;
+  onAdd?: (preset: WeaponPreset) => void;
+}) {
+  return (
+    <CatalogRow
+      icon={icon}
+      name={p.data.name ?? ''}
+      subtitle={[p.data.damage, p.data.prerequisites].filter((s) => s && s.trim() !== '').join(' · ')}
+      addLabel={`Ajouter ${p.data.name}`}
+      alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
+      onAdd={onAdd && (() => onAdd(p))}>
+      <WeaponDetail
+        weapon={p.data}
+        caracValue={readings?.caracValue}
+        caracModifier={readings?.caracModifier}
+        skill={readings?.skillReading(p.data.skillName)}
+      />
+    </CatalogRow>
+  );
+});
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 16, paddingBottom: 48 },

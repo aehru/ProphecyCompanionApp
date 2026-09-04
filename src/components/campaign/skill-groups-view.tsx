@@ -99,11 +99,14 @@ export default function SkillGroupsView({
   emptyLabel = 'Aucune compétence.',
   compact = false,
   density = 'compact',
+  onRoll,
 }: {
   groups: SkillGroup[];
   emptyLabel?: string;
   compact?: boolean;
   density?: SkillDensity;
+  /** Turns every TOT badge into a roll target, as <SkillRows> already does. */
+  onRoll?: (skill: SkillLineData) => void;
 }) {
   const theme = useProphecyTheme();
   if (groups.length === 0) {
@@ -122,14 +125,22 @@ export default function SkillGroupsView({
   return (
     <View style={{ gap: compact ? 12 : 16 }}>
       {groups.map((g) => (
-        <SkillGroupBlock key={g.key} group={g} density={density} />
+        <SkillGroupBlock key={g.key} group={g} density={density} onRoll={onRoll} />
       ))}
     </View>
   );
 }
 
 /** One attribut block: coloured header with the attribut value, then its rows. */
-function SkillGroupBlock({ group: g, density }: { group: SkillGroup; density: SkillDensity }) {
+function SkillGroupBlock({
+  group: g,
+  density,
+  onRoll,
+}: {
+  group: SkillGroup;
+  density: SkillDensity;
+  onRoll?: (skill: SkillLineData) => void;
+}) {
   const theme = useProphecyTheme();
   return (
     <View style={{ gap: SCALE[density].rowGap }}>
@@ -148,7 +159,7 @@ function SkillGroupBlock({ group: g, density }: { group: SkillGroup; density: Sk
         <SkillColumnLegend density={density} />
       </View>
       {g.skills.map((s) => (
-        <SkillLine key={s.key} skill={s} color={g.color} density={density} />
+        <SkillLine key={s.key} skill={s} color={g.color} density={density} onRoll={onRoll} />
       ))}
     </View>
   );

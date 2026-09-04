@@ -89,6 +89,7 @@ export default function SpellFilterPanel({
           value={criteria.sphere}
           onChange={(v) => set('sphere', v)}
           style={styles.sphereFilter}
+          inline
         />
         <View style={styles.disciplineFilter}>
           <ChipSelect

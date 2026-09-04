@@ -149,6 +149,16 @@ export const actualState = sqliteTable('actual_state', {
   maitriseCurrent: integer('maitrise_current').notNull().default(0),
   chanceCurrent: integer('chance_current').notNull().default(0),
 
+  // Expérience — two counters, not a balance. `xpTotal` is what the character
+  // has ever been awarded, `xpSpent` what has gone into raising things; the
+  // disponible is derived (lib/xp), never stored, so the two can't drift.
+  // Deliberately NOT in RESOURCES: those are a sheet max with a live current,
+  // while XP has no max at all. Spending is manual — the app knows no cost
+  // table — and the disponible MAY go negative: a GM lets a player buy on
+  // credit, and refusing to record that would just push it off the app.
+  xpTotal: integer('xp_total').notNull().default(0),
+  xpSpent: integer('xp_spent').notNull().default(0),
+
   // Magic — current reserve + per-sphere current (maxes live on the character)
   reserveMagiqueCurrent: integer('reserve_magique_current').notNull().default(0),
   sphereCitesCurrent: integer('sphere_cites_current').notNull().default(0),
@@ -433,6 +443,27 @@ export const spells = sqliteTable('spells', {
    * cannot reconstruct after the fact.
    */
   presetRevision: text('preset_revision'),
+
+  // --- is this sortilège part of the character's own repertoire? -------------
+
+  /**
+   * FALSE marks a spell the character CANNOT cast: it lives in this row only
+   * because an `enchants` row points at it — the object was enchanted by
+   * somebody else, another mage the character paid or asked, and the sheet has
+   * to remember which sortilège was used without ever pretending the character
+   * learned it.
+   *
+   * Stored as a flag on `spells` rather than duplicated onto the enchant so the
+   * whole sortilège — difficulté, durée, cibles, tags, `effect` — stays one
+   * shape everywhere, and `SpellDetail` renders an enchant's source with no
+   * special case. The cost is that every reader of the spellbook must filter:
+   * `knownSpellsQuery` is that filter, and the catalogue's "déjà ajouté" badge
+   * ignores unknown rows too (they get an « Enchanté » badge instead).
+   *
+   * Defaults to TRUE so every row written before this column reads as known —
+   * which is what they all were.
+   */
+  known: integer('known', { mode: 'boolean' }).notNull().default(true),
 });
 
 /**
@@ -484,7 +515,13 @@ export type EnchantTarget = (typeof ENCHANT_TARGETS)[number];
  * never re-reads the live spell. `sourceSpellId` is a *soft* link kept
  * alongside it purely so the UI can offer "view this spell" — `onDelete:
  * 'set null'` clears it if the source spell is later deleted, while
- * `sourceSpellName`/`effect` stay put as history. Using an enchant never
+ * `sourceSpellName`/`effect` stay put as history.
+ *
+ * That link may point at a sortilège the character does NOT know (`spells.known`
+ * false): a mage the character hired cast it into the object, so the spell is
+ * recorded for what it explains — difficulté, durée, cibles — while staying out
+ * of the spellbook. Which is why the source can be picked from the whole
+ * catalogue and not just from what the character can cast. Using an enchant never
  * touches the magic reserve — `usesCurrent`/`usesMax` is its own independent
  * charge pool, ticked by hand like `magic_reserves`.
  */
@@ -501,6 +538,24 @@ export const enchants = sqliteTable('enchants', {
   effect: text('effect').notNull().default(''),
   usesMax: integer('uses_max').notNull().default(1),
   usesCurrent: integer('uses_current').notNull().default(1),
+  /**
+   * The score the ENCHANTER rolled when casting the sortilège into the object,
+   * and the difficulté it was rolled against (snapshotted from the spell at
+   * link time, editable afterwards — the GM may have set another).
+   *
+   * Both NULLABLE, and that is the whole design: an enchant may be a line of
+   * flavour text with no numbers behind it, and every row written before these
+   * columns existed is exactly that. A failed enchantment is storable too — a
+   * score BELOW the difficulté is recorded as rolled, never rejected.
+   *
+   * They are stored and not recomputed because the roll belongs to whoever cast
+   * it — usually not this character, sometimes not anyone the sheet knows — so
+   * there is no score to derive it from. Everything else (réussite, NR, and
+   * through it the durée and the number of cibles) IS derived from this pair by
+   * `lib/enchant-score`, never stored: two numbers can't drift, five can.
+   */
+  castScore: integer('cast_score'),
+  difficulty: integer('difficulty'),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

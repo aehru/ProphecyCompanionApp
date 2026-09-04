@@ -2,7 +2,7 @@
 // radial tendance dial. Pure presentation.
 
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { MAX_PUCES } from '@/constants/prophecy';
@@ -30,29 +30,42 @@ function ModBadge({ modifier }: { modifier?: number }) {
   );
 }
 
-/** Attribut tile: value over label with a coloured top edge. */
+/**
+ * Attribut tile: value over label with a coloured top edge.
+ *
+ * `onRoll` makes the tile a button, exactly as <StatChip> does on the player's
+ * own Fiche — a Pressable in both cases, so a tile that rolls nothing stays a
+ * tile and announces nothing.
+ */
 export function AttrTile({
   label,
   value,
   color,
   modifier,
+  onRoll,
 }: {
   label: string;
   value: number;
   color: string;
   /** Effects aimed at this attribut alone. 0/undefined hides the badge. */
   modifier?: number;
+  onRoll?: () => void;
 }) {
   const theme = useProphecyTheme();
   return (
-    <View
-      style={[
+    <Pressable
+      onPress={onRoll}
+      disabled={!onRoll}
+      accessibilityRole={onRoll ? 'button' : undefined}
+      accessibilityLabel={onRoll ? `Lancer ${label}, ${value}` : undefined}
+      style={({ pressed }) => [
         styles.tile,
         {
           backgroundColor: theme.colors.surfaceVariant,
           borderColor: theme.prophecy.borderSoft,
           borderTopColor: color,
           borderTopWidth: 2,
+          opacity: pressed ? 0.7 : 1,
         },
       ]}>
       <View style={styles.valueRow}>
@@ -62,27 +75,40 @@ export function AttrTile({
       <Text style={{ fontSize: 8.5, letterSpacing: 0.4, color: theme.colors.onSurfaceVariant }}>
         {label}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
-/** Caractéristique tile: abbr over value, plain surface. */
+/** Caractéristique tile: abbr over value, plain surface. Rolls like AttrTile. */
 export function CaracTile({
   label,
   value,
   modifier,
+  onRoll,
+  rollLabel,
 }: {
   label: string;
   value: number;
   /** Effects aimed at this caractéristique alone. */
   modifier?: number;
+  onRoll?: () => void;
+  /** Spelled out for the button: the tile itself only shows « VOL ». */
+  rollLabel?: string;
 }) {
   const theme = useProphecyTheme();
   return (
-    <View
-      style={[
+    <Pressable
+      onPress={onRoll}
+      disabled={!onRoll}
+      accessibilityRole={onRoll ? 'button' : undefined}
+      accessibilityLabel={onRoll ? `Lancer ${rollLabel ?? label}, ${value}` : undefined}
+      style={({ pressed }) => [
         styles.tile,
-        { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.prophecy.borderSoft },
+        {
+          backgroundColor: theme.colors.surfaceVariant,
+          borderColor: theme.prophecy.borderSoft,
+          opacity: pressed ? 0.7 : 1,
+        },
       ]}>
       <Text
         style={{ fontSize: 8.5, fontWeight: '700', letterSpacing: 0.5, color: theme.colors.onSurfaceVariant }}>
@@ -95,7 +121,7 @@ export function CaracTile({
         </Text>
         <ModBadge modifier={modifier} />
       </View>
-    </View>
+    </Pressable>
   );
 }
 

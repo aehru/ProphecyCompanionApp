@@ -8,12 +8,12 @@ import EffectsCard from '@/components/effects-card';
 import HealthSection from '@/components/fiche/health-section';
 import InitiativeSection from '@/components/fiche/initiative-section';
 import ResourcesSection from '@/components/fiche/resources-section';
-import type { ActualState } from '@/db/schema';
+import type { Character } from '@/db/schema';
+import { useInPlayWriters } from '@/hooks/use-in-play-writers';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { asNumRecord, clamp } from '@/lib/character-values';
-import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
+import { asNumRecord } from '@/lib/character-values';
 import { woundMalus } from '@/lib/modifiers';
-import { actualStateQuery, updateActualState } from '@/repositories/actual-state';
+import { actualStateQuery } from '@/repositories/actual-state';
 import { characterByUuidQuery } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
 import { skillsQuery } from '@/repositories/skills';
@@ -35,7 +35,6 @@ import { skillsQuery } from '@/repositories/skills';
  * campaign pushes it on the usual debounce and a paused one syncs on resume.
  */
 export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
-  const theme = useProphecyTheme();
   // `updatedAt` is undefined until a query has actually run. useLiveQuery seeds
   // `data` with [] and fetches in an effect, so without this an empty result is
   // indistinguishable from "not loaded yet" — and the not-found message below
@@ -45,81 +44,54 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
     [charUuid],
   );
   const char = charRows?.[0] ?? null;
-  // 0 matches nothing — keeps the hook order stable while the character loads.
-  const localId = char?.id ?? 0;
+
+  if (!charLoaded) return <ActivityIndicator style={styles.loading} />;
+  // The PNJ is shared from another device: the projection is all we have.
+  if (!char) return <NotOnThisDevice />;
+  // The three state queries hang off the LOCAL id, so they mount only once the
+  // uuid has resolved to one — running them against `id = 0` while it loads was
+  // three round-trips that could never match. Hooks can't be conditional, hence
+  // the split; the same one <NpcGearSections> makes.
+  return <EditorBody char={char} />;
+}
+
+function NotOnThisDevice() {
+  const theme = useProphecyTheme();
+  return (
+    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+      Ce personnage n’existe pas sur cet appareil — modification impossible.
+    </Text>
+  );
+}
+
+function EditorBody({ char }: { char: Character }) {
+  const localId = char.id;
   const { data: stateRows, updatedAt: stateLoaded } = useLiveQuery(actualStateQuery(localId), [
     localId,
   ]);
   const { data: effects } = useLiveQuery(effectsQuery(localId), [localId]);
   const { data: skills } = useLiveQuery(skillsQuery(localId), [localId]);
   const state = stateRows?.[0] ?? null;
+  // No `mirror`: this screen reads through useLiveQuery, so a local copy would
+  // only fight the refresh. See the hook. Above the guards below, like the
+  // queries it reads from — it tolerates a state row that has not loaded.
+  const { setStateValue, persistState, adjustRes, refillRes, initiative } = useInPlayWriters({
+    characterId: localId,
+    char,
+    state,
+  });
 
-  if (!charLoaded || (char && !stateLoaded)) {
-    return <ActivityIndicator style={styles.loading} />;
-  }
-
-  // The PNJ is shared from another device: the projection is all we have.
-  if (!char || !state) {
-    return (
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-        Ce personnage n’existe pas sur cet appareil — modification impossible.
-      </Text>
-    );
-  }
+  if (!stateLoaded) return <ActivityIndicator style={styles.loading} />;
+  // A character row with no `actual_state` is the same dead end as one that
+  // isn't here at all: there is nothing in play to edit.
+  if (!state) return <NotOnThisDevice />;
 
   const rec = asNumRecord(char);
   const stRec = asNumRecord(state);
-  const initMax = rec.initiativeMax ?? 0;
-  const initBonus = stRec.initiativeBonusDice ?? 0;
-  const initCount = initiativeDiceCount(initMax, initBonus);
-  const initStored = state.initiativeValues ?? [];
-  const initIcons = state.initiativeDiceIcons ?? [];
-
-  const setStateValue = (key: string, value: number) =>
-    updateActualState(localId, { [key]: value } as Partial<ActualState>);
-  const persistState = (patch: Partial<ActualState>) => updateActualState(localId, patch);
-  const adjustRes = (key: string, delta: number) =>
-    setStateValue(
-      `${key}Current`,
-      clamp((stRec[`${key}Current`] ?? 0) + delta, 0, rec[`${key}Max`] ?? 0),
-    );
-  const setInit = (i: number, n: number) =>
-    persistState({
-      initiativeValues: Array.from({ length: initCount }, (_, j) =>
-        j === i ? n : initStored[j] ?? 0,
-      ),
-    });
-  const setInitIcon = (i: number, icon: string) =>
-    persistState({
-      initiativeDiceIcons: Array.from({ length: initCount }, (_, j) =>
-        j === i ? icon : initIcons[j] ?? '',
-      ),
-    });
 
   return (
     <View style={styles.root}>
-      <InitiativeSection
-        max={initMax}
-        bonus={initBonus}
-        values={initStored}
-        icons={initIcons}
-        wound={woundMalus(stRec)}
-        onSetDie={setInit}
-        onSetIcon={setInitIcon}
-        onSetBonus={(n) => {
-          // Dropping a die drops its stored roll and its mark — see the Fiche.
-          const next = initiativeDiceCount(initMax, n);
-          persistState({
-            initiativeBonusDice: n,
-            initiativeValues: trimInitiativeSlots(initStored, next),
-            initiativeDiceIcons: trimInitiativeSlots(initIcons, next),
-          });
-        }}
-        onRoll={() => {
-          const { values, icons } = rollInitiativeWithIcons(initCount, initIcons);
-          persistState({ initiativeValues: values, initiativeDiceIcons: icons });
-        }}
-      />
+      <InitiativeSection {...initiative} wound={woundMalus(stRec)} />
       <HealthSection
         maxOf={(k) => rec[k] ?? 0}
         currentOf={(k) => stRec[k] ?? 0}
@@ -130,11 +102,11 @@ export default function NpcInPlayEditor({ charUuid }: { charUuid: string }) {
         currentOf={(k) => stRec[k] ?? 0}
         maxOf={(k) => rec[k] ?? 0}
         adjust={adjustRes}
-        onRefill={(k) => setStateValue(`${k}Current`, rec[`${k}Max`] ?? 0)}
+        onRefill={refillRes}
         editing
       />
       <ConditionsCard state={state} editing onPersist={persistState} />
-      <EffectsCard effects={effects ?? []} skills={skills ?? []} editing />
+      <EffectsCard characterId={localId} effects={effects ?? []} skills={skills ?? []} editing />
     </View>
   );
 }

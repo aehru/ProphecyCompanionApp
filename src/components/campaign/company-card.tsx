@@ -9,48 +9,55 @@ import { Divider, Text } from 'react-native-paper';
 
 import { useAttrColors, useTendColors } from '@/components/campaign/roster-accents';
 import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-badges';
-import SkillGroupsView from '@/components/campaign/skill-groups-view';
+import SkillGroupsView, { type SkillLineData } from '@/components/campaign/skill-groups-view';
 import { AttrTile, CaracTile, TendanceRing } from '@/components/campaign/stat-tiles';
 import { ATTRIBUTS, CARACTERISTIQUES, TENDANCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import GlobalModifierRow from '@/components/global-modifier-row';
-import { sharedWoundMalus } from '@/lib/initiative-order';
+import { sharedStatRollContext } from '@/lib/campaign-roll';
+import { openRoller } from '@/lib/dice-roller';
 import { globalModifier, statModifier } from '@/lib/modifiers';
+import { skillRollContext } from '@/lib/roll-context';
 import type { TableRosterEntry } from '@/lib/roster-merge';
-import { groupSkills, type SharedEffect, type SharedSkill } from '@/lib/skill-groups';
-import { nums, pools } from '@/lib/shared-character-view';
+import { groupSkills } from '@/lib/skill-groups';
+import { effectsOf, nums, skillsOf, woundOf } from '@/lib/shared-character-view';
 
 type SharedCharacter = RosterEntry['character'];
-
-/** The character's active effects, narrowed off the opaque projection. */
-function effectsOf(character: SharedCharacter): SharedEffect[] {
-  return Array.isArray(character.effects) ? (character.effects as SharedEffect[]) : [];
-}
 
 export default function CompanyCard({
   entry,
   tab,
   query,
   hasNote,
-  onPress,
+  onOpen,
 }: {
   entry: TableRosterEntry;
   /** Index of the screen's active tab (0 stats, 1 skills, 2 tendances). */
   tab: number;
   query: string;
   hasNote: boolean;
-  onPress: () => void;
+  /** Opens the full sheet. Bound to the HEAD only — see below. */
+  onOpen: () => void;
 }) {
   const theme = useProphecyTheme();
   const c = entry.character;
   const nom = String(c.nom ?? 'Sans nom');
 
+  // The card is NOT one big button any more: its body is made of roll targets
+  // (stat tiles, TOT badges), and a press that both rolls and opens the sheet
+  // is a press that does the wrong one half the time. The HEAD — avatar, name,
+  // badges — is what opens the sheet.
   return (
-    <Pressable
-      onPress={onPress}
+    <View
+      testID={`roster-card-${entry.charId}`}
       style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.borderSoft }]}>
-      <View style={styles.cardHead}>
+      <Pressable
+        testID={`roster-open-${entry.charId}`}
+        onPress={onOpen}
+        accessibilityRole="button"
+        accessibilityLabel={`Ouvrir la fiche de ${nom}`}
+        style={({ pressed }) => [styles.cardHead, { opacity: pressed ? 0.7 : 1 }]}>
         <PlayerAvatar nom={nom} online={entry.online} size={42} />
         <Text style={{ flex: 1, fontFamily: 'Cinzel_600SemiBold', fontSize: 15, color: theme.colors.onSurface }}>
           {nom}
@@ -59,12 +66,12 @@ export default function CompanyCard({
         {entry.owner === 'gm' ? <OwnerBadge /> : null}
         {/* Presence only means something for a character held by someone else. */}
         {entry.source === 'remote' ? <StatusPill online={entry.online} /> : null}
-      </View>
+      </Pressable>
 
       {tab === 0 ? <StatsBody character={c} /> : null}
       {tab === 1 ? <SkillsBody character={c} query={query} /> : null}
       {tab === 2 ? <TendancesBody character={c} /> : null}
-    </Pressable>
+    </View>
   );
 }
 
@@ -74,12 +81,17 @@ function StatsBody({ character }: { character: SharedCharacter }) {
   const attrColors = useAttrColors();
   const attr = nums(character.attributs);
   const carac = nums(character.caracteristiques);
-  const effects = effectsOf(character);
+  const effects = effectsOf(character.effects);
   // Wounds and 'all' effects hit every roll, so they are read once above the
   // tiles — a roll adds an attribut to a caractéristique and would show them
   // twice. Each tile badges only the effects aimed at that stat.
-  const global = globalModifier(effects, sharedWoundMalus(pools(character.wounds)));
+  const global = globalModifier(effects, woundOf(character.wounds));
   const modOf = (key: string) => statModifier(key, effects);
+  // Rolled straight off the projection — the GM does not have to open the sheet
+  // to ask for a VOL test, and a player's card rolls the same as a PNJ's: a roll
+  // reads the character, it never writes to it.
+  const roll = (key: string, kind: 'attribut' | 'caracteristique') =>
+    openRoller(sharedStatRollContext(character, key, kind));
   return (
     <View style={styles.statsBody}>
       <GlobalModifierRow modifier={global} compact />
@@ -91,6 +103,7 @@ function StatsBody({ character }: { character: SharedCharacter }) {
             value={attr[a.key] ?? 0}
             color={attrColors[a.key]}
             modifier={modOf(a.key)}
+            onRoll={() => roll(a.key, 'attribut')}
           />
         ))}
       </View>
@@ -107,8 +120,10 @@ function StatsBody({ character }: { character: SharedCharacter }) {
           <CaracTile
             key={k.key}
             label={k.abbr}
+            rollLabel={k.label}
             value={carac[k.key] ?? 0}
             modifier={modOf(k.key)}
+            onRoll={() => roll(k.key, 'caracteristique')}
           />
         ))}
       </View>
@@ -117,8 +132,10 @@ function StatsBody({ character }: { character: SharedCharacter }) {
           <CaracTile
             key={k.key}
             label={k.abbr}
+            rollLabel={k.label}
             value={carac[k.key] ?? 0}
             modifier={modOf(k.key)}
+            onRoll={() => roll(k.key, 'caracteristique')}
           />
         ))}
       </View>
@@ -129,19 +146,24 @@ function StatsBody({ character }: { character: SharedCharacter }) {
 /** Trained skills grouped by attribut, filtered by the screen's search box. */
 function SkillsBody({ character, query }: { character: SharedCharacter; query: string }) {
   const attrColors = useAttrColors();
-  const skills = useMemo(
-    () => (Array.isArray(character.skills) ? (character.skills as SharedSkill[]) : []),
-    [character.skills],
-  );
-  const effects = useMemo(() => effectsOf(character), [character]);
+  const skills = useMemo(() => skillsOf(character.skills), [character.skills]);
+  const effects = useMemo(() => effectsOf(character.effects), [character.effects]);
   const attr = nums(character.attributs);
   // The wound malus applies to skill rolls too — the TOT column is a roll base.
-  const wound = sharedWoundMalus(pools(character.wounds));
+  const wound = woundOf(character.wounds);
   const groups = useMemo(
     () => groupSkills(skills, attr, attrColors, query, effects, wound),
     [skills, attr, attrColors, query, effects, wound],
   );
-  return <SkillGroupsView groups={groups} emptyLabel="Aucune correspondance." compact />;
+  const roll = (skill: SkillLineData) => openRoller(skillRollContext(skill));
+  return (
+    <SkillGroupsView
+      groups={groups}
+      emptyLabel="Aucune correspondance."
+      compact
+      onRoll={roll}
+    />
+  );
 }
 
 /** The three tendance dials. */

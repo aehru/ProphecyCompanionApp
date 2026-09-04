@@ -217,7 +217,7 @@ describe('toSharedCharacter', () => {
     expect(shared.effects).toEqual([]);
   });
 
-  it('leaks no minimised data (backstory, notes, money, magic)', () => {
+  it('leaks no minimised data (backstory, notes, money, magic, XP)', () => {
     // Populate the excluded fields, then assert none of them reach the wire.
     const shared = toSharedCharacter(
       makeCharacter({
@@ -231,6 +231,8 @@ describe('toSharedCharacter', () => {
       makeState({
         notes: 'note privée du joueur',
         dracOr: 99,
+        xpTotal: 77,
+        xpSpent: 55,
         sphereFeuCurrent: 3,
         reserveMagiqueCurrent: 10,
       }),
@@ -248,6 +250,11 @@ describe('toSharedCharacter', () => {
       'magie',
       'sorcellerie',
       'reservemagique',
+      // XP is the GM's business at the table, not on the wire — the roster shows
+      // in-play state, and an unspent-XP readout is not that.
+      'xp',
+      '77',
+      '55',
     ]) {
       expect(json).not.toContain(forbidden.toLowerCase());
     }

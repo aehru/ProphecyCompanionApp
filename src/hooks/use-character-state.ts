@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { ActualState, Character } from '@/db/schema';
+import { log } from '@/lib/log';
 import { ensureActualState, getActualState } from '@/repositories/actual-state';
 import { getCharacter } from '@/repositories/characters';
 
@@ -20,8 +21,23 @@ export function useCharacterState(
 
   const reload = useCallback(() => {
     let active = true;
-    getCharacter(id).then((c) => active && setChar(c));
-    (ensure ? ensureActualState(id) : getActualState(id)).then((s) => active && setState(s));
+    // A rejected read resolves to "not there": `char === undefined` is the
+    // LOADING state every consumer branches on (characterFallback), so leaving
+    // it there on failure hangs the screen on a spinner forever. `null` is the
+    // not-found state, which already has a screen. The cause goes to the
+    // diagnostic log — that is where a bug report can still find it.
+    getCharacter(id)
+      .catch((error) => {
+        log.error('character.read.failed', error, { characterId: id });
+        return null;
+      })
+      .then((c) => active && setChar(c));
+    (ensure ? ensureActualState(id) : getActualState(id))
+      .catch((error) => {
+        log.error('actual_state.read.failed', error, { characterId: id, ensure });
+        return null;
+      })
+      .then((s) => active && setState(s));
     return () => {
       active = false;
     };

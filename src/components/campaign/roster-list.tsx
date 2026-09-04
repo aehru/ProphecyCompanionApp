@@ -25,7 +25,7 @@ export default function RosterList({
   notedUuids,
   bottomInset,
   stale = false,
-  onSelect,
+  onOpen,
 }: {
   roster: TableRosterEntry[];
   /** Which card body to draw (0 stats, 1 skills, 2 tendances). */
@@ -36,7 +36,8 @@ export default function RosterList({
   bottomInset: number;
   /** Cards still showing results for an older query — dimmed while catching up. */
   stale?: boolean;
-  onSelect: (entry: TableRosterEntry) => void;
+  /** Opens one character's sheet — bound to a card's head, not the whole card. */
+  onOpen: (entry: TableRosterEntry) => void;
 }) {
   const theme = useProphecyTheme();
 
@@ -76,7 +77,7 @@ export default function RosterList({
           tab={tab}
           query={query}
           hasNote={notedUuids.has(item.charId)}
-          onPress={() => onSelect(item)}
+          onOpen={() => onOpen(item)}
         />
       )}
     />

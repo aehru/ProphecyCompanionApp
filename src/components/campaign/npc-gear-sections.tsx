@@ -17,8 +17,8 @@ import Section from '@/components/campaign/sheet-section';
 import ShieldCard from '@/components/shield-card';
 import SpellCard from '@/components/spell-card';
 import WeaponCard from '@/components/weapon-card';
-import type { Weapon } from '@/db/schema';
-import { useDiceRoller } from '@/hooks/use-dice-roller';
+import type { Character, Weapon } from '@/db/schema';
+import { openRoller } from '@/lib/dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
@@ -32,29 +32,35 @@ import { effectsQuery } from '@/repositories/effects';
 import { enchantsQuery } from '@/repositories/enchants';
 import { shieldsQuery } from '@/repositories/shields';
 import { skillsQuery } from '@/repositories/skills';
-import { spellsQuery } from '@/repositories/spells';
+import { knownSpellsQuery } from '@/repositories/spells';
 import { weaponsQuery } from '@/repositories/weapons';
 
 export default function NpcGearSections({ charUuid }: { charUuid: string }) {
-  const theme = useProphecyTheme();
-  const { open: openRoller } = useDiceRoller();
   const { data: charRows } = useLiveQuery(characterByUuidQuery(charUuid), [charUuid]);
   const char = charRows?.[0] ?? null;
-  // 0 matches nothing — keeps the hook order stable while the character loads
-  // (and forever, for a character that only exists on a player's phone).
-  const localId = char?.id ?? 0;
+  // The eight gear queries live in a child mounted only once the uuid RESOLVES.
+  // Hooks can't be conditional, so keeping them here meant running all eight
+  // against `id = 0` — eight round-trips that match nothing on every open, and
+  // eight standing subscriptions forever for a character that only exists on a
+  // player's phone. Same split, for the same reason, as <LiveBroadcaster>.
+  if (!char) return null;
+  return <GearBody char={char} />;
+}
+
+function GearBody({ char }: { char: Character }) {
+  const theme = useProphecyTheme();
+  const localId = char.id;
   const { data: stateRows } = useLiveQuery(actualStateQuery(localId), [localId]);
   const { data: weapons } = useLiveQuery(weaponsQuery(localId), [localId]);
   const { data: armors } = useLiveQuery(armorQuery(localId), [localId]);
   const { data: shields } = useLiveQuery(shieldsQuery(localId), [localId]);
-  const { data: spells } = useLiveQuery(spellsQuery(localId), [localId]);
+  const { data: spells } = useLiveQuery(knownSpellsQuery(localId), [localId]);
   const { data: effects } = useLiveQuery(effectsQuery(localId), [localId]);
   const { data: enchants } = useLiveQuery(enchantsQuery(localId), [localId]);
   // Local rows again: an NPC's attack total needs its compétences, which the
   // wire projection would carry but the GM's own characters never travel.
   const { data: skills } = useLiveQuery(skillsQuery(localId), [localId]);
 
-  if (!char) return null;
   const weaponList = weapons ?? [];
   const armorList = armors ?? [];
   const shieldList = shields ?? [];
@@ -98,7 +104,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
   return (
     <>
       {weaponList.length > 0 ? (
-        <Section title="Armes">
+        <Section testID="npc-gear-weapons" title="Armes">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {weaponList.map((w) => (
               <WeaponCard
@@ -116,7 +122,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       ) : null}
 
       {armorList.length > 0 ? (
-        <Section title="Armures">
+        <Section testID="npc-gear-armors" title="Armures">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {armorList.map((a) => (
               <ArmorCard
@@ -131,7 +137,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       ) : null}
 
       {shieldList.length > 0 ? (
-        <Section title="Boucliers">
+        <Section testID="npc-gear-shields" title="Boucliers">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {shieldList.map((s) => (
               <ShieldCard
@@ -147,7 +153,7 @@ export default function NpcGearSections({ charUuid }: { charUuid: string }) {
       ) : null}
 
       {spellList.length > 0 ? (
-        <Section title="Sorts">
+        <Section testID="npc-gear-spells" title="Sorts">
           <View style={[styles.list, { borderColor: theme.prophecy.borderSoft }]}>
             {spellList.map((s) => {
               // Same score for the badge and for the roll — see the weapons above.
