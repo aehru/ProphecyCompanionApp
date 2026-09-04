@@ -75,7 +75,7 @@ bun run test          # vitest run (once, for CI)
 bun run test:watch    # vitest (watch mode)
 ```
 
-Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](src/lib/formula.test.ts)). The `@/` alias is mirrored in [vitest.config.ts](vitest.config.ts) so imports match the app.
+Tests live next to their source as `*.test.ts` (e.g. [src/lib/formula.test.ts](src/lib/formula.test.ts)). The `@/` alias is mirrored in [vitest.config.mts](vitest.config.mts) so imports match the app.
 
 **Covered today:**
 - Pure logic — `lib/formula` (weapon formula parse/compute), `lib/modifiers` (wound malus + effect stacking), `lib/character-transfer` (export/import serialize + validate), `lib/character-values`, `lib/csv`, `lib/dice`, `lib/uuid`, `lib/weapon-skill`, `lib/skill-groups` + `lib/skill-grouping`, `lib/spell-total`, `lib/initiative-order`, `lib/npc-name`. Keep new pure logic covered here.
