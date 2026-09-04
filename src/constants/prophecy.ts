@@ -252,6 +252,21 @@ export const TRAIT_KIND_LABEL: Record<string, string> = Object.fromEntries(
 );
 
 /**
+ * What the rulebook's asterisk means, which depends on the side: a marked
+ * désavantage can be shed during play, a marked avantage can be picked up.
+ *
+ * Spelled out rather than reproduced as a bare « * » — the legend for it sits on
+ * a page the player does not have in front of them. Here rather than in a
+ * component because it is domain vocabulary keyed by `kind`, exactly like
+ * {@link TRAIT_KIND_LABEL}, and both the catalogue and the editor say it.
+ */
+export function traitEvolvingLabel(kind: string): string {
+  return kind === 'avantage'
+    ? 'Peut apparaître en cours de campagne'
+    : 'Peut être surmonté en cours de campagne';
+}
+
+/**
  * How available an avantage/désavantage is, per the rulebook's own headings.
  *
  * NOT a cost and NOT a tier: « Commun » and « Rare » say how easily the entry is
@@ -262,6 +277,11 @@ export const TRAIT_KIND_LABEL: Record<string, string> = Object.fromEntries(
  * creation flow that will know the character's age.
  */
 export const TRAIT_RARITIES = [
+  // The two kinds head their first table differently — « Désavantages communs »
+  // against « Avantages généraux » — and that is the rulebook's own wording on
+  // the page a player is reading from, so they get one key each rather than a
+  // shared one relabelled per kind.
+  { key: 'general', label: 'Général' },
   { key: 'commun', label: 'Commun' },
   { key: 'rare', label: 'Rare' },
   { key: 'enfant', label: 'Enfant' },
@@ -276,15 +296,17 @@ export const TRAIT_RARITY_LABEL: Record<string, string> = Object.fromEntries(
 );
 
 /**
- * Which rarities each kind may carry: « Rare » exists for désavantages only —
- * the rulebook has no rare avantage. The catalogue generator REJECTS a rare
+ * Which rarities each kind may carry, in the order the rulebook prints its
+ * tables. They barely overlap: an avantage is « Général », « Enfant » or
+ * « Ancien », a désavantage « Commun », « Rare », « Enfant » or « Ancien » —
+ * there is no rare avantage and no general désavantage. The catalogue generator REJECTS a rare
  * avantage (a typo in the spreadsheet); the editor merely doesn't offer one,
  * which is not the same thing — a row that already carries an odd rarity
  * (imported, or from a later rulebook) keeps it and still renders its badge.
  */
 export const TRAIT_KIND_RARITIES: Record<TraitKind, readonly TraitRarity[]> = {
   desavantage: ['commun', 'rare', 'enfant', 'ancien'],
-  avantage: ['commun', 'enfant', 'ancien'],
+  avantage: ['general', 'enfant', 'ancien'],
 };
 
 /**

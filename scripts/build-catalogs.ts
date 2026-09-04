@@ -208,10 +208,20 @@ const matchTraitKind = matcher(
     [k.plural, k.key],
   ]),
 );
+// The plurals too: the rulebook heads its tables « Désavantages communs » and
+// « Avantages généraux », so that is what an author types into the cell.
+const RARITY_PLURAL: Record<string, string> = {
+  general: 'Généraux',
+  commun: 'Communs',
+  rare: 'Rares',
+  enfant: 'Enfants',
+  ancien: 'Anciens',
+};
 const matchTraitRarity = matcher(
   TRAIT_RARITIES.flatMap((r): [string, string][] => [
     [r.key, r.key],
     [r.label, r.key],
+    [RARITY_PLURAL[r.key] ?? r.label, r.key],
   ]),
 );
 
@@ -534,10 +544,13 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
 }
 
 /**
- * The widest a « 1-5 » range may open. A range is a convenience for the four or
- * five prices an entry really has; anything wider is a typo (a stray digit, or
- * two numbers that were never a range at all), and expanding it would put a
- * hundred chips in the picker instead of failing here.
+ * The widest a « 1-5 » range may open. A range is a convenience for the handful
+ * of prices an entry really has; anything wider is a typo (a stray digit, or two
+ * numbers that were never a range at all), and expanding it would flood the pick
+ * dialog instead of failing here.
+ *
+ * The widest real one is « Fortune personnelle » at 1-10 — the rulebook prices
+ * it *variable*, and a player who wants more takes the entry twice.
  */
 const MAX_COST_SPAN = 20;
 
