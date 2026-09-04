@@ -119,6 +119,10 @@ const TRAIT_COLUMNS = [
   // l'anomalie »). OPTIONAL — blank means the entry is complete as written and
   // the picker asks nothing. See TraitPreset.precisionPrompt.
   'precision',
+  // The rulebook's asterisk: this entry can change hands during a campaign (see
+  // the `evolving` column in db/schema.ts). Optional — blank reads as permanent,
+  // which is what every désavantage of the anciens is.
+  'evolutif',
   // Editorial provenance, declared so the header check accepts it and then
   // deliberately not read — same as the spells' `rulebook` column.
   'rulebook',
@@ -476,6 +480,7 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
     if (nom === '') errors.push('nom : requis');
 
     const inGameEffect = (rec.effetJeu ?? '').trim();
+    const evolving = readFlag(rec, 'evolutif', errors);
     const sensoryEffect = (rec.perception ?? '').trim();
     const duration = readFormula(rec, 'duree', errors, { nr: true, sphere: true }) ?? '';
     const targets = readFormula(rec, 'cibles', errors, { nr: true, sphere: true }) ?? '';
@@ -632,6 +637,8 @@ function buildTraits(failures: Failure[]): TraitPreset[] {
     const description = (rec.description ?? '').trim();
     if (description === '') errors.push('description : requise');
     const inGameEffect = (rec.effetJeu ?? '').trim();
+    // The rulebook's asterisk — see the `evolving` column in db/schema.ts.
+    const evolving = readFlag(rec, 'evolutif', errors);
 
     const data = {
       kind,
@@ -642,6 +649,7 @@ function buildTraits(failures: Failure[]): TraitPreset[] {
       // default, and emitting a dead key on every preset would make an unrelated
       // catalogue diff unreadable.
       ...(inGameEffect !== '' && { inGameEffect }),
+      ...(evolving && { evolving }),
     };
     const costs = readCosts(rec, errors);
     // Costs and the précision prompt ride in the fingerprint: a re-priced or
