@@ -39,6 +39,7 @@ const { createCharacter } = await import('@/repositories/characters');
 const { createWeapon } = await import('@/repositories/weapons');
 const { createSpell } = await import('@/repositories/spells');
 const { createEnchant } = await import('@/repositories/enchants');
+const { createTrait } = await import('@/repositories/traits');
 const { exportCharacters, importCharacters } = await import('@/repositories/transfer');
 
 beforeEach(() => {
@@ -103,6 +104,52 @@ describe('exportCharacters', () => {
 });
 
 describe('export → import round trip', () => {
+  it('carries both halves of the point pool onto the copy', async () => {
+    const { character } = await seedCharacter('Aldric', []);
+    await createTrait(character.id, {
+      kind: 'desavantage',
+      name: 'Phobie',
+      rarity: 'commun',
+      cost: 3,
+      description: 'Peur irraisonnée.',
+      inGameEffect: 'Difficulté augmentée de 5.',
+      evolving: true,
+      note: 'les araignées',
+      presetId: 'phobie',
+      presetRevision: 'abc123def456',
+    });
+    await createTrait(character.id, { kind: 'avantage', name: 'Fortune', cost: 2 });
+
+    const { ids } = await importCharacters(await exportCharacters([character.id]), 'copy');
+    const rows = harness.raw
+      .prepare(
+        'SELECT kind, name, cost, in_game_effect, evolving, note, preset_id FROM traits WHERE character_id = ? ORDER BY id',
+      )
+      .all(ids[0]);
+    expect(rows).toEqual([
+      {
+        kind: 'desavantage',
+        name: 'Phobie',
+        cost: 3,
+        in_game_effect: 'Difficulté augmentée de 5.',
+        // The rulebook's asterisk survives the round trip: a Phobie that can be
+        // overcome must not come back permanent.
+        evolving: 1,
+        note: 'les araignées',
+        preset_id: 'phobie',
+      },
+      {
+        kind: 'avantage',
+        name: 'Fortune',
+        cost: 2,
+        in_game_effect: '',
+        evolving: 0,
+        note: '',
+        preset_id: null,
+      },
+    ]);
+  });
+
   it('rebuilds an enchant against the right weapon after re-insertion', async () => {
     const { character, weapons } = await seedCharacter('Aldric', ['A', 'B', 'C', 'D']);
     await createEnchant(character.id, 'weapon', weapons[2].id, { name: 'Flamme' });

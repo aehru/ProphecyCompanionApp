@@ -232,6 +232,84 @@ export const SPELL_TAG_GROUP: Record<string, string> = Object.fromEntries(
 );
 
 /**
+ * Avantages and désavantages — the two halves of ONE list, because they are the
+ * two ends of one transaction: a désavantage GIVES points, an avantage SPENDS
+ * them, and the sheet only ever shows the balance between them (`lib/trait-pool`).
+ *
+ * French game terms, so keys are stored accent-free (`desavantage`) and the
+ * label carries the accent, like the sphères and the castes.
+ */
+export const TRAIT_KINDS = [
+  { key: 'desavantage', label: 'Désavantage', plural: 'Désavantages' },
+  { key: 'avantage', label: 'Avantage', plural: 'Avantages' },
+] as const;
+
+export type TraitKind = (typeof TRAIT_KINDS)[number]['key'];
+
+/** Trait kind key → display label (accented). */
+export const TRAIT_KIND_LABEL: Record<string, string> = Object.fromEntries(
+  TRAIT_KINDS.map((k) => [k.key, k.label]),
+);
+
+/**
+ * What the rulebook's asterisk means, which depends on the side: a marked
+ * désavantage can be shed during play, a marked avantage can be picked up.
+ *
+ * Spelled out rather than reproduced as a bare « * » — the legend for it sits on
+ * a page the player does not have in front of them. Here rather than in a
+ * component because it is domain vocabulary keyed by `kind`, exactly like
+ * {@link TRAIT_KIND_LABEL}, and both the catalogue and the editor say it.
+ */
+export function traitEvolvingLabel(kind: string): string {
+  return kind === 'avantage'
+    ? 'Peut apparaître en cours de campagne'
+    : 'Peut être surmonté en cours de campagne';
+}
+
+/**
+ * How available an avantage/désavantage is, per the rulebook's own headings.
+ *
+ * NOT a cost and NOT a tier: « Commun » and « Rare » say how easily the entry is
+ * picked up, « Enfant » and « Ancien » that it belongs to a character of that
+ * age. The rulebook builds real quotas on top of them (an « Ancien » takes two
+ * Communs and one Rare), but nothing here enforces any of it — the app shows a
+ * badge and lets the player choose, and the quotas belong to a later character
+ * creation flow that will know the character's age.
+ */
+export const TRAIT_RARITIES = [
+  // The two kinds head their first table differently — « Désavantages communs »
+  // against « Avantages généraux » — and that is the rulebook's own wording on
+  // the page a player is reading from, so they get one key each rather than a
+  // shared one relabelled per kind.
+  { key: 'general', label: 'Général' },
+  { key: 'commun', label: 'Commun' },
+  { key: 'rare', label: 'Rare' },
+  { key: 'enfant', label: 'Enfant' },
+  { key: 'ancien', label: 'Ancien' },
+] as const;
+
+export type TraitRarity = (typeof TRAIT_RARITIES)[number]['key'];
+
+/** Trait rarity key → display label. */
+export const TRAIT_RARITY_LABEL: Record<string, string> = Object.fromEntries(
+  TRAIT_RARITIES.map((r) => [r.key, r.label]),
+);
+
+/**
+ * Which rarities each kind may carry, in the order the rulebook prints its
+ * tables. They barely overlap: an avantage is « Général », « Enfant » or
+ * « Ancien », a désavantage « Commun », « Rare », « Enfant » or « Ancien » —
+ * there is no rare avantage and no general désavantage. The catalogue generator REJECTS a rare
+ * avantage (a typo in the spreadsheet); the editor merely doesn't offer one,
+ * which is not the same thing — a row that already carries an odd rarity
+ * (imported, or from a later rulebook) keeps it and still renders its badge.
+ */
+export const TRAIT_KIND_RARITIES: Record<TraitKind, readonly TraitRarity[]> = {
+  desavantage: ['commun', 'rare', 'enfant', 'ancien'],
+  avantage: ['general', 'enfant', 'ancien'],
+};
+
+/**
  * Default skill catalogue. Single global list, same for every
  * character. Each skill links to one attribut key.
  */

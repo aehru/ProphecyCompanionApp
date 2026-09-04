@@ -43,6 +43,75 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Manage spells** — spellbook with catalogue + editor, disciplines, reserve & spheres.
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
+- [~] **Avantages & désavantages.** The sheet half is done end-to-end: the
+  `traits` table (one table, `kind` discriminates), the point pool
+  ([lib/trait-pool.ts](src/lib/trait-pool.ts) — désavantages grant, avantages
+  spend, the balance may go negative), a catalogue picker with a tier dialog for
+  the entries the rulebook prices at several levels, the editor modal, and
+  export/import. Deliberately NOT in the campaign projection: what a character is
+  bad at is not roster data.
+  _Remaining, in order:_
+  1. [x] **The rulebook rows — DONE.** All 83 entries of the base rulebook are in
+     `data-src/traits.csv`: 50 désavantages (15 communs, 15 rares, 10 enfants,
+     10 anciens) and 33 avantages (22 généraux, 5 enfants, 6 anciens), each with
+     its `effetJeu` summary, its `precision` prompt where the entry is a blank
+     the player fills, and its `evolutif` flag. Supplements would extend the same
+     CSV.
+  2. **The Augures — a table the app should own, not print.**
+     « Augure favorable » (avantage général, 3 points) grants **cercles de
+     Tendance** and **Compétence bonuses** according to the character's Augure of
+     birth. Today the whole table is inlined into that entry's `effetJeu` as
+     prose and the pick dialog only asks which Augure, as free text — enough to
+     read, useless to compute.
+     _Why it deserves its own model:_ an Augure is not trait data. It is a
+     **property of the character** (every character has one, whether or not they
+     took this avantage), it feeds character CREATION — the bonuses land after
+     the base profile and before the Points de Compétence are spent — and the
+     tendance cercles it grants are the same `dragonSub` / `fataliteSub` /
+     `hommeSub` columns the sheet already has. The natural shape is an `AUGURES`
+     constant in `constants/prophecy.ts` (key + label + cercles + bonuses), a
+     `characters.augure` column, and the avantage merely pointing at it.
+     _The table, as parsed from the rulebook_ — cercles first, then the
+     Compétence bonuses:
+
+     | Augure | Cercles de Tendance | Bonus |
+     |---|---|---|
+     | Le fataliste | Fatalité +5 | +1 à une Compétence d'Influence, +1 à une Compétence de Communication |
+     | Le volcan | Dragon +4, Fatalité +1 | +1 à deux Compétences de Combat |
+     | Le métal | Dragon +3, Homme +2 | +1 à une Compétence de Combat, +1 à une Compétence de Technique |
+     | La cité | Dragon +1, Homme +4 | +1 à deux Compétences de Communication |
+     | Le vent | Dragon +4, Homme +1 | +1 à deux Compétences de Mouvement |
+     | L'océan | Dragon +5 | +1 à une Compétence de Théorie, +1 à une Compétence de Pratique |
+     | La chimère | Dragon +3, Homme +1, Fatalité +1 | +1 à une Sphère, +1 en Magie instinctive |
+     | La nature | Dragon +4, Fatalité +1 | +1 à une Compétence de Mouvement, +1 à une Compétence de Pratique |
+     | La pierre | Dragon +5 | +1 à une Compétence de Combat, +1 à une Compétence d'Influence |
+     | L'homme | Homme +5 | +1 à une Compétence de Communication, +1 à une Compétence au choix (sauf Sphères et Disciplines) |
+
+     Le volcan and La nature carry the SAME cercles (Dragon +4, Fatalité +1) and
+     differ only in their bonuses — checked against the book, not a transcription
+     slip.
+     The same treatment is owed to **« Héritage draconique »** (avantage général,
+     6 points), whose Faveur is rolled on a D10 table currently inlined into its
+     `effetJeu` the same way — nine Faveurs, one per Great Dragon, plus a reroll.
+     `GREAT_DRAGONS` already exists in `constants/prophecy.ts`, so that table is
+     a Faveur label per dragon key away from being real data.
+     Every bonus is « à une Compétence de <catégorie> » — a CHOICE, not an
+     assignment — so applying one means asking the player which compétence, from
+     a category taxonomy the app does not model yet (Combat, Mouvement, Théorie,
+     Pratique, Technique, Communication, Influence). That taxonomy is also what
+     « Incompétence » (désavantage rare) needs, so the two land together.
+  3. **Mechanical effects.** Traits are descriptive today: nothing computes from
+     one. Once the full list exists, the shape of what they actually do is
+     knowable, and the ones granting a flat bonus/malus should write an `effects`
+     row rather than grow a second modifier engine. Some of them are `RollContext`
+     work instead («&nbsp;2 dés sur tout ce qui touche au MENTAL&nbsp;» — see the
+     dice roller entry, whose `dice` / `diceMode` fields exist for exactly this).
+  4. **Creation-time quotas.** The rulebook's rules — an « Ancien » takes two
+     Communs and one Rare, a minimum point count per age bracket — need a
+     character age the sheet does not record, and belong to a creation flow.
+     Nothing is enforced today, on purpose.
+  5. **Catalogue propagation.** Picked rows carry `presetId` + `presetRevision`
+     like spells do, and nothing consumes them yet (same flow, same blocker).
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
 - [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
   opens the roller against it and rolls a D10 at once, with the difficulté

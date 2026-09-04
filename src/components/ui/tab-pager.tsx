@@ -27,6 +27,20 @@ import {
 import SubTabs, { labelKey, type TabLabel } from '@/components/ui/sub-tabs';
 import { USE_NATIVE_DRIVER } from '@/lib/animation';
 
+/**
+ * How far off a page boundary an offset may sit and still count as resting.
+ * Generous enough for the sub-pixel drift a smooth scroll leaves behind, far
+ * tighter than the half-page a mid-flight scroll sits at.
+ */
+const SNAP_TOLERANCE = 0.05;
+
+/**
+ * How long a programmatic scroll is given before its target is re-asserted
+ * without animation. Longer than the platforms' own smooth-scroll (~250-300ms),
+ * short enough that a swallowed one is corrected before the eye settles.
+ */
+const SCROLL_SETTLE_MS = 350;
+
 export default function TabPager({
   labels,
   active,
@@ -60,10 +74,38 @@ export default function TabPager({
   // instead of one frame later.
   if (!visited.includes(active)) setVisited([...visited, active]);
 
+  /**
+   * Where a programmatic scroll is heading, while it is still on its way.
+   *
+   * Load-bearing, not bookkeeping: a smooth scroll toward a LAZY page stalls
+   * while that page's module evaluates, and the settle below then fires on
+   * whatever offset the pager stopped at — including the page it started from,
+   * which is a boundary and therefore looks like a resting place. It commits
+   * that tab, the effect scrolls back to it, and the tap looks like it did
+   * nothing. Until the target is reached, no offset settles anything.
+   */
+  const pending = useRef<number | null>(null);
+
   // A tap on the strip (or any external tab change) scrolls the pager. Also runs
   // on the first layout, which is what puts a non-zero initial tab on screen.
+  //
+  // TWICE, and the second one is not belt-and-braces. The tapped page mounts in
+  // the SAME commit that moved `active` (see `visited` above), so the row is
+  // re-laid-out while the smooth scroll is under way — and on react-native-web
+  // that lay-out swallows it: the pager stays put while the strip and the
+  // mounted page both say it moved. Re-asserting the offset once the animation's
+  // window has passed lands it for certain, and clearing `pending` there means a
+  // swallowed scroll can never leave the pager unable to settle at all.
   useEffect(() => {
-    if (width > 0) scrollRef.current?.scrollTo({ x: active * width, animated: true });
+    if (width <= 0) return;
+    const target = active * width;
+    pending.current = target;
+    scrollRef.current?.scrollTo({ x: target, animated: true });
+    const id = setTimeout(() => {
+      scrollRef.current?.scrollTo({ x: target, animated: false });
+      pending.current = null;
+    }, SCROLL_SETTLE_MS);
+    return () => clearTimeout(id);
   }, [active, width]);
 
   const progress = useMemo(
@@ -71,11 +113,31 @@ export default function TabPager({
     [scrollX, width],
   );
 
-  /** Commit the tab the pager has come to rest on. */
+  /**
+   * Commit the tab the pager has come to rest on.
+   *
+   * An offset that is not ON a page boundary is not a resting place, so it
+   * commits nothing: `pagingEnabled` always snaps, which means a mid-page value
+   * can only ever be a scroll still in flight. Without that guard a programmatic
+   * scroll that STALLS — the tapped page is lazy, and evaluating its catalogue
+   * blocks the thread long enough for the debounce below to fire mid-animation —
+   * settles on whichever page it happens to be passing over, which calls
+   * `onChange` back to the tab the user just left and then scrolls there. The
+   * tap looked like it did nothing at all.
+   */
   const settleAt = useCallback(
     (x: number) => {
       if (width <= 0) return;
+      const target = pending.current;
+      if (target !== null) {
+        // Still travelling: only the arrival counts, and it needs no commit —
+        // `active` is already the tab it is arriving at.
+        if (Math.abs(x - target) > width * SNAP_TOLERANCE) return;
+        pending.current = null;
+        return;
+      }
       const index = Math.round(x / width);
+      if (Math.abs(x - index * width) > width * SNAP_TOLERANCE) return;
       if (index !== active && index >= 0 && index < labels.length) onChange(index);
     },
     [width, active, labels.length, onChange],
@@ -133,6 +195,15 @@ export default function TabPager({
     if (Math.abs(e.nativeEvent.velocity?.x ?? 0) < 0.1) onSettle(e);
   };
 
+  /**
+   * A finger on the pager overrides whatever programmatic scroll was in flight:
+   * the user is now the one deciding where it lands, and leaving `pending` set
+   * would swallow the tab they swiped to.
+   */
+  const onDragStart = () => {
+    pending.current = null;
+  };
+
   return (
     <View style={styles.root}>
       <SubTabs
@@ -160,6 +231,7 @@ export default function TabPager({
         onScroll={onScroll}
         scrollEventThrottle={16}
         onMomentumScrollEnd={onSettle}
+        onScrollBeginDrag={onDragStart}
         onScrollEndDrag={onDragEnd}>
         {labels.map((label, i) => (
           <View key={labelKey(label)} style={{ width }}>

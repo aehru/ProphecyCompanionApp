@@ -5,6 +5,7 @@ import { Button, Text } from 'react-native-paper';
 
 import CasteChip from '@/components/caste-chip';
 import TendancesCircles from '@/components/tendances-circles';
+import TraitsSection from '@/components/traits-section';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
 import Icon, { dsIcon } from '@/components/ui/icon';
@@ -132,6 +133,10 @@ export default function CharacterDashboardScreen() {
             ))}
           </View>
         </SectionCard>
+
+        {/* Points earned and spent, then both lists. Read-only like the rest of
+            the dashboard: a row opens its editor as a modal. */}
+        <TraitsSection characterId={numId} />
 
         {/* Full portrait — collapsed by default; the avatar is set via the hero tap. */}
         <SectionCard title="ILLUSTRATION" icon="character">

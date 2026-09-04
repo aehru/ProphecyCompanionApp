@@ -76,6 +76,22 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
+        name="trait/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Avantages et désavantages',
+        }}
+      />
+      <Stack.Screen
+        name="trait/[tid]"
+        options={{
+          presentation: 'modal',
+          // Not « Modifier … » like the gear editors: this one opens on the
+          // entry as it reads, and the FAB is what flips it to a form.
+          title: "Détail de l'entrée",
+        }}
+      />
+      <Stack.Screen
         name="enchant/[eid]"
         options={{
           presentation: 'modal',

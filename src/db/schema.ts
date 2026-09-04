@@ -1,13 +1,26 @@
 import { sql } from 'drizzle-orm';
 import { check, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-import { CASTES, type CasteKey, DISCIPLINES, SPHERES, TIME_UNITS } from '@/constants/prophecy';
+import {
+  CASTES,
+  type CasteKey,
+  DISCIPLINES,
+  SPHERES,
+  TIME_UNITS,
+  TRAIT_KINDS,
+  type TraitKind,
+  type TraitRarity,
+} from '@/constants/prophecy';
 import type { ArmorCategory } from '@/data/armor-constants';
 import { newUuid } from '@/lib/uuid';
 
 // The caste list lives in `constants/prophecy` (it carries the accented labels);
 // drizzle's text enum wants a non-empty tuple, which `.map` can't prove.
 const CASTE_KEYS = CASTES.map((c) => c.key) as unknown as readonly [CasteKey, ...CasteKey[]];
+const TRAIT_KIND_KEYS = TRAIT_KINDS.map((k) => k.key) as unknown as readonly [
+  TraitKind,
+  ...TraitKind[],
+];
 
 type DisciplineKey = (typeof DISCIPLINES)[number]['key'];
 type SphereKey = (typeof SPHERES)[number]['key'];
@@ -620,6 +633,86 @@ export const effects = sqliteTable('effects', {
 });
 
 /**
+ * A character's avantages and désavantages. One row per taken entry.
+ *
+ * ONE table for both, discriminated by `kind`, because they are the two halves
+ * of a single transaction: a désavantage grants points, an avantage spends them,
+ * and every screen that reads one reads the other to show the balance
+ * (`lib/trait-pool`). Two tables would mean every such reader joining them back
+ * together, and the columns would be identical anyway.
+ *
+ * The `cost` is a POSITIVE magnitude on both sides — its sign is `kind`'s job,
+ * not the number's. A stored −3 would be ambiguous the moment a kind changes,
+ * and the pool arithmetic reads better as `Σ désavantages − Σ avantages` than as
+ * a sum of numbers whose sign has to be trusted.
+ *
+ * Purely DESCRIPTIVE for now: nothing computes from a trait, no roll is
+ * modified. The rulebook's mechanical effects come once the catalogue is
+ * complete (see ROADMAP), at which point a trait that does grant a bonus will
+ * write an `effects` row rather than growing a second modifier engine here.
+ */
+export const traits = sqliteTable('traits', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  /** Which side of the pool this row sits on (see TRAIT_KINDS). */
+  kind: text('kind', { enum: TRAIT_KIND_KEYS }).notNull(),
+  name: text('name').notNull().default(''),
+  /**
+   * Rulebook availability heading — a badge, never a rule (see TRAIT_RARITIES).
+   * Plain text with no CHECK, like `effects.durationUnit`: adding a heading to
+   * the enum must not need a migration.
+   */
+  rarity: text('rarity').$type<TraitRarity>().notNull().default('commun'),
+  /** Points granted (désavantage) or spent (avantage). Always positive. */
+  cost: integer('cost').notNull().default(0),
+  /** The rulebook paragraph, copied from the catalogue or written by the player. */
+  description: text('description').notNull().default(''),
+  /**
+   * The mechanical half of `description`, extracted from it — the numbers, the
+   * jets and the restrictions, with the flavour left behind. Same contract as
+   * `spells.inGameEffect`: `description` stays the source of truth and is never
+   * rewritten from this, and an entry carrying none renders the paragraph alone.
+   *
+   * It earns its place because a désavantage's rulebook text is a paragraph of
+   * fiction wrapped around one sentence that matters (« Difficulté augmentée de
+   * 3 sur les actions sociales »), and that sentence is the one a player looks
+   * up mid-game.
+   */
+  inGameEffect: text('in_game_effect').notNull().default(''),
+  /**
+   * The rulebook's asterisk: this entry can CHANGE HANDS during play.
+   *
+   * The two kinds read it in opposite directions, which is why one column is
+   * enough — `kind` already says which: a marked *désavantage* can be overcome
+   * and struck off in the course of a campaign (« Phobie », « Dette »), while a
+   * marked *avantage* is one a character can come to acquire rather than buy at
+   * creation (see « Choix des avantages »). Unmarked is the permanent case:
+   * « Impotent » says in so many words that it cannot be surmounted, and no
+   * désavantage of the anciens is marked at all.
+   *
+   * Informative, like `rarity`: the app shows it and enforces nothing. Acquiring
+   * one mid-campaign is an Expérience matter the sheet does not model yet.
+   */
+  evolving: integer('evolving', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * What THIS character's copy of the entry actually is — « les araignées » on a
+   * Phobie, « la jambe gauche » on une Infirmité. Kept apart from `description`
+   * (which stays the generic rulebook text, shared by every character who took
+   * the entry) so a catalogue correction can one day rewrite the paragraph
+   * without touching what the player wrote about their own character.
+   */
+  note: text('note').notNull().default(''),
+
+  // --- provenance: which catalogue entry this row was copied from ------------
+  // Same contract as `spells` — see the long comment there. NULL on both ⇒ the
+  // player wrote it, and no catalogue correction may ever touch it.
+  presetId: text('preset_id'),
+  presetRevision: text('preset_revision'),
+});
+
+/**
  * A table this device runs or plays at (docs/campaign-protocol.md §5). One row
  * per created/joined campaign. `role` fixes what the row means: `gm` rows may
  * carry the portable `gmToken` (proof of ownership — travels in backups so a GM
@@ -710,6 +803,8 @@ export type MagicReserve = typeof magicReserves.$inferSelect;
 export type NewMagicReserve = typeof magicReserves.$inferInsert;
 export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;
+export type Trait = typeof traits.$inferSelect;
+export type NewTrait = typeof traits.$inferInsert;
 export type Campaign = typeof campaigns.$inferSelect;
 export type NewCampaign = typeof campaigns.$inferInsert;
 export type CampaignShare = typeof campaignShares.$inferSelect;

@@ -1,0 +1,1 @@
+ALTER TABLE `traits` ADD `evolving` integer DEFAULT false NOT NULL;
