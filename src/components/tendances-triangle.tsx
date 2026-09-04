@@ -3,9 +3,8 @@ import { StyleSheet, View } from 'react-native';
 
 import Bullets from '@/components/bullets';
 import TendanceBadge from '@/components/tendance-badge';
-import { MAX_PUCES, TENDANCES } from '@/constants/prophecy';
+import { MAX_PUCES, TENDANCE_BY_KEY, type TendanceKey } from '@/constants/prophecy';
 
-type TendanceKey = (typeof TENDANCES)[number]['key'];
 
 // Where a unit's puces sit relative to its disc, so the three discs stay in a
 // tight triangle and the bullets fan outward (Dragon right, Fatalité left,
@@ -32,7 +31,7 @@ type UnitProps = {
 // identity every render, so React unmounted/remounted all three units on each
 // re-render (e.g. every ±1 tap on the editable status screen).
 function Unit({ tKey, placement, get, onValue, onSub }: UnitProps) {
-  const t = TENDANCES.find((x) => x.key === tKey)!;
+  const t = TENDANCE_BY_KEY[tKey];
   const { value, sub } = get(tKey);
 
   const badge = (

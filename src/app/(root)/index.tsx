@@ -228,6 +228,14 @@ export default function CharactersListScreen() {
               }}
               title="Confidentialité"
             />
+            <Menu.Item
+              leadingIcon="information-outline"
+              onPress={() => {
+                setMenuOpen(false);
+                router.push('/about' as Href);
+              }}
+              title="À propos"
+            />
           </Menu>
         </View>
       ),

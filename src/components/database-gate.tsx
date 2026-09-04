@@ -87,7 +87,9 @@ export default function DatabaseGate({ fontsLoaded, onRetry, children }: Props) 
     log.info('db.migrate.ok');
     // Migration went through — the pre-migration snapshot is no longer needed.
     clearBackup();
-    AsyncStorage.removeItem(RESET_FLAG);
+    // Best-effort, like clearBackup: a flag that fails to clear only costs the
+    // dev auto-reset one attempt, and there is nothing useful to do about it.
+    AsyncStorage.removeItem(RESET_FLAG).catch(() => {});
     // Fill portable uuids on characters that predate the column. Best-effort:
     // idempotent (NULL-only) and never blocks the UI.
     backfillCharacterUuids().catch(() => {});

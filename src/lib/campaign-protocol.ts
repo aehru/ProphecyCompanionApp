@@ -14,16 +14,22 @@ import type { SharedCharacter } from '@/lib/character-share';
 // v2: the hello identifies the SESSION, not a character — one socket may share
 // N characters (share/unshare carry the charId). Hard break: a v1 hello gets an
 // `unsupported_version` error from the server.
-export const PROTOCOL_VERSION = 2;
+//
+// Every builder below stamps THIS constant rather than a literal, so bumping it
+// is what a version bump is. It is typed `as const` so `v` stays a literal type
+// on the wire messages — a widened `number` would let a v3 frame typecheck
+// against a v2 handler.
+export const PROTOCOL_VERSION = 2 as const;
+type V = typeof PROTOCOL_VERSION;
 
 // --- outgoing (client -> server) ----------------------------------------------
 
 export type HelloMsg =
-  | { v: 2; type: 'hello'; role: 'gm'; code: string; gmToken: string }
-  | { v: 2; type: 'hello'; role: 'player'; code: string };
+  | { v: V; type: 'hello'; role: 'gm'; code: string; gmToken: string }
+  | { v: V; type: 'hello'; role: 'player'; code: string };
 
 export const gmHello = (code: string, gmToken: string): HelloMsg => ({
-  v: 2,
+  v: PROTOCOL_VERSION,
   type: 'hello',
   role: 'gm',
   code,
@@ -31,26 +37,26 @@ export const gmHello = (code: string, gmToken: string): HelloMsg => ({
 });
 
 export const playerHello = (code: string): HelloMsg => ({
-  v: 2,
+  v: PROTOCOL_VERSION,
   type: 'hello',
   role: 'player',
   code,
 });
 
 export const shareMsg = (charId: string, character: SharedCharacter) => ({
-  v: 2 as const,
+  v: PROTOCOL_VERSION,
   type: 'share' as const,
   charId,
   character,
 });
 
 export const unshareMsg = (charId: string) => ({
-  v: 2 as const,
+  v: PROTOCOL_VERSION,
   type: 'unshare' as const,
   charId,
 });
 
-export const pingMsg = () => ({ v: 2 as const, type: 'ping' as const });
+export const pingMsg = () => ({ v: PROTOCOL_VERSION, type: 'ping' as const });
 
 // --- incoming (server -> client) -----------------------------------------------
 // Tolerant reader (§4): `character` payloads pass through as opaque records so a

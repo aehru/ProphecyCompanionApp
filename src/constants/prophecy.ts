@@ -7,6 +7,20 @@ export const TENDANCES = [
   { key: 'homme', label: 'Homme', color: '#FFFFFF', textColor: '#000000', border: '#9E9E9E' },
 ] as const;
 
+export type TendanceKey = (typeof TENDANCES)[number]['key'];
+
+/**
+ * Tendance key → its entry, so the four components that draw one tendance stop
+ * re-scanning the list (`TENDANCES.find(x => x.key === k)!`) on every render —
+ * and stop each carrying their own non-null assertion. Same shape as
+ * {@link ATTRIBUT_LABEL} below.
+ */
+export const TENDANCE_BY_KEY: Record<TendanceKey, (typeof TENDANCES)[number]> =
+  Object.fromEntries(TENDANCES.map((t) => [t.key, t])) as Record<
+    TendanceKey,
+    (typeof TENDANCES)[number]
+  >;
+
 /** Number of "puces" slots shown for a tendance subnumber (0–10). */
 export const MAX_PUCES = 10;
 
@@ -80,6 +94,51 @@ export const SPHERES = [
   { key: 'sphereVents', label: 'Vents' },
   { key: 'sphereOmbre', label: "Ombre" },
 ] as const;
+
+/**
+ * The nine Great Dragons. A caste-patron each, plus Kalimsshar — a fixed
+ * rulebook list, so `key` is the accent-free game term and `label` carries what
+ * the UI prints, like every other Prophecy domain here.
+ *
+ * Two consumers: a spell's `dragon` restriction (some sortilèges are open only
+ * to a « Mage de Kroryn », not to the whole sphère) and the per-dragon accent
+ * palettes in `theme/dragonsTheme`, which imports `GreatDragonKey` from here so
+ * the two lists cannot drift apart.
+ */
+export const GREAT_DRAGONS = [
+  { key: 'kroryn', label: 'Kroryn', sphere: 'sphereFeu' },
+  { key: 'heyra', label: 'Heyra', sphere: 'sphereNature' },
+  { key: 'nenya', label: 'Nenya', sphere: 'sphereReves' },
+  { key: 'kezyr', label: 'Kezyr', sphere: 'sphereMetal' },
+  { key: 'brorne', label: 'Brorne', sphere: 'spherePierre' },
+  { key: 'khy', label: 'Khy', sphere: 'sphereCites' },
+  { key: 'szyl', label: 'Szyl', sphere: 'sphereVents' },
+  { key: 'ozyr', label: 'Ozyr', sphere: 'sphereOceans' },
+  { key: 'kalimsshar', label: 'Kalimsshar', sphere: 'sphereOmbre' },
+] as const;
+
+export type GreatDragonKey = (typeof GREAT_DRAGONS)[number]['key'];
+
+/** Great dragon key → display label. */
+export const DRAGON_LABEL: Record<string, string> = Object.fromEntries(
+  GREAT_DRAGONS.map((d) => [d.key, d.label]),
+);
+
+/** Sphère key → the dragon who patrons it. */
+const DRAGON_BY_SPHERE: Record<string, GreatDragonKey> = Object.fromEntries(
+  GREAT_DRAGONS.map((d) => [d.sphere, d.key]),
+);
+
+/**
+ * How a spell's restriction READS: « Mage de Kroryn » for a Sphère du Feu
+ * sortilège. Derived and never stored — the pairing above is one-to-one over
+ * the nine sphères, so a row carrying its own dragon name could only ever
+ * repeat what its `sphere` already says, or contradict it.
+ */
+export function dragonMageLabel(sphereKey: string): string | null {
+  const dragon = DRAGON_BY_SPHERE[sphereKey];
+  return dragon ? `Mage de ${DRAGON_LABEL[dragon]}` : null;
+}
 
 /**
  * Magic disciplines. Plain single-value stats like the caractéristiques — one
@@ -254,24 +313,6 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
   { name: 'Intimidation', attribut: 'social' },
   { name: 'Séduction', attribut: 'social' },
 ];
-
-/**
- * Default weapon catalogue. Empty placeholder for now — a future PR will fill
- * this with the rulebook's standard weapons (and a "add from catalogue" flow).
- * Fields mirror the `weapons` table; formula columns hold raw formula strings.
- */
-export const DEFAULT_WEAPONS: {
-  name: string;
-  damage: string;
-  prerequisites: string;
-  creationDifficulty: number;
-  creationTime: number;
-  initMelee: number;
-  initCorpsACorps: number;
-  special: string;
-  rangeEffective: string | null;
-  rangeMax: string | null;
-}[] = [];
 
 export const WOUND_LEVELS = [
   { key: 'egratignure', label: 'Égratignure', damage: '1-10', malus: null },

@@ -3,10 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Circle } from 'react-native-svg';
 
-import { MAX_PUCES, TENDANCES } from '@/constants/prophecy';
+import { MAX_PUCES, TENDANCES, TENDANCE_BY_KEY, type TendanceKey } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
-type TendanceKey = (typeof TENDANCES)[number]['key'];
 
 const SIZE = 64;
 const STROKE = 5;
@@ -21,7 +20,7 @@ const CIRC = 2 * Math.PI * R;
  */
 function TendanceGauge({ tKey, value, sub }: { tKey: TendanceKey; value: number; sub: number }) {
   const theme = useProphecyTheme();
-  const t = TENDANCES.find((x) => x.key === tKey)!;
+  const t = TENDANCE_BY_KEY[tKey];
   const progress = Math.max(0, Math.min(1, sub / MAX_PUCES));
   const offset = CIRC * (1 - progress);
 

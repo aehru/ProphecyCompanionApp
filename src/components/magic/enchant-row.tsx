@@ -8,18 +8,13 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon, IconButton, Text } from 'react-native-paper';
 
+import EnchantScoreSummary from '@/components/magic/enchant-score-summary';
 import SpellDetail from '@/components/spell-detail';
 import { dsIcon } from '@/components/ui/icon';
-import type { Armor, Enchant, EnchantTarget, Item, Shield, Spell, Weapon } from '@/db/schema';
+import type { Armor, Enchant, Item, Shield, Spell, Weapon } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { ENCHANT_TARGET_LABEL } from '@/lib/enchant-targets';
 import { updateEnchant } from '@/repositories/enchants';
-
-export const TARGET_KIND_LABEL: Record<EnchantTarget, string> = {
-  weapon: 'Arme',
-  armor: 'Armure',
-  shield: 'Bouclier',
-  item: 'Objet',
-};
 
 export default function EnchantRow({
   enchant: e,
@@ -49,14 +44,18 @@ export default function EnchantRow({
               {e.name.trim() || 'Enchantement'}
             </Text>
             <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
-              {target?.name.trim() || '?'} · {TARGET_KIND_LABEL[e.targetType]}
+              {target?.name.trim() || '?'} · {ENCHANT_TARGET_LABEL[e.targetType]}
               {!equipped ? ' · non équipé' : ''}
             </Text>
             {e.sourceSpellName ? (
               <Text style={[styles.hint, { color: theme.colors.onSurfaceVariant }]}>
                 D’après : {e.sourceSpellName}
+                {linkedSpell && !linkedSpell.known ? ' · lancé par un autre mage' : ''}
               </Text>
             ) : null}
+            {/* The enchanter's roll, right under the name: it is what the object
+                does, and it is fixed for good. */}
+            <EnchantScoreSummary enchant={e} spell={linkedSpell} />
           </View>
           <Icon source="chevron-right" size={20} color={theme.colors.onSurfaceVariant} />
         </Pressable>

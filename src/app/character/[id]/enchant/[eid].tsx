@@ -42,11 +42,14 @@ export default function EnchantEditModal() {
           <KeyboardAwareScrollView contentContainerStyle={[styles.container, contentWidth]} bottomOffset={24}>
             <EnchantEditor
               enchant={enchant}
-              weapons={weapons ?? []}
-              armor={armor ?? []}
-              shields={shields ?? []}
-              items={items ?? []}
+              lists={{
+                weapons: weapons ?? [],
+                armor: armor ?? [],
+                shields: shields ?? [],
+                items: items ?? [],
+              }}
               spells={spells ?? []}
+              onPickFromCatalog={() => router.push(`/character/${id}/enchant/catalog?eid=${eid}`)}
               onClose={() => router.back()}
             />
           </KeyboardAwareScrollView>

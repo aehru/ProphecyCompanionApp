@@ -64,21 +64,30 @@ export function SkillColumnLegend({ density = 'compact' }: { density?: SkillDens
   );
 }
 
+/** A skill as its row knows it — what a caller needs to build a roll context. */
+export type SkillLineData = SkillGroup['skills'][number];
+
 /**
  * The rows of ONE group, without a header — for a caller that draws its own
  * (the player's tab titles each attribut with a DS <SectionCard>).
+ *
+ * `onRoll` turns the TOT badge into a roll target. Optional because this file is
+ * shared with the GM's reading of someone else's character, where a total is a
+ * number to read and not a die to throw.
  */
 export function SkillRows({
   group: g,
   density = 'compact',
+  onRoll,
 }: {
   group: SkillGroup;
   density?: SkillDensity;
+  onRoll?: (skill: SkillLineData) => void;
 }) {
   return (
     <View style={{ gap: SCALE[density].rowGap }}>
       {g.skills.map((s) => (
-        <SkillLine key={s.key} skill={s} color={g.color} density={density} />
+        <SkillLine key={s.key} skill={s} color={g.color} density={density} onRoll={onRoll} />
       ))}
     </View>
   );
@@ -90,11 +99,14 @@ export default function SkillGroupsView({
   emptyLabel = 'Aucune compétence.',
   compact = false,
   density = 'compact',
+  onRoll,
 }: {
   groups: SkillGroup[];
   emptyLabel?: string;
   compact?: boolean;
   density?: SkillDensity;
+  /** Turns every TOT badge into a roll target, as <SkillRows> already does. */
+  onRoll?: (skill: SkillLineData) => void;
 }) {
   const theme = useProphecyTheme();
   if (groups.length === 0) {
@@ -113,14 +125,22 @@ export default function SkillGroupsView({
   return (
     <View style={{ gap: compact ? 12 : 16 }}>
       {groups.map((g) => (
-        <SkillGroupBlock key={g.key} group={g} density={density} />
+        <SkillGroupBlock key={g.key} group={g} density={density} onRoll={onRoll} />
       ))}
     </View>
   );
 }
 
 /** One attribut block: coloured header with the attribut value, then its rows. */
-function SkillGroupBlock({ group: g, density }: { group: SkillGroup; density: SkillDensity }) {
+function SkillGroupBlock({
+  group: g,
+  density,
+  onRoll,
+}: {
+  group: SkillGroup;
+  density: SkillDensity;
+  onRoll?: (skill: SkillLineData) => void;
+}) {
   const theme = useProphecyTheme();
   return (
     <View style={{ gap: SCALE[density].rowGap }}>
@@ -139,7 +159,7 @@ function SkillGroupBlock({ group: g, density }: { group: SkillGroup; density: Sk
         <SkillColumnLegend density={density} />
       </View>
       {g.skills.map((s) => (
-        <SkillLine key={s.key} skill={s} color={g.color} density={density} />
+        <SkillLine key={s.key} skill={s} color={g.color} density={density} onRoll={onRoll} />
       ))}
     </View>
   );
@@ -150,10 +170,12 @@ function SkillLine({
   skill: s,
   color,
   density,
+  onRoll,
 }: {
-  skill: SkillGroup['skills'][number];
+  skill: SkillLineData;
   color: string;
   density: SkillDensity;
+  onRoll?: (skill: SkillLineData) => void;
 }) {
   const theme = useProphecyTheme();
   const sc = SCALE[density];
@@ -196,14 +218,22 @@ function SkillLine({
           }}>
           {s.bonus === 0 ? '—' : fmtSignedMod(s.bonus)}
         </Text>
-        <View
-          style={[
+        {/* The badge IS the roll button when the caller wants one — it already
+            reads as the row's one filled, tappable-looking cell, so a separate
+            die icon per row would only cost the width the names need. */}
+        <Pressable
+          onPress={onRoll ? () => onRoll(s) : undefined}
+          disabled={!onRoll}
+          accessibilityRole={onRoll ? 'button' : undefined}
+          accessibilityLabel={onRoll ? `Lancer ${s.name}, total ${s.total}` : undefined}
+          style={({ pressed }) => [
             styles.totalBadge,
             {
               backgroundColor: color,
               width: sc.totalW,
               paddingVertical: sc.badgePadV,
               paddingHorizontal: sc.badgePadH,
+              opacity: pressed ? 0.7 : 1,
             },
           ]}>
           <Text
@@ -215,7 +245,7 @@ function SkillLine({
             }}>
             {s.total}
           </Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   );

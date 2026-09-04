@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { Skill } from '@/db/schema';
 import { buildSkillRows, type SkillRow, skillRowsToInput } from '@/lib/character-values';
+import { detachWrite } from '@/repositories/log';
 import { replaceSkills } from '@/repositories/skills';
 
 /**
@@ -42,7 +43,11 @@ export function useSkillsDraft(characterId: number, skills: Skill[], editing: bo
     timer.current = null;
     if (!dirty.current) return;
     dirty.current = false;
-    replaceSkills(characterId, skillRowsToInput(rowsRef.current));
+    // Fired from a debounce and from unmount, so there is nobody left to await
+    // it — a rejected flush would otherwise lose the whole edit silently.
+    detachWrite('skills', replaceSkills(characterId, skillRowsToInput(rowsRef.current)), {
+      characterId,
+    });
   }, [characterId]);
 
   const scheduleSave = useCallback(() => {

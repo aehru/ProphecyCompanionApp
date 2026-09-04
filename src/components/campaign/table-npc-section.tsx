@@ -38,7 +38,7 @@ export default function TableNpcSection({
         Les personnages cochés composent la Compagnie : fiches, blessures et initiative, sur cet
         appareil.
       </Text>
-      <Button mode="outlined" icon={dsIcon('plus')} onPress={onCreate}>
+      <Button testID="new-npc" mode="outlined" icon={dsIcon('plus')} onPress={onCreate}>
         Nouveau PNJ
       </Button>
       <CharacterPickList characters={characters} sharedIds={memberIds} onToggle={onToggle} />

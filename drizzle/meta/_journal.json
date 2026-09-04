@@ -211,6 +211,27 @@
       "when": 1786993062446,
       "tag": "0029_odd_ricochet",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1787898482219,
+      "tag": "0030_clever_nuke",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1788116371875,
+      "tag": "0031_regular_centennial",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1788206833262,
+      "tag": "0032_remarkable_annihilus",
+      "breakpoints": true
     }
   ]
 }

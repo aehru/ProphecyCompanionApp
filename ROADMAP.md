@@ -16,21 +16,77 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [ ] **Migration authoring guidelines.** Document the safe-change rules in DEV.md: additive columns with defaults, avoid tightening constraints on existing columns, never hand-edit `drizzle/` artifacts.
 - [ ] **Add a `db:generate` script** to `package.json` wrapping `drizzle-kit generate` (currently a bare `bunx` command).
 
+## Performance
+
+- [ ] **Cache prepared statements in the driver.** Every non-`run` query in
+  [src/db/client.ts](src/db/client.ts) does `prepareAsync` → `executeForRawResultAsync`
+  → `finalizeAsync`, so identical SQL is re-compiled on every call. That matters
+  because the app is subscription-heavy: a character tab holds seven to nine
+  `useLiveQuery` subscriptions, and drizzle refetches on any write to a watched
+  table — one wound tap re-runs, re-prepares and re-finalizes the lot.
+  _Sketch:_ a `Map<sqlText, SQLiteStatement>` in front of `execute`, finalizing
+  on `closeConnection()` so a restore can still swap the file underneath.
+  _Why it is not done yet:_ **nobody has measured it.** It was inferred from
+  reading the driver, not from a profile, and it sits on the path every single
+  query in the app takes — the worst place to trade correctness for a win of
+  unknown size. The failure modes are real: a statement outliving its
+  connection across the lock-retry reopen, and cache growth on the parameterized
+  `inArray` queries, whose SQL text varies with the number of ids.
+  _Do this in order:_ profile a real device first (a stat stepper on a character
+  with a full sheet is the loudest case), and only then cache — the repository
+  harness added in [test-db.ts](src/repositories/test-db.ts) can now cover the
+  lifecycle. **If a tester reports the sheet feeling sluggish on a low-end
+  Android while everything else is fine, this is the first suspect.**
+
 ## Game content
 
 - [x] **Manage spells** — spellbook with catalogue + editor, disciplines, reserve & spheres.
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
-- [ ] **Dice roller in context.** The roller is now app-level and reachable
-  from every header ([use-dice-roller.tsx](src/hooks/use-dice-roller.tsx)), but
-  it stays free-form on purpose: XdY plus the tendance trio, knowing nothing
-  about the screen it was opened from. Two follow-ups, agreed but deferred:
-  **prefill from context** (opening it from Compétences seeds the skill total as
-  a modifier, from Inventaire the weapon's damage formula — both readings already
-  exist, through `lib/modifiers` and `lib/formula`), and **per-row roll buttons**
-  on skills and weapons, which save the taps the global roller cannot. Neither
-  should bring back a roll history: results are deliberately forgotten on close.
+- [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
+  opens the roller against it and rolls a D10 at once, with the difficulté
+  prefilled at 15, « Confirmer » for a 10 or a 1, and the tendance trio selectable
+  so the kept die becomes the roll. The rules live in [lib/roll.ts](src/lib/roll.ts)
+  and the header button still opens the free-form roller — context arrives ONLY by
+  tapping a value and dies with the dialog, like the results.
+  Done too for **caractéristiques and attributs**: tapping a tile on the Fiche
+  rolls it, adding the modifier the tile's badge deliberately doesn't show in
+  full (the wound malus is badged once per character, not per stat). Every
+  context is built in [lib/roll-context.ts](src/lib/roll-context.ts) so the
+  confirm rule lives in one place. **An attribut confirms on itself** — the rule
+  names the compétence or the caractéristique, and a bare attribut roll has
+  neither.
+  A test can throw **several D10** — a « Dés » field plus a Garder / Sommer
+  toggle, since effects grant both readings and the sheet models neither yet.
+  `RollContext.dice` / `.diceMode` are the hooks for when traits land («&nbsp;2 dés
+  sur tout ce qui touche au MENTAL&nbsp;»): the builder will set them and no screen
+  will learn the rule twice.
+  Done for **weapons** as well: the attack total in a weapon's detail is the roll
+  button, going through `weaponRollContext` — an attack IS its compétence's roll,
+  so the weapon only names it. A weapon with no compétence linked, or naming one
+  that no longer exists, has no total and stays unrollable.
+  The attack total rides on the collapsed row as a [`<TotalBadge>`](src/components/ui/total-badge.tsx)
+  — the very component a spell's score uses, so the two rows can't drift — and
+  the badge IS the roll button: it rolls, the row around it still expands. The
+  GM's NPC weapon cards roll the same way, being the GM's own local rows.
+  **Spells** roll from the same badge, through `spellRollContext`: the score's
+  terms each become a part (sphère, discipline, wound, clé), the difficulté
+  prefills from `spells.difficulty` — falling back to 15 when the spell carries
+  none — and **the discipline is what confirms** a 10 or a 1.
+  For gear the badge is the ONLY roll button: an expanded card shows its
+  breakdown as a reading and offers no second control, since two ways to make one
+  roll on one card is a question the player shouldn't have to answer.
+  A **cast** follows the magic rules on top: Miracle / Contrecoup naming, no +5,
+  and on the tendance trio the discarded dice can backlash — see the `readDice`
+  paragraph in [CLAUDE.md](CLAUDE.md). Each die owing a reroll gets its own
+  « Confirmer » row, because which die produced which outcome is the whole point.
+  _Remaining:_ the stat tiles on the dashboard, which stay a reading for
+  now; plus the UI that builds
+  a multi-part context (MEN + VOL, optionally + a tendance die) — `RollContext.parts`
+  is already a list precisely so that needs no type change. Whatever gets added
+  must name its own `confirm` value: no rule says which part of a sum a 10 is
+  confirmed against. Still no roll history — results are forgotten on close.
 - [ ] **« Lancer le sort » — the cast flow.** The last piece of the spell
   breakdown layer; everything it needs is already in place. Today a durée renders
   symbolically (« 1 + NR jours ») because NR belongs to a *cast*, not to a spell:
@@ -53,19 +109,26 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   an implementation detail, and the dialog probably has to ask. And the deferred
   `bonus` column (« +5 à Discrétion ») was left out on purpose, so the created
   effect starts from prefilled, editable text rather than a parsed target.
-- [ ] **« Mettre à jour depuis le catalogue » — propagate rulebook corrections
-  to spells players already picked.** The provenance half shipped: a spell copied
-  from the catalogue now stores `spells.preset_id` + `spells.preset_revision`
-  (the preset's content fingerprint, `lib/preset-revision`, computed at build
-  time and baked into `*-catalog.gen.ts`). A row with no `preset_id` is the
-  player's own and must stay untouchable — that asymmetry is the safety
-  property, so **never infer provenance from a name match**.
-  _What's left:_ a pure `planSpellSync(rows, catalog)` (field-level: row empty +
-  preset filled ⇒ fill, both filled and differing ⇒ ask, `cleParfaite` and every
-  in-play value never touched), a preview screen grouped by spell with the
-  player's value vs the catalogue's and "keep mine" as the default, then one
-  transaction. Stamp the current revision on accept **and** on decline, so a
-  declined change doesn't ask again until the entry actually changes.
+- [x] **« Mettre à jour depuis le catalogue » — propagate rulebook corrections
+  to spells players already picked.** Provenance (`spells.preset_id` +
+  `preset_revision`, the preset's content fingerprint from `lib/preset-revision`)
+  is the signal; a row with no `preset_id` is the player's own and is never a
+  candidate — that asymmetry is the safety property, and provenance is **never
+  inferred from a name match**. `planSpellSync(rows, presets)`
+  ([lib/spell-sync.ts](src/lib/spell-sync.ts), pure + tested) splits the
+  difference two ways: a column the sheet left EMPTY that the catalogue now
+  fills is applied without a question (nothing of the player's is at stake),
+  while two values that disagree are a conflict. The decision is **per
+  sortilège, not per column** — a spell is read as one paragraph, and "my effect
+  but their durée" is a state nobody can check afterwards. `cleParfaite` and
+  every in-play value stay outside it. The current revision is stamped on
+  decline as well as on accept, so a refused change stops being offered until
+  the entry actually moves again.
+  The sweep is **app-wide** ([catalog-sync.tsx](src/app/catalog-sync.tsx),
+  reached from the Catalogues tab's overflow): a correction lands for every
+  sheet at once, and a GM holding a dozen NPCs would otherwise walk the same
+  dialog a dozen times. One transaction for the whole plan
+  ([repositories/spell-sync.ts](src/repositories/spell-sync.ts)).
   _Agreed non-goals:_ no undo beyond `prophecy.db.bak`; a spell newly added to
   the catalogue does nothing (the player picks it); a spell removed from the
   catalogue leaves the row alone.
@@ -124,14 +187,13 @@ merge, character detail sheet, join disclaimer, privacy policy.
   for its own NPCs on top of the projection: armes (damage formulas resolved
   with the wound/effects modifier), armures, boucliers, sorts. Remote players
   stay projection-limited by protocol.
-- [ ] **No way to add a bonus/malus to a PNJ from the table.** `createEffect` is
-  called from exactly one place, the Fiche's "Effet" FAB
-  ([src/app/character/[id]/(tabs)/fiche.tsx](src/app/character/%5Bid%5D/(tabs)/fiche.tsx));
-  `<NpcInPlayEditor>` renders `<EffectsCard>`, which by design never spawns rows,
-  so the GM can only view and tick existing effects and has to leave the campaign
-  to create one. _Fix with the planned effect-creation rework:_ an add control in
-  the in-play editor, ideally opening `<EffectEditor>` in a `<DsDialog>` so the
-  GM stays on the table screen.
+- [x] **Adding a bonus/malus to a PNJ from the table.** Creating AND editing an
+  effect now happen in [`<EffectDialog>`](src/components/effect-dialog.tsx), owned
+  by `<EffectsCard>` — so both callers (the Fiche, `<NpcInPlayEditor>`) get the
+  same surface and the GM never leaves the campaign screen. The `effect/[eid]`
+  modal route is gone with it. The dialog **drafts**: nothing is written until
+  « Enregistrer », where the old flow inserted a blank row up front and left a +0
+  effect behind whenever the editor was backed out of.
 - [ ] **A quick-created PNJ has no wound boxes and no initiative dice.**
   `createNpc` ([src/repositories/campaigns.ts](src/repositories/campaigns.ts))
   builds the character with a name only, so every `*Max` column keeps its `0`

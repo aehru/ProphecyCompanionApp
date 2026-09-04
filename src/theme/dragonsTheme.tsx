@@ -1,4 +1,4 @@
-import type { MD3Theme } from 'react-native-paper';
+import type { GreatDragonKey } from '@/constants/prophecy';
 
 /**
  * Prophecy — accent themes for the nine Great Dragons (eight caste-patrons + Kalimsshar).
@@ -6,16 +6,12 @@ import type { MD3Theme } from 'react-native-paper';
  * single HCT hue per dragon's elemental sphere. Use to recolour the app's
  * primary based on a character's draconic allegiance.
  */
-export type DragonKey =
-  | 'kroryn'
-  | 'heyra'
-  | 'nenya'
-  | 'kezyr'
-  | 'brorne'
-  | 'khy'
-  | 'szyl'
-  | 'ozyr'
-  | 'kalimsshar';
+/**
+ * Re-exported from `constants/prophecy`, where the nine dragons are declared:
+ * the same list also drives a spell's « Mage de … » restriction, and two copies
+ * of it would drift.
+ */
+export type DragonKey = GreatDragonKey;
 
 export type DragonAccent = {
   name: string;
@@ -180,13 +176,3 @@ export const DragonAccents: Record<DragonKey, DragonAccent> = {
     },
   },
 };
-
-/** Merge a dragon's accent onto a base Paper theme (swaps the primary group). */
-export function withDragon(
-  base: MD3Theme,
-  dragon: DragonKey,
-  scheme: 'light' | 'dark',
-): MD3Theme {
-  const a = DragonAccents[dragon][scheme];
-  return { ...base, colors: { ...base.colors, ...a } };
-}

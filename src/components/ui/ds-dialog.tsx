@@ -49,6 +49,7 @@ export default function DsDialog({
   dismiss,
   actions,
   children,
+  testID,
 }: {
   visible: boolean;
   onDismiss: () => void;
@@ -58,6 +59,8 @@ export default function DsDialog({
   /** What the dialog is FOR — one or two buttons, pinned to the right. */
   actions?: React.ReactNode;
   children: React.ReactNode;
+  /** Names the whole surface for the e2e suite — the buttons name themselves. */
+  testID?: string;
 }) {
   const theme = useProphecyTheme();
   const { height } = useWindowDimensions();
@@ -67,6 +70,7 @@ export default function DsDialog({
   return (
     <Portal>
       <Dialog
+        testID={testID}
         visible={visible}
         onDismiss={onDismiss}
         style={[

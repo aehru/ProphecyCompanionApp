@@ -76,17 +76,17 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
-        name="effect/[eid]"
-        options={{
-          presentation: 'modal',
-          title: "Modifier l'effet",
-        }}
-      />
-      <Stack.Screen
         name="enchant/[eid]"
         options={{
           presentation: 'modal',
           title: "Modifier l'enchantement",
+        }}
+      />
+      <Stack.Screen
+        name="enchant/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Sort de l’enchantement',
         }}
       />
     </Stack>

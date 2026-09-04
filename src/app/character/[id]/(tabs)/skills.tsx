@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, IconButton } from 'react-native-paper';
 
+import type { SkillLineData } from '@/components/campaign/skill-groups-view';
 import AddSkillDialog from '@/components/skills/add-skill-dialog';
 import SkillsEditList from '@/components/skills/skills-edit-list';
 import SkillsReadPage from '@/components/skills/skills-read-page';
@@ -19,11 +20,13 @@ import { ATTRIBUTS } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { openRoller } from '@/lib/dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSkillGroups } from '@/hooks/use-skill-groups';
 import { useSkillsDraft } from '@/hooks/use-skills-draft';
 import { asNumRecord } from '@/lib/character-values';
 import { woundMalus } from '@/lib/modifiers';
+import { skillRollContext } from '@/lib/roll-context';
 import type { SkillScope } from '@/lib/skill-grouping';
 import { effectsQuery } from '@/repositories/effects';
 import {
@@ -82,6 +85,13 @@ export default function CharacterSkillsScreen() {
     effects: effectList,
     wound,
   });
+
+  // Tapping a TOT rolls against that skill — see lib/roll-context for why the
+  // total and the confirmation number are not the same one.
+  const rollSkill = useCallback(
+    (skill: SkillLineData) => openRoller(skillRollContext(skill)),
+    [],
+  );
 
   const clearFocus = useCallback(() => setPendingFocus(null), []);
   const closeSearch = useCallback(() => {
@@ -155,6 +165,7 @@ export default function CharacterSkillsScreen() {
             <SkillsReadPage
               group={pageGroups.find((g) => g.key === attr.key)}
               attrVal={rec[attr.key] ?? 0}
+              onRoll={rollSkill}
             />
           )}
       </TabPage>

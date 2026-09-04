@@ -1,6 +1,6 @@
 import { type Href, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import LevelSwitcher from '@/components/diagnostics/level-switcher';
@@ -11,6 +11,7 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useLogTail } from '@/hooks/use-log-tail';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
+import { newIssueUrl, openExternal } from '@/lib/links';
 import { APP_VERSION, log, setLogLevel, SESSION_ID, type LogEntry, type LogLevel } from '@/lib/log';
 import { copyDiagnostics, shareDiagnostics } from '@/lib/log/share';
 
@@ -59,6 +60,12 @@ export default function DiagnosticsScreen() {
     } finally {
       setBusy(false);
     }
+  }, []);
+
+  // Version + platform only. The log itself never rides in a URL — the share
+  // sheet is its one exit, and a query string would be a second one.
+  const handleReport = useCallback(() => {
+    void openExternal(newIssueUrl(`Version ${APP_VERSION} · ${Platform.OS}`));
   }, []);
 
   // Destructive → native confirm, per the app's convention for irreversible acts.
@@ -115,6 +122,21 @@ export default function DiagnosticsScreen() {
               onPress={() => router.push('/privacy' as Href)}>
               En savoir plus
             </Text>
+          </Text>
+        </SectionCard>
+
+        {/* Folded by default: a tester opens this screen to READ the log far more
+            often than to file a ticket, and the section's blurb is three lines. */}
+        <SectionCard title="Signaler un problème" icon="bell" collapsible defaultExpanded={false}>
+          <View style={styles.actions}>
+            <Button icon="bug-outline" onPress={handleReport}>
+              Ouvrir un ticket
+            </Button>
+          </View>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Le ticket s’ouvre sur GitHub, pré-rempli avec la version et le système — rien d’autre.
+            Décrivez ce que vous faisiez, puis joignez le journal si vous le voulez : c’est
+            « Partager » ci-dessus qui le sort de l’appareil, jamais ce bouton.
           </Text>
         </SectionCard>
       </View>

@@ -6,7 +6,7 @@ import NpcGearSections from '@/components/campaign/npc-gear-sections';
 import NpcInPlayEditor from '@/components/campaign/npc-in-play-editor';
 import { useAttrColors, useTendColors } from '@/components/campaign/roster-accents';
 import { PlayerAvatar } from '@/components/campaign/roster-badges';
-import SkillGroupsView from '@/components/campaign/skill-groups-view';
+import SkillGroupsView, { type SkillLineData } from '@/components/campaign/skill-groups-view';
 import { AttrTile, CaracTile } from '@/components/campaign/stat-tiles';
 import {
   EffectsList,
@@ -23,10 +23,13 @@ import { useLocalDieIcons } from '@/hooks/use-local-die-icons';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import GlobalModifierRow from '@/components/global-modifier-row';
-import { sharedWoundMalus } from '@/lib/initiative-order';
+
+import { sharedStatRollContext } from '@/lib/campaign-roll';
+import { openRoller } from '@/lib/dice-roller';
 import { globalModifier, statModifier } from '@/lib/modifiers';
-import { groupSkills, type SharedSkill } from '@/lib/skill-groups';
-import { nums, pools, type SharedEffectView } from '@/lib/shared-character-view';
+import { skillRollContext } from '@/lib/roll-context';
+import { groupSkills } from '@/lib/skill-groups';
+import { effectsOf, nums, pools, skillsOf, woundOf } from '@/lib/shared-character-view';
 
 interface Props {
   entry: RosterEntry | null;
@@ -78,20 +81,17 @@ export function GmSheetBody({
   const [editing, setEditing] = useState(canEdit && startEditing);
 
   const c = entry?.character;
-  const attr = nums(c?.attributs);
-  const skills = useMemo(
-    () => (Array.isArray(c?.skills) ? (c?.skills as SharedSkill[]) : []),
-    [c?.skills],
-  );
-  const effectRows = useMemo(
-    () => (Array.isArray(c?.effects) ? (c?.effects as SharedEffectView[]) : []),
-    [c?.effects],
-  );
+  // Memoized like its three siblings below, and for the same reason: it feeds
+  // the `groups` memo, so a fresh object per render made that memo a no-op and
+  // re-grouped every skill on every render.
+  const attr = useMemo(() => nums(c?.attributs), [c?.attributs]);
+  const skills = useMemo(() => skillsOf(c?.skills), [c?.skills]);
+  const effectRows = useMemo(() => effectsOf(c?.effects), [c?.effects]);
   // Wound boxes aren't surfaced as a section, but the malus applies to EVERY
   // roll — initiative, the stat tiles and the skills' TOT column alike, same
   // reading the turn order and the player's own sheet use. Computed before the
   // early return so the grouping memo below can fold it in.
-  const wound = useMemo(() => sharedWoundMalus(pools(c?.wounds)), [c?.wounds]);
+  const wound = useMemo(() => woundOf(c?.wounds), [c?.wounds]);
   // Die marks never cross the wire, so they come from the local rows — filled
   // for the GM's own PNJs, absent for a player's character.
   const dieIconsByUuid = useLocalDieIcons();
@@ -111,6 +111,13 @@ export function GmSheetBody({
   // caractéristique roll doesn't show the same malus twice.
   const global = globalModifier(effectRows, wound);
   const modOf = (key: string) => statModifier(key, effectRows);
+  // Rolling reads the character and writes nothing, so it is offered for every
+  // roster entry — a player's projection carries the same numbers their own
+  // sheet would roll (see lib/campaign-roll), and a GM regularly rolls for an
+  // absent player. Editing stays GM-owned; that one does write.
+  const rollStat = (key: string, kind: 'attribut' | 'caracteristique') =>
+    openRoller(sharedStatRollContext(c, key, kind));
+  const rollSkill = (skill: SkillLineData) => openRoller(skillRollContext(skill));
 
   const save = () => {
     onSaveNote(entry.charId, draftRef.current);
@@ -121,7 +128,9 @@ export function GmSheetBody({
 
   return (
     <>
-        {embedded ? null : <View style={styles.handle} />}
+        {embedded ? null : (
+          <View style={[styles.handle, { backgroundColor: theme.colors.outlineVariant }]} />
+        )}
         <View style={styles.titleRow}>
           <PlayerAvatar nom={String(c.nom ?? 'Sans nom')} online={entry.online} size={48} />
           <View style={{ flex: 1 }}>
@@ -133,6 +142,15 @@ export function GmSheetBody({
               {canEdit ? 'PNJ' : entry.online ? 'En ligne' : 'Hors ligne'}
             </Text>
           </View>
+          {/* The sheet's own roller. On a phone it IS a full-screen Modal, so
+              the header's dice button is behind it — without this one, an open
+              sheet can only roll what it happens to show. */}
+          <IconButton
+            testID="sheet-dice-roller"
+            icon={dsIcon('dice')}
+            onPress={() => openRoller()}
+            accessibilityLabel="Lancer les dés"
+          />
           {canEdit ? (
             <IconButton
               icon={editing ? dsIcon('check') : dsIcon('edit')}
@@ -173,6 +191,7 @@ export function GmSheetBody({
                   value={attr[a.key] ?? 0}
                   color={attrColors[a.key]}
                   modifier={modOf(a.key)}
+                  onRoll={() => rollStat(a.key, 'attribut')}
                 />
               ))}
             </View>
@@ -185,8 +204,10 @@ export function GmSheetBody({
                 <CaracTile
                   key={k.key}
                   label={k.abbr}
+                  rollLabel={k.label}
                   value={carac[k.key] ?? 0}
                   modifier={modOf(k.key)}
+                  onRoll={() => rollStat(k.key, 'caracteristique')}
                 />
               ))}
             </View>
@@ -194,7 +215,11 @@ export function GmSheetBody({
 
           {/* Compétences (trained, with specializations) */}
           <Section title="Compétences">
-            <SkillGroupsView groups={groups} emptyLabel="Aucune compétence apprise." />
+            <SkillGroupsView
+              groups={groups}
+              emptyLabel="Aucune compétence apprise."
+              onRoll={rollSkill}
+            />
           </Section>
 
           {/* Armes/armures/boucliers/sorts: only ever available for a character
@@ -251,6 +276,7 @@ export default function GmCharacterSheet(props: Props) {
   return (
     <Portal>
       <Modal
+        testID="gm-sheet"
         visible
         onDismiss={props.onDismiss}
         style={styles.wrapper}
@@ -277,14 +303,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     maxHeight: '88%',
   },
-  handle: {
-    alignSelf: 'center',
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#8888',
-    marginBottom: 8,
-  },
+  // Colour comes from the theme at the call site — nothing here is hardcoded.
+  handle: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, marginBottom: 8 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   body: { gap: 18, paddingVertical: 12 },
   // In a pane the sheet has a real height to fill; in the modal it hugs.

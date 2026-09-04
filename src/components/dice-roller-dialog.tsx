@@ -1,164 +1,234 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Button, Menu, Text } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 
-import NumberField from '@/components/number-field';
-import { TendanceDiceRow } from '@/components/tendance-die';
+import RollContextBody from '@/components/roll-context-body';
+import RollFreeformBody from '@/components/roll-freeform-body';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { rollDice, rollTendances, type TendanceRoll } from '@/lib/dice';
+import { rollDice, rollDie, rollTendances, type TendanceRoll } from '@/lib/dice';
+import {
+  DEFAULT_DICE,
+  DEFAULT_DIFFICULTY,
+  DIE_SIDES,
+  diceCount,
+  resolveRoll,
+  type DiceMode,
+  type RollContext,
+  type RollResult,
+  type RollThrow,
+} from '@/lib/roll';
 
 /**
- * Free-form dice roller — roll any XdY, independent of any character stat
- * (initiative has its own roll on the weapons tab). Prophecy is D10-heavy, so
- * the die picker defaults to 10.
+ * The dice roller, in its two shapes.
  *
- * Alongside it sits the tendance roll — one D10 per tendance, the rulebook's
- * "roll all three, keep the one that suits your action". A separate result, not
- * a preset of the XdY roller: the two never show at once, and « Tendances » sits
- * next to « Lancer » on the right of the actions row because both are things the
- * dialog DOES, unlike « Fermer ».
+ * WITHOUT a context it is the free-form roller it has always been: any XdY, plus
+ * the tendance trio as a reading. WITH one — a skill's TOT, a stat, a sum of
+ * both — it becomes a TEST: the XdY picker gives way to a difficulté and a
+ * verdict, because Prophecy tests a D10 and nothing else.
  *
- * The dialog only exists while open — `DiceRollerProvider` mounts it on demand —
- * so count and results start fresh on every open, matching the "no roll history"
- * decision. The one thing that outlives an open is the die size, which the
- * provider holds: reopening the roller keeps the die you picked (for the session,
- * not across restarts).
+ * Both buttons stay in both shapes. « Lancer » rolls the one die, « Tendances »
+ * rolls all three and, in context, the player keeps the one they invoke — that
+ * kept die IS the roll, and it is what a 10 or a 1 is confirmed on.
+ *
+ * This component owns the dice and nothing else draws them: the two bodies are
+ * presentational, so there is exactly one place where a die is rolled and one
+ * place where the rules read it (`lib/roll`).
+ *
+ * The dialog only exists while open — `<DiceRollerHost>` mounts it on demand —
+ * so everything here starts fresh on every open, matching the "no roll history"
+ * decision. The one thing that outlives an open is the die size, which the store
+ * holds (`lib/dice-roller`): reopening the roller keeps the die you picked (for
+ * the session, not across restarts).
  */
-const SIDES = [4, 6, 8, 10, 12, 20];
+
+/**
+ * Everything one throw put on the table. ONE state, not five: every transition
+ * below names the whole next table, so a new roll cannot leave a stale die, an
+ * orphaned confirmation or a kept tendance behind it — which is exactly what
+ * five independent setters and a "remember to clear first" helper allowed.
+ */
+interface RollState {
+  /** The contextual throw and how it reads — see `lib/roll` RollThrow. */
+  roll: RollThrow | null;
+  /** Each die's confirmation reroll, by the same index — a cast can owe three. */
+  confirms: (number | null)[];
+  /** The free-form XdY throw; never set in context (a test is D10s only). */
+  freeform: number[] | null;
+}
+
+const EMPTY: RollState = { roll: null, confirms: [], freeform: null };
+
+/**
+ * The trio as the dice rows want it — value plus colour, in throw order.
+ *
+ * DERIVED, never stored: `RollThrow.tendances` already carries the keys because
+ * the rules need them, and keeping a second parallel array of the same dice is
+ * how the two would come to disagree about which die is which.
+ */
+function tendanceRolls(t: RollThrow | null): TendanceRoll[] | null {
+  if (t?.tendances == null) return null;
+  return t.tendances.map((key, i) => ({ key, value: t.dice[i] }));
+}
+
+/**
+ * Throw `n` D10 for a test. A single die needs no choosing, so it is kept on the
+ * spot — that is what makes the ordinary one-die roll show its verdict straight
+ * away while a handful waits for a pick.
+ */
+function throwFor(n: number, mode: DiceMode): RollThrow {
+  const count = diceCount(n);
+  return {
+    dice: rollDice(count, DIE_SIDES),
+    mode,
+    keptIndex: mode === 'keep' && count === 1 ? 0 : null,
+  };
+}
 
 export default function DiceRollerDialog({
   sides,
+  context,
   onSidesChange,
   onDismiss,
 }: {
   sides: number;
+  /** What the roll is made against, or null for the free-form roller. */
+  context?: RollContext | null;
   /** Lifted so the picked die survives closing and reopening the dialog. */
   onSidesChange: (sides: number) => void;
   onDismiss: () => void;
 }) {
-  const theme = useProphecyTheme();
-  const [sidesMenu, setSidesMenu] = useState(false);
-  const [count, setCount] = useState(1);
-  const [result, setResult] = useState<number[] | null>(null);
-  const [tendances, setTendances] = useState<TendanceRoll[] | null>(null);
+  const [count, setCount] = useState('1');
+  const [difficulty, setDifficulty] = useState(String(context?.difficulty ?? DEFAULT_DIFFICULTY));
+  // How many D10 a test throws, and what several of them mean. Both start from
+  // the context so a trait can one day grant « 2 dés, sommés » without any
+  // screen learning the rule; today nothing on the sheet models one, so they are
+  // the player's to set. Defaulted ONCE — the field and the opening throw have
+  // to agree, and reading `context` twice is how they would stop agreeing.
+  const initialDice = context?.dice ?? DEFAULT_DICE;
+  const initialMode = context?.diceMode ?? 'keep';
+  const [dice, setDice] = useState(String(initialDice));
+  const [mode, setMode] = useState<DiceMode>(initialMode);
+  // A tap on a value is a request to roll, so a contextual dialog opens with its
+  // dice already thrown. Seeded in the initializer rather than in an effect: an
+  // effect would render the empty state first and then set state from it.
+  const [state, setState] = useState<RollState>(() =>
+    context ? { ...EMPTY, roll: throwFor(initialDice, initialMode) } : EMPTY,
+  );
 
-  // The two rolls own the same result area, so each one clears the other.
-  const clearResults = () => {
-    setResult(null);
-    setTendances(null);
+  const rollNow = () =>
+    setState(
+      context
+        ? { ...EMPTY, roll: throwFor(Number(dice), mode) }
+        : { ...EMPTY, freeform: rollDice(Math.max(1, parseInt(count, 10) || 1), sides) },
+    );
+  const rollTendance = () => {
+    const trio = rollTendances();
+    // The trio is always kept-from, never summed: leaving the toggle on
+    // « Sommer » would have it contradict the three dice it sits above, and the
+    // hint underneath telling the player to keep one.
+    setMode('keep');
+    // The trio is a `keep` throw whose dice happen to have colours: same shape,
+    // same keptIndex, so nothing downstream needs a tendance special case.
+    // The throw carries the tendances themselves: on a cast they decide what a
+    // discarded die costs (see lib/roll readDice).
+    setState({
+      ...EMPTY,
+      roll: {
+        dice: trio.map((t) => t.value),
+        mode: 'keep',
+        keptIndex: null,
+        tendances: trio.map((t) => t.key),
+      },
+    });
   };
+  /**
+   * Keeping a die settles the throw. Every confirmation is dropped: which dice
+   * were discarded just changed, and on a cast that is exactly what decides
+   * which of them owed a reroll.
+   */
+  const keep = (index: number) =>
+    setState((s) => (s.roll ? { ...s, roll: { ...s.roll, keptIndex: index }, confirms: [] } : s));
+  /** Reroll ONE die's confirmation — a cast can owe several, one per die. */
+  const confirm = (index: number) =>
+    setState((s) => {
+      const confirms = [...s.confirms];
+      confirms[index] = rollDie(DIE_SIDES);
+      return { ...s, confirms };
+    });
+
+  // Changing what you are about to roll clears what you rolled: the dice on
+  // screen must never belong to a different question than the one on display.
   const pickSides = (s: number) => {
     onSidesChange(s);
-    clearResults();
-    setSidesMenu(false);
+    setState(EMPTY);
   };
   const setCountSafe = (t: string) => {
-    setCount(Math.max(1, parseInt(t, 10) || 1));
-    clearResults();
+    setCount(t);
+    setState(EMPTY);
   };
-  const roll = () => {
-    setTendances(null);
-    setResult(rollDice(count, sides));
+  const setDiceSafe = (t: string) => {
+    // Clamp what is TYPED, not just what is thrown: a field reading « 9 » that
+    // rolls MAX_DICE dice is the app lying about what it did. An empty field is
+    // left empty so it can be retyped.
+    setDice(t === '' ? t : String(diceCount(Number(t))));
+    setState(EMPTY);
   };
-  const rollTendance = () => {
-    setResult(null);
-    setTendances(rollTendances());
+  const setModeSafe = (m: DiceMode) => {
+    setMode(m);
+    setState(EMPTY);
   };
 
-  const total = result ? result.reduce((a, b) => a + b, 0) : 0;
+  // Read on every render rather than stored: editing the difficulté has to move
+  // the verdict WITHOUT touching the dice. resolveRoll returns null on its own
+  // while a `keep` throw is still waiting to be picked from.
+  const result: RollResult | null =
+    context && state.roll != null && difficulty.trim() !== ''
+      ? resolveRoll(state.roll, context, Number(difficulty), state.confirms)
+      : null;
 
   return (
     <DsDialog
+      testID="dice-roller-dialog"
       visible
       onDismiss={onDismiss}
-      title="Lancer les dés"
+      title={context ? 'Jet de dés' : 'Lancer les dés'}
       dismiss={<Button onPress={onDismiss}>Fermer</Button>}
       actions={
         <>
           <Button mode="outlined" icon={dsIcon('dragon')} onPress={rollTendance}>
             Tendances
           </Button>
-          <Button mode="contained" icon={dsIcon('dice')} onPress={roll}>
+          <Button mode="contained" icon={dsIcon('dice')} onPress={rollNow}>
             Lancer
           </Button>
         </>
       }>
-      <View style={styles.countRow}>
-        <NumberField
-          fieldKey="count"
-          value={String(count)}
-          onChange={(_, t) => setCountSafe(t)}
-          maxLength={2}
-          style={styles.countField}
+      {context ? (
+        <RollContextBody
+          context={context}
+          dice={dice}
+          onDice={setDiceSafe}
+          mode={mode}
+          onMode={setModeSafe}
+          difficulty={difficulty}
+          onDifficulty={setDifficulty}
+          roll={state.roll}
+          tendances={tendanceRolls(state.roll)}
+          confirms={state.confirms}
+          onKeep={keep}
+          onConfirm={confirm}
+          result={result}
         />
-        <Text variant="titleLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-          ×
-        </Text>
-        <Menu
-          visible={sidesMenu}
-          onDismiss={() => setSidesMenu(false)}
-          anchor={
-            <Button
-              mode="outlined"
-              icon={dsIcon('chev')}
-              contentStyle={styles.sidesAnchorContent}
-              onPress={() => setSidesMenu(true)}>
-              {`D${sides}`}
-            </Button>
-          }>
-          {SIDES.map((s) => (
-            <Menu.Item key={s} title={`D${s}`} onPress={() => pickSides(s)} />
-          ))}
-        </Menu>
-      </View>
-      {tendances ? <TendanceDiceRow rolls={tendances} /> : null}
-      {result ? (
-        <View style={styles.results}>
-          <View style={styles.dice}>
-            {result.map((v, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.die,
-                  {
-                    borderColor: theme.prophecy.border,
-                    backgroundColor: theme.colors.surfaceVariant,
-                  },
-                ]}>
-                <Text style={[styles.dieText, { color: theme.colors.onSurface }]}>{v}</Text>
-              </View>
-            ))}
-          </View>
-          {result.length > 1 ? (
-            <Text variant="titleMedium" style={{ color: theme.colors.primary }}>
-              Total : {total}
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
+      ) : (
+        <RollFreeformBody
+          count={count}
+          onCount={setCountSafe}
+          sides={sides}
+          onPickSides={pickSides}
+          result={state.freeform}
+          tendances={tendanceRolls(state.roll)}
+        />
+      )}
     </DsDialog>
   );
 }
-
-const styles = StyleSheet.create({
-  countRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
-  // Two digits wide — a dice count is never more, and the width freed here is
-  // what lets « 2 × D10 » read as one centred phrase instead of a stretched form.
-  countField: { flexGrow: 0, flexBasis: 'auto', width: 56, minWidth: 0 },
-  // Chevron trailing the "D10" label instead of leading it.
-  sidesAnchorContent: { flexDirection: 'row-reverse' },
-  results: { alignItems: 'center', gap: 10 },
-  dice: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
-  die: {
-    minWidth: 40,
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  dieText: { fontFamily: 'Cinzel_600SemiBold', fontSize: 18 },
-});

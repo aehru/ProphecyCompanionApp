@@ -11,7 +11,11 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
-import { SkillColumnLegend, SkillRows } from '@/components/campaign/skill-groups-view';
+import {
+  SkillColumnLegend,
+  SkillRows,
+  type SkillLineData,
+} from '@/components/campaign/skill-groups-view';
 import SectionCard from '@/components/ui/section-card';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { SkillGroup } from '@/lib/skill-groups';
@@ -20,6 +24,7 @@ export default function SkillsReadPage({
   group,
   attrVal,
   title,
+  onRoll,
 }: {
   /** The attribut's group, or undefined when nothing is trained in it. */
   group?: SkillGroup;
@@ -27,6 +32,8 @@ export default function SkillsReadPage({
   attrVal: number;
   /** Set outside the pager, where the attribut isn't named by the strip. */
   title?: string;
+  /** Tapping a TOT rolls against it. Absent on a read-only reading. */
+  onRoll?: (skill: SkillLineData) => void;
 }) {
   const theme = useProphecyTheme();
 
@@ -49,7 +56,7 @@ export default function SkillsReadPage({
       )}
 
       {group ? (
-        <SkillRows group={group} density="comfortable" />
+        <SkillRows group={group} density="comfortable" onRoll={onRoll} />
       ) : (
         <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
           Aucune compétence.

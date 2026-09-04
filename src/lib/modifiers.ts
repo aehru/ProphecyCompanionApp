@@ -13,7 +13,7 @@
 // stable key (replaceSkills re-inserts rows, so ids churn), so a skill effect
 // stores its target as `skill:<name>` — see the `skill*` helpers below.
 
-import { WOUND_LEVELS } from '@/constants/prophecy';
+import { EFFECT_TARGET_LABEL, WOUND_LEVELS } from '@/constants/prophecy';
 
 /**
  * The only three fields a modifier computation reads off an effect. Structural
@@ -157,4 +157,13 @@ export function skillModifier(
 /** Format a signed modifier for display, e.g. 1 → "+1", -5 → "-5". */
 export function fmtSignedMod(n: number): string {
   return n > 0 ? `+${n}` : String(n);
+}
+
+/**
+ * Display label for an effect target: a skill's own name, a stat's label, or the
+ * raw key when it is neither (a target written by a future version).
+ */
+export function effectTargetLabel(target: string): string {
+  if (isSkillTarget(target)) return skillTargetName(target);
+  return EFFECT_TARGET_LABEL[target] ?? target;
 }

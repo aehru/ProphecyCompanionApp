@@ -17,15 +17,17 @@ import TabPage from '@/components/ui/tab-page';
 import TabPager from '@/components/ui/tab-pager';
 import WeaponCard from '@/components/weapon-card';
 import { MONEY } from '@/constants/prophecy';
-import type { ActualState } from '@/db/schema';
+import type { Weapon } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useInPlayWriters } from '@/hooks/use-in-play-writers';
+import { openRoller } from '@/lib/dice-roller';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { weaponRollContext } from '@/lib/roll-context';
 import { weaponSkillReading } from '@/lib/weapon-skill';
-import { updateActualState } from '@/repositories/actual-state';
 import { armorQuery } from '@/repositories/armor';
 import { enchantsQuery } from '@/repositories/enchants';
 import { effectsQuery } from '@/repositories/effects';
@@ -53,6 +55,10 @@ export default function CharacterWeaponsScreen() {
   const moneyRefs = useRef<Record<string, RNTextInput | null>>({});
   // ensure: money (dracs) lives on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
+
+  // Live writes go through the shared writers (local copy first, DB after) —
+  // see hooks/use-in-play-writers.
+  const { setStateValue } = useInPlayWriters({ characterId: numId, char, state, mirror: setState });
   const { data: weapons } = useLiveQuery(weaponsQuery(numId), [numId]);
   const { data: armors } = useLiveQuery(armorQuery(numId), [numId]);
   const { data: shields } = useLiveQuery(shieldsQuery(numId), [numId]);
@@ -89,10 +95,19 @@ export default function CharacterWeaponsScreen() {
   const skillList = skills ?? [];
   const caracModifier = (caracKey: string) => totalModifier(caracKey, effectList, wound);
 
-  const setStateValue = (key: string, value: number) => {
-    setState((p) => (p ? ({ ...p, [key]: value } as ActualState) : p));
-    updateActualState(numId, { [key]: value } as Partial<ActualState>);
+  // One place that knows what a weapon's compétence resolves against — the card
+  // reads it and the roll re-reads it, and the two must not drift apart.
+  const skillOf = (w: Weapon) =>
+    weaponSkillReading(w.skillName, skillList, rec, effectList, wound);
+
+  // An attack is its compétence's roll. Nothing happens when the weapon has no
+  // compétence linked, or names one that no longer exists — the card already
+  // says so, and there is no total to roll (see lib/roll-context).
+  const rollWeapon = (w: Weapon) => {
+    const ctx = weaponRollContext(w.name, skillOf(w));
+    if (ctx) openRoller(ctx);
   };
+
 
   const moneyKeys: string[] = MONEY.map((m) => m.key);
   const moneyChain = (key: string) => {
@@ -126,8 +141,9 @@ export default function CharacterWeaponsScreen() {
                   weapon={w}
                   caracValue={(k) => rec[k] ?? 0}
                   caracModifier={caracModifier}
-                  skill={weaponSkillReading(w.skillName, skillList, rec, effectList, wound)}
+                  skill={skillOf(w)}
                   enchanted={isEnchanted('weapon', w.id)}
+                  onRoll={() => rollWeapon(w)}
                 />
               ))}
             </Columns>

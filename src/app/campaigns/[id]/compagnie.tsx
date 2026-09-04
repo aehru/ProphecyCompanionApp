@@ -179,7 +179,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
                     notedUuids={notedUuids}
                     bottomInset={16 + insets.bottom}
                     stale={index === SKILLS_TAB && stale}
-                    onSelect={openReading}
+                    onOpen={openReading}
                   />
                 </View>
               )
@@ -199,6 +199,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
 
         {split ? (
           <View
+            testID="gm-sheet"
             style={[
               styles.pane,
               { backgroundColor: theme.colors.surface, borderLeftColor: theme.prophecy.borderSoft },
