@@ -9,9 +9,11 @@ import {
   EXPORT_FORMAT,
   exportFileName,
   forSharing,
+  linkEnchant,
   parseImport,
   planImport,
   planMagicReserves,
+  resolveEnchantLinks,
   SCHEMA_VERSION,
   serializeExport,
 } from './character-transfer';
@@ -109,7 +111,24 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
         effect: 'Pare une attaque.',
       },
     ],
+    items: [{ name: 'Corde de chanvre', description: '10 mètres', quantity: 1, equipped: false }],
     magicReserves: [{ nom: 'Gemme de vent', max: 5, current: 2 }],
+    // Bound to the weapon above (index 0) and sourced from the spell above
+    // (index 0) — the positional links an export carries instead of ids.
+    enchants: [
+      {
+        targetType: 'weapon',
+        targetIndex: 0,
+        name: 'Morsure ardente',
+        effect: 'Pare une attaque.',
+        usesMax: 3,
+        usesCurrent: 1,
+        sourceSpellName: 'Bouclier carmin',
+        sourceSpellIndex: 0,
+        castScore: 22,
+        difficulty: 15,
+      },
+    ],
     effects: [
       {
         label: 'Bénédiction',
@@ -192,6 +211,47 @@ describe('round-trip', () => {
     const r = parseImport(serializeExport(buildExport([bundle])));
     if (!r.ok) throw new Error(r.error);
     expect(r.data.characters[0].effects.map((e) => e.durationUnit)).toEqual(['permanent', 'minute']);
+  });
+
+  it('round-trips an enchantment: its positional links and the enchanter’s roll', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    if (!r.ok) throw new Error(r.error);
+    const e = r.data.characters[0].enchants[0];
+    // The links travel as positions, never as ids — the ids don't survive.
+    expect(e).toMatchObject({
+      targetType: 'weapon',
+      targetIndex: 0,
+      sourceSpellIndex: 0,
+      castScore: 22,
+      difficulty: 15,
+    });
+    expect(r.data.characters[0].items[0]).toEqual({
+      name: 'Corde de chanvre',
+      description: '10 mètres',
+      quantity: 1,
+      equipped: false,
+    });
+  });
+
+  it('round-trips a sortilège known only as an enchantment’s source', () => {
+    const bundle = makeBundle();
+    (bundle.spells[0] as { known?: boolean }).known = false;
+    const r = parseImport(serializeExport(buildExport([bundle])));
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.characters[0].spells[0].known).toBe(false);
+  });
+
+  it('imports a file written before items and enchantments existed', () => {
+    // Exactly the shape an older export has: the two keys are simply absent.
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: Record<string, unknown>[];
+    };
+    delete exp.characters[0].items;
+    delete exp.characters[0].enchants;
+    const r = parseImport(serializeExport(exp as never));
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.characters[0].items).toEqual([]);
+    expect(r.data.characters[0].enchants).toEqual([]);
   });
 
   it('round-trips an empty roster', () => {
@@ -381,6 +441,68 @@ describe('parseImport validation', () => {
     const exp = buildExport([makeBundle({ character: { ...makeBundle().character, uuid: 'abc-123' } })]);
     const r = parseImport(serializeExport(exp));
     expect(r.ok && r.data.characters[0].character.uuid).toBe('abc-123');
+  });
+});
+
+// The one piece of this feature with a decision in it. Both halves live in the
+// repository's transaction, so these pure functions are the only place the
+// drop-vs-degrade rule can be pinned down at all.
+describe('linkEnchant / resolveEnchantLinks', () => {
+  const gearIndex = () => ({
+    weapon: new Map([[70, 0], [71, 1]]),
+    armor: new Map([[80, 0]]),
+    shield: new Map<number, number>(),
+    item: new Map([[90, 0]]),
+  });
+  const spellIndex = new Map([[10, 0], [11, 1]]);
+
+  it('writes the position, not the id — and reads the id back out of it', () => {
+    const links = linkEnchant(
+      { targetType: 'weapon', targetId: 71, sourceSpellId: 11 },
+      gearIndex(),
+      spellIndex,
+    );
+    expect(links).toEqual({ targetIndex: 1, sourceSpellIndex: 1 });
+    // The far side has different ids for the same positions — that IS the point.
+    expect(resolveEnchantLinks({ targetType: 'weapon', ...links! }, { weapon: [500, 501] }, [600, 601]))
+      .toEqual({ targetId: 501, sourceSpellId: 601 });
+  });
+
+  it('indexes each kind against its OWN array', () => {
+    // Id 70 is a weapon at position 0; nothing in `armor` has that id, so an
+    // armor-typed enchant pointing at it must not silently take the weapon's slot.
+    expect(linkEnchant({ targetType: 'armor', targetId: 70, sourceSpellId: null }, gearIndex(), spellIndex))
+      .toBeNull();
+    // And on the way back: position 0 means a different row per kind.
+    const ids = { weapon: [500], armor: [800] };
+    expect(resolveEnchantLinks({ targetType: 'armor', targetIndex: 0 }, ids, []))
+      .toEqual({ targetId: 800, sourceSpellId: null });
+  });
+
+  it('DROPS an enchant whose object is gone, either way round', () => {
+    expect(linkEnchant({ targetType: 'shield', targetId: 5, sourceSpellId: null }, gearIndex(), spellIndex))
+      .toBeNull();
+    // A file naming a kind this bundle has no rows for, or a position past the
+    // end of one it does — never bind to whatever else sits there.
+    expect(resolveEnchantLinks({ targetType: 'shield', targetIndex: 0 }, { weapon: [500] }, [])).toBeNull();
+    expect(resolveEnchantLinks({ targetType: 'weapon', targetIndex: 3 }, { weapon: [500] }, [])).toBeNull();
+  });
+
+  it('DEGRADES a missing source to null instead, keeping the enchant', () => {
+    // The spell was deleted under it (`on delete set null`) — the enchant still
+    // means something: its name and effect are a frozen snapshot.
+    expect(linkEnchant({ targetType: 'weapon', targetId: 70, sourceSpellId: 999 }, gearIndex(), spellIndex))
+      .toEqual({ targetIndex: 0, sourceSpellIndex: null });
+    expect(resolveEnchantLinks({ targetType: 'weapon', targetIndex: 0, sourceSpellIndex: 4 }, { weapon: [500] }, [600]))
+      .toEqual({ targetId: 500, sourceSpellId: null });
+  });
+
+  it('keeps position 0 and a source of 0 — neither is "absent"', () => {
+    // The falsy trap: index 0 is a real position and id 0 would be a real id.
+    expect(linkEnchant({ targetType: 'item', targetId: 90, sourceSpellId: 10 }, gearIndex(), spellIndex))
+      .toEqual({ targetIndex: 0, sourceSpellIndex: 0 });
+    expect(resolveEnchantLinks({ targetType: 'item', targetIndex: 0, sourceSpellIndex: 0 }, { item: [900] }, [1000]))
+      .toEqual({ targetId: 900, sourceSpellId: 1000 });
   });
 });
 

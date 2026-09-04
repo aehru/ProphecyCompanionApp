@@ -1,7 +1,7 @@
 // Character export / import: a self-contained, versioned JSON envelope that
 // carries one or more whole characters (sheet + live state + skills + armor +
-// weapons + shields + spells + magic reserve objects + effects) between
-// devices, or as a user backup.
+// weapons + shields + items + spells + magic reserve objects + enchantments +
+// effects) between devices, or as a user backup.
 //
 // This module is PURE — no DB, no filesystem. The repository layer
 // (`repositories/transfer`) gathers rows into bundles and re-inserts them; the
@@ -23,6 +23,7 @@ import {
   SPHERES,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
+import { ENCHANT_TARGETS, type EnchantTarget } from '@/db/schema';
 import { casteFromInput } from '@/lib/caste';
 
 /** Bumped on any breaking change to the bundle shape. Import rejects mismatches. */
@@ -84,6 +85,11 @@ const stateSchema = z.object({
   initiativeDiceIcons: z.array(str).optional(),
   conditions: str,
   notes: str,
+  // Expérience (total awarded / total spent). OPTIONAL for the same reason as
+  // the initiative keys above: exports predating the columns have no such key
+  // and import at the column default 0.
+  xpTotal: int.optional(),
+  xpSpent: int.optional(),
 });
 
 const skillSchema = z.object({
@@ -191,6 +197,53 @@ const spellSchema = z.object({
   // sharing concern: a preset slug identifies a rulebook entry, not a device.
   presetId: str.nullable().optional(),
   presetRevision: str.nullable().optional(),
+  // Part of the character's own repertoire, or only an enchantment's source?
+  // OPTIONAL (not a version bump, like `level`): every row that predates the
+  // column was a spell the character knew, which is the default.
+  known: z.boolean().optional(),
+});
+
+// Inventory. OPTIONAL with a `[]` default (not a version bump, like `shields`):
+// items were simply missing from the bundle until enchantments needed something
+// to be bound to, and older files carry none.
+const itemSchema = z.object({
+  name: str,
+  description: str,
+  quantity: int,
+  equipped: z.boolean(),
+});
+
+/**
+ * An enchantment, and the one thing that makes it awkward to carry: it points at
+ * a piece of gear and (sometimes) at a spell, and NEITHER id survives a file.
+ * Child rows are exported as plain arrays and re-inserted with fresh ids, so the
+ * link travels as a POSITION in the matching array of this same bundle —
+ * `targetIndex` into weapons/armor/shields/items per `targetType`,
+ * `sourceSpellIndex` into spells.
+ *
+ * An index and not a portable uuid on every gear row: the bundle is
+ * self-contained and its arrays are re-inserted in order, so a position resolves
+ * exactly, while uuids would mean four more columns, a backfill, and a minting
+ * rule at every place gear is created or duplicated. If a cross-file link is
+ * ever needed, a `targetUuid` can join this shape as an optional field without
+ * invalidating a single existing export.
+ *
+ * An index that no longer resolves (a hand-edited file) drops the enchant rather
+ * than binding it to the wrong sword.
+ */
+const enchantSchema = z.object({
+  targetType: z.enum(ENCHANT_TARGETS),
+  targetIndex: int,
+  name: str,
+  effect: str,
+  usesMax: int,
+  usesCurrent: int,
+  sourceSpellName: str.nullable().optional(),
+  sourceSpellIndex: int.nullable().optional(),
+  // The enchanter's roll and what it was rolled against. Nullable: an enchant
+  // with no recorded numbers is a normal state (see the `enchants` schema).
+  castScore: int.nullable().optional(),
+  difficulty: int.nullable().optional(),
 });
 
 // Magic reserve objects. OPTIONAL with a `[]` default (not a version bump, like
@@ -223,8 +276,10 @@ const characterBundleSchema = z.object({
   // OPTIONAL with a `[]` default (not a version bump, like `magicReserves`):
   // exports made before the table existed simply carry none.
   shields: z.array(shieldSchema).default([]),
+  items: z.array(itemSchema).default([]),
   spells: z.array(spellSchema),
   magicReserves: z.array(magicReserveSchema).default([]),
+  enchants: z.array(enchantSchema).default([]),
   effects: z.array(effectSchema),
 });
 
@@ -246,7 +301,66 @@ export const SKILL_FIELDS = Object.keys(skillSchema.shape);
 export const ARMOR_FIELDS = Object.keys(armorSchema.shape);
 export const WEAPON_FIELDS = Object.keys(weaponSchema.shape);
 export const SHIELD_FIELDS = Object.keys(shieldSchema.shape);
+/**
+ * Export side: an enchant's live row ids → the positions a file carries.
+ *
+ * Returns null when the target no longer resolves — an enchant bound to a
+ * deleted object has nothing to point at on the far side, and a bundle is only
+ * self-contained if every link in it resolves.
+ *
+ * A missing SOURCE is not the same thing: a spell can vanish out from under an
+ * enchant (`sourceSpellId` is `on delete set null`) while the enchant stays
+ * perfectly meaningful — `sourceSpellName` and `effect` are its frozen history.
+ * So an unresolvable source degrades to null; an unresolvable target drops.
+ */
+export function linkEnchant(
+  row: { targetType: EnchantTarget; targetId: number; sourceSpellId: number | null },
+  gearIndex: Record<EnchantTarget, Map<number, number>>,
+  spellIndex: Map<number, number>,
+): { targetIndex: number; sourceSpellIndex: number | null } | null {
+  const targetIndex = gearIndex[row.targetType]?.get(row.targetId);
+  if (targetIndex == null) return null;
+  return {
+    targetIndex,
+    sourceSpellIndex: row.sourceSpellId == null ? null : (spellIndex.get(row.sourceSpellId) ?? null),
+  };
+}
+
+/**
+ * Import side: the positions back into the ids just written. Mirror of
+ * {@link linkEnchant}, and it drops on the same rule — an index pointing past
+ * the end of the array (a hand-edited file, or a bundle whose gear was trimmed)
+ * binds the enchant to NOTHING rather than to whatever sits at that position.
+ */
+export function resolveEnchantLinks(
+  e: { targetType: string; targetIndex: number; sourceSpellIndex?: number | null },
+  gearIds: Partial<Record<EnchantTarget, number[]>>,
+  spellIds: number[],
+): { targetId: number; sourceSpellId: number | null } | null {
+  const targetId = gearIds[e.targetType as EnchantTarget]?.[e.targetIndex];
+  if (targetId == null) return null;
+  return {
+    targetId,
+    sourceSpellId: e.sourceSpellIndex == null ? null : (spellIds[e.sourceSpellIndex] ?? null),
+  };
+}
+
+export const ITEM_FIELDS = Object.keys(itemSchema.shape);
 export const SPELL_FIELDS = Object.keys(spellSchema.shape);
+/**
+ * The enchant COLUMNS only — `targetIndex`/`sourceSpellIndex` are computed from
+ * the sibling arrays at export time, so they can't be picked off a row.
+ */
+export const ENCHANT_FIELDS = [
+  'targetType',
+  'name',
+  'effect',
+  'usesMax',
+  'usesCurrent',
+  'sourceSpellName',
+  'castScore',
+  'difficulty',
+];
 export const MAGIC_RESERVE_FIELDS = Object.keys(magicReserveSchema.shape);
 export const EFFECT_FIELDS = Object.keys(effectSchema.shape);
 

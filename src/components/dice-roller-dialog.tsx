@@ -34,11 +34,11 @@ import {
  * presentational, so there is exactly one place where a die is rolled and one
  * place where the rules read it (`lib/roll`).
  *
- * The dialog only exists while open — `DiceRollerProvider` mounts it on demand —
+ * The dialog only exists while open — `<DiceRollerHost>` mounts it on demand —
  * so everything here starts fresh on every open, matching the "no roll history"
- * decision. The one thing that outlives an open is the die size, which the
- * provider holds: reopening the roller keeps the die you picked (for the session,
- * not across restarts).
+ * decision. The one thing that outlives an open is the die size, which the store
+ * holds (`lib/dice-roller`): reopening the roller keeps the die you picked (for
+ * the session, not across restarts).
  */
 
 /**
@@ -188,6 +188,7 @@ export default function DiceRollerDialog({
 
   return (
     <DsDialog
+      testID="dice-roller-dialog"
       visible
       onDismiss={onDismiss}
       title={context ? 'Jet de dés' : 'Lancer les dés'}

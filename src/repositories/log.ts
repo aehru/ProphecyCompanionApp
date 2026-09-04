@@ -33,3 +33,24 @@ export function logWrite(
   if (op === 'update') log.debug('repo.write', payload);
   else log.info('repo.write', payload);
 }
+
+/**
+ * Give a DELIBERATELY un-awaited write an error path.
+ *
+ * The in-play writers are optimistic on purpose — the local copy moves first so
+ * a long-pressed stepper repeats without waiting on SQLite — which means nobody
+ * is holding the promise when it rejects. Without this the failure is an
+ * unhandled rejection and the UI shows a value the database never took.
+ *
+ * The UI is deliberately left alone: reverting a wound tap mid-fight, with no
+ * room to explain why, is worse than a stale number that the next focus re-reads
+ * from the row. What the failure gets is a line in the diagnostic log, at
+ * `error` — which also flushes immediately (see lib/log/logger) — so a bug
+ * report carries it.
+ *
+ * Called at the site that fires the write, not threaded through the repository:
+ * the repository has no idea it was called without an `await`.
+ */
+export function detachWrite(entity: string, promise: Promise<unknown>, data: LogPayload = {}): void {
+  promise.catch((error) => log.error('repo.write.failed', error, { entity, ...data }));
+}

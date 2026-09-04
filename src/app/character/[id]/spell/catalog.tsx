@@ -32,11 +32,21 @@ export default function SpellCatalogModal() {
    * Which presets are already in this character's spellbook. `preset_id` and
    * not the name: a renamed spell is still the same pick, and a hand-written
    * one has no id and must never be flagged.
+   *
+   * Unknown rows are counted SEPARATELY: a sortilège that only exists because a
+   * hired mage enchanted an object with it is not in the spellbook, and badging
+   * it « Déjà ajouté » would talk the player out of learning it. It gets
+   * « Enchanté » instead — still worth seeing, since it says the character has
+   * already met this spell.
    */
-  const owned = useMemo(
-    () => new Set((ownedRows ?? []).map((r) => r.presetId).filter((id): id is string => !!id)),
-    [ownedRows],
-  );
+  const { owned, enchanted } = useMemo(() => {
+    const own = new Set<string>();
+    const ench = new Set<string>();
+    for (const r of ownedRows ?? []) {
+      if (r.presetId) (r.known ? own : ench).add(r.presetId);
+    }
+    return { owned: own, enchanted: ench };
+  }, [ownedRows]);
 
   const add = useCallback(
     async (preset?: SpellPreset) => {
@@ -69,7 +79,7 @@ export default function SpellCatalogModal() {
 
   return (
     <View style={styles.root}>
-      <SpellCatalogList readings={readings} owned={owned} onAdd={add} />
+      <SpellCatalogList readings={readings} owned={owned} enchanted={enchanted} onAdd={add} />
       <CatalogSnackbar state={added} />
     </View>
   );

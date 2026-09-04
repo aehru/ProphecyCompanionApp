@@ -186,11 +186,17 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
         title="Nouveau PNJ"
         dismiss={<Button onPress={() => setNpcName(null)}>Annuler</Button>}
         actions={
-          <Button mode="contained" icon={dsIcon('plus')} onPress={submitNpc}>
+          <Button testID="dialog-npc-submit" mode="contained" icon={dsIcon('plus')} onPress={submitNpc}>
             Créer
           </Button>
         }>
-        <TextInput label="Nom" value={npcName ?? ''} onChangeText={setNpcName} autoFocus />
+        <TextInput
+          testID="field-npc-name"
+          label="Nom"
+          value={npcName ?? ''}
+          onChangeText={setNpcName}
+          autoFocus
+        />
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
           Seul le nom est requis : la fiche s’ouvre ensuite pour compléter ce dont vous avez besoin.
         </Text>

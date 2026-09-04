@@ -11,13 +11,16 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 export default function Section({
   title,
   children,
+  testID,
 }: {
   title: string;
   children: React.ReactNode;
+  /** Names one block for the e2e suite (the GM sheet's gear sections use it). */
+  testID?: string;
 }) {
   const theme = useProphecyTheme();
   return (
-    <View style={styles.section}>
+    <View testID={testID} style={styles.section}>
       <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
         {title}
       </Text>

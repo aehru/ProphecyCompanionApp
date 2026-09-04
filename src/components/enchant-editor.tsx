@@ -2,22 +2,21 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
+import EnchantScoreSummary from '@/components/magic/enchant-score-summary';
 import NumberField from '@/components/number-field';
 import SpellDetail from '@/components/spell-detail';
 import ChipSelect from '@/components/ui/chip-select';
 import { dsIcon } from '@/components/ui/icon';
-import type { Armor, Enchant, EnchantTarget, Item, Shield, Spell, Weapon } from '@/db/schema';
+import type { Enchant, EnchantTarget, Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
-import { deleteEnchant, updateEnchant } from '@/repositories/enchants';
-
-const TARGET_KIND_OPTIONS = [
-  { key: 'weapon', label: 'Arme' },
-  { key: 'armor', label: 'Armure' },
-  { key: 'shield', label: 'Bouclier' },
-  { key: 'item', label: 'Objet' },
-] as const;
+import {
+  ENCHANT_TARGET_OPTIONS,
+  type EnchantTargetLists,
+  targetsOfKind,
+} from '@/lib/enchant-targets';
+import { deleteEnchant, setEnchantSource, updateEnchant } from '@/repositories/enchants';
 
 /**
  * Enchant editor form, rendered in the `enchant/[eid]` modal screen (mirrors
@@ -28,19 +27,18 @@ const TARGET_KIND_OPTIONS = [
  */
 export default function EnchantEditor({
   enchant: e,
-  weapons,
-  armor,
-  shields,
-  items,
+  lists,
   spells,
+  onPickFromCatalog,
   onClose,
 }: {
   enchant: Enchant;
-  weapons: Weapon[];
-  armor: Armor[];
-  shields: Shield[];
-  items: Item[];
+  /** Everything the character owns that can carry an enchantment. */
+  lists: EnchantTargetLists;
+  /** EVERY spell row of this character — the unknown enchant sources included. */
   spells: Spell[];
+  /** Opens the catalogue picker, for a sortilège the character does not know. */
+  onPickFromCatalog: () => void;
   onClose: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -51,30 +49,43 @@ export default function EnchantEditor({
     const max = Math.max(1, parseInt(t, 10) || 1);
     updateEnchant(e.id, { usesMax: max, usesCurrent: Math.min(e.usesCurrent, max) });
   });
+  // Both numbers CLEAR to null rather than to 0: an enchant with no recorded
+  // roll is a normal state (pure flavour, or a sheet filled before the player
+  // asked the GM), and a 0 would read as a botched cast instead of as silence.
+  const [castScore, setCastScore] = useDebouncedText(numText(e.castScore), (t) =>
+    updateEnchant(e.id, { castScore: parseScore(t) }),
+  );
+  const [difficulty, setDifficulty] = useDebouncedText(numText(e.difficulty), (t) =>
+    updateEnchant(e.id, { difficulty: parseScore(t) }),
+  );
 
-  const targetListFor = (kind: EnchantTarget) =>
-    kind === 'weapon' ? weapons : kind === 'armor' ? armor : kind === 'shield' ? shields : items;
-  const targetOptions = targetListFor(e.targetType).map((o) => ({
+  const targetOptions = targetsOfKind(e.targetType, lists).map((o) => ({
     key: String(o.id),
     label: o.name.trim() || '?',
   }));
 
-  const spellOptions = [
-    { key: '', label: 'Libre' },
-    ...spells.map((s) => ({ key: String(s.id), label: s.name.trim() || 'Sort' })),
-  ];
   // sourceSpellId is a soft link (set null by the FK if the spell was
   // deleted) — fall back to the frozen name/effect snapshot when it's gone.
   const linkedSpell = e.sourceSpellId != null ? spells.find((s) => s.id === e.sourceSpellId) : undefined;
 
+  // The chips offer the character's OWN sortilèges — plus this enchant's source
+  // when it is one they don't know, which is the only way an unknown spell is
+  // ever selectable. Picking a new unknown one goes through the catalogue.
+  const spellOptions = [
+    { key: '', label: 'Libre' },
+    ...spells
+      .filter((s) => s.known || s.id === linkedSpell?.id)
+      .map((s) => ({ key: String(s.id), label: s.name.trim() || 'Sort' })),
+  ];
+  // The repository owns the copy of name/effect/difficulté and the cleanup of
+  // an unknown source left behind — see `setEnchantSource`.
   const pickSpell = (key: string) => {
     if (!key) {
-      updateEnchant(e.id, { sourceSpellName: null, sourceSpellId: null });
+      setEnchantSource(e.id, null);
       return;
     }
     const sp = spells.find((s) => String(s.id) === key);
-    if (!sp) return;
-    updateEnchant(e.id, { name: sp.name, effect: sp.effect, sourceSpellName: sp.name, sourceSpellId: sp.id });
+    if (sp) setEnchantSource(e.id, sp);
   };
 
   const adjustUses = (delta: number) => {
@@ -100,13 +111,13 @@ export default function EnchantEditor({
     <>
       <ChipSelect
         label="Cible"
-        options={TARGET_KIND_OPTIONS}
+        options={ENCHANT_TARGET_OPTIONS}
         value={e.targetType}
         onChange={(k) => {
           const kind = k as EnchantTarget;
           // Only switch if the character owns at least one object of that
           // kind — otherwise there's nothing valid to point targetId at.
-          const first = targetListFor(kind)[0];
+          const first = targetsOfKind(kind, lists)[0];
           if (first) updateEnchant(e.id, { targetType: kind, targetId: first.id });
         }}
       />
@@ -122,7 +133,7 @@ export default function EnchantEditor({
         />
       )}
 
-      {spells.length > 0 ? (
+      {spellOptions.length > 1 ? (
         <ChipSelect
           label="Sort lié (optionnel — copie le nom et l’effet)"
           options={spellOptions}
@@ -130,6 +141,19 @@ export default function EnchantEditor({
           onChange={pickSpell}
         />
       ) : null}
+
+      {/* An object is routinely enchanted by SOMEONE ELSE — a mage the character
+          paid — so the source may be any sortilège in the game, not one of the
+          chips above. What the catalogue adds is recorded as unknown: it never
+          joins the spellbook. */}
+      <Button
+        compact
+        mode="outlined"
+        icon={dsIcon('magic')}
+        onPress={onPickFromCatalog}
+        style={styles.viewSpellBtn}>
+        Sort du catalogue…
+      </Button>
 
       {linkedSpell ? (
         <Button
@@ -175,6 +199,28 @@ export default function EnchantEditor({
         />
       </View>
 
+      {/* The roll that made the object. It is the ENCHANTER's — usually not this
+          character — so it is typed in, never rolled here, and a failed score is
+          recorded as readily as a good one. */}
+      <Text style={styles.sectionLabel}>Enchantement</Text>
+      <View style={styles.scoreRow}>
+        <NumberField
+          fieldKey="castScore"
+          label="Score obtenu"
+          value={castScore}
+          onChange={(_, t) => setCastScore(t)}
+          style={styles.scoreField}
+        />
+        <NumberField
+          fieldKey="difficulty"
+          label="Difficulté"
+          value={difficulty}
+          onChange={(_, t) => setDifficulty(t)}
+          style={styles.scoreField}
+        />
+      </View>
+      <EnchantScoreSummary enchant={e} spell={linkedSpell} />
+
       <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>
         Supprimer
       </Button>
@@ -182,8 +228,24 @@ export default function EnchantEditor({
   );
 }
 
+/** A nullable stored number as field text — empty when nothing was recorded. */
+function numText(n: number | null): string {
+  return n == null ? '' : String(n);
+}
+
+/** Field text back to a stored number: blank clears it, a score never goes below 0. */
+function parseScore(t: string): number | null {
+  const trimmed = t.trim();
+  if (trimmed === '') return null;
+  const n = parseInt(trimmed, 10);
+  return Number.isNaN(n) ? null : Math.max(0, n);
+}
+
 const styles = StyleSheet.create({
   usesField: { flexGrow: 0, flexBasis: 140 },
+  sectionLabel: { fontSize: 13, fontWeight: '600', marginTop: 4 },
+  scoreRow: { flexDirection: 'row', gap: 12 },
+  scoreField: { flexGrow: 0, flexBasis: 140 },
   viewSpellBtn: { alignSelf: 'flex-start' },
   usesRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   usesLabel: { flex: 1, fontSize: 16 },

@@ -8,7 +8,7 @@
 // and the Compagnie are two routes that must not open two GM sockets for the
 // same gmToken.
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 import type { Campaign } from '@/db/schema';
 import { useGmRoster } from '@/hooks/use-gm-roster';
@@ -33,13 +33,19 @@ export function TableRosterProvider({
   const local = useLocalRoster(campaign.id);
   // Connects only when a server is attached — see useGmRoster's own guard.
   const { status, serverError, roster: remote, kick } = useGmRoster(campaign);
-  const roster = mergeRoster(local, remote);
   const connected = Boolean(campaign.serverUrl && campaign.code && campaign.gmToken);
-  return (
-    <TableRosterContext.Provider value={{ status, serverError, roster, kick, connected }}>
-      {children}
-    </TableRosterContext.Provider>
+
+  // Both memoized by hand, for the reason `useGmRoster` memoizes its own half:
+  // the roster is a FlatList's `data` and the initiative order's input, so a
+  // fresh array (or a fresh context value, which re-renders every consumer)
+  // would undo the memoization downstream — every player push would re-derive
+  // the turn order and re-render every card.
+  const roster = useMemo(() => mergeRoster(local, remote), [local, remote]);
+  const value = useMemo(
+    () => ({ status, serverError, roster, kick, connected }),
+    [status, serverError, roster, kick, connected],
   );
+  return <TableRosterContext.Provider value={value}>{children}</TableRosterContext.Provider>;
 }
 
 /** Read the table roster. Throws if used outside a GM subtree. */

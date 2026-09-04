@@ -20,7 +20,7 @@ import { ATTRIBUTS } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
-import { useDiceRoller } from '@/hooks/use-dice-roller';
+import { openRoller } from '@/lib/dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSkillGroups } from '@/hooks/use-skill-groups';
 import { useSkillsDraft } from '@/hooks/use-skills-draft';
@@ -62,7 +62,6 @@ export default function CharacterSkillsScreen() {
   const { char, state } = useCharacterState(numId, { reloadOnFocus: true });
   const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
-  const { open: openRoller } = useDiceRoller();
   const [editing, setEditing] = useEditToggle(navigation);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
@@ -91,7 +90,7 @@ export default function CharacterSkillsScreen() {
   // total and the confirmation number are not the same one.
   const rollSkill = useCallback(
     (skill: SkillLineData) => openRoller(skillRollContext(skill)),
-    [openRoller],
+    [],
   );
 
   const clearFocus = useCallback(() => setPendingFocus(null), []);

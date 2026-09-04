@@ -109,12 +109,19 @@ const keyExtractor = (e: { preset: { id: string } }) => e.preset.id;
 export default function SpellCatalogList({
   readings,
   owned = NONE_OWNED,
+  enchanted = NONE_OWNED,
   onAdd,
 }: {
   /** Casting score and stat values for this character's sheet. */
   readings?: SpellReadings;
   /** Preset ids already in the spellbook — flagged « Déjà ajouté », never hidden. */
   owned?: ReadonlySet<string>;
+  /**
+   * Preset ids the character owns only as an ENCHANT's source — a spell cast
+   * into one of their objects by someone else. Flagged « Enchanté »: it is not
+   * in the spellbook and adding it is a perfectly sensible thing to do.
+   */
+  enchanted?: ReadonlySet<string>;
   /** Called with a preset, or with nothing for « Sortilège personnalisé ». */
   onAdd?: (preset?: SpellPreset) => void;
 }) {
@@ -212,10 +219,11 @@ export default function SpellCatalogList({
         total={totals.get(item.preset.id)}
         caracValue={caracValue}
         owned={owned.has(item.preset.id)}
+        enchanted={enchanted.has(item.preset.id)}
         onAdd={onAdd}
       />
     ),
-    [onAdd, totals, caracValue, owned],
+    [onAdd, totals, caracValue, owned, enchanted],
   );
 
   const renderSectionHeader = useCallback(
@@ -326,6 +334,7 @@ const SpellRow = React.memo(function SpellRow({
   total,
   caracValue,
   owned,
+  enchanted,
   onAdd,
 }: {
   entry: Entry;
@@ -334,6 +343,8 @@ const SpellRow = React.memo(function SpellRow({
   caracValue?: (caracKey: string) => number;
   /** Already in this character's spellbook — flagged, never hidden or blocked. */
   owned: boolean;
+  /** Known to the character only as an enchantment's source. */
+  enchanted: boolean;
   onAdd?: (preset: SpellPreset) => void;
 }) {
   const { preset: p } = entry;
@@ -355,7 +366,7 @@ const SpellRow = React.memo(function SpellRow({
       icon="magic"
       name={p.data.name ?? ''}
       subtitle={sub}
-      badge={owned ? 'Déjà ajouté' : undefined}
+      badge={owned ? 'Déjà ajouté' : enchanted ? 'Enchanté' : undefined}
       addLabel={`Ajouter ${p.data.name}`}
       onAdd={onAdd && (() => onAdd(p))}>
       {/* The preset's discipline/sphère fall back the same way the index does,

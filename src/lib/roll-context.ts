@@ -13,7 +13,12 @@
  * beside it — so a stat roll has to add that modifier itself, or the total would
  * silently ignore a wound.
  */
-import { DISCIPLINE_LABEL, SPHERE_LABEL } from '@/constants/prophecy';
+import {
+  ATTRIBUTS,
+  CARACTERISTIQUES,
+  DISCIPLINE_LABEL,
+  SPHERE_LABEL,
+} from '@/constants/prophecy';
 import { totalModifier, type ModifierSource } from '@/lib/modifiers';
 import { DEFAULT_DIFFICULTY, type RollContext } from '@/lib/roll';
 import type { SpellTotal } from '@/lib/spell-total';
@@ -21,6 +26,20 @@ import type { WeaponSkillReading } from '@/lib/weapon-skill';
 
 /** What a modifier part is called when it makes the sum. */
 const MODIFIER_LABEL = 'Modificateur';
+
+/**
+ * Both stat catalogues by column key, for the roller: the dialog titles a roll
+ * with the full name a tile has no room for (« Volonté », not « VOL ») and keeps
+ * the abbreviation for the sum. Attributs have no short form and use neither.
+ *
+ * Built once at module load — the catalogues are static — and shared, because
+ * the Fiche and the GM's roster now build the same roll from two different
+ * shapes of the same character.
+ */
+export const STAT_LABELS: Record<string, { label: string; abbr?: string }> = {
+  ...Object.fromEntries(CARACTERISTIQUES.map((c) => [c.key, { label: c.label, abbr: c.abbr }])),
+  ...Object.fromEntries(ATTRIBUTS.map((a) => [a.key, { label: a.label }])),
+};
 
 /** The one sphère whose fluctuation is the Fatalité rather than the Dragon. */
 const OMBRE_SPHERE = 'sphereOmbre';

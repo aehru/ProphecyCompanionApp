@@ -16,6 +16,28 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [ ] **Migration authoring guidelines.** Document the safe-change rules in DEV.md: additive columns with defaults, avoid tightening constraints on existing columns, never hand-edit `drizzle/` artifacts.
 - [ ] **Add a `db:generate` script** to `package.json` wrapping `drizzle-kit generate` (currently a bare `bunx` command).
 
+## Performance
+
+- [ ] **Cache prepared statements in the driver.** Every non-`run` query in
+  [src/db/client.ts](src/db/client.ts) does `prepareAsync` → `executeForRawResultAsync`
+  → `finalizeAsync`, so identical SQL is re-compiled on every call. That matters
+  because the app is subscription-heavy: a character tab holds seven to nine
+  `useLiveQuery` subscriptions, and drizzle refetches on any write to a watched
+  table — one wound tap re-runs, re-prepares and re-finalizes the lot.
+  _Sketch:_ a `Map<sqlText, SQLiteStatement>` in front of `execute`, finalizing
+  on `closeConnection()` so a restore can still swap the file underneath.
+  _Why it is not done yet:_ **nobody has measured it.** It was inferred from
+  reading the driver, not from a profile, and it sits on the path every single
+  query in the app takes — the worst place to trade correctness for a win of
+  unknown size. The failure modes are real: a statement outliving its
+  connection across the lock-retry reopen, and cache growth on the parameterized
+  `inArray` queries, whose SQL text varies with the number of ids.
+  _Do this in order:_ profile a real device first (a stat stepper on a character
+  with a full sheet is the loudest case), and only then cache — the repository
+  harness added in [test-db.ts](src/repositories/test-db.ts) can now cover the
+  lifecycle. **If a tester reports the sheet feeling sluggish on a low-end
+  Android while everything else is fine, this is the first suspect.**
+
 ## Game content
 
 - [x] **Manage spells** — spellbook with catalogue + editor, disciplines, reserve & spheres.
@@ -165,14 +187,13 @@ merge, character detail sheet, join disclaimer, privacy policy.
   for its own NPCs on top of the projection: armes (damage formulas resolved
   with the wound/effects modifier), armures, boucliers, sorts. Remote players
   stay projection-limited by protocol.
-- [ ] **No way to add a bonus/malus to a PNJ from the table.** `createEffect` is
-  called from exactly one place, the Fiche's "Effet" FAB
-  ([src/app/character/[id]/(tabs)/fiche.tsx](src/app/character/%5Bid%5D/(tabs)/fiche.tsx));
-  `<NpcInPlayEditor>` renders `<EffectsCard>`, which by design never spawns rows,
-  so the GM can only view and tick existing effects and has to leave the campaign
-  to create one. _Fix with the planned effect-creation rework:_ an add control in
-  the in-play editor, ideally opening `<EffectEditor>` in a `<DsDialog>` so the
-  GM stays on the table screen.
+- [x] **Adding a bonus/malus to a PNJ from the table.** Creating AND editing an
+  effect now happen in [`<EffectDialog>`](src/components/effect-dialog.tsx), owned
+  by `<EffectsCard>` — so both callers (the Fiche, `<NpcInPlayEditor>`) get the
+  same surface and the GM never leaves the campaign screen. The `effect/[eid]`
+  modal route is gone with it. The dialog **drafts**: nothing is written until
+  « Enregistrer », where the old flow inserted a blank row up front and left a +0
+  effect behind whenever the editor was backed out of.
 - [ ] **A quick-created PNJ has no wound boxes and no initiative dice.**
   `createNpc` ([src/repositories/campaigns.ts](src/repositories/campaigns.ts))
   builds the character with a name only, so every `*Max` column keeps its `0`

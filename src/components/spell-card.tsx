@@ -254,6 +254,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
             value={s.castTimeUnit}
             onChange={(k) => updateSpell(s.id, { castTimeUnit: k as Spell['castTimeUnit'] })}
             style={styles.castUnit}
+            inline
           />
         </View>
       </View>
@@ -305,6 +306,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
             value={s.durationUnit}
             onChange={(k) => updateSpell(s.id, { durationUnit: k as Spell['durationUnit'] })}
             style={styles.castUnit}
+            inline
           />
         </View>
       </View>
@@ -381,7 +383,9 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   numCol: { flexGrow: 1, flexBasis: 120, minWidth: 120 },
   fieldLabel: { fontSize: 12, marginBottom: 2 },
-  castRow: { flexDirection: 'row', gap: 12 },
+  // Tops, not the default stretch: the unit field expands its options in place,
+  // and a stretched neighbour would grow just as tall to match it.
+  castRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   castAmount: { flexGrow: 0, flexBasis: 90 },
   castUnit: { flexGrow: 1, flexBasis: 120 },
   // Wider than `castAmount`: this one holds a formula ("30 + 30 par NR"), not a

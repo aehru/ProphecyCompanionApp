@@ -2,10 +2,10 @@ import React from 'react';
 import { IconButton } from 'react-native-paper';
 
 import { dsIcon } from '@/components/ui/icon';
-import { useDiceRoller } from '@/hooks/use-dice-roller';
+import { openRoller } from '@/lib/dice-roller';
 
 /**
- * The header entry point to the app-level dice roller (see `use-dice-roller`).
+ * The header entry point to the app-level dice roller (see `lib/dice-roller`).
  *
  * It goes in a navigator's `headerRight` rather than the FAB stack: four of the
  * five character tabs already stack one or two FABs bottom-right, and a third
@@ -15,6 +15,5 @@ import { useDiceRoller } from '@/hooks/use-dice-roller';
  * beside its own button.
  */
 export default function DiceRollerButton() {
-  const { open } = useDiceRoller();
-  return <IconButton testID="dice-roller" icon={dsIcon('dice')} onPress={() => open()} />;
+  return <IconButton testID="dice-roller" icon={dsIcon('dice')} onPress={() => openRoller()} />;
 }

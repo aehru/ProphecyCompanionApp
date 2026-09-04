@@ -1,8 +1,14 @@
 import { desc, eq, inArray, isNull } from 'drizzle-orm';
 
 import { SPHERES } from '@/constants/prophecy';
-import { db } from '@/db/client';
-import { actualState, characters, type NewActualState, type NewCharacter } from '@/db/schema';
+import { db, transaction, type Executor } from '@/db/client';
+import {
+  actualState,
+  characters,
+  type Character,
+  type NewActualState,
+  type NewCharacter,
+} from '@/db/schema';
 import { initiativeDiceCount, rollInitiativeWithIcons } from '@/lib/dice';
 import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
@@ -16,10 +22,16 @@ import { logWrite } from '@/repositories/log';
  */
 export async function backfillCharacterUuids(): Promise<void> {
   const rows = await db.select({ id: characters.id }).from(characters).where(isNull(characters.uuid));
-  for (const r of rows) {
-    await db.update(characters).set({ uuid: newUuid() }).where(eq(characters.id, r.id));
-  }
-  if (rows.length > 0) logWrite('characters', 'update', { count: rows.length, phase: 'uuid-backfill' });
+  if (rows.length === 0) return;
+  // One transaction rather than N queued statements: this runs on every launch
+  // right after the migrations, and a half-backfilled roster would leave some
+  // characters without a campaign identity until the next start.
+  await transaction(async (tx) => {
+    for (const r of rows) {
+      await tx.update(characters).set({ uuid: newUuid() }).where(eq(characters.id, r.id));
+    }
+  });
+  logWrite('characters', 'update', { count: rows.length, phase: 'uuid-backfill' });
 }
 
 /** Magic pools whose current value should follow their max when the max changes. */
@@ -91,22 +103,27 @@ export async function rollInitiativeFor(charUuids: readonly string[]): Promise<n
     // sheet dice (bonus reads as null → 0).
     .leftJoin(actualState, eq(actualState.characterId, characters.id))
     .where(inArray(characters.uuid, [...charUuids]));
+  // One transaction for the whole side: the GM opening a fight expects every
+  // PNJ to have rolled or none to have, not a turn order half of which is last
+  // fight's numbers.
   let rolled = 0;
-  for (const row of rows) {
-    const dice = initiativeDiceCount(row.max ?? 0, row.bonus ?? 0);
-    if (dice <= 0) continue;
-    // Marks ride along with their own roll, exactly as on the Fiche — a bulk
-    // roll must not shuffle which die is the PNJ's off hand.
-    const { values, icons } = rollInitiativeWithIcons(dice, row.icons ?? []);
-    await updateActualState(row.id, { initiativeValues: values, initiativeDiceIcons: icons });
-    rolled++;
-  }
+  await transaction(async (tx) => {
+    for (const row of rows) {
+      const dice = initiativeDiceCount(row.max ?? 0, row.bonus ?? 0);
+      if (dice <= 0) continue;
+      // Marks ride along with their own roll, exactly as on the Fiche — a bulk
+      // roll must not shuffle which die is the PNJ's off hand.
+      const { values, icons } = rollInitiativeWithIcons(dice, row.icons ?? []);
+      await updateActualState(row.id, { initiativeValues: values, initiativeDiceIcons: icons }, tx);
+      rolled++;
+    }
+  });
   logWrite('actual_state', 'update', { count: rolled, phase: 'roll-initiative' });
   return rolled;
 }
 
-export async function getCharacter(id: number) {
-  const rows = await db.select().from(characters).where(eq(characters.id, id)).limit(1);
+export async function getCharacter(id: number, x: Executor = db) {
+  const rows = await x.select().from(characters).where(eq(characters.id, id)).limit(1);
   return rows[0] ?? null;
 }
 
@@ -115,32 +132,59 @@ export async function createCharacter(data: Partial<NewCharacter>) {
   // Magic reserve defaults to Volonté when the form left it blank (rulebook);
   // an explicit form value wins. Never re-syncs if Volonté later changes.
   const reserve = data.reserveMagiqueMax || data.volonte || 0;
-  const [row] = await db
-    .insert(characters)
-    .values({ ...data, reserveMagiqueMax: reserve, createdAt: now, updatedAt: now })
-    .returning();
-  // Spheres start full (current = max), matching the reserve/resource pools.
-  const rowRec = row as unknown as Record<string, number>;
-  const sphereCurrents = Object.fromEntries(
-    SPHERES.map((s) => [`${s.key}Current`, rowRec[`${s.key}Max`] ?? 0]),
-  ) as Partial<NewActualState>;
-  // Every character gets a matching state row. Pools start full so a fresh
-  // character isn't created empty.
-  await db.insert(actualState).values({
-    characterId: row.id,
-    maitriseCurrent: row.maitriseMax,
-    chanceCurrent: row.chanceMax,
-    reserveMagiqueCurrent: row.reserveMagiqueMax,
-    ...sphereCurrents,
+  // Both rows or neither: the sheet/state split is 1:1 by construction, and a
+  // `characters` row whose `actual_state` never landed is a character with no
+  // wounds, no pools and no initiative — a shape nothing else in the app expects.
+  const row = await transaction(async (tx) => {
+    const created = await tx
+      .insert(characters)
+      .values({ ...data, reserveMagiqueMax: reserve, createdAt: now, updatedAt: now })
+      .returning()
+      .get();
+    // Spheres start full (current = max), matching the reserve/resource pools.
+    const rowRec = created as unknown as Record<string, number>;
+    const sphereCurrents = Object.fromEntries(
+      SPHERES.map((s) => [`${s.key}Current`, rowRec[`${s.key}Max`] ?? 0]),
+    ) as Partial<NewActualState>;
+    // Every character gets a matching state row. Pools start full so a fresh
+    // character isn't created empty.
+    await tx.insert(actualState).values({
+      characterId: created.id,
+      maitriseCurrent: created.maitriseMax,
+      chanceCurrent: created.chanceMax,
+      reserveMagiqueCurrent: created.reserveMagiqueMax,
+      ...sphereCurrents,
+    });
+    return created;
   });
   logWrite('characters', 'insert', { characterId: row.id, uuid: row.uuid ?? undefined, kind: row.kind });
   return row;
 }
 
-export async function updateCharacter(id: number, data: Partial<NewCharacter>) {
+/**
+ * Update the sheet, and top up any magic pool whose maximum just became known.
+ *
+ * Read-modify-write across two tables, so it runs in a transaction: the "was it
+ * 0 before?" decision is only correct against the row this same unit of work is
+ * about to overwrite, and a concurrent edit landing between the read and the
+ * write would make it answer about a value nobody has any more.
+ *
+ * `x` is for a caller that already holds a transaction (`spawnNpc`) — passing it
+ * joins that one instead of opening a second, which would deadlock. See
+ * `transaction()` in db/client.
+ */
+// Return type spelled out: the function references itself (the no-executor case
+// re-enters through `transaction`), which TypeScript cannot infer through.
+export async function updateCharacter(
+  id: number,
+  data: Partial<NewCharacter>,
+  x?: Executor,
+): Promise<Character> {
+  if (!x) return transaction((tx) => updateCharacter(id, data, tx));
+
   // Read the previous maxes first so we can fill a pool that just became known.
-  const prev = await getCharacter(id);
-  const [row] = await db
+  const prev = await getCharacter(id, x);
+  const [row] = await x
     .update(characters)
     .set({ ...data, updatedAt: new Date() })
     .where(eq(characters.id, id))
@@ -158,7 +202,7 @@ export async function updateCharacter(id: number, data: Partial<NewCharacter>) {
     if (prevMax === 0 && nextMax > 0) currentPatch[curKey] = nextMax;
   }
   if (Object.keys(currentPatch).length > 0) {
-    await updateActualState(id, currentPatch as Partial<NewActualState>);
+    await updateActualState(id, currentPatch as Partial<NewActualState>, x);
   }
   logWrite('characters', 'update', { characterId: id }, data);
   return row;
