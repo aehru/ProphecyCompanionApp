@@ -65,11 +65,11 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/react": "~19.2.10",
     "babel-plugin-inline-import": "^3.0.0",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.3",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^9.39.4",
+    "eslint": "^10.9.1",
     "eslint-config-expo": "~57.0.2",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "vitest": "^4.1.10"
   },
   "private": true
