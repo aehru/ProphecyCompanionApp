@@ -51,11 +51,12 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
   export/import. Deliberately NOT in the campaign projection: what a character is
   bad at is not roster data.
   _Remaining, in order:_
-  1. **The rulebook rows.** The 11 « Désavantages communs » are in
-     `data-src/traits.csv`, each with its `effetJeu` summary. The rest of the
-     désavantages (Rares, Enfant, Ancien) and every avantage are still to type —
-     the app never invents rulebook text, so they arrive one scanned page at a
-     time, then `bun run build:catalogs`.
+  1. **The rulebook rows.** All 50 désavantages are in `data-src/traits.csv` —
+     15 communs, 15 rares, 10 enfants, 10 anciens — each with its `effetJeu`
+     summary, its `precision` prompt where the entry is a blank the player fills,
+     and its `evolutif` flag. The AVANTAGES are still to type (général, enfants,
+     anciens): the app never invents rulebook text, so they arrive one scanned
+     page at a time, then `bun run build:catalogs`.
   2. **Mechanical effects.** Traits are descriptive today: nothing computes from
      one. Once the full list exists, the shape of what they actually do is
      knowable, and the ones granting a flat bonus/malus should write an `effects`
