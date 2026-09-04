@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildTraitIndex, groupTraits, type GroupableTrait } from '@/lib/trait-grouping';
+import type { TraitKind } from '@/constants/prophecy';
+import {
+  buildTraitIndex,
+  groupTraits,
+  hasTraitFilters,
+  type GroupableTrait,
+} from '@/lib/trait-grouping';
+
+/** The criteria object the screen builds, with the two filters off by default. */
+const on = (kind: TraitKind, over: { query?: string; rarity?: string } = {}) => ({
+  kind,
+  query: '',
+  rarity: '',
+  ...over,
+});
 
 const preset = (
   id: string,
@@ -50,14 +64,14 @@ describe('groupTraits', () => {
   ]);
 
   it('keeps only the browsed kind', () => {
-    const { groups, total, kindTotal } = groupTraits(index, 'avantage', '');
+    const { groups, total, kindTotal } = groupTraits(index, on('avantage'));
     expect(total).toBe(1);
     expect(kindTotal).toBe(1);
     expect(groups.flatMap((g) => g.items.map((e) => e.preset.id))).toEqual(['fortune']);
   });
 
   it('groups in the rulebook’s order of headings, dropping the empty ones', () => {
-    const { groups } = groupTraits(index, 'desavantage', '');
+    const { groups } = groupTraits(index, on('desavantage'));
     // TRAIT_KIND_RARITIES order is commun, rare, enfant, ancien — « rare » and
     // « enfant » hold nothing here and get no bare heading.
     expect(groups.map((g) => g.rarity)).toEqual(['commun', 'ancien']);
@@ -65,7 +79,7 @@ describe('groupTraits', () => {
   });
 
   it('matches on the description as well as the name', () => {
-    const { total, groups } = groupTraits(index, 'desavantage', 'faveur');
+    const { total, groups } = groupTraits(index, on('desavantage', { query: 'faveur' }));
     expect(total).toBe(1);
     expect(groups[0].items[0].preset.id).toBe('dette');
   });
@@ -73,10 +87,10 @@ describe('groupTraits', () => {
   it('separates “nothing matched” from “this half is not typed yet”', () => {
     // The distinction the empty state is built on: a search that found nothing
     // must not read the same as a catalogue half nobody has filled in.
-    const empty = groupTraits(buildTraitIndex([]), 'avantage', '');
+    const empty = groupTraits(buildTraitIndex([]), on('avantage'));
     expect(empty).toMatchObject({ total: 0, kindTotal: 0 });
 
-    const noMatch = groupTraits(index, 'avantage', 'zzz');
+    const noMatch = groupTraits(index, on('avantage', { query: 'zzz' }));
     expect(noMatch).toMatchObject({ total: 0, kindTotal: 1 });
   });
 
@@ -85,8 +99,55 @@ describe('groupTraits', () => {
     // hand-edited file could produce one — it gets a heading rather than
     // vanishing from a list that claims to be the whole catalogue.
     const odd = buildTraitIndex([preset('x', { kind: 'avantage', rarity: 'rare' })]);
-    const { groups, total } = groupTraits(odd, 'avantage', '');
+    const { groups, total } = groupTraits(odd, on('avantage'));
     expect(total).toBe(1);
     expect(groups.map((g) => g.rarity)).toEqual(['rare']);
+  });
+
+  it('narrows to one rareté, and to that heading alone', () => {
+    const { groups, total, kindTotal } = groupTraits(
+      index,
+      on('desavantage', { rarity: 'ancien' }),
+    );
+    expect(total).toBe(1);
+    // `kindTotal` ignores the filters — it answers "is this half typed yet?",
+    // which a rareté filter must not change.
+    expect(kindTotal).toBe(3);
+    expect(groups.map((g) => g.rarity)).toEqual(['ancien']);
+  });
+
+  it('keeps a collapsed heading, with its count, and drops only its rows', () => {
+    const { groups } = groupTraits(index, on('desavantage'), new Set(['commun']));
+    const commun = groups.find((g) => g.rarity === 'commun');
+    expect(commun).toMatchObject({ count: 2, items: [] });
+    // The other heading is untouched.
+    expect(groups.find((g) => g.rarity === 'ancien')?.items).toHaveLength(1);
+  });
+
+  it('ignores the folds while a filter is active', () => {
+    // A search that found something must not hide it behind a header the player
+    // folded ten minutes ago.
+    const searched = groupTraits(
+      index,
+      on('desavantage', { query: 'phobie' }),
+      new Set(['commun']),
+    );
+    expect(searched.groups[0].items.map((e) => e.preset.id)).toEqual(['phobie']);
+
+    const filtered = groupTraits(
+      index,
+      on('desavantage', { rarity: 'commun' }),
+      new Set(['commun']),
+    );
+    expect(filtered.groups[0].items).toHaveLength(2);
+  });
+});
+
+describe('hasTraitFilters', () => {
+  it('counts the query and the rareté, never the browsed kind', () => {
+    expect(hasTraitFilters(on('desavantage'))).toBe(false);
+    expect(hasTraitFilters(on('avantage'))).toBe(false);
+    expect(hasTraitFilters(on('desavantage', { query: 'a' }))).toBe(true);
+    expect(hasTraitFilters(on('desavantage', { rarity: 'rare' }))).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
-import React, { useDeferredValue, useMemo, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import React, { useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Searchbar, Text } from 'react-native-paper';
 
@@ -11,8 +11,13 @@ import { TRAIT_ICON } from '@/components/trait-icon';
 import TraitPoolBar from '@/components/trait-pool-bar';
 import ChipSelect from '@/components/ui/chip-select';
 import Icon from '@/components/ui/icon';
-import SectionCard from '@/components/ui/section-card';
-import { TRAIT_KINDS, TRAIT_RARITY_LABEL, type TraitKind } from '@/constants/prophecy';
+import { SectionHeader } from '@/components/ui/section-card';
+import {
+  TRAIT_KIND_RARITIES,
+  TRAIT_KINDS,
+  TRAIT_RARITY_LABEL,
+  type TraitKind,
+} from '@/constants/prophecy';
 import { TRAIT_CATALOG, type TraitPreset } from '@/data/trait-catalog';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -34,6 +39,23 @@ const EMPTY_KIND: Record<TraitKind, string> = {
   avantage: 'Les avantages du livre de règles ne sont pas encore saisis.',
   desavantage: 'Les désavantages du livre de règles ne sont pas encore saisis.',
 };
+
+/**
+ * The rareté chips, per kind — « Rare » exists on one side only, so the filter
+ * cannot be one shared list. Built once: the headings are a constant.
+ */
+const RARITY_OPTIONS: Record<TraitKind, { key: string; label: string }[]> = {
+  avantage: [
+    { key: '', label: 'Toutes' },
+    ...TRAIT_KIND_RARITIES.avantage.map((r) => ({ key: r, label: TRAIT_RARITY_LABEL[r] })),
+  ],
+  desavantage: [
+    { key: '', label: 'Toutes' },
+    ...TRAIT_KIND_RARITIES.desavantage.map((r) => ({ key: r, label: TRAIT_RARITY_LABEL[r] })),
+  ],
+};
+
+const NONE_COLLAPSED: ReadonlySet<string> = new Set();
 
 /**
  * The avantages / désavantages catalogue — search, a kind switch, and rows
@@ -75,16 +97,37 @@ export default function TraitCatalogList({
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState<TraitKind>('desavantage');
+  const [rarity, setRarity] = useState('');
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(NONE_COLLAPSED);
   // Lets a row's « Replier » put itself back at the top of the screen.
   const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
+
+  // Switching side clears the rareté: « Rare » is a désavantage heading, and
+  // carrying it over would leave the Avantages half filtered on something it
+  // cannot have — an empty list with no visible cause.
+  const switchKind = useCallback((next: string) => {
+    setKind(next as TraitKind);
+    setRarity('');
+  }, []);
+
+  const toggleRarity = useCallback(
+    (key: string) =>
+      setCollapsed((open) => {
+        const next = new Set(open);
+        if (!next.delete(key)) next.add(key);
+        return next;
+      }),
+    [],
+  );
 
   // Re-grouping the catalogue is the expensive half of a keystroke; deferring it
   // keeps the Searchbar responsive while the list catches up — the same
   // treatment the weapon and spell catalogues give their own filtering.
   const applied = useDeferredValue(foldQuery(query));
+  const criteria = useMemo(() => ({ kind, query: applied, rarity }), [kind, applied, rarity]);
   const { groups, total, kindTotal } = useMemo(
-    () => groupTraits(INDEX, kind, applied),
-    [kind, applied],
+    () => groupTraits(INDEX, criteria, collapsed),
+    [criteria, collapsed],
   );
 
   return (
@@ -103,22 +146,32 @@ export default function TraitCatalogList({
 
         {pool ? <TraitPoolBar pool={pool} /> : null}
 
+        <ChipSelect options={KIND_OPTIONS} value={kind} onChange={switchKind} />
+
         <ChipSelect
-          options={KIND_OPTIONS}
-          value={kind}
-          onChange={(key) => setKind(key as TraitKind)}
+          label="Rareté"
+          options={RARITY_OPTIONS[kind]}
+          value={rarity}
+          onChange={setRarity}
         />
 
         {onAddCustom ? (
           <CatalogCustomRow label={CUSTOM_LABEL[kind]} onPress={() => onAddCustom(kind)} />
         ) : null}
 
-        {groups.map(({ rarity, items }) => (
-          <SectionCard
-            key={rarity}
-            title={TRAIT_RARITY_LABEL[rarity] ?? rarity}
-            icon={TRAIT_ICON[kind]}>
-            {items.map((e) => (
+        {groups.map((group) => (
+          <View key={group.rarity} style={styles.section}>
+            {/* The count rides on the header, so a folded rareté still says how
+                many entries it holds — that is what makes folding safe to keep
+                while a search is running. */}
+            <SectionHeader
+              title={TRAIT_RARITY_LABEL[group.rarity] ?? group.rarity}
+              icon={TRAIT_ICON[kind]}
+              helper={String(group.count)}
+              expanded={group.items.length > 0}
+              onPress={() => toggleRarity(group.rarity)}
+            />
+            {group.items.map((e) => (
               <CatalogRow
                 key={e.preset.id}
                 icon={TRAIT_ICON[kind]}
@@ -137,10 +190,11 @@ export default function TraitCatalogList({
                   cost={e.costLabel}
                   description={e.preset.data.description ?? ''}
                   inGameEffect={e.preset.data.inGameEffect}
+                  evolving={e.preset.data.evolving ?? false}
                 />
               </CatalogRow>
             ))}
-          </SectionCard>
+          </View>
         ))}
 
         {total === 0 ? (
@@ -158,5 +212,7 @@ export default function TraitCatalogList({
 
 const styles = StyleSheet.create({
   container: { padding: 16, gap: 16, paddingBottom: 48 },
+  // The gap <SectionCard> used to own, now that the header is driven from here.
+  section: { gap: 10 },
   empty: { textAlign: 'center', marginTop: 8 },
 });

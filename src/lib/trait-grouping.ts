@@ -51,7 +51,27 @@ export interface IndexedTrait<P extends GroupableTrait> {
 
 export interface RarityGroup<P extends GroupableTrait> {
   rarity: TraitRarity;
+  /** Matches under this heading — reported even while collapsed, which is the point. */
+  count: number;
+  /** Empty while collapsed; `count` is what the header shows. */
   items: IndexedTrait<P>[];
+}
+
+/**
+ * What is narrowing the list. `kind` is the half being browsed rather than a
+ * facet — there is always one — while `query` and `rarity` are the filters
+ * proper, `''` meaning "no filter on this axis".
+ */
+export interface TraitFilterCriteria {
+  kind: TraitKind;
+  /** ALREADY folded — see `foldQuery`. Folding once per pass, not per entry. */
+  query: string;
+  rarity: string;
+}
+
+/** Whether anything is narrowing the list — see the collapse rule in `groupTraits`. */
+export function hasTraitFilters(c: TraitFilterCriteria): boolean {
+  return c.query !== '' || c.rarity !== '';
 }
 
 export interface TraitGrouping<P extends GroupableTrait> {
@@ -85,19 +105,28 @@ export function buildTraitIndex<P extends GroupableTrait>(presets: readonly P[])
 }
 
 /**
- * Narrow to one kind + `query` (already folded — see `foldQuery`) and group in
- * ONE pass.
+ * Narrow to one kind, then to the query and the rareté, and group in ONE pass.
  *
  * An empty query matches everything, so the catalogue can be browsed whole.
  * Groups come out in the RULEBOOK's order of headings (`TRAIT_KIND_RARITIES`),
  * not in the order rows happened to be bucketed, and an empty heading is
  * dropped rather than rendered as a bare title.
+ *
+ * A **collapsed** rareté keeps its group with `items: []`, so its header and its
+ * count stay on screen and can be unfolded — a fold hides rows, never the fact
+ * that they exist. The one exception, and it is the same rule the spell
+ * catalogue follows: while a filter is active, NOTHING is collapsed. A search
+ * that found three entries must not hide them behind a folded header the player
+ * closed ten minutes ago.
  */
 export function groupTraits<P extends GroupableTrait>(
   index: readonly IndexedTrait<P>[],
-  kind: TraitKind,
-  query: string,
+  criteria: TraitFilterCriteria,
+  collapsed: ReadonlySet<string> = EMPTY_SET,
 ): TraitGrouping<P> {
+  const { kind, query, rarity } = criteria;
+  const folds = hasTraitFilters(criteria) ? EMPTY_SET : collapsed;
+
   const buckets = new Map<TraitRarity, IndexedTrait<P>[]>();
   let total = 0;
   let kindTotal = 0;
@@ -105,6 +134,7 @@ export function groupTraits<P extends GroupableTrait>(
   for (const entry of index) {
     if (entry.preset.data.kind !== kind) continue;
     kindTotal++;
+    if (rarity !== '' && entry.rarity !== rarity) continue;
     if (query !== '' && !entry.search.includes(query)) continue;
     total++;
     const bucket = buckets.get(entry.rarity);
@@ -113,16 +143,22 @@ export function groupTraits<P extends GroupableTrait>(
   }
 
   const groups: RarityGroup<P>[] = [];
-  for (const rarity of TRAIT_KIND_RARITIES[kind]) {
-    const items = buckets.get(rarity);
-    if (items) groups.push({ rarity, items });
+  const push = (r: TraitRarity, items: IndexedTrait<P>[]) =>
+    groups.push({ rarity: r, count: items.length, items: folds.has(r) ? [] : items });
+
+  for (const r of TRAIT_KIND_RARITIES[kind]) {
+    const items = buckets.get(r);
+    if (items) push(r, items);
   }
   // A rarity the kind is not supposed to have (an entry from a later rulebook,
   // or a hand-edited CSV) still gets a heading rather than vanishing from a
   // list that claims to be the catalogue.
-  for (const [rarity, items] of buckets) {
-    if (!TRAIT_KIND_RARITIES[kind].includes(rarity)) groups.push({ rarity, items });
+  for (const [r, items] of buckets) {
+    if (!TRAIT_KIND_RARITIES[kind].includes(r)) push(r, items);
   }
 
   return { groups, total, kindTotal };
 }
+
+/** Module-level: a fresh Set per call would be a new prop on every render. */
+const EMPTY_SET: ReadonlySet<string> = new Set();
