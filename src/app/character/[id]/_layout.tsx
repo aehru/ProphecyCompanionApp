@@ -76,6 +76,20 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
+        name="trait/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Avantages et désavantages',
+        }}
+      />
+      <Stack.Screen
+        name="trait/[tid]"
+        options={{
+          presentation: 'modal',
+          title: "Modifier l'entrée",
+        }}
+      />
+      <Stack.Screen
         name="enchant/[eid]"
         options={{
           presentation: 'modal',
