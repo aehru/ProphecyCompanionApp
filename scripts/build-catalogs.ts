@@ -42,6 +42,11 @@ import {
   SPELL_TAGS,
   SPHERES,
   TIME_UNITS,
+  TRAIT_KIND_RARITIES,
+  TRAIT_KINDS,
+  TRAIT_RARITIES,
+  type TraitKind,
+  type TraitRarity,
 } from '../src/constants/prophecy';
 import { parseCsvTable } from '../src/lib/csv';
 import { parseFormula, parsePrerequisites } from '../src/lib/formula';
@@ -60,6 +65,7 @@ import type {
 } from '../src/data/archetype-catalog';
 import type { ArmorPreset } from '../src/data/armor-catalog';
 import type { ShieldPreset } from '../src/data/shield-catalog';
+import type { TraitPreset } from '../src/data/trait-catalog';
 import type { WeaponPreset } from '../src/data/weapon-catalog';
 import type { SpellPreset } from '../src/data/spell-catalog';
 
@@ -98,6 +104,24 @@ const ARMOR_COLUMNS = [
 const SHIELD_COLUMNS = [
   'id', 'nom', 'degats', 'prerequis', 'diffCreation',
   'tempsCreation', 'defenseMax', 'encombrement', 'special',
+];
+const TRAIT_COLUMNS = [
+  'id', 'type', 'nom', 'rarete',
+  // Prices, in points — a plain number, explicit tiers (« 1|2|3 ») or a range
+  // (« 1-5 »). See `readCosts` for the grammar and why both forms exist.
+  'cout',
+  'description',
+  // The mechanical summary extracted from `description` (see the `traits` doc
+  // comment in db/schema.ts). OPTIONAL — the catalogue is filled one section at
+  // a time, and `description` stays the source of truth either way.
+  'effetJeu',
+  // The question this entry asks the player at pick time (« Nature de
+  // l'anomalie »). OPTIONAL — blank means the entry is complete as written and
+  // the picker asks nothing. See TraitPreset.precisionPrompt.
+  'precision',
+  // Editorial provenance, declared so the header check accepts it and then
+  // deliberately not read — same as the spells' `rulebook` column.
+  'rulebook',
 ];
 const ARCHETYPE_COLUMNS = [
   'id', 'nom', 'caste', 'concept',
@@ -169,6 +193,21 @@ const matchCaste = matcher(
   CASTES.flatMap((c): [string, string][] => [
     [c.key, c.key],
     [c.label, c.key],
+  ]),
+);
+// Avantage / Désavantage, and the rulebook's availability headings. Plurals are
+// accepted too: a spreadsheet column is as likely to be headed « Désavantages ».
+const matchTraitKind = matcher(
+  TRAIT_KINDS.flatMap((k): [string, string][] => [
+    [k.key, k.key],
+    [k.label, k.key],
+    [k.plural, k.key],
+  ]),
+);
+const matchTraitRarity = matcher(
+  TRAIT_RARITIES.flatMap((r): [string, string][] => [
+    [r.key, r.key],
+    [r.label, r.key],
   ]),
 );
 
@@ -489,6 +528,140 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
   return out;
 }
 
+/**
+ * The widest a « 1-5 » range may open. A range is a convenience for the four or
+ * five prices an entry really has; anything wider is a typo (a stray digit, or
+ * two numbers that were never a range at all), and expanding it would put a
+ * hundred chips in the picker instead of failing here.
+ */
+const MAX_COST_SPAN = 20;
+
+/**
+ * « 3 » / « 1|2|3 » / « 1-5 » → the prices this entry may be taken for.
+ *
+ * Two grammars because the rulebook prices entries two ways: explicit TIERS,
+ * where only the listed values exist (Phobie 1, 2 or 3), and a RANGE, where the
+ * GM and player settle on any value in between. Both end up as the same sorted
+ * list — the picker offers one number per value either way, so the distinction
+ * has no life past this function, and keeping it would mean a second shape for
+ * every reader to branch on.
+ *
+ * Separators are `|` (as in the archetypes' `optionChoix`), `,` and `/` — the
+ * last because the rulebook itself prints its tiers that way (« Maladie
+ * (1/3/5) »), so a row can be typed straight off the page. Values are
+ * deduplicated and sorted; a
+ * zero or a negative is rejected — `kind` carries the sign (see the `traits`
+ * doc comment), and a blank cell is far likelier than a genuinely free entry.
+ */
+function readCosts(rec: Record<string, string>, errors: RowErrors): number[] {
+  const raw = (rec.cout ?? '').trim();
+  if (raw === '') {
+    errors.push('cout : requis (ex : 3, 1|2|3, 1-5)');
+    return [];
+  }
+
+  const costs = new Set<number>();
+  for (const seg of raw.split(/[|,\/]/)) {
+    const part = seg.trim();
+    if (part === '') continue;
+
+    const range = /^(\d+)\s*-\s*(\d+)$/.exec(part);
+    if (range) {
+      const [from, to] = [Number(range[1]), Number(range[2])];
+      if (from < 1) errors.push(`cout : « ${part} » commence sous 1`);
+      else if (to < from) errors.push(`cout : « ${part} » décroît`);
+      else if (to - from + 1 > MAX_COST_SPAN) {
+        errors.push(`cout : « ${part} » couvre plus de ${MAX_COST_SPAN} valeurs (faute de frappe ?)`);
+      } else for (let c = from; c <= to; c++) costs.add(c);
+      continue;
+    }
+
+    if (!/^\d+$/.test(part)) {
+      errors.push(`cout : « ${part} » n'est ni un entier ni un intervalle (ex : 3, 1|2|3, 1-5)`);
+      continue;
+    }
+    const value = Number(part);
+    if (value < 1) errors.push(`cout : « ${part} » doit valoir au moins 1`);
+    else costs.add(value);
+  }
+
+  if (costs.size === 0 && errors.length === 0) errors.push(`cout : « ${raw} » ne donne aucun coût`);
+  return [...costs].sort((a, b) => a - b);
+}
+
+/**
+ * The avantages / désavantages catalogue.
+ *
+ * The one cross-column rule: « Rare » belongs to désavantages only
+ * (`TRAIT_KIND_RARITIES`), so a rare avantage fails the build instead of
+ * reaching a picker that has no section to file it under.
+ */
+function buildTraits(failures: Failure[]): TraitPreset[] {
+  const records = readTable('traits.csv', TRAIT_COLUMNS, failures);
+  const seen = new Set<string>();
+  const out: TraitPreset[] = [];
+
+  records.forEach((rec, i) => {
+    const errors: RowErrors = [];
+    const id = readSlug(rec, seen, errors);
+    const nom = (rec.nom ?? '').trim();
+    if (nom === '') errors.push('nom : requis');
+
+    const kind = readEnum(
+      rec,
+      'type',
+      matchTraitKind,
+      TRAIT_KINDS.map((k) => k.label),
+      errors,
+    ) as TraitKind;
+    const rarity = readEnum(
+      rec,
+      'rarete',
+      matchTraitRarity,
+      TRAIT_RARITIES.map((r) => r.label),
+      errors,
+    ) as TraitRarity;
+    // Only when both columns actually resolved: `readEnum` falls back to the
+    // first accepted spelling on a miss, which is a LABEL, not a key — the row
+    // is already failing at that point and has nothing left to cross-check.
+    const allowed = TRAIT_KIND_RARITIES[kind];
+    if (allowed && !allowed.includes(rarity) && TRAIT_RARITIES.some((r) => r.key === rarity)) {
+      errors.push(`rarete : « ${rarity} » n'existe pas pour un ${kind} (valides : ${allowed.join(', ')})`);
+    }
+
+    const description = (rec.description ?? '').trim();
+    if (description === '') errors.push('description : requise');
+    const inGameEffect = (rec.effetJeu ?? '').trim();
+
+    const data = {
+      kind,
+      name: nom,
+      rarity,
+      description,
+      // Omitted when empty, like the spells' convenience layer: the column has a
+      // default, and emitting a dead key on every preset would make an unrelated
+      // catalogue diff unreadable.
+      ...(inGameEffect !== '' && { inGameEffect }),
+    };
+    const costs = readCosts(rec, errors);
+    // Costs and the précision prompt ride in the fingerprint: a re-priced or
+    // re-worded entry has changed for every sheet holding it, exactly like a
+    // rewritten description.
+    const precisionPrompt = (rec.precision ?? '').trim();
+    const preset: TraitPreset = {
+      id,
+      revision: presetRevision({ ...data, costs, precisionPrompt }),
+      costs,
+      ...(precisionPrompt !== '' && { precisionPrompt }),
+      data,
+    };
+
+    if (errors.length) failures.push({ file: 'traits.csv', record: i + 2, name: nom || id, errors });
+    else out.push(preset);
+  });
+  return out;
+}
+
 function buildArmor(failures: Failure[]): ArmorPreset[] {
   const records = readTable('armor.csv', ARMOR_COLUMNS, failures);
   const seen = new Set<string>();
@@ -710,6 +883,7 @@ export function generateCatalogs(): {
     armor: number;
     shields: number;
     archetypes: number;
+    traits: number;
   };
 } {
   const failures: Failure[] = [];
@@ -718,6 +892,7 @@ export function generateCatalogs(): {
   const armor = buildArmor(failures);
   const shields = buildShields(failures);
   const archetypes = buildArchetypes(failures);
+  const traits = buildTraits(failures);
   return {
     failures,
     counts: {
@@ -726,6 +901,7 @@ export function generateCatalogs(): {
       armor: armor.length,
       shields: shields.length,
       archetypes: archetypes.length,
+      traits: traits.length,
     },
     files: [
       {
@@ -743,6 +919,10 @@ export function generateCatalogs(): {
       {
         file: 'shield-catalog.gen.ts',
         content: render('shield.csv', 'ShieldPreset', './shield-catalog', 'SHIELD_CATALOG_DATA', shields),
+      },
+      {
+        file: 'trait-catalog.gen.ts',
+        content: render('traits.csv', 'TraitPreset', './trait-catalog', 'TRAIT_CATALOG_DATA', traits),
       },
       {
         file: 'archetype-catalog.gen.ts',
@@ -816,7 +996,8 @@ function main() {
   for (const f of files) writeFileSync(generatedPath(f.file), f.content, 'utf8');
   console.log(
     `OK : ${counts.weapons} armes, ${counts.spells} sortilèges, ${counts.armor} armures, ` +
-      `${counts.shields} boucliers, ${counts.archetypes} archétypes.`,
+      `${counts.shields} boucliers, ${counts.archetypes} archétypes, ` +
+      `${counts.traits} avantages/désavantages.`,
   );
 }
 
