@@ -89,6 +89,22 @@ describe('traitCostLabel', () => {
     expect(traitCostLabel([1, 3, 5])).toBe('1, 3 ou 5 points');
   });
 
+  it('collapses a long unbroken run to its bounds', () => {
+    // « Fortune personnelle » is priced *variable* in the rulebook and carried as
+    // 1-10: spelling out ten values would be unreadable.
+    const wide = Array.from({ length: 10 }, (_, i) => i + 1);
+    expect(traitCostLabel(wide)).toBe('de 1 à 10 points');
+    expect(traitCostLabel([1, 2, 3, 4])).toBe('de 1 à 4 points');
+  });
+
+  it('still spells out the rulebook’s own tiers', () => {
+    // Non-contiguous, so it stays a list however long it gets…
+    expect(traitCostLabel([1, 3, 5])).toBe('1, 3 ou 5 points');
+    // …and a short run reads better spelled out than as bounds.
+    expect(traitCostLabel([1, 2])).toBe('1 ou 2 points');
+    expect(traitCostLabel([1, 2, 3])).toBe('1, 2 ou 3 points');
+  });
+
   it('says nothing about an entry with no price', () => {
     expect(traitCostLabel([])).toBe('');
   });

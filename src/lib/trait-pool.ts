@@ -76,13 +76,35 @@ export function traitUnaffordable(
 }
 
 /**
- * « 2 points » / « 1, 2 ou 3 points » — one price, or the whole set a catalogue
- * entry offers. French list punctuation (« ou » before the last), because this
- * reads inside a sentence-like meta line rather than as a field value.
+ * Whether a price list is a run of consecutive values — « 1, 2, 3, 4 » rather
+ * than the rulebook's own tiers « 1, 3, 5 ». Sorted ascending by the generator,
+ * so neighbours are enough to tell.
+ */
+function isContiguous(costs: readonly number[]): boolean {
+  return costs.every((c, i) => i === 0 || c === costs[i - 1] + 1);
+}
+
+/**
+ * Long enough that spelling the values out stops helping. Four is where « 1, 2,
+ * 3 ou 4 points » becomes worse than « de 1 à 4 points », and it leaves the
+ * rulebook's real tier lists (1/2, 1/3/5, 3/5) reading as tiers.
+ */
+const COST_RANGE_MIN = 4;
+
+/**
+ * « 2 points » / « 1, 2 ou 3 points » / « de 1 à 50 points » — one price, or the
+ * whole set a catalogue entry offers. French list punctuation (« ou » before the
+ * last), because this reads inside a sentence-like meta line rather than as a
+ * field value; a long unbroken run collapses to its bounds instead, which is
+ * what « Fortune personnelle » (priced *variable* in the book) needs.
  */
 export function traitCostLabel(costs: readonly number[]): string {
   if (costs.length === 0) return '';
   const unit = costs[costs.length - 1] > 1 || costs.length > 1 ? 'points' : 'point';
   if (costs.length === 1) return `${costs[0]} ${unit}`;
+  if (costs.length >= COST_RANGE_MIN && isContiguous(costs)) {
+    return `de ${costs[0]} à ${costs[costs.length - 1]} ${unit}`;
+  }
   return `${costs.slice(0, -1).join(', ')} ou ${costs[costs.length - 1]} ${unit}`;
 }
+
