@@ -25,6 +25,7 @@ export default function TraitDetail({
   cost,
   description,
   inGameEffect,
+  evolving,
 }: {
   kind: string;
   rarity: string;
@@ -33,6 +34,8 @@ export default function TraitDetail({
   description: string;
   /** The extracted mechanical half. Empty on most entries; see the schema. */
   inGameEffect?: string;
+  /** Carries the rulebook's asterisk — see `traitEvolvingLabel`. */
+  evolving?: boolean;
 }) {
   const theme = useProphecyTheme();
   const meta = [TRAIT_KIND_LABEL[kind] ?? kind, TRAIT_RARITY_LABEL[rarity] ?? rarity, cost]
@@ -42,6 +45,11 @@ export default function TraitDetail({
   return (
     <View style={styles.root}>
       <Text style={[styles.meta, { color: theme.colors.primary }]}>{meta}</Text>
+      {evolving ? (
+        <Text style={[styles.evolving, { color: theme.colors.onSurfaceVariant }]}>
+          {traitEvolvingLabel(kind)}
+        </Text>
+      ) : null}
       {inGameEffect?.trim() ? (
         <Text style={[styles.body, { color: theme.colors.onSurface }]}>{inGameEffect.trim()}</Text>
       ) : null}
@@ -62,8 +70,21 @@ export default function TraitDetail({
   );
 }
 
+/**
+ * What the rulebook's asterisk means, which depends on the side: a marked
+ * désavantage can be shed during play, a marked avantage can be picked up.
+ * Spelled out rather than reproduced as a bare « * » — the legend for it is on
+ * a page the player does not have in front of them.
+ */
+export function traitEvolvingLabel(kind: string): string {
+  return kind === 'avantage'
+    ? 'Peut apparaître en cours de campagne'
+    : 'Peut être surmonté en cours de campagne';
+}
+
 const styles = StyleSheet.create({
   root: { gap: 6, paddingBottom: 10 },
   meta: { fontSize: 12, letterSpacing: 0.3 },
   body: { fontSize: 13, lineHeight: 19 },
+  evolving: { fontSize: 12, fontStyle: 'italic' },
 });

@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Button, Text, TextInput } from 'react-native-paper';
+import { Button, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
+import { traitEvolvingLabel } from '@/components/trait-detail';
 import { TRAIT_ICON } from '@/components/trait-icon';
 import ChipSelect from '@/components/ui/chip-select';
 import Icon, { dsIcon } from '@/components/ui/icon';
@@ -146,6 +147,14 @@ export function TraitEditor({ trait: t, onClose }: { trait: Trait; onClose: () =
         style={styles.costField}
       />
 
+      <View style={styles.switchRow}>
+        <Text style={styles.switchLabel}>{traitEvolvingLabel(t.kind)}</Text>
+        <Switch
+          value={t.evolving}
+          onValueChange={(v) => updateTrait(t.id, { evolving: v })}
+        />
+      </View>
+
       <TextInput
         label="Précision"
         placeholder="Ce que c'est pour ce personnage"
@@ -206,6 +215,8 @@ const styles = StyleSheet.create({
   sub: { fontSize: 12, marginTop: 1 },
   points: { fontFamily: 'Cinzel_600SemiBold', fontSize: 16 },
   costField: { flexGrow: 0, flexBasis: 140, minWidth: 140 },
+  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  switchLabel: { fontSize: 13, flexShrink: 1 },
   actions: { flexDirection: 'row', gap: 8 },
   actionBtn: { flex: 1 },
 });
