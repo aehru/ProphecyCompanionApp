@@ -43,6 +43,31 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
 - [x] **Manage spells** — spellbook with catalogue + editor, disciplines, reserve & spheres.
 - [x] **Money** — the four Drac coins tracked on the sheet.
 - [x] **Armor & shield catalogues.** Armor gained weapon-level fields (category, prerequisites, creation, encombrement) and a real catalogue picker (was a blank-only inline editor). Shields added end-to-end: table, catalogue, editor/card, independent equip slot, enchant target, export/import. `data-src/armor.csv` / `shield.csv` are seeded with real rulebook rows; extend them as more gear is added.
+- [~] **Avantages & désavantages.** The sheet half is done end-to-end: the
+  `traits` table (one table, `kind` discriminates), the point pool
+  ([lib/trait-pool.ts](src/lib/trait-pool.ts) — désavantages grant, avantages
+  spend, the balance may go negative), a catalogue picker with a tier dialog for
+  the entries the rulebook prices at several levels, the editor modal, and
+  export/import. Deliberately NOT in the campaign projection: what a character is
+  bad at is not roster data.
+  _Remaining, in order:_
+  1. **The rulebook rows.** The 11 « Désavantages communs » are in
+     `data-src/traits.csv`, each with its `effetJeu` summary. The rest of the
+     désavantages (Rares, Enfant, Ancien) and every avantage are still to type —
+     the app never invents rulebook text, so they arrive one scanned page at a
+     time, then `bun run build:catalogs`.
+  2. **Mechanical effects.** Traits are descriptive today: nothing computes from
+     one. Once the full list exists, the shape of what they actually do is
+     knowable, and the ones granting a flat bonus/malus should write an `effects`
+     row rather than grow a second modifier engine. Some of them are `RollContext`
+     work instead («&nbsp;2 dés sur tout ce qui touche au MENTAL&nbsp;» — see the
+     dice roller entry, whose `dice` / `diceMode` fields exist for exactly this).
+  3. **Creation-time quotas.** The rulebook's rules — an « Ancien » takes two
+     Communs and one Rare, a minimum point count per age bracket — need a
+     character age the sheet does not record, and belong to a creation flow.
+     Nothing is enforced today, on purpose.
+  4. **Catalogue propagation.** Picked rows carry `presetId` + `presetRevision`
+     like spells do, and nothing consumes them yet (same flow, same blocker).
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
 - [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
   opens the roller against it and rolls a D10 at once, with the difficulté
