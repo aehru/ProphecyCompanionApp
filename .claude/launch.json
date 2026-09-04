@@ -4,6 +4,17 @@
     {
       "name": "web",
       "url": "http://localhost:8081"
+    },
+    {
+      "name": "web-dev",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "web",
+        "--port",
+        "8082"
+      ],
+      "port": 8082
     }
   ]
 }
