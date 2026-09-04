@@ -3,11 +3,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Snackbar } from 'react-native-paper';
 
 /** The `/character/[id]/<kind>/[rowId]` editors a catalogue picker can land on. */
-export type CatalogKind = 'armor' | 'shield' | 'weapon' | 'spell';
+export type CatalogKind = 'armor' | 'shield' | 'weapon' | 'spell' | 'trait';
 
 /**
  * What a catalogue picker does after it inserts a row — the same two moves in
- * all four (armes, armures, boucliers, sortilèges):
+ * all five (armes, armures, boucliers, sortilèges, avantages/désavantages):
  *
  * - a **blank** entry has nothing left to read in the catalogue, so it goes
  *   straight to its editor ({@link CatalogSnackbarState.openEditor});
