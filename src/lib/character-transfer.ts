@@ -1,7 +1,7 @@
 // Character export / import: a self-contained, versioned JSON envelope that
 // carries one or more whole characters (sheet + live state + skills + armor +
 // weapons + shields + items + spells + magic reserve objects + enchantments +
-// effects) between devices, or as a user backup.
+// avantages/désavantages + effects) between devices, or as a user backup.
 //
 // This module is PURE — no DB, no filesystem. The repository layer
 // (`repositories/transfer`) gathers rows into bundles and re-inserts them; the
@@ -21,6 +21,7 @@ import {
   PERMANENT_UNIT,
   RESOURCES,
   SPHERES,
+  TRAIT_KINDS,
   WOUND_LEVELS,
 } from '@/constants/prophecy';
 import { ENCHANT_TARGETS, type EnchantTarget } from '@/db/schema';
@@ -33,6 +34,9 @@ export const EXPORT_FORMAT = 'prophecy-export';
 
 const int = z.number().int();
 const str = z.string();
+
+// zod's enum wants a non-empty tuple, which `.map` can't prove.
+const TRAIT_KIND_KEYS = TRAIT_KINDS.map((k) => k.key) as unknown as [string, ...string[]];
 
 /** Build a `{ key: schema }` shape for a list of column keys. */
 const shapeFrom = (keys: readonly string[], schema: z.ZodTypeAny) =>
@@ -258,6 +262,32 @@ const magicReserveSchema = z.object({
 // is not plain `UNIT_KEYS`.
 const EFFECT_DURATION_UNITS = [...UNIT_KEYS, PERMANENT_UNIT] as [string, ...string[]];
 
+// Avantages / désavantages. OPTIONAL with a `[]` default (not a version bump,
+// like `items` and `shields`): exports made before the table existed carry none.
+//
+// `kind` is the only strict field — it decides which side of the point pool the
+// cost lands on, so an unknown value cannot be defaulted into one half without
+// silently rewriting the character's balance. `rarity` is deliberately loose
+// (plain string, like `effects.durationUnit`): it is a badge, and a heading this
+// version doesn't know about must not cost the player the whole trait.
+const traitSchema = z.object({
+  kind: z.enum(TRAIT_KIND_KEYS),
+  name: str,
+  rarity: str,
+  cost: int,
+  description: str,
+  // The mechanical summary. OPTIONAL (not a version bump, like a spell's
+  // `inGameEffect`): exports predating the column carry none, and an entry
+  // without one renders its paragraph alone.
+  inGameEffect: str.optional(),
+  note: str,
+  // Provenance, carried on BOTH export intents for the same reason as a spell's:
+  // a round trip through a file must not turn a catalogue entry into a hand
+  // written one, and nothing downstream could tell afterwards.
+  presetId: str.nullable().optional(),
+  presetRevision: str.nullable().optional(),
+});
+
 const effectSchema = z.object({
   label: str,
   target: str,
@@ -280,6 +310,7 @@ const characterBundleSchema = z.object({
   spells: z.array(spellSchema),
   magicReserves: z.array(magicReserveSchema).default([]),
   enchants: z.array(enchantSchema).default([]),
+  traits: z.array(traitSchema).default([]),
   effects: z.array(effectSchema),
 });
 
@@ -362,6 +393,7 @@ export const ENCHANT_FIELDS = [
   'difficulty',
 ];
 export const MAGIC_RESERVE_FIELDS = Object.keys(magicReserveSchema.shape);
+export const TRAIT_FIELDS = Object.keys(traitSchema.shape);
 export const EFFECT_FIELDS = Object.keys(effectSchema.shape);
 
 export type ImportResult =

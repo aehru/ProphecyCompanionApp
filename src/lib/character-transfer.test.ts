@@ -129,6 +129,27 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
         difficulty: 15,
       },
     ],
+    traits: [
+      {
+        kind: 'desavantage',
+        name: 'Phobie',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Peur irraisonnée.',
+        inGameEffect: 'Difficulté augmentée de 5 face à la peur choisie.',
+        note: 'les araignées',
+        presetId: 'phobie',
+        presetRevision: 'abc123def456',
+      },
+      {
+        kind: 'avantage',
+        name: 'Fortune',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Naissance aisée.',
+        note: '',
+      },
+    ],
     effects: [
       {
         label: 'Bénédiction',
@@ -375,6 +396,53 @@ describe('parseImport validation', () => {
     delete exp.characters[0].magicReserves;
     const r = parseImport(JSON.stringify(exp));
     expect(r.ok && r.data.characters[0].magicReserves).toEqual([]);
+  });
+
+  it('carries the avantages and désavantages through parse, provenance included', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.characters[0].traits).toEqual([
+      {
+        kind: 'desavantage',
+        name: 'Phobie',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Peur irraisonnée.',
+        inGameEffect: 'Difficulté augmentée de 5 face à la peur choisie.',
+        // The player's own note and the rulebook paragraph travel apart, so a
+        // later catalogue correction can rewrite one without touching the other.
+        note: 'les araignées',
+        presetId: 'phobie',
+        presetRevision: 'abc123def456',
+      },
+      {
+        kind: 'avantage',
+        name: 'Fortune',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Naissance aisée.',
+        note: '',
+      },
+    ]);
+  });
+
+  it('accepts an export predating the traits table (defaults to none)', () => {
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: Record<string, unknown>[];
+    };
+    delete exp.characters[0].traits;
+    const r = parseImport(JSON.stringify(exp));
+    expect(r.ok && r.data.characters[0].traits).toEqual([]);
+  });
+
+  it('rejects a trait whose kind names neither side of the pool', () => {
+    // The one strict field: defaulting an unknown kind would move the cost to
+    // the wrong half of the balance rather than fail.
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: { traits: Record<string, unknown>[] }[];
+    };
+    exp.characters[0].traits[0].kind = 'privilege';
+    expect(parseImport(JSON.stringify(exp)).ok).toBe(false);
   });
 
   it('accepts an export predating the shields table (defaults to none)', () => {
