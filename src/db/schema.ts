@@ -682,6 +682,21 @@ export const traits = sqliteTable('traits', {
    */
   inGameEffect: text('in_game_effect').notNull().default(''),
   /**
+   * The rulebook's asterisk: this entry can CHANGE HANDS during play.
+   *
+   * The two kinds read it in opposite directions, which is why one column is
+   * enough — `kind` already says which: a marked *désavantage* can be overcome
+   * and struck off in the course of a campaign (« Phobie », « Dette »), while a
+   * marked *avantage* is one a character can come to acquire rather than buy at
+   * creation (see « Choix des avantages »). Unmarked is the permanent case:
+   * « Impotent » says in so many words that it cannot be surmounted, and no
+   * désavantage of the anciens is marked at all.
+   *
+   * Informative, like `rarity`: the app shows it and enforces nothing. Acquiring
+   * one mid-campaign is an Expérience matter the sheet does not model yet.
+   */
+  evolving: integer('evolving', { mode: 'boolean' }).notNull().default(false),
+  /**
    * What THIS character's copy of the entry actually is — « les araignées » on a
    * Phobie, « la jambe gauche » on une Infirmité. Kept apart from `description`
    * (which stays the generic rulebook text, shared by every character who took
