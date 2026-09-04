@@ -2,12 +2,17 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
-import { TRAIT_KIND_LABEL, TRAIT_RARITY_LABEL } from '@/constants/prophecy';
+import {
+  TRAIT_KIND_LABEL,
+  TRAIT_RARITY_LABEL,
+  traitEvolvingLabel,
+} from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 /**
  * The read-only body of one avantage / désavantage: a « Désavantage · Commun ·
- * 2 points » line, the mechanical summary, then the rulebook paragraph.
+ * 2 points » line, the mechanical summary, the rulebook paragraph, and — on a
+ * row a character has taken — the player's own précision.
  *
  * Shared by the catalogue row's preview and the character's editor, so what a
  * player reads before taking an entry is what they read afterwards. `cost` is
@@ -26,6 +31,7 @@ export default function TraitDetail({
   description,
   inGameEffect,
   evolving,
+  note,
 }: {
   kind: string;
   rarity: string;
@@ -36,6 +42,12 @@ export default function TraitDetail({
   inGameEffect?: string;
   /** Carries the rulebook's asterisk — see `traitEvolvingLabel`. */
   evolving?: boolean;
+  /**
+   * What the PLAYER wrote about their own copy — « les araignées » on a Phobie.
+   * The catalogue has none to show; a taken row does, and it is the half that
+   * says what this character's entry actually is.
+   */
+  note?: string;
 }) {
   const theme = useProphecyTheme();
   const meta = [TRAIT_KIND_LABEL[kind] ?? kind, TRAIT_RARITY_LABEL[rarity] ?? rarity, cost]
@@ -66,20 +78,13 @@ export default function TraitDetail({
           {description.trim()}
         </Text>
       ) : null}
+      {note?.trim() ? (
+        <Text style={[styles.note, { color: theme.colors.onSurfaceVariant }]}>
+          Précision : {note.trim()}
+        </Text>
+      ) : null}
     </View>
   );
-}
-
-/**
- * What the rulebook's asterisk means, which depends on the side: a marked
- * désavantage can be shed during play, a marked avantage can be picked up.
- * Spelled out rather than reproduced as a bare « * » — the legend for it is on
- * a page the player does not have in front of them.
- */
-export function traitEvolvingLabel(kind: string): string {
-  return kind === 'avantage'
-    ? 'Peut apparaître en cours de campagne'
-    : 'Peut être surmonté en cours de campagne';
 }
 
 const styles = StyleSheet.create({
@@ -87,4 +92,5 @@ const styles = StyleSheet.create({
   meta: { fontSize: 12, letterSpacing: 0.3 },
   body: { fontSize: 13, lineHeight: 19 },
   evolving: { fontSize: 12, fontStyle: 'italic' },
+  note: { fontSize: 12, fontStyle: 'italic' },
 });

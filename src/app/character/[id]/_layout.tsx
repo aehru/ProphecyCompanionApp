@@ -86,7 +86,9 @@ export default function CharacterLayout() {
         name="trait/[tid]"
         options={{
           presentation: 'modal',
-          title: "Modifier l'entrée",
+          // Not « Modifier … » like the gear editors: this one opens on the
+          // entry as it reads, and the FAB is what flips it to a form.
+          title: "Détail de l'entrée",
         }}
       />
       <Stack.Screen

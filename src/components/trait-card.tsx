@@ -4,7 +4,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, Switch, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
-import { traitEvolvingLabel } from '@/components/trait-detail';
 import { TRAIT_ICON } from '@/components/trait-icon';
 import ChipSelect from '@/components/ui/chip-select';
 import Icon, { dsIcon } from '@/components/ui/icon';
@@ -13,6 +12,7 @@ import {
   TRAIT_KINDS,
   TRAIT_RARITIES,
   TRAIT_RARITY_LABEL,
+  traitEvolvingLabel,
   type TraitKind,
   type TraitRarity,
 } from '@/constants/prophecy';
@@ -38,7 +38,8 @@ export default function TraitRow({ trait, characterId }: { trait: Trait; charact
   const theme = useProphecyTheme();
   const router = useRouter();
   const granted = trait.kind === 'desavantage';
-  const points = `${granted ? '+' : '−'}${trait.cost}`;
+  // A blank row starts at 0, and « −0 » reads as a bug rather than as nothing.
+  const points = trait.cost === 0 ? '0' : `${granted ? '+' : '−'}${trait.cost}`;
 
   return (
     <Pressable
@@ -88,7 +89,22 @@ export default function TraitRow({ trait, characterId }: { trait: Trait; charact
  * at which version, so a future "mettre à jour depuis le catalogue" flow can
  * still find the row; it just can't assume the paragraph is untouched.
  */
-export function TraitEditor({ trait: t, onClose }: { trait: Trait; onClose: () => void }) {
+export function TraitEditor({
+  trait: t,
+  onClose,
+  onDeleted,
+}: {
+  trait: Trait;
+  /** Done editing — the caller decides what that returns to. */
+  onClose: () => void;
+  /**
+   * The row is gone. Separate from {@link onClose} because they end in different
+   * places: finishing an edit goes back to the reading, deleting cannot — there
+   * is nothing left to read, and a screen that kept trying would show « Entrée
+   * introuvable ».
+   */
+  onDeleted: () => void;
+}) {
   const theme = useProphecyTheme();
   const [name, setName] = useDebouncedText(t.name, (v) => updateTrait(t.id, { name: v }));
   const [note, setNote] = useDebouncedText(t.note, (v) => updateTrait(t.id, { note: v }));
@@ -114,7 +130,7 @@ export function TraitEditor({ trait: t, onClose }: { trait: Trait; onClose: () =
         style: 'destructive',
         onPress: async () => {
           await deleteTrait(t.id);
-          onClose();
+          onDeleted();
         },
       },
     ]);
@@ -139,6 +155,11 @@ export function TraitEditor({ trait: t, onClose }: { trait: Trait; onClose: () =
         onChange={(key) => updateTrait(t.id, { rarity: key as TraitRarity })}
       />
 
+      {/* Any positive number, where the pick dialog offers only the rulebook's
+          prices. Not an oversight: the dialog is choosing among the tiers an
+          ENTRY has, while this is one character's row, which a GM ruling may
+          have priced differently — and the row carries no `costs` to check
+          against anyway. */}
       <NumberField
         fieldKey="cost"
         label="Coût en points"
