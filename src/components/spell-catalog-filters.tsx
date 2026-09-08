@@ -22,6 +22,12 @@ const DISCIPLINE_OPTIONS = [
 
 const SPHERE_OPTIONS = [{ key: '', label: 'Toutes' }, ...SPHERES];
 
+/** A two-chip toggle rather than a lone chip: « Tous » is what turns it back off. */
+const FAVORITE_OPTIONS = [
+  { key: '', label: 'Tous' },
+  { key: 'fav', label: 'Favoris' },
+];
+
 /**
  * Tag options per axis, in `SPELL_TAGS` order. Split here rather than in the
  * screen so the three chip groups can never drift from the taxonomy.
@@ -44,12 +50,23 @@ export default function SpellFilterPanel({
   criteria,
   onChange,
   levelOptions,
+  favoritesOnly,
+  onFavoritesOnly,
   autoFocus,
 }: {
   criteria: SpellFilterCriteria;
   onChange: (next: SpellFilterCriteria) => void;
   /** Niveaux present in the catalogue, read from the data by the screen. */
   levelOptions: readonly { key: string; label: string }[];
+  /**
+   * Narrowed to the character's starred entries. Kept OUT of
+   * {@link SpellFilterCriteria}: every facet in there is a property of the
+   * preset, which a favourite is not — it belongs to whoever is reading the
+   * catalogue. Absent (with `onFavoritesOnly`) when nobody is: the home
+   * catalogue has no character to have starred anything.
+   */
+  favoritesOnly?: boolean;
+  onFavoritesOnly?: (next: boolean) => void;
   autoFocus?: boolean;
 }) {
   // Open when tags are already narrowing the list, so reopening the panel never
@@ -107,6 +124,16 @@ export default function SpellFilterPanel({
             onChange={(v) => set('level', v)}
           />
         </View>
+        {onFavoritesOnly ? (
+          <View style={styles.levelFilter}>
+            <ChipSelect
+              label="Favoris"
+              options={FAVORITE_OPTIONS}
+              value={favoritesOnly ? 'fav' : ''}
+              onChange={(v) => onFavoritesOnly(v === 'fav')}
+            />
+          </View>
+        ) : null}
       </View>
 
       {/* 23 tag chips on three axes would double the header's height for a

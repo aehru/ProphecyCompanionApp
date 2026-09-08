@@ -6,6 +6,7 @@ import SpellCatalogList from '@/components/catalog/spell-catalog-list';
 import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import { type SpellPreset } from '@/data/spell-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { useFavorites } from '@/hooks/use-favorites';
 import { useSpellTotal } from '@/hooks/use-spell-total';
 import { log } from '@/lib/log';
 import { createSpell, spellsQuery } from '@/repositories/spells';
@@ -25,6 +26,7 @@ export default function SpellCatalogModal() {
   // what they would cast it at BEFORE adding it.
   const readings = useSpellTotal(numId);
   const { data: ownedRows } = useLiveQuery(spellsQuery(numId), [numId]);
+  const favorites = useFavorites(numId, 'spell');
   const added = useCatalogSnackbar(numId, 'spell');
   const { announce, openEditor } = added;
 
@@ -79,7 +81,14 @@ export default function SpellCatalogModal() {
 
   return (
     <View style={styles.root}>
-      <SpellCatalogList readings={readings} owned={owned} enchanted={enchanted} onAdd={add} />
+      <SpellCatalogList
+        readings={readings}
+        owned={owned}
+        enchanted={enchanted}
+        onAdd={add}
+        favorites={favorites.ids}
+        onToggleFavorite={favorites.toggle}
+      />
       <CatalogSnackbar state={added} />
     </View>
   );

@@ -74,11 +74,14 @@ const LEVEL_OPTIONS = [
 ];
 
 const NONE_COLLAPSED: ReadonlySet<string> = new Set();
+
+/** Section key for the starred rows. Not a `SphereKey`, so it can never clash. */
+const FAVORITES_KEY = 'favorites';
 const NONE_OWNED: ReadonlySet<string> = new Set();
 
 // Hoisted: a fresh array or arrow on every render is a changed prop to the
 // VirtualizedList, which is exactly what it warns about.
-const keyExtractor = (e: { preset: { id: string } }) => e.preset.id;
+const keyExtractor = (e: { preset: { id: string } }, index: number) => `${e.preset.id}-${index}`;
 
 /**
  * The spell catalogue itself — filters, sections and rows, with no idea whose
@@ -111,6 +114,8 @@ export default function SpellCatalogList({
   owned = NONE_OWNED,
   enchanted = NONE_OWNED,
   onAdd,
+  favorites = NONE_OWNED,
+  onToggleFavorite,
 }: {
   /** Casting score and stat values for this character's sheet. */
   readings?: SpellReadings;
@@ -124,6 +129,10 @@ export default function SpellCatalogList({
   enchanted?: ReadonlySet<string>;
   /** Called with a preset, or with nothing for « Sortilège personnalisé ». */
   onAdd?: (preset?: SpellPreset) => void;
+  /** Preset ids on the character's shopping list — see the `favorites` table. */
+  favorites?: ReadonlySet<string>;
+  /** Stars / unstars one entry. Absent when no character is reading. */
+  onToggleFavorite?: (presetId: string) => void;
 }) {
   const theme = useProphecyTheme();
 
@@ -135,6 +144,7 @@ export default function SpellCatalogList({
   // The header has scrolled off; the FAB stands in for it.
   const [stuck, setStuck] = useState(false);
   const [filterDialog, setFilterDialog] = useState(false);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   // Lets a row's « Replier » put itself back at the top of the screen.
   const { scrollRef, onScroll: trackScroll, value: catalogScroll } = useCatalogScrollHost();
 
@@ -142,10 +152,44 @@ export default function SpellCatalogList({
   // it keeps the Searchbar and the chips responsive while the list catches up.
   const applied = useDeferredValue(criteria);
 
-  const sections = useMemo(
-    () => buildSpellSections(INDEX, SPHERES, applied, collapsed),
-    [applied, collapsed],
+  // « Favoris » narrows the POOL rather than joining `SpellFilterCriteria`:
+  // every facet in there is a property of the preset, and a star is a property
+  // of the reader. Filtering the input keeps the tested engine untouched.
+  const pool = useMemo(
+    () => (favoritesOnly ? INDEX.filter((e) => favorites.has(e.preset.id)) : INDEX),
+    [favoritesOnly, favorites],
   );
+
+  const spheres = useMemo(
+    () => buildSpellSections(pool, SPHERES, applied, collapsed),
+    [pool, applied, collapsed],
+  );
+
+  /**
+   * The starred entries, as a section of their own above the sphères.
+   *
+   * Built by running the very same sectioner over the favourites alone and
+   * flattening it — so the section obeys the search and the facets exactly as
+   * the sphères do, and stays in the catalogue's own order, with no second
+   * filtering rule to keep in step.
+   *
+   * The rows also STAY in their sphère below. Moving them out would mean a
+   * player opening « Sphère du Feu » cannot find the spell they starred, which
+   * is a worse surprise than seeing it twice.
+   */
+  const sections = useMemo(() => {
+    if (favoritesOnly || favorites.size === 0) return spheres;
+    const starred = INDEX.filter((e) => favorites.has(e.preset.id));
+    const rows = buildSpellSections(starred, SPHERES, applied, NONE_COLLAPSED).flatMap(
+      (sec) => sec.data,
+    );
+    if (rows.length === 0) return spheres;
+    const open = !collapsed.has(FAVORITES_KEY);
+    return [
+      { key: FAVORITES_KEY, title: 'Favoris', count: rows.length, data: open ? rows : [] },
+      ...spheres,
+    ];
+  }, [spheres, favorites, favoritesOnly, applied, collapsed]);
 
   /**
    * Every preset's casting score, computed once per character change instead of
@@ -173,7 +217,9 @@ export default function SpellCatalogList({
     return m;
   }, [totalFor]);
 
-  const resultCount = useMemo(() => sections.reduce((n, s) => n + s.count, 0), [sections]);
+  // Counted off the sphères, never `sections`: the Favoris block repeats rows
+  // that are already below, and « Voir 12 résultats » must not count them twice.
+  const resultCount = useMemo(() => spheres.reduce((n, s) => n + s.count, 0), [spheres]);
   const filterCount = activeFilterCount(criteria);
   // Counted off the APPLIED criteria, so the button never promises a number the
   // list behind it is not showing yet.
@@ -220,10 +266,12 @@ export default function SpellCatalogList({
         caracValue={caracValue}
         owned={owned.has(item.preset.id)}
         enchanted={enchanted.has(item.preset.id)}
+        favorite={favorites.has(item.preset.id)}
         onAdd={onAdd}
+        onToggleFavorite={onToggleFavorite}
       />
     ),
-    [onAdd, totals, caracValue, owned, enchanted],
+    [onAdd, totals, caracValue, owned, enchanted, favorites, onToggleFavorite],
   );
 
   const renderSectionHeader = useCallback(
@@ -231,7 +279,7 @@ export default function SpellCatalogList({
       <View style={styles.sectionHeader}>
         <SectionHeader
           title={section.title}
-          icon="magic"
+          icon={section.key === FAVORITES_KEY ? 'star' : 'magic'}
           helper={String(section.count)}
           expanded={!collapsed.has(section.key)}
           onPress={() => toggleSphere(section.key)}
@@ -246,6 +294,8 @@ export default function SpellCatalogList({
       criteria={criteria}
       onChange={setCriteria}
       levelOptions={LEVEL_OPTIONS}
+      favoritesOnly={favoritesOnly}
+      onFavoritesOnly={onToggleFavorite ? setFavoritesOnly : undefined}
       {...props}
     />
   );
@@ -335,7 +385,9 @@ const SpellRow = React.memo(function SpellRow({
   caracValue,
   owned,
   enchanted,
+  favorite,
   onAdd,
+  onToggleFavorite,
 }: {
   entry: Entry;
   /** Absent with no character in context — the row then shows no « Total ». */
@@ -345,7 +397,10 @@ const SpellRow = React.memo(function SpellRow({
   owned: boolean;
   /** Known to the character only as an enchantment's source. */
   enchanted: boolean;
+  /** On the shopping list — the star reads filled. */
+  favorite: boolean;
   onAdd?: (preset: SpellPreset) => void;
+  onToggleFavorite?: (presetId: string) => void;
 }) {
   const { preset: p } = entry;
   // The sphère is the section title, so the row names its discipline instead.
@@ -368,6 +423,8 @@ const SpellRow = React.memo(function SpellRow({
       subtitle={sub}
       badge={owned ? 'Déjà ajouté' : enchanted ? 'Enchanté' : undefined}
       addLabel={`Ajouter ${p.data.name}`}
+      favorite={favorite}
+      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(p.id))}
       onAdd={onAdd && (() => onAdd(p))}>
       {/* The preset's discipline/sphère fall back the same way the index does,
           so the preview's total matches the row's. */}
