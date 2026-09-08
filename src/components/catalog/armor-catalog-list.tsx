@@ -16,6 +16,9 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { fold, foldQuery } from '@/lib/text-fold';
 
+const NONE_FAVORITE: ReadonlySet<string> = new Set();
+
+
 /**
  * The armor catalogue itself — search, weight-category grouping and rows, with
  * no idea whose it is. No handedness sub-grouping (armor has none).
@@ -26,11 +29,17 @@ import { fold, foldQuery } from '@/lib/text-fold';
 export default function ArmorCatalogList({
   readings,
   onAdd,
+  favorites = NONE_FAVORITE,
+  onToggleFavorite,
 }: {
   /** Resolves prérequis against a sheet. */
   readings?: CaracReadings;
   /** Called with a preset, or with nothing for « Armure personnalisée ». */
   onAdd?: (preset?: ArmorPreset) => void;
+  /** Preset ids on the character's shopping list — see the `favorites` table. */
+  favorites?: ReadonlySet<string>;
+  /** Stars / unstars one entry. Absent when no character is reading. */
+  onToggleFavorite?: (presetId: string) => void;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
@@ -43,6 +52,29 @@ export default function ArmorCatalogList({
       q === '' ? ARMOR_CATALOG : ARMOR_CATALOG.filter((p) => fold(p.data.name ?? '').includes(q)),
     [q],
   );
+
+  // One renderer for both places: the Favoris card must show the very same row
+  // as the catégorie below it.
+  const renderRow = (p: ArmorPreset) => (
+    <CatalogRow
+      key={p.id}
+      icon="shield"
+      name={p.data.name ?? ''}
+      subtitle={[`Défense ${p.data.defenseMax}`, p.data.prerequisites]
+        .filter((s) => s && String(s).trim() !== '')
+        .join(' · ')}
+      addLabel={`Ajouter ${p.data.name}`}
+      alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
+      favorite={favorites.has(p.id)}
+      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(p.id))}
+      onAdd={onAdd && (() => onAdd(p))}>
+      <ArmorDetail armor={p.data} caracValue={readings?.caracValue} />
+    </CatalogRow>
+  );
+
+  // Starred entries first, and they STAY in their catégorie below: moving them
+  // out would mean a player opening « Légère » cannot find what they starred.
+  const starred = filtered.filter((p) => favorites.has(p.id));
 
   return (
     <CatalogScrollProvider value={catalogScroll}>
@@ -60,25 +92,18 @@ export default function ArmorCatalogList({
 
         {onAdd ? <CatalogCustomRow label="Armure personnalisée" onPress={() => onAdd()} /> : null}
 
+        {starred.length > 0 ? (
+          <SectionCard title="Favoris" icon="star">
+            {starred.map(renderRow)}
+          </SectionCard>
+        ) : null}
+
         {ARMOR_CATEGORIES.map((cat) => {
           const items = filtered.filter((p) => p.category === cat);
           if (items.length === 0) return null;
           return (
             <SectionCard key={cat} title={cat} icon="shield">
-              {items.map((p) => (
-                <CatalogRow
-                  key={p.id}
-                  icon="shield"
-                  name={p.data.name ?? ''}
-                  subtitle={[`Défense ${p.data.defenseMax}`, p.data.prerequisites]
-                    .filter((s) => s && String(s).trim() !== '')
-                    .join(' · ')}
-                  addLabel={`Ajouter ${p.data.name}`}
-                  alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
-                  onAdd={onAdd && (() => onAdd(p))}>
-                  <ArmorDetail armor={p.data} caracValue={readings?.caracValue} />
-                </CatalogRow>
-              ))}
+              {items.map(renderRow)}
             </SectionCard>
           );
         })}

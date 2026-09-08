@@ -6,6 +6,7 @@ import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackb
 import { type ArmorPreset } from '@/data/armor-catalog';
 import { useCaracReadings } from '@/hooks/use-carac-readings';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { useFavorites } from '@/hooks/use-favorites';
 import { log } from '@/lib/log';
 import { createArmor } from '@/repositories/armor';
 
@@ -17,6 +18,7 @@ import { createArmor } from '@/repositories/armor';
  */
 export default function ArmorCatalogModal() {
   const numId = useCharacterId();
+  const favorites = useFavorites(numId, 'armor');
   const added = useCatalogSnackbar(numId, 'armor');
   const readings = useCaracReadings(numId);
 
@@ -35,7 +37,12 @@ export default function ArmorCatalogModal() {
 
   return (
     <View style={styles.root}>
-      <ArmorCatalogList readings={readings} onAdd={add} />
+      <ArmorCatalogList
+        readings={readings}
+        onAdd={add}
+        favorites={favorites.ids}
+        onToggleFavorite={favorites.toggle}
+      />
       <CatalogSnackbar state={added} />
     </View>
   );
