@@ -29,6 +29,8 @@ export default function CatalogRow({
   subtitle,
   addLabel,
   onAdd,
+  favorite,
+  onToggleFavorite,
   alert,
   badge,
   children,
@@ -44,6 +46,13 @@ export default function CatalogRow({
    * The row then previews and nothing else.
    */
   onAdd?: () => void;
+  /** This entry is on the character's shopping list — the star reads filled. */
+  favorite?: boolean;
+  /**
+   * Stars / unstars the entry. Omitted wherever `onAdd` is (no character, no
+   * list to star into) — the star is then gone rather than inert.
+   */
+  onToggleFavorite?: () => void;
   /** Flags the tile in the error colour (an unmet prérequis), like the cards do. */
   alert?: boolean;
   /**
@@ -118,6 +127,27 @@ export default function CatalogRow({
             ) : null}
           </View>
         </Pressable>
+
+        {/* Colour alone carries the state: the DS has one star glyph, and a gold
+            one against a muted one reads at a glance without a second asset.
+            A sibling of the disclosure for the same reason the `+` is — nested
+            buttons are invalid HTML and React drops their clicks on web. */}
+        {onToggleFavorite ? (
+          <IconButton
+            icon={() => (
+              <Icon
+                name="star"
+                size={22}
+                color={favorite ? theme.colors.primary : theme.colors.onSurfaceVariant}
+              />
+            )}
+            size={22}
+            accessibilityLabel={favorite ? `Retirer ${name} des favoris` : `Ajouter ${name} aux favoris`}
+            accessibilityState={{ selected: !!favorite }}
+            onPress={onToggleFavorite}
+            style={styles.add}
+          />
+        ) : null}
 
         {/* The add button, not a chevron: the row itself is the disclosure. */}
         {onAdd ? (
