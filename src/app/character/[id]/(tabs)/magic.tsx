@@ -9,7 +9,7 @@ import ReserveObjectDialog, {
   type ReserveObjectDraft,
 } from '@/components/magic/reserve-object-dialog';
 import ReserveTab from '@/components/magic/reserve-tab';
-import SpellCard from '@/components/spell-card';
+import SpellBook from '@/components/magic/spell-book';
 import AppFab from '@/components/ui/app-fab';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
@@ -27,14 +27,12 @@ import type {
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
 import { useInPlayWriters } from '@/hooks/use-in-play-writers';
-import { openRoller } from '@/lib/dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellTotal } from '@/hooks/use-spell-total';
 import { Alert } from '@/lib/alert';
 import { asNumRecord } from '@/lib/character-values';
 import { findTarget, firstTarget, isTargetEquipped } from '@/lib/enchant-targets';
-import { spellRollContext } from '@/lib/roll-context';
 import { armorQuery } from '@/repositories/armor';
 import { createEnchant, enchantsQuery } from '@/repositories/enchants';
 import { itemsQuery } from '@/repositories/items';
@@ -83,7 +81,7 @@ export default function CharacterMagicScreen() {
   const { data: shieldRows } = useLiveQuery(shieldsQuery(numId), [numId]);
   const { data: items } = useLiveQuery(itemsQuery(numId), [numId]);
   const { data: enchantList } = useLiveQuery(enchantsQuery(numId), [numId]);
-  const { totalFor: spellTotalFor, caracValue: spellCaracValue } = useSpellTotal(numId);
+  const readings = useSpellTotal(numId);
   const [tab, setTab] = useState(0);
   // Shared by the Réserve and Enchantements tabs: unlocks bullet-tapping plus
   // the reserve-object add/delete controls, same convention across this screen.
@@ -165,32 +163,9 @@ export default function CharacterMagicScreen() {
       );
     }
     if (index === SPELLS_TAB) {
-      return (
-        <TabPage>
-          {knownSpells.length === 0 ? (
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>
-              Aucun sortilège. Ajoutez-en un avec le bouton « Sort ».
-            </Text>
-          ) : (
-            <Columns gap={10}>
-              {knownSpells.map((sp) => {
-                // Once per card: the badge shows this score and the roll uses
-                // it, and the two must not drift apart.
-                const total = spellTotalFor(sp);
-                return (
-                  <SpellCard
-                    key={sp.id}
-                    spell={sp}
-                    total={total}
-                    caracValue={spellCaracValue}
-                    onRoll={() => openRoller(spellRollContext(sp, total))}
-                  />
-                );
-              })}
-            </Columns>
-          )}
-        </TabPage>
-      );
+      // Owns its own page: groups by sphère, and pins a search field above the
+      // scroll once the spellbook is long enough to need one.
+      return <SpellBook spells={knownSpells} readings={readings} />;
     }
     return (
       <TabPage>
