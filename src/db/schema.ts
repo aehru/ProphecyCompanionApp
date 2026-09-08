@@ -781,6 +781,51 @@ export const gmNotes = sqliteTable('gm_notes', {
   uniqueIndex('gm_notes_campaign_char_unique').on(table.campaignId, table.charUuid),
 ]);
 
+/** The catalogues a favourite can point into — one per `*-catalog-list`. */
+export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait'] as const;
+export type CatalogKind = (typeof CATALOG_KINDS)[number];
+
+/**
+ * Entries a character has STARRED in a catalogue — a shopping list of what they
+ * mean to acquire later, not anything they own.
+ *
+ * Its own table rather than a flag on `spells`/`traits`/… because a favourite is
+ * the opposite of a row: nothing has been bought, there is no cost, no name to
+ * edit, no provenance to keep. Folding it into the owned tables would also walk
+ * straight into `pruneUnknownSpell`, which deletes any `spells` row flagged
+ * unknown once no enchant points at it — a starred spell stored that way would
+ * vanish the next time an enchant changed source.
+ *
+ * A POINTER, deliberately thin. No `preset_revision`: provenance exists because
+ * a picked row is a *copy* a later catalogue correction must find again, while a
+ * favourite always means "whatever this entry is now". No name or cost snapshot:
+ * the preset is the source, and a denormalised copy could only go stale. No
+ * `created_at`: favoris are read in the catalogue's own order (niveau, nom), and
+ * nothing sorts them by when they were starred.
+ *
+ * `kind` is not redundant with `preset_id`: slugs are unique WITHIN a catalogue,
+ * not across them, and every read wants one catalogue at a time anyway.
+ *
+ * Catalogue entries only — a hand-written sortilège has no slug, and starring
+ * something the character already wrote is a note, not a plan.
+ */
+export const favorites = sqliteTable(
+  'favorites',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    characterId: integer('character_id')
+      .notNull()
+      .references(() => characters.id, { onDelete: 'cascade' }),
+    kind: text('kind').$type<CatalogKind>().notNull(),
+    presetId: text('preset_id').notNull(),
+  },
+  (table) => [
+    // Starring twice is the same statement made twice; the index makes the
+    // repository's toggle a plain delete-or-insert with no read-modify-write.
+    uniqueIndex('favorites_char_kind_preset').on(table.characterId, table.kind, table.presetId),
+  ],
+);
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -809,3 +854,4 @@ export type Campaign = typeof campaigns.$inferSelect;
 export type NewCampaign = typeof campaigns.$inferInsert;
 export type CampaignShare = typeof campaignShares.$inferSelect;
 export type GmNote = typeof gmNotes.$inferSelect;
+export type Favorite = typeof favorites.$inferSelect;
