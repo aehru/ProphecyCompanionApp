@@ -56,6 +56,16 @@ const RARITY_OPTIONS: Record<TraitKind, { key: string; label: string }[]> = {
 };
 
 const NONE_COLLAPSED: ReadonlySet<string> = new Set();
+const NONE_FAVORITE: ReadonlySet<string> = new Set();
+
+/** Fold key for the starred block. Not a `TraitRarity`, so it cannot clash. */
+const FAVORITES_KEY = 'favorites';
+
+/** A two-chip toggle: the « Tous » chip is what turns it back off. */
+const FAVORITE_OPTIONS = [
+  { key: '', label: 'Tous' },
+  { key: 'fav', label: 'Favoris' },
+];
 
 /**
  * The avantages / désavantages catalogue — search, a kind switch, and rows
@@ -76,6 +86,8 @@ export default function TraitCatalogList({
   pool,
   onAdd,
   onAddCustom,
+  favorites = NONE_FAVORITE,
+  onToggleFavorite,
 }: {
   /**
    * How many times each preset is already on this character's sheet — badged
@@ -93,12 +105,17 @@ export default function TraitCatalogList({
    * other side of the pool.
    */
   onAddCustom?: (kind: TraitKind) => void;
+  /** Preset ids on the character's shopping list — see the `favorites` table. */
+  favorites?: ReadonlySet<string>;
+  /** Stars / unstars one entry. Absent when no character is reading. */
+  onToggleFavorite?: (presetId: string) => void;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState<TraitKind>('desavantage');
   const [rarity, setRarity] = useState('');
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(NONE_COLLAPSED);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   // Lets a row's « Replier » put itself back at the top of the screen.
   const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
 
@@ -125,9 +142,54 @@ export default function TraitCatalogList({
   // treatment the weapon and spell catalogues give their own filtering.
   const applied = useDeferredValue(foldQuery(query));
   const criteria = useMemo(() => ({ kind, query: applied, rarity }), [kind, applied, rarity]);
+  // « Favoris » narrows the POOL rather than joining the criteria: every facet
+  // in there is a property of the entry, and a star belongs to whoever is
+  // reading. Filtering the input leaves the tested grouper untouched.
+  const starred = useMemo(() => INDEX.filter((e) => favorites.has(e.preset.id)), [favorites]);
   const { groups, total, kindTotal } = useMemo(
-    () => groupTraits(INDEX, criteria, collapsed),
-    [criteria, collapsed],
+    () => groupTraits(favoritesOnly ? starred : INDEX, criteria, collapsed),
+    [favoritesOnly, starred, criteria, collapsed],
+  );
+
+  /**
+   * The starred entries as one block above the raretés — the same grouper run
+   * over the favourites alone and flattened, so it obeys the side switch, the
+   * search and the rareté chip exactly as the headings below do.
+   *
+   * The rows also STAY in their rareté below: moving them out would mean a
+   * player opening « Commun » cannot find the trait they starred.
+   */
+  const favoriteRows = useMemo(() => {
+    if (favoritesOnly || starred.length === 0) return [];
+    return groupTraits(starred, criteria).groups.flatMap((g) => g.items);
+  }, [favoritesOnly, starred, criteria]);
+
+  // One renderer for both places: the Favoris block must show the very same row
+  // as the rareté below it, badge, alert and all.
+  const renderRow = (e: (typeof INDEX)[number]) => (
+    <CatalogRow
+      key={e.preset.id}
+      icon={TRAIT_ICON[kind]}
+      name={e.preset.data.name ?? ''}
+      subtitle={e.subtitle}
+      addLabel={`Ajouter ${e.preset.data.name}`}
+      badge={traitOwnedBadge(owned?.get(e.preset.id))}
+      // Flags an avantage the balance can't pay for, in the same error colour
+      // the gear catalogues use for an unmet prérequis. A FLAG and not a block:
+      // nothing enforces the pool.
+      alert={traitUnaffordable({ kind, costs: e.preset.costs }, pool)}
+      favorite={favorites.has(e.preset.id)}
+      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(e.preset.id))}
+      onAdd={onAdd && (() => onAdd(e.preset))}>
+      <TraitDetail
+        kind={kind}
+        rarity={e.rarity}
+        cost={e.costLabel}
+        description={e.preset.data.description ?? ''}
+        inGameEffect={e.preset.data.inGameEffect}
+        evolving={e.preset.data.evolving ?? false}
+      />
+    </CatalogRow>
   );
 
   return (
@@ -155,8 +217,30 @@ export default function TraitCatalogList({
           onChange={setRarity}
         />
 
+        {onToggleFavorite ? (
+          <ChipSelect
+            label="Favoris"
+            options={FAVORITE_OPTIONS}
+            value={favoritesOnly ? 'fav' : ''}
+            onChange={(v) => setFavoritesOnly(v === 'fav')}
+          />
+        ) : null}
+
         {onAddCustom ? (
           <CatalogCustomRow label={CUSTOM_LABEL[kind]} onPress={() => onAddCustom(kind)} />
+        ) : null}
+
+        {favoriteRows.length > 0 ? (
+          <View style={styles.section}>
+            <SectionHeader
+              title="Favoris"
+              icon="star"
+              helper={String(favoriteRows.length)}
+              expanded={!collapsed.has(FAVORITES_KEY)}
+              onPress={() => toggleRarity(FAVORITES_KEY)}
+            />
+            {collapsed.has(FAVORITES_KEY) ? null : favoriteRows.map(renderRow)}
+          </View>
         ) : null}
 
         {groups.map((group) => (
@@ -171,29 +255,7 @@ export default function TraitCatalogList({
               expanded={group.items.length > 0}
               onPress={() => toggleRarity(group.rarity)}
             />
-            {group.items.map((e) => (
-              <CatalogRow
-                key={e.preset.id}
-                icon={TRAIT_ICON[kind]}
-                name={e.preset.data.name ?? ''}
-                subtitle={e.subtitle}
-                addLabel={`Ajouter ${e.preset.data.name}`}
-                badge={traitOwnedBadge(owned?.get(e.preset.id))}
-                // Flags an avantage the balance can't pay for, in the same
-                // error colour the gear catalogues use for an unmet prérequis.
-                // A FLAG and not a block: nothing enforces the pool.
-                alert={traitUnaffordable({ kind, costs: e.preset.costs }, pool)}
-                onAdd={onAdd && (() => onAdd(e.preset))}>
-                <TraitDetail
-                  kind={kind}
-                  rarity={e.rarity}
-                  cost={e.costLabel}
-                  description={e.preset.data.description ?? ''}
-                  inGameEffect={e.preset.data.inGameEffect}
-                  evolving={e.preset.data.evolving ?? false}
-                />
-              </CatalogRow>
-            ))}
+            {group.items.map(renderRow)}
           </View>
         ))}
 

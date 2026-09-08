@@ -8,6 +8,7 @@ import TraitPickDialog, { type TraitPick } from '@/components/trait-pick-dialog'
 import type { TraitKind } from '@/constants/prophecy';
 import type { TraitPreset } from '@/data/trait-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { useFavorites } from '@/hooks/use-favorites';
 import { log } from '@/lib/log';
 import { traitPool } from '@/lib/trait-pool';
 import { createTrait, traitsQuery } from '@/repositories/traits';
@@ -28,6 +29,7 @@ import { createTrait, traitsQuery } from '@/repositories/traits';
 export default function TraitCatalogModal() {
   const numId = useCharacterId();
   const { data: ownedRows } = useLiveQuery(traitsQuery(numId), [numId]);
+  const favorites = useFavorites(numId, 'trait');
   const added = useCatalogSnackbar(numId, 'trait');
   const { announce, openEditor } = added;
   // The entry waiting on an answer, if any.
@@ -96,7 +98,14 @@ export default function TraitCatalogModal() {
 
   return (
     <View style={styles.root}>
-      <TraitCatalogList owned={owned} pool={pool} onAdd={add} onAddCustom={addCustom} />
+      <TraitCatalogList
+        owned={owned}
+        pool={pool}
+        onAdd={add}
+        onAddCustom={addCustom}
+        favorites={favorites.ids}
+        onToggleFavorite={favorites.toggle}
+      />
       <TraitPickDialog
         // Keyed by the entry: the dialog opens on that entry's cheapest tier and
         // an empty précision, which it can only do by mounting fresh (see its
