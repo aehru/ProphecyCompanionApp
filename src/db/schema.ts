@@ -477,6 +477,28 @@ export const spells = sqliteTable('spells', {
    * which is what they all were.
    */
   known: integer('known', { mode: 'boolean' }).notNull().default(true),
+  /**
+   * The mage's own shortlist — the sortilèges they reach for every session,
+   * pulled to the top of the Sorts tab.
+   *
+   * A column on the ROW and not a `favorites` entry, even though the catalogues
+   * star through that table. Two reasons, and the first is decisive: a
+   * hand-written sortilège has no `preset_id`, so the table could never hold it.
+   * The second is that `favorites` survives an export precisely because a preset
+   * slug is a stable global id — pointing it at a local `spells.id` would mean
+   * teaching it the positional-index machinery `enchants` carries, for a
+   * boolean.
+   *
+   * The two marks are the same star seen at two moments: the catalogue's means
+   * « je compte l'apprendre », this one « je le lance tout le temps ». Learning
+   * a starred entry carries the star onto the new row and clears the catalogue's
+   * (see the spell picker) — the mark follows the spell rather than being
+   * duplicated into two places that can then disagree.
+   *
+   * Meaningless on a `known: false` row (an enchantment's source is not in the
+   * spellbook and cannot be starred); nothing writes it there.
+   */
+  favorite: integer('favorite', { mode: 'boolean' }).notNull().default(false),
 });
 
 /**
@@ -855,3 +877,4 @@ export type NewCampaign = typeof campaigns.$inferInsert;
 export type CampaignShare = typeof campaignShares.$inferSelect;
 export type GmNote = typeof gmNotes.$inferSelect;
 export type Favorite = typeof favorites.$inferSelect;
+export type NewFavorite = typeof favorites.$inferInsert;
