@@ -51,6 +51,7 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
   return {
     character,
     state,
+    favorites: [{ kind: 'spell', presetId: 'boule-de-feu' }],
     skills: [{ name: 'Esquive', attribut: 'physique', value: 3 }],
     armor: [
       {
@@ -649,8 +650,16 @@ describe('forSharing', () => {
     expect((exp.characters[0].character as { uuid?: string }).uuid).toBe('u1');
   });
 
-  it('leaves an already anonymous export alone', () => {
+  it('strips the shopping list, which is a note to its owner', () => {
     const exp = buildExport([makeBundle()]);
+    expect(exp.characters[0].favorites.length).toBeGreaterThan(0);
+    expect(forSharing(exp).characters[0].favorites).toEqual([]);
+    // The source envelope is untouched — forSharing is pure.
+    expect(exp.characters[0].favorites.length).toBeGreaterThan(0);
+  });
+
+  it('leaves an already anonymous export alone', () => {
+    const exp = buildExport([makeBundle({ favorites: [] })]);
     expect(forSharing(exp)).toEqual(exp);
   });
 
