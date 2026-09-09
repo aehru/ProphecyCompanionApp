@@ -123,6 +123,27 @@ function SpellSummary({
             </Text>
           ) : null}
         </View>
+        {/* Toggled from the card itself rather than through a prop: both
+            callers are the sheet of the character who owns the row, and
+            `updateSpell` is the same write the editor below makes. A plain
+            Pressable like <TotalBadge> beside it — the row is a Pressable with
+            no button role, so this nests legally on web. */}
+        <Pressable
+          onPress={() => updateSpell(s.id, { favorite: !s.favorite })}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityState={{ selected: s.favorite }}
+          accessibilityLabel={
+            s.favorite ? `Retirer ${s.name} des favoris` : `Ajouter ${s.name} aux favoris`
+          }
+          style={styles.star}>
+          <Icon
+            name="star"
+            size={18}
+            color={s.favorite ? theme.colors.primary : theme.colors.onSurfaceVariant}
+          />
+        </Pressable>
+
         {/* The score is the number a player needs at a glance, so it stays on
             the collapsed row — and it is the roll button: it casts, the row
             around it still expands. */}
@@ -364,6 +385,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
 }
 
 const styles = StyleSheet.create({
+  star: { padding: 2 },
   // DS inventory row (shared shape with weapon/armor cards).
   item: { borderBottomWidth: 1 },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 12 },

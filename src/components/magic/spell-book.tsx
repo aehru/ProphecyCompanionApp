@@ -30,6 +30,9 @@ const SEARCH_THRESHOLD = 12;
 
 const NONE_COLLAPSED: ReadonlySet<string> = new Set();
 
+/** Section key for the starred rows. Not a `SphereKey`, so it cannot clash. */
+const FAVORITES_KEY = 'favorites';
+
 export default function SpellBook({
   spells,
   readings,
@@ -81,8 +84,30 @@ export default function SpellBook({
     [index, applied, searching, collapsed],
   );
 
+  /**
+   * The mage's shortlist, as a section above the sphères — the same sectioner
+   * run over the starred rows alone and flattened, so it obeys the search
+   * exactly as the sphères do and needs no second filtering rule.
+   *
+   * The rows also STAY in their sphère below, like the catalogues': moving them
+   * out would mean opening « Sphère du Feu » and not finding the spell you
+   * starred.
+   */
+  const favorites = useMemo(() => {
+    const starred = index.filter((e) => e.spell.favorite);
+    if (starred.length === 0) return [];
+    return buildSpellSections(
+      starred,
+      SPHERES,
+      { ...NO_FILTERS, query: applied },
+      NONE_COLLAPSED,
+    ).flatMap((s) => s.data);
+  }, [index, applied]);
+
   // Folding the only sphère a character knows just hides their whole spellbook.
-  const foldable = !searching && sections.length > 1;
+  // The Favoris block counts as one: with a single sphère it is the only other
+  // heading, and folding either is then a real choice.
+  const foldable = !searching && sections.length + (favorites.length > 0 ? 1 : 0) > 1;
 
   const toggle = (key: string) =>
     setCollapsed((prev) => {
@@ -122,6 +147,21 @@ export default function SpellBook({
         </View>
       ) : null}
       <TabPage>
+        {favorites.length > 0 ? (
+          <View style={styles.section}>
+            <SectionHeader
+              title="Favoris"
+              icon="star"
+              helper={String(favorites.length)}
+              expanded={!collapsed.has(FAVORITES_KEY)}
+              onPress={foldable ? () => toggle(FAVORITES_KEY) : undefined}
+            />
+            {collapsed.has(FAVORITES_KEY) && !searching ? null : (
+              <Columns gap={10}>{favorites.map((e) => card(e.spell))}</Columns>
+            )}
+          </View>
+        ) : null}
+
         {sections.length === 0 ? (
           // No sections and no query means an empty spellbook: same branch, and
           // « aucun résultat » would be a lie about a list nobody has filled yet.
