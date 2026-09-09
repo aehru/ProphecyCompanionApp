@@ -482,21 +482,19 @@ export const spells = sqliteTable('spells', {
    * pulled to the top of the Sorts tab.
    *
    * A column on the ROW and not a `favorites` entry, even though the catalogues
-   * star through that table. Two reasons, and the first is decisive: a
-   * hand-written sortilège has no `preset_id`, so the table could never hold it.
-   * The second is that `favorites` survives an export precisely because a preset
-   * slug is a stable global id — pointing it at a local `spells.id` would mean
-   * teaching it the positional-index machinery `enchants` carries, for a
-   * boolean.
+   * star through that table: a hand-written sortilège has no `preset_id`, so the
+   * table could never hold it. `favorites` also survives an export precisely
+   * because a slug means the same thing on every device — pointing it at a local
+   * `spells.id` would need the positional-index machinery `enchants` carries,
+   * for a boolean.
    *
-   * The two marks are the same star seen at two moments: the catalogue's means
-   * « je compte l'apprendre », this one « je le lance tout le temps ». Learning
-   * a starred entry carries the star onto the new row and clears the catalogue's
-   * (see the spell picker) — the mark follows the spell rather than being
-   * duplicated into two places that can then disagree.
+   * The two marks are one star at two moments — « je compte l'apprendre », then
+   * « je le lance tout le temps ». Learning a starred entry carries it onto the
+   * new row and clears the catalogue's (see the spell picker), so the mark
+   * follows the spell instead of living in two places that can disagree.
    *
-   * Meaningless on a `known: false` row (an enchantment's source is not in the
-   * spellbook and cannot be starred); nothing writes it there.
+   * Meaningless on a `known: false` row: an enchantment's source is not in the
+   * spellbook, and nothing writes it there.
    */
   favorite: integer('favorite', { mode: 'boolean' }).notNull().default(false),
 });
@@ -820,13 +818,12 @@ export type CatalogKind = (typeof CATALOG_KINDS)[number];
  *
  * A POINTER, deliberately thin. No `preset_revision`: provenance exists because
  * a picked row is a *copy* a later catalogue correction must find again, while a
- * favourite always means "whatever this entry is now". No name or cost snapshot:
- * the preset is the source, and a denormalised copy could only go stale. No
- * `created_at`: favoris are read in the catalogue's own order (niveau, nom), and
- * nothing sorts them by when they were starred.
+ * favourite always means "whatever this entry is now". No name or cost snapshot,
+ * which could only go stale. No `created_at`: favoris are read in the
+ * catalogue's own order, and nothing sorts them by when they were starred.
  *
  * `kind` is not redundant with `preset_id`: slugs are unique WITHIN a catalogue,
- * not across them, and every read wants one catalogue at a time anyway.
+ * not across them.
  *
  * Catalogue entries only — a hand-written sortilège has no slug, and starring
  * something the character already wrote is a note, not a plan.
