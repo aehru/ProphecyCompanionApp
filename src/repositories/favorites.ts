@@ -18,11 +18,7 @@ export function favoritesQuery(characterId: number, kind: CatalogKind) {
 /**
  * Star or unstar one entry. Takes the target state rather than flipping what it
  * finds: the caller already holds the set it rendered the star from, so a read
- * here would only be a slower way to learn the same thing — and two taps racing
- * would flip it twice into the same value.
- *
- * `onConflictDoNothing` leans on the unique index: starring something already
- * starred is the same statement made twice, not an error.
+ * here would only be a slower way to learn the same thing.
  */
 export async function setFavorite(
   characterId: number,
@@ -31,6 +27,8 @@ export async function setFavorite(
   on: boolean,
 ) {
   if (on) {
+    // Leans on the unique index: starring what is already starred is the same
+    // statement made twice, not an error.
     await db.insert(favorites).values({ characterId, kind, presetId }).onConflictDoNothing();
   } else {
     await db

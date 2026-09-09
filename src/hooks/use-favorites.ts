@@ -1,7 +1,11 @@
 // The star state one catalogue needs: which slugs are starred, and how to
-// toggle one. A hook rather than four lines in each of the five catalogue
-// screens — the Set has to be memoized (the lists pass it into `React.memo`'d
-// rows) and that is exactly the part worth writing once.
+// toggle one.
+//
+// A hook rather than four lines in each of the five catalogue screens, and
+// memoized down to the query rows: the lists hand this object to `React.memo`'d
+// rows, so a fresh `{ ids, toggle }` per render would defeat the memo outright
+// and re-render every catalogue row on every keystroke — the same trap
+// `useSpellTotal` documents.
 
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useCallback, useMemo } from 'react';
@@ -33,5 +37,5 @@ export function useFavorites(characterId: number, kind: CatalogKind): Favorites 
     },
     [characterId, kind, ids],
   );
-  return { ids, toggle };
+  return useMemo(() => ({ ids, toggle }), [ids, toggle]);
 }
