@@ -2,7 +2,7 @@
   "expo": {
     "name": "Prophecy Companion App",
     "slug": "prophecy-app",
-    "version": "0.19.0-rc",
+    "version": "0.19.0-rc2",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "prophecyapp",
@@ -12,7 +12,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 38,
+      "versionCode": 39,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
