@@ -199,7 +199,9 @@ function FavoriteStar({
         />
       )}
       size={22}
-      accessibilityLabel={starred ? `Retirer ${name} des favoris` : `Ajouter ${name} aux favoris`}
+      accessibilityLabel={
+        starred ? `Retirer ${name} des favoris` : `Mettre ${name} en favori`
+      }
       accessibilityState={{ selected: starred }}
       onPress={() => favorites.toggle(presetId)}
       style={styles.add}

@@ -135,10 +135,14 @@ export async function createNpc(page: Page, campaignId: string, nom: string): Pr
  * Add a catalogue weapon to a character, through the picker's `+` — which names
  * itself « Ajouter <arme> ». A CATALOGUE weapon, not a blank one, because only
  * a preset carries the `skillName` that gives the card a total and a roll.
+ *
+ * EXACT: `getByLabel` matches a substring by default, and a row carries other
+ * controls named after the same weapon (the favourite star). Without this the
+ * locator resolves to two elements and strict mode fails the test.
  */
 export async function addCatalogWeapon(page: Page, characterId: string, name: string) {
   await page.goto(`/character/${characterId}/weapon/catalog`);
-  await page.getByLabel(`Ajouter ${name}`).click();
+  await page.getByLabel(`Ajouter ${name}`, { exact: true }).click();
   // The toast is the insert's acknowledgement: wait for it, or navigating away
   // races the async write.
   await expect(page.getByText(`« ${name} » ajoutée.`)).toBeVisible();

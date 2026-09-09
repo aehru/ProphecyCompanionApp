@@ -134,7 +134,7 @@ function SpellSummary({
           accessibilityRole="button"
           accessibilityState={{ selected: s.favorite }}
           accessibilityLabel={
-            s.favorite ? `Retirer ${s.name} des favoris` : `Ajouter ${s.name} aux favoris`
+            s.favorite ? `Retirer ${s.name} des favoris` : `Mettre ${s.name} en favori`
           }
           style={styles.star}>
           <Icon
