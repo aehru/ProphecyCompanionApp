@@ -39,7 +39,7 @@ during a session: wounds, ressources, initiative, effets, réserve de magie.
 
 | Screen | What you get |
 | --- | --- |
-| **Accueil** | Avatar, the three tendances as ring gauges, vitals in brief, optional full illustration, free-form dice roller. |
+| **Accueil** | Avatar, the three tendances as ring gauges, vitals in brief, avantages & désavantages with their point balance, optional full illustration, free-form dice roller. |
 | **Fiche** | The whole sheet: tendances, 8 caractéristiques, attributs, initiative dice (temporary ones included — deux armes, sorts…), santé, effets, armure & bouclier pools, ressources, conditions, biographie. |
 | **Compétences** | Skills linked to attributs, from the Prophecy 2e catalogue or your own, with search + attribut filters within thumb reach. |
 | **Inventaire** | Argent, armes (rulebook catalogue + formulas + prerequisites), armures, boucliers, objets. |
