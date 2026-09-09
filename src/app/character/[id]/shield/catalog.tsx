@@ -40,8 +40,7 @@ export default function ShieldCatalogModal() {
       <ShieldCatalogList
         readings={readings}
         onAdd={add}
-        favorites={favorites.ids}
-        onToggleFavorite={favorites.toggle}
+        favorites={favorites}
       />
       <CatalogSnackbar state={added} />
     </View>

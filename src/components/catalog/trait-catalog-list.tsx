@@ -10,6 +10,7 @@ import TraitDetail from '@/components/trait-detail';
 import { TRAIT_ICON } from '@/components/trait-icon';
 import TraitPoolBar from '@/components/trait-pool-bar';
 import ChipSelect from '@/components/ui/chip-select';
+import FavoritesChip from '@/components/ui/favorites-chip';
 import Icon from '@/components/ui/icon';
 import { SectionHeader } from '@/components/ui/section-card';
 import {
@@ -19,6 +20,7 @@ import {
   type TraitKind,
 } from '@/constants/prophecy';
 import { TRAIT_CATALOG, type TraitPreset } from '@/data/trait-catalog';
+import type { Favorites } from '@/hooks/use-favorites';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { foldQuery } from '@/lib/text-fold';
@@ -56,16 +58,8 @@ const RARITY_OPTIONS: Record<TraitKind, { key: string; label: string }[]> = {
 };
 
 const NONE_COLLAPSED: ReadonlySet<string> = new Set();
-const NONE_FAVORITE: ReadonlySet<string> = new Set();
-
 /** Fold key for the starred block. Not a `TraitRarity`, so it cannot clash. */
 const FAVORITES_KEY = 'favorites';
-
-/** A two-chip toggle: the « Tous » chip is what turns it back off. */
-const FAVORITE_OPTIONS = [
-  { key: '', label: 'Tous' },
-  { key: 'fav', label: 'Favoris' },
-];
 
 /**
  * The avantages / désavantages catalogue — search, a kind switch, and rows
@@ -86,8 +80,7 @@ export default function TraitCatalogList({
   pool,
   onAdd,
   onAddCustom,
-  favorites = NONE_FAVORITE,
-  onToggleFavorite,
+  favorites,
 }: {
   /**
    * How many times each preset is already on this character's sheet — badged
@@ -105,10 +98,8 @@ export default function TraitCatalogList({
    * other side of the pool.
    */
   onAddCustom?: (kind: TraitKind) => void;
-  /** Preset ids on the character's shopping list — see the `favorites` table. */
-  favorites?: ReadonlySet<string>;
-  /** Stars / unstars one entry. Absent when no character is reading. */
-  onToggleFavorite?: (presetId: string) => void;
+  /** The reader's shopping list. Absent when no character is reading. */
+  favorites?: Favorites;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
@@ -145,7 +136,10 @@ export default function TraitCatalogList({
   // « Favoris » narrows the POOL rather than joining the criteria: every facet
   // in there is a property of the entry, and a star belongs to whoever is
   // reading. Filtering the input leaves the tested grouper untouched.
-  const starred = useMemo(() => INDEX.filter((e) => favorites.has(e.preset.id)), [favorites]);
+  const starred = useMemo(
+    () => (favorites ? INDEX.filter((e) => favorites.ids.has(e.preset.id)) : []),
+    [favorites],
+  );
   const { groups, total, kindTotal } = useMemo(
     () => groupTraits(favoritesOnly ? starred : INDEX, criteria, collapsed),
     [favoritesOnly, starred, criteria, collapsed],
@@ -178,8 +172,8 @@ export default function TraitCatalogList({
       // the gear catalogues use for an unmet prérequis. A FLAG and not a block:
       // nothing enforces the pool.
       alert={traitUnaffordable({ kind, costs: e.preset.costs }, pool)}
-      favorite={favorites.has(e.preset.id)}
-      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(e.preset.id))}
+      presetId={e.preset.id}
+      favorites={favorites}
       onAdd={onAdd && (() => onAdd(e.preset))}>
       <TraitDetail
         kind={kind}
@@ -217,13 +211,8 @@ export default function TraitCatalogList({
           onChange={setRarity}
         />
 
-        {onToggleFavorite ? (
-          <ChipSelect
-            label="Favoris"
-            options={FAVORITE_OPTIONS}
-            value={favoritesOnly ? 'fav' : ''}
-            onChange={(v) => setFavoritesOnly(v === 'fav')}
-          />
+        {favorites ? (
+          <FavoritesChip checked={favoritesOnly} onChange={setFavoritesOnly} />
         ) : null}
 
         {onAddCustom ? (

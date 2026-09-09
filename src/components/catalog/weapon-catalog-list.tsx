@@ -12,6 +12,7 @@ import SectionCard from '@/components/ui/section-card';
 import WeaponDetail from '@/components/weapon-detail';
 import { WEAPON_CATALOG, type WeaponCategory, type WeaponPreset } from '@/data/weapon-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
+import type { Favorites } from '@/hooks/use-favorites';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { foldQuery } from '@/lib/text-fold';
@@ -30,8 +31,6 @@ const iconFor = (cat: WeaponCategory): IconName =>
 // keystroke is the cost lib/weapon-grouping exists to remove.
 const INDEX = buildWeaponIndex(WEAPON_CATALOG);
 
-const NONE_FAVORITE: ReadonlySet<string> = new Set();
-
 
 /**
  * The weapon catalogue itself — search, grouping and rows, with no idea whose
@@ -48,17 +47,14 @@ const NONE_FAVORITE: ReadonlySet<string> = new Set();
 export default function WeaponCatalogList({
   readings,
   onAdd,
-  favorites = NONE_FAVORITE,
-  onToggleFavorite,
+  favorites,
 }: {
   /** Resolves formulas, prérequis and the compétence against a sheet. */
   readings?: CaracReadings;
   /** Called with a preset, or with nothing for « Arme personnalisée ». */
   onAdd?: (preset?: WeaponPreset) => void;
-  /** Preset ids on the character's shopping list — see the `favorites` table. */
-  favorites?: ReadonlySet<string>;
-  /** Stars / unstars one entry. Absent when no character is reading. */
-  onToggleFavorite?: (presetId: string) => void;
+  /** The reader's shopping list. Absent when no character is reading. */
+  favorites?: Favorites;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
@@ -81,12 +77,12 @@ export default function WeaponCatalogList({
    * player opening « Armes de jet » cannot find the weapon they starred.
    */
   const starred = useMemo(() => {
-    if (favorites.size === 0) return [];
+    if (!favorites || favorites.ids.size === 0) return [];
     const rows: { preset: WeaponPreset; icon: IconName }[] = [];
     for (const group of groups) {
       const icon = iconFor(group.category);
       for (const { items } of group.hands) {
-        for (const p of items) if (favorites.has(p.id)) rows.push({ preset: p, icon });
+        for (const p of items) if (favorites.ids.has(p.id)) rows.push({ preset: p, icon });
       }
     }
     return rows;
@@ -116,9 +112,8 @@ export default function WeaponCatalogList({
                 preset={preset}
                 icon={icon}
                 readings={readings}
-                favorite
+                favorites={favorites}
                 onAdd={onAdd}
-                onToggleFavorite={onToggleFavorite}
               />
             ))}
           </SectionCard>
@@ -141,9 +136,8 @@ export default function WeaponCatalogList({
                       preset={p}
                       icon={icon}
                       readings={readings}
-                      favorite={favorites.has(p.id)}
+                      favorites={favorites}
                       onAdd={onAdd}
-                      onToggleFavorite={onToggleFavorite}
                     />
                   ))}
                 </View>
@@ -176,18 +170,15 @@ const WeaponRow = React.memo(function WeaponRow({
   preset: p,
   icon,
   readings,
-  favorite,
+  favorites,
   onAdd,
-  onToggleFavorite,
 }: {
   preset: WeaponPreset;
   icon: IconName;
   /** Absent when the catalogue is browsed with no character in context. */
   readings?: CaracReadings;
-  /** On the shopping list — the star reads filled. */
-  favorite?: boolean;
+  favorites?: Favorites;
   onAdd?: (preset: WeaponPreset) => void;
-  onToggleFavorite?: (presetId: string) => void;
 }) {
   return (
     <CatalogRow
@@ -196,8 +187,8 @@ const WeaponRow = React.memo(function WeaponRow({
       subtitle={[p.data.damage, p.data.prerequisites].filter((s) => s && s.trim() !== '').join(' · ')}
       addLabel={`Ajouter ${p.data.name}`}
       alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
-      favorite={favorite}
-      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(p.id))}
+      presetId={p.id}
+      favorites={favorites}
       onAdd={onAdd && (() => onAdd(p))}>
       <WeaponDetail
         weapon={p.data}

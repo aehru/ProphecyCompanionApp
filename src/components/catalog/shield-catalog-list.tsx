@@ -12,11 +12,10 @@ import Icon from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { SHIELD_CATALOG, type ShieldPreset } from '@/data/shield-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
+import type { Favorites } from '@/hooks/use-favorites';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { fold, foldQuery } from '@/lib/text-fold';
-
-const NONE_FAVORITE: ReadonlySet<string> = new Set();
 
 
 /**
@@ -30,17 +29,14 @@ const NONE_FAVORITE: ReadonlySet<string> = new Set();
 export default function ShieldCatalogList({
   readings,
   onAdd,
-  favorites = NONE_FAVORITE,
-  onToggleFavorite,
+  favorites,
 }: {
   /** Resolves the dégâts formula and prérequis against a sheet. */
   readings?: CaracReadings;
   /** Called with a preset, or with nothing for « Bouclier personnalisé ». */
   onAdd?: (preset?: ShieldPreset) => void;
-  /** Preset ids on the character's shopping list — see the `favorites` table. */
-  favorites?: ReadonlySet<string>;
-  /** Stars / unstars one entry. Absent when no character is reading. */
-  onToggleFavorite?: (presetId: string) => void;
+  /** The reader's shopping list. Absent when no character is reading. */
+  favorites?: Favorites;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
@@ -64,8 +60,8 @@ export default function ShieldCatalogList({
         .join(' · ')}
       addLabel={`Ajouter ${p.data.name}`}
       alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
-      favorite={favorites.has(p.id)}
-      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(p.id))}
+      presetId={p.id}
+      favorites={favorites}
       onAdd={onAdd && (() => onAdd(p))}>
       {/* `defenseCurrent` is seeded from the max on insert (createShield), so
           the preview reads an undamaged shield. */}
@@ -79,7 +75,7 @@ export default function ShieldCatalogList({
 
   // Starred entries first, and they stay in the list below — the boucliers are
   // one flat list, so the Favoris card is the only grouping there is.
-  const starred = filtered.filter((p) => favorites.has(p.id));
+  const starred = favorites ? filtered.filter((p) => favorites.ids.has(p.id)) : [];
 
   return (
     <CatalogScrollProvider value={catalogScroll}>

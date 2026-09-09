@@ -27,6 +27,7 @@ import { dsIcon } from '@/components/ui/icon';
 import { SectionHeader } from '@/components/ui/section-card';
 import { DISCIPLINE_LABEL, dragonMageLabel, SPHERES } from '@/constants/prophecy';
 import { SPELL_CATALOG, type SpellPreset } from '@/data/spell-catalog';
+import type { Favorites } from '@/hooks/use-favorites';
 import type { SpellReadings } from '@/hooks/use-spell-total';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -114,8 +115,7 @@ export default function SpellCatalogList({
   owned = NONE_OWNED,
   enchanted = NONE_OWNED,
   onAdd,
-  favorites = NONE_OWNED,
-  onToggleFavorite,
+  favorites,
 }: {
   /** Casting score and stat values for this character's sheet. */
   readings?: SpellReadings;
@@ -129,10 +129,8 @@ export default function SpellCatalogList({
   enchanted?: ReadonlySet<string>;
   /** Called with a preset, or with nothing for « Sortilège personnalisé ». */
   onAdd?: (preset?: SpellPreset) => void;
-  /** Preset ids on the character's shopping list — see the `favorites` table. */
-  favorites?: ReadonlySet<string>;
-  /** Stars / unstars one entry. Absent when no character is reading. */
-  onToggleFavorite?: (presetId: string) => void;
+  /** The reader's shopping list. Absent when no character is reading. */
+  favorites?: Favorites;
 }) {
   const theme = useProphecyTheme();
 
@@ -152,34 +150,31 @@ export default function SpellCatalogList({
   // it keeps the Searchbar and the chips responsive while the list catches up.
   const applied = useDeferredValue(criteria);
 
+  const starred = useMemo(
+    () => (favorites ? INDEX.filter((e) => favorites.ids.has(e.preset.id)) : []),
+    [favorites],
+  );
+
   // « Favoris » narrows the POOL rather than joining `SpellFilterCriteria`:
   // every facet in there is a property of the preset, and a star is a property
   // of the reader. Filtering the input keeps the tested engine untouched.
-  const pool = useMemo(
-    () => (favoritesOnly ? INDEX.filter((e) => favorites.has(e.preset.id)) : INDEX),
-    [favoritesOnly, favorites],
-  );
-
   const spheres = useMemo(
-    () => buildSpellSections(pool, SPHERES, applied, collapsed),
-    [pool, applied, collapsed],
+    () => buildSpellSections(favoritesOnly ? starred : INDEX, SPHERES, applied, collapsed),
+    [favoritesOnly, starred, applied, collapsed],
   );
 
   /**
-   * The starred entries, as a section of their own above the sphères.
-   *
-   * Built by running the very same sectioner over the favourites alone and
-   * flattening it — so the section obeys the search and the facets exactly as
-   * the sphères do, and stays in the catalogue's own order, with no second
-   * filtering rule to keep in step.
+   * The starred entries as a section above the sphères — the same sectioner run
+   * over the favourites alone and flattened, so it obeys the search and the
+   * facets exactly as the sphères do, with no second filtering rule to keep in
+   * step.
    *
    * The rows also STAY in their sphère below. Moving them out would mean a
    * player opening « Sphère du Feu » cannot find the spell they starred, which
    * is a worse surprise than seeing it twice.
    */
   const sections = useMemo(() => {
-    if (favoritesOnly || favorites.size === 0) return spheres;
-    const starred = INDEX.filter((e) => favorites.has(e.preset.id));
+    if (favoritesOnly) return spheres;
     const rows = buildSpellSections(starred, SPHERES, applied, NONE_COLLAPSED).flatMap(
       (sec) => sec.data,
     );
@@ -189,7 +184,7 @@ export default function SpellCatalogList({
       { key: FAVORITES_KEY, title: 'Favoris', count: rows.length, data: open ? rows : [] },
       ...spheres,
     ];
-  }, [spheres, favorites, favoritesOnly, applied, collapsed]);
+  }, [spheres, starred, favoritesOnly, applied, collapsed]);
 
   /**
    * Every preset's casting score, computed once per character change instead of
@@ -266,12 +261,11 @@ export default function SpellCatalogList({
         caracValue={caracValue}
         owned={owned.has(item.preset.id)}
         enchanted={enchanted.has(item.preset.id)}
-        favorite={favorites.has(item.preset.id)}
+        favorites={favorites}
         onAdd={onAdd}
-        onToggleFavorite={onToggleFavorite}
       />
     ),
-    [onAdd, totals, caracValue, owned, enchanted, favorites, onToggleFavorite],
+    [onAdd, totals, caracValue, owned, enchanted, favorites],
   );
 
   const renderSectionHeader = useCallback(
@@ -295,7 +289,7 @@ export default function SpellCatalogList({
       onChange={setCriteria}
       levelOptions={LEVEL_OPTIONS}
       favoritesOnly={favoritesOnly}
-      onFavoritesOnly={onToggleFavorite ? setFavoritesOnly : undefined}
+      onFavoritesOnly={favorites ? setFavoritesOnly : undefined}
       {...props}
     />
   );
@@ -385,9 +379,8 @@ const SpellRow = React.memo(function SpellRow({
   caracValue,
   owned,
   enchanted,
-  favorite,
+  favorites,
   onAdd,
-  onToggleFavorite,
 }: {
   entry: Entry;
   /** Absent with no character in context — the row then shows no « Total ». */
@@ -397,10 +390,8 @@ const SpellRow = React.memo(function SpellRow({
   owned: boolean;
   /** Known to the character only as an enchantment's source. */
   enchanted: boolean;
-  /** On the shopping list — the star reads filled. */
-  favorite: boolean;
+  favorites?: Favorites;
   onAdd?: (preset: SpellPreset) => void;
-  onToggleFavorite?: (presetId: string) => void;
 }) {
   const { preset: p } = entry;
   // The sphère is the section title, so the row names its discipline instead.
@@ -423,8 +414,8 @@ const SpellRow = React.memo(function SpellRow({
       subtitle={sub}
       badge={owned ? 'Déjà ajouté' : enchanted ? 'Enchanté' : undefined}
       addLabel={`Ajouter ${p.data.name}`}
-      favorite={favorite}
-      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(p.id))}
+      presetId={p.id}
+      favorites={favorites}
       onAdd={onAdd && (() => onAdd(p))}>
       {/* The preset's discipline/sphère fall back the same way the index does,
           so the preview's total matches the row's. */}

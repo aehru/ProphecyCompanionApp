@@ -48,8 +48,7 @@ export default function WeaponCatalogModal() {
       <WeaponCatalogList
         readings={readings}
         onAdd={add}
-        favorites={favorites.ids}
-        onToggleFavorite={favorites.toggle}
+        favorites={favorites}
       />
       <CatalogSnackbar state={added} />
     </View>

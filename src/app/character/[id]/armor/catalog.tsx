@@ -40,8 +40,7 @@ export default function ArmorCatalogModal() {
       <ArmorCatalogList
         readings={readings}
         onAdd={add}
-        favorites={favorites.ids}
-        onToggleFavorite={favorites.toggle}
+        favorites={favorites}
       />
       <CatalogSnackbar state={added} />
     </View>

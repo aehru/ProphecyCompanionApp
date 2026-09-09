@@ -103,8 +103,7 @@ export default function TraitCatalogModal() {
         pool={pool}
         onAdd={add}
         onAddCustom={addCustom}
-        favorites={favorites.ids}
-        onToggleFavorite={favorites.toggle}
+        favorites={favorites}
       />
       <TraitPickDialog
         // Keyed by the entry: the dialog opens on that entry's cheapest tier and

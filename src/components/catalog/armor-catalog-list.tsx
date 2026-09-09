@@ -12,11 +12,10 @@ import Icon from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { ARMOR_CATALOG, ARMOR_CATEGORIES, type ArmorPreset } from '@/data/armor-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
+import type { Favorites } from '@/hooks/use-favorites';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { fold, foldQuery } from '@/lib/text-fold';
-
-const NONE_FAVORITE: ReadonlySet<string> = new Set();
 
 
 /**
@@ -29,17 +28,14 @@ const NONE_FAVORITE: ReadonlySet<string> = new Set();
 export default function ArmorCatalogList({
   readings,
   onAdd,
-  favorites = NONE_FAVORITE,
-  onToggleFavorite,
+  favorites,
 }: {
   /** Resolves prérequis against a sheet. */
   readings?: CaracReadings;
   /** Called with a preset, or with nothing for « Armure personnalisée ». */
   onAdd?: (preset?: ArmorPreset) => void;
-  /** Preset ids on the character's shopping list — see the `favorites` table. */
-  favorites?: ReadonlySet<string>;
-  /** Stars / unstars one entry. Absent when no character is reading. */
-  onToggleFavorite?: (presetId: string) => void;
+  /** The reader's shopping list. Absent when no character is reading. */
+  favorites?: Favorites;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
@@ -65,8 +61,8 @@ export default function ArmorCatalogList({
         .join(' · ')}
       addLabel={`Ajouter ${p.data.name}`}
       alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
-      favorite={favorites.has(p.id)}
-      onToggleFavorite={onToggleFavorite && (() => onToggleFavorite(p.id))}
+      presetId={p.id}
+      favorites={favorites}
       onAdd={onAdd && (() => onAdd(p))}>
       <ArmorDetail armor={p.data} caracValue={readings?.caracValue} />
     </CatalogRow>
@@ -74,7 +70,7 @@ export default function ArmorCatalogList({
 
   // Starred entries first, and they STAY in their catégorie below: moving them
   // out would mean a player opening « Légère » cannot find what they starred.
-  const starred = filtered.filter((p) => favorites.has(p.id));
+  const starred = favorites ? filtered.filter((p) => favorites.ids.has(p.id)) : [];
 
   return (
     <CatalogScrollProvider value={catalogScroll}>

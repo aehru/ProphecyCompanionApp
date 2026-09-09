@@ -99,8 +99,7 @@ export default function SpellCatalogModal() {
         owned={owned}
         enchanted={enchanted}
         onAdd={add}
-        favorites={favorites.ids}
-        onToggleFavorite={favorites.toggle}
+        favorites={favorites}
       />
       <CatalogSnackbar state={added} />
     </View>
