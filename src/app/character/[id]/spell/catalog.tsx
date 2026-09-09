@@ -9,6 +9,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useSpellTotal } from '@/hooks/use-spell-total';
 import { log } from '@/lib/log';
+import { setFavorite } from '@/repositories/favorites';
 import { createSpell, spellsQuery } from '@/repositories/spells';
 
 /**
@@ -61,10 +62,22 @@ export default function SpellCatalogModal() {
       // was copied at are what let a later catalogue correction find this row
       // again — and their absence is what marks « Sortilège personnalisé » as
       // the player's own, forever off limits.
+      // The star follows the spell. A catalogue star means « je compte
+      // l'apprendre »; once learned, that sentence is spent — so it carries
+      // onto the new row (where it means « je le lance tout le temps ») and the
+      // catalogue's is cleared. Leaving both would show the same sortilège
+      // starred on the shopping list and unstarred in the spellbook.
+      const starred = preset ? favorites.ids.has(preset.id) : false;
       const row = await createSpell(
         numId,
-        preset && { ...preset.data, presetId: preset.id, presetRevision: preset.revision },
+        preset && {
+          ...preset.data,
+          presetId: preset.id,
+          presetRevision: preset.revision,
+          favorite: starred,
+        },
       );
+      if (preset && starred) await setFavorite(numId, 'spell', preset.id, false);
       // A blank spell has nothing to read in the catalogue, so it still opens
       // its editor; a preset stays here so the player can pick the next one.
       if (!preset) {
@@ -74,9 +87,9 @@ export default function SpellCatalogModal() {
       announce(`« ${preset.data.name} » ajouté.`, row.id);
     },
     // The two actions are stable (see useCatalogSnackbar), so `add` is too —
-    // which is what keeps the list's `renderItem` and its memoized rows from
-    // churning.
-    [numId, announce, openEditor],
+    // `favorites` is the one moving part, and it only changes when a star is
+    // tapped, which the list has to re-render for anyway.
+    [numId, announce, openEditor, favorites],
   );
 
   return (
