@@ -3,7 +3,9 @@
 The full tour of what the app does, screen by screen. For the short version, see
 [README.md](../README.md).
 
-The app opens on your **character roster** — every character with name + concept. Tap **+** to create one; tap a character to open its five tabs: **Accueil**, **Fiche**, **Compétences**, **Inventaire**, **Magie**.
+The app has three root tabs — **Personnages**, **Catalogues** and **Campagnes** — and opens on the first.
+
+The **character roster** lists every character with name + concept. Tap **+** to create one; tap a character to open its five tabs: **Accueil**, **Fiche**, **Compétences**, **Inventaire**, **Magie**.
 
 ## The data split
 
@@ -63,21 +65,30 @@ Your skills, each linked to an attribut. Start from the built-in Prophecy 2e ski
 - **Réserve** — the global magic reserve plus each known **sphère** (Cités, Feu, Métal, Nature, Océans, Pierre, Rêves, Vents, Ombre), tracked as bullet pools; a sphere appears once its max > 0.
 - **Objets de réserve** — items holding their own magic puces (gemme, bâton, talisman). The section only shows up once the character owns one (or while editing, to add the first): **Ajouter un objet** asks a name and a number of puces. Each object is an independent pool spent by tapping its bullets, so the global reserve stays untouched. Tap an object's name to rename or re-size it, the bin to delete it.
 - **Sortilèges** — add spells from the catalogue (the magic FAB) or your own. Each spell carries niveau, complexité, discipline, sphère, coût, incantation (temps + unité), difficulté, clé, and effet, editable in a modal.
+  - **Finding one in a full spellbook** — spells are grouped under their **sphère**, each heading carrying its count and folding away (once there are at least two headings). From a dozen spells on, a **search field** pins itself above the list. Tap a spell's star and it also appears in a **Favoris** group at the very top — the ones you cast every session, without losing them from their sphère.
 - **Enchantements** — bind an enchantment to a weapon, armor, shield or object (a name, an optional linked spell that copies its effet, and a current/max charge count). Each card shows what it's bound to and whether that item is currently equipped; a small badge marks enchanted gear everywhere it's listed (Inventaire cards included).
+
+## Catalogues & favoris
+
+Five rulebook catalogues ship with the app — **armes, armures, boucliers, sortilèges, avantages / désavantages**. Each is reachable both as a picker from the character who is buying (the tab's FAB) and as a plain reference from the **Catalogues** tab, where there is no character and nothing can be added.
+
+Opened as a picker, every row carries a **star** — bar the enchantment picker, where you are recording what some other mage cast into an object rather than shopping. Starring an entry puts it on that character's shopping list — what you mean to acquire when the points come in — and nothing else: no cost is counted, no order is kept. Starred entries then appear in a **Favoris** group at the top of the catalogue *and* stay under their own heading, so a star never hides an entry from where you would otherwise look for it. On the sortilèges and the avantages / désavantages a **Favoris** chip narrows the list to them alone.
+
+The star follows the spell: learn a sortilège you had starred and it arrives already starred in your spellbook, off the catalogue's list. Favoris are per character, and they are not shared with anyone — a GM never sees them.
 
 ## Backup & transfer
 
 **Long-press a character** in the roster to enter selection mode (taps then toggle rows), and the header turns into four actions: **tout sélectionner**, **dupliquer**, **exporter**, **supprimer**. Export writes the selection to a JSON file through the OS share sheet — save it to Files, send it to another device. **Importer…**, in the roster's **⋮** menu, reads one back.
 
 Export asks what the file is *for*, and the answer changes what happens on import:
-- **Sauvegarde** — keeps each character's portable id, so re-importing restores *that* character in place instead of doubling it (campaign slot and GM notes still attached).
-- **Partage** — strips it, so the friend you send it to gets their own copy with a fresh lineage. Two devices broadcasting the same id would fight over one campaign roster slot.
+- **Sauvegarde** — keeps each character's portable id, so re-importing restores *that* character in place instead of doubling it (campaign slot and GM notes still attached). Your favoris travel with it: it is the only backup there is.
+- **Partage** — strips it, so the friend you send it to gets their own copy with a fresh lineage. Two devices broadcasting the same id would fight over one campaign roster slot. The shopping list is dropped too — what you were saving up for is a note to yourself, not part of the sheet you hand over.
 
 Your safety net against device loss, and how you move a character between phones. *(Character illustrations aren't included in the export yet.)*
 
 ## Campagnes — the GM's table, with or without a server
 
-From the roster header's **group** icon, open **Campagnes**:
+From the **Campagnes** tab:
 - **The GM** creates a **table** — no server, no account, no network. Add **PNJ** (a name is enough; they're ordinary characters, badged as such in your roster) and **La Compagnie** shows the whole table at once: one card each, switchable between **Attributs**, **Compétences** (searchable across everyone, with each skill's total and active modifier) and **Tendances**, plus an **Initiative** tab ranking one row per die. Tap a card for the sheet — your own PNJ open in full (armes with their damage resolved, armures, boucliers, sorts) and editable in place: wounds, ressources, conditions, effets. **Private notes** never leave your phone.
 - **Connecting a server** (a shared community instance or one your group self-hosts) is the optional bonus: it mints a **join code** + **QR code**, and your players' characters join the same roster, read-only.
 - **A player** joins with the code (type it, or scan the GM's QR), picks which character to share, and taps **Diffuser**. From then on, changes to the character's *in-play* values (wounds, Maîtrise/Chance, tendances, conditions, initiative, active effects) stream to the GM in near real-time. A floating indicator shows you're broadcasting; **Arrêter** pauses it.

@@ -43,7 +43,8 @@ during a session: wounds, ressources, initiative, effets, réserve de magie.
 | **Fiche** | The whole sheet: tendances, 8 caractéristiques, attributs, initiative dice (temporary ones included — deux armes, sorts…), santé, effets, armure & bouclier pools, ressources, conditions, biographie. |
 | **Compétences** | Skills linked to attributs, from the Prophecy 2e catalogue or your own, with search + attribut filters within thumb reach. |
 | **Inventaire** | Argent, armes (rulebook catalogue + formulas + prerequisites), armures, boucliers, objets. |
-| **Magie** | Disciplines, réserve globale + spheres, standalone réserve objects, sortilèges, enchantements bound to gear. |
+| **Magie** | Disciplines, réserve globale + spheres, standalone réserve objects, sortilèges grouped by sphère with search + favoris, enchantements bound to gear. |
+| **Catalogues** | The five rulebook catalogues as pure reference — armes, armures, boucliers, sortilèges, avantages / désavantages — with no character attached. |
 | **Campagnes** | The GM's table — PNJ, La Compagnie, initiative order — local by default, networked if you attach a server. |
 | **Backup** | Select characters to duplicate, export to JSON (sauvegarde or partage) or delete; import a file back. |
 | **Diagnostic** | A local, technical-identifiers-only log you can read, share or wipe. Nothing is sent automatically. |
