@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Searchbar, Text } from 'react-native-paper';
 
 import ChipSelect, { ChipMultiSelect } from '@/components/ui/chip-select';
+import FavoritesChip from '@/components/ui/favorites-chip';
 import Icon from '@/components/ui/icon';
 import SelectField from '@/components/ui/select-field';
 import {
@@ -21,12 +22,6 @@ const DISCIPLINE_OPTIONS = [
 ];
 
 const SPHERE_OPTIONS = [{ key: '', label: 'Toutes' }, ...SPHERES];
-
-/** A two-chip toggle rather than a lone chip: « Tous » is what turns it back off. */
-const FAVORITE_OPTIONS = [
-  { key: '', label: 'Tous' },
-  { key: 'fav', label: 'Favoris' },
-];
 
 /**
  * Tag options per axis, in `SPELL_TAGS` order. Split here rather than in the
@@ -126,12 +121,7 @@ export default function SpellFilterPanel({
         </View>
         {onFavoritesOnly ? (
           <View style={styles.levelFilter}>
-            <ChipSelect
-              label="Favoris"
-              options={FAVORITE_OPTIONS}
-              value={favoritesOnly ? 'fav' : ''}
-              onChange={(v) => onFavoritesOnly(v === 'fav')}
-            />
+            <FavoritesChip checked={!!favoritesOnly} onChange={onFavoritesOnly} />
           </View>
         ) : null}
       </View>
