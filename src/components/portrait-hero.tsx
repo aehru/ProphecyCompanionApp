@@ -6,6 +6,7 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import CasteChip from '@/components/caste-chip';
 import ConceptChip from '@/components/concept-chip';
+import StatutChip from '@/components/statut-chip';
 import TendancesCircles from '@/components/tendances-circles';
 import Icon from '@/components/ui/icon';
 import { type TendanceKey } from '@/constants/prophecy';
@@ -49,6 +50,7 @@ export default function PortraitHero({
   avatar,
   nom,
   caste,
+  statut,
   concept,
   tendances,
   onPickAvatar,
@@ -58,6 +60,7 @@ export default function PortraitHero({
   avatar: string | null;
   nom?: string | null;
   caste?: string | null;
+  statut?: number | null;
   concept?: string | null;
   tendances: (key: TendanceKey) => { value: number; sub: number };
   onPickAvatar: () => void;
@@ -111,13 +114,18 @@ export default function PortraitHero({
         <TendancesCircles get={tendances} size={ringSize} layout="column" tone="overlay" />
       </View>
 
-      <View style={styles.identity} pointerEvents="none">
+      {/* `box-none` and not `none`: the block itself must stay transparent to
+          touches (it overlays the portrait), but the Statut chip inside it is
+          tappable — it opens the rung. `none` would swallow that tap, which is
+          what it did while every chip here was inert. */}
+      <View style={styles.identity} pointerEvents="box-none">
         <Text variant="headlineSmall" style={styles.name} numberOfLines={1}>
           {nom || 'Sans nom'}
         </Text>
         {caste || concept ? (
           <View style={styles.chips}>
             <CasteChip caste={caste} tone="overlay" />
+            <StatutChip caste={caste} statut={statut} tone="overlay" />
             <ConceptChip concept={concept} tone="overlay" />
           </View>
         ) : null}
