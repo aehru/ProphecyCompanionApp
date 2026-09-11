@@ -13,20 +13,33 @@ import { Text } from 'react-native-paper';
 import { CASTE_LABEL } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
+/**
+ * Over a photograph the gold has to be the LIGHT one whatever the theme says:
+ * the chip sits on a dark scrim, and the light theme's `secondary` (#A37B3F)
+ * is a mid brown that all but disappears there. Same reasoning as the tendance
+ * rings' overlay palette — a wash over arbitrary pixels is not a theme role.
+ */
+const OVERLAY_GOLD = '#E1C37A';
+
+export type ChipTone = 'surface' | 'overlay';
+
 export default function CasteChip({
   caste,
   style,
+  tone = 'surface',
 }: {
   caste?: string | null;
   style?: ViewStyle;
+  tone?: ChipTone;
 }) {
   const theme = useProphecyTheme();
   if (!caste) return null;
+  const color = tone === 'overlay' ? OVERLAY_GOLD : theme.colors.secondary;
   return (
     <View
       testID="caste-chip"
-      style={[styles.chip, { borderColor: theme.colors.secondary }, style]}>
-      <Text style={[styles.text, { color: theme.colors.secondary }]} numberOfLines={1}>
+      style={[styles.chip, { borderColor: color }, style]}>
+      <Text style={[styles.text, { color }]} numberOfLines={1}>
         {/* An unknown key cannot arrive through the picker or an import —
             `casteFromInput` folds anything it cannot place to NULL first. Only a
             raw edit of the database reaches this, and showing it beats dropping

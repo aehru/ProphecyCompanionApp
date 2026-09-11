@@ -38,7 +38,7 @@ jobs:
 
       # The Gradle build needs a JDK; 17 is what AGP 8 expects.
       - name: Setup Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17

@@ -6,6 +6,7 @@ import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackb
 import { HAND_VALUE, type WeaponPreset } from '@/data/weapon-catalog';
 import { useCaracReadings } from '@/hooks/use-carac-readings';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { useFavorites } from '@/hooks/use-favorites';
 import { log } from '@/lib/log';
 import { createWeapon } from '@/repositories/weapons';
 
@@ -20,6 +21,7 @@ import { createWeapon } from '@/repositories/weapons';
  */
 export default function WeaponCatalogModal() {
   const numId = useCharacterId();
+  const favorites = useFavorites(numId, 'weapon');
   const added = useCatalogSnackbar(numId, 'weapon');
   // Same readings the Inventaire tab feeds its cards — a player picking a weapon
   // wants to know what it does in THEIR hands before adding it.
@@ -43,7 +45,11 @@ export default function WeaponCatalogModal() {
 
   return (
     <View style={styles.root}>
-      <WeaponCatalogList readings={readings} onAdd={add} />
+      <WeaponCatalogList
+        readings={readings}
+        onAdd={add}
+        favorites={favorites}
+      />
       <CatalogSnackbar state={added} />
     </View>
   );

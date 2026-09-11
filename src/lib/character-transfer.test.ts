@@ -51,6 +51,7 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
   return {
     character,
     state,
+    favorites: [{ kind: 'spell', presetId: 'boule-de-feu' }],
     skills: [{ name: 'Esquive', attribut: 'physique', value: 3 }],
     armor: [
       {
@@ -127,6 +128,28 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
         sourceSpellIndex: 0,
         castScore: 22,
         difficulty: 15,
+      },
+    ],
+    traits: [
+      {
+        kind: 'desavantage',
+        name: 'Phobie',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Peur irraisonnée.',
+        inGameEffect: 'Difficulté augmentée de 5 face à la peur choisie.',
+        evolving: true,
+        note: 'les araignées',
+        presetId: 'phobie',
+        presetRevision: 'abc123def456',
+      },
+      {
+        kind: 'avantage',
+        name: 'Fortune',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Naissance aisée.',
+        note: '',
       },
     ],
     effects: [
@@ -377,6 +400,54 @@ describe('parseImport validation', () => {
     expect(r.ok && r.data.characters[0].magicReserves).toEqual([]);
   });
 
+  it('carries the avantages and désavantages through parse, provenance included', () => {
+    const r = parseImport(serializeExport(buildExport([makeBundle()])));
+    if (!r.ok) throw new Error(r.error);
+    expect(r.data.characters[0].traits).toEqual([
+      {
+        kind: 'desavantage',
+        name: 'Phobie',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Peur irraisonnée.',
+        inGameEffect: 'Difficulté augmentée de 5 face à la peur choisie.',
+        evolving: true,
+        // The player's own note and the rulebook paragraph travel apart, so a
+        // later catalogue correction can rewrite one without touching the other.
+        note: 'les araignées',
+        presetId: 'phobie',
+        presetRevision: 'abc123def456',
+      },
+      {
+        kind: 'avantage',
+        name: 'Fortune',
+        rarity: 'commun',
+        cost: 2,
+        description: 'Naissance aisée.',
+        note: '',
+      },
+    ]);
+  });
+
+  it('accepts an export predating the traits table (defaults to none)', () => {
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: Record<string, unknown>[];
+    };
+    delete exp.characters[0].traits;
+    const r = parseImport(JSON.stringify(exp));
+    expect(r.ok && r.data.characters[0].traits).toEqual([]);
+  });
+
+  it('rejects a trait whose kind names neither side of the pool', () => {
+    // The one strict field: defaulting an unknown kind would move the cost to
+    // the wrong half of the balance rather than fail.
+    const exp = buildExport([makeBundle()]) as unknown as {
+      characters: { traits: Record<string, unknown>[] }[];
+    };
+    exp.characters[0].traits[0].kind = 'privilege';
+    expect(parseImport(JSON.stringify(exp)).ok).toBe(false);
+  });
+
   it('accepts an export predating the shields table (defaults to none)', () => {
     const exp = buildExport([makeBundle()]) as unknown as {
       characters: Record<string, unknown>[];
@@ -579,8 +650,16 @@ describe('forSharing', () => {
     expect((exp.characters[0].character as { uuid?: string }).uuid).toBe('u1');
   });
 
-  it('leaves an already anonymous export alone', () => {
+  it('strips the shopping list, which is a note to its owner', () => {
     const exp = buildExport([makeBundle()]);
+    expect(exp.characters[0].favorites.length).toBeGreaterThan(0);
+    expect(forSharing(exp).characters[0].favorites).toEqual([]);
+    // The source envelope is untouched — forSharing is pure.
+    expect(exp.characters[0].favorites.length).toBeGreaterThan(0);
+  });
+
+  it('leaves an already anonymous export alone', () => {
+    const exp = buildExport([makeBundle({ favorites: [] })]);
     expect(forSharing(exp)).toEqual(exp);
   });
 

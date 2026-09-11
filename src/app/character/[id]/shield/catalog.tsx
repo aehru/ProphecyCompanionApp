@@ -6,6 +6,7 @@ import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackb
 import { type ShieldPreset } from '@/data/shield-catalog';
 import { useCaracReadings } from '@/hooks/use-carac-readings';
 import { useCharacterId } from '@/hooks/use-character-id';
+import { useFavorites } from '@/hooks/use-favorites';
 import { log } from '@/lib/log';
 import { createShield } from '@/repositories/shields';
 
@@ -17,6 +18,7 @@ import { createShield } from '@/repositories/shields';
  */
 export default function ShieldCatalogModal() {
   const numId = useCharacterId();
+  const favorites = useFavorites(numId, 'shield');
   const added = useCatalogSnackbar(numId, 'shield');
   const readings = useCaracReadings(numId);
 
@@ -35,7 +37,11 @@ export default function ShieldCatalogModal() {
 
   return (
     <View style={styles.root}>
-      <ShieldCatalogList readings={readings} onAdd={add} />
+      <ShieldCatalogList
+        readings={readings}
+        onAdd={add}
+        favorites={favorites}
+      />
       <CatalogSnackbar state={added} />
     </View>
   );

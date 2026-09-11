@@ -14,7 +14,7 @@ import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
  *
  * Not a micro-optimisation: Expo's Metro config sets `inlineRequires: false`, so
  * a plain top-level import evaluates the module the moment THIS screen is
- * required — all four generated data modules, on the tap that opens the tab.
+ * required — every generated data module, on the tap that opens the tab.
  * They are not small: measured in Node, `spell-catalog.gen` alone costs ~139ms
  * to evaluate (338 spells of rulebook prose) against ~43ms for the weapon,
  * armor and shield catalogues put together.
@@ -25,6 +25,7 @@ import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
  */
 const PAGES = [
   lazy(() => import('@/components/catalog/spell-catalog-list')),
+  lazy(() => import('@/components/catalog/trait-catalog-list')),
   lazy(() => import('@/components/catalog/weapon-catalog-list')),
   lazy(() => import('@/components/catalog/armor-catalog-list')),
   lazy(() => import('@/components/catalog/shield-catalog-list')),
@@ -41,18 +42,21 @@ function CatalogLoading() {
 
 const TABS: readonly TabLabel[] = [
   { full: 'Sortilèges', short: 'Sorts' },
+  'Av./Dés.',
   'Armes',
   'Armures',
   'Boucliers',
 ];
 
 /**
- * The rulebook, read outside any character: the same four catalogues a player
- * picks from on a sheet, with nothing to pick INTO. No `onAdd` and no readings,
- * so the rows lose their `+` and every formula stays symbolic — « FOR × 2 + 1D10 »
- * rather than a number that would belong to a character who is not here.
+ * The rulebook, read outside any character: the same catalogues a player picks
+ * from on a sheet, with nothing to pick INTO. No `onAdd`, no readings and no
+ * point pool, so the rows lose their `+`, every formula stays symbolic
+ * — « FOR × 2 + 1D10 » rather than a number that would belong to a character who
+ * is not here — and no avantage is flagged as unaffordable by a balance that
+ * belongs to nobody.
  *
- * A `TabPager` and not four screens: switching from a sortilège to the arme it
+ * A `TabPager` and not five screens: switching from a sortilège to the arme it
  * is cast alongside is the whole reason to open this, and a stack would make
  * that two taps and a lost scroll position. Pages mount lazily and then stay.
  *

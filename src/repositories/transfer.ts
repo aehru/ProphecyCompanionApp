@@ -12,6 +12,8 @@ import {
   shields,
   skills,
   spells,
+  favorites,
+  traits,
   weapons,
   type EnchantTarget,
   type NewActualState,
@@ -24,6 +26,8 @@ import {
   type NewShield,
   type NewSkill,
   type NewSpell,
+  type NewFavorite,
+  type NewTrait,
   type NewWeapon,
 } from '@/db/schema';
 import {
@@ -48,6 +52,8 @@ import {
   SKILL_FIELDS,
   SPELL_FIELDS,
   STATE_FIELDS,
+  FAVORITE_FIELDS,
+  TRAIT_FIELDS,
   WEAPON_FIELDS,
 } from '@/lib/character-transfer';
 import { copyMedia } from '@/lib/media';
@@ -122,10 +128,10 @@ export async function exportCharacters(
     return intent === 'share' ? forSharing(empty) : empty;
   }
 
-  // TEN queries for the whole envelope, not ten PER CHARACTER. Every statement
-  // takes its turn in the client's queue (see db/client), so a full backup used
-  // to be `10 × N` serialized round-trips — 500 of them for fifty characters,
-  // each prepared and finalized on its own.
+  // TWELVE queries for the whole envelope, not twelve PER CHARACTER. Every
+  // statement takes its turn in the client's queue (see db/client), so a full
+  // backup used to be `12 × N` serialized round-trips — 550 of them for fifty
+  // characters, each prepared and finalized on its own.
   //
   // Ordered by id, all of them: an enchant's target and its source spell ride
   // along as POSITIONS in these arrays (see `enchantSchema`), so export and
@@ -133,7 +139,7 @@ export async function exportCharacters(
   // the order the importer re-inserts in. Bucketing one ordered result set per
   // character preserves it exactly (see `byCharacter`).
   const charIds = rows.map((c) => c.id);
-  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, effectRows] =
+  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, traitRows, effectRows, favoriteRows] =
     await Promise.all([
       db.select().from(actualState).where(inArray(actualState.characterId, charIds)),
       db.select().from(skills).where(inArray(skills.characterId, charIds)).orderBy(asc(skills.id)),
@@ -148,7 +154,13 @@ export async function exportCharacters(
         .where(inArray(magicReserves.characterId, charIds))
         .orderBy(asc(magicReserves.id)),
       db.select().from(enchants).where(inArray(enchants.characterId, charIds)).orderBy(asc(enchants.id)),
+      db.select().from(traits).where(inArray(traits.characterId, charIds)).orderBy(asc(traits.id)),
       db.select().from(effects).where(inArray(effects.characterId, charIds)).orderBy(asc(effects.id)),
+      db
+        .select()
+        .from(favorites)
+        .where(inArray(favorites.characterId, charIds))
+        .orderBy(asc(favorites.id)),
     ]);
 
   const stateByChar = new Map(stateRows.map((s) => [s.characterId, s]));
@@ -160,7 +172,9 @@ export async function exportCharacters(
   const spellsByChar = byCharacter(spellRows);
   const reservesByChar = byCharacter(reserveRows);
   const enchantsByChar = byCharacter(enchantRows);
+  const traitsByChar = byCharacter(traitRows);
   const effectsByChar = byCharacter(effectRows);
+  const favoritesByChar = byCharacter(favoriteRows);
 
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {
@@ -173,6 +187,7 @@ export async function exportCharacters(
     const sp = spellsByChar.get(c.id) ?? [];
     const mr = reservesByChar.get(c.id) ?? [];
     const en = enchantsByChar.get(c.id) ?? [];
+    const tr = traitsByChar.get(c.id) ?? [];
     const ef = effectsByChar.get(c.id) ?? [];
 
     const gearIndex: Record<EnchantTarget, Map<number, number>> = {
@@ -200,7 +215,9 @@ export async function exportCharacters(
         const links = linkEnchant(r, gearIndex, spellIndex);
         return links ? [{ ...pick(r, ENCHANT_FIELDS), ...links }] : [];
       }),
+      traits: tr.map((r) => pick(r, TRAIT_FIELDS)),
       effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
+      favorites: (favoritesByChar.get(c.id) ?? []).map((r) => pick(r, FAVORITE_FIELDS)),
     } as CharacterBundle);
   }
 
@@ -293,7 +310,9 @@ export async function importCharacters(
             enchants,
             spells,
             magicReserves,
+            traits,
             effects,
+            favorites,
           ]) {
             await tx.delete(t).where(eq(t.characterId, characterId));
           }
@@ -326,7 +345,15 @@ export async function importCharacters(
       if (reserves.length) {
         await tx.insert(magicReserves).values(link(reserves) as NewMagicReserve[]);
       }
+      const traitRows = b.traits ?? [];
+      if (traitRows.length) await tx.insert(traits).values(link(traitRows) as NewTrait[]);
       if (b.effects.length) await tx.insert(effects).values(link(b.effects) as NewEffect[]);
+      // No link to resolve: a favourite carries a rulebook slug, which means the
+      // same thing on every device.
+      const favoriteRows = b.favorites ?? [];
+      if (favoriteRows.length) {
+        await tx.insert(favorites).values(link(favoriteRows) as NewFavorite[]);
+      }
 
       // Enchants LAST: their target and their source spell travelled as
       // positions in the arrays just written (see `enchantSchema`), so the fresh
@@ -380,7 +407,8 @@ export async function importCharacters(
 /**
  * Duplicate one character locally (issue #59): a full deep copy — sheet, live
  * state (wounds included), skills, armor, weapons, shields, spells, magic
- * reserve objects (recharged full, see `planMagicReserves`), effects — under a
+ * reserve objects (recharged full, see `planMagicReserves`), avantages /
+ * désavantages, effects — under a
  * freshly minted uuid, so the copy is a new lineage that never collides with the
  * original in a campaign roster. Rides the export→import pipeline in `'copy'`
  * mode instead of re-walking the tables by hand; the transfer field lists drop
