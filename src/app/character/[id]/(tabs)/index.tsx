@@ -7,6 +7,10 @@ import CasteChip from '@/components/caste-chip';
 import ConceptChip from '@/components/concept-chip';
 import PortraitHero from '@/components/portrait-hero';
 import StatutChip from '@/components/statut-chip';
+import {
+  StatutBenefitsSection,
+  StatutTechniquesSection,
+} from '@/components/statut-sections';
 import TendancesCircles from '@/components/tendances-circles';
 import TraitsSection from '@/components/traits-section';
 import { characterFallback } from '@/components/ui/character-gate';
@@ -152,6 +156,13 @@ export default function CharacterDashboardScreen() {
             ))}
           </View>
         </SectionCard>
+
+        {/* What the caste ladder gives, then what the player bought: the two
+            statut sections read as one block under the Statut that grants them,
+            with the avantages — the character's own choices — after. Both
+            derive from `caste` + `statut` and both disappear at Statut 0. */}
+        <StatutBenefitsSection caste={char.caste} statut={char.statut} />
+        <StatutTechniquesSection caste={char.caste} statut={char.statut} />
 
         {/* Points earned and spent, then both lists. Read-only like the rest of
             the dashboard: a row opens its editor as a modal. */}
