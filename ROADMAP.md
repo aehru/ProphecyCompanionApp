@@ -112,6 +112,31 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
      Nothing is enforced today, on purpose.
   5. **Catalogue propagation.** Picked rows carry `presetId` + `presetRevision`
      like spells do, and nothing consumes them yet (same flow, same blocker).
+- [~] **Statuts de caste.** All 40 rungs are in. The ladder each caste climbs (« Statuts et
+  expérience »), 1 through 5. Done: `characters.statut` (0 = aucun Statut),
+  the generated catalogue (`data-src/statuses.csv` → `status-catalog.gen.ts`,
+  keyed by caste + niveau, carrying the rung's `requis`, its bénéfice, the named
+  Technique the rulebook prints in italics and the level's asterisk note), the
+  lookup ([lib/statut.ts](src/lib/statut.ts)), the chip + rung dialog beside the
+  caste on the character home, the field next to the caste on the Identité form,
+  a Catalogues tab, and `STATUT` as a formula variable. Off the campaign wire on
+  purpose, like the traits. _Remaining:_
+  1. **Mechanical bénéfices.** Descriptive today, like the traits — « bonus de 2
+     à tous ses jets d'attaque et de parade » (Maître d'armes) and « la
+     Difficulté de tous ses jets de combat est réduite de 5 » (Grand maître
+     d'armes) are `RollContext` work, and land with the traits' own mechanical
+     pass rather than as a second engine.
+  2. **Prerequisites are prose and stay prose.** Half of a `requis` names no
+     particular column (« une Compétence d'arme à 6 » is any of them, « 40 points
+     dans les Compétences Physiques » is a sum) and most of them count Privilèges
+     de caste, which the app does not model. Checking one against the sheet waits
+     on both.
+- [ ] **Privilèges de caste.** Per-caste capabilities, shaped like the avantages
+  but reserved to a caste and counted by the Statut ladder's `requis` (« 2
+  Privilèges de caste »). Nothing exists yet: no table, no catalogue, no counter.
+  The natural shape is the `traits` one — a kind discriminator and a caste
+  restriction — which is the reason to build it after the traits' mechanical
+  pass rather than before.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
 - [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
   opens the roller against it and rolls a D10 at once, with the difficulté

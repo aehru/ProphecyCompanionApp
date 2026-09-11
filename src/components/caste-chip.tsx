@@ -1,27 +1,20 @@
 // The caste pill. Shared by the character list and the fiche header so the two
-// can't drift — same shape as the concept chip next to it, but ringed in the DS
-// gold (`colors.secondary`) instead of the neutral hairline, because the caste
-// is a closed set of eight and reads as a badge, where the concept is free text.
+// can't drift — ringed in the DS gold (`colors.secondary`) instead of the
+// neutral hairline its neighbours use, because the caste is a closed set of
+// eight and reads as a badge, where the concept is free text.
 //
 // Renders NOTHING for a NULL caste: « Sans Caste » is a real choice, and a chip
 // saying so would shout the absence of a label on every unfilled sheet.
+//
+// Geometry lives in `<IdentityChip>`, with the concept's and the Statut's.
 
 import React from 'react';
-import { StyleSheet, View, type ViewStyle } from 'react-native';
-import { Text } from 'react-native-paper';
+import { type ViewStyle } from 'react-native';
 
+import IdentityChip, { type ChipTone } from '@/components/ui/identity-chip';
 import { CASTE_LABEL } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-
-/**
- * Over a photograph the gold has to be the LIGHT one whatever the theme says:
- * the chip sits on a dark scrim, and the light theme's `secondary` (#A37B3F)
- * is a mid brown that all but disappears there. Same reasoning as the tendance
- * rings' overlay palette — a wash over arbitrary pixels is not a theme role.
- */
-const OVERLAY_GOLD = '#E1C37A';
-
-export type ChipTone = 'surface' | 'overlay';
+import { OVERLAY_INK } from '@/theme/overlayInk';
 
 export default function CasteChip({
   caste,
@@ -34,34 +27,16 @@ export default function CasteChip({
 }) {
   const theme = useProphecyTheme();
   if (!caste) return null;
-  const color = tone === 'overlay' ? OVERLAY_GOLD : theme.colors.secondary;
   return (
-    <View
+    <IdentityChip
       testID="caste-chip"
-      style={[styles.chip, { borderColor: color }, style]}>
-      <Text style={[styles.text, { color }]} numberOfLines={1}>
-        {/* An unknown key cannot arrive through the picker or an import —
-            `casteFromInput` folds anything it cannot place to NULL first. Only a
-            raw edit of the database reaches this, and showing it beats dropping
-            the row's only caste information. */}
-        {CASTE_LABEL[caste] ?? caste}
-      </Text>
-    </View>
+      // An unknown key cannot arrive through the picker or an import —
+      // `casteFromInput` folds anything it cannot place to NULL first. Only a
+      // raw edit of the database reaches this, and showing it beats dropping the
+      // row's only caste information.
+      label={CASTE_LABEL[caste] ?? caste}
+      color={tone === 'overlay' ? OVERLAY_INK.gold : theme.colors.secondary}
+      style={style}
+    />
   );
 }
-
-// Geometry and type are the concept chip's, to the pixel (see the fiche header's
-// `conceptChip`): the two sit side by side, so anything else would read as a
-// misalignment rather than a distinction. The gold ring is the ONLY difference.
-const styles = StyleSheet.create({
-  chip: {
-    alignSelf: 'flex-start',
-    flexShrink: 1,
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    maxWidth: '100%',
-  },
-  text: { fontSize: 12 },
-});

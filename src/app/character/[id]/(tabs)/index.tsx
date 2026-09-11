@@ -6,6 +6,11 @@ import { Button, Text } from 'react-native-paper';
 import CasteChip from '@/components/caste-chip';
 import ConceptChip from '@/components/concept-chip';
 import PortraitHero from '@/components/portrait-hero';
+import StatutChip from '@/components/statut-chip';
+import {
+  StatutBenefitsSection,
+  StatutTechniquesSection,
+} from '@/components/statut-sections';
 import TendancesCircles from '@/components/tendances-circles';
 import TraitsSection from '@/components/traits-section';
 import { characterFallback } from '@/components/ui/character-gate';
@@ -91,6 +96,7 @@ export default function CharacterDashboardScreen() {
           avatar={avatar}
           nom={char.nom}
           caste={char.caste}
+          statut={char.statut}
           concept={char.concept}
           tendances={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
           onPickAvatar={pickAvatar}
@@ -120,6 +126,9 @@ export default function CharacterDashboardScreen() {
             {char.concept || char.caste ? (
               <View style={styles.chips}>
                 <CasteChip caste={char.caste} />
+                {/* The Statut belongs to the caste, so it follows it — and it is
+                    the one chip here that is tappable (it opens the rung). */}
+                <StatutChip caste={char.caste} statut={char.statut} />
                 <ConceptChip concept={char.concept} />
               </View>
             ) : null}
@@ -147,6 +156,13 @@ export default function CharacterDashboardScreen() {
             ))}
           </View>
         </SectionCard>
+
+        {/* What the caste ladder gives, then what the player bought: the two
+            statut sections read as one block under the Statut that grants them,
+            with the avantages — the character's own choices — after. Both
+            derive from `caste` + `statut` and both disappear at Statut 0. */}
+        <StatutBenefitsSection caste={char.caste} statut={char.statut} />
+        <StatutTechniquesSection caste={char.caste} statut={char.statut} />
 
         {/* Points earned and spent, then both lists. Read-only like the rest of
             the dashboard: a row opens its editor as a modal. */}
