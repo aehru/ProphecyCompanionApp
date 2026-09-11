@@ -1,4 +1,4 @@
-import { DEFAULT_SKILLS, NUMERIC_KEYS } from '@/constants/prophecy';
+import { DEFAULT_SKILLS, NUMERIC_KEYS, STATUT_MAX } from '@/constants/prophecy';
 import type { Character, NewCharacter, Skill } from '@/db/schema';
 import { casteFromInput } from '@/lib/caste';
 import type { SkillInput } from '@/repositories/skills';
@@ -125,6 +125,9 @@ export function fromFormValues(v: FormValues): Partial<NewCharacter> {
     if (!Number.isFinite(n)) n = 0;
     // Tendance puces are capped at 10 (matches the DB CHECK constraint).
     if (k.endsWith('Sub')) n = Math.min(10, Math.max(0, n));
+    // The Statut ladder stops at 5. Clamped HERE and not by a DB CHECK: adding
+    // one to an existing SQLite table means rebuilding it (see the schema).
+    if (k === 'statut') n = Math.min(STATUT_MAX, Math.max(0, n));
     out[k] = n;
   }
   return out as Partial<NewCharacter>;

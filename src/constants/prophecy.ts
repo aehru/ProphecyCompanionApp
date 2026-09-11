@@ -47,6 +47,13 @@ export const CASTES = [
 
 export type CasteKey = (typeof CASTES)[number]['key'];
 
+/**
+ * Highest rung of a caste's Statut ladder, in every caste. `characters.statut`
+ * runs 0 (« aucun Statut ») through this; what each rung SAYS lives in the
+ * generated catalogue, looked up by (caste, niveau) in `lib/statut`.
+ */
+export const STATUT_MAX = 5;
+
 /** What a NULL caste is called on screen. */
 export const SANS_CASTE_LABEL = 'Sans Caste';
 
@@ -504,6 +511,9 @@ export const NUMERIC_KEYS: string[] = [
   ...WOUND_LEVELS.map((w) => `${w.key}Max`),
   ...RESOURCES.map((r) => `${r.key}Max`),
   'initiativeMax',
+  // Rank inside the caste, 0–5 (see `characters.statut`). Here so the form,
+  // the export and the import schema all pick it up like any other stat.
+  'statut',
   // Magic maxes + disciplines are all form-edited (Magie tab). Per-sphere/reserve
   // current values live on actual_state and are tracked from the sheet's Magie tab.
   'reserveMagiqueMax',
