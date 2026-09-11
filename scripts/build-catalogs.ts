@@ -37,6 +37,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   CASTES,
+  type CasteKey,
   DEFAULT_SKILLS,
   DISCIPLINES,
   SPELL_TAGS,
@@ -65,6 +66,7 @@ import type {
 } from '../src/data/archetype-catalog';
 import type { ArmorPreset } from '../src/data/armor-catalog';
 import type { ShieldPreset } from '../src/data/shield-catalog';
+import type { StatutPreset } from '../src/data/status-catalog';
 import type { TraitPreset } from '../src/data/trait-catalog';
 import type { WeaponPreset } from '../src/data/weapon-catalog';
 import type { SpellPreset } from '../src/data/spell-catalog';
@@ -123,6 +125,19 @@ const TRAIT_COLUMNS = [
   // the `evolving` column in db/schema.ts). Optional — blank reads as permanent,
   // which is what every désavantage of the anciens is.
   'evolutif',
+  // Editorial provenance, declared so the header check accepts it and then
+  // deliberately not read — same as the spells' `rulebook` column.
+  'rulebook',
+];
+const STATUS_COLUMNS = [
+  // (caste, niveau) IS the identity — no id column, and no provenance either:
+  // nothing is copied onto a character (see StatutPreset).
+  'caste', 'niveau', 'nom', 'requis', 'benefice',
+  // The named power printed in italics under the bénéfice. Both blank together
+  // on a rung that has none; half-filled is an error.
+  'techniqueNom', 'techniqueEffet',
+  // The rulebook's asterisk. Blank on every rung that carries none.
+  'note',
   // Editorial provenance, declared so the header check accepts it and then
   // deliberately not read — same as the spells' `rulebook` column.
   'rulebook',
@@ -877,6 +892,62 @@ function buildArchetypes(failures: Failure[]): ArchetypePreset[] {
   return out;
 }
 
+function buildStatuses(failures: Failure[]): StatutPreset[] {
+  const records = readTable('statuses.csv', STATUS_COLUMNS, failures);
+  const casteKeys = CASTES.map((c) => c.key);
+  // (caste, niveau) is the key the app looks a rung up by — a duplicate would
+  // silently shadow one of the two rows.
+  const seen = new Set<string>();
+  const out: StatutPreset[] = [];
+
+  records.forEach((rec, i) => {
+    const errors: RowErrors = [];
+    const rawCaste = (rec.caste ?? '').trim();
+    // No « Sans Caste » here, unlike the archétypes: a Statut is a rung INSIDE a
+    // caste, so a blank one has nothing to hang off.
+    const caste = readEnum(rec, 'caste', matchCaste, casteKeys, errors) as CasteKey;
+    const niveau = readInt(rec, 'niveau', errors);
+    if (niveau < 1 || niveau > 5) errors.push(`niveau : « ${niveau} » hors de 1–5`);
+    const key = `${caste}-${niveau}`;
+    if (rawCaste !== '' && seen.has(key)) errors.push(`caste + niveau : « ${key} » en double`);
+    seen.add(key);
+
+    const nom = (rec.nom ?? '').trim();
+    if (nom === '') errors.push('nom : requis');
+    const requis = (rec.requis ?? '').trim();
+    if (requis === '') errors.push('requis : requis');
+    const benefice = (rec.benefice ?? '').trim();
+    if (benefice === '') errors.push('benefice : requis');
+
+    // Half-filled is an error rather than a silent null: an author who typed the
+    // technique's effect and forgot its name meant to have one.
+    const techNom = (rec.techniqueNom ?? '').trim();
+    const techEffet = (rec.techniqueEffet ?? '').trim();
+    if (techNom === '' && techEffet !== '') errors.push("techniqueNom : requis dès qu'un effet est saisi");
+    if (techEffet === '' && techNom !== '') errors.push("techniqueEffet : requis dès qu'un nom est saisi");
+
+    const preset: StatutPreset = {
+      caste,
+      niveau,
+      nom,
+      requis,
+      benefice,
+      technique: techNom === '' ? null : { nom: techNom, effet: techEffet },
+      note: (rec.note ?? '').trim(),
+    };
+    if (errors.length) {
+      failures.push({ file: 'statuses.csv', record: i + 2, name: nom || key, errors });
+    } else {
+      out.push(preset);
+    }
+  });
+
+  // Sorted by caste then niveau, so the .gen file's order is the reading order
+  // whatever the spreadsheet's row order happens to be.
+  out.sort((a, b) => casteKeys.indexOf(a.caste) - casteKeys.indexOf(b.caste) || a.niveau - b.niveau);
+  return out;
+}
+
 // --- codegen ----------------------------------------------------------------
 
 function render(sourceCsv: string, typeName: string, typeImport: string, constName: string, data: unknown[]) {
@@ -905,6 +976,7 @@ export function generateCatalogs(): {
     shields: number;
     archetypes: number;
     traits: number;
+    statuses: number;
   };
 } {
   const failures: Failure[] = [];
@@ -914,6 +986,7 @@ export function generateCatalogs(): {
   const shields = buildShields(failures);
   const archetypes = buildArchetypes(failures);
   const traits = buildTraits(failures);
+  const statuses = buildStatuses(failures);
   return {
     failures,
     counts: {
@@ -923,6 +996,7 @@ export function generateCatalogs(): {
       shields: shields.length,
       archetypes: archetypes.length,
       traits: traits.length,
+      statuses: statuses.length,
     },
     files: [
       {
@@ -940,6 +1014,10 @@ export function generateCatalogs(): {
       {
         file: 'shield-catalog.gen.ts',
         content: render('shield.csv', 'ShieldPreset', './shield-catalog', 'SHIELD_CATALOG_DATA', shields),
+      },
+      {
+        file: 'status-catalog.gen.ts',
+        content: render('statuses.csv', 'StatutPreset', './status-catalog', 'STATUS_CATALOG_DATA', statuses),
       },
       {
         file: 'trait-catalog.gen.ts',
@@ -1018,7 +1096,7 @@ function main() {
   console.log(
     `OK : ${counts.weapons} armes, ${counts.spells} sortilèges, ${counts.armor} armures, ` +
       `${counts.shields} boucliers, ${counts.archetypes} archétypes, ` +
-      `${counts.traits} avantages/désavantages.`,
+      `${counts.traits} avantages/désavantages, ${counts.statuses} statuts.`,
   );
 }
 
