@@ -278,16 +278,16 @@ function readFormula(
   rec: Record<string, string>,
   col: string,
   errors: RowErrors,
-  // `nr` / `sphere` opt into the spell variables — durations and target counts
-  // only, never a weapon's damage.
-  { required = false, nr = false, sphere = false } = {},
+  // `nr` / `sphere` / `statut` opt into the spell variables — durations and
+  // target counts only, never a weapon's damage.
+  { required = false, nr = false, sphere = false, statut = false } = {},
 ): string | null {
   const raw = (rec[col] ?? '').trim();
   if (raw === '') {
     if (required) errors.push(`${col} : requis`);
     return null;
   }
-  const parsed = parseFormula(raw, { nr, sphere });
+  const parsed = parseFormula(raw, { nr, sphere, statut });
   if (!parsed.ok) errors.push(`${col} « ${raw} » : ${parsed.error}`);
   return raw;
 }
@@ -507,8 +507,8 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
     const inGameEffect = (rec.effetJeu ?? '').trim();
     const evolving = readFlag(rec, 'evolutif', errors);
     const sensoryEffect = (rec.perception ?? '').trim();
-    const duration = readFormula(rec, 'duree', errors, { nr: true, sphere: true }) ?? '';
-    const targets = readFormula(rec, 'cibles', errors, { nr: true, sphere: true }) ?? '';
+    const duration = readFormula(rec, 'duree', errors, { nr: true, sphere: true, statut: true }) ?? '';
+    const targets = readFormula(rec, 'cibles', errors, { nr: true, sphere: true, statut: true }) ?? '';
     const tags = readTags(rec, 'tags', errors);
     // Empty is the norm — only a handful of sortilèges are sworn to one dragon.
     const dragonOnly = readFlag(rec, 'reserveDragon', errors);

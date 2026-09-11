@@ -22,6 +22,12 @@ export interface SpellReadings {
    * de Volonté »). Same record the score reads, so the two can't drift.
    */
   caracValue: (caracKey: string) => number;
+  /**
+   * The caster's Statut — the `FormulaVars.statut` resolver, for the sortilèges
+   * whose durée or portée scales off the caster's rank (« 1 mètre par Statut »).
+   * 0 is « aucun Statut » and leaves such a term symbolic.
+   */
+  statut: number;
 }
 
 /**
@@ -45,6 +51,7 @@ export function useSpellTotal(characterId: number): SpellReadings {
     return {
       totalFor: (spell) => spellTotal(spell, rec, effectList, wound),
       caracValue: (k) => rec[k] ?? 0,
+      statut: rec.statut ?? 0,
     };
   }, [charRows, stateRows, effects]);
 }

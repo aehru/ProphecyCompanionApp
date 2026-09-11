@@ -357,3 +357,40 @@ describe('spellFormulaResult', () => {
     expect(spellFormulaResult('SPHERE + 3 par NR', { nr: 2, sphere: ownSphere(5) })).toBe('11');
   });
 });
+
+describe('STATUT terms', () => {
+  it('is rejected unless opted in', () => {
+    const r = parseFormula('STATUT');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toMatch(/STATUT/);
+  });
+
+  it('accepts every spelling the rulebook uses', () => {
+    const spellings: [string, number][] = [
+      ['STATUT', 1],
+      ['Statut', 1],
+      ['STATUTS', 1],
+      ['STATUT x2', 2],
+      ['2 x STATUT', 2],
+      ['20 par Statut', 20],
+      ['1/Statut', 1],
+    ];
+    for (const [raw, mult] of spellings) {
+      const r = parseFormula(raw, { statut: true });
+      expect(r.ok, raw).toBe(true);
+      if (r.ok) expect(r.formula.terms, raw).toEqual([{ kind: 'statut', mult }]);
+    }
+  });
+
+  it('stays symbolic without a Statut, and « aucun Statut » counts as none', () => {
+    expect(spellFormulaResult('SPHERE + STATUT', { sphere: () => 4 })).toBe('4 + Statut');
+    // 0 is « aucun Statut » — a caster at no rank must not read as rank zero.
+    expect(spellFormulaResult('100 x STATUT', { statut: 0 })).toBe('100 × Statut');
+  });
+
+  it('resolves against the caster', () => {
+    expect(spellFormulaResult('STATUT', { statut: 4 })).toBe('4');
+    expect(spellFormulaResult('20 par Statut', { statut: 3 })).toBe('60');
+    expect(spellFormulaResult('SPHERE + STATUT', { sphere: () => 8, statut: 4 })).toBe('12');
+  });
+});

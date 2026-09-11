@@ -29,7 +29,7 @@ import { deleteSpell, updateSpell } from '@/repositories/spells';
 
 /** Validation message for a spell formula field (null = valid or empty). */
 function spellFormulaError(raw: string): string | null {
-  const res = parseFormula(raw, { nr: true, sphere: true });
+  const res = parseFormula(raw, { nr: true, sphere: true, statut: true });
   return res.ok ? null : res.error;
 }
 
@@ -43,12 +43,15 @@ export default function SpellCard({
   spell,
   total,
   caracValue,
+  statut,
   onRoll,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   /** Passed through to the detail — resolves a durée written against a stat. */
   caracValue?: (caracKey: string) => number;
+  /** Passed through to the detail — the caster's Statut. */
+  statut?: number;
   /** Rolls the incantation. Omitted where the card is only a reading. */
   onRoll?: () => void;
 }) {
@@ -58,6 +61,7 @@ export default function SpellCard({
       spell={spell}
       total={total}
       caracValue={caracValue}
+      statut={statut}
       onRoll={onRoll}
       onEdit={() => router.push(`/character/${spell.characterId}/spell/${spell.id}`)}
     />
@@ -68,12 +72,14 @@ function SpellSummary({
   spell: s,
   total,
   caracValue,
+  statut,
   onRoll,
   onEdit,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   caracValue?: (caracKey: string) => number;
+  statut?: number;
   onRoll?: () => void;
   onEdit: () => void;
 }) {
@@ -162,7 +168,7 @@ function SpellSummary({
       </Pressable>
 
       {expanded ? (
-        <SpellDetail spell={s} total={total} caracValue={caracValue} onEdit={onEdit} />
+        <SpellDetail spell={s} total={total} caracValue={caracValue} statut={statut} onEdit={onEdit} />
       ) : null}
     </View>
   );
