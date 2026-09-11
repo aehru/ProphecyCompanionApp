@@ -131,12 +131,33 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
      dans les Compétences Physiques » is a sum) and most of them count Privilèges
      de caste, which the app does not model. Checking one against the sheet waits
      on both.
-- [ ] **Privilèges de caste.** Per-caste capabilities, shaped like the avantages
-  but reserved to a caste and counted by the Statut ladder's `requis` (« 2
-  Privilèges de caste »). Nothing exists yet: no table, no catalogue, no counter.
-  The natural shape is the `traits` one — a kind discriminator and a caste
-  restriction — which is the reason to build it after the traits' mechanical
-  pass rather than before.
+- [~] **Privilèges de caste.** Per-caste capabilities, counted by the Statut
+  ladder's `requis` (« 2 Privilèges de caste »). The CATALOGUE half is done:
+  `data-src/privileges.csv` → `privilege-catalog.gen.ts`, one row per (caste,
+  privilège) under the rulebook's two headings (`famille` = `caste` | `annexe`),
+  browsable on its own Catalogues tab. ALL EIGHT castes typed in, 86 entries:
+  most run 8 + 3, the Prodiges 9 + 3 (one « don » per Great Dragon, matching
+  `GREAT_DRAGONS` exactly), three castes 7 + 3 (see below). Every row carries
+  `rulebook`, so a supplement's privilèges sort in beside these.
+  _Remaining, and blocked on rules rather than on code:_
+  1. **Two entries still missing.** The Érudits and the Protecteurs each carry 7 privilèges de caste where the other non-Prodige
+     castes carry 8, and in both cases the gap falls on a page boundary in the
+     scan — between « Calligraphie officielle » and « Linguistique » for the
+     Érudits (an entry starting D–K), between « Défense » and « Influences » for
+     the Protecteurs (E–H).
+  2. **The currency.** The bracketed number is a cost, but NOT out of the
+     avantages' pool — privilèges are paid for with expérience, which the sheet
+     tracks as two bare counters (`xpTotal` / `xpSpent`) and nothing else. A
+     character cannot take a privilège until that budget has a shape, which is
+     why there is no table and no acquisition flow yet.
+  3. **Does an « annexe » count toward « X Privilèges de caste »?** The rulebook
+     names the family explicitly in the Statut requirement, which reads as "no".
+     Undecided until more castes are transcribed.
+  4. **The Statut counter.** Showing « 3 / 4 privilèges » against the next rung
+     is the one place the two systems meet; it needs the required number as a
+     real column rather than parsed out of the `requis` prose.
+  5. **Renommée.** « Notoriété » (Commerçant) raises it by 1 — a stat the sheet
+     does not have at all.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
 - [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
   opens the roller against it and rolls a D10 at once, with the difficulté
