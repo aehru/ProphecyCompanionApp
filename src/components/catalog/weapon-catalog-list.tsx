@@ -12,6 +12,7 @@ import SectionCard from '@/components/ui/section-card';
 import WeaponDetail from '@/components/weapon-detail';
 import { WEAPON_CATALOG, type WeaponCategory, type WeaponPreset } from '@/data/weapon-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
+import type { Favorites } from '@/hooks/use-favorites';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { foldQuery } from '@/lib/text-fold';
@@ -30,6 +31,7 @@ const iconFor = (cat: WeaponCategory): IconName =>
 // keystroke is the cost lib/weapon-grouping exists to remove.
 const INDEX = buildWeaponIndex(WEAPON_CATALOG);
 
+
 /**
  * The weapon catalogue itself — search, grouping and rows, with no idea whose
  * it is. Grouped by category then by handedness. Preset data lives in
@@ -45,11 +47,14 @@ const INDEX = buildWeaponIndex(WEAPON_CATALOG);
 export default function WeaponCatalogList({
   readings,
   onAdd,
+  favorites,
 }: {
   /** Resolves formulas, prérequis and the compétence against a sheet. */
   readings?: CaracReadings;
   /** Called with a preset, or with nothing for « Arme personnalisée ». */
   onAdd?: (preset?: WeaponPreset) => void;
+  /** The reader's shopping list. Absent when no character is reading. */
+  favorites?: Favorites;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
@@ -61,6 +66,27 @@ export default function WeaponCatalogList({
   // the spell catalogue gives its own filtering.
   const applied = useDeferredValue(foldQuery(query));
   const { groups, total } = useMemo(() => groupWeapons(INDEX, applied), [applied]);
+
+  /**
+   * The starred weapons, flattened out of the groups that survived the search —
+   * so the Favoris card obeys the query exactly as the catégories do. The icon
+   * travels with the preset: it is a property of the CATEGORY, which flattening
+   * would otherwise lose.
+   *
+   * The rows also stay in their catégorie below: moving them out would mean a
+   * player opening « Armes de jet » cannot find the weapon they starred.
+   */
+  const starred = useMemo(() => {
+    if (!favorites || favorites.ids.size === 0) return [];
+    const rows: { preset: WeaponPreset; icon: IconName }[] = [];
+    for (const group of groups) {
+      const icon = iconFor(group.category);
+      for (const { items } of group.hands) {
+        for (const p of items) if (favorites.ids.has(p.id)) rows.push({ preset: p, icon });
+      }
+    }
+    return rows;
+  }, [groups, favorites]);
 
   return (
     <CatalogScrollProvider value={catalogScroll}>
@@ -78,6 +104,21 @@ export default function WeaponCatalogList({
 
         {onAdd ? <CatalogCustomRow label="Arme personnalisée" onPress={() => onAdd()} /> : null}
 
+        {starred.length > 0 ? (
+          <SectionCard title="Favoris" icon="star">
+            {starred.map(({ preset, icon }) => (
+              <WeaponRow
+                key={preset.id}
+                preset={preset}
+                icon={icon}
+                readings={readings}
+                favorites={favorites}
+                onAdd={onAdd}
+              />
+            ))}
+          </SectionCard>
+        ) : null}
+
         {groups.map((group) => {
           // The glyph is a UI fact, resolved here rather than in the grouping —
           // lib/weapon-grouping stays free of anything the screen decides.
@@ -90,7 +131,14 @@ export default function WeaponCatalogList({
                     {hand}
                   </Text>
                   {items.map((p) => (
-                    <WeaponRow key={p.id} preset={p} icon={icon} readings={readings} onAdd={onAdd} />
+                    <WeaponRow
+                      key={p.id}
+                      preset={p}
+                      icon={icon}
+                      readings={readings}
+                      favorites={favorites}
+                      onAdd={onAdd}
+                    />
                   ))}
                 </View>
               ))}
@@ -122,12 +170,14 @@ const WeaponRow = React.memo(function WeaponRow({
   preset: p,
   icon,
   readings,
+  favorites,
   onAdd,
 }: {
   preset: WeaponPreset;
   icon: IconName;
   /** Absent when the catalogue is browsed with no character in context. */
   readings?: CaracReadings;
+  favorites?: Favorites;
   onAdd?: (preset: WeaponPreset) => void;
 }) {
   return (
@@ -137,6 +187,8 @@ const WeaponRow = React.memo(function WeaponRow({
       subtitle={[p.data.damage, p.data.prerequisites].filter((s) => s && s.trim() !== '').join(' · ')}
       addLabel={`Ajouter ${p.data.name}`}
       alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
+      presetId={p.id}
+      favorites={favorites}
       onAdd={onAdd && (() => onAdd(p))}>
       <WeaponDetail
         weapon={p.data}

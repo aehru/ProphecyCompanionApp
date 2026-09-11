@@ -9,11 +9,14 @@ import { CatalogScrollProvider, useCatalogScrollHost } from '@/components/catalo
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import ShieldDetail from '@/components/shield-detail';
 import Icon from '@/components/ui/icon';
+import SectionCard from '@/components/ui/section-card';
 import { SHIELD_CATALOG, type ShieldPreset } from '@/data/shield-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
+import type { Favorites } from '@/hooks/use-favorites';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { fold, foldQuery } from '@/lib/text-fold';
+
 
 /**
  * The shield catalogue itself — search and rows, with no idea whose it is. Flat
@@ -26,11 +29,14 @@ import { fold, foldQuery } from '@/lib/text-fold';
 export default function ShieldCatalogList({
   readings,
   onAdd,
+  favorites,
 }: {
   /** Resolves the dégâts formula and prérequis against a sheet. */
   readings?: CaracReadings;
   /** Called with a preset, or with nothing for « Bouclier personnalisé ». */
   onAdd?: (preset?: ShieldPreset) => void;
+  /** The reader's shopping list. Absent when no character is reading. */
+  favorites?: Favorites;
 }) {
   const theme = useProphecyTheme();
   const [query, setQuery] = useState('');
@@ -43,6 +49,33 @@ export default function ShieldCatalogList({
       q === '' ? SHIELD_CATALOG : SHIELD_CATALOG.filter((p) => fold(p.data.name ?? '').includes(q)),
     [q],
   );
+
+  const renderRow = (p: ShieldPreset) => (
+    <CatalogRow
+      key={p.id}
+      icon="shield"
+      name={p.data.name ?? ''}
+      subtitle={[p.data.damage, `Défense ${p.data.defenseMax}`, p.data.prerequisites]
+        .filter((s) => s && String(s).trim() !== '')
+        .join(' · ')}
+      addLabel={`Ajouter ${p.data.name}`}
+      alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
+      presetId={p.id}
+      favorites={favorites}
+      onAdd={onAdd && (() => onAdd(p))}>
+      {/* `defenseCurrent` is seeded from the max on insert (createShield), so
+          the preview reads an undamaged shield. */}
+      <ShieldDetail
+        shield={{ ...p.data, defenseCurrent: p.data.defenseMax }}
+        caracValue={readings?.caracValue}
+        caracModifier={readings?.caracModifier}
+      />
+    </CatalogRow>
+  );
+
+  // Starred entries first, and they stay in the list below — the boucliers are
+  // one flat list, so the Favoris card is the only grouping there is.
+  const starred = favorites ? filtered.filter((p) => favorites.ids.has(p.id)) : [];
 
   return (
     <CatalogScrollProvider value={catalogScroll}>
@@ -60,26 +93,13 @@ export default function ShieldCatalogList({
 
         {onAdd ? <CatalogCustomRow label="Bouclier personnalisé" onPress={() => onAdd()} /> : null}
 
-        {filtered.map((p) => (
-          <CatalogRow
-            key={p.id}
-            icon="shield"
-            name={p.data.name ?? ''}
-            subtitle={[p.data.damage, `Défense ${p.data.defenseMax}`, p.data.prerequisites]
-              .filter((s) => s && String(s).trim() !== '')
-              .join(' · ')}
-            addLabel={`Ajouter ${p.data.name}`}
-            alert={prerequisitesUnmet(p.data.prerequisites, readings?.caracValue)}
-            onAdd={onAdd && (() => onAdd(p))}>
-            {/* `defenseCurrent` is seeded from the max on insert (createShield),
-                so the preview reads an undamaged shield. */}
-            <ShieldDetail
-              shield={{ ...p.data, defenseCurrent: p.data.defenseMax }}
-              caracValue={readings?.caracValue}
-              caracModifier={readings?.caracModifier}
-            />
-          </CatalogRow>
-        ))}
+        {starred.length > 0 ? (
+          <SectionCard title="Favoris" icon="star">
+            {starred.map(renderRow)}
+          </SectionCard>
+        ) : null}
+
+        {filtered.map(renderRow)}
 
         {filtered.length === 0 ? (
           <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>

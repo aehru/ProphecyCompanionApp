@@ -4,6 +4,8 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 
 import CasteChip from '@/components/caste-chip';
+import ConceptChip from '@/components/concept-chip';
+import PortraitHero from '@/components/portrait-hero';
 import TendancesCircles from '@/components/tendances-circles';
 import TraitsSection from '@/components/traits-section';
 import { characterFallback } from '@/components/ui/character-gate';
@@ -25,14 +27,19 @@ import { setCharacterMedia } from '@/repositories/characters';
  * place of the DS hero card's health/magic bars), a compact vitals summary, and
  * the portrait illustration. All editing lives on the Fiche tab; the exceptions
  * here are the avatar (tap the hero) and the portrait (ILLUSTRATION card).
+ *
+ * The hero has TWO shapes and the portrait decides: with one, `<PortraitHero>`
+ * gives the illustration the whole card and lays the identity and the rings over
+ * it; without, the compact hero below draws the same three things on parchment.
+ * A character with only an avatar, or with no image at all, is untouched.
  */
 export default function CharacterDashboardScreen() {
   const numId = useCharacterId();
   const theme = useProphecyTheme();
   const { char, state, reload } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
-  // Full portrait is large; collapsed by default. Illustrations are the one
-  // thing editable from the otherwise read-only dashboard.
-  const [showPortrait, setShowPortrait] = useState(false);
+  // Illustrations are the one thing editable from the otherwise read-only
+  // dashboard, and the ILLUSTRATION card keeps that job even when the portrait
+  // hero is showing the image — a tap on the hero must never open the gallery.
   const [busyPortrait, setBusyPortrait] = useState(false);
   const splitWidth = useSplitWidth();
 
@@ -76,7 +83,19 @@ export default function CharacterDashboardScreen() {
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.container, splitWidth]}>
-      {/* Hero card: identity + tendances ring gauges (replacing health/magic). */}
+      {/* Hero: the portrait one when there is a portrait, the compact card
+          otherwise. Both carry the identity and the three tendance gauges. */}
+      {portrait ? (
+        <PortraitHero
+          portrait={portrait}
+          avatar={avatar}
+          nom={char.nom}
+          caste={char.caste}
+          concept={char.concept}
+          tendances={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
+          onPickAvatar={pickAvatar}
+        />
+      ) : (
       <View style={[styles.hero, { backgroundColor: theme.colors.surface, borderColor: theme.prophecy.border }]}>
         <View style={styles.identity}>
           <Pressable
@@ -101,13 +120,7 @@ export default function CharacterDashboardScreen() {
             {char.concept || char.caste ? (
               <View style={styles.chips}>
                 <CasteChip caste={char.caste} />
-                {char.concept ? (
-                  <View style={[styles.conceptChip, { borderColor: theme.prophecy.border }]}>
-                    <Text style={[styles.conceptText, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
-                      {char.concept}
-                    </Text>
-                  </View>
-                ) : null}
+                <ConceptChip concept={char.concept} />
               </View>
             ) : null}
           </View>
@@ -117,6 +130,7 @@ export default function CharacterDashboardScreen() {
 
         <TendancesCircles get={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })} />
       </View>
+      )}
 
       <Columns>
         {/* At-a-glance vitals (read-only; edit on the Fiche). */}
@@ -138,28 +152,19 @@ export default function CharacterDashboardScreen() {
             the dashboard: a row opens its editor as a modal. */}
         <TraitsSection characterId={numId} />
 
-        {/* Full portrait — collapsed by default; the avatar is set via the hero tap. */}
+        {/* Portrait controls. No preview here once there is a portrait — the
+            hero above IS the preview — so the card is down to the two actions;
+            the avatar is still set by tapping it on either hero. */}
         <SectionCard title="ILLUSTRATION" icon="character">
           {portrait ? (
-            <>
-              <Button compact icon={dsIcon('chev')} onPress={() => setShowPortrait((s) => !s)}>
-                {showPortrait ? 'Masquer le portrait' : 'Afficher le portrait'}
+            <View style={styles.portraitActions}>
+              <Button compact icon={dsIcon('edit')} loading={busyPortrait} onPress={pickPortrait}>
+                Remplacer le portrait
               </Button>
-              {showPortrait ? (
-                <Pressable onPress={pickPortrait}>
-                  <Image
-                    source={portrait}
-                    style={[styles.portrait, { borderColor: theme.prophecy.border }]}
-                    contentFit="cover"
-                  />
-                </Pressable>
-              ) : null}
-              {showPortrait ? (
-                <Button compact textColor={theme.colors.error} onPress={clearPortrait}>
-                  Retirer le portrait
-                </Button>
-              ) : null}
-            </>
+              <Button compact textColor={theme.colors.error} onPress={clearPortrait}>
+                Retirer le portrait
+              </Button>
+            </View>
           ) : (
             <Button mode="outlined" icon={dsIcon('plus')} loading={busyPortrait} onPress={pickPortrait}>
               Ajouter un portrait
@@ -210,18 +215,8 @@ const styles = StyleSheet.create({
   avatarImg: { width: '100%', height: '100%' },
   identityText: { flex: 1, gap: 6 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  conceptChip: {
-    alignSelf: 'flex-start',
-    flexShrink: 1,
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    maxWidth: '100%',
-  },
-  conceptText: { fontSize: 12 },
   divider: { height: 1 },
-  portrait: { width: '100%', aspectRatio: 3 / 4, borderRadius: 12, borderWidth: 1 },
+  portraitActions: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' },
   vitals: { flexDirection: 'row', justifyContent: 'space-around', gap: 8 },
   vital: { alignItems: 'center', gap: 2 },
   vitalLabel: { fontSize: 12 },

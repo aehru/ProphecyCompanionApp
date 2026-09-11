@@ -21,13 +21,16 @@
 // ends up baked into every asset URL. Both forms are accepted and normalised
 // below, but the slash-less one is the one that survives every shell.
 
-const app = require('./app.json');
-
-module.exports = () => {
+// The `config` argument IS app.json's `expo` object (Expo reads the static file
+// and hands it in). Take it rather than `require`-ing app.json ourselves:
+// @expo/config tags that object with a Symbol and checks the returned object
+// still carries it, and a self-read copy does not — which is what made
+// `expo-doctor` report « your app.config.js is not using the values from it ».
+module.exports = ({ config }) => {
   const raw = process.env.WEB_BASE_URL?.trim().replace(/^\/+|\/+$/g, '');
 
   return {
-    ...app.expo,
+    ...config,
     // `bun run web` sets WEB_OUTPUT=single. The dev server otherwise renders
     // every route on the server first (output: "static"), and that server graph
     // cannot be bundled: expo-sqlite chooses its web implementation with a
@@ -40,9 +43,9 @@ module.exports = () => {
     // per-route static HTML, which is what ships and what the e2e suite runs
     // against. The cost is that dev renders as a plain SPA — fine, since nothing
     // in the app depends on the server pass.
-    web: { ...app.expo.web, ...(process.env.WEB_OUTPUT ? { output: process.env.WEB_OUTPUT } : {}) },
+    web: { ...config.web, ...(process.env.WEB_OUTPUT ? { output: process.env.WEB_OUTPUT } : {}) },
     experiments: {
-      ...app.expo.experiments,
+      ...config.experiments,
       ...(raw ? { baseUrl: `/${raw}` } : {}),
     },
   };

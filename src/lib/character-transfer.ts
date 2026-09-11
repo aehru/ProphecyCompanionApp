@@ -205,6 +205,10 @@ const spellSchema = z.object({
   // OPTIONAL (not a version bump, like `level`): every row that predates the
   // column was a spell the character knew, which is the default.
   known: z.boolean().optional(),
+  // The mage's shortlist. OPTIONAL, same reasoning as `known`, and carried on
+  // BOTH export intents: which spells someone reaches for is part of their
+  // sheet, not an identity that a share has to strip.
+  favorite: z.boolean().optional(),
 });
 
 // Inventory. OPTIONAL with a `[]` default (not a version bump, like `shields`):
@@ -292,6 +296,21 @@ const traitSchema = z.object({
   presetRevision: str.nullable().optional(),
 });
 
+/**
+ * Starred catalogue entries. OPTIONAL with a `[]` default (not a version bump,
+ * like `traits`): exports made before the table existed carry none.
+ *
+ * Two plain strings and no link to resolve — unlike an enchant, a favourite
+ * points at a rulebook slug, which is the same on every device and survives a
+ * file. `kind` is loose on purpose: a catalogue a later version knows about must
+ * not make an older app reject the whole bundle, and an unknown kind simply
+ * matches nothing until that app catches up.
+ */
+const favoriteSchema = z.object({
+  kind: str,
+  presetId: str,
+});
+
 const effectSchema = z.object({
   label: str,
   target: str,
@@ -316,6 +335,7 @@ const characterBundleSchema = z.object({
   enchants: z.array(enchantSchema).default([]),
   traits: z.array(traitSchema).default([]),
   effects: z.array(effectSchema),
+  favorites: z.array(favoriteSchema).default([]),
 });
 
 const exportSchema = z.object({
@@ -336,6 +356,7 @@ export const SKILL_FIELDS = Object.keys(skillSchema.shape);
 export const ARMOR_FIELDS = Object.keys(armorSchema.shape);
 export const WEAPON_FIELDS = Object.keys(weaponSchema.shape);
 export const SHIELD_FIELDS = Object.keys(shieldSchema.shape);
+export const FAVORITE_FIELDS = Object.keys(favoriteSchema.shape);
 /**
  * Export side: an enchant's live row ids → the positions a file carries.
  *
@@ -501,7 +522,11 @@ export function forSharing(exp: ProphecyExport): ProphecyExport {
     ...exp,
     characters: exp.characters.map((b) => {
       const { uuid: _uuid, ...character } = b.character as { uuid?: string };
-      return { ...b, character } as CharacterBundle;
+      // The shopping list goes with the uuid. A sauvegarde is the only backup
+      // there is, so it keeps them; a partage hands someone a character to
+      // play, and what its previous owner was planning to buy is a note to
+      // themselves, not part of the sheet.
+      return { ...b, character, favorites: [] as CharacterBundle['favorites'] } as CharacterBundle;
     }),
   };
 }

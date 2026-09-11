@@ -40,6 +40,7 @@ const { createWeapon } = await import('@/repositories/weapons');
 const { createSpell } = await import('@/repositories/spells');
 const { createEnchant } = await import('@/repositories/enchants');
 const { createTrait } = await import('@/repositories/traits');
+const { setFavorite } = await import('@/repositories/favorites');
 const { exportCharacters, importCharacters } = await import('@/repositories/transfer');
 
 beforeEach(() => {
@@ -104,6 +105,37 @@ describe('exportCharacters', () => {
 });
 
 describe('export → import round trip', () => {
+  it('carries the shopping list and the spellbook stars onto the copy', async () => {
+    const { character } = await seedCharacter('Sylwen', []);
+    await setFavorite(character.id, 'spell', 'boule-de-feu', true);
+    await setFavorite(character.id, 'trait', 'fortune', true);
+    // Starred, then unstarred: the row must not travel.
+    await setFavorite(character.id, 'weapon', 'epee-courte', true);
+    await setFavorite(character.id, 'weapon', 'epee-courte', false);
+    await createSpell(character.id, { name: 'Trait de feu', favorite: true });
+    await createSpell(character.id, { name: 'Mur de pierre' });
+
+    const { ids } = await importCharacters(await exportCharacters([character.id]), 'copy');
+
+    expect(
+      harness.raw
+        .prepare('SELECT kind, preset_id FROM favorites WHERE character_id = ? ORDER BY kind')
+        .all(ids[0]),
+    ).toEqual([
+      { kind: 'spell', preset_id: 'boule-de-feu' },
+      { kind: 'trait', preset_id: 'fortune' },
+    ]);
+    // The row-level star is a plain column and rides with the spell.
+    expect(
+      harness.raw
+        .prepare('SELECT name, favorite FROM spells WHERE character_id = ? ORDER BY id')
+        .all(ids[0]),
+    ).toEqual([
+      { name: 'Trait de feu', favorite: 1 },
+      { name: 'Mur de pierre', favorite: 0 },
+    ]);
+  });
+
   it('carries both halves of the point pool onto the copy', async () => {
     const { character } = await seedCharacter('Aldric', []);
     await createTrait(character.id, {

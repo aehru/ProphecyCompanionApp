@@ -4,6 +4,7 @@ import { Button, IconButton, Text } from 'react-native-paper';
 
 import { useCatalogScroll } from '@/components/catalog-scroll';
 import Icon, { dsIcon, type IconName } from '@/components/ui/icon';
+import type { Favorites } from '@/hooks/use-favorites';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 /**
@@ -29,6 +30,8 @@ export default function CatalogRow({
   subtitle,
   addLabel,
   onAdd,
+  presetId,
+  favorites,
   alert,
   badge,
   children,
@@ -44,6 +47,13 @@ export default function CatalogRow({
    * The row then previews and nothing else.
    */
   onAdd?: () => void;
+  /** Catalogue slug this row stands for — what a star is recorded against. */
+  presetId?: string;
+  /**
+   * The reader's shopping list. Absent when nobody is reading (the home
+   * catalogue has no character), and the star is then gone rather than inert.
+   */
+  favorites?: Favorites;
   /** Flags the tile in the error colour (an unmet prérequis), like the cards do. */
   alert?: boolean;
   /**
@@ -119,6 +129,12 @@ export default function CatalogRow({
           </View>
         </Pressable>
 
+        {/* A sibling of the disclosure for the same reason the `+` is — nested
+            buttons are invalid HTML and React drops their clicks on web. */}
+        {favorites && presetId ? (
+          <FavoriteStar favorites={favorites} presetId={presetId} name={name} />
+        ) : null}
+
         {/* The add button, not a chevron: the row itself is the disclosure. */}
         {onAdd ? (
           <IconButton
@@ -154,6 +170,42 @@ export default function CatalogRow({
         </>
       ) : null}
     </View>
+  );
+}
+
+/**
+ * The shopping-list toggle. Colour alone carries the state: the DS has one star
+ * glyph, and a gold one against a muted one reads at a glance without a second
+ * asset — so the label and the `selected` state carry it for a screen reader.
+ */
+function FavoriteStar({
+  favorites,
+  presetId,
+  name,
+}: {
+  favorites: Favorites;
+  presetId: string;
+  name: string;
+}) {
+  const theme = useProphecyTheme();
+  const starred = favorites.ids.has(presetId);
+  return (
+    <IconButton
+      icon={() => (
+        <Icon
+          name="star"
+          size={22}
+          color={starred ? theme.colors.primary : theme.colors.onSurfaceVariant}
+        />
+      )}
+      size={22}
+      accessibilityLabel={
+        starred ? `Retirer ${name} des favoris` : `Mettre ${name} en favori`
+      }
+      accessibilityState={{ selected: starred }}
+      onPress={() => favorites.toggle(presetId)}
+      style={styles.add}
+    />
   );
 }
 

@@ -246,6 +246,20 @@
       "when": 1788515562800,
       "tag": "0034_nappy_next_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "6",
+      "when": 1788899770474,
+      "tag": "0035_violet_taskmaster",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1788968887631,
+      "tag": "0036_green_weapon_omega",
+      "breakpoints": true
     }
   ]
 }

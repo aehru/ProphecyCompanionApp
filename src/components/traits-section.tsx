@@ -2,14 +2,13 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 
 import TraitRow from '@/components/trait-card';
 import TraitPoolBar from '@/components/trait-pool-bar';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { TRAIT_KINDS } from '@/constants/prophecy';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { traitPool } from '@/lib/trait-pool';
 import { traitsQuery } from '@/repositories/traits';
 
@@ -21,9 +20,13 @@ import { traitsQuery } from '@/repositories/traits';
  * the entries themselves are picked once at creation and read rarely. It is
  * shown even at zero: a blank space would read as "not filled in yet" on a
  * character who genuinely has none.
+ *
+ * The two kinds are grouped but NOT titled: every row already carries its icon
+ * and its signed cost (`+3` granted, `−2` spent), so a heading over each half
+ * restated what the rows say and cost two lines in a section meant to be
+ * glanced at.
  */
 export default function TraitsSection({ characterId }: { characterId: number }) {
-  const theme = useProphecyTheme();
   const router = useRouter();
   const { data: rows } = useLiveQuery(traitsQuery(characterId), [characterId]);
   const traits = rows ?? [];
@@ -38,9 +41,6 @@ export default function TraitsSection({ characterId }: { characterId: number }) 
         if (list.length === 0) return null;
         return (
           <View key={kind.key} style={styles.group}>
-            <Text style={[styles.groupTitle, { color: theme.colors.onSurfaceVariant }]}>
-              {kind.plural}
-            </Text>
             {list.map((t) => (
               <TraitRow key={t.id} trait={t} characterId={characterId} />
             ))}
@@ -60,5 +60,4 @@ export default function TraitsSection({ characterId }: { characterId: number }) 
 
 const styles = StyleSheet.create({
   group: { marginTop: 4 },
-  groupTitle: { fontSize: 12, letterSpacing: 0.3, marginBottom: 2 },
 });
