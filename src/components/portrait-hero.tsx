@@ -11,6 +11,7 @@ import Icon from '@/components/ui/icon';
 import { type TendanceKey } from '@/constants/prophecy';
 import { useLayout } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { OVERLAY_INK } from '@/theme/overlayInk';
 
 /**
  * The dashboard hero for a character who HAS a full portrait: the illustration
@@ -33,7 +34,7 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 // rings — rather than expo-linear-gradient: a new native module would force a
 // dev-client rebuild for a wash.
 const SCRIM_HEIGHT = 0.45;
-const SCRIM_COLOR = '#141618';
+const SCRIM_COLOR = OVERLAY_INK.scrim;
 
 /** Panel height by window class. Tall enough to read as an illustration on a
  *  phone; shorter on a tablet (the split's two columns start right underneath)
@@ -126,8 +127,8 @@ export default function PortraitHero({
 }
 
 // The name is fixed light ink rather than a theme role: it sits on the scrim,
-// which is the same dark wash in both themes (see the rings' overlay palette).
-const NAME_COLOR = '#F8F2E8';
+// which is the same dark wash in both themes (see `theme/overlayInk`).
+const NAME_COLOR = OVERLAY_INK.text;
 
 const styles = StyleSheet.create({
   hero: { borderWidth: 1, borderRadius: 18, overflow: 'hidden' },
