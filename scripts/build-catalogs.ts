@@ -38,6 +38,9 @@ import { fileURLToPath } from 'node:url';
 import {
   CASTES,
   type CasteKey,
+  PRIVILEGE_FAMILIES,
+  PRIVILEGE_FAMILY_KEYS,
+  type PrivilegeFamily,
   DEFAULT_SKILLS,
   DISCIPLINES,
   SPELL_TAGS,
@@ -67,6 +70,7 @@ import type {
 import type { ArmorPreset } from '../src/data/armor-catalog';
 import type { ShieldPreset } from '../src/data/shield-catalog';
 import type { StatutPreset } from '../src/data/status-catalog';
+import type { PrivilegePreset } from '../src/data/privilege-catalog';
 import type { TraitPreset } from '../src/data/trait-catalog';
 import type { WeaponPreset } from '../src/data/weapon-catalog';
 import type { SpellPreset } from '../src/data/spell-catalog';
@@ -125,6 +129,14 @@ const TRAIT_COLUMNS = [
   // the `evolving` column in db/schema.ts). Optional — blank reads as permanent,
   // which is what every désavantage of the anciens is.
   'evolutif',
+  // Editorial provenance, declared so the header check accepts it and then
+  // deliberately not read — same as the spells' `rulebook` column.
+  'rulebook',
+];
+const PRIVILEGE_COLUMNS = [
+  // `id` is caste-prefixed by hand: the same name recurs across castes at a
+  // different price, so the name alone is not unique (see PrivilegePreset).
+  'id', 'caste', 'famille', 'nom', 'cout', 'description',
   // Editorial provenance, declared so the header check accepts it and then
   // deliberately not read — same as the spells' `rulebook` column.
   'rulebook',
@@ -216,6 +228,12 @@ const matchCaste = matcher(
 );
 // Avantage / Désavantage, and the rulebook's availability headings. Plurals are
 // accepted too: a spreadsheet column is as likely to be headed « Désavantages ».
+const matchPrivilegeFamily = matcher(
+  PRIVILEGE_FAMILIES.flatMap((f) => [
+    [f.key, f.key],
+    [f.label, f.key],
+  ] as [string, string][]),
+);
 const matchTraitKind = matcher(
   TRAIT_KINDS.flatMap((k): [string, string][] => [
     [k.key, k.key],
@@ -892,6 +910,52 @@ function buildArchetypes(failures: Failure[]): ArchetypePreset[] {
   return out;
 }
 
+function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
+  const records = readTable('privileges.csv', PRIVILEGE_COLUMNS, failures);
+  const casteKeys = CASTES.map((c) => c.key);
+  const seen = new Set<string>();
+  const out: PrivilegePreset[] = [];
+
+  records.forEach((rec, i) => {
+    const errors: RowErrors = [];
+    const id = readSlug(rec, seen, errors);
+    // No « Sans Caste » here: a privilège is bought from a caste, so a blank one
+    // has nothing to belong to.
+    const caste = readEnum(rec, 'caste', matchCaste, casteKeys, errors) as CasteKey;
+    const famille = readEnum(
+      rec,
+      'famille',
+      matchPrivilegeFamily,
+      PRIVILEGE_FAMILY_KEYS,
+      errors,
+    ) as PrivilegeFamily;
+    const nom = (rec.nom ?? '').trim();
+    if (nom === '') errors.push('nom : requis');
+    const description = (rec.description ?? '').trim();
+    if (description === '') errors.push('description : requise');
+    const cout = readInt(rec, 'cout', errors);
+    if (cout < 1) errors.push(`cout : « ${cout} » — un privilège coûte au moins 1 point`);
+
+    const preset: PrivilegePreset = { id, caste, famille, nom, cout, description };
+    if (errors.length) {
+      failures.push({ file: 'privileges.csv', record: i + 2, name: nom || id, errors });
+    } else {
+      out.push(preset);
+    }
+  });
+
+  // Caste order, then the rulebook's two headings, then alphabetical — the
+  // reading order of a caste's page, whatever order the spreadsheet is in.
+  const familyOrder = PRIVILEGE_FAMILY_KEYS as readonly string[];
+  out.sort(
+    (a, b) =>
+      casteKeys.indexOf(a.caste) - casteKeys.indexOf(b.caste) ||
+      familyOrder.indexOf(a.famille) - familyOrder.indexOf(b.famille) ||
+      a.nom.localeCompare(b.nom, 'fr'),
+  );
+  return out;
+}
+
 function buildStatuses(failures: Failure[]): StatutPreset[] {
   const records = readTable('statuses.csv', STATUS_COLUMNS, failures);
   const casteKeys = CASTES.map((c) => c.key);
@@ -977,6 +1041,7 @@ export function generateCatalogs(): {
     archetypes: number;
     traits: number;
     statuses: number;
+    privileges: number;
   };
 } {
   const failures: Failure[] = [];
@@ -987,6 +1052,7 @@ export function generateCatalogs(): {
   const archetypes = buildArchetypes(failures);
   const traits = buildTraits(failures);
   const statuses = buildStatuses(failures);
+  const privileges = buildPrivileges(failures);
   return {
     failures,
     counts: {
@@ -997,6 +1063,7 @@ export function generateCatalogs(): {
       archetypes: archetypes.length,
       traits: traits.length,
       statuses: statuses.length,
+      privileges: privileges.length,
     },
     files: [
       {
@@ -1014,6 +1081,16 @@ export function generateCatalogs(): {
       {
         file: 'shield-catalog.gen.ts',
         content: render('shield.csv', 'ShieldPreset', './shield-catalog', 'SHIELD_CATALOG_DATA', shields),
+      },
+      {
+        file: 'privilege-catalog.gen.ts',
+        content: render(
+          'privileges.csv',
+          'PrivilegePreset',
+          './privilege-catalog',
+          'PRIVILEGE_CATALOG_DATA',
+          privileges,
+        ),
       },
       {
         file: 'status-catalog.gen.ts',
@@ -1096,7 +1173,7 @@ function main() {
   console.log(
     `OK : ${counts.weapons} armes, ${counts.spells} sortilèges, ${counts.armor} armures, ` +
       `${counts.shields} boucliers, ${counts.archetypes} archétypes, ` +
-      `${counts.traits} avantages/désavantages, ${counts.statuses} statuts.`,
+      `${counts.traits} avantages/désavantages, ${counts.statuses} statuts, ${counts.privileges} privilèges.`,
   );
 }
 

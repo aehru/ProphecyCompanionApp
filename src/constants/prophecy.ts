@@ -246,6 +246,28 @@ export const SPELL_TAG_GROUP: Record<string, string> = Object.fromEntries(
  * French game terms, so keys are stored accent-free (`desavantage`) and the
  * label carries the accent, like the sphères and the castes.
  */
+/**
+ * The two families a Privilège de caste belongs to — the rulebook's own two
+ * headings on a caste's page.
+ *
+ * They are NOT the same list read twice: an entry can sit under « Privilèges de
+ * caste » for one caste and under « Privilèges annexes » for another, at a
+ * different price — « Expertise » is an annexe at 4 points for an Artisan and a
+ * caste privilège at 2 for a Commerçant, with the same text. That is why a
+ * privilège is stored per caste rather than as one row bound to several.
+ */
+export const PRIVILEGE_FAMILIES = [
+  { key: 'caste', label: 'Privilèges de caste' },
+  { key: 'annexe', label: 'Privilèges annexes' },
+] as const;
+
+export type PrivilegeFamily = (typeof PRIVILEGE_FAMILIES)[number]['key'];
+
+export const PRIVILEGE_FAMILY_KEYS = PRIVILEGE_FAMILIES.map((f) => f.key) as [
+  PrivilegeFamily,
+  ...PrivilegeFamily[],
+];
+
 export const TRAIT_KINDS = [
   { key: 'desavantage', label: 'Désavantage', plural: 'Désavantages' },
   { key: 'avantage', label: 'Avantage', plural: 'Avantages' },
