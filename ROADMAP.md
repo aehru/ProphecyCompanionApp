@@ -131,11 +131,13 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
      dans les Compétences Physiques » is a sum) and most of them count Privilèges
      de caste, which the app does not model. Checking one against the sheet waits
      on both.
-  3. **Les Ordres Noirs — black ladders.** `characters.darkOrders` switches the
-     lookup to the caste's black ladder (`statuses.csv` `ordresNoirs` = oui), and
-     a caste with none falls back to the normal one. Only the Combattant's is
-     typed in (*Les Secrets de Kalimsshar*); the other castes' follow, except
-     perhaps the Prodiges.
+  3. ~~**Les Ordres Noirs — black ladders.**~~ Done. `characters.darkOrders`
+     switches the lookup to the caste's black ladder (`statuses.csv`
+     `ordresNoirs` = oui), and a caste with none falls back to the normal one.
+     Typed in from *Les Secrets de Kalimsshar*: Combattant, Érudit, Protecteur,
+     Mage, Artisan, Commerçant, with their black privilèges. The Voyageurs and
+     the Prodiges have NO black ladder by the book, so the fallback is the rule
+     there, not a gap.
   4. **Hidden values survive a caste change.** Clearing the caste hides the
      Statut field and the « Rejoindre Les Ordres Noirs » checkbox but keeps what
      was stored, so choosing a caste again brings both back. Harmless today —
