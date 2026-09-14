@@ -131,6 +131,16 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
      dans les Compétences Physiques » is a sum) and most of them count Privilèges
      de caste, which the app does not model. Checking one against the sheet waits
      on both.
+  3. **Les Ordres Noirs — black ladders.** `characters.darkOrders` switches the
+     lookup to the caste's black ladder (`statuses.csv` `ordresNoirs` = oui), and
+     a caste with none falls back to the normal one. Only the Combattant's is
+     typed in (*Les Secrets de Kalimsshar*); the other castes' follow, except
+     perhaps the Prodiges.
+  4. **Hidden values survive a caste change.** Clearing the caste hides the
+     Statut field and the « Rejoindre Les Ordres Noirs » checkbox but keeps what
+     was stored, so choosing a caste again brings both back. Harmless today —
+     every reader returns nothing without a caste. If « Sans Caste » should never
+     carry them, `fromFormValues` resets both when the caste is empty.
 - [~] **Privilèges de caste.** Per-caste capabilities, counted by the Statut
   ladder's `requis` (« 2 Privilèges de caste »). The CATALOGUE half is done:
   `data-src/privileges.csv` → `privilege-catalog.gen.ts`, one row per (caste,
