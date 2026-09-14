@@ -34,6 +34,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet de disposer d'une autorisation d'accès aux ateliers des artisans résidents. Elle se présente sous la forme d'une série de broderies apposées sur son tablier de sortie. Elles lui garantissent un accueil favorable chez ses confrères, qui lui demanderont alors un dédommagement plus modique pour prêter un établi et quelques outils. Ce Privilège permet évidemment d'éviter les hausses de Difficulté dues à un matériel insuffisant. De plus, le personnage ne subira pas les allongements de délai de création dus au travail solitaire."
   },
   {
+    "id": "artisan-compagnon-du-voyage",
+    "caste": "artisan",
+    "famille": "caste",
+    "nom": "Compagnon du voyage",
+    "costs": [
+      2
+    ],
+    "description": "L'artisan noir reconnaît à des signes discrets sur des œuvres d'art ou d'artisanat les marques de ses compagnons de l'Ordre Noir. Ces signes secrets permettent de laisser des messages simples (passage, présence, danger, etc.).",
+    "darkOrders": true
+  },
+  {
     "id": "artisan-ecole",
     "caste": "artisan",
     "famille": "caste",
@@ -62,6 +73,30 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       1
     ],
     "description": "Permet de posséder un petit animal intelligent, généralement un oiseau ou un mammifère, capable d'échanger des émotions et des informations sommaires avec le personnage et de lui rendre quelques menus services (porter un outil, maintenir deux pièces ensemble, etc.)."
+  },
+  {
+    "id": "artisan-faussaire",
+    "caste": "artisan",
+    "famille": "caste",
+    "nom": "Faussaire",
+    "costs": [
+      3
+    ],
+    "description": "L'artisan noir est très doué pour copier d'autres œuvres. Il gagne un bonus de 3 sur tous ses jets de Contrefaçon d'œuvres d'art ou d'artisanat (et pas sur la copie d'écriture, de signature, de documents, etc.).",
+    "darkOrders": true
+  },
+  {
+    "id": "artisan-mecene",
+    "caste": "artisan",
+    "famille": "caste",
+    "nom": "Mécène",
+    "costs": [
+      3,
+      4,
+      5
+    ],
+    "description": "L'artisan a un mécène qui lui achète ses meilleures réalisations si la qualité est au rendez-vous. Suivant le coût d'achat du Privilège, la Difficulté du jet d'Artisanat diminue. Pour 3 points, la Difficulté est de 25, pour 4 elle est de 20, pour 5 elle est de 15. La base de rémunération est de 500 dracs de fer + 500 par Niveau de Réussite. L'artisan doit travailler pendant un minimum de trois semaines pour apporter une œuvre présentable à son mécène.",
+    "darkOrders": true
   },
   {
     "id": "artisan-notable",
@@ -196,6 +231,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet au personnage d'être tellement habitué aux horreurs de la guerre qu'il ne gagne plus aucun Cercle de Fatalité lorsqu'il conserve ce dé. Cependant, s'il commet une action particulièrement vicieuse, ou susceptible de lui faire gagner des Cercles, il les gagne tout de même. Un personnage qui possède ce Privilège ne peut jamais dépasser 1 en Tendance Homme, mais il est possible d'y renoncer à tout moment, pour peu que la Tendance Fatalité du personnage ne soit pas supérieure de 2."
   },
   {
+    "id": "combattant-dissimulation",
+    "caste": "combattant",
+    "famille": "caste",
+    "nom": "Dissimulation",
+    "costs": [
+      5
+    ],
+    "description": "Le combattant est habitué à cacher ses armes sur lui. Il peut dissimuler pour (500 g x Statut dans l'Ordre Noir) d'armes sur lui, sans qu'un jet soit nécessaire, pour peu qu'il ne soit ni dévêtu ni fouillé.",
+    "darkOrders": true
+  },
+  {
     "id": "combattant-double-attaque",
     "caste": "combattant",
     "famille": "caste",
@@ -224,6 +270,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       6
     ],
     "description": "Permet de porter un coup simulé que l'adversaire tentera de parer ou d'esquiver. Cette technique, particulièrement efficace, a pour effet principal d'augmenter la Difficulté des jets suivants de l'adversaire car, si la feinte ne compte pas comme une action, la parade et/ou l'esquive le sont bel et bien. Le personnage peut donc feindre une attaque, contraindre à la défense et porter une véritable attaque sans aucun malus. Une seule feinte est possible lors d'un même tour. Après la première feinte, l'adversaire a droit à un jet de Mental + Compétence d'arme concernée contre une Difficulté de 15 pour comprendre qu'il ne s'agit pas d'une véritable attaque. La Difficulté de ce jet est réduite de 5 à chaque nouvelle feinte. Un personnage disposant de ce Privilège sur le point de subir une feinte peut directement effectuer le jet de Mental + Compétence d'arme concernée pour deviner la feinte (il n'est pas obligé d'attendre APRÈS l'avoir subie une fois). La Difficulté reste inchangée."
+  },
+  {
+    "id": "combattant-predateur-nocturne",
+    "caste": "combattant",
+    "famille": "caste",
+    "nom": "Prédateur nocturne",
+    "costs": [
+      4
+    ],
+    "description": "Le combattant gagne les sens des prédateurs nocturnes (vision, ouïe, odorat). Il ne subit pas de modification à la Difficulté pour ses actions la nuit ou dans l'obscurité, tant qu'une source de lumière si faible soit-elle est disponible. En contrepartie, ses yeux luisent dans l'obscurité comme ceux d'un chat.",
+    "darkOrders": true
   },
   {
     "id": "combattant-recuperation",
@@ -346,6 +403,29 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet de savoir comment entrer en contact avec des intermédiaires douteux pouvant lui fournir du poison. Le meneur de jeu reste libre quant aux poisons qu'il souhaite fournir au personnage. De plus, ce Privilège est rare et ses pairs se déchargent sur lui des affaires douteuses. Si le personnage est considéré comme un criminel par les autorités, sa caste interviendra tout de même pour étouffer les poursuites mineures dont il pourra faire l'objet."
   },
   {
+    "id": "commercant-la-cause",
+    "caste": "commercant",
+    "famille": "caste",
+    "nom": "La Cause",
+    "costs": [
+      4
+    ],
+    "description": "Le commerçant appartient à une confrérie ou une faction très soudée. Les rapports entre membres sont aussi forts que les liens du sang d'une famille. Dès que le personnage a besoin d'aide, sa famille peut lui en fournir, mais le personnage doit garder à l'esprit qu'il faut toujours rendre la politesse.",
+    "darkOrders": true
+  },
+  {
+    "id": "commercant-majordome",
+    "caste": "commercant",
+    "famille": "caste",
+    "nom": "Majordome",
+    "costs": [
+      2,
+      4
+    ],
+    "description": "Le personnage possède un majordome. Pour deux points, il reste dans la demeure principale et gère la maison pendant son absence. Pour quatre points, il accompagne le marchand dans ses aventures. Il aide aux tâches quotidiennes mais ne participe pas aux éléments moteurs d'un scénario (combat, enquêtes, diplomatie).",
+    "darkOrders": true
+  },
+  {
     "id": "commercant-notoriete",
     "caste": "commercant",
     "famille": "caste",
@@ -354,6 +434,21 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       2
     ],
     "description": "Permet de s'être forgé une bonne réputation au sein d'une cité ou d'une région de petite taille. La Renommée du personnage est augmentée de 1 une fois qu'il est reconnu. Le personnage gagne un bonus de 1 à toutes ses actions sociales effectuées à l'intérieur de cette cité ou région. Ce Privilège peut être acheté plusieurs fois et s'applique à une cité ou à une petite région à chaque fois."
+  },
+  {
+    "id": "commercant-petit-carnet",
+    "caste": "commercant",
+    "famille": "caste",
+    "nom": "Petit carnet",
+    "costs": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "description": "Le commerçant dispose d'un carnet d'adresse très fourni. À chaque début de scénario, le personnage lance 1D10, si ce résultat est inférieur ou égal au coût d'achat du Privilège, le personnage rencontre, par hasard, pendant un temps mort, une de ses connaissances, membre d'une caste, d'un Ordre ou d'une faction de Statut inférieur ou égal au sien. Ces PNJ peuvent lui rendre des services en échange de quelque chose (argent, enseignement, faveur, sexe, etc.), fournir des informations, etc. Il est souhaitable de créer quelques personnalités récurrentes, pour l'intérêt du jeu.",
+    "darkOrders": true
   },
   {
     "id": "commercant-psychologie",
@@ -506,6 +601,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet au personnage de faire prévaloir son statut d'érudit lors d'un litige, de conflits et de différends susceptibles de se régler en duel - qu'il s'agisse d'un duel physique ou d'une joute de toute autre nature. De par sa position, le personnage peut rappeler les lois en vigueur et proposer un affrontement conforme aux préceptes draconiques, qui ne saurait être refusé par un citoyen. Le personnage devient alors seul « juge » de l'issue du duel, de son vainqueur, des réparations requises, etc. Ce Privilège peut s'appliquer à un duel impliquant le personnage, mais les érudits ont généralement pour coutume de désigner des champions."
   },
   {
+    "id": "erudit-graphologue",
+    "caste": "erudit",
+    "famille": "caste",
+    "nom": "Graphologue",
+    "costs": [
+      3
+    ],
+    "description": "L'érudit a appris à discerner les schémas de pensée sous l'écriture. Du moment que l'érudit dispose d'au moins vingt lignes manuscrites, il peut faire un jet de Mental + Psychologie ou Lire et écrire (prendre le plus faible des deux) Difficulté 15. Il obtient une information sur la psychologie de l'auteur par Niveau de Réussite.",
+    "darkOrders": true
+  },
+  {
     "id": "erudit-linguistique",
     "caste": "erudit",
     "famille": "caste",
@@ -534,6 +640,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       4
     ],
     "description": "Permet de disposer des bonnes grâces d'un certain milieu social, de compter des amis fidèles au sein de la noblesse et de prétendre à certains égards liés à sa condition d'érudit. Il pourra ainsi être invité à des réunions privées, des soirées mondaines, etc. Lorsque le personnage cherche à se faire reconnaître dans son pays d'origine, il peut ajouter son Statut à sa Renommée."
+  },
+  {
+    "id": "erudit-reseau-occulte",
+    "caste": "erudit",
+    "famille": "caste",
+    "nom": "Réseau occulte",
+    "costs": [
+      4
+    ],
+    "description": "L'érudit connaît les endroits, échoppes, cercles occultes, où l'on parle de choses interdites et où l'on échange des livres sulfureux. Sur un jet de Social + Vie en cité Difficulté 15, il peut rentrer en contact avec des représentants de ces groupes. Ce Privilège n'est utile que dans les villes d'au moins dix mille habitants.",
+    "darkOrders": true
   },
   {
     "id": "erudit-faveur-politique",
@@ -586,6 +703,28 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet au personnage de posséder une aura magique, visible uniquement par les membres de sa caste et les créatures féeriques, qui traduit par des nuances de couleurs le niveau de sa puissance, son Statut, ses Disciplines et Sphères de prédilection, ainsi que ses particularités magiques - pouvoirs spéciaux, Lien, etc. Tant qu'il ne précise pas le contraire, cette aura peut être sondée et observée par tous les mages. Dans ce cas, elle confère au personnage un bonus égal à son Statut pour tous les jets de Social qui concernent sa situation hiérarchique, ainsi que lors des rencontres avec des créatures élémentaires. Pour tenter de la masquer, il faut réussir un jet d'opposition Mental + Volonté contre Mental + Empathie de l'observateur."
   },
   {
+    "id": "mage-discretion",
+    "caste": "mage",
+    "famille": "caste",
+    "nom": "Discrétion",
+    "costs": [
+      5
+    ],
+    "description": "Du moment que le mage dispose de toutes les Clés d'un sort sur lui, il peut lancer ce sort sans Clé de posture ni de voix.",
+    "darkOrders": true
+  },
+  {
+    "id": "mage-emotions-exacerbees",
+    "caste": "mage",
+    "famille": "caste",
+    "nom": "Émotions exacerbées",
+    "costs": [
+      5
+    ],
+    "description": "Le mage retient à grand peine ses émotions. Mais il a appris à s'en servir lors du lancement de ses sorts. Sur un jet de Mental + Empathie Difficulté 5, le mage gagne un bonus de 1 par Niveau de Réussite pour un lancement de sort. Le meneur de jeu peut demander un bon roleplay pour accorder la totalité du bonus obtenu. À cause du drain d'énergie que cela représente, le mage ne récupère cette capacité qu'après avoir dormi ou médité.",
+    "darkOrders": true
+  },
+  {
     "id": "mage-empathie-elementaire",
     "caste": "mage",
     "famille": "caste",
@@ -594,6 +733,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       5
     ],
     "description": "Permet au personnage d'être tellement en phase avec les courants élémentaires qu'il peut, en effectuant un simple rituel, puiser dans l'énergie magique d'un lieu pour regagner des Points de Magie. En effectuant un jet de Mental + Empathie contre une Difficulté de 10, le personnage regagne 1 Point de Magie par Niveau de Réussite. Ces points sont ajoutés à la réserve élémentaire correspondant à la Sphère invoquée par le mage, qui doit clairement énoncer l'élément avec lequel il souhaite entrer en contact. De fait, la Difficulté du jet peut être augmentée ou diminuée en fonction de la puissance de cet élément aux alentours."
+  },
+  {
+    "id": "mage-esprit-esclave",
+    "caste": "mage",
+    "famille": "caste",
+    "nom": "Esprit esclave",
+    "costs": [
+      5
+    ],
+    "description": "Le mage dispose d'une relation empathique avec une créature de magie, affiliée à une Sphère particulière. Cette créature l'aide physiquement ou psychiquement dans le lancement des sorts de sa Sphère. Si le mage lance un sort avec l'aide de son familier, il doit consacrer une unité de temps supplémentaire au lancement du sort (si le lancement du sort se compte en actions, le mage doit rajouter une action, s'il se compte en heures, une heure, etc.). Le mage gagne un bonus de 3 à chaque fois qu'il utilise son familier. Un mage ne peut créer un lien qu'avec un familier.",
+    "darkOrders": true
   },
   {
     "id": "mage-laboratoire",
@@ -644,6 +794,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       2
     ],
     "description": "Permet de disposer à tout moment des ingrédients non périssables et des Clés matérielles dont il risque d'avoir besoin pour lancer ses sortilèges. Ce Privilège ne prend pas en compte les ingrédients rares et extrêmement coûteux, sauf si le personnage a déjà fait la démarche nécessaire pour se les procurer — auquel cas il les a conservés sur lui."
+  },
+  {
+    "id": "mage-reveur",
+    "caste": "mage",
+    "famille": "caste",
+    "nom": "Rêveur",
+    "costs": [
+      5
+    ],
+    "description": "Le mage est un rêveur invétéré. Le monde des rêves lui est aussi familier que celui de l'éveil. Pour des interactions entre le mage et le monde des rêves ou ses habitants, le mage peut rajouter sa Tendance Dragon ou Fatalité à tous ses jets (sauf ceux de magie).",
+    "darkOrders": true
   },
   {
     "id": "mage-sortilege-fetiche",
@@ -886,6 +1047,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet de faire valoir son Statut pour prendre la direction de toute investigation officielle au sein d'une cité respectant les Lois draconiques. Du moment qu'aucun protecteur de Statut supérieur n'est présent, le personnage devient responsable des enquêtes, des rapports officiels et de la gestion des éventuels messages diplomatiques."
   },
   {
+    "id": "protecteur-conviction",
+    "caste": "protecteur",
+    "famille": "caste",
+    "nom": "Conviction",
+    "costs": [
+      4
+    ],
+    "description": "La liberté qu'offre Kalimsshar à tous les Ordres touche particulièrement les protecteurs noirs. La conscience et l'acceptation de leurs propres actes deviennent leurs principes fondamentaux. Quand leur libre-arbitre est menacé (torture, domination magique, contraintes, etc.), le protecteur noir peut résister en ajoutant sa Tendance Fatalité à tous ses jets de Volonté.",
+    "darkOrders": true
+  },
+  {
     "id": "protecteur-cuirasse",
     "caste": "protecteur",
     "famille": "caste",
@@ -956,6 +1128,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet de réquisitionner tout matériel, renfort ou moyen financier qu'il juge indispensable au bon déroulement de sa mission. Les abus sont sévèrement punis par la caste."
   },
   {
+    "id": "protecteur-sacrifice",
+    "caste": "protecteur",
+    "famille": "caste",
+    "nom": "Sacrifice",
+    "costs": [
+      5
+    ],
+    "description": "Une fois par jour, le protecteur noir peut se sacrifier pour sauver d'autres personnes. En guise de « sacrifice », la Fatalité le guide durant un combat. Il ne peut plus utiliser les Tendances, mais gagne un Point de Fatalité à chaque fois qu'il décide d'ajouter sa Tendance Fatalité à une attaque, parade, ou à un jet de dommages. Ses adversaires décident de ne plus s'occuper d'autres cibles et l'attaquent en priorité, à cause de l'aura de menace incroyable qu'il dégage.",
+    "darkOrders": true
+  },
+  {
     "id": "protecteur-suspicion",
     "caste": "protecteur",
     "famille": "caste",
@@ -1014,6 +1197,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       6
     ],
     "description": "Permet au personnage d'effectuer une attaque à distance avant le début d'un tour de combat, sans dépenser d'action ou déterminer de rang d'Initiative. Pour cela, le joueur doit impérativement prévenir le meneur de jeu de la « préparation » de son personnage - flèche encochée, vigilance, etc. - et réussir un jet de Manuel + Perception + niveau de Statut contre une Difficulté de 20. Cette Difficulté peut être réduite ou augmentée de 5 selon que le personnage est particulièrement vigilant, aux aguets ou, au contraire, fatigué, inattentif, etc. Le jet d'attaque est géré de façon normale et peut faire l'objet d'un appel aux Tendances, de dépense de Points de Maîtrise ou de Chance, mais ne peut en aucun cas être couplé avec un autre Privilège de caste, quelle qu'il soit."
+  },
+  {
+    "id": "voyageur-compagnon-de-shar",
+    "caste": "voyageur",
+    "famille": "caste",
+    "nom": "Compagnon de Shar",
+    "costs": [
+      4
+    ],
+    "description": "Tant que Shar est visible dans le ciel, le voyageur noir bénéficie de l'influence du cœur lunaire de Kalimsshar. La journée, il perce à jour les illusions sur un jet de Mental + Perception d'une Difficulté égale au jet qui a mis en place cette illusion. De nuit, en extérieur, il ne souffre pas des malus dus à l'obscurité, et tous ses jets de Crochetage, Déguisement, Discrétion et Pickpocket gagnent un bonus de 2. Par contre, pendant les jours et augures du Serpent, son visage devient hâve et blafard : la Difficulté de tous ses jets de Social augmente de 5.",
+    "darkOrders": true
   },
   {
     "id": "voyageur-compagnons",
@@ -1076,6 +1270,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
     "description": "Permet de rendre son armure particulièrement résistante à une arme précise. Pour utiliser ce Privilège, le personnage doit obligatoirement être spécialisé dans l'arme contre laquelle il souhaite renforcer son armure. L'Indice de protection augmente de 10 face à cette arme."
   },
   {
+    "id": "voyageur-pionnier",
+    "caste": "voyageur",
+    "famille": "caste",
+    "nom": "Pionnier",
+    "costs": [
+      4
+    ],
+    "description": "Le voyageur noir sait comment ouvrir un passage dans des lieux sauvages, isolés, ou inconnus. La Difficulté de ses jets de réaction sur des agressions par le milieu naturel (catastrophes naturelles, climat, végétaux, animaux) est réduite de 5. Ses jets de Cartographie et d'Orientation dans ces régions oubliées gagnent un bonus de 2.",
+    "darkOrders": true
+  },
+  {
     "id": "voyageur-rancune",
     "caste": "voyageur",
     "famille": "caste",
@@ -1094,6 +1299,17 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
       4
     ],
     "description": "Permet d'agir plus efficacement lorsqu'il est seul et de gagner un bonus de 2 à ses actions de pistage, de diplomatie et de Communication."
+  },
+  {
+    "id": "voyageur-souterrain",
+    "caste": "voyageur",
+    "famille": "caste",
+    "nom": "Souterrain",
+    "costs": [
+      3
+    ],
+    "description": "Le voyageur noir a une affinité avec les espaces clos et souterrains. Quand le voyageur se trouve dans un souterrain, tous les jets de Cartographie, Orientation, Perception et de Pistage gagnent un bonus de 2.",
+    "darkOrders": true
   },
   {
     "id": "voyageur-vigilance",
