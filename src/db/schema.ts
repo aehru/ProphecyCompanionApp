@@ -82,6 +82,12 @@ export const characters = sqliteTable('characters', {
   // in the generated catalogue, so a rulebook correction reaches every sheet.
   statut: integer('statut').notNull().default(0),
 
+  // Sworn to Kalimsshar — « Les Ordres Noirs ». Switches the Statut lookup to
+  // the caste's black ladder where the catalogue has one (see lib/statut); every
+  // privilège of the caste stays open. A boolean and not in NUMERIC_KEYS: it is
+  // no stat, and keeping it out of that list keeps it off the campaign wire.
+  darkOrders: integer('dark_orders', { mode: 'boolean' }).notNull().default(false),
+
   // Tendances — each has a main number + a subnumber (0–10)
   dragon: integer('dragon').notNull().default(0),
   dragonSub: integer('dragon_sub').notNull().default(0),
