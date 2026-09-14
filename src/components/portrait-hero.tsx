@@ -51,10 +51,12 @@ export default function PortraitHero({
   nom,
   caste,
   statut,
+  darkOrders,
   concept,
   tendances,
   onPickAvatar,
 }: {
+  darkOrders?: boolean | null;
   /** Resolved `file://` uri — the caller has already established there is one. */
   portrait: string;
   avatar: string | null;
@@ -125,7 +127,7 @@ export default function PortraitHero({
         {caste || concept ? (
           <View style={styles.chips}>
             <CasteChip caste={caste} tone="overlay" />
-            <StatutChip caste={caste} statut={statut} tone="overlay" />
+            <StatutChip caste={caste} statut={statut} darkOrders={darkOrders} tone="overlay" />
             <ConceptChip concept={concept} tone="overlay" />
           </View>
         ) : null}

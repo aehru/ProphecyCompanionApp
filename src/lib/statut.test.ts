@@ -37,6 +37,17 @@ describe('statut lookup', () => {
     expect(statutLabel('artisan', 0)).toBeNull();
   });
 
+  it('reads the black ladder for Les Ordres Noirs, and the normal one where a caste has none', () => {
+    expect(statutFor('combattant', 1)?.nom).toBe('Apprenti');
+    expect(statutFor('combattant', 1, true)?.nom).toBe('Apprenti noir');
+    expect(rungsUpTo('combattant', 3, true).map((s) => s.nom)).toEqual([
+      'Apprenti noir',
+      'Spadassin noir',
+      'Combattant noir',
+    ]);
+    expect(statutsForCaste('prodige', true)).toEqual(statutsForCaste('prodige'));
+  });
+
   it('keeps every rung already climbed', () => {
     // A Maître d'armes still has the Apprenti's « L'œil du maître ».
     expect(rungsUpTo('combattant', 4).map((s) => s.niveau)).toEqual([1, 2, 3, 4]);

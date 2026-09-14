@@ -45,6 +45,12 @@ export type StatutPreset = {
    * Empty is the normal case.
    */
   note: string;
+  /**
+   * A rung of the caste's BLACK ladder (« Les Ordres Noirs », sworn to
+   * Kalimsshar). Absent on the normal ladder. So the identity is really
+   * (caste, darkOrders, niveau) — see `statutsForCaste`.
+   */
+  darkOrders?: boolean;
 };
 
 export { STATUS_CATALOG_DATA as STATUS_CATALOG } from './status-catalog.gen';

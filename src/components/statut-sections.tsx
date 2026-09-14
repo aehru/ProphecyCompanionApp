@@ -33,11 +33,13 @@ import { rungLabel, rungsUpTo } from '@/lib/statut';
 export function StatutBenefitsSection({
   caste,
   statut,
+  darkOrders,
 }: {
   caste?: string | null;
   statut?: number | null;
+  darkOrders?: boolean | null;
 }) {
-  const rungs = rungsUpTo(caste, statut);
+  const rungs = rungsUpTo(caste, statut, !!darkOrders);
   if (rungs.length === 0) return null;
 
   return (
@@ -52,14 +54,16 @@ export function StatutBenefitsSection({
 export function StatutTechniquesSection({
   caste,
   statut,
+  darkOrders,
 }: {
   caste?: string | null;
   statut?: number | null;
+  darkOrders?: boolean | null;
 }) {
   const theme = useProphecyTheme();
   // A rung without a Technique is possible in the type, though no rulebook rung
   // is missing one today — so the filter is a guard, not a normal case.
-  const rungs = rungsUpTo(caste, statut).filter((r) => r.technique);
+  const rungs = rungsUpTo(caste, statut, !!darkOrders).filter((r) => r.technique);
   if (rungs.length === 0) return null;
 
   return (
