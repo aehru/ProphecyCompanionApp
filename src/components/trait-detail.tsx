@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import {
-  CASTES,
+  CASTE_LABEL,
   TRAIT_KIND_LABEL,
   TRAIT_RARITY_LABEL,
   traitEvolvingLabel,
@@ -62,12 +62,12 @@ export default function TraitDetail({
     <View style={styles.root}>
       <Text style={[styles.meta, { color: theme.colors.primary }]}>{meta}</Text>
       {caste ? (
-        <Text style={[styles.evolving, { color: theme.colors.onSurfaceVariant }]}>
-          Réservé à la caste : {CASTES.find((c) => c.key === caste)?.label ?? caste}
+        <Text style={[styles.aside, { color: theme.colors.onSurfaceVariant }]}>
+          Réservé à la caste : {CASTE_LABEL[caste] ?? caste}
         </Text>
       ) : null}
       {evolving ? (
-        <Text style={[styles.evolving, { color: theme.colors.onSurfaceVariant }]}>
+        <Text style={[styles.aside, { color: theme.colors.onSurfaceVariant }]}>
           {traitEvolvingLabel(kind)}
         </Text>
       ) : null}
@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
   root: { gap: 6, paddingBottom: 10 },
   meta: { fontSize: 12, letterSpacing: 0.3 },
   body: { fontSize: 13, lineHeight: 19 },
-  evolving: { fontSize: 12, fontStyle: 'italic' },
+  // The italic side notes under the meta line: the asterisk, the caste reservation.
+  aside: { fontSize: 12, fontStyle: 'italic' },
   note: { fontSize: 12, fontStyle: 'italic' },
 });
