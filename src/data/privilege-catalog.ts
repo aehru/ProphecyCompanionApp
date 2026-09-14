@@ -38,6 +38,11 @@ export type PrivilegePreset = {
    * later without invalidating a single row.
    */
   description: string;
+  /**
+   * Only for a character sworn to Kalimsshar (« Les Ordres Noirs »). Such a
+   * character keeps every other privilège of the caste too. Absent = open.
+   */
+  darkOrders?: boolean;
 };
 
 export { PRIVILEGE_CATALOG_DATA as PRIVILEGE_CATALOG } from './privilege-catalog.gen';

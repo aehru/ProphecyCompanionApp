@@ -140,6 +140,8 @@ const PRIVILEGE_COLUMNS = [
   // `id` is caste-prefixed by hand: the same name recurs across castes at a
   // different price, so the name alone is not unique (see PrivilegePreset).
   'id', 'caste', 'famille', 'nom', 'cout', 'description',
+  // Reserved to Les Ordres Noirs (sworn to Kalimsshar). Blank = open to the caste.
+  'ordresNoirs',
   // Editorial provenance, declared so the header check accepts it and then
   // deliberately not read — same as the spells' `rulebook` column.
   'rulebook',
@@ -153,6 +155,8 @@ const STATUS_COLUMNS = [
   'techniqueNom', 'techniqueEffet',
   // The rulebook's asterisk. Blank on every rung that carries none.
   'note',
+  // A rung of the caste's black ladder (Les Ordres Noirs). Blank = normal ladder.
+  'ordresNoirs',
   // Editorial provenance, declared so the header check accepts it and then
   // deliberately not read — same as the spells' `rulebook` column.
   'rulebook',
@@ -223,6 +227,8 @@ const matchTag = matcher(
     [t.label, t.key],
   ]),
 );
+// Caste keys in rulebook order — the enum every caste column validates against.
+const CASTE_KEYS = CASTES.map((c) => c.key);
 const matchCaste = matcher(
   CASTES.flatMap((c): [string, string][] => [
     [c.key, c.key],
@@ -526,7 +532,6 @@ function buildSpells(failures: Failure[]): SpellPreset[] {
     if (nom === '') errors.push('nom : requis');
 
     const inGameEffect = (rec.effetJeu ?? '').trim();
-    const evolving = readFlag(rec, 'evolutif', errors);
     const sensoryEffect = (rec.perception ?? '').trim();
     const duration = readFormula(rec, 'duree', errors, { nr: true, sphere: true, statut: true }) ?? '';
     const targets = readFormula(rec, 'cibles', errors, { nr: true, sphere: true, statut: true }) ?? '';
@@ -709,7 +714,7 @@ function buildTraits(failures: Failure[]): TraitPreset[] {
     const caste =
       (rec.caste ?? '').trim() === ''
         ? undefined
-        : (readEnum(rec, 'caste', matchCaste, CASTES.map((c) => c.label), errors) as CasteKey);
+        : (readEnum(rec, 'caste', matchCaste, CASTE_KEYS, errors) as CasteKey);
     const preset: TraitPreset = {
       id,
       revision: presetRevision({ ...data, costs, precisionPrompt }),
@@ -859,7 +864,6 @@ function readOption(rec: Record<string, string>, errors: RowErrors): ArchetypeOp
 function buildArchetypes(failures: Failure[]): ArchetypePreset[] {
   const records = readTable('archetypes.csv', ARCHETYPE_COLUMNS, failures);
   const seen = new Set<string>();
-  const casteKeys = CASTES.map((c) => c.key);
   const out: ArchetypePreset[] = [];
 
   records.forEach((rec, i) => {
@@ -875,7 +879,7 @@ function buildArchetypes(failures: Failure[]): ArchetypePreset[] {
     if (rawCaste !== '') {
       const canonical = matchCaste(rawCaste);
       if (canonical == null) {
-        errors.push(`caste : « ${rawCaste} » inconnue (valides : ${casteKeys.join(', ')})`);
+        errors.push(`caste : « ${rawCaste} » inconnue (valides : ${CASTE_KEYS.join(', ')})`);
       } else {
         caste = canonical as ArchetypePreset['caste'];
       }
@@ -921,7 +925,6 @@ function buildArchetypes(failures: Failure[]): ArchetypePreset[] {
 
 function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
   const records = readTable('privileges.csv', PRIVILEGE_COLUMNS, failures);
-  const casteKeys = CASTES.map((c) => c.key);
   const seen = new Set<string>();
   const out: PrivilegePreset[] = [];
 
@@ -930,7 +933,7 @@ function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
     const id = readSlug(rec, seen, errors);
     // No « Sans Caste » here: a privilège is bought from a caste, so a blank one
     // has nothing to belong to.
-    const caste = readEnum(rec, 'caste', matchCaste, casteKeys, errors) as CasteKey;
+    const caste = readEnum(rec, 'caste', matchCaste, CASTE_KEYS, errors) as CasteKey;
     const famille = readEnum(
       rec,
       'famille',
@@ -945,7 +948,17 @@ function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
     // Same grammar as the traits: « Symbiose (3 à 8) » is really tiers 3|5|8.
     const costs = readCosts(rec, errors);
 
-    const preset: PrivilegePreset = { id, caste, famille, nom, costs, description };
+    const darkOrders = readFlag(rec, 'ordresNoirs', errors);
+
+    const preset: PrivilegePreset = {
+      id,
+      caste,
+      famille,
+      nom,
+      costs,
+      description,
+      ...(darkOrders && { darkOrders }),
+    };
     if (errors.length) {
       failures.push({ file: 'privileges.csv', record: i + 2, name: nom || id, errors });
     } else {
@@ -958,7 +971,7 @@ function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
   const familyOrder = PRIVILEGE_FAMILY_KEYS as readonly string[];
   out.sort(
     (a, b) =>
-      casteKeys.indexOf(a.caste) - casteKeys.indexOf(b.caste) ||
+      CASTE_KEYS.indexOf(a.caste) - CASTE_KEYS.indexOf(b.caste) ||
       familyOrder.indexOf(a.famille) - familyOrder.indexOf(b.famille) ||
       a.nom.localeCompare(b.nom, 'fr'),
   );
@@ -967,7 +980,6 @@ function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
 
 function buildStatuses(failures: Failure[]): StatutPreset[] {
   const records = readTable('statuses.csv', STATUS_COLUMNS, failures);
-  const casteKeys = CASTES.map((c) => c.key);
   // (caste, niveau) is the key the app looks a rung up by — a duplicate would
   // silently shadow one of the two rows.
   const seen = new Set<string>();
@@ -978,10 +990,13 @@ function buildStatuses(failures: Failure[]): StatutPreset[] {
     const rawCaste = (rec.caste ?? '').trim();
     // No « Sans Caste » here, unlike the archétypes: a Statut is a rung INSIDE a
     // caste, so a blank one has nothing to hang off.
-    const caste = readEnum(rec, 'caste', matchCaste, casteKeys, errors) as CasteKey;
+    const caste = readEnum(rec, 'caste', matchCaste, CASTE_KEYS, errors) as CasteKey;
     const niveau = readInt(rec, 'niveau', errors);
     if (niveau < 1 || niveau > 5) errors.push(`niveau : « ${niveau} » hors de 1–5`);
-    const key = `${caste}-${niveau}`;
+    // The black ladder shares (caste, niveau) with the normal one, so the flag
+    // is part of the key.
+    const darkOrders = readFlag(rec, 'ordresNoirs', errors);
+    const key = `${caste}-${darkOrders ? 'noir-' : ''}${niveau}`;
     if (rawCaste !== '' && seen.has(key)) errors.push(`caste + niveau : « ${key} » en double`);
     seen.add(key);
 
@@ -1007,6 +1022,7 @@ function buildStatuses(failures: Failure[]): StatutPreset[] {
       benefice,
       technique: techNom === '' ? null : { nom: techNom, effet: techEffet },
       note: (rec.note ?? '').trim(),
+      ...(darkOrders && { darkOrders }),
     };
     if (errors.length) {
       failures.push({ file: 'statuses.csv', record: i + 2, name: nom || key, errors });
@@ -1017,7 +1033,12 @@ function buildStatuses(failures: Failure[]): StatutPreset[] {
 
   // Sorted by caste then niveau, so the .gen file's order is the reading order
   // whatever the spreadsheet's row order happens to be.
-  out.sort((a, b) => casteKeys.indexOf(a.caste) - casteKeys.indexOf(b.caste) || a.niveau - b.niveau);
+  out.sort(
+    (a, b) =>
+      CASTE_KEYS.indexOf(a.caste) - CASTE_KEYS.indexOf(b.caste) ||
+      Number(!!a.darkOrders) - Number(!!b.darkOrders) ||
+      a.niveau - b.niveau,
+  );
   return out;
 }
 

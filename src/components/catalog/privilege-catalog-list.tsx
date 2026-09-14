@@ -27,13 +27,22 @@ export default function PrivilegeCatalogList() {
       renderCaste={(caste) => {
         const own = PRIVILEGE_CATALOG.filter((p) => p.caste === caste);
         if (own.length === 0) return null;
-        return PRIVILEGE_FAMILIES.map((f) => {
-          const list = own.filter((p) => p.famille === f.key);
+        // Les Ordres Noirs get a heading of their own after the rulebook's two:
+        // a player browsing their caste must see at a glance what needs the oath.
+        const headings = [
+          ...PRIVILEGE_FAMILIES.map((f) => ({
+            key: f.key,
+            label: f.label,
+            list: own.filter((p) => !p.darkOrders && p.famille === f.key),
+          })),
+          { key: 'dark-orders', label: 'Ordres Noirs', list: own.filter((p) => p.darkOrders) },
+        ];
+        return headings.map(({ key, label, list }) => {
           if (list.length === 0) return null;
           return (
-            <React.Fragment key={f.key}>
+            <React.Fragment key={key}>
               <Text style={[styles.family, { color: theme.colors.onSurfaceVariant }]}>
-                {f.label}
+                {label}
               </Text>
               {list.map((p) => (
                 <CatalogRow
