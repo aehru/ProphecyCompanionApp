@@ -7,6 +7,7 @@ import CatalogRow from '@/components/catalog-row';
 import { PRIVILEGE_FAMILIES } from '@/constants/prophecy';
 import { PRIVILEGE_CATALOG } from '@/data/privilege-catalog';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { traitCostLabel } from '@/lib/trait-pool';
 
 /**
  * The Privilèges, read outside any character — one section per caste, the
@@ -42,7 +43,7 @@ export default function PrivilegeCatalogList() {
                   // The rulebook prints the price in brackets after the name —
                   // « Apprenti (3) » — so it belongs on the row, not folded away
                   // in the detail.
-                  subtitle={`${p.cout} point${p.cout > 1 ? 's' : ''}`}>
+                  subtitle={traitCostLabel(p.costs)}>
                   <Text style={[styles.body, { color: theme.colors.onSurface }]}>
                     {p.description}
                   </Text>

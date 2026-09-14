@@ -933,10 +933,10 @@ function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
     if (nom === '') errors.push('nom : requis');
     const description = (rec.description ?? '').trim();
     if (description === '') errors.push('description : requise');
-    const cout = readInt(rec, 'cout', errors);
-    if (cout < 1) errors.push(`cout : « ${cout} » — un privilège coûte au moins 1 point`);
+    // Same grammar as the traits: « Symbiose (3 à 8) » is really tiers 3|5|8.
+    const costs = readCosts(rec, errors);
 
-    const preset: PrivilegePreset = { id, caste, famille, nom, cout, description };
+    const preset: PrivilegePreset = { id, caste, famille, nom, costs, description };
     if (errors.length) {
       failures.push({ file: 'privileges.csv', record: i + 2, name: nom || id, errors });
     } else {

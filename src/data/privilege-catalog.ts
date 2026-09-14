@@ -25,9 +25,10 @@ export type PrivilegePreset = {
   /**
    * What it costs, in points — the number the rulebook prints in brackets after
    * the name. The CURRENCY is not the avantages' pool: privilèges are paid for
-   * separately (XP), which is why nothing here feeds `lib/trait-pool`.
+   * separately (XP), which is why nothing here feeds `lib/trait-pool`. A list,
+   * like `TraitPreset.costs`, for the entries priced in tiers (« Symbiose »).
    */
-  cout: number;
+  costs: number[];
   /**
    * The rulebook paragraph, verbatim — the source of truth, never rewritten.
    *
