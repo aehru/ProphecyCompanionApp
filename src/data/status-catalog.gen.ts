@@ -64,6 +64,71 @@ export const STATUS_CATALOG_DATA: StatutPreset[] = [
     "note": "À ce Statut, les artisans se présentent généralement comme les Maîtres de leur art (Maître Forgeron, par exemple). Il n'y a qu'un seul Maître par voie."
   },
   {
+    "caste": "artisan",
+    "niveau": 1,
+    "nom": "Apprenti noir",
+    "requis": "une Compétence d'Artisanat à 6, Manuel à 3",
+    "benefice": "Le personnage peut développer une spécialisation de Compétence Technique.",
+    "technique": {
+      "nom": "D'un compagnon à l'autre",
+      "effet": "En réussissant un jet de Mental + Artisanat approprié contre une Difficulté de 10, le personnage peut déterminer l'âge, la qualité et le mode de fonctionnement de tout objet manufacturé. Chaque Niveau de Réussite lui confère une information supplémentaire."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "artisan",
+    "niveau": 2,
+    "nom": "Compagnon noir",
+    "requis": "une Compétence d'Artisanat à 7, Manuel à 4, 40 points en Compétences Manuelles",
+    "benefice": "Le personnage peut développer n'importe quelle Compétence Manuelle humaniste à un niveau maximum égal à son Attribut Mental + 2, du moment qu'il trouve un professeur.",
+    "technique": {
+      "nom": "La voie du progrès",
+      "effet": "En réussissant un jet de Mental + Coordination contre une Difficulté de 10, le personnage peut comprendre le fonctionnement de n'importe quel objet mécanique et l'utiliser comme s'il possédait la Compétence appropriée à un niveau égal à la moitié de son Attribut Manuel (arrondi au supérieur)."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "artisan",
+    "niveau": 3,
+    "nom": "Artisan noir",
+    "requis": "une Compétence d'Artisanat à 8, Manuel à 5, 60 points en Compétences Manuelles",
+    "benefice": "Chaque fois qu'il fait appel aux Tendances, le personnage peut dépenser 1 Point de Chance pour relancer le dé de l'Homme ou de la Fatalité.",
+    "technique": {
+      "nom": "Puissance de l'émotion",
+      "effet": "L'artisan noir retire une émotion particulière des œuvres d'art ou d'artisanat. Si elle correspond à la situation et s'il réussit un jet de Mental + Empathie Difficulté 5, l'artisan noir gagne un bonus égal à 1 + Niveaux de Réussite pour un jet unique. Par exemple, épée et violence lors d'un combat, sculpture et charme pour un rendez-vous galant devant une fontaine de marbre taillé. Cette Technique ne peut être utilisée qu'une unique fois par objet et (niveau de Statut) fois par jour."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "artisan",
+    "niveau": 4,
+    "nom": "Maître Artisan noir",
+    "requis": "une Compétence d'Artisanat à 10, Manuel à 6, 70 points en Compétences Manuelles",
+    "benefice": "Le personnage est capable de comprendre le fonctionnement de n'importe quel mécanisme rien qu'en le touchant. Il peut ainsi déclencher ou désamorcer toutes sortes de pièges, ôter la pièce indispensable d'un rouage, saboter une arme complexe.",
+    "technique": {
+      "nom": "Simulacre de vie",
+      "effet": "L'artisan noir, en sacrifiant un Point de Maîtrise (qui peut être récupéré via Points d'Expérience), insuffle le mouvement à une œuvre. Cette Technique permet aux non-mages de réaliser des œuvres enchantées sans user de Sphères. Il n'est pas possible de créer un service ou un serviteur par ce moyen : l'œuvre agit uniquement en fonction de ce qu'elle représente. Par exemple, dans un tableau bucolique, les cygnes nagent dans le lac, tandis que les enfants jouent sur la rive, la statue d'un athlète prend des poses et effectue des mouvements typiques de son activité. Cela peut surprendre une personne non prévenue."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "artisan",
+    "niveau": 5,
+    "nom": "Maître Artisan noir",
+    "requis": "une Compétence d'Artisanat à 10+, Manuel à 8, 80 points en Compétences Manuelles",
+    "benefice": "À chacun de ses jets, le personnage lance et conserve un dé supplémentaire de l'Homme qui ne lui rapporte aucun Point de Tendance, et ce, quelle que soit son affiliation.",
+    "technique": {
+      "nom": "La force du rouage",
+      "effet": "En dépensant 1 Point de Maîtrise, le personnage peut utiliser son Attribut Manuel à la place de n'importe quel autre Attribut. Si le jet est réussi, il ne regagne aucun Point de Maîtrise."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
     "caste": "combattant",
     "niveau": 1,
     "nom": "Apprenti",
@@ -122,6 +187,71 @@ export const STATUS_CATALOG_DATA: StatutPreset[] = [
       "effet": "Le personnage ne peut subir d'échec critique lorsqu'il utilise son arme de prédilection. Tous les « 1 » obtenus sur un jet de combat sont donc relancés."
     },
     "note": "À ce Statut, les combattants peuvent tenter de devenir Maître de l'arme dont ils ont fait leur spécialité (Maître des Épées, par exemple). Il n'existe qu'un seul Maître par famille d'armes parmi les Grands Maîtres d'Armes, et l'obtention de ce titre passe par un duel public."
+  },
+  {
+    "caste": "combattant",
+    "niveau": 1,
+    "nom": "Apprenti noir",
+    "requis": "une Compétence d'arme à 6, Physique à 4",
+    "benefice": "Le personnage peut développer une spécialisation de Combat.",
+    "technique": {
+      "nom": "L'œil du maître",
+      "effet": "En réussissant un jet de Mental + Compétence d'arme de l'adversaire contre une Difficulté de 10, le personnage peut déterminer si le niveau de Compétence de son adversaire est inférieur, supérieur ou égal au sien. Chaque Niveau de Réussite peut lui donner une indication sur la technique utilisée (botte secrète, Technique spéciale, etc.)."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "combattant",
+    "niveau": 2,
+    "nom": "Spadassin noir",
+    "requis": "une Compétence d'arme à 8, Physique à 5, 30 points dans les Compétences Physiques",
+    "benefice": "Le personnage peut posséder deux spécialisations de Combat.",
+    "technique": {
+      "nom": "La main du maître",
+      "effet": "Une fois par combat, le personnage peut ajouter la valeur de son Attribut Physique au résultat de l'un de ses dés d'Initiative, du moment qu'il annonce l'utilisation de cette Technique avant de lancer les dés."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "combattant",
+    "niveau": 3,
+    "nom": "Combattant noir",
+    "requis": "une Compétence d'arme à 9, Physique à 6, 40 points dans les Compétences Physiques",
+    "benefice": "Le personnage peut porter une attaque supplémentaire sans pénalité à chaque tour de combat.",
+    "technique": {
+      "nom": "Le coup du maître",
+      "effet": "Lorsqu'il combat avec une arme dans laquelle il s'est spécialisé et qu'il obtient une réussite critique, le personnage peut dépenser des Points de Chance ou de Maîtrise pour les ajouter au jet sur la table des critiques. Il peut au maximum dépenser autant de points que son niveau de Statut et tous ces points doivent être du même Attribut mineur."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "combattant",
+    "niveau": 4,
+    "nom": "Maître d'armes noir",
+    "requis": "une Compétence d'arme à 10, Physique à 7, 50 points dans les Compétences Physiques",
+    "benefice": "Lorsqu'il combat un adversaire maniant une arme utilisant la même Compétence que celle dans laquelle (ou lesquelles) il s'est spécialisé, le personnage gagne un bonus de 2 points à tous ses jets d'attaque et de parade.",
+    "technique": {
+      "nom": "La voie du maître",
+      "effet": "Lorsqu'il combat, le personnage n'est pas soumis à la règle des Tendances et peut conserver n'importe quel dé sans gagner ni perdre de Points de Tendance (sauf dans le cas d'une réussite critique)."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "combattant",
+    "niveau": 5,
+    "nom": "Grand Maître d'armes noir",
+    "requis": "une Compétence d'arme à 10+, Physique à 8, 60 points dans les Compétences Physiques",
+    "benefice": "La Difficulté de tous les jets de combat est réduite de 5 lorsque le personnage utilise son arme de prédilection. De plus, il ne peut être ni désarmé, ni abusé par une feinte d'arme de la même famille que la sienne.",
+    "technique": {
+      "nom": "La maîtrise parfaite",
+      "effet": "Le personnage ne peut subir d'échec critique lorsqu'il utilise son arme de prédilection. Tous les « 1 » obtenus sur un jet de combat sont donc relancés."
+    },
+    "note": "",
+    "darkOrders": true
   },
   {
     "caste": "commercant",
@@ -184,6 +314,71 @@ export const STATUS_CATALOG_DATA: StatutPreset[] = [
     "note": ""
   },
   {
+    "caste": "commercant",
+    "niveau": 1,
+    "nom": "Marchand noir",
+    "requis": "Social à 3, 20 points dans les Compétences Sociales",
+    "benefice": "Le personnage débute sa carrière avec une somme de 500 dracs d'argent.",
+    "technique": {
+      "nom": "Le sourire accueillant",
+      "effet": "En réussissant un jet de Social + Empathie contre une Difficulté de 15, le personnage peut deviner ce qui amène un individu dans la ville où il se trouve. Si cette raison est secrète, le personnage doit réussir un jet de Social + Empathie contre une Difficulté de 20 pour obtenir la même information."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "commercant",
+    "niveau": 2,
+    "nom": "Commerçant noir",
+    "requis": "Présence ou Empathie à 6, 30 points dans les Compétences Sociales",
+    "benefice": "Le personnage dispose d'un abri secret, dans la cité de son choix, comprenant une entrée normale et au maximum deux passages secrets.",
+    "technique": {
+      "nom": "Reconnaître son erreur",
+      "effet": "Une fois par jour, en dépensant tous ses Points de Chance restants (minimum 1), le personnage peut transformer un échec critique en un échec simple."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "commercant",
+    "niveau": 3,
+    "nom": "Négociant noir",
+    "requis": "Social à 5, 50 points dans les Compétences Sociales",
+    "benefice": "Le personnage connaît le nom et les principales caractéristiques de toutes les compagnies commerciales, guildes et factions marchandes de son royaume. Dans le cas d'un groupe récemment créé, il peut effectuer un jet de Social + Vie en cité contre une Difficulté de 15, ou de 20, dans le cas d'une compagnie secrète, pour obtenir ces mêmes informations.",
+    "technique": {
+      "nom": "L'examen de conscience",
+      "effet": "Chaque fois qu'il le désire, le personnage peut effacer tous ses cercles de Tendances, du moment qu'il vient de faire une bonne affaire."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "commercant",
+    "niveau": 4,
+    "nom": "Dignitaire noir",
+    "requis": "Présence ou Empathie à 8, 60 points dans les Compétences Sociales",
+    "benefice": "Pour tous ses jets de Social ou de Manuel, le personnage lance un dé supplémentaire de la Tendance Homme ou Fatalité, qu'il peut choisir de conserver à la place de n'importe quel autre. De plus, il gagne un bonus de 1 à tous ses jets de Social effectués dans sa cité d'origine, ou dans celle où se trouve son abri principal.",
+    "technique": {
+      "nom": "Une technique éprouvée",
+      "effet": "Une fois par jour, en dépensant 3 Points de Chance, le personnage peut doubler la valeur de son Attribut Manuel ou Social pour effectuer une action. Aucun Point de Maîtrise ou de Chance ne peut être regagné de cette façon."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "commercant",
+    "niveau": 5,
+    "nom": "Prince Marchand noir",
+    "requis": "Social à 7, 70 points dans les Compétences Sociales",
+    "benefice": "Le personnage est à ce point psychologue qu'il sait toujours si on lui ment. En réussissant un jet de Social + Empathie contre une Difficulté de 15, ou de 20 pour un dragon, il peut également apprendre la vérité sans le montrer à son interlocuteur.",
+    "technique": {
+      "nom": "Le bénéfice du doute",
+      "effet": "Une fois par jour, le personnage peut effacer de la mémoire d'un individu tout souvenir le concernant, du moment qu'il n'a eu aucun contact physique avec cette personne. La durée du souvenir ne peut excéder un nombre de minutes égal à la valeur de l'Attribut Social du personnage. Une fois « l'entretien » terminé, l'individu ne se doute même pas qu'il a rencontré le personnage."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
     "caste": "erudit",
     "niveau": 1,
     "nom": "Apprenti",
@@ -244,6 +439,71 @@ export const STATUS_CATALOG_DATA: StatutPreset[] = [
     "note": ""
   },
   {
+    "caste": "erudit",
+    "niveau": 1,
+    "nom": "Apprenti noir",
+    "requis": "une Compétence Théorique à 6, Mental à 4",
+    "benefice": "Le personnage peut se spécialiser dans une Compétence Théorique de son choix.",
+    "technique": {
+      "nom": "La lettre et le nom",
+      "effet": "Du moment qu'il a déjà lu un écrit, le personnage est capable d'en reconnaître l'auteur sans effectuer de jet."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "erudit",
+    "niveau": 2,
+    "nom": "Initié noir",
+    "requis": "une Compétence Théorique à 8, Mental à 5, 30 points dans les Compétences Théoriques",
+    "benefice": "Par un jet de Mental + Empathie contre une Difficulté de (Volonté de la cible x 3), le personnage peut discerner si un interlocuteur est actuellement tenté par la transgression d'Interdits, de lois ou d'Édits (ou s'il est en train de le faire).",
+    "technique": {
+      "nom": "La rune et le secret",
+      "effet": "En réussissant un jet de Mental + Lire et écrire contre une Difficulté de 15, le personnage peut déterminer l'origine, la date ou le sens général de n'importe quel ouvrage écrit (y compris les symboles, les runes et les motifs divers). Chaque Niveau de Réussite lui donne une de ces trois informations."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "erudit",
+    "niveau": 3,
+    "nom": "Érudit noir",
+    "requis": "une Compétence Théorique à 9, Intelligence à 6, 40 points dans les Compétences Théoriques",
+    "benefice": "Le personnage lance un dé de neutre pour tous ses jets de Mental qu'il rajoute au résultat du dé choisi.",
+    "technique": {
+      "nom": "L'homme et l'étoile",
+      "effet": "Par son seul regard, le personnage peut déterminer si le personnage est touché par une Étoile. En réussissant un jet de Mental + Empathie contre une Difficulté de 10, il peut découvrir une des Motivations de l'Étoile pour chaque Niveau de Réussite."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "erudit",
+    "niveau": 4,
+    "nom": "Sage noir",
+    "requis": "une Compétence Théorique à 10, Mental à 6, 60 points dans les Compétences Théoriques",
+    "benefice": "En tant que disciple de Kalimsshar, le Sage noir ressent intuitivement les rapports de force entre individus. Il discerne automatiquement les tensions, les alliances et les intérêts des groupes d'individus.",
+    "technique": {
+      "nom": "Le livre et le temps",
+      "effet": "Une fois par jour, en réussissant un jet de Mental + Chance contre une Difficulté de 15, le personnage peut se souvenir d'un texte et obtenir des informations sur n'importe quel sujet traité par l'écrit (histoire, légende, géographie, science, etc.)."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "erudit",
+    "niveau": 5,
+    "nom": "Prophète noir",
+    "requis": "une Compétence Théorique à 10+, Mental à 7, Intelligence à 8, 70 points dans les Compétences Théoriques",
+    "benefice": "En appelant à la source du pouvoir de Kalimsshar, le Prophète noir peut poser une question précise à l'auteur de n'importe quel écrit qu'il détient. Ce Bénéfice force l'esprit désincarné de l'auteur à y répondre. Il ne peut utiliser ce Bénéfice qu'une fois par jour, et une unique fois par écrit.",
+    "technique": {
+      "nom": "L'homme et le destin",
+      "effet": "Le personnage est tellement en phase avec le monde qu'il peut lire dans le destin comme dans un livre. Une fois par jour, comme le ferait un Oracle, il peut interroger les astres pour obtenir une réponse à l'une des questions qu'il se pose sur son avenir ou celui de ses compagnons."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
     "caste": "mage",
     "niveau": 1,
     "nom": "Apprenti",
@@ -302,6 +562,71 @@ export const STATUS_CATALOG_DATA: StatutPreset[] = [
       "effet": "Une fois par jour, le personnage peut puiser dans sa Réserve personnelle de Points de Magie pour soigner des blessures, à raison d'une case de blessure par Point de Magie. Les points dépensés de cette façon ne peuvent être regagnés avant le prochain lever du soleil, quel que soit le moyen utilisé (méditation, rituel, etc.)."
     },
     "note": "À ce Statut, les mages peuvent tenter de devenir Maîtres de la Sphère ou de la Discipline dont ils ont acquis la maîtrise parfaite (Grand Maître du Feu ou des Rituels, par exemple). Comme chez les combattants, il n'existe qu'un seul Grand Maître reconnu pour chaque Sphère et chaque Discipline parmi l'ensemble des Grands Maîtres."
+  },
+  {
+    "caste": "mage",
+    "niveau": 1,
+    "nom": "Apprenti noir",
+    "requis": "une Sphère ou une Discipline à 4, Mental à 4, 10 points dans les Compétences de magie",
+    "benefice": "Le personnage peut lire les runes magiques et reconnaître les domaines d'influence des mages grâce à leurs couleurs.",
+    "technique": {
+      "nom": "La matière",
+      "effet": "Pour chaque Sphère qu'il maîtrise, le personnage peut faire apparaître, une fois par jour, un petit volume d'élément qu'il pourra ensuite façonner, orienter ou projeter à sa guise. Il peut s'agir d'une petite flamme, d'une poignée de terre, d'un litre d'eau pure, etc."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "mage",
+    "niveau": 2,
+    "nom": "Initié noir",
+    "requis": "une Sphère ou une Discipline à 5, Intelligence à 6, 20 points dans les Compétences de magie",
+    "benefice": "En réussissant un jet de Mental + Connaissance de la magie Difficulté 15, le personnage peut reconnaître un sortilège lancé par un autre mage. Si ce sortilège utilise sa Sphère privilégiée, la Difficulté de ce sort est réduite de 5.",
+    "technique": {
+      "nom": "L'esprit",
+      "effet": "Chaque jour, le personnage dispose de deux Niveaux de Réussite gratuits qu'il peut utiliser pour augmenter les effets de n'importe quel sortilège (portée, dommages, précision, etc.). Ces bonus peuvent s'appliquer sur deux sortilèges différents ou pour améliorer deux effets d'un même sortilège. S'ils ne sont pas dépensés, ils sont tous simplement perdus."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "mage",
+    "niveau": 3,
+    "nom": "Mage noir",
+    "requis": "une Sphère ou une Discipline à 7, Mental à 6, 30 points dans les Compétences de magie",
+    "benefice": "Le personnage est désormais capable de concevoir ses propres sortilèges et de rédiger des parchemins magiques.",
+    "technique": {
+      "nom": "La volonté",
+      "effet": "En dépensant 2 Points de Maîtrise et 2 Points de Magie, le personnage peut lancer et conserver un dé supplémentaire pour effectuer n'importe quel jet de Discipline magique. Ce dé neutre n'est pas concerné par la règle des Tendances."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "mage",
+    "niveau": 4,
+    "nom": "Grand Mage noir",
+    "requis": "une Sphère ou une Discipline à 8, Intelligence à 8, 50 points dans les Compétences de magie",
+    "benefice": "Le personnage ajoute le niveau de chacune de ses Sphères à tous ses jets de défense contre des sortilèges utilisant la Sphère correspondante.",
+    "technique": {
+      "nom": "La flamme",
+      "effet": "Une fois par combat, le personnage peut lancer un sortilège de Magie instinctive sans dépenser aucun Point de Magie."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "mage",
+    "niveau": 5,
+    "nom": "Grand Maître noir",
+    "requis": "une Sphère ou une Discipline à 10, Mental à 8, 70 points dans les Compétences de magie",
+    "benefice": "Le personnage est immunisé aux effets des sortilèges de niveaux 1 et 2 de sa Sphère privilégiée.",
+    "technique": {
+      "nom": "La source noire",
+      "effet": "Une fois par jour, le mage noir peut puiser dans sa Réserve personnelle de Points de Magie pour infliger des blessures, à raison d'une égratignure pour deux Points de Magie. Les points utilisés de cette manière ne peuvent être regagnés avant le prochain coucher de soleil - quel que soit le moyen utilisé (méditation, rituel, etc.)."
+    },
+    "note": "",
+    "darkOrders": true
   },
   {
     "caste": "prodige",
@@ -422,6 +747,71 @@ export const STATUS_CATALOG_DATA: StatutPreset[] = [
       "effet": "En dépensant définitivement 1 point de Résistance, le personnage peut rappeler à la vie n'importe quel être humain possédant au moins 3 en Tendance Dragon."
     },
     "note": ""
+  },
+  {
+    "caste": "protecteur",
+    "niveau": 1,
+    "nom": "Soldat noir",
+    "requis": "20 points dans les Compétences de Combat, Physique à 3",
+    "benefice": "Le personnage peut porter un bouclier dragon et développer une spécialisation de Combat.",
+    "technique": {
+      "nom": "L'écaille du dragon",
+      "effet": "Si son jet de parade au bouclier est réussi contre la Difficulté de base, le personnage gagne automatiquement un Niveau de Réussite supplémentaire."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "protecteur",
+    "niveau": 2,
+    "nom": "Lieutenant noir",
+    "requis": "30 points dans les Compétences de Combat, 15 points dans les Compétences d'Influence",
+    "benefice": "Le personnage peut donner des ordres aux protecteurs de Statut inférieur et demander l'octroi d'hommes de troupe pour effectuer des missions précises. Le nombre maximum de ces renforts est égal à deux fois la Compétence Commandement du personnage, et il ne peut s'agir que de protecteurs de Statut strictement inférieur.",
+    "technique": {
+      "nom": "La cuirasse du dragon",
+      "effet": "Chaque fois qu'il effectue une parade au bouclier, le personnage peut dépenser des Points de Maîtrise APRÈS son jet pour réussir sa défense."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "protecteur",
+    "niveau": 3,
+    "nom": "Capitaine noir",
+    "requis": "40 points dans les Compétences de Combat, 25 points dans les Compétences d'Influence, avoir résolu une situation délicate (en combat ou par action sociale)",
+    "benefice": "Le personnage est autorisé à prendre les mesures qu'il juge nécessaires pour faire respecter les Lois draconiques au sein d'une cité.",
+    "technique": {
+      "nom": "Le souffle du dragon noir",
+      "effet": "Lorsque le personnage choisit le dé de la Fatalité au cours d'un combat, il gagne automatiquement un Niveau de Réussite supplémentaire, et ce, quelle que soit l'action, si son jet est réussi."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "protecteur",
+    "niveau": 4,
+    "nom": "Commandeur noir",
+    "requis": "50 points dans les Compétences de Combat, 40 points dans les Compétences Sociales, avoir commandé avec succès un bataillon de 200 hommes minimum",
+    "benefice": "Le personnage est investi de l'autorité de Kalimsshar et peut faire appliquer sa loi sur l'ensemble du Royaume de Kor. De plus, lorsqu'il prend le commandement d'une unité, tous les hommes qui suivent ses ordres gagnent un bonus de 2 à toutes leurs actions de combat. Ce bonus n'est applicable que si le personnage participe activement au combat.",
+    "technique": {
+      "nom": "Le sang du dragon noir",
+      "effet": "Le protecteur noir peut prendre sur lui les blessures de tout être vivant. Il peut diminuer chaque blessure d'un seuil par Niveau de Réussite sur un jet de Physique + Volonté Difficulté 10. Il lui est impossible de transférer une case de Mort."
+    },
+    "note": "",
+    "darkOrders": true
+  },
+  {
+    "caste": "protecteur",
+    "niveau": 5,
+    "nom": "Dragon noir",
+    "requis": "60 points dans les Compétences de Combat, 50 points dans les Compétences Sociales, avoir commandé avec succès une compagnie de 1000 hommes minimum",
+    "benefice": "Le protecteur noir jouit d'une telle réputation que tous ses adversaires (au sens large) subissent en sa présence un malus de -3 pour chaque action agressive dirigée contre lui (attaques physiques, magiques, sociales, etc.).",
+    "technique": {
+      "nom": "Réveil d'entre les morts",
+      "effet": "En dépensant définitivement un Point de Résistance, le protecteur noir peut transformer en mort asservi n'importe quel cadavre « frais » d'être humain (moins d'une semaine). Voir le sort Servitude de l'Ombre pour les caractéristiques de ce serviteur."
+    },
+    "note": "",
+    "darkOrders": true
   },
   {
     "caste": "voyageur",
