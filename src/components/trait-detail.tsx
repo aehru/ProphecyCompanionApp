@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import {
+  CASTES,
   TRAIT_KIND_LABEL,
   TRAIT_RARITY_LABEL,
   traitEvolvingLabel,
@@ -32,7 +33,10 @@ export default function TraitDetail({
   inGameEffect,
   evolving,
   note,
+  caste,
 }: {
+  /** The caste a catalogue entry is reserved to. Absent when open to all. */
+  caste?: string;
   kind: string;
   rarity: string;
   /** Already formatted — see `traitCostLabel`. */
@@ -57,6 +61,11 @@ export default function TraitDetail({
   return (
     <View style={styles.root}>
       <Text style={[styles.meta, { color: theme.colors.primary }]}>{meta}</Text>
+      {caste ? (
+        <Text style={[styles.evolving, { color: theme.colors.onSurfaceVariant }]}>
+          Réservé à la caste : {CASTES.find((c) => c.key === caste)?.label ?? caste}
+        </Text>
+      ) : null}
       {evolving ? (
         <Text style={[styles.evolving, { color: theme.colors.onSurfaceVariant }]}>
           {traitEvolvingLabel(kind)}

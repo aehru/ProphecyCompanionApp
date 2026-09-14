@@ -129,6 +129,9 @@ const TRAIT_COLUMNS = [
   // the `evolving` column in db/schema.ts). Optional — blank reads as permanent,
   // which is what every désavantage of the anciens is.
   'evolutif',
+  // The one caste this entry is reserved to (« Présent », Artisans only).
+  // Optional — blank means any caste. See TraitPreset.caste.
+  'caste',
   // Editorial provenance, declared so the header check accepts it and then
   // deliberately not read — same as the spells' `rulebook` column.
   'rulebook',
@@ -702,11 +705,17 @@ function buildTraits(failures: Failure[]): TraitPreset[] {
     // re-worded entry has changed for every sheet holding it, exactly like a
     // rewritten description.
     const precisionPrompt = (rec.precision ?? '').trim();
+    // Not hashed: it is never copied onto a row, so no sheet goes stale over it.
+    const caste =
+      (rec.caste ?? '').trim() === ''
+        ? undefined
+        : (readEnum(rec, 'caste', matchCaste, CASTES.map((c) => c.label), errors) as CasteKey);
     const preset: TraitPreset = {
       id,
       revision: presetRevision({ ...data, costs, precisionPrompt }),
       costs,
       ...(precisionPrompt !== '' && { precisionPrompt }),
+      ...(caste && { caste }),
       data,
     };
 

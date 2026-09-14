@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   traitCostLabel,
+  traitOffCaste,
   traitOwnedBadge,
   traitPool,
   traitUnaffordable,
@@ -75,6 +76,19 @@ describe('traitUnaffordable', () => {
 
   it('flags nothing without a pool (the catalogue read outside any character)', () => {
     expect(traitUnaffordable({ kind: 'avantage', costs: [99] })).toBe(false);
+  });
+});
+
+describe('traitOffCaste', () => {
+  it('flags an entry reserved to another caste, or to any caste for a casteless character', () => {
+    expect(traitOffCaste({ caste: 'artisan' }, 'mage')).toBe(true);
+    expect(traitOffCaste({ caste: 'artisan' }, null)).toBe(true);
+    expect(traitOffCaste({ caste: 'artisan' }, 'artisan')).toBe(false);
+  });
+
+  it('flags nothing for an open entry or without a character', () => {
+    expect(traitOffCaste({}, 'mage')).toBe(false);
+    expect(traitOffCaste({ caste: 'artisan' }, undefined)).toBe(false);
   });
 });
 

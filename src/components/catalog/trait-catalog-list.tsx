@@ -25,7 +25,12 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { foldQuery } from '@/lib/text-fold';
 import { buildTraitIndex, groupTraits } from '@/lib/trait-grouping';
-import { traitOwnedBadge, traitUnaffordable, type TraitPool } from '@/lib/trait-pool';
+import {
+  traitOffCaste,
+  traitOwnedBadge,
+  traitUnaffordable,
+  type TraitPool,
+} from '@/lib/trait-pool';
 
 // Folded and pre-rendered once at module load: the catalogue is static, and
 // re-deriving it per keystroke is the cost lib/trait-grouping exists to remove.
@@ -81,7 +86,13 @@ export default function TraitCatalogList({
   onAdd,
   onAddCustom,
   favorites,
+  caste,
 }: {
+  /**
+   * The reading character's caste (`null` = none), to flag caste-reserved
+   * entries. `undefined` when no character is reading.
+   */
+  caste?: string | null;
   /**
    * How many times each preset is already on this character's sheet — badged
    * « Déjà ajouté », or « Déjà ajouté ×2 » for the entries the rulebook lets a
@@ -171,7 +182,8 @@ export default function TraitCatalogList({
       // Flags an avantage the balance can't pay for, in the same error colour
       // the gear catalogues use for an unmet prérequis. A FLAG and not a block:
       // nothing enforces the pool.
-      alert={traitUnaffordable({ kind, costs: e.preset.costs }, pool)}
+      // Also flags an entry reserved to another caste — same colour, same rule.
+      alert={traitUnaffordable({ kind, costs: e.preset.costs }, pool) || traitOffCaste(e.preset, caste)}
       presetId={e.preset.id}
       favorites={favorites}
       onAdd={onAdd && (() => onAdd(e.preset))}>
@@ -182,6 +194,7 @@ export default function TraitCatalogList({
         description={e.preset.data.description ?? ''}
         inGameEffect={e.preset.data.inGameEffect}
         evolving={e.preset.data.evolving ?? false}
+        caste={e.preset.caste}
       />
     </CatalogRow>
   );

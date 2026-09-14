@@ -76,6 +76,19 @@ export function traitUnaffordable(
 }
 
 /**
+ * Reserved to a caste this character is not in — flagged, never blocked, for the
+ * same reason as `traitUnaffordable`: the GM settles exceptions. A character
+ * with no caste (`null`) is outside every caste; `undefined` means no character
+ * is reading, and then nothing is flagged.
+ */
+export function traitOffCaste(
+  entry: { caste?: string },
+  caste: string | null | undefined,
+): boolean {
+  return entry.caste !== undefined && caste !== undefined && entry.caste !== caste;
+}
+
+/**
  * Whether a price list is a run of consecutive values — « 1, 2, 3, 4 » rather
  * than the rulebook's own tiers « 1, 3, 5 ». Sorted ascending by the generator,
  * so neighbours are enough to tell.
