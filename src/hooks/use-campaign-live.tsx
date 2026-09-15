@@ -39,6 +39,7 @@ import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
 import { diffShares, LIVE_DEBOUNCE_MS, projectionSignature } from '@/lib/campaign-live';
 import { gmHello, playerHello, unshareMsg, shareMsg } from '@/lib/campaign-protocol';
 import { campaignQuery, membersQuery, updateCampaignName } from '@/repositories/campaigns';
+import { detachWrite } from '@/repositories/log';
 
 const STORAGE_KEY = 'campaign.live.id';
 
@@ -212,7 +213,9 @@ function LiveBroadcaster({
         if (msg.type === 'welcome') {
           onServerError(null);
           if (msg.campaign.name && msg.campaign.name !== nameRef.current) {
-            updateCampaignName(campaignRowId, msg.campaign.name).catch(() => {});
+            detachWrite('campaigns', updateCampaignName(campaignRowId, msg.campaign.name), {
+              campaignId: campaignRowId,
+            });
           }
         } else if (msg.type === 'error') {
           onServerError(msg.code);

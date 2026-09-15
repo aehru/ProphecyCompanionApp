@@ -6,6 +6,7 @@ import Bullets from '@/components/bullets';
 import SectionCard from '@/components/ui/section-card';
 import type { Shield } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { detachWrite } from '@/repositories/log';
 import { updateShield } from '@/repositories/shields';
 
 /**
@@ -29,7 +30,14 @@ export default function ShieldSection({ shield, editing }: { shield: Shield; edi
           gap={4}
           perRow={5}
           style={styles.healthDots}
-          onSet={editing ? (n) => updateShield(shield.id, { defenseCurrent: n }) : undefined}
+          onSet={
+            editing
+              ? (n) =>
+                  detachWrite('shields', updateShield(shield.id, { defenseCurrent: n }), {
+                    shieldId: shield.id,
+                  })
+              : undefined
+          }
         />
       </View>
     </SectionCard>

@@ -96,7 +96,7 @@ async function execute(
   sqlText: string,
   params: unknown[],
   method: 'run' | 'all' | 'values' | 'get',
-): Promise<{ rows: any[] }> {
+): Promise<{ rows: unknown[] }> {
   const conn = await connection();
   const bind = params as SQLiteBindValue[];
 

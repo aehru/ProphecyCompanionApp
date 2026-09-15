@@ -10,6 +10,7 @@ import type { Effect, Skill } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { effectTargetLabel, fmtSignedMod, isSkillTarget, skillTargetName } from '@/lib/modifiers';
 import { tickUnit } from '@/repositories/effects';
+import { detachWrite } from '@/repositories/log';
 
 /** An effect targets a skill that the character no longer owns (renamed/deleted). */
 function isOrphanSkill(target: string, skills: Skill[]): boolean {
@@ -88,7 +89,7 @@ export default function EffectsCard({
                 mode="outlined"
                 compact
                 icon="clock-minus-outline"
-                onPress={() => tickUnit(characterId, u.key)}>
+                onPress={() => detachWrite('effects', tickUnit(characterId, u.key), { characterId })}>
                 {u.label} −1
               </Button>
             ))}

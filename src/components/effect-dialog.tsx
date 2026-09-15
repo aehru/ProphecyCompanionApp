@@ -12,6 +12,7 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { effectTargetLabel, skillTarget } from '@/lib/modifiers';
 import { createEffect, deleteEffect, updateEffect } from '@/repositories/effects';
+import { detachWrite } from '@/repositories/log';
 
 /** The fields as the dialog holds them — numbers stay text until it commits. */
 type Draft = {
@@ -98,7 +99,7 @@ export default function EffectDialog({
     targetOptions.push({ key: draft.target, label: effectTargetLabel(draft.target) });
   }
 
-  const save = async () => {
+  const save = () => {
     const amount = parseSigned(draft.amount);
     const timing = draft.permanent
       ? { durationUnit: PERMANENT_UNIT, durationRemaining: 0 }
@@ -114,9 +115,8 @@ export default function EffectDialog({
       // effect and closing on « Enregistrer » would quietly put it back in play.
       expired: draft.permanent || amount > 0 ? false : (effect?.expired ?? false),
     };
-    if (effect) await updateEffect(effect.id, data);
-    else await createEffect(characterId, data);
-    onDismiss();
+    const write = effect ? updateEffect(effect.id, data) : createEffect(characterId, data);
+    detachWrite('effects', write.then(onDismiss), { characterId });
   };
 
   const confirmDelete = () =>
@@ -125,9 +125,9 @@ export default function EffectDialog({
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          if (effect) await deleteEffect(effect.id);
-          onDismiss();
+        onPress: () => {
+          if (!effect) return onDismiss();
+          detachWrite('effects', deleteEffect(effect.id).then(onDismiss), { effectId: effect.id });
         },
       },
     ]);

@@ -3,13 +3,14 @@ import { StyleSheet, View } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
-import type { Shield } from '@/db/schema';
+import type { NewShield, Shield } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { formatDecimal, parseDecimal } from '@/lib/character-values';
 import { parseFormula } from '@/lib/formula';
+import { detachWrite } from '@/repositories/log';
 import { deleteShield, updateShield } from '@/repositories/shields';
 
 // Split out of shield-card.tsx: the read-only card and this editor form share
@@ -39,12 +40,15 @@ export default function ShieldEditor({
   onClose: () => void;
 }) {
   const theme = useProphecyTheme();
-  const [name, setName] = useDebouncedText(s.name, (t) => updateShield(s.id, { name: t }));
-  const [damage, setDamage] = useDebouncedText(s.damage, (t) => updateShield(s.id, { damage: t }));
+  // Every field writes straight through and nobody awaits it — see detachWrite.
+  const patch = (data: Partial<NewShield>) =>
+    detachWrite('shields', updateShield(s.id, data), { shieldId: s.id });
+  const [name, setName] = useDebouncedText(s.name, (t) => patch({ name: t }));
+  const [damage, setDamage] = useDebouncedText(s.damage, (t) => patch({ damage: t }));
   const [prereq, setPrereq] = useDebouncedText(s.prerequisites, (t) =>
-    updateShield(s.id, { prerequisites: t }),
+    patch({ prerequisites: t }),
   );
-  const [special, setSpecial] = useDebouncedText(s.special, (t) => updateShield(s.id, { special: t }));
+  const [special, setSpecial] = useDebouncedText(s.special, (t) => patch({ special: t }));
   const [creationTime, setCreationTime] = useState(
     s.creationTime ? formatDecimal(s.creationTime) : '',
   );
@@ -57,10 +61,7 @@ export default function ShieldEditor({
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          await deleteShield(s.id);
-          onClose();
-        },
+        onPress: () => detachWrite('shields', deleteShield(s.id).then(onClose), { shieldId: s.id }),
       },
     ]);
 
@@ -109,7 +110,7 @@ export default function ShieldEditor({
           fieldKey="creationDifficulty"
           label="Difficulté création"
           value={s.creationDifficulty ? String(s.creationDifficulty) : ''}
-          onChange={(_, t) => updateShield(s.id, { creationDifficulty: Number(t) || 0 })}
+          onChange={(_, t) => patch({ creationDifficulty: Number(t) || 0 })}
           style={styles.numCol}
           {...numChain('creationDifficulty')}
         />
@@ -119,7 +120,7 @@ export default function ShieldEditor({
           value={creationTime}
           onChange={(_, t) => {
             setCreationTime(t);
-            updateShield(s.id, { creationTime: parseDecimal(t) });
+            patch({ creationTime: parseDecimal(t) });
           }}
           decimal
           style={styles.numCol}
@@ -132,7 +133,7 @@ export default function ShieldEditor({
           onChange={(_, t) => {
             const max = Number(t) || 0;
             const full = s.defenseCurrent >= s.defenseMax;
-            updateShield(s.id, {
+            patch({
               defenseMax: max,
               defenseCurrent: full ? max : Math.min(s.defenseCurrent, max),
             });
@@ -144,7 +145,7 @@ export default function ShieldEditor({
           fieldKey="encombrement"
           label="Pénalité d'encombrement"
           value={s.encombrementMalus ? String(s.encombrementMalus) : ''}
-          onChange={(_, t) => updateShield(s.id, { encombrementMalus: Number(t) || 0 })}
+          onChange={(_, t) => patch({ encombrementMalus: Number(t) || 0 })}
           style={styles.numCol}
           {...numChain('encombrement', true)}
         />
@@ -171,7 +172,7 @@ export default function ShieldEditor({
         <Button
           mode="contained-tonal"
           icon="hammer-wrench"
-          onPress={() => updateShield(s.id, { defenseCurrent: s.defenseMax })}
+          onPress={() => patch({ defenseCurrent: s.defenseMax })}
           style={styles.actionBtn}>
           Réparer
         </Button>
