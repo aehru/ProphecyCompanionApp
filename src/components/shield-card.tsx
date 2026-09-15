@@ -13,6 +13,7 @@ import Icon from '@/components/ui/icon';
 import type { Shield } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult } from '@/lib/formula';
+import { detachWrite } from '@/repositories/log';
 import { equipShield } from '@/repositories/shields';
 
 /**
@@ -81,7 +82,7 @@ function ShieldSummary({
       <Pressable style={styles.itemRow} onPress={() => setExpanded((e) => !e)}>
         {/* Tap the shield tile to equip (one shield equipped at a time). */}
         <Pressable
-          onPress={() => equipShield(s.characterId, s.id)}
+          onPress={() => detachWrite('shields', equipShield(s.characterId, s.id), { shieldId: s.id })}
           style={[
             styles.tile,
             {

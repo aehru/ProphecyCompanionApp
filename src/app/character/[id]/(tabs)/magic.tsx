@@ -36,6 +36,7 @@ import { findTarget, firstTarget, isTargetEquipped } from '@/lib/enchant-targets
 import { armorQuery } from '@/repositories/armor';
 import { createEnchant, enchantsQuery } from '@/repositories/enchants';
 import { itemsQuery } from '@/repositories/items';
+import { detachWrite } from '@/repositories/log';
 import {
   createMagicReserve,
   deleteMagicReserve,
@@ -115,15 +116,24 @@ export default function CharacterMagicScreen() {
     if (!draft) return;
     const nom = draft.nom.trim();
     const max = Math.max(0, parseInt(draft.max, 10) || 0);
-    if (draft.id == null) createMagicReserve(numId, { nom, max });
-    else updateMagicReserve(draft.id, { nom, max });
+    detachWrite(
+      'magic_reserves',
+      draft.id == null
+        ? createMagicReserve(numId, { nom, max })
+        : updateMagicReserve(draft.id, { nom, max }),
+      { characterId: numId },
+    );
     setDraft(null);
   };
 
   const confirmDeleteObject = (o: MagicReserve) =>
     Alert.alert('Supprimer', `Supprimer « ${o.nom.trim() || 'cet objet'} » ?`, [
       { text: 'Annuler', style: 'cancel' },
-      { text: 'Supprimer', style: 'destructive', onPress: () => deleteMagicReserve(o.id) },
+      {
+        text: 'Supprimer',
+        style: 'destructive',
+        onPress: () => detachWrite('magic_reserves', deleteMagicReserve(o.id), { reserveId: o.id }),
+      },
     ]);
 
   // New enchant starts blank on the first object the character owns (any
@@ -133,13 +143,17 @@ export default function CharacterMagicScreen() {
 
   const addEnchant = async () => {
     if (!target0) return;
-    const row = await createEnchant(numId, target0.type, target0.id, {
-      name: '',
-      effect: '',
-      usesMax: 1,
-      usesCurrent: 1,
-    });
-    router.push(`/character/${numId}/enchant/${row.id}`);
+    try {
+      const row = await createEnchant(numId, target0.type, target0.id, {
+        name: '',
+        effect: '',
+        usesMax: 1,
+        usesCurrent: 1,
+      });
+      router.push(`/character/${numId}/enchant/${row.id}`);
+    } catch (e) {
+      Alert.alert('Ajout impossible', e instanceof Error ? e.message : String(e));
+    }
   };
 
   // One page per tab. Each owns its scrolling, so the strip above stays pinned
@@ -154,7 +168,11 @@ export default function CharacterMagicScreen() {
             editing={editing}
             objects={objects}
             onSetCurrent={setStateValue}
-            onSetObjectCurrent={(o, n) => updateMagicReserve(o.id, { current: n })}
+            onSetObjectCurrent={(o, n) =>
+              detachWrite('magic_reserves', updateMagicReserve(o.id, { current: n }), {
+                reserveId: o.id,
+              })
+            }
             onEditObject={(o) => setDraft({ id: o.id, nom: o.nom, max: String(o.max) })}
             onAddObject={() => setDraft({ id: null, nom: '', max: '3' })}
             onDeleteObject={confirmDeleteObject}

@@ -4,13 +4,14 @@ import { Button, HelperText, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import WeaponSkillField from '@/components/weapon-skill-field';
-import type { Weapon } from '@/db/schema';
+import type { NewWeapon, Weapon } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { formatDecimal, parseDecimal } from '@/lib/character-values';
 import { parseFormula } from '@/lib/formula';
+import { detachWrite } from '@/repositories/log';
 import { deleteWeapon, updateWeapon } from '@/repositories/weapons';
 
 // Split out of weapon-card.tsx: the read-only card and this editor form share
@@ -42,25 +43,28 @@ export default function WeaponEditor({
   onClose: () => void;
 }) {
   const theme = useProphecyTheme();
-  const [name, setName] = useDebouncedText(w.name, (t) => updateWeapon(w.id, { name: t }));
-  const [damage, setDamage] = useDebouncedText(w.damage, (t) => updateWeapon(w.id, { damage: t }));
+  // Every field writes straight through and nobody awaits it — see detachWrite.
+  const patch = (data: Partial<NewWeapon>) =>
+    detachWrite('weapons', updateWeapon(w.id, data), { weaponId: w.id });
+  const [name, setName] = useDebouncedText(w.name, (t) => patch({ name: t }));
+  const [damage, setDamage] = useDebouncedText(w.damage, (t) => patch({ damage: t }));
   const [prereq, setPrereq] = useDebouncedText(w.prerequisites, (t) =>
-    updateWeapon(w.id, { prerequisites: t }),
+    patch({ prerequisites: t }),
   );
   const [rangeEff, setRangeEff] = useDebouncedText(w.rangeEffective ?? '', (t) =>
-    updateWeapon(w.id, { rangeEffective: t.trim() === '' ? null : t }),
+    patch({ rangeEffective: t.trim() === '' ? null : t }),
   );
   const [rangeMax, setRangeMax] = useDebouncedText(w.rangeMax ?? '', (t) =>
-    updateWeapon(w.id, { rangeMax: t.trim() === '' ? null : t }),
+    patch({ rangeMax: t.trim() === '' ? null : t }),
   );
   const [special, setSpecial] = useDebouncedText(w.special, (t) =>
-    updateWeapon(w.id, { special: t }),
+    patch({ special: t }),
   );
   const [initMelee, setInitMelee] = useDebouncedText(String(w.initMelee), (t) =>
-    updateWeapon(w.id, { initMelee: parseSigned(t) }),
+    patch({ initMelee: parseSigned(t) }),
   );
   const [initCac, setInitCac] = useDebouncedText(String(w.initCorpsACorps), (t) =>
-    updateWeapon(w.id, { initCorpsACorps: parseSigned(t) }),
+    patch({ initCorpsACorps: parseSigned(t) }),
   );
   // Creation time is the one fractional field (0,5 jour). Its text is kept local
   // instead of read back off the row: `0,` parses to 0 and would render back as
@@ -80,10 +84,7 @@ export default function WeaponEditor({
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          await deleteWeapon(w.id);
-          onClose();
-        },
+        onPress: () => detachWrite('weapons', deleteWeapon(w.id).then(onClose), { weaponId: w.id }),
       },
     ]);
 
@@ -187,7 +188,7 @@ export default function WeaponEditor({
           fieldKey="creationDifficulty"
           label="Difficulté création"
           value={w.creationDifficulty ? String(w.creationDifficulty) : ''}
-          onChange={(_, t) => updateWeapon(w.id, { creationDifficulty: Number(t) || 0 })}
+          onChange={(_, t) => patch({ creationDifficulty: Number(t) || 0 })}
           style={styles.numCol}
           {...numChain('creationDifficulty')}
         />
@@ -197,7 +198,7 @@ export default function WeaponEditor({
           value={creationTime}
           onChange={(_, t) => {
             setCreationTime(t);
-            updateWeapon(w.id, { creationTime: parseDecimal(t) });
+            patch({ creationTime: parseDecimal(t) });
           }}
           decimal
           style={styles.numCol}

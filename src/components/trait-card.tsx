@@ -16,10 +16,11 @@ import {
   type TraitKind,
   type TraitRarity,
 } from '@/constants/prophecy';
-import type { Trait } from '@/db/schema';
+import type { NewTrait, Trait } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
+import { detachWrite } from '@/repositories/log';
 import { deleteTrait, updateTrait } from '@/repositories/traits';
 
 // Hoisted: a fresh array on every render is a changed prop to <ChipSelect>.
@@ -106,13 +107,16 @@ export function TraitEditor({
   onDeleted: () => void;
 }) {
   const theme = useProphecyTheme();
-  const [name, setName] = useDebouncedText(t.name, (v) => updateTrait(t.id, { name: v }));
-  const [note, setNote] = useDebouncedText(t.note, (v) => updateTrait(t.id, { note: v }));
+  // Every field writes straight through and nobody awaits it — see detachWrite.
+  const patch = (data: Partial<NewTrait>) =>
+    detachWrite('traits', updateTrait(t.id, data), { traitId: t.id });
+  const [name, setName] = useDebouncedText(t.name, (v) => patch({ name: v }));
+  const [note, setNote] = useDebouncedText(t.note, (v) => patch({ note: v }));
   const [description, setDescription] = useDebouncedText(t.description, (v) =>
-    updateTrait(t.id, { description: v }),
+    patch({ description: v }),
   );
   const [inGameEffect, setInGameEffect] = useDebouncedText(t.inGameEffect, (v) =>
-    updateTrait(t.id, { inGameEffect: v }),
+    patch({ inGameEffect: v }),
   );
 
   // Only the rarities that exist for this side, plus whatever the row already
@@ -128,10 +132,7 @@ export function TraitEditor({
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          await deleteTrait(t.id);
-          onDeleted();
-        },
+        onPress: () => detachWrite('traits', deleteTrait(t.id).then(onDeleted), { traitId: t.id }),
       },
     ]);
 
@@ -144,7 +145,7 @@ export function TraitEditor({
         info="Un désavantage donne des points, un avantage en dépense."
         options={KIND_OPTIONS}
         value={t.kind}
-        onChange={(key) => updateTrait(t.id, { kind: key as TraitKind })}
+        onChange={(key) => patch({ kind: key as TraitKind })}
       />
 
       <ChipSelect
@@ -152,7 +153,7 @@ export function TraitEditor({
         info="Indication du livre de règles. Aucune restriction n'est appliquée."
         options={rarities.map((r) => ({ key: r.key, label: r.label }))}
         value={t.rarity}
-        onChange={(key) => updateTrait(t.id, { rarity: key as TraitRarity })}
+        onChange={(key) => patch({ rarity: key as TraitRarity })}
       />
 
       {/* Any positive number, where the pick dialog offers only the rulebook's
@@ -164,7 +165,7 @@ export function TraitEditor({
         fieldKey="cost"
         label="Coût en points"
         value={t.cost ? String(t.cost) : ''}
-        onChange={(_, v) => updateTrait(t.id, { cost: Math.max(0, Number(v) || 0) })}
+        onChange={(_, v) => patch({ cost: Math.max(0, Number(v) || 0) })}
         style={styles.costField}
       />
 
@@ -172,7 +173,7 @@ export function TraitEditor({
         <Text style={styles.switchLabel}>{traitEvolvingLabel(t.kind)}</Text>
         <Switch
           value={t.evolving}
-          onValueChange={(v) => updateTrait(t.id, { evolving: v })}
+          onValueChange={(v) => patch({ evolving: v })}
         />
       </View>
 

@@ -7,6 +7,7 @@ import SectionCard from '@/components/ui/section-card';
 import type { Armor } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { updateArmor } from '@/repositories/armor';
+import { detachWrite } from '@/repositories/log';
 
 /**
  * ARMURE: the equipped armor's remaining defense, as bullets. Rendered only when
@@ -29,7 +30,14 @@ export default function ArmorSection({ armor, editing }: { armor: Armor; editing
           gap={4}
           perRow={5}
           style={styles.healthDots}
-          onSet={editing ? (n) => updateArmor(armor.id, { defenseCurrent: n }) : undefined}
+          onSet={
+            editing
+              ? (n) =>
+                  detachWrite('armor', updateArmor(armor.id, { defenseCurrent: n }), {
+                    armorId: armor.id,
+                  })
+              : undefined
+          }
         />
       </View>
     </SectionCard>

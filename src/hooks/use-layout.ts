@@ -27,6 +27,15 @@ export const CONTENT_MAX_WIDTH = 720;
 export const SPLIT_MAX_WIDTH = 1160;
 /** MD3 dialog max width. Paper's Dialog has none — it stretches edge to edge. */
 export const DIALOG_MAX_WIDTH = 560;
+/**
+ * Pinned height of the JS header (the Tabs navigators, and the root Stack on
+ * web where expo-router falls back to it). Its non-iOS default is 64
+ * (elements/Header/getDefaultHeaderHeight) — 8dp taller than the native-stack
+ * toolbar every pushed screen uses (Android actionBarSize = 56 / iOS 44), so
+ * headers would jump between screens. Add `insets.top`: on the JS header
+ * `height` is the total, status bar included.
+ */
+export const HEADER_HEIGHT = 56;
 
 export type NavMode = 'bar' | 'rail';
 

@@ -15,6 +15,7 @@ import type { Armor, Enchant, Item, Shield, Spell, Weapon } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { ENCHANT_TARGET_LABEL } from '@/lib/enchant-targets';
 import { updateEnchant } from '@/repositories/enchants';
+import { detachWrite } from '@/repositories/log';
 
 export default function EnchantRow({
   enchant: e,
@@ -34,6 +35,8 @@ export default function EnchantRow({
   const theme = useProphecyTheme();
   const [showSpell, setShowSpell] = useState(false);
   const linkedSpell = e.sourceSpellId != null ? spells.find((s) => s.id === e.sourceSpellId) : undefined;
+  const setUses = (n: number) =>
+    detachWrite('enchants', updateEnchant(e.id, { usesCurrent: n }), { enchantId: e.id });
 
   return (
     <View style={[styles.enchantCard, { borderBottomColor: theme.prophecy.borderSoft }]}>
@@ -76,7 +79,7 @@ export default function EnchantRow({
             mode="contained"
             size={16}
             disabled={e.usesCurrent <= 0}
-            onPress={() => updateEnchant(e.id, { usesCurrent: Math.max(0, e.usesCurrent - 1) })}
+            onPress={() => setUses(Math.max(0, e.usesCurrent - 1))}
           />
         ) : null}
         <Text style={styles.usesCount}>
@@ -88,7 +91,7 @@ export default function EnchantRow({
             mode="contained"
             size={16}
             disabled={e.usesCurrent >= e.usesMax}
-            onPress={() => updateEnchant(e.id, { usesCurrent: Math.min(e.usesMax, e.usesCurrent + 1) })}
+            onPress={() => setUses(Math.min(e.usesMax, e.usesCurrent + 1))}
           />
         ) : null}
       </View>
