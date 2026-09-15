@@ -54,26 +54,18 @@ const CREATE_TIMEOUT_MS = 10_000;
  * is generated here and only its hash ever reaches the server — the raw token
  * stays in this row (and the user's backups) as proof of ownership.
  *
- * `signal` lets the UI cancel in flight (the dialog's "Annuler"); an internal
- * 10s timeout turns an unreachable server into a fast, explicit failure instead
- * of hanging on the OS connect timeout. Both surface as an abort — the caller
- * tells them apart via its own cancelled flag.
+ * An internal 10s timeout turns an unreachable server into a fast, explicit
+ * failure instead of hanging on the OS connect timeout.
  */
-export async function attachServer(
-  campaignId: number,
-  serverUrl: string,
-  signal?: AbortSignal,
-): Promise<Campaign> {
+export async function attachServer(campaignId: number, serverUrl: string): Promise<Campaign> {
   const existing = await getCampaign(campaignId);
   if (!existing) throw new Error('Table introuvable.');
   const name = existing.name;
   const gmToken = newUuid();
   const host = normalizeServerHost(serverUrl);
-  // AbortSignal.any/timeout aren't available on Hermes — combine by hand.
+  // AbortSignal.timeout isn't available on Hermes — done by hand.
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CREATE_TIMEOUT_MS);
-  const forward = () => controller.abort();
-  signal?.addEventListener('abort', forward);
   let res: Response;
   try {
     res = await fetch(`${httpUrl(host)}/campaigns`, {
@@ -83,15 +75,14 @@ export async function attachServer(
       signal: controller.signal,
     });
   } catch (e) {
-    if (controller.signal.aborted && !signal?.aborted) {
+    if (controller.signal.aborted) {
       throw new Error(
         'Serveur injoignable (délai dépassé). Vérifiez l’adresse, que le serveur tourne, et le pare-feu.',
       );
     }
-    throw e; // user cancel (AbortError) or a real network error
+    throw e; // a real network error
   } finally {
     clearTimeout(timer);
-    signal?.removeEventListener('abort', forward);
   }
   if (!res.ok) throw new Error(`Le serveur a refusé la création (${res.status}).`);
   const body = (await res.json()) as { code: string };

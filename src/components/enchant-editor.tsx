@@ -7,7 +7,7 @@ import NumberField from '@/components/number-field';
 import SpellDetail from '@/components/spell-detail';
 import ChipSelect from '@/components/ui/chip-select';
 import { dsIcon } from '@/components/ui/icon';
-import type { Enchant, EnchantTarget, Spell } from '@/db/schema';
+import type { Enchant, EnchantTarget, NewEnchant, Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
@@ -17,6 +17,7 @@ import {
   targetsOfKind,
 } from '@/lib/enchant-targets';
 import { deleteEnchant, setEnchantSource, updateEnchant } from '@/repositories/enchants';
+import { detachWrite } from '@/repositories/log';
 
 /**
  * Enchant editor form, rendered in the `enchant/[eid]` modal screen (mirrors
@@ -43,20 +44,23 @@ export default function EnchantEditor({
 }) {
   const theme = useProphecyTheme();
   const [showSpell, setShowSpell] = useState(false);
-  const [name, setName] = useDebouncedText(e.name, (t) => updateEnchant(e.id, { name: t }));
-  const [effect, setEffect] = useDebouncedText(e.effect, (t) => updateEnchant(e.id, { effect: t }));
+  // Every field writes straight through and nobody awaits it — see detachWrite.
+  const patch = (data: Partial<NewEnchant>) =>
+    detachWrite('enchants', updateEnchant(e.id, data), { enchantId: e.id });
+  const [name, setName] = useDebouncedText(e.name, (t) => patch({ name: t }));
+  const [effect, setEffect] = useDebouncedText(e.effect, (t) => patch({ effect: t }));
   const [usesMax, setUsesMax] = useDebouncedText(String(e.usesMax), (t) => {
     const max = Math.max(1, parseInt(t, 10) || 1);
-    updateEnchant(e.id, { usesMax: max, usesCurrent: Math.min(e.usesCurrent, max) });
+    patch({ usesMax: max, usesCurrent: Math.min(e.usesCurrent, max) });
   });
   // Both numbers CLEAR to null rather than to 0: an enchant with no recorded
   // roll is a normal state (pure flavour, or a sheet filled before the player
   // asked the GM), and a 0 would read as a botched cast instead of as silence.
   const [castScore, setCastScore] = useDebouncedText(numText(e.castScore), (t) =>
-    updateEnchant(e.id, { castScore: parseScore(t) }),
+    patch({ castScore: parseScore(t) }),
   );
   const [difficulty, setDifficulty] = useDebouncedText(numText(e.difficulty), (t) =>
-    updateEnchant(e.id, { difficulty: parseScore(t) }),
+    patch({ difficulty: parseScore(t) }),
   );
 
   const targetOptions = targetsOfKind(e.targetType, lists).map((o) => ({
@@ -79,19 +83,21 @@ export default function EnchantEditor({
   ];
   // The repository owns the copy of name/effect/difficulté and the cleanup of
   // an unknown source left behind — see `setEnchantSource`.
+  const link = (sp: Spell | null) =>
+    detachWrite('enchants', setEnchantSource(e.id, sp), { enchantId: e.id });
   const pickSpell = (key: string) => {
     if (!key) {
-      setEnchantSource(e.id, null);
+      link(null);
       return;
     }
     const sp = spells.find((s) => String(s.id) === key);
-    if (sp) setEnchantSource(e.id, sp);
+    if (sp) link(sp);
   };
 
   const adjustUses = (delta: number) => {
     const max = Math.max(1, parseInt(usesMax, 10) || 1);
     const next = Math.min(max, Math.max(0, e.usesCurrent + delta));
-    updateEnchant(e.id, { usesCurrent: next });
+    patch({ usesCurrent: next });
   };
 
   const confirmDelete = () =>
@@ -100,10 +106,8 @@ export default function EnchantEditor({
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          await deleteEnchant(e.id);
-          onClose();
-        },
+        onPress: () =>
+          detachWrite('enchants', deleteEnchant(e.id).then(onClose), { enchantId: e.id }),
       },
     ]);
 
@@ -118,7 +122,7 @@ export default function EnchantEditor({
           // Only switch if the character owns at least one object of that
           // kind — otherwise there's nothing valid to point targetId at.
           const first = targetsOfKind(kind, lists)[0];
-          if (first) updateEnchant(e.id, { targetType: kind, targetId: first.id });
+          if (first) patch({ targetType: kind, targetId: first.id });
         }}
       />
 
@@ -129,7 +133,7 @@ export default function EnchantEditor({
           label="Objet"
           options={targetOptions}
           value={String(e.targetId)}
-          onChange={(k) => updateEnchant(e.id, { targetId: Number(k) })}
+          onChange={(k) => patch({ targetId: Number(k) })}
         />
       )}
 

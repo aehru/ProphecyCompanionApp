@@ -1,10 +1,11 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { Redirect, useLocalSearchParams } from 'expo-router';
+import { Redirect } from 'expo-router';
 import React, { useDeferredValue, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Snackbar, Text, TextInput } from 'react-native-paper';
+import { Snackbar, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useCampaign } from '@/components/campaign/campaign-provider';
 import InitiativeList from '@/components/campaign/initiative-list';
 import RosterList from '@/components/campaign/roster-list';
 import { ServerStatusChip } from '@/components/campaign/roster-badges';
@@ -18,8 +19,9 @@ import { useLayout } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import type { RosterEntry } from '@/lib/campaign-protocol';
-import { campaignQuery, gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
+import { gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
 import { rollInitiativeFor } from '@/repositories/characters';
+import { detachWrite } from '@/repositories/log';
 
 // Short forms for a narrow column (a phone, or the split view's left pane).
 const TABS = [
@@ -34,16 +36,8 @@ const SKILLS_TAB = 1;
 const INITIATIVE_TAB = 3;
 
 export default function CompagnieScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { data } = useLiveQuery(campaignQuery(Number(id)), [id]);
-  const campaign = data?.[0];
-  if (!campaign) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
+  // Resolved once by the layout, which also owns the not-found case.
+  const campaign = useCampaign();
   // The Compagnie overview is GM-only; a player deep-linking here bounces back.
   if (campaign.role !== 'gm') return <Redirect href={`/campaigns/${campaign.id}`} />;
   return <Compagnie campaign={campaign} />;
@@ -78,23 +72,39 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   };
 
   const duplicate = async (charUuid: string) => {
-    const created = await spawnNpc(campaign.id, charUuid);
-    if (!created) return;
-    // The roster is local, so the copy is on screen before this toast is read.
-    setToast(`« ${created.nom} » ajouté à la Compagnie.`);
+    try {
+      const created = await spawnNpc(campaign.id, charUuid);
+      if (!created) return;
+      // The roster is local, so the copy is on screen before this toast is read.
+      setToast(`« ${created.nom} » ajouté à la Compagnie.`);
+    } catch (e) {
+      Alert.alert('Duplication impossible', e instanceof Error ? e.message : String(e));
+    }
   };
+
+  // Fired from the sheet's Enregistrer and never awaited (the sheet closes on
+  // its own) — `detachWrite` is the error path.
+  const saveNote = (charUuid: string, body: string) =>
+    detachWrite('gm_notes', upsertGmNote(campaign.id, charUuid, body), {
+      campaignId: campaign.id,
+      charUuid,
+    });
 
   // Open a fight in one tap. Re-rolling mid-combat scrambles an order the table
   // is already playing from and can't be undone, so confirm — but only when
   // there is something to lose.
   const rollNpcInitiative = () => {
     const run = async () => {
-      const n = await rollInitiativeFor(npcs.map((e) => e.charId));
-      setToast(
-        n > 0
-          ? `Initiative lancée pour ${n} PNJ.`
-          : 'Aucun PNJ n’a de dés d’initiative.',
-      );
+      try {
+        const n = await rollInitiativeFor(npcs.map((e) => e.charId));
+        setToast(
+          n > 0
+            ? `Initiative lancée pour ${n} PNJ.`
+            : 'Aucun PNJ n’a de dés d’initiative.',
+        );
+      } catch (e) {
+        Alert.alert('Initiative impossible', e instanceof Error ? e.message : String(e));
+      }
     };
     const alreadyRolled = npcs.some((e) => {
       const init = e.character.initiative as { values?: number[] } | undefined;
@@ -210,7 +220,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
                 embedded
                 entry={openEntry}
                 note={noteByUuid.get(openEntry.charId) ?? ''}
-                onSaveNote={(charUuid, body) => upsertGmNote(campaign.id, charUuid, body)}
+                onSaveNote={saveNote}
                 onDuplicate={duplicate}
                 startEditing={editOnOpen}
                 onDismiss={() => setSelected(null)}
@@ -230,7 +240,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         <GmCharacterSheet
           entry={openEntry}
           note={openEntry ? (noteByUuid.get(openEntry.charId) ?? '') : ''}
-          onSaveNote={(charUuid, body) => upsertGmNote(campaign.id, charUuid, body)}
+          onSaveNote={saveNote}
           onDuplicate={duplicate}
           startEditing={editOnOpen}
           onDismiss={() => setSelected(null)}

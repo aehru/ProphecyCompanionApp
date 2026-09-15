@@ -1,4 +1,4 @@
-import { DEFAULT_SKILLS, NUMERIC_KEYS } from '@/constants/prophecy';
+import { DEFAULT_SKILLS, NUMERIC_KEYS, STATUT_MAX } from '@/constants/prophecy';
 import type { Character, NewCharacter, Skill } from '@/db/schema';
 import { casteFromInput } from '@/lib/caste';
 import type { SkillInput } from '@/repositories/skills';
@@ -68,6 +68,8 @@ export function toFormValues(c?: Partial<Character> | null): FormValues {
     // and becomes NULL again in `fromFormValues`.
     caste: (src.caste as string) ?? '',
     biographie: (src.biographie as string) ?? '',
+    // A checkbox in a strings-only form: '1' checked, '' not.
+    darkOrders: src.darkOrders ? '1' : '',
   };
   for (const k of NUMERIC_KEYS) v[k] = src[k] != null ? String(src[k]) : '';
   return v;
@@ -119,12 +121,16 @@ export function fromFormValues(v: FormValues): Partial<NewCharacter> {
     concept: v.concept.trim(),
     caste: casteFromInput(v.caste),
     biographie: v.biographie.trim(),
+    darkOrders: v.darkOrders === '1',
   };
   for (const k of NUMERIC_KEYS) {
     let n = parseInt(v[k], 10);
     if (!Number.isFinite(n)) n = 0;
     // Tendance puces are capped at 10 (matches the DB CHECK constraint).
     if (k.endsWith('Sub')) n = Math.min(10, Math.max(0, n));
+    // The Statut ladder stops at 5. Clamped HERE and not by a DB CHECK: adding
+    // one to an existing SQLite table means rebuilding it (see the schema).
+    if (k === 'statut') n = Math.min(STATUT_MAX, Math.max(0, n));
     out[k] = n;
   }
   return out as Partial<NewCharacter>;

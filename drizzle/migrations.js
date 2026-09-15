@@ -38,6 +38,8 @@ import m0033 from './0033_mature_christian_walker.sql';
 import m0034 from './0034_nappy_next_avengers.sql';
 import m0035 from './0035_violet_taskmaster.sql';
 import m0036 from './0036_green_weapon_omega.sql';
+import m0037 from './0037_concerned_la_nuit.sql';
+import m0038 from './0038_open_harrier.sql';
 
   export default {
     journal,
@@ -78,7 +80,9 @@ m0032,
 m0033,
 m0034,
 m0035,
-m0036
+m0036,
+m0037,
+m0038
     }
   }
   

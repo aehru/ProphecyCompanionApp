@@ -18,18 +18,19 @@ import {
   SPHERES,
   TIME_UNITS,
 } from '@/constants/prophecy';
-import type { Spell } from '@/db/schema';
+import type { NewSpell, Spell } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import TotalBadge from '@/components/ui/total-badge';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { parseFormula } from '@/lib/formula';
 import type { SpellTotal } from '@/lib/spell-total';
+import { detachWrite } from '@/repositories/log';
 import { deleteSpell, updateSpell } from '@/repositories/spells';
 
 /** Validation message for a spell formula field (null = valid or empty). */
 function spellFormulaError(raw: string): string | null {
-  const res = parseFormula(raw, { nr: true, sphere: true });
+  const res = parseFormula(raw, { nr: true, sphere: true, statut: true });
   return res.ok ? null : res.error;
 }
 
@@ -43,12 +44,15 @@ export default function SpellCard({
   spell,
   total,
   caracValue,
+  statut,
   onRoll,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   /** Passed through to the detail — resolves a durée written against a stat. */
   caracValue?: (caracKey: string) => number;
+  /** Passed through to the detail — the caster's Statut. */
+  statut?: number;
   /** Rolls the incantation. Omitted where the card is only a reading. */
   onRoll?: () => void;
 }) {
@@ -58,6 +62,7 @@ export default function SpellCard({
       spell={spell}
       total={total}
       caracValue={caracValue}
+      statut={statut}
       onRoll={onRoll}
       onEdit={() => router.push(`/character/${spell.characterId}/spell/${spell.id}`)}
     />
@@ -68,12 +73,14 @@ function SpellSummary({
   spell: s,
   total,
   caracValue,
+  statut,
   onRoll,
   onEdit,
 }: {
   spell: Spell;
   total?: SpellTotal | null;
   caracValue?: (caracKey: string) => number;
+  statut?: number;
   onRoll?: () => void;
   onEdit: () => void;
 }) {
@@ -129,7 +136,9 @@ function SpellSummary({
             Pressable like <TotalBadge> beside it — the row is a Pressable with
             no button role, so this nests legally on web. */}
         <Pressable
-          onPress={() => updateSpell(s.id, { favorite: !s.favorite })}
+          onPress={() =>
+            detachWrite('spells', updateSpell(s.id, { favorite: !s.favorite }), { spellId: s.id })
+          }
           hitSlop={8}
           accessibilityRole="button"
           accessibilityState={{ selected: s.favorite }}
@@ -162,7 +171,7 @@ function SpellSummary({
       </Pressable>
 
       {expanded ? (
-        <SpellDetail spell={s} total={total} caracValue={caracValue} onEdit={onEdit} />
+        <SpellDetail spell={s} total={total} caracValue={caracValue} statut={statut} onEdit={onEdit} />
       ) : null}
     </View>
   );
@@ -175,20 +184,23 @@ function SpellSummary({
  */
 export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () => void }) {
   const theme = useProphecyTheme();
-  const [name, setName] = useDebouncedText(s.name, (t) => updateSpell(s.id, { name: t }));
-  const [cle, setCle] = useDebouncedText(s.cle, (t) => updateSpell(s.id, { cle: t }));
-  const [effect, setEffect] = useDebouncedText(s.effect, (t) => updateSpell(s.id, { effect: t }));
+  // Every field writes straight through and nobody awaits it — see detachWrite.
+  const patch = (data: Partial<NewSpell>) =>
+    detachWrite('spells', updateSpell(s.id, data), { spellId: s.id });
+  const [name, setName] = useDebouncedText(s.name, (t) => patch({ name: t }));
+  const [cle, setCle] = useDebouncedText(s.cle, (t) => patch({ cle: t }));
+  const [effect, setEffect] = useDebouncedText(s.effect, (t) => patch({ effect: t }));
   const [inGameEffect, setInGameEffect] = useDebouncedText(s.inGameEffect, (t) =>
-    updateSpell(s.id, { inGameEffect: t }),
+    patch({ inGameEffect: t }),
   );
   const [sensoryEffect, setSensoryEffect] = useDebouncedText(s.sensoryEffect, (t) =>
-    updateSpell(s.id, { sensoryEffect: t }),
+    patch({ sensoryEffect: t }),
   );
   const [duration, setDuration] = useDebouncedText(s.duration, (t) =>
-    updateSpell(s.id, { duration: t }),
+    patch({ duration: t }),
   );
   const [targets, setTargets] = useDebouncedText(s.targets, (t) =>
-    updateSpell(s.id, { targets: t }),
+    patch({ targets: t }),
   );
 
   // Same parser, same opt-ins as the catalogue build (scripts/build-catalogs).
@@ -201,10 +213,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          await deleteSpell(s.id);
-          onClose();
-        },
+        onPress: () => detachWrite('spells', deleteSpell(s.id).then(onClose), { spellId: s.id }),
       },
     ]);
 
@@ -216,14 +225,14 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
         label="Discipline"
         options={DISCIPLINES}
         value={s.discipline}
-        onChange={(k) => updateSpell(s.id, { discipline: k as Spell['discipline'] })}
+        onChange={(k) => patch({ discipline: k as Spell['discipline'] })}
       />
 
       <ChipSelect
         label="Sphère"
         options={SPHERES}
         value={s.sphere}
-        onChange={(k) => updateSpell(s.id, { sphere: k as Spell['sphere'] })}
+        onChange={(k) => patch({ sphere: k as Spell['sphere'] })}
       />
 
       <View style={styles.grid}>
@@ -231,28 +240,28 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
           fieldKey="level"
           label="Niveau"
           value={s.level ? String(s.level) : ''}
-          onChange={(_, t) => updateSpell(s.id, { level: Number(t) || 0 })}
+          onChange={(_, t) => patch({ level: Number(t) || 0 })}
           style={styles.numCol}
         />
         <NumberField
           fieldKey="complexity"
           label="Complexité"
           value={s.complexity ? String(s.complexity) : ''}
-          onChange={(_, t) => updateSpell(s.id, { complexity: Number(t) || 0 })}
+          onChange={(_, t) => patch({ complexity: Number(t) || 0 })}
           style={styles.numCol}
         />
         <NumberField
           fieldKey="cost"
           label="Coût"
           value={s.cost ? String(s.cost) : ''}
-          onChange={(_, t) => updateSpell(s.id, { cost: Number(t) || 0 })}
+          onChange={(_, t) => patch({ cost: Number(t) || 0 })}
           style={styles.numCol}
         />
         <NumberField
           fieldKey="difficulty"
           label="Difficulté"
           value={s.difficulty ? String(s.difficulty) : ''}
-          onChange={(_, t) => updateSpell(s.id, { difficulty: Number(t) || 0 })}
+          onChange={(_, t) => patch({ difficulty: Number(t) || 0 })}
           style={styles.numCol}
         />
       </View>
@@ -267,13 +276,13 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
           <NumberField
             fieldKey="castTimeAmount"
             value={s.castTimeAmount ? String(s.castTimeAmount) : ''}
-            onChange={(_, t) => updateSpell(s.id, { castTimeAmount: Number(t) || 0 })}
+            onChange={(_, t) => patch({ castTimeAmount: Number(t) || 0 })}
             style={styles.castAmount}
           />
           <SelectField
             options={TIME_UNITS}
             value={s.castTimeUnit}
-            onChange={(k) => updateSpell(s.id, { castTimeUnit: k as Spell['castTimeUnit'] })}
+            onChange={(k) => patch({ castTimeUnit: k as Spell['castTimeUnit'] })}
             style={styles.castUnit}
             inline
           />
@@ -292,7 +301,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
         </View>
         <Switch
           value={s.cleParfaite}
-          onValueChange={(v) => updateSpell(s.id, { cleParfaite: v })}
+          onValueChange={(v) => patch({ cleParfaite: v })}
         />
       </View>
 
@@ -325,7 +334,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
           <SelectField
             options={TIME_UNITS}
             value={s.durationUnit}
-            onChange={(k) => updateSpell(s.id, { durationUnit: k as Spell['durationUnit'] })}
+            onChange={(k) => patch({ durationUnit: k as Spell['durationUnit'] })}
             style={styles.castUnit}
             inline
           />
@@ -374,7 +383,7 @@ export function SpellEditor({ spell: s, onClose }: { spell: Spell; onClose: () =
         label="Tags"
         options={SPELL_TAGS}
         values={s.tags}
-        onChange={(next) => updateSpell(s.id, { tags: next })}
+        onChange={(next) => patch({ tags: next })}
       />
 
       <Button mode="outlined" icon="delete" textColor={theme.colors.error} onPress={confirmDelete}>

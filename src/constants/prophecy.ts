@@ -47,6 +47,13 @@ export const CASTES = [
 
 export type CasteKey = (typeof CASTES)[number]['key'];
 
+/**
+ * Highest rung of a caste's Statut ladder, in every caste. `characters.statut`
+ * runs 0 (« aucun Statut ») through this; what each rung SAYS lives in the
+ * generated catalogue, looked up by (caste, niveau) in `lib/statut`.
+ */
+export const STATUT_MAX = 5;
+
 /** What a NULL caste is called on screen. */
 export const SANS_CASTE_LABEL = 'Sans Caste';
 
@@ -239,6 +246,28 @@ export const SPELL_TAG_GROUP: Record<string, string> = Object.fromEntries(
  * French game terms, so keys are stored accent-free (`desavantage`) and the
  * label carries the accent, like the sphères and the castes.
  */
+/**
+ * The two families a Privilège de caste belongs to — the rulebook's own two
+ * headings on a caste's page.
+ *
+ * They are NOT the same list read twice: an entry can sit under « Privilèges de
+ * caste » for one caste and under « Privilèges annexes » for another, at a
+ * different price — « Expertise » is an annexe at 4 points for an Artisan and a
+ * caste privilège at 2 for a Commerçant, with the same text. That is why a
+ * privilège is stored per caste rather than as one row bound to several.
+ */
+export const PRIVILEGE_FAMILIES = [
+  { key: 'caste', label: 'Privilèges de caste' },
+  { key: 'annexe', label: 'Privilèges annexes' },
+] as const;
+
+export type PrivilegeFamily = (typeof PRIVILEGE_FAMILIES)[number]['key'];
+
+export const PRIVILEGE_FAMILY_KEYS = PRIVILEGE_FAMILIES.map((f) => f.key) as [
+  PrivilegeFamily,
+  ...PrivilegeFamily[],
+];
+
 export const TRAIT_KINDS = [
   { key: 'desavantage', label: 'Désavantage', plural: 'Désavantages' },
   { key: 'avantage', label: 'Avantage', plural: 'Avantages' },
@@ -504,6 +533,9 @@ export const NUMERIC_KEYS: string[] = [
   ...WOUND_LEVELS.map((w) => `${w.key}Max`),
   ...RESOURCES.map((r) => `${r.key}Max`),
   'initiativeMax',
+  // Rank inside the caste, 0–5 (see `characters.statut`). Here so the form,
+  // the export and the import schema all pick it up like any other stat.
+  'statut',
   // Magic maxes + disciplines are all form-edited (Magie tab). Per-sphere/reserve
   // current values live on actual_state and are tracked from the sheet's Magie tab.
   'reserveMagiqueMax',

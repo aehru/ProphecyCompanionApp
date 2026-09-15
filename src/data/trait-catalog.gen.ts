@@ -1268,5 +1268,72 @@ export const TRAIT_CATALOG_DATA: TraitPreset[] = [
       "inGameEffect": "Annoncée AVANT le jet, une dépense de 3 Points de Maîtrise donne un NR automatique, acquis si le jet est réussi. Les Points de Maîtrise non dépensés ainsi restent utilisables normalement. Ne peut être pris qu'une fois.",
       "evolving": true
     }
+  },
+  {
+    "id": "present",
+    "revision": "008e1fa38dd9",
+    "costs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "precisionPrompt": "Bénéficiaire et présent",
+    "caste": "artisan",
+    "data": {
+      "kind": "avantage",
+      "name": "Présent",
+      "rarity": "general",
+      "description": "Permet à un personnage d'avoir eu l'honneur d'offrir un présent de sa facture à un dignitaire, un noble, une personnalité influente, un dragon, etc. La valeur du présent en question varie en fonction du coût payé pour acheter cet Avantage - et de la dette que le bénéficiaire se promettra d'honorer un jour. Le coût de l'Avantage, la description du présent, l'identité du bénéficiaire et la nature de la dette sont laissés à l'appréciation du meneur de jeu. À titre d'exemple, chaque point dépensé peut correspondre à un Statut de caste pour déterminer la qualité du bénéficiaire - où 6 points correspondront à un dragon d'importance ou un héros du Royaume de Kor. Les valeurs matérielle et symbolique de l'objet offert évolueront en parallèle, tout comme la dette. Cet Avantage peut être choisi deux fois, mais pour deux bénéficiaires différents.",
+      "inGameEffect": "Un bénéficiaire influent doit une dette au personnage pour un présent de sa facture. Chaque point dépensé peut correspondre à un Statut de caste du bénéficiaire (6 points : un dragon d'importance ou un héros du Royaume de Kor). Peut être choisi deux fois, pour deux bénéficiaires différents."
+    }
+  },
+  {
+    "id": "surprise",
+    "revision": "4ec223f61067",
+    "costs": [
+      6
+    ],
+    "caste": "commercant",
+    "data": {
+      "kind": "avantage",
+      "name": "Surprise",
+      "rarity": "general",
+      "description": "Permet au personnage de gagner un bonus de +5 sur le jet de sa première action d'un tour ou, au contraire, d'imposer un malus de +5 à la Difficulté du premier jet d'action de son adversaire. Ce Privilège n'est applicable que sur le jet correspondant à la première action du personnage ou de son adversaire - une seule fois par combat, donc.",
+      "inGameEffect": "Une fois par combat : +5 au jet de la première action du personnage, ou +5 à la Difficulté du premier jet d'action de son adversaire."
+    }
+  },
+  {
+    "id": "enigmatique",
+    "revision": "f12506a85c39",
+    "costs": [
+      3
+    ],
+    "caste": "voyageur",
+    "data": {
+      "kind": "avantage",
+      "name": "Énigmatique",
+      "rarity": "general",
+      "description": "Permet au personnage de masquer si bien ses émotions, ses valeurs personnelles et ses motivations que, s'il est soumis à la question ou sondé par des moyens magiques, l'observateur n'a que peu de chances de discerner la graduation de ses Tendances. La Difficulté de tout jet visant à définir les Tendances du personnage est, en secret, augmentée de 10. Le meneur de jeu doit se garder d'annoncer cette augmentation. Si le jet n'est réussi que contre la Difficulté de base, le personnage voyageur peut modifier tout ou partie des valeurs de ses Tendances, en les augmentant et/ou les réduisant chacune d'un nombre de points maximum égal à son niveau de Statut - tout en conservant la limite cumulée de 5 points. Cependant, si le jet est réussi contre la Difficulté réelle, soit celle de base augmentée de 10, le personnage ne parvient à altérer aucune des informations recherchées par l'observateur.",
+      "inGameEffect": "Difficulté augmentée de 10, en secret, sur tout jet visant à définir les Tendances du personnage. Si le jet ne réussit que contre la Difficulté de base, le personnage peut altérer chaque Tendance perçue d'autant de points que son niveau de Statut (limite cumulée de 5 points)."
+    }
+  },
+  {
+    "id": "illumine",
+    "revision": "6ad2026a26b9",
+    "costs": [
+      3
+    ],
+    "precisionPrompt": "Sujet de prédilection",
+    "caste": "erudit",
+    "data": {
+      "kind": "avantage",
+      "name": "Illuminé",
+      "rarity": "general",
+      "description": "Permet au personnage d'utiliser son Attribut Mental à la place de l'Attribut Social chaque fois qu'il tente d'expliquer, de justifier ou de présenter certains aspects de son sujet d'étude de prédilection. Convaincu et passionné, le personnage peut ainsi motiver ses explications en trouvant les mots adéquats - et convaincre plus aisément un Inquisiteur que l'astronomie n'a rien d'une pratique hérétique... Le personnage définit un sujet de prédilection, lorsqu'il choisit cet Avantage. Par exemple, il peut choisir de travailler sur l'implication des Étoiles dans l'histoire de Kor, les raisons fondamentales de l'Humanisme, l'art de la guerre au fil des âges, etc. Ce bénéfice peut s'appliquer à tous les jets concernant des Compétences de Théorie et de Pratique que le personnage possède et qu'il utilise en relation avec ce sujet.",
+      "inGameEffect": "Utilise l'Attribut Mental à la place du Social pour expliquer, justifier ou présenter son sujet de prédilection, sur tous les jets de Compétences de Théorie et de Pratique liés à ce sujet."
+    }
   }
 ];

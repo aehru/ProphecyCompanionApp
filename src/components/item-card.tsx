@@ -4,11 +4,12 @@ import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import Icon, { dsIcon } from '@/components/ui/icon';
-import type { Item } from '@/db/schema';
+import type { Item, NewItem } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { deleteItem, updateItem } from '@/repositories/items';
+import { detachWrite } from '@/repositories/log';
 
 /**
  * One inventory item: a read-only summary that flips to an inline editor via
@@ -46,7 +47,9 @@ function ItemSummary({
     <View style={[styles.item, { borderBottomColor: theme.prophecy.borderSoft }]}>
       <View style={styles.itemRow}>
         <Pressable
-          onPress={() => updateItem(it.id, { equipped: !it.equipped })}
+          onPress={() =>
+            detachWrite('items', updateItem(it.id, { equipped: !it.equipped }), { itemId: it.id })
+          }
           style={[
             styles.tile,
             {
@@ -94,15 +97,22 @@ function ItemSummary({
 /** Inline editor. Edits persist live (debounced) like the weapon/armor editor. */
 function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) {
   const theme = useProphecyTheme();
-  const [name, setName] = useDebouncedText(it.name, (t) => updateItem(it.id, { name: t }));
+  // Every field writes straight through and nobody awaits it — see detachWrite.
+  const patch = (data: Partial<NewItem>) =>
+    detachWrite('items', updateItem(it.id, data), { itemId: it.id });
+  const [name, setName] = useDebouncedText(it.name, (t) => patch({ name: t }));
   const [description, setDescription] = useDebouncedText(it.description, (t) =>
-    updateItem(it.id, { description: t }),
+    patch({ description: t }),
   );
 
   const confirmDelete = () =>
     Alert.alert('Supprimer', 'Supprimer cet objet ?', [
       { text: 'Annuler', style: 'cancel' },
-      { text: 'Supprimer', style: 'destructive', onPress: () => deleteItem(it.id) },
+      {
+        text: 'Supprimer',
+        style: 'destructive',
+        onPress: () => detachWrite('items', deleteItem(it.id), { itemId: it.id }),
+      },
     ]);
 
   return (
@@ -122,7 +132,7 @@ function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) 
         fieldKey="quantity"
         label="Quantité"
         value={it.quantity ? String(it.quantity) : ''}
-        onChange={(_, t) => updateItem(it.id, { quantity: Math.max(0, Number(t) || 0) })}
+        onChange={(_, t) => patch({ quantity: Math.max(0, Number(t) || 0) })}
         style={styles.qtyField}
       />
 

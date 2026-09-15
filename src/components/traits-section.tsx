@@ -21,6 +21,10 @@ import { traitsQuery } from '@/repositories/traits';
  * shown even at zero: a blank space would read as "not filled in yet" on a
  * character who genuinely has none.
  *
+ * It FOLDS but starts open, unlike the statut sections above it: this is a
+ * short list with a running balance, glanced at often, where those are rulebook
+ * prose read occasionally.
+ *
  * The two kinds are grouped but NOT titled: every row already carries its icon
  * and its signed cost (`+3` granted, `−2` spent), so a heading over each half
  * restated what the rows say and cost two lines in a section meant to be
@@ -33,7 +37,7 @@ export default function TraitsSection({ characterId }: { characterId: number }) 
   const pool = traitPool(traits);
 
   return (
-    <SectionCard title="AVANTAGES & DÉSAVANTAGES" icon="plusminus">
+    <SectionCard title="AVANTAGES & DÉSAVANTAGES" icon="plusminus" collapsible>
       <TraitPoolBar pool={pool} />
 
       {TRAIT_KINDS.map((kind) => {

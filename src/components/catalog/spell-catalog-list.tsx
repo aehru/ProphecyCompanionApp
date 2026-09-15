@@ -253,19 +253,21 @@ export default function SpellCatalogList({
   );
 
   const caracValue = readings?.caracValue;
+  const statut = readings?.statut;
   const renderItem = useCallback(
     ({ item }: { item: Entry }) => (
       <SpellRow
         entry={item}
         total={totals.get(item.preset.id)}
         caracValue={caracValue}
+        statut={statut}
         owned={owned.has(item.preset.id)}
         enchanted={enchanted.has(item.preset.id)}
         favorites={favorites}
         onAdd={onAdd}
       />
     ),
-    [onAdd, totals, caracValue, owned, enchanted, favorites],
+    [onAdd, totals, caracValue, statut, owned, enchanted, favorites],
   );
 
   const renderSectionHeader = useCallback(
@@ -377,6 +379,7 @@ const SpellRow = React.memo(function SpellRow({
   entry,
   total,
   caracValue,
+  statut,
   owned,
   enchanted,
   favorites,
@@ -386,6 +389,8 @@ const SpellRow = React.memo(function SpellRow({
   /** Absent with no character in context — the row then shows no « Total ». */
   total?: SpellTotal;
   caracValue?: (caracKey: string) => number;
+  /** The caster's Statut, for a durée that scales off it. Absent = no character. */
+  statut?: number;
   /** Already in this character's spellbook — flagged, never hidden or blocked. */
   owned: boolean;
   /** Known to the character only as an enchantment's source. */
@@ -423,6 +428,7 @@ const SpellRow = React.memo(function SpellRow({
         spell={{ ...p.data, discipline: entry.discipline, sphere: entry.sphere }}
         total={total}
         caracValue={caracValue}
+        statut={statut}
       />
     </CatalogRow>
   );

@@ -19,7 +19,6 @@ import TabPager from '@/components/ui/tab-pager';
 import { ATTRIBUTS } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
-import { useCharacterState } from '@/hooks/use-character-state';
 import { openRoller } from '@/lib/dice-roller';
 import { useEditToggle } from '@/hooks/use-edit-toggle';
 import { useSkillGroups } from '@/hooks/use-skill-groups';
@@ -28,7 +27,10 @@ import { asNumRecord } from '@/lib/character-values';
 import { woundMalus } from '@/lib/modifiers';
 import { skillRollContext } from '@/lib/roll-context';
 import type { SkillScope } from '@/lib/skill-grouping';
+import { actualStateQuery } from '@/repositories/actual-state';
+import { characterQuery } from '@/repositories/characters';
 import { effectsQuery } from '@/repositories/effects';
+import { detachWrite } from '@/repositories/log';
 import {
   createSpecialization,
   deleteSpecialization,
@@ -58,8 +60,13 @@ const TABS = ATTRIBUTS.map((a) => ({ full: a.label, short: SHORT[a.key] ?? a.lab
 export default function CharacterSkillsScreen() {
   const numId = useCharacterId();
   const navigation = useNavigation();
-  // Reload on focus so attribut values edited elsewhere keep the totals correct.
-  const { char, state } = useCharacterState(numId, { reloadOnFocus: true });
+  const { data: charRows, updatedAt } = useLiveQuery(characterQuery(numId), [numId]);
+  const { data: stateRows } = useLiveQuery(actualStateQuery(numId), [numId]);
+  // `undefined` while the first read is in flight (characterFallback spins),
+  // `null` once it came back empty. Live, so a stat edited on the Fiche moves
+  // the totals here with no reload.
+  const char = updatedAt === undefined ? undefined : (charRows?.[0] ?? null);
+  const state = stateRows?.[0] ?? null;
   const { data: skills } = useLiveQuery(skillsQuery(numId), [numId]);
   const { data: effects } = useLiveQuery(effectsQuery(numId), [numId]);
   const [editing, setEditing] = useEditToggle(navigation);
@@ -120,13 +127,24 @@ export default function CharacterSkillsScreen() {
     (mother: SpecMother) => {
       // Flush pending base edits first so the mother is persisted with its value.
       flush();
-      createSpecialization(numId, mother);
+      detachWrite('skills', createSpecialization(numId, mother), { characterId: numId });
     },
     [numId, flush],
   );
-  const onSpecLabel = useCallback((spec: Skill, label: string) => renameSpecialization(spec, label), []);
-  const onSpecValue = useCallback((spec: Skill, value: number) => updateSkillValue(spec.id, value), []);
-  const onSpecRemove = useCallback((spec: Skill) => deleteSpecialization(spec), []);
+  const onSpecLabel = useCallback(
+    (spec: Skill, label: string) =>
+      detachWrite('skills', renameSpecialization(spec, label), { skillId: spec.id }),
+    [],
+  );
+  const onSpecValue = useCallback(
+    (spec: Skill, value: number) =>
+      detachWrite('skills', updateSkillValue(spec.id, value), { skillId: spec.id }),
+    [],
+  );
+  const onSpecRemove = useCallback(
+    (spec: Skill) => detachWrite('skills', deleteSpecialization(spec), { skillId: spec.id }),
+    [],
+  );
 
   const fallback = characterFallback(char);
   if (fallback || !char) return fallback;

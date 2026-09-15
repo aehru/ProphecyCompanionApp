@@ -10,7 +10,7 @@ import type { TextInput as RNTextInput } from 'react-native';
  *
  *   const { textChain, numChain } = useFieldChain(EDIT_ORDER);
  *   <TextInput {...textChain('name')} />
- *   <NumberField {...numChain('encombrement', true)} />
+ *   <NumberField {...numChain('encombrement')} />   // last in `order` → "done"
  *
  * The two variants exist because Paper's `TextInput` takes a `ref` while
  * `NumberField` forwards its own `inputRef`.
@@ -49,13 +49,13 @@ export function useFieldChain(order: readonly string[]) {
   );
 
   const numChain = useCallback(
-    (key: string, last = false) => ({
+    (key: string, last = key === order[order.length - 1]) => ({
       inputRef: setRef(key),
       returnKeyType: (last ? 'done' : 'next') as 'done' | 'next',
       submitBehavior: (last ? 'blurAndSubmit' : 'submit') as 'blurAndSubmit' | 'submit',
       onSubmitEditing: () => focusNext(key),
     }),
-    [focusNext, setRef],
+    [focusNext, setRef, order],
   );
 
   return { textChain, numChain };

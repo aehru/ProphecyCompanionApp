@@ -112,6 +112,64 @@ Local-only app, no cloud, no backup — losing the SQLite DB means losing every 
      Nothing is enforced today, on purpose.
   5. **Catalogue propagation.** Picked rows carry `presetId` + `presetRevision`
      like spells do, and nothing consumes them yet (same flow, same blocker).
+- [~] **Statuts de caste.** All 40 rungs are in. The ladder each caste climbs (« Statuts et
+  expérience »), 1 through 5. Done: `characters.statut` (0 = aucun Statut),
+  the generated catalogue (`data-src/statuses.csv` → `status-catalog.gen.ts`,
+  keyed by caste + niveau, carrying the rung's `requis`, its bénéfice, the named
+  Technique the rulebook prints in italics and the level's asterisk note), the
+  lookup ([lib/statut.ts](src/lib/statut.ts)), the chip + rung dialog beside the
+  caste on the character home, the field next to the caste on the Identité form,
+  a Catalogues tab, and `STATUT` as a formula variable. Off the campaign wire on
+  purpose, like the traits. _Remaining:_
+  1. **Mechanical bénéfices.** Descriptive today, like the traits — « bonus de 2
+     à tous ses jets d'attaque et de parade » (Maître d'armes) and « la
+     Difficulté de tous ses jets de combat est réduite de 5 » (Grand maître
+     d'armes) are `RollContext` work, and land with the traits' own mechanical
+     pass rather than as a second engine.
+  2. **Prerequisites are prose and stay prose.** Half of a `requis` names no
+     particular column (« une Compétence d'arme à 6 » is any of them, « 40 points
+     dans les Compétences Physiques » is a sum) and most of them count Privilèges
+     de caste, which the app does not model. Checking one against the sheet waits
+     on both.
+  3. ~~**Les Ordres Noirs — black ladders.**~~ Done. `characters.darkOrders`
+     switches the lookup to the caste's black ladder (`statuses.csv`
+     `ordresNoirs` = oui), and a caste with none falls back to the normal one.
+     Typed in from *Les Secrets de Kalimsshar*: Combattant, Érudit, Protecteur,
+     Mage, Artisan, Commerçant, with their black privilèges. The Voyageurs and
+     the Prodiges have NO black ladder by the book, so the fallback is the rule
+     there, not a gap.
+  4. **Hidden values survive a caste change.** Clearing the caste hides the
+     Statut field and the « Rejoindre Les Ordres Noirs » checkbox but keeps what
+     was stored, so choosing a caste again brings both back. Harmless today —
+     every reader returns nothing without a caste. If « Sans Caste » should never
+     carry them, `fromFormValues` resets both when the caste is empty.
+- [~] **Privilèges de caste.** Per-caste capabilities, counted by the Statut
+  ladder's `requis` (« 2 Privilèges de caste »). The CATALOGUE half is done:
+  `data-src/privileges.csv` → `privilege-catalog.gen.ts`, one row per (caste,
+  privilège) under the rulebook's two headings (`famille` = `caste` | `annexe`),
+  browsable on its own Catalogues tab. ALL EIGHT castes typed in, 86 entries:
+  most run 8 + 3, the Prodiges 9 + 3 (one « don » per Great Dragon, matching
+  `GREAT_DRAGONS` exactly), three castes 7 + 3 (see below). Every row carries
+  `rulebook`, so a supplement's privilèges sort in beside these.
+  _Remaining, and blocked on rules rather than on code:_
+  1. **Two entries still missing.** The Érudits and the Protecteurs each carry 7 privilèges de caste where the other non-Prodige
+     castes carry 8, and in both cases the gap falls on a page boundary in the
+     scan — between « Calligraphie officielle » and « Linguistique » for the
+     Érudits (an entry starting D–K), between « Défense » and « Influences » for
+     the Protecteurs (E–H).
+  2. **The currency.** The bracketed number is a cost, but NOT out of the
+     avantages' pool — privilèges are paid for with expérience, which the sheet
+     tracks as two bare counters (`xpTotal` / `xpSpent`) and nothing else. A
+     character cannot take a privilège until that budget has a shape, which is
+     why there is no table and no acquisition flow yet.
+  3. **Does an « annexe » count toward « X Privilèges de caste »?** The rulebook
+     names the family explicitly in the Statut requirement, which reads as "no".
+     Undecided until more castes are transcribed.
+  4. **The Statut counter.** Showing « 3 / 4 privilèges » against the next rung
+     is the one place the two systems meet; it needs the required number as a
+     real column rather than parsed out of the `requis` prose.
+  5. **Renommée.** « Notoriété » (Commerçant) raises it by 1 — a stat the sheet
+     does not have at all.
 - [ ] **Wire `encombrementMalus` into rolls.** Currently stored/displayed only — not folded into `lib/modifiers` like the wound malus is.
 - [~] **Dice roller in context.** Done for **compétences**: tapping a skill's TOT
   opens the roller against it and rolls a D10 at once, with the difficulté

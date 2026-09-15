@@ -62,12 +62,15 @@ export default function SpellDetail({
   spell: s,
   total,
   caracValue,
+  statut,
   onEdit,
 }: {
   spell: SpellView;
   total?: SpellTotal | null;
   /** Resolves a durée written against a stat (« une minute par point de Volonté »). */
   caracValue?: (caracKey: string) => number;
+  /** The caster's Statut, for a durée that scales off it. 0 / omitted = none. */
+  statut?: number;
   onEdit?: () => void;
 }) {
   // A crafted clé parfaite makes the spell easier to cast: the roll gains
@@ -97,6 +100,7 @@ export default function SpellDetail({
     // only one the catalogue ever scales off — so it costs nothing to resolve.
     sphere: total ? (key: string | null) => (key == null ? total.sphere : null) : undefined,
     carac: caracValue,
+    statut,
   };
   const durationValue = spellFormulaResult(duration, vars);
   const targetsValue = spellFormulaResult(targets, vars);
