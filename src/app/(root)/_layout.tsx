@@ -4,11 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import DiceRollerButton from '@/components/dice-roller-button';
 import { dsIcon } from '@/components/ui/icon';
+import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-
-// Same pin as the character tabs: the JS header's non-iOS default is 64, 8dp
-// taller than the native-stack toolbar every pushed screen uses.
-const HEADER_HEIGHT = 56;
 
 /**
  * The app's three top-level destinations. Everything a player opens FROM one of

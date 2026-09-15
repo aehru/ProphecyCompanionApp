@@ -4,6 +4,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text } from 'react-native-paper';
 
+import { CampaignProvider } from '@/components/campaign/campaign-provider';
 import { TableRosterProvider } from '@/components/campaign/table-roster-provider';
 import DiceRollerButton from '@/components/dice-roller-button';
 import { campaignQuery } from '@/repositories/campaigns';
@@ -72,10 +73,17 @@ export default function CampaignLayout() {
     </Stack>
   );
 
-  if (campaign.role === 'gm') {
-    return <TableRosterProvider campaign={campaign}>{stack}</TableRosterProvider>;
-  }
-  return stack;
+  // The row is handed down rather than re-queried by each screen: the layout
+  // has already answered loading and not-found for the whole subtree.
+  return (
+    <CampaignProvider campaign={campaign}>
+      {campaign.role === 'gm' ? (
+        <TableRosterProvider campaign={campaign}>{stack}</TableRosterProvider>
+      ) : (
+        stack
+      )}
+    </CampaignProvider>
+  );
 }
 
 const styles = StyleSheet.create({
