@@ -25,9 +25,10 @@ export type PrivilegePreset = {
   /**
    * What it costs, in points — the number the rulebook prints in brackets after
    * the name. The CURRENCY is not the avantages' pool: privilèges are paid for
-   * separately (XP), which is why nothing here feeds `lib/trait-pool`.
+   * separately (XP), which is why nothing here feeds `lib/trait-pool`. A list,
+   * like `TraitPreset.costs`, for the entries priced in tiers (« Symbiose »).
    */
-  cout: number;
+  costs: number[];
   /**
    * The rulebook paragraph, verbatim — the source of truth, never rewritten.
    *
@@ -37,6 +38,11 @@ export type PrivilegePreset = {
    * later without invalidating a single row.
    */
   description: string;
+  /**
+   * Only for a character sworn to Kalimsshar (« Les Ordres Noirs »). Such a
+   * character keeps every other privilège of the caste too. Absent = open.
+   */
+  darkOrders?: boolean;
 };
 
 export { PRIVILEGE_CATALOG_DATA as PRIVILEGE_CATALOG } from './privilege-catalog.gen';

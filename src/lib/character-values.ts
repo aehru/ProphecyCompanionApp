@@ -68,6 +68,8 @@ export function toFormValues(c?: Partial<Character> | null): FormValues {
     // and becomes NULL again in `fromFormValues`.
     caste: (src.caste as string) ?? '',
     biographie: (src.biographie as string) ?? '',
+    // A checkbox in a strings-only form: '1' checked, '' not.
+    darkOrders: src.darkOrders ? '1' : '',
   };
   for (const k of NUMERIC_KEYS) v[k] = src[k] != null ? String(src[k]) : '';
   return v;
@@ -119,6 +121,7 @@ export function fromFormValues(v: FormValues): Partial<NewCharacter> {
     concept: v.concept.trim(),
     caste: casteFromInput(v.caste),
     biographie: v.biographie.trim(),
+    darkOrders: v.darkOrders === '1',
   };
   for (const k of NUMERIC_KEYS) {
     let n = parseInt(v[k], 10);

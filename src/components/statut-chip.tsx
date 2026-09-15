@@ -26,22 +26,26 @@ import { OVERLAY_INK } from '@/theme/overlayInk';
 export default function StatutChip({
   caste,
   statut,
+  darkOrders,
   style,
   tone = 'surface',
 }: {
   caste?: string | null;
   statut?: number | null;
+  /** Reads the caste's black ladder — see `characters.darkOrders`. */
+  darkOrders?: boolean | null;
   style?: ViewStyle;
   tone?: ChipTone;
 }) {
   const theme = useProphecyTheme();
   const [open, setOpen] = useState(false);
-  const label = statutLabel(caste, statut);
+  const noir = !!darkOrders;
+  const label = statutLabel(caste, statut, noir);
   if (!label) return null;
 
   const color = tone === 'overlay' ? OVERLAY_INK.gold : theme.colors.secondary;
-  const rung = statutFor(caste, statut);
-  const next = statutFor(caste, (statut ?? 0) + 1);
+  const rung = statutFor(caste, statut, noir);
+  const next = statutFor(caste, (statut ?? 0) + 1, noir);
 
   return (
     <>
@@ -59,7 +63,9 @@ export default function StatutChip({
         visible={open}
         onDismiss={() => setOpen(false)}
         testID="statut-dialog"
-        title={`Statut — ${CASTE_LABEL[caste ?? ''] ?? caste}`}
+        // Off the RUNG, not the flag: a sworn Prodige reads the normal ladder
+        // (no black one yet) and must not be told otherwise.
+        title={`Statut — ${CASTE_LABEL[caste ?? ''] ?? caste}${rung?.darkOrders ? ' · Ordres Noirs' : ''}`}
         dismiss={<Button onPress={() => setOpen(false)}>Fermer</Button>}>
         {rung ? (
           <ScrollView>

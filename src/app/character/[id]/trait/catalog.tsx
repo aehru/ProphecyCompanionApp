@@ -11,6 +11,7 @@ import { useCharacterId } from '@/hooks/use-character-id';
 import { useFavorites } from '@/hooks/use-favorites';
 import { log } from '@/lib/log';
 import { traitPool } from '@/lib/trait-pool';
+import { characterQuery } from '@/repositories/characters';
 import { createTrait, traitsQuery } from '@/repositories/traits';
 
 /**
@@ -29,6 +30,8 @@ import { createTrait, traitsQuery } from '@/repositories/traits';
 export default function TraitCatalogModal() {
   const numId = useCharacterId();
   const { data: ownedRows } = useLiveQuery(traitsQuery(numId), [numId]);
+  // `undefined` until loaded, so nothing is flagged on the first frame.
+  const { data: charRows } = useLiveQuery(characterQuery(numId), [numId]);
   const favorites = useFavorites(numId, 'trait');
   const added = useCatalogSnackbar(numId, 'trait');
   const { announce, openEditor } = added;
@@ -101,6 +104,7 @@ export default function TraitCatalogModal() {
       <TraitCatalogList
         owned={owned}
         pool={pool}
+        caste={charRows?.[0]?.caste}
         onAdd={add}
         onAddCustom={addCustom}
         favorites={favorites}

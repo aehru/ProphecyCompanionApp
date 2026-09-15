@@ -1,3 +1,4 @@
+import type { CasteKey } from '@/constants/prophecy';
 import type { NewTrait } from '@/db/schema';
 
 /**
@@ -38,6 +39,13 @@ export type TraitPreset = {
    * character, and the field stays editable afterwards.
    */
   precisionPrompt?: string;
+  /**
+   * The one caste this entry is reserved to (« Présent » is for Artisans).
+   * Absent on the entries any caste may take. The picker FLAGS a mismatch and
+   * never blocks, like the pool — see `traitOffCaste`. Not in `data`: nothing
+   * about a taken row depends on it.
+   */
+  caste?: CasteKey;
   /**
    * The row payload. No `cost` (chosen at pick time, from `costs`) and no
    * `note` — the note is what the PLAYER writes about their own character's

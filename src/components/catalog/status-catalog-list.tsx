@@ -3,7 +3,7 @@ import React from 'react';
 import CasteCatalogList from '@/components/catalog/caste-catalog-list';
 import CatalogRow from '@/components/catalog-row';
 import StatutDetail from '@/components/statut-detail';
-import { rungLabel, statutsForCaste } from '@/lib/statut';
+import { ladder, rungLabel } from '@/lib/statut';
 
 /**
  * The Statut ladders, read outside any character — one section per caste, five
@@ -17,11 +17,12 @@ export default function StatusCatalogList() {
       icon="compass"
       emptyLabel="Statuts pas encore saisis."
       renderCaste={(caste) => {
-        const ladder = statutsForCaste(caste);
-        if (ladder.length === 0) return null;
-        return ladder.map((rung) => (
+        // The black ladder follows the normal one.
+        const rungs = [...ladder(caste, false), ...ladder(caste, true)];
+        if (rungs.length === 0) return null;
+        return rungs.map((rung) => (
           <CatalogRow
-            key={rung.niveau}
+            key={`${rung.darkOrders ? 'noir-' : ''}${rung.niveau}`}
             icon="compass"
             name={rungLabel(rung)}
             subtitle={rung.technique?.nom}>

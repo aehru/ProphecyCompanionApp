@@ -9,6 +9,11 @@
 // and neither does a level of 0 — the state of a fresh character and of every
 // sheet made before the column existed.
 //
+// A character sworn to Kalimsshar (`characters.darkOrders`) climbs the caste's
+// BLACK ladder instead — « Apprenti noir » and so on. A caste the catalogue has
+// no black ladder for (the Prodiges, so far) falls back to the normal one: the
+// flag says who the character serves, not that their Statut vanishes.
+//
 // Plain scans over the array, no index: the catalogue is forty rows and there is
 // nothing to search — the spellbook's folded maps exist because 300+ rulebook
 // paragraphs were being re-normalized per keystroke, which is not this.
@@ -23,17 +28,37 @@ type Caste = CasteKey | string | null | undefined;
  * and for a caste the catalogue does not carry. All three are normal states,
  * not errors.
  */
-export function statutFor(caste: Caste, niveau: number | null | undefined): StatutPreset | null {
+export function statutFor(
+  caste: Caste,
+  niveau: number | null | undefined,
+  darkOrders = false,
+): StatutPreset | null {
   if (!caste || !niveau) return null;
-  return STATUS_CATALOG.find((s) => s.caste === caste && s.niveau === niveau) ?? null;
+  return statutsForCaste(caste, darkOrders).find((s) => s.niveau === niveau) ?? null;
 }
 
-/** A caste's whole ladder, ascending. Empty for a caste the catalogue lacks. */
-export function statutsForCaste(caste: Caste): StatutPreset[] {
+/**
+ * A caste's whole ladder, ascending — the black one for `darkOrders` when the
+ * catalogue has it, the normal one otherwise. Empty for a caste it lacks.
+ */
+export function statutsForCaste(caste: Caste, darkOrders = false): StatutPreset[] {
+  if (darkOrders) {
+    const black = ladder(caste, true);
+    if (black.length > 0) return black;
+  }
+  return ladder(caste, false);
+}
+
+/**
+ * Exactly one ladder, no fallback — the black one is empty for a caste that has
+ * none. For the catalogue, which lists both; a character reads
+ * {@link statutsForCaste}.
+ */
+export function ladder(caste: Caste, darkOrders: boolean): StatutPreset[] {
   if (!caste) return [];
-  // The generator emits the catalogue sorted by caste then niveau, so a filter
-  // preserves the reading order with nothing to sort here.
-  return STATUS_CATALOG.filter((s) => s.caste === caste);
+  // The generator emits the catalogue sorted by caste, ladder, then niveau, so a
+  // filter preserves the reading order with nothing to sort here.
+  return STATUS_CATALOG.filter((s) => s.caste === caste && !!s.darkOrders === darkOrders);
 }
 
 /**
@@ -45,9 +70,13 @@ export function statutsForCaste(caste: Caste): StatutPreset[] {
  * alone. Empty at Statut 0, for « Sans Caste », and for a caste the catalogue
  * does not carry.
  */
-export function rungsUpTo(caste: Caste, niveau: number | null | undefined): StatutPreset[] {
+export function rungsUpTo(
+  caste: Caste,
+  niveau: number | null | undefined,
+  darkOrders = false,
+): StatutPreset[] {
   if (!caste || !niveau) return [];
-  return statutsForCaste(caste).filter((s) => s.niveau <= niveau);
+  return statutsForCaste(caste, darkOrders).filter((s) => s.niveau <= niveau);
 }
 
 /** The rulebook writes a Statut in Roman numerals (« III° Statut »). */
@@ -65,8 +94,12 @@ export const rungLabel = (rung: StatutPreset) => `${statutRoman(rung.niveau)} ·
  * entered and must show either way, where the name is the catalogue's to supply.
  * Null when there is no Statut at all, so a caller renders nothing.
  */
-export function statutLabel(caste: Caste, niveau: number | null | undefined): string | null {
+export function statutLabel(
+  caste: Caste,
+  niveau: number | null | undefined,
+  darkOrders = false,
+): string | null {
   if (!caste || !niveau) return null;
-  const rung = statutFor(caste, niveau);
+  const rung = statutFor(caste, niveau, darkOrders);
   return rung ? rungLabel(rung) : statutRoman(niveau);
 }
