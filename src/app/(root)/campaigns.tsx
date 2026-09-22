@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { Button, IconButton, List, Text, TextInput } from 'react-native-paper';
 
@@ -20,6 +20,11 @@ import {
 
 type DialogKind = 'create' | 'join' | null;
 
+// Module-level, like the character list: an inline arrow is a new component
+// type on every render, which remounts every separator instead of reusing it.
+const RowSeparator = () => <View style={styles.separator} />;
+const keyExtractor = (c: { id: number }) => String(c.id);
+
 export default function CampaignsScreen() {
   const router = useRouter();
   const theme = useProphecyTheme();
@@ -35,8 +40,6 @@ export default function CampaignsScreen() {
   // Same reason as the characters list: `data` starts at [], so « Aucune table »
   // would flash before the first query returns.
   const loading = updatedAt === undefined;
-  // Abort handle for the in-flight create; "Annuler" cancels the request too.
-  const abortRef = useRef<AbortController | null>(null);
 
   // Deep link from the GM's QR code (prophecyapp://campaigns?code=..&server=..):
   // prefill and open the join dialog. Runs once per param arrival.
@@ -58,21 +61,14 @@ export default function CampaignsScreen() {
     setDialog(kind);
   };
 
-  const cancel = () => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-    setDialog(null);
-    setBusy(false);
-  };
+  const cancel = () => setDialog(null);
 
   const submit = async () => {
     setBusy(true);
-    const controller = new AbortController();
-    abortRef.current = controller;
     try {
-      // Creating a table touches no network at all — the relay is attached
-      // later, from the table itself, and only if the GM wants the players'
-      // sheets. Joining one obviously needs a server.
+      // Neither touches the network. A table stays local until a relay is
+      // attached from inside it; joining only records the code and the server
+      // — the connection happens when the player goes live.
       const row =
         dialog === 'create'
           ? await createLocalTable(name.trim())
@@ -82,12 +78,8 @@ export default function CampaignsScreen() {
       setCode('');
       router.push(`/campaigns/${row.id}` as Href);
     } catch (e) {
-      // User pressed Annuler: the dialog is already closed — stay silent.
-      if (!controller.signal.aborted) {
-        Alert.alert('Erreur', e instanceof Error ? e.message : 'Connexion au serveur impossible.');
-      }
+      Alert.alert('Erreur', e instanceof Error ? e.message : String(e));
     } finally {
-      abortRef.current = null;
       setBusy(false);
     }
   };
@@ -102,7 +94,14 @@ export default function CampaignsScreen() {
         : 'Vos notes locales pour cette campagne seront effacées.',
       [
         { text: 'Annuler', style: 'cancel' },
-        { text: 'Confirmer', style: 'destructive', onPress: () => deleteCampaign(id) },
+        {
+          text: 'Confirmer',
+          style: 'destructive',
+          onPress: () =>
+            deleteCampaign(id).catch((e) =>
+              Alert.alert('Suppression impossible', e instanceof Error ? e.message : String(e)),
+            ),
+        },
       ],
     );
   };
@@ -176,8 +175,8 @@ export default function CampaignsScreen() {
         <FlatList
           data={campaigns}
           contentContainerStyle={[styles.listContent, contentWidth]}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          keyExtractor={(c) => String(c.id)}
+          ItemSeparatorComponent={RowSeparator}
+          keyExtractor={keyExtractor}
           renderItem={({ item }) => (
             // The delete button is a SIBLING of the row, not its `right` slot: a
             // List.Item with onPress renders a real <button> on web, and the slot
@@ -319,6 +318,7 @@ const styles = StyleSheet.create({
   // Clears the stacked FABs (scan sits above "Créer") so the last campaign row
   // stays tappable.
   listContent: { paddingHorizontal: 16, paddingBottom: 160 },
+  separator: { height: 8 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   item: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
   // The row and its delete button sit side by side; the row takes the space so

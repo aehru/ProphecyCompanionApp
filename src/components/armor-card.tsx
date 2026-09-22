@@ -9,6 +9,7 @@ import Icon from '@/components/ui/icon';
 import type { Armor } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { equipArmor } from '@/repositories/armor';
+import { detachWrite } from '@/repositories/log';
 
 /**
  * One armor: a read-only summary. The pencil opens the editor in a modal
@@ -63,7 +64,7 @@ function ArmorSummary({
       <Pressable style={styles.itemRow} onPress={() => setExpanded((e) => !e)}>
         {/* Tap the shield tile to equip (one armor equipped at a time). */}
         <Pressable
-          onPress={() => equipArmor(a.characterId, a.id)}
+          onPress={() => detachWrite('armor', equipArmor(a.characterId, a.id), { armorId: a.id })}
           style={[
             styles.tile,
             {

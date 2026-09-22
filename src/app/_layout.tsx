@@ -23,6 +23,7 @@ import DiceRollerHost from '@/components/dice-roller-host';
 import LogErrorBoundary from '@/components/log-error-boundary';
 import AlertHost from '@/components/ui/alert-host';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
+import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
@@ -45,15 +46,11 @@ function RouteBreadcrumbs() {
 installCapture();
 void initDiagnostics();
 
-// The same 56 the two Tabs navigators pin, for the same reason — but this stack
-// needs it on WEB only. There, expo-router's Stack falls back to the JS header,
-// whose non-iOS default is 64 (elements/Header/getDefaultHeaderHeight), so every
-// pushed screen — Diagnostic, Confidentialité, À propos — stood 8dp taller than
-// the tab screen it came from. Native needs nothing: its toolbar is already 56
-// (Android actionBarSize) / 44 (iOS).
-const HEADER_HEIGHT = 56;
-
 /**
+ * Web only: there expo-router's Stack falls back to the JS header, so every
+ * pushed screen — Diagnostic, Confidentialité, À propos — stood 8dp taller than
+ * the tab screen it came from (see HEADER_HEIGHT). Native needs nothing.
+ *
  * `height` is absent from native-stack's `headerStyle` type on purpose — a
  * native toolbar's height belongs to the OS, which is why only `backgroundColor`
  * is read there. The JS header the web build falls back to *does* read it. The

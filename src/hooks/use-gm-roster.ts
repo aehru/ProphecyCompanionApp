@@ -13,6 +13,7 @@ import type { Campaign } from '@/db/schema';
 import { CampaignSocket, type SocketStatus } from '@/lib/campaign-client';
 import { gmHello, unshareMsg, type RosterEntry } from '@/lib/campaign-protocol';
 import { updateCampaignName } from '@/repositories/campaigns';
+import { detachWrite } from '@/repositories/log';
 
 export function useGmRoster(campaign: Campaign) {
   const [status, setStatus] = useState<SocketStatus>('offline');
@@ -48,7 +49,9 @@ export function useGmRoster(campaign: Campaign) {
           case 'welcome':
             setServerError(null);
             if (msg.campaign.name && msg.campaign.name !== nameRef.current) {
-              updateCampaignName(campaignId, msg.campaign.name).catch(() => {});
+              detachWrite('campaigns', updateCampaignName(campaignId, msg.campaign.name), {
+                campaignId,
+              });
             }
             break;
           case 'roster':
@@ -106,12 +109,10 @@ export function useGmRoster(campaign: Campaign) {
     setEntries((prev) => prev.filter((e) => e.charId !== charId));
   }, []);
 
-  // Memoized by hand on purpose. React Compiler bails out of this whole hook
-  // because `nameRef.current` is assigned during render (above), so nothing here
-  // is auto-memoized — and an unstable `roster` identity would defeat the
-  // memoization the compiler DOES apply in the screens that consume it (the
-  // initiative order recomputes, the FlatList re-derives). Verified by compiling
-  // this file with the compiler: zero memo slots, no runtime import.
+  // Memoized by hand: the sorted roster's identity is what the consuming
+  // screens' memoization keys on (the initiative order recomputes, the FlatList
+  // re-derives), so the guarantee is spelled out here rather than left to the
+  // compiler's output for this file.
   const roster = useMemo(
     () =>
       [...entries].sort((a, b) =>

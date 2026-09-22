@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
-import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 
 import ArmorCard from '@/components/armor-card';
@@ -20,6 +20,7 @@ import { MONEY } from '@/constants/prophecy';
 import type { Weapon } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useCharacterState } from '@/hooks/use-character-state';
+import { useFieldChain } from '@/hooks/use-field-chain';
 import { useInPlayWriters } from '@/hooks/use-in-play-writers';
 import { openRoller } from '@/lib/dice-roller';
 import { useSplitWidth } from '@/hooks/use-layout';
@@ -32,6 +33,7 @@ import { armorQuery } from '@/repositories/armor';
 import { enchantsQuery } from '@/repositories/enchants';
 import { effectsQuery } from '@/repositories/effects';
 import { createItem, itemsQuery } from '@/repositories/items';
+import { detachWrite } from '@/repositories/log';
 import { shieldsQuery } from '@/repositories/shields';
 import { skillsQuery } from '@/repositories/skills';
 import { weaponsQuery } from '@/repositories/weapons';
@@ -42,6 +44,7 @@ const TABS = [
   { full: 'Boucliers', short: 'Boucl.' },
   'Objets',
 ] as const;
+const MONEY_KEYS = MONEY.map((m) => m.key);
 
 export default function CharacterWeaponsScreen() {
   const numId = useCharacterId();
@@ -50,9 +53,8 @@ export default function CharacterWeaponsScreen() {
   const [tab, setTab] = useState(0);
   const [itemQuery, setItemQuery] = useState('');
   const splitWidth = useSplitWidth();
-  // Keyboard "next" wiring for the ARGENT fields (self-contained here — money
-  // is the only chained field group left on this screen).
-  const moneyRefs = useRef<Record<string, RNTextInput | null>>({});
+  // Keyboard "next" wiring for the ARGENT fields.
+  const { numChain } = useFieldChain(MONEY_KEYS);
   // ensure: money (dracs) lives on actual_state, edited here.
   const { char, state, setState } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
 
@@ -106,21 +108,6 @@ export default function CharacterWeaponsScreen() {
   const rollWeapon = (w: Weapon) => {
     const ctx = weaponRollContext(w.name, skillOf(w));
     if (ctx) openRoller(ctx);
-  };
-
-
-  const moneyKeys: string[] = MONEY.map((m) => m.key);
-  const moneyChain = (key: string) => {
-    const i = moneyKeys.indexOf(key);
-    const isLast = i === moneyKeys.length - 1;
-    return {
-      inputRef: (el: RNTextInput | null) => {
-        moneyRefs.current[key] = el;
-      },
-      returnKeyType: (isLast ? 'done' : 'next') as 'done' | 'next',
-      submitBehavior: (isLast ? 'blurAndSubmit' : 'submit') as 'blurAndSubmit' | 'submit',
-      onSubmitEditing: () => moneyRefs.current[moneyKeys[i + 1]]?.focus(),
-    };
   };
 
   // One page per category; each scrolls on its own under the pinned money card
@@ -243,7 +230,7 @@ export default function CharacterWeaponsScreen() {
             <MoneySection
               valueOf={(k) => String(stRec[k] ?? 0)}
               onChange={(k, t) => setStateValue(k, Number(t) || 0)}
-              chain={moneyChain}
+              chain={numChain}
               editing={editing}
             />
           )}
@@ -270,7 +257,12 @@ export default function CharacterWeaponsScreen() {
           onPress={() => router.push(`/character/${numId}/shield/catalog`)}
         />
       ) : null}
-      {tab === 3 ? <AppFab icon={dsIcon('backpack')} onPress={() => createItem(numId)} /> : null}
+      {tab === 3 ? (
+        <AppFab
+          icon={dsIcon('backpack')}
+          onPress={() => detachWrite('items', createItem(numId), { characterId: numId })}
+        />
+      ) : null}
     </View>
   );
 }

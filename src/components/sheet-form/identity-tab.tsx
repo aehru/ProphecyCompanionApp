@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, HelperText, TextInput } from 'react-native-paper';
+import { Button, Checkbox, HelperText, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import type { ChainMap } from '@/components/sheet-form/field-chain';
@@ -102,6 +102,17 @@ export default function IdentityTab({
             />
           ) : null}
         </View>
+        {/* Same rule as the Statut: the oath switches to the caste's black
+            ladder, so outside a caste there is nothing for it to change. */}
+        {v.caste ? (
+          <Checkbox.Item
+            testID="field-dark-orders"
+            label="Rejoindre Les Ordres Noirs"
+            position="leading"
+            status={v.darkOrders === '1' ? 'checked' : 'unchecked'}
+            onPress={() => onText('darkOrders', v.darkOrders === '1' ? '' : '1')}
+          />
+        ) : null}
       </SectionCard>
 
       <SectionCard title="TENDANCES">
