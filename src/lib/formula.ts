@@ -23,6 +23,13 @@
 // opt-in because a weapon's damage has no NR — letting it through there would
 // turn a typo into a silently valid formula.
 //
+// STATUT is the third opt-in variable — `{ statut: true }`. A handful of
+// sortilèges scale off the caster's rank inside their caste: « 100 fois le
+// niveau de (Sphère des cités + Statut) », « 20 kg par degré de Statut », « 1
+// mètre/Statut ». Same spellings as NR (`STATUT x2`, `2 par STATUT`,
+// `2/STATUT`), for the same reason: an author copies the book rather than
+// learning a syntax. Opt-in like the others — a weapon has no Statut.
+//
 // SPHERE is the second opt-in variable — `{ sphere: true }`. The supplements
 // scale most of their durations off the caster's sphere score: « dure (Sphère
 // des vents) tours », « (Sphère de la nature × 2) tours », « une heure par point
@@ -39,6 +46,7 @@ import { fold } from '@/lib/text-fold';
 export type FormulaTerm =
   | { kind: 'carac'; carac: string; abbr: string; mult: number }
   | { kind: 'nr'; mult: number }
+  | { kind: 'statut'; mult: number }
   /** `sphere: null` = the spell's own sphere; otherwise a `SPHERES` key. */
   | { kind: 'sphere'; sphere: string | null; mult: number }
   | { kind: 'flat'; value: number }
@@ -67,6 +75,11 @@ const NR_RE = /^NR$/i;
  * is the book's "par", NOT division — the grammar still has no division.
  */
 const NR_MULT_RE = /^(?:NR\s*[x×*]\s*(\d+)|(\d+)\s*(?:[x×*]\s*NR|par\s+NR|\/\s*NR))$/i;
+/** Bare `STATUT` — checked BEFORE CARAC_RE, which would otherwise match it. */
+const STATUT_RE = /^STATUTS?$/i;
+/** `STATUT` with a coefficient — the NR spellings, applied to the Statut. */
+const STATUT_MULT_RE =
+  /^(?:STATUTS?\s*[x×*]\s*(\d+)|(\d+)\s*(?:[x×*]\s*STATUTS?|par\s+STATUTS?|\/\s*STATUTS?))$/i;
 /**
  * `SPHERE`, `SPHERE_VENTS`, `SPHERE_DES_VENTS`, any optionally followed by `x2`.
  * The name is captured loosely — separators and articles are sorted out by
@@ -94,7 +107,10 @@ const SPHERE_BY_NAME: Record<string, string> = Object.fromEntries(
 );
 
 /** Parse a formula string into terms. Empty string parses to zero terms. */
-export function parseFormula(input: string, { nr = false, sphere = false } = {}): ParseResult {
+export function parseFormula(
+  input: string,
+  { nr = false, sphere = false, statut = false } = {},
+): ParseResult {
   const raw = (input ?? '').trim();
   if (raw === '') return { ok: true, formula: { terms: [] } };
 
@@ -120,6 +136,17 @@ export function parseFormula(input: string, { nr = false, sphere = false } = {})
         continue;
       }
     }
+    if (statut) {
+      if (STATUT_RE.test(part)) {
+        terms.push({ kind: 'statut', mult: 1 });
+        continue;
+      }
+      const statutMult = part.match(STATUT_MULT_RE);
+      if (statutMult) {
+        terms.push({ kind: 'statut', mult: Number(statutMult[1] ?? statutMult[2]) });
+        continue;
+      }
+    }
     if (sphere) {
       const sph = part.match(SPHERE_RE);
       if (sph) {
@@ -142,6 +169,9 @@ export function parseFormula(input: string, { nr = false, sphere = false } = {})
     }
     if (!sphere && SPHERE_RE.test(part)) {
       return { ok: false, error: `SPHERE n'est utilisable que dans une formule de sortilège` };
+    }
+    if (!statut && (STATUT_RE.test(part) || STATUT_MULT_RE.test(part))) {
+      return { ok: false, error: `STATUT n'est utilisable que dans une formule de sortilège` };
     }
     const mult = part.match(CARAC_MULT_RE);
     if (mult) {
@@ -192,6 +222,13 @@ export interface FormulaVars {
   caracModifier?: (caracKey: string) => number;
   /** The niveau de réussite the player rolled. */
   nr?: number | null;
+  /**
+   * The caster's Statut — their rung inside their caste, 1–5 (see lib/statut).
+   * Declines as 0/null/undefined, which is « aucun Statut » as well as « no
+   * character in context »: both leave the term symbolic rather than counting
+   * the caster as rank zero.
+   */
+  statut?: number | null;
   /** Answers for `null` (the spell's OWN sphere) and/or a named `SPHERES` key. */
   sphere?: (sphereKey: string | null) => number | null | undefined;
 }
@@ -228,6 +265,10 @@ export function computeFormula(formula: ParsedFormula, vars: FormulaVars = {}): 
         if (vars.nr == null) symbolic.push(t);
         else total += vars.nr * t.mult;
         break;
+      case 'statut':
+        if (!vars.statut) symbolic.push(t);
+        else total += vars.statut * t.mult;
+        break;
       case 'sphere': {
         const v = vars.sphere?.(t.sphere);
         if (v == null) symbolic.push(t);
@@ -248,6 +289,8 @@ export function formulaTermLabel(t: FormulaTerm): string {
       return t.mult === 1 ? t.abbr : `${t.abbr} × ${t.mult}`;
     case 'nr':
       return t.mult === 1 ? 'NR' : `${t.mult} × NR`;
+    case 'statut':
+      return t.mult === 1 ? 'Statut' : `${t.mult} × Statut`;
     case 'sphere': {
       const name = t.sphere == null ? 'Sphère' : `Sphère ${SPHERE_LABEL_BY_KEY[t.sphere]}`;
       return t.mult === 1 ? name : `${name} × ${t.mult}`;
@@ -275,7 +318,7 @@ export function formulaTermLabel(t: FormulaTerm): string {
 export function formulaResult(
   raw: string | null | undefined,
   vars: FormulaVars = {},
-  parse: { nr?: boolean; sphere?: boolean } = {},
+  parse: { nr?: boolean; sphere?: boolean; statut?: boolean } = {},
 ): string | null {
   if (raw == null || raw.trim() === '') return null;
   const parsed = parseFormula(raw, parse);
@@ -290,7 +333,7 @@ export function formulaResult(
 }
 
 /**
- * `formulaResult` with both spell variables enabled — a spell's durée or its
+ * `formulaResult` with every spell variable enabled — a spell's durée or its
  * nombre de cibles. Same `vars` bag: pass whichever resolvers you hold, and the
  * rest stays symbolic.
  */
@@ -298,7 +341,7 @@ export function spellFormulaResult(
   raw: string | null | undefined,
   vars: FormulaVars = {},
 ): string | null {
-  return formulaResult(raw, vars, { nr: true, sphere: true });
+  return formulaResult(raw, vars, { nr: true, sphere: true, statut: true });
 }
 
 export type Prerequisite = { carac: string; abbr: string; min: number };

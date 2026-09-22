@@ -8,6 +8,7 @@ import Icon, { dsIcon } from '@/components/ui/icon';
 import type { Weapon } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { skillOptions, specializationsOf } from '@/lib/weapon-skill';
+import { detachWrite } from '@/repositories/log';
 import { skillsQuery } from '@/repositories/skills';
 import { updateWeapon } from '@/repositories/weapons';
 
@@ -39,7 +40,7 @@ export default function WeaponSkillField({ weapon: w }: { weapon: Weapon }) {
     setMother(null);
   };
   const commit = (name: string | null) => {
-    updateWeapon(w.id, { skillName: name });
+    detachWrite('weapons', updateWeapon(w.id, { skillName: name }), { weaponId: w.id });
     close();
   };
 

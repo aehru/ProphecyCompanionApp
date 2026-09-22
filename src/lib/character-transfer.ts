@@ -63,6 +63,9 @@ const characterSchema = z.object({
   // existed have no such field and import as a player character, the column
   // default. Carried so duplicating/restoring an NPC keeps it an NPC.
   kind: z.enum(['pc', 'npc']).optional(),
+  // Sworn to Kalimsshar. OPTIONAL (not a version bump): older exports import at
+  // the column default, outside the Ordres Noirs.
+  darkOrders: z.boolean().optional(),
   ...shapeFrom(NUMERIC_KEYS, int),
 });
 

@@ -15,6 +15,7 @@ import TotalBadge from '@/components/ui/total-badge';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { formulaResult } from '@/lib/formula';
 import type { WeaponSkillReading } from '@/lib/weapon-skill';
+import { detachWrite } from '@/repositories/log';
 import { equipWeapon, unequipWeapon } from '@/repositories/weapons';
 
 /**
@@ -94,10 +95,12 @@ function WeaponSummary({
   // Toggle a slot: tapping the active one unequips. Any weapon can go in any
   // slot — handedness isn't enforced (an advantage may allow a two-handed weapon
   // in one hand, with a malus applied in play).
-  const toggleHand = (hand: 'main' | 'off' | 'both') => {
-    if (w.equippedHand === hand) unequipWeapon(w.id);
-    else equipWeapon(w.characterId, w.id, hand);
-  };
+  const toggleHand = (hand: 'main' | 'off' | 'both') =>
+    detachWrite(
+      'weapons',
+      w.equippedHand === hand ? unequipWeapon(w.id) : equipWeapon(w.characterId, w.id, hand),
+      { weaponId: w.id },
+    );
 
   // Collapsed-row subtitle: computed damage + initiative (mêlée / corps à corps).
   // The full breakdown (formula results, prereqs, ranges, creation) is in the

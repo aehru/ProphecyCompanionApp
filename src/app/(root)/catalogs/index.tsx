@@ -26,6 +26,8 @@ import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
 const PAGES = [
   lazy(() => import('@/components/catalog/spell-catalog-list')),
   lazy(() => import('@/components/catalog/trait-catalog-list')),
+  lazy(() => import('@/components/catalog/status-catalog-list')),
+  lazy(() => import('@/components/catalog/privilege-catalog-list')),
   lazy(() => import('@/components/catalog/weapon-catalog-list')),
   lazy(() => import('@/components/catalog/armor-catalog-list')),
   lazy(() => import('@/components/catalog/shield-catalog-list')),
@@ -43,6 +45,8 @@ function CatalogLoading() {
 const TABS: readonly TabLabel[] = [
   { full: 'Sortilèges', short: 'Sorts' },
   'Av./Dés.',
+  'Statuts',
+  'Privilèges',
   'Armes',
   'Armures',
   'Boucliers',

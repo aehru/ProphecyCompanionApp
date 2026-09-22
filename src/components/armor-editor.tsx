@@ -5,13 +5,14 @@ import { Button, TextInput } from 'react-native-paper';
 import NumberField from '@/components/number-field';
 import ChipSelect from '@/components/ui/chip-select';
 import { ARMOR_CATEGORIES, type ArmorCategory } from '@/data/armor-catalog';
-import type { Armor } from '@/db/schema';
+import type { Armor, NewArmor } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { formatDecimal, parseDecimal } from '@/lib/character-values';
 import { deleteArmor, updateArmor } from '@/repositories/armor';
+import { detachWrite } from '@/repositories/log';
 
 // Split out of armor-card.tsx: the read-only card and this editor form share
 // nothing but the Armor type, and only the `armor/[aid]` modal loads this one.
@@ -28,11 +29,14 @@ const EDIT_ORDER = ['name', 'prereq', 'defenseMax', 'creationDifficulty', 'creat
  */
 export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClose: () => void }) {
   const theme = useProphecyTheme();
-  const [name, setName] = useDebouncedText(a.name, (t) => updateArmor(a.id, { name: t }));
+  // Every field writes straight through and nobody awaits it — see detachWrite.
+  const patch = (data: Partial<NewArmor>) =>
+    detachWrite('armor', updateArmor(a.id, data), { armorId: a.id });
+  const [name, setName] = useDebouncedText(a.name, (t) => patch({ name: t }));
   const [prereq, setPrereq] = useDebouncedText(a.prerequisites, (t) =>
-    updateArmor(a.id, { prerequisites: t }),
+    patch({ prerequisites: t }),
   );
-  const [special, setSpecial] = useDebouncedText(a.special, (t) => updateArmor(a.id, { special: t }));
+  const [special, setSpecial] = useDebouncedText(a.special, (t) => patch({ special: t }));
   // Creation time is the one fractional field (0,5 jour) — see WeaponEditor's
   // note on why it's kept local instead of read back off the row.
   const [creationTime, setCreationTime] = useState(a.creationTime ? formatDecimal(a.creationTime) : '');
@@ -43,10 +47,7 @@ export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClo
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          await deleteArmor(a.id);
-          onClose();
-        },
+        onPress: () => detachWrite('armor', deleteArmor(a.id).then(onClose), { armorId: a.id }),
       },
     ]);
 
@@ -68,7 +69,7 @@ export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClo
         label="Catégorie"
         options={CATEGORY_OPTIONS}
         value={a.category}
-        onChange={(k) => updateArmor(a.id, { category: k as ArmorCategory })}
+        onChange={(k) => patch({ category: k as ArmorCategory })}
       />
 
       <TextInput
@@ -91,7 +92,7 @@ export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClo
             // An undamaged armor (current at its max) stays full as the max
             // changes; a damaged one clamps to the new ceiling.
             const full = a.defenseCurrent >= a.defenseMax;
-            updateArmor(a.id, {
+            patch({
               defenseMax: max,
               defenseCurrent: full ? max : Math.min(a.defenseCurrent, max),
             });
@@ -103,7 +104,7 @@ export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClo
           fieldKey="creationDifficulty"
           label="Difficulté création"
           value={a.creationDifficulty ? String(a.creationDifficulty) : ''}
-          onChange={(_, t) => updateArmor(a.id, { creationDifficulty: Number(t) || 0 })}
+          onChange={(_, t) => patch({ creationDifficulty: Number(t) || 0 })}
           style={styles.numCol}
           {...numChain('creationDifficulty')}
         />
@@ -113,7 +114,7 @@ export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClo
           value={creationTime}
           onChange={(_, t) => {
             setCreationTime(t);
-            updateArmor(a.id, { creationTime: parseDecimal(t) });
+            patch({ creationTime: parseDecimal(t) });
           }}
           decimal
           style={styles.numCol}
@@ -123,7 +124,7 @@ export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClo
           fieldKey="encombrement"
           label="Pénalité d'encombrement"
           value={a.encombrementMalus ? String(a.encombrementMalus) : ''}
-          onChange={(_, t) => updateArmor(a.id, { encombrementMalus: Number(t) || 0 })}
+          onChange={(_, t) => patch({ encombrementMalus: Number(t) || 0 })}
           style={styles.numCol}
           {...numChain('encombrement', true)}
         />
@@ -150,7 +151,7 @@ export default function ArmorEditor({ armor: a, onClose }: { armor: Armor; onClo
         <Button
           mode="contained-tonal"
           icon="hammer-wrench"
-          onPress={() => updateArmor(a.id, { defenseCurrent: a.defenseMax })}
+          onPress={() => patch({ defenseCurrent: a.defenseMax })}
           style={styles.actionBtn}>
           Réparer
         </Button>

@@ -69,6 +69,25 @@ export const characters = sqliteTable('characters', {
     .notNull()
     .default('pc'),
 
+  // Rank inside the caste (« Statuts et expérience »): 1–5, each level a named
+  // rung with its own prerequisites and bénéfices. 0 is « aucun Statut » — the
+  // state of a fresh character, of every row that predates the column, and the
+  // only possible one for « Sans Caste ». NOT NULL rather than nullable so the
+  // column rides NUMERIC_KEYS with the other stats (form, export and the import
+  // schema all derive from that list) — a nullable stat would need its own case
+  // in each. No CHECK on the range, unlike the tendance puces: SQLite can only
+  // add one by rebuilding the table, and the rebuild drizzle generates reads the
+  // new column out of the old table. The stepper caps it and the catalogue
+  // lookup simply finds nothing outside 1–5. The level's TEXT is not stored: it is looked up by (caste, statut)
+  // in the generated catalogue, so a rulebook correction reaches every sheet.
+  statut: integer('statut').notNull().default(0),
+
+  // Sworn to Kalimsshar — « Les Ordres Noirs ». Switches the Statut lookup to
+  // the caste's black ladder where the catalogue has one (see lib/statut); every
+  // privilège of the caste stays open. A boolean and not in NUMERIC_KEYS: it is
+  // no stat, and keeping it out of that list keeps it off the campaign wire.
+  darkOrders: integer('dark_orders', { mode: 'boolean' }).notNull().default(false),
+
   // Tendances — each has a main number + a subnumber (0–10)
   dragon: integer('dragon').notNull().default(0),
   dragonSub: integer('dragon_sub').notNull().default(0),

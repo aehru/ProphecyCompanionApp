@@ -1,0 +1,1 @@
+ALTER TABLE `characters` ADD `statut` integer DEFAULT 0 NOT NULL;

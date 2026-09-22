@@ -5,20 +5,16 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { MAX_PUCES, TENDANCES, TENDANCE_BY_KEY, type TendanceKey } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { OVERLAY_INK } from '@/theme/overlayInk';
 
 
 const DEFAULT_SIZE = 64;
 const STROKE = 5;
 
-/**
- * The overlay palette is FIXED, not themed — like the tendance trio's own
- * colours. These sit on a photograph, not on a surface: the wash has to darken
- * whatever pixels are underneath, so a light-theme role would make the rings
- * vanish on a pale portrait and a dark-theme one would do the same on a dark
- * one.
- */
-const OVERLAY_DISC = 'rgba(20,22,24,0.55)';
-const OVERLAY_TEXT = '#F8F2E8';
+// The overlay ink is shared with the portrait hero and the identity chips —
+// see `theme/overlayInk` for why it is fixed rather than themed.
+const OVERLAY_DISC = OVERLAY_INK.scrimDisc;
+const OVERLAY_TEXT = OVERLAY_INK.text;
 
 /**
  * The unfilled track is the tendance's OWN colour, faded — not a neutral

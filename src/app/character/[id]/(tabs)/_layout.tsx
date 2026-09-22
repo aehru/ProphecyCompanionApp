@@ -5,13 +5,8 @@ import { IconButton } from 'react-native-paper';
 
 import DiceRollerButton from '@/components/dice-roller-button';
 import { dsIcon } from '@/components/ui/icon';
+import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-
-// The tabs header is the JS one from @react-navigation/elements, whose non-iOS
-// default is 64 (getDefaultHeaderHeight) — 8dp taller than the native-stack
-// toolbar (Android actionBarSize = 56) used by every other screen. Pin it to 56
-// so headers are the same height across the app.
-const HEADER_HEIGHT = 56;
 
 export default function CharacterTabsLayout() {
   const theme = useProphecyTheme();

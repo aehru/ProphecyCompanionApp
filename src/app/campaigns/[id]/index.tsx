@@ -1,10 +1,11 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { type Href, Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { type Href, Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Button, Divider, Text, TextInput } from 'react-native-paper';
+import { Button, Divider, Text, TextInput } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useCampaign } from '@/components/campaign/campaign-provider';
 import CharacterPickList, {
   type PickableCharacter,
 } from '@/components/campaign/character-pick-list';
@@ -23,7 +24,6 @@ import { Alert } from '@/lib/alert';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import {
   attachServer,
-  campaignQuery,
   createNpc,
   membersQuery,
   setMember,
@@ -31,36 +31,34 @@ import {
   unshareFromServer,
 } from '@/repositories/campaigns';
 import { charactersListQuery } from '@/repositories/characters';
+import { detachWrite } from '@/repositories/log';
 
 /**
  * Shared membership toggle: persist the row, and when REMOVING a character
  * while the campaign is not broadcasting, purge its projection from the server
  * best-effort (the ghost-roster fix — while live, the broadcaster sends the
  * `unshare` on the live socket instead). A local table has nothing to purge.
+ *
+ * Fired from a checkbox and never awaited — the live membership query is what
+ * puts the tick back on screen — hence `detachWrite` for the error path.
  */
-async function toggleMember(
+function toggleMember(
   campaign: Campaign,
   character: PickableCharacter,
   next: boolean,
   isLiveHere: boolean,
-) {
-  await setMember(campaign.id, character.id, next);
-  if (!next && !isLiveHere && character.uuid) {
-    unshareFromServer(campaign, character.uuid).catch(() => {});
-  }
+): void {
+  const write = setMember(campaign.id, character.id, next).then(() => {
+    if (!next && !isLiveHere && character.uuid) {
+      unshareFromServer(campaign, character.uuid).catch(() => {});
+    }
+  });
+  detachWrite('campaign_shares', write, { campaignId: campaign.id, characterId: character.id });
 }
 
 export default function CampaignSalonScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { data } = useLiveQuery(campaignQuery(Number(id)), [id]);
-  const campaign = data?.[0];
-  if (!campaign) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
+  // Resolved once by the layout, which also owns the not-found case.
+  const campaign = useCampaign();
   return campaign.role === 'gm' ? <GmSalon campaign={campaign} /> : <PlayerSalon campaign={campaign} />;
 }
 
@@ -88,9 +86,13 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
   // Create the NPC, then land on its sheet: only the name is required, the rest
   // is filled in the character form like any other character.
   const submitNpc = async () => {
-    const created = await createNpc(campaign.id, npcName ?? '');
-    setNpcName(null);
-    router.push(`/character/${created.id}` as Href);
+    try {
+      const created = await createNpc(campaign.id, npcName ?? '');
+      setNpcName(null);
+      router.push(`/character/${created.id}` as Href);
+    } catch (e) {
+      Alert.alert('Création impossible', e instanceof Error ? e.message : String(e));
+    }
   };
 
   const submitAttach = async () => {
@@ -108,9 +110,13 @@ function GmSalon({ campaign }: { campaign: Campaign }) {
   // Publishing NPCs is opt-in (co-GM case): flipping it on also starts the
   // broadcast, flipping it off purges what is already on the server.
   const toggleShareNpcs = async (next: boolean) => {
-    await setShareNpcs(campaign.id, next);
-    if (next) start(campaign.id);
-    else if (isLiveHere) stop();
+    try {
+      await setShareNpcs(campaign.id, next);
+      if (next) start(campaign.id);
+      else if (isLiveHere) stop();
+    } catch (e) {
+      Alert.alert('Erreur', e instanceof Error ? e.message : String(e));
+    }
   };
 
   return (
@@ -332,7 +338,6 @@ function PlayerSalon({ campaign }: { campaign: Campaign }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scroll: { padding: 16, paddingBottom: 96, gap: 14 },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   bottomBar: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },

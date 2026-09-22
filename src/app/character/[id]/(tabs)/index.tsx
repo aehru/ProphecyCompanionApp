@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -6,6 +7,11 @@ import { Button, Text } from 'react-native-paper';
 import CasteChip from '@/components/caste-chip';
 import ConceptChip from '@/components/concept-chip';
 import PortraitHero from '@/components/portrait-hero';
+import StatutChip from '@/components/statut-chip';
+import {
+  StatutBenefitsSection,
+  StatutTechniquesSection,
+} from '@/components/statut-sections';
 import TendancesCircles from '@/components/tendances-circles';
 import TraitsSection from '@/components/traits-section';
 import { characterFallback } from '@/components/ui/character-gate';
@@ -14,12 +20,13 @@ import Icon, { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
 import { RESOURCES, WOUND_LEVELS } from '@/constants/prophecy';
 import { useCharacterId } from '@/hooks/use-character-id';
-import { useCharacterState } from '@/hooks/use-character-state';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
 import { asNumRecord } from '@/lib/character-values';
 import { mediaUri, pickCharacterMedia } from '@/lib/media';
-import { setCharacterMedia } from '@/repositories/characters';
+import { actualStateQuery } from '@/repositories/actual-state';
+import { characterQuery, setCharacterMedia } from '@/repositories/characters';
 
 /**
  * Character home dashboard — the glanceable, read-only landing (modelled on the
@@ -36,7 +43,12 @@ import { setCharacterMedia } from '@/repositories/characters';
 export default function CharacterDashboardScreen() {
   const numId = useCharacterId();
   const theme = useProphecyTheme();
-  const { char, state, reload } = useCharacterState(numId, { ensure: true, reloadOnFocus: true });
+  const { data: charRows, updatedAt } = useLiveQuery(characterQuery(numId), [numId]);
+  const { data: stateRows } = useLiveQuery(actualStateQuery(numId), [numId]);
+  // `undefined` while the first read is in flight (characterFallback spins),
+  // `null` once it came back empty.
+  const char = updatedAt === undefined ? undefined : (charRows?.[0] ?? null);
+  const state = stateRows?.[0] ?? null;
   // Illustrations are the one thing editable from the otherwise read-only
   // dashboard, and the ILLUSTRATION card keeps that job even when the portrait
   // hero is showing the image — a tap on the hero must never open the gallery.
@@ -55,11 +67,17 @@ export default function CharacterDashboardScreen() {
   const woundFilled = WOUND_LEVELS.reduce((n, w) => n + (stRec[`${w.key}Current`] ?? 0), 0);
   const woundMax = WOUND_LEVELS.reduce((n, w) => n + (rec[`${w.key}Max`] ?? 0), 0);
 
+  // The live queries redraw the hero the moment the row changes, so nothing
+  // here reloads. A failed copy is the one thing worth a word.
+  const mediaFailed = (e: unknown) =>
+    Alert.alert('Illustration impossible', e instanceof Error ? e.message : String(e));
+
   const pickAvatar = async () => {
-    const path = await pickCharacterMedia(numId, 'avatar');
-    if (path) {
-      await setCharacterMedia(numId, 'avatar', path);
-      reload();
+    try {
+      const path = await pickCharacterMedia(numId, 'avatar');
+      if (path) await setCharacterMedia(numId, 'avatar', path);
+    } catch (e) {
+      mediaFailed(e);
     }
   };
 
@@ -67,19 +85,15 @@ export default function CharacterDashboardScreen() {
     setBusyPortrait(true);
     try {
       const path = await pickCharacterMedia(numId, 'portrait');
-      if (path) {
-        await setCharacterMedia(numId, 'portrait', path);
-        reload();
-      }
+      if (path) await setCharacterMedia(numId, 'portrait', path);
+    } catch (e) {
+      mediaFailed(e);
     } finally {
       setBusyPortrait(false);
     }
   };
 
-  const clearPortrait = async () => {
-    await setCharacterMedia(numId, 'portrait', null);
-    reload();
-  };
+  const clearPortrait = () => setCharacterMedia(numId, 'portrait', null).catch(mediaFailed);
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.container, splitWidth]}>
@@ -91,6 +105,8 @@ export default function CharacterDashboardScreen() {
           avatar={avatar}
           nom={char.nom}
           caste={char.caste}
+          statut={char.statut}
+          darkOrders={char.darkOrders}
           concept={char.concept}
           tendances={(k) => ({ value: rec[k] ?? 0, sub: rec[`${k}Sub`] ?? 0 })}
           onPickAvatar={pickAvatar}
@@ -120,6 +136,9 @@ export default function CharacterDashboardScreen() {
             {char.concept || char.caste ? (
               <View style={styles.chips}>
                 <CasteChip caste={char.caste} />
+                {/* The Statut belongs to the caste, so it follows it — and it is
+                    the one chip here that is tappable (it opens the rung). */}
+                <StatutChip caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
                 <ConceptChip concept={char.concept} />
               </View>
             ) : null}
@@ -136,17 +155,23 @@ export default function CharacterDashboardScreen() {
         {/* At-a-glance vitals (read-only; edit on the Fiche). */}
         <SectionCard title="EN BREF" icon="compass">
           <View style={styles.vitals}>
-            <Vital label="Blessures" value={`${woundFilled}/${woundMax}`} theme={theme} />
+            <Vital label="Blessures" value={`${woundFilled}/${woundMax}`} />
             {RESOURCES.map((r) => (
               <Vital
                 key={r.key}
                 label={r.label}
                 value={`${stRec[`${r.key}Current`] ?? 0}/${rec[`${r.key}Max`] ?? 0}`}
-                theme={theme}
               />
             ))}
           </View>
         </SectionCard>
+
+        {/* What the caste ladder gives, then what the player bought: the two
+            statut sections read as one block under the Statut that grants them,
+            with the avantages — the character's own choices — after. Both
+            derive from `caste` + `statut` and both disappear at Statut 0. */}
+        <StatutBenefitsSection caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
+        <StatutTechniquesSection caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
 
         {/* Points earned and spent, then both lists. Read-only like the rest of
             the dashboard: a row opens its editor as a modal. */}
@@ -176,15 +201,8 @@ export default function CharacterDashboardScreen() {
   );
 }
 
-function Vital({
-  label,
-  value,
-  theme,
-}: {
-  label: string;
-  value: string;
-  theme: ReturnType<typeof useProphecyTheme>;
-}) {
+function Vital({ label, value }: { label: string; value: string }) {
+  const theme = useProphecyTheme();
   return (
     <View style={styles.vital}>
       <Text style={[styles.vitalLabel, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>

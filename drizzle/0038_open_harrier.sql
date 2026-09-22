@@ -1,0 +1,1 @@
+ALTER TABLE `characters` ADD `dark_orders` integer DEFAULT false NOT NULL;
