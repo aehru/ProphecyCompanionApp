@@ -3,9 +3,10 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { CatalogScrollProvider, useCatalogScrollHost } from '@/components/catalog-scroll';
-import SectionCard from '@/components/ui/section-card';
+import FoldSection from '@/components/ui/fold-section';
 import type { IconName } from '@/components/ui/icon';
 import { CASTES, type CasteKey } from '@/constants/prophecy';
+import { useFolds } from '@/hooks/use-folds';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
@@ -35,6 +36,7 @@ export default function CasteCatalogList({
   renderCaste: (caste: CasteKey) => React.ReactNode | null;
 }) {
   const theme = useProphecyTheme();
+  const { isOpen, toggle } = useFolds();
   const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
 
   return (
@@ -44,15 +46,22 @@ export default function CasteCatalogList({
         onScroll={onScroll}
         contentContainerStyle={[styles.container, contentWidth]}>
         {CASTES.map((c) => {
-          const body = renderCaste(c.key);
+          const open = isOpen(c.key);
+          // A folded caste renders nothing, so its rows are not even built.
+          const body = open ? renderCaste(c.key) : null;
           return (
-            <SectionCard key={c.key} title={c.label.toUpperCase()} icon={icon}>
+            <FoldSection
+              key={c.key}
+              title={c.label.toUpperCase()}
+              icon={icon}
+              open={open}
+              onToggle={() => toggle(c.key)}>
               {body ?? (
                 <Text style={[styles.empty, { color: theme.colors.onSurfaceVariant }]}>
                   {emptyLabel}
                 </Text>
               )}
-            </SectionCard>
+            </FoldSection>
           );
         })}
       </ScrollView>
