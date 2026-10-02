@@ -62,7 +62,9 @@ const RARITY_OPTIONS: Record<TraitKind, { key: string; label: string }[]> = {
   ],
 };
 
-const NONE_COLLAPSED: ReadonlySet<string> = new Set();
+// Every rareté starts folded, so the catalogue opens as a short list of headings.
+// Favoris is left out: it is the reader's own shortlist and starts open.
+const ALL_RARITIES_COLLAPSED: ReadonlySet<string> = new Set(Object.keys(TRAIT_RARITY_LABEL));
 /** Fold key for the starred block. Not a `TraitRarity`, so it cannot clash. */
 const FAVORITES_KEY = 'favorites';
 
@@ -116,7 +118,7 @@ export default function TraitCatalogList({
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState<TraitKind>('desavantage');
   const [rarity, setRarity] = useState('');
-  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(NONE_COLLAPSED);
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(ALL_RARITIES_COLLAPSED);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   // Lets a row's « Replier » put itself back at the top of the screen.
   const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
