@@ -26,7 +26,7 @@ import { openRoller } from '@/lib/dice-roller';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
-import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { damageModifier, woundMalus } from '@/lib/modifiers';
 import { weaponRollContext } from '@/lib/roll-context';
 import { weaponSkillReading } from '@/lib/weapon-skill';
 import { armorQuery } from '@/repositories/armor';
@@ -90,12 +90,12 @@ export default function CharacterWeaponsScreen() {
   const isEnchanted = (kind: 'weapon' | 'armor' | 'shield' | 'item', id: number) =>
     enchantedKeys.has(`${kind}:${id}`);
   const stRec = asNumRecord(state);
-  // Wound malus + temporary effects, per caractéristique. Folded into each carac
-  // value before the multiplier in a weapon's damage formula.
+  // The wound malus hits the attack roll (skillOf), never the damage: a damage
+  // formula's carac only folds in the temporary effects, before the multiplier.
   const wound = woundMalus(stRec);
   const effectList = effects ?? [];
   const skillList = skills ?? [];
-  const caracModifier = (caracKey: string) => totalModifier(caracKey, effectList, wound);
+  const caracModifier = (caracKey: string) => damageModifier(caracKey, effectList);
 
   // One place that knows what a weapon's compétence resolves against — the card
   // reads it and the roll re-reads it, and the two must not drift apart.

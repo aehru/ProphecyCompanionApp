@@ -40,8 +40,8 @@ export function DetailRow({ label, value }: { label: string; value: string }) {
 
 /**
  * A formula field (dégâts, portées): the raw formula plus its result for this
- * character. The badge is the raw carac modifier (wound + effects), shown BEFORE
- * any multiplier: a +2 on `FOR x2` reads "+2", not "+4".
+ * character. The badge is the raw carac modifier (effects, never the wound
+ * malus), shown BEFORE any multiplier: a +2 on `FOR x2` reads "+2", not "+4".
  */
 export function FormulaRow({
   label,

@@ -215,8 +215,8 @@ export interface FormulaVars {
   /** A caractéristique's value on the sheet. */
   carac?: (caracKey: string) => number | null | undefined;
   /**
-   * Wound malus + temporary effects for a caractéristique, folded into its value
-   * BEFORE the multiplier: FOR 5 with -1 in a `FOR x2` term gives (5-1)*2 = 8,
+   * Modifier for a caractéristique (a damage formula passes `damageModifier`:
+   * effects only, no wound malus), folded into its value BEFORE the multiplier: FOR 5 with -1 in a `FOR x2` term gives (5-1)*2 = 8,
    * not 5*2-1 = 9. Only consulted when `carac` answered.
    */
   caracModifier?: (caracKey: string) => number;
