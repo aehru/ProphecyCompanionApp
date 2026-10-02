@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import React, { useMemo, useState } from 'react';
+import { FlatList, type GestureResponderEvent, Pressable, StyleSheet, View } from 'react-native';
+import { Menu, Text } from 'react-native-paper';
 
-import { OwnerBadge, PlayerAvatar, StatusPill } from '@/components/campaign/roster-badges';
+import { OwnerBadge, PlayerAvatar } from '@/components/campaign/roster-badges';
 import { asDieIcon } from '@/components/ui/die-icons';
 import StatChip from '@/components/ui/stat-chip';
 import { contentWidth } from '@/hooks/use-layout';
@@ -17,16 +17,21 @@ import { initiativeOrder, type InitiativeInput, type InitiativeRow } from '@/lib
  * appears three times — that's the Prophecy rule, not a display quirk.
  *
  * Tapping any row opens that character's sheet, which is where a PNJ's wounds
- * get marked off mid-fight.
+ * get marked off mid-fight. Long-pressing a row the GM owns (a PNJ, or a PJ
+ * held on this device) offers to take it off the table — a dead garde's dice
+ * otherwise keep cluttering the order. A player's character has no menu: it
+ * is their projection, not the GM's row.
  */
 export default function InitiativeList({
   roster,
   bottomInset,
   onSelect,
+  onRemove,
 }: {
   roster: RosterEntry[];
   bottomInset: number;
   onSelect: (entry: RosterEntry) => void;
+  onRemove: (entry: RosterEntry) => void;
 }) {
   const theme = useProphecyTheme();
 
@@ -51,6 +56,17 @@ export default function InitiativeList({
     const entry = byId.get(charId);
     if (entry) onSelect(entry);
   };
+  // One menu for the whole list, anchored where the finger landed.
+  const [menu, setMenu] = useState<{ entry: RosterEntry; x: number; y: number } | null>(null);
+  // Undefined for a player's row on purpose: a handler that did nothing would
+  // still swallow the tap that ends a long hold, and that tap opens the sheet.
+  const holdFor = (row: { charId: string; owner?: string }) =>
+    row.owner === 'gm'
+      ? (e: GestureResponderEvent) => {
+          const entry = byId.get(row.charId);
+          if (entry) setMenu({ entry, x: e.nativeEvent.pageX, y: e.nativeEvent.pageY });
+        }
+      : undefined;
 
   if (rows.length === 0 && unrolled.length === 0) {
     return (
@@ -63,51 +79,68 @@ export default function InitiativeList({
   }
 
   return (
-    <FlatList
-      data={rows}
-      keyExtractor={(r) => `${r.charId}-${r.dieIndex}`}
-      style={styles.fill}
-      contentContainerStyle={[styles.list, { paddingBottom: 16 + bottomInset }, contentWidth]}
-      ItemSeparatorComponent={Separator}
-      renderItem={({ item, index }) => (
-        <OrderRow
-          row={item}
-          rank={index + 1}
-          // `dieIndex` indexes the projection's values, which is the very array
-          // the local icons are aligned with — same order, same source row.
-          icon={dieIcons.get(item.charId)?.[item.dieIndex]}
-          onPress={() => open(item.charId)}
+    <>
+      <FlatList
+        data={rows}
+        keyExtractor={(r) => `${r.charId}-${r.dieIndex}`}
+        style={styles.fill}
+        contentContainerStyle={[styles.list, { paddingBottom: 16 + bottomInset }, contentWidth]}
+        ItemSeparatorComponent={Separator}
+        renderItem={({ item, index }) => (
+          <OrderRow
+            row={item}
+            rank={index + 1}
+            // `dieIndex` indexes the projection's values, which is the very array
+            // the local icons are aligned with — same order, same source row.
+            icon={dieIcons.get(item.charId)?.[item.dieIndex]}
+            onPress={() => open(item.charId)}
+            onLongPress={holdFor(item)}
+          />
+        )}
+        ListEmptyComponent={
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            Personne n’a encore lancé son initiative.
+          </Text>
+        }
+        ListFooterComponent={
+          unrolled.length > 0 ? (
+            <View style={styles.footer}>
+              <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
+                En attente du jet
+              </Text>
+              {unrolled.map((e) => (
+                <Pressable
+                  key={e.charId}
+                  onPress={() => open(e.charId)}
+                  onLongPress={holdFor(e)}
+                  style={[styles.waitRow, { borderColor: theme.prophecy.borderSoft }]}>
+                  <PlayerAvatar nom={e.nom} online={e.online} size={30} />
+                  <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>
+                    {e.nom}
+                  </Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    {`${e.initiative?.max ?? 0} dé(s)`}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null
+        }
+      />
+      <Menu
+        visible={menu !== null}
+        onDismiss={() => setMenu(null)}
+        anchor={{ x: menu?.x ?? 0, y: menu?.y ?? 0 }}>
+        <Menu.Item
+          leadingIcon="account-remove"
+          title="Retirer de la table"
+          onPress={() => {
+            if (menu) onRemove(menu.entry);
+            setMenu(null);
+          }}
         />
-      )}
-      ListEmptyComponent={
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Personne n’a encore lancé son initiative.
-        </Text>
-      }
-      ListFooterComponent={
-        unrolled.length > 0 ? (
-          <View style={styles.footer}>
-            <Text variant="labelLarge" style={{ color: theme.colors.primary }}>
-              En attente du jet
-            </Text>
-            {unrolled.map((e) => (
-              <Pressable
-                key={e.charId}
-                onPress={() => open(e.charId)}
-                style={[styles.waitRow, { borderColor: theme.prophecy.borderSoft }]}>
-                <PlayerAvatar nom={e.nom} online={e.online} size={30} />
-                <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>
-                  {e.nom}
-                </Text>
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  {`${e.initiative?.max ?? 0} dé(s)`}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        ) : null
-      }
-    />
+      </Menu>
+    </>
   );
 }
 
@@ -118,17 +151,20 @@ function OrderRow({
   rank,
   icon,
   onPress,
+  onLongPress,
 }: {
   row: InitiativeRow;
   rank: number;
   /** Local die mark, if this character lives on this device. */
   icon?: string;
   onPress: () => void;
+  onLongPress?: (e: GestureResponderEvent) => void;
 }) {
   const theme = useProphecyTheme();
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       style={[
         styles.row,
         {
@@ -151,8 +187,8 @@ function OrderRow({
           </Text>
         ) : null}
       </View>
+      {/* Presence is the avatar's dot — a pill here cost the name its width. */}
       {row.owner === 'gm' ? <OwnerBadge /> : null}
-      <StatusPill online={row.online} />
       {/* Same reading as every other initiative display: the roll is the value,
           the wound malus is the badge. The rank column already conveys order. */}
       {/* "Dé 2/3": the list ranks every character's dice together, so the index
