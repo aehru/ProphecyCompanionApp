@@ -86,6 +86,7 @@ export const ALLOWED_PAYLOAD_KEYS: readonly string[] = [
   'reserveId',
   'enchantId',
   'traitId',
+  'xpAwardId',
   'uuid',
   'charUuid',
   'sessionId',
