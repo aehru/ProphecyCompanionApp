@@ -142,6 +142,8 @@ export async function createNpc(page: Page, campaignId: string, nom: string): Pr
  */
 export async function addCatalogWeapon(page: Page, characterId: string, name: string) {
   await page.goto(`/character/${characterId}/weapon/catalog`);
+  // Categories open folded; a search unfolds every section it matches.
+  await page.getByPlaceholder('Rechercher une arme').fill(name);
   await page.getByLabel(`Ajouter ${name}`, { exact: true }).click();
   // The toast is the insert's acknowledgement: wait for it, or navigating away
   // races the async write.

@@ -9,10 +9,11 @@ import CatalogRow from '@/components/catalog-row';
 import { CatalogScrollProvider, useCatalogScrollHost } from '@/components/catalog-scroll';
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon from '@/components/ui/icon';
-import SectionCard from '@/components/ui/section-card';
+import FoldSection from '@/components/ui/fold-section';
 import { ARMOR_CATALOG, ARMOR_CATEGORIES, type ArmorPreset } from '@/data/armor-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
 import type { Favorites } from '@/hooks/use-favorites';
+import { useFolds } from '@/hooks/use-folds';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { fold, foldQuery } from '@/lib/text-fold';
@@ -43,6 +44,7 @@ export default function ArmorCatalogList({
   const { scrollRef, onScroll, value: catalogScroll } = useCatalogScrollHost();
 
   const q = foldQuery(query);
+  const { isOpen, toggle } = useFolds(q !== '');
   const filtered = useMemo(
     () =>
       q === '' ? ARMOR_CATALOG : ARMOR_CATALOG.filter((p) => fold(p.data.name ?? '').includes(q)),
@@ -89,18 +91,29 @@ export default function ArmorCatalogList({
         {onAdd ? <CatalogCustomRow label="Armure personnalisée" onPress={() => onAdd()} /> : null}
 
         {starred.length > 0 ? (
-          <SectionCard title="Favoris" icon="star">
+          <FoldSection
+            title="Favoris"
+            icon="star"
+            count={starred.length}
+            open={isOpen('favorites', true)}
+            onToggle={() => toggle('favorites')}>
             {starred.map(renderRow)}
-          </SectionCard>
+          </FoldSection>
         ) : null}
 
         {ARMOR_CATEGORIES.map((cat) => {
           const items = filtered.filter((p) => p.category === cat);
           if (items.length === 0) return null;
           return (
-            <SectionCard key={cat} title={cat} icon="shield">
+            <FoldSection
+              key={cat}
+              title={cat}
+              icon="shield"
+              count={items.length}
+              open={isOpen(cat)}
+              onToggle={() => toggle(cat)}>
               {items.map(renderRow)}
-            </SectionCard>
+            </FoldSection>
           );
         })}
 
