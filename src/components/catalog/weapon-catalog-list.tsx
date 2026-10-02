@@ -8,11 +8,12 @@ import CatalogRow from '@/components/catalog-row';
 import { CatalogScrollProvider, useCatalogScrollHost } from '@/components/catalog-scroll';
 import { prerequisitesUnmet } from '@/components/gear-detail-rows';
 import Icon, { type IconName } from '@/components/ui/icon';
-import SectionCard from '@/components/ui/section-card';
+import FoldSection from '@/components/ui/fold-section';
 import WeaponDetail from '@/components/weapon-detail';
 import { WEAPON_CATALOG, type WeaponCategory, type WeaponPreset } from '@/data/weapon-catalog';
 import type { CaracReadings } from '@/hooks/use-carac-readings';
 import type { Favorites } from '@/hooks/use-favorites';
+import { useFolds } from '@/hooks/use-folds';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { foldQuery } from '@/lib/text-fold';
@@ -65,6 +66,7 @@ export default function WeaponCatalogList({
   // keeps the Searchbar responsive while the list catches up — same treatment
   // the spell catalogue gives its own filtering.
   const applied = useDeferredValue(foldQuery(query));
+  const { isOpen, toggle } = useFolds(applied !== '');
   const { groups, total } = useMemo(() => groupWeapons(INDEX, applied), [applied]);
 
   /**
@@ -105,7 +107,12 @@ export default function WeaponCatalogList({
         {onAdd ? <CatalogCustomRow label="Arme personnalisée" onPress={() => onAdd()} /> : null}
 
         {starred.length > 0 ? (
-          <SectionCard title="Favoris" icon="star">
+          <FoldSection
+            title="Favoris"
+            icon="star"
+            count={starred.length}
+            open={isOpen('favorites', true)}
+            onToggle={() => toggle('favorites')}>
             {starred.map(({ preset, icon }) => (
               <WeaponRow
                 key={preset.id}
@@ -116,7 +123,7 @@ export default function WeaponCatalogList({
                 onAdd={onAdd}
               />
             ))}
-          </SectionCard>
+          </FoldSection>
         ) : null}
 
         {groups.map((group) => {
@@ -124,7 +131,13 @@ export default function WeaponCatalogList({
           // lib/weapon-grouping stays free of anything the screen decides.
           const icon = iconFor(group.category);
           return (
-            <SectionCard key={group.category} title={group.category} icon={icon}>
+            <FoldSection
+              key={group.category}
+              title={group.category}
+              icon={icon}
+              count={group.hands.reduce((n, h) => n + h.items.length, 0)}
+              open={isOpen(group.category)}
+              onToggle={() => toggle(group.category)}>
               {group.hands.map(({ hand, items }) => (
                 <View key={hand} style={styles.handGroup}>
                   <Text style={[styles.handLabel, { color: theme.colors.onSurfaceVariant }]}>
@@ -142,7 +155,7 @@ export default function WeaponCatalogList({
                   ))}
                 </View>
               ))}
-            </SectionCard>
+            </FoldSection>
           );
         })}
 
