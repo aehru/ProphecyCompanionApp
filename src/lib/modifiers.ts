@@ -122,8 +122,8 @@ export function globalModifier(
 
 /**
  * Total modifier for a roll using `targetKey`: wound malus + matching effects.
- * The full arithmetic for one roll — use it to COMPUTE a value (a skill total,
- * a damage formula), not to badge a stat tile.
+ * The full arithmetic for one roll — use it to COMPUTE a value (a skill total),
+ * not to badge a stat tile. A damage formula is not a roll: see `damageModifier`.
  */
 export function totalModifier(
   targetKey: string,
@@ -131,6 +131,15 @@ export function totalModifier(
   wound: number,
 ): number {
   return wound + effectsSum(targetKey, effects);
+}
+
+/**
+ * Modifier folded into a caractéristique inside a DAMAGE formula (`FOR x2 +3`):
+ * the effects on that stat or on 'all', and NOT the wound malus. Wounds hamper
+ * actions — the attack roll still carries them — not the blow once it lands.
+ */
+export function damageModifier(caracKey: string, effects: readonly ModifierSource[]): number {
+  return effectsSum(caracKey, effects);
 }
 
 /**
