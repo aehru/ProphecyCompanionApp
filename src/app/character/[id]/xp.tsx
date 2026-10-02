@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import ScenarioDialog from '@/components/xp/scenario-dialog';
-import { VALEURS } from '@/constants/prophecy';
+import { VALEUR_LABEL, VALEURS } from '@/constants/prophecy';
 import type { XpAward } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { contentWidth } from '@/hooks/use-layout';
@@ -12,8 +12,6 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { awardTotal } from '@/lib/xp';
 import { deleteXpAward, updateXpAward, xpAwardsQuery } from '@/repositories/xp-awards';
-
-const VALEUR_LABEL: Record<string, string> = Object.fromEntries(VALEURS.map((v) => [v.key, v.label]));
 
 /**
  * Every scénario this character has played, newest first: the Valeur staked,

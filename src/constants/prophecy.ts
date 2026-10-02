@@ -285,6 +285,11 @@ export type ValeurKey = (typeof VALEURS)[number]['key'];
 
 export const VALEUR_KEYS = VALEURS.map((v) => v.key) as [ValeurKey, ...ValeurKey[]];
 
+/** Valeur key → display label (accented). */
+export const VALEUR_LABEL: Record<string, string> = Object.fromEntries(
+  VALEURS.map((v) => [v.key, v.label]),
+);
+
 export const TRAIT_KINDS = [
   { key: 'desavantage', label: 'Désavantage', plural: 'Désavantages' },
   { key: 'avantage', label: 'Avantage', plural: 'Avantages' },

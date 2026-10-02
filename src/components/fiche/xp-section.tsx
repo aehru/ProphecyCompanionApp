@@ -8,7 +8,7 @@ import NumberField from '@/components/number-field';
 import SectionCard from '@/components/ui/section-card';
 import StatChip from '@/components/ui/stat-chip';
 import ScenarioDialog, { type ScenarioDialogMode } from '@/components/xp/scenario-dialog';
-import { VALEURS } from '@/constants/prophecy';
+import { VALEUR_LABEL } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { xpAvailable, xpEarned } from '@/lib/xp';
 import { endScenario, startScenario, xpAwardsQuery } from '@/repositories/xp-awards';
@@ -87,7 +87,7 @@ export default function XpSection({
           {open ? (
             <Text style={{ color: theme.colors.onSurfaceVariant }}>
               En cours{open.label ? ` : ${open.label}` : ''} — Valeur choisie :{' '}
-              {VALEURS.find((v) => v.key === open.chosenValeur)?.label}
+              {VALEUR_LABEL[open.chosenValeur]}
             </Text>
           ) : null}
           <View style={styles.actions}>

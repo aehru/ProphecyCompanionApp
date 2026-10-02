@@ -6,7 +6,7 @@ import NumberField from '@/components/number-field';
 import ChipSelect from '@/components/ui/chip-select';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
-import { VALEURS, type ValeurKey } from '@/constants/prophecy';
+import { VALEUR_LABEL, VALEURS, type ValeurKey } from '@/constants/prophecy';
 import type { XpAward } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { awardTotal, clampScore, type ValeurScores } from '@/lib/xp';
@@ -92,7 +92,7 @@ export default function ScenarioDialog({
         <>
           {mode === 'end' ? (
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              Points du MJ, de 0 à 5. Valeur choisie : {VALEURS.find((v) => v.key === valeur)?.label}{' '}
+              Points du MJ, de 0 à 5. Valeur choisie : {VALEUR_LABEL[valeur]}{' '}
               (×2).
             </Text>
           ) : null}
