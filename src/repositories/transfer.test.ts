@@ -41,6 +41,8 @@ const { createSpell } = await import('@/repositories/spells');
 const { createEnchant } = await import('@/repositories/enchants');
 const { createTrait } = await import('@/repositories/traits');
 const { setFavorite } = await import('@/repositories/favorites');
+const { endScenario, startScenario } = await import('@/repositories/xp-awards');
+const { parseImport, serializeExport } = await import('@/lib/character-transfer');
 const { exportCharacters, importCharacters } = await import('@/repositories/transfer');
 
 beforeEach(() => {
@@ -133,6 +135,26 @@ describe('export → import round trip', () => {
     ).toEqual([
       { name: 'Trait de feu', favorite: 1 },
       { name: 'Mur de pierre', favorite: 0 },
+    ]);
+  });
+
+  it('carries the scénario awards through a real file, the open one included', async () => {
+    const { character } = await seedCharacter('Aldric', []);
+    const done = await startScenario(character.id, 'magie', 'La tour');
+    await endScenario(done.id, { danger: 1, decouverte: 2, magie: 3, implication: 4, initiatives: 5 });
+    await startScenario(character.id, 'danger');
+
+    const parsed = parseImport(serializeExport(await exportCharacters([character.id])));
+    if (!parsed.ok) throw new Error(parsed.error);
+    const { ids } = await importCharacters(parsed.data, 'copy');
+    const rows = harness.raw
+      .prepare(
+        'SELECT label, chosen_valeur, magie, ended_at IS NULL AS open FROM xp_awards WHERE character_id = ? ORDER BY id',
+      )
+      .all(ids[0]);
+    expect(rows).toEqual([
+      { label: 'La tour', chosen_valeur: 'magie', magie: 3, open: 0 },
+      { label: '', chosen_valeur: 'danger', magie: 0, open: 1 },
     ]);
   });
 
