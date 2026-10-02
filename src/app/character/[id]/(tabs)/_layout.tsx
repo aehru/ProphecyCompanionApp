@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -5,13 +6,17 @@ import { IconButton } from 'react-native-paper';
 
 import DiceRollerButton from '@/components/dice-roller-button';
 import { dsIcon } from '@/components/ui/icon';
+import { useCharacterId } from '@/hooks/use-character-id';
 import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { characterQuery } from '@/repositories/characters';
 
 export default function CharacterTabsLayout() {
   const theme = useProphecyTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const numId = useCharacterId();
+  const { data } = useLiveQuery(characterQuery(numId), [numId]);
 
   return (
     <Tabs
@@ -22,6 +27,9 @@ export default function CharacterTabsLayout() {
       // now that only Accueil shows an arrow.
       backBehavior="none"
       screenOptions={{
+        // The character's name, not the tab's: the tab bar already says which
+        // tab this is. `title` stays the tab's own, since it is the bar label.
+        headerTitle: data[0]?.nom ?? '',
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
         tabBarStyle: { backgroundColor: theme.colors.surface },
