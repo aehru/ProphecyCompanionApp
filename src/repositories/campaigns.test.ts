@@ -30,7 +30,7 @@ vi.mock('@/lib/log', () => ({
   log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
 }));
 
-const { createLocalTable, createNpc, setMember, spawnNpc, upsertGmNote } = await import(
+const { createLocalTable, createNpc, leaveTable, setMember, spawnNpc, upsertGmNote } = await import(
   '@/repositories/campaigns'
 );
 const { createCharacter } = await import('@/repositories/characters');
@@ -86,6 +86,24 @@ describe('setMember', () => {
     await setMember(one.id, c.id, false);
     expect(memberIds(one.id)).toEqual([]);
     expect(memberIds(two.id)).toEqual([c.id]);
+  });
+});
+
+describe('leaveTable', () => {
+  it('unseats by uuid, keeps the character row, and returns the id for an undo', async () => {
+    const table = await createLocalTable('Les Cendres');
+    const { id } = await createNpc(table.id, 'Garde');
+    const { uuid } = harness.raw.prepare('SELECT uuid FROM characters WHERE id = ?').get(id) as {
+      uuid: string;
+    };
+    expect(await leaveTable(table.id, uuid)).toBe(id);
+    expect(memberIds(table.id)).toEqual([]);
+    expect(harness.raw.prepare('SELECT id FROM characters WHERE id = ?').get(id)).toEqual({ id });
+  });
+
+  it('is null for an unknown uuid', async () => {
+    const table = await createLocalTable('Les Cendres');
+    expect(await leaveTable(table.id, 'not-a-uuid-here')).toBeNull();
   });
 });
 
