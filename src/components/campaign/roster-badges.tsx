@@ -6,7 +6,7 @@ import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
-import { initials, playerAccent } from '@/components/campaign/roster-accents';
+import { initials, playerAccent, useAttrColors } from '@/components/campaign/roster-accents';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { SocketStatus } from '@/lib/campaign-client';
 
@@ -32,7 +32,11 @@ export function ServerStatusChip({ status }: { status: SocketStatus }) {
   );
 }
 
-/** Round initials chip with the player accent and a presence dot. */
+/**
+ * Round initials chip with the player accent and a presence dot — green when
+ * online, grey when not. The green is the campaign palette's (the MD3 scale has
+ * none), so it stays legible on parchment and charcoal alike.
+ */
 export function PlayerAvatar({
   nom,
   online,
@@ -43,6 +47,7 @@ export function PlayerAvatar({
   size?: number;
 }) {
   const theme = useProphecyTheme();
+  const onlineColor = useAttrColors().social;
   const accent = playerAccent(nom);
   const dot = Math.max(9, Math.round(size * 0.26));
   return (
@@ -72,7 +77,7 @@ export function PlayerAvatar({
           borderRadius: dot / 2,
           borderWidth: 2,
           borderColor: theme.colors.surface,
-          backgroundColor: online ? theme.colors.primary : theme.colors.outline,
+          backgroundColor: online ? onlineColor : theme.colors.outline,
         }}
       />
     </View>
