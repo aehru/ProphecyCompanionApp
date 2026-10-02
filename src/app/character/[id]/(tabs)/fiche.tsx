@@ -239,7 +239,13 @@ export default function CharacterFicheScreen() {
             editing={editing}
           />
 
-          <XpSection valueOf={(k) => stRec[k] ?? 0} onChange={setXp} editing={editing} />
+          <XpSection
+            characterId={numId}
+            valueOf={(k) => stRec[k] ?? 0}
+            onChange={setXp}
+            editing={editing}
+            scenarios={char.kind !== 'npc'}
+          />
 
           {state ? (
             <ConditionsCard state={state} editing={editing} onPersist={persistState} />
