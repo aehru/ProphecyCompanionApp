@@ -99,6 +99,13 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
+        name="xp"
+        options={{
+          presentation: 'modal',
+          title: 'Expérience',
+        }}
+      />
+      <Stack.Screen
         name="enchant/catalog"
         options={{
           presentation: 'modal',
