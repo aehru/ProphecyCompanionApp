@@ -213,6 +213,14 @@ export default function CharactersListScreen() {
             }>
             <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
             <Menu.Item
+              leadingIcon="palette-outline"
+              onPress={() => {
+                setMenuOpen(false);
+                router.push('/appearance' as Href);
+              }}
+              title="Apparence"
+            />
+            <Menu.Item
               leadingIcon="clipboard-text-clock-outline"
               onPress={() => {
                 setMenuOpen(false);
