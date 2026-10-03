@@ -1,6 +1,6 @@
-import { DEFAULT_SKILLS, NUMERIC_KEYS, STATUT_MAX } from '@/constants/prophecy';
+import { BOND_MAX, DEFAULT_SKILLS, NUMERIC_KEYS, STATUT_MAX } from '@/constants/prophecy';
 import type { Character, NewCharacter, Skill } from '@/db/schema';
-import { casteFromInput } from '@/lib/caste';
+import { casteFromInput, dragonFromInput } from '@/lib/caste';
 import type { SkillInput } from '@/repositories/skills';
 
 export type FormValues = Record<string, string>;
@@ -70,6 +70,9 @@ export function toFormValues(c?: Partial<Character> | null): FormValues {
     biographie: (src.biographie as string) ?? '',
     // A checkbox in a strings-only form: '1' checked, '' not.
     darkOrders: src.darkOrders ? '1' : '',
+    // Élu: '' is « non Élu » (NULL). Outside NUMERIC_KEYS, so off the wire.
+    chosenBy: (src.chosenBy as string) ?? '',
+    bond: src.bond != null ? String(src.bond) : '',
   };
   for (const k of NUMERIC_KEYS) v[k] = src[k] != null ? String(src[k]) : '';
   return v;
@@ -114,6 +117,20 @@ export function skillRowsToInput(rows: SkillRow[]): SkillInput[] {
   });
 }
 
+/**
+ * The Élu pair. An unknown dragon key reads as « non Élu », and a character who
+ * is not an Élu has no Lien — the stepper is hidden then, so a stale number
+ * would otherwise survive invisibly.
+ */
+function eluFromForm(dragon: string | undefined, bond: string | undefined) {
+  const chosenBy = dragonFromInput(dragon);
+  const n = parseInt(bond ?? '', 10);
+  return {
+    chosenBy,
+    bond: chosenBy && Number.isFinite(n) ? Math.min(BOND_MAX, Math.max(0, n)) : 0,
+  };
+}
+
 /** Form values → character patch (blank numerics become 0). */
 export function fromFormValues(v: FormValues): Partial<NewCharacter> {
   const out: Record<string, unknown> = {
@@ -122,6 +139,7 @@ export function fromFormValues(v: FormValues): Partial<NewCharacter> {
     caste: casteFromInput(v.caste),
     biographie: v.biographie.trim(),
     darkOrders: v.darkOrders === '1',
+    ...eluFromForm(v.chosenBy, v.bond),
   };
   for (const k of NUMERIC_KEYS) {
     let n = parseInt(v[k], 10);

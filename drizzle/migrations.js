@@ -41,6 +41,7 @@ import m0036 from './0036_green_weapon_omega.sql';
 import m0037 from './0037_concerned_la_nuit.sql';
 import m0038 from './0038_open_harrier.sql';
 import m0039 from './0039_normal_scarlet_witch.sql';
+import m0040 from './0040_peaceful_frank_castle.sql';
 
   export default {
     journal,
@@ -84,7 +85,8 @@ m0035,
 m0036,
 m0037,
 m0038,
-m0039
+m0039,
+m0040
     }
   }
   
