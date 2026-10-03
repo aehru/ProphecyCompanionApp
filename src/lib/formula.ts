@@ -30,6 +30,11 @@
 // `2/STATUT`), for the same reason: an author copies the book rather than
 // learning a syntax. Opt-in like the others — a weapon has no Statut.
 //
+// TENDANCE is the fourth opt-in variable — `{ tendance: true }`. The Faveurs
+// of an Élu scale off the character's tendances: « un nombre de tours égal à la
+// valeur de sa Tendance Dragon ». Written `TENDANCE_DRAGON`, `TENDANCE_HOMME`,
+// `TENDANCE_FATALITE` (accents, case and `_`/space loose, optional `x2`).
+//
 // SPHERE is the second opt-in variable — `{ sphere: true }`. The supplements
 // scale most of their durations off the caster's sphere score: « dure (Sphère
 // des vents) tours », « (Sphère de la nature × 2) tours », « une heure par point
@@ -40,13 +45,20 @@
 // with or without the `sphere` prefix, singular or plural) so an author can
 // write `SPHERE_VENT` or `SPHERE_Vents` and mean the same thing.
 
-import { CARACTERISTIQUES, SPHERES } from '@/constants/prophecy';
+import {
+  CARACTERISTIQUES,
+  SPHERES,
+  TENDANCE_BY_KEY,
+  TENDANCES,
+  type TendanceKey,
+} from '@/constants/prophecy';
 import { fold } from '@/lib/text-fold';
 
 export type FormulaTerm =
   | { kind: 'carac'; carac: string; abbr: string; mult: number }
   | { kind: 'nr'; mult: number }
   | { kind: 'statut'; mult: number }
+  | { kind: 'tendance'; tendance: TendanceKey; mult: number }
   /** `sphere: null` = the spell's own sphere; otherwise a `SPHERES` key. */
   | { kind: 'sphere'; sphere: string | null; mult: number }
   | { kind: 'flat'; value: number }
@@ -80,6 +92,14 @@ const STATUT_RE = /^STATUTS?$/i;
 /** `STATUT` with a coefficient — the NR spellings, applied to the Statut. */
 const STATUT_MULT_RE =
   /^(?:STATUTS?\s*[x×*]\s*(\d+)|(\d+)\s*(?:[x×*]\s*STATUTS?|par\s+STATUTS?|\/\s*STATUTS?))$/i;
+/** `TENDANCE_DRAGON`, `TENDANCE FATALITÉ x2` — the name is resolved through `TENDANCE_BY_NAME`. */
+const TENDANCE_RE = /^TENDANCE[_ ]+([A-Za-zÀ-ÿ]+)(?:\s*[x×*]\s*(\d+))?$/i;
+
+/** Folded tendance name → key: `dragon`, `fatalite`, `homme`. */
+const TENDANCE_BY_NAME: Record<string, TendanceKey> = Object.fromEntries(
+  TENDANCES.map((t) => [fold(t.label), t.key]),
+);
+
 /**
  * `SPHERE`, `SPHERE_VENTS`, `SPHERE_DES_VENTS`, any optionally followed by `x2`.
  * The name is captured loosely — separators and articles are sorted out by
@@ -109,7 +129,7 @@ const SPHERE_BY_NAME: Record<string, string> = Object.fromEntries(
 /** Parse a formula string into terms. Empty string parses to zero terms. */
 export function parseFormula(
   input: string,
-  { nr = false, sphere = false, statut = false } = {},
+  { nr = false, sphere = false, statut = false, tendance = false } = {},
 ): ParseResult {
   const raw = (input ?? '').trim();
   if (raw === '') return { ok: true, formula: { terms: [] } };
@@ -147,6 +167,15 @@ export function parseFormula(
         continue;
       }
     }
+    if (tendance) {
+      const tm = part.match(TENDANCE_RE);
+      if (tm) {
+        const key = TENDANCE_BY_NAME[fold(tm[1])];
+        if (!key) return { ok: false, error: `Tendance inconnue : ${tm[1]}` };
+        terms.push({ kind: 'tendance', tendance: key, mult: Number(tm[2] ?? 1) });
+        continue;
+      }
+    }
     if (sphere) {
       const sph = part.match(SPHERE_RE);
       if (sph) {
@@ -169,6 +198,9 @@ export function parseFormula(
     }
     if (!sphere && SPHERE_RE.test(part)) {
       return { ok: false, error: `SPHERE n'est utilisable que dans une formule de sortilège` };
+    }
+    if (!tendance && TENDANCE_RE.test(part)) {
+      return { ok: false, error: `TENDANCE n'est utilisable que dans une formule de sortilège ou de Faveur` };
     }
     if (!statut && (STATUT_RE.test(part) || STATUT_MULT_RE.test(part))) {
       return { ok: false, error: `STATUT n'est utilisable que dans une formule de sortilège` };
@@ -229,6 +261,8 @@ export interface FormulaVars {
    * the caster as rank zero.
    */
   statut?: number | null;
+  /** A tendance's value on the sheet (the main number, not the puces). */
+  tendance?: (key: TendanceKey) => number | null | undefined;
   /** Answers for `null` (the spell's OWN sphere) and/or a named `SPHERES` key. */
   sphere?: (sphereKey: string | null) => number | null | undefined;
 }
@@ -269,6 +303,12 @@ export function computeFormula(formula: ParsedFormula, vars: FormulaVars = {}): 
         if (!vars.statut) symbolic.push(t);
         else total += vars.statut * t.mult;
         break;
+      case 'tendance': {
+        const v = vars.tendance?.(t.tendance);
+        if (v == null) symbolic.push(t);
+        else total += v * t.mult;
+        break;
+      }
       case 'sphere': {
         const v = vars.sphere?.(t.sphere);
         if (v == null) symbolic.push(t);
@@ -291,6 +331,10 @@ export function formulaTermLabel(t: FormulaTerm): string {
       return t.mult === 1 ? 'NR' : `${t.mult} × NR`;
     case 'statut':
       return t.mult === 1 ? 'Statut' : `${t.mult} × Statut`;
+    case 'tendance': {
+      const name = `Tendance ${TENDANCE_BY_KEY[t.tendance].label}`;
+      return t.mult === 1 ? name : `${name} × ${t.mult}`;
+    }
     case 'sphere': {
       const name = t.sphere == null ? 'Sphère' : `Sphère ${SPHERE_LABEL_BY_KEY[t.sphere]}`;
       return t.mult === 1 ? name : `${name} × ${t.mult}`;
@@ -318,7 +362,7 @@ export function formulaTermLabel(t: FormulaTerm): string {
 export function formulaResult(
   raw: string | null | undefined,
   vars: FormulaVars = {},
-  parse: { nr?: boolean; sphere?: boolean; statut?: boolean } = {},
+  parse: { nr?: boolean; sphere?: boolean; statut?: boolean; tendance?: boolean } = {},
 ): string | null {
   if (raw == null || raw.trim() === '') return null;
   const parsed = parseFormula(raw, parse);
@@ -341,7 +385,7 @@ export function spellFormulaResult(
   raw: string | null | undefined,
   vars: FormulaVars = {},
 ): string | null {
-  return formulaResult(raw, vars, { nr: true, sphere: true, statut: true });
+  return formulaResult(raw, vars, { nr: true, sphere: true, statut: true, tendance: true });
 }
 
 export type Prerequisite = { carac: string; abbr: string; min: number };

@@ -26,7 +26,7 @@ import {
   VALEUR_KEYS,
 } from '@/constants/prophecy';
 import { ENCHANT_TARGETS, type EnchantTarget } from '@/db/schema';
-import { casteFromInput } from '@/lib/caste';
+import { casteFromInput, dragonFromInput } from '@/lib/caste';
 
 /** Bumped on any breaking change to the bundle shape. Import rejects mismatches. */
 export const SCHEMA_VERSION = 1;
@@ -67,6 +67,10 @@ const characterSchema = z.object({
   // Sworn to Kalimsshar. OPTIONAL (not a version bump): older exports import at
   // the column default, outside the Ordres Noirs.
   darkOrders: z.boolean().optional(),
+  // Élu (dragon key or null) + Lien. OPTIONAL (not a version bump): older
+  // exports import as « non Élu ». An unknown key folds to null, like a caste.
+  chosenBy: str.nullable().transform(dragonFromInput).optional(),
+  bond: int.optional(),
   ...shapeFrom(NUMERIC_KEYS, int),
 });
 

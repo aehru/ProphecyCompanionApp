@@ -54,6 +54,12 @@ export type CasteKey = (typeof CASTES)[number]['key'];
  */
 export const STATUT_MAX = 5;
 
+/**
+ * Highest Lien between an Élu and their Great Dragon. `characters.bond` runs 0
+ * through this; Faveur N is granted at Lien N (see `lib/favor`).
+ */
+export const BOND_MAX = 5;
+
 /** What a NULL caste is called on screen. */
 export const SANS_CASTE_LABEL = 'Sans Caste';
 

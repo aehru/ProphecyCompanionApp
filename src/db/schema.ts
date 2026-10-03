@@ -5,6 +5,8 @@ import {
   CASTES,
   type CasteKey,
   DISCIPLINES,
+  GREAT_DRAGONS,
+  type GreatDragonKey,
   SPHERES,
   TIME_UNITS,
   TRAIT_KINDS,
@@ -18,6 +20,10 @@ import { newUuid } from '@/lib/uuid';
 // The caste list lives in `constants/prophecy` (it carries the accented labels);
 // drizzle's text enum wants a non-empty tuple, which `.map` can't prove.
 const CASTE_KEYS = CASTES.map((c) => c.key) as unknown as readonly [CasteKey, ...CasteKey[]];
+const DRAGON_KEYS = GREAT_DRAGONS.map((d) => d.key) as unknown as readonly [
+  GreatDragonKey,
+  ...GreatDragonKey[],
+];
 const TRAIT_KIND_KEYS = TRAIT_KINDS.map((k) => k.key) as unknown as readonly [
   TraitKind,
   ...TraitKind[],
@@ -88,6 +94,14 @@ export const characters = sqliteTable('characters', {
   // privilège of the caste stays open. A boolean and not in NUMERIC_KEYS: it is
   // no stat, and keeping it out of that list keeps it off the campaign wire.
   darkOrders: integer('dark_orders', { mode: 'boolean' }).notNull().default(false),
+
+  // Élu — the Great Dragon who chose this character (NULL = not an Élu), and
+  // the Lien (0–5) between them. Same contract as `statut`: a number, never a
+  // copy — Faveur N is granted at Lien N and its text is looked up by
+  // (dragon, niveau) in the generated catalogue (see lib/favor). Out of
+  // NUMERIC_KEYS on purpose, like `darkOrders`: it stays off the campaign wire.
+  chosenBy: text('chosen_by', { enum: DRAGON_KEYS }),
+  bond: integer('bond').notNull().default(0),
 
   // Tendances — each has a main number + a subnumber (0–10)
   dragon: integer('dragon').notNull().default(0),
