@@ -393,4 +393,19 @@ describe('STATUT terms', () => {
     expect(spellFormulaResult('20 par Statut', { statut: 3 })).toBe('60');
     expect(spellFormulaResult('SPHERE + STATUT', { sphere: () => 8, statut: 4 })).toBe('12');
   });
+
+  it('reads a tendance only when opted in', () => {
+    const r = parseFormula('TENDANCE_DRAGON + Tendance Fatalité x2', { tendance: true });
+    expect(r.ok && r.formula.terms).toEqual([
+      { kind: 'tendance', tendance: 'dragon', mult: 1 },
+      { kind: 'tendance', tendance: 'fatalite', mult: 2 },
+    ]);
+    expect(parseFormula('TENDANCE_HOMME').ok).toBe(false);
+    expect(parseFormula('TENDANCE_ORAGE', { tendance: true }).ok).toBe(false);
+  });
+
+  it('resolves a tendance against the character, symbolic otherwise', () => {
+    expect(spellFormulaResult('TENDANCE_DRAGON')).toBe('Tendance Dragon');
+    expect(spellFormulaResult('3 + TENDANCE_HOMME x2', { tendance: () => 4 })).toBe('11');
+  });
 });
