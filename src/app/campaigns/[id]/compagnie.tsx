@@ -15,11 +15,19 @@ import AppFab from '@/components/ui/app-fab';
 import TabPager from '@/components/ui/tab-pager';
 import { dsIcon } from '@/components/ui/icon';
 import type { Campaign } from '@/db/schema';
+import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { useLayout } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import type { RosterEntry } from '@/lib/campaign-protocol';
-import { gmNotesQuery, spawnNpc, upsertGmNote } from '@/repositories/campaigns';
+import {
+  gmNotesQuery,
+  leaveTable,
+  setMember,
+  spawnNpc,
+  unshareFromServer,
+  upsertGmNote,
+} from '@/repositories/campaigns';
 import { rollInitiativeFor } from '@/repositories/characters';
 import { detachWrite } from '@/repositories/log';
 
@@ -57,7 +65,8 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
   // Opening from the turn order goes straight to editing (that's the point of
   // tapping a PNJ mid-fight); opening from a card starts read-only.
   const [editOnOpen, setEditOnOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ text: string; onUndo?: () => void } | null>(null);
+  const { liveCampaignId } = useCampaignLive();
   // Only the GM's own NPCs are theirs to roll; players roll their own.
   const npcs = roster.filter((e) => e.owner === 'gm');
   const split = useLayout().columns > 1;
@@ -76,9 +85,31 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
       const created = await spawnNpc(campaign.id, charUuid);
       if (!created) return;
       // The roster is local, so the copy is on screen before this toast is read.
-      setToast(`« ${created.nom} » ajouté à la Compagnie.`);
+      setToast({ text: `« ${created.nom} » ajouté à la Compagnie.` });
     } catch (e) {
       Alert.alert('Duplication impossible', e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  // No confirm — mid-fight that's one dialog per dead garde; the toast's
+  // « Annuler » is the safety net. While live, the broadcaster's diff sends the
+  // `unshare`; paused, purge the server ourselves (same split as the salon).
+  const removeFromTable = async (entry: RosterEntry) => {
+    try {
+      const id = await leaveTable(campaign.id, entry.charId);
+      if (id == null) return;
+      if (liveCampaignId !== campaign.id) unshareFromServer(campaign, entry.charId).catch(() => {});
+      if (selected?.charId === entry.charId) setSelected(null);
+      setToast({
+        text: `« ${String(entry.character.nom ?? 'Sans nom')} » retiré de la table.`,
+        onUndo: () =>
+          detachWrite('campaign_shares', setMember(campaign.id, id, true), {
+            campaignId: campaign.id,
+            characterId: id,
+          }),
+      });
+    } catch (e) {
+      Alert.alert('Retrait impossible', e instanceof Error ? e.message : String(e));
     }
   };
 
@@ -97,11 +128,9 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
     const run = async () => {
       try {
         const n = await rollInitiativeFor(npcs.map((e) => e.charId));
-        setToast(
-          n > 0
-            ? `Initiative lancée pour ${n} PNJ.`
-            : 'Aucun PNJ n’a de dés d’initiative.',
-        );
+        setToast({
+          text: n > 0 ? `Initiative lancée pour ${n} PNJ.` : 'Aucun PNJ n’a de dés d’initiative.',
+        });
       } catch (e) {
         Alert.alert('Initiative impossible', e instanceof Error ? e.message : String(e));
       }
@@ -162,6 +191,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
                   roster={roster}
                   bottomInset={insets.bottom + 72}
                   onSelect={openEditing}
+                  onRemove={removeFromTable}
                 />
               ) : (
                 <View style={styles.fill}>
@@ -247,8 +277,12 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
         />
       )}
 
-      <Snackbar visible={toast !== null} onDismiss={() => setToast(null)} duration={2500}>
-        {toast ?? ''}
+      <Snackbar
+        visible={toast !== null}
+        onDismiss={() => setToast(null)}
+        duration={toast?.onUndo ? 5000 : 2500}
+        action={toast?.onUndo ? { label: 'Annuler', onPress: toast.onUndo } : undefined}>
+        {toast?.text ?? ''}
       </Snackbar>
     </View>
   );

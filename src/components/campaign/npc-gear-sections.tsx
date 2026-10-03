@@ -21,7 +21,7 @@ import type { Character, Weapon } from '@/db/schema';
 import { openRoller } from '@/lib/dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
-import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { damageModifier, woundMalus } from '@/lib/modifiers';
 import { spellRollContext, weaponRollContext } from '@/lib/roll-context';
 import { spellTotal } from '@/lib/spell-total';
 import { weaponSkillReading } from '@/lib/weapon-skill';
@@ -77,12 +77,11 @@ function GearBody({ char }: { char: Character }) {
   const rec = asNumRecord(char);
   const skillList = skills ?? [];
   const caracValue = (key: string) => rec[key] ?? 0;
-  // Same reading as the Fiche: wound malus + active effects, folded into a carac
-  // BEFORE a formula's multiplier — so a damage line shown here is the damage
-  // the wounded NPC actually deals.
+  // Same reading as the Fiche: the wound malus hits the attack roll, never the
+  // damage — a damage formula's carac folds in only the active effects.
   const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
   const effectList = effects ?? [];
-  const caracModifier = (key: string) => totalModifier(key, effectList, wound);
+  const caracModifier = (key: string) => damageModifier(key, effectList);
 
   const enchantedKeys = new Set((enchants ?? []).map((e) => `${e.targetType}:${e.targetId}`));
   const isEnchanted = (kind: 'weapon' | 'armor' | 'shield', id: number) =>

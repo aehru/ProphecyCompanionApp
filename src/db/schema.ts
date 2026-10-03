@@ -10,6 +10,7 @@ import {
   TRAIT_KINDS,
   type TraitKind,
   type TraitRarity,
+  VALEUR_KEYS,
 } from '@/constants/prophecy';
 import type { ArmorCategory } from '@/data/armor-constants';
 import { newUuid } from '@/lib/uuid';
@@ -752,6 +753,36 @@ export const traits = sqliteTable('traits', {
 });
 
 /**
+ * One scénario's Expérience award (N per character). The player picks a Valeur
+ * at the START — the row is created then, `endedAt` NULL — and types the GM's
+ * five 0–5 scores at the END, which closes it. Choosing before the scores exist
+ * is the rule's whole point, hence two steps rather than one form.
+ *
+ * Only the scores are stored; the award (sum, chosen Valeur doubled) is derived
+ * in `lib/xp`, and the character's earned total is `actual_state.xpTotal` (the
+ * hand-typed base, « XP initiale ») plus the sum over closed rows.
+ */
+export const xpAwards = sqliteTable('xp_awards', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  /** Optional scénario name, typed by the player. */
+  label: text('label').notNull().default(''),
+  chosenValeur: text('chosen_valeur', { enum: VALEUR_KEYS }).notNull(),
+  danger: integer('danger').notNull().default(0),
+  decouverte: integer('decouverte').notNull().default(0),
+  magie: integer('magie').notNull().default(0),
+  implication: integer('implication').notNull().default(0),
+  initiatives: integer('initiatives').notNull().default(0),
+  startedAt: integer('started_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  /** NULL while the scénario is being played; set when the scores are typed. */
+  endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
+});
+
+/**
  * A table this device runs or plays at (docs/campaign-protocol.md §5). One row
  * per created/joined campaign. `role` fixes what the row means: `gm` rows may
  * carry the portable `gmToken` (proof of ownership — travels in backups so a GM
@@ -888,6 +919,8 @@ export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;
 export type Trait = typeof traits.$inferSelect;
 export type NewTrait = typeof traits.$inferInsert;
+export type XpAward = typeof xpAwards.$inferSelect;
+export type NewXpAward = typeof xpAwards.$inferInsert;
 export type Campaign = typeof campaigns.$inferSelect;
 export type NewCampaign = typeof campaigns.$inferInsert;
 export type CampaignShare = typeof campaignShares.$inferSelect;

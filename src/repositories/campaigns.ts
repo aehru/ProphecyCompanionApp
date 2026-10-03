@@ -312,6 +312,26 @@ export async function setMember(
 }
 
 /**
+ * Take one character off a table — the "this garde is dead, get him out of the
+ * initiative" path. Keyed by uuid because the caller holds a roster entry.
+ * Returns the local id so the caller can undo with `setMember(…, true)`, or null
+ * when no row has that uuid. The character row itself survives, like the NPCs
+ * of a deleted table. The server side is the caller's: while live, the
+ * broadcaster's diff sends the `unshare`; otherwise `unshareFromServer`.
+ */
+export async function leaveTable(campaignId: number, charUuid: string): Promise<number | null> {
+  const rows = await db
+    .select({ id: characters.id })
+    .from(characters)
+    .where(eq(characters.uuid, charUuid))
+    .limit(1);
+  const id = rows[0]?.id;
+  if (id == null) return null;
+  await setMember(campaignId, id, false);
+  return id;
+}
+
+/**
  * Create an NPC and put it on the table in one step — the "I need a garde, now"
  * path. It is an ordinary character row (`kind: 'npc'`), so the full sheet, the
  * catalogues and the export all work on it; only `nom` is required.

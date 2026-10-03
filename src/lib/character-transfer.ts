@@ -23,6 +23,7 @@ import {
   SPHERES,
   TRAIT_KINDS,
   WOUND_LEVELS,
+  VALEUR_KEYS,
 } from '@/constants/prophecy';
 import { ENCHANT_TARGETS, type EnchantTarget } from '@/db/schema';
 import { casteFromInput } from '@/lib/caste';
@@ -314,6 +315,23 @@ const favoriteSchema = z.object({
   presetId: str,
 });
 
+/**
+ * Scénario Expérience awards. OPTIONAL with a `[]` default (not a version bump,
+ * like `traits`): exports made before the table existed carry none. Dates ride
+ * as the ISO strings JSON makes of them and are coerced back on the way in.
+ */
+const xpAwardSchema = z.object({
+  label: str,
+  chosenValeur: z.enum(VALEUR_KEYS),
+  danger: int,
+  decouverte: int,
+  magie: int,
+  implication: int,
+  initiatives: int,
+  startedAt: z.coerce.date(),
+  endedAt: z.coerce.date().nullable(),
+});
+
 const effectSchema = z.object({
   label: str,
   target: str,
@@ -339,6 +357,7 @@ const characterBundleSchema = z.object({
   traits: z.array(traitSchema).default([]),
   effects: z.array(effectSchema),
   favorites: z.array(favoriteSchema).default([]),
+  xpAwards: z.array(xpAwardSchema).default([]),
 });
 
 const exportSchema = z.object({
@@ -360,6 +379,7 @@ export const ARMOR_FIELDS = Object.keys(armorSchema.shape);
 export const WEAPON_FIELDS = Object.keys(weaponSchema.shape);
 export const SHIELD_FIELDS = Object.keys(shieldSchema.shape);
 export const FAVORITE_FIELDS = Object.keys(favoriteSchema.shape);
+export const XP_AWARD_FIELDS = Object.keys(xpAwardSchema.shape);
 /**
  * Export side: an enchant's live row ids → the positions a file carries.
  *

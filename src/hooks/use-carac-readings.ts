@@ -1,6 +1,6 @@
 // The character-aware readings a piece of gear needs to be displayed: the raw
-// caractéristique values, the modifier that hits them (wound + effects), and the
-// compétence a weapon resolves to. Assembled once here so the catalogue previews
+// caractéristique values, the modifier a damage formula folds in (effects, never
+// the wound malus), and the compétence a weapon resolves to. Assembled once here so the catalogue previews
 // show the exact numbers the Fiche shows — the arithmetic itself stays in
 // lib/modifiers and lib/weapon-skill.
 //
@@ -12,7 +12,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { useMemo } from 'react';
 
 import { asNumRecord } from '@/lib/character-values';
-import { totalModifier, woundMalus } from '@/lib/modifiers';
+import { damageModifier, woundMalus } from '@/lib/modifiers';
 import { weaponSkillReading, type WeaponSkillReading } from '@/lib/weapon-skill';
 import { actualStateQuery } from '@/repositories/actual-state';
 import { characterQuery } from '@/repositories/characters';
@@ -22,7 +22,7 @@ import { skillsQuery } from '@/repositories/skills';
 export interface CaracReadings {
   /** A caractéristique's value on the sheet (0 when unknown). */
   caracValue: (caracKey: string) => number;
-  /** Wound malus + active effects for that caractéristique (signed, often 0). */
+  /** Active effects for that caractéristique in a damage formula — no wound malus. */
   caracModifier: (caracKey: string) => number;
   /** A weapon's compétence resolved against this character. */
   skillReading: (skillName: string | null | undefined) => WeaponSkillReading;
@@ -50,7 +50,7 @@ export function useCaracReadings(characterId: number): CaracReadings {
     const skillList = skills ?? [];
     return {
       caracValue: (k: string) => rec[k] ?? 0,
-      caracModifier: (k: string) => totalModifier(k, effectList, wound),
+      caracModifier: (k: string) => damageModifier(k, effectList),
       skillReading: (name: string | null | undefined) =>
         weaponSkillReading(name, skillList, rec, effectList, wound),
     };

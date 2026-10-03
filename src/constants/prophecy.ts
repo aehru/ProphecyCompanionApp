@@ -268,6 +268,28 @@ export const PRIVILEGE_FAMILY_KEYS = PRIVILEGE_FAMILIES.map((f) => f.key) as [
   ...PrivilegeFamily[],
 ];
 
+/**
+ * The rulebook's five Valeurs of Expérience. At the end of a scénario the GM
+ * scores each one 0–5; the one the player chose at its start counts double
+ * (`lib/xp` `awardTotal`).
+ */
+export const VALEURS = [
+  { key: 'danger', label: 'Le danger' },
+  { key: 'decouverte', label: 'La découverte' },
+  { key: 'magie', label: 'La magie' },
+  { key: 'implication', label: "L'implication" },
+  { key: 'initiatives', label: 'Les initiatives' },
+] as const;
+
+export type ValeurKey = (typeof VALEURS)[number]['key'];
+
+export const VALEUR_KEYS = VALEURS.map((v) => v.key) as [ValeurKey, ...ValeurKey[]];
+
+/** Valeur key → display label (accented). */
+export const VALEUR_LABEL: Record<string, string> = Object.fromEntries(
+  VALEURS.map((v) => [v.key, v.label]),
+);
+
 export const TRAIT_KINDS = [
   { key: 'desavantage', label: 'Désavantage', plural: 'Désavantages' },
   { key: 'avantage', label: 'Avantage', plural: 'Avantages' },

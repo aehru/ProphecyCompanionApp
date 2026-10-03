@@ -15,6 +15,7 @@ import {
   favorites,
   traits,
   weapons,
+  xpAwards,
   type EnchantTarget,
   type NewActualState,
   type NewArmor,
@@ -29,6 +30,7 @@ import {
   type NewFavorite,
   type NewTrait,
   type NewWeapon,
+  type NewXpAward,
 } from '@/db/schema';
 import {
   ARMOR_FIELDS,
@@ -55,6 +57,7 @@ import {
   FAVORITE_FIELDS,
   TRAIT_FIELDS,
   WEAPON_FIELDS,
+  XP_AWARD_FIELDS,
 } from '@/lib/character-transfer';
 import { copyMedia } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
@@ -128,9 +131,9 @@ export async function exportCharacters(
     return intent === 'share' ? forSharing(empty) : empty;
   }
 
-  // TWELVE queries for the whole envelope, not twelve PER CHARACTER. Every
+  // THIRTEEN queries for the whole envelope, not thirteen PER CHARACTER. Every
   // statement takes its turn in the client's queue (see db/client), so a full
-  // backup used to be `12 × N` serialized round-trips — 550 of them for fifty
+  // backup used to be `13 × N` serialized round-trips — 550 of them for fifty
   // characters, each prepared and finalized on its own.
   //
   // Ordered by id, all of them: an enchant's target and its source spell ride
@@ -139,7 +142,7 @@ export async function exportCharacters(
   // the order the importer re-inserts in. Bucketing one ordered result set per
   // character preserves it exactly (see `byCharacter`).
   const charIds = rows.map((c) => c.id);
-  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, traitRows, effectRows, favoriteRows] =
+  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, traitRows, effectRows, favoriteRows, xpAwardRows] =
     await Promise.all([
       db.select().from(actualState).where(inArray(actualState.characterId, charIds)),
       db.select().from(skills).where(inArray(skills.characterId, charIds)).orderBy(asc(skills.id)),
@@ -161,6 +164,7 @@ export async function exportCharacters(
         .from(favorites)
         .where(inArray(favorites.characterId, charIds))
         .orderBy(asc(favorites.id)),
+      db.select().from(xpAwards).where(inArray(xpAwards.characterId, charIds)).orderBy(asc(xpAwards.id)),
     ]);
 
   const stateByChar = new Map(stateRows.map((s) => [s.characterId, s]));
@@ -175,6 +179,7 @@ export async function exportCharacters(
   const traitsByChar = byCharacter(traitRows);
   const effectsByChar = byCharacter(effectRows);
   const favoritesByChar = byCharacter(favoriteRows);
+  const xpAwardsByChar = byCharacter(xpAwardRows);
 
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {
@@ -218,6 +223,7 @@ export async function exportCharacters(
       traits: tr.map((r) => pick(r, TRAIT_FIELDS)),
       effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
       favorites: (favoritesByChar.get(c.id) ?? []).map((r) => pick(r, FAVORITE_FIELDS)),
+      xpAwards: (xpAwardsByChar.get(c.id) ?? []).map((r) => pick(r, XP_AWARD_FIELDS)),
     } as CharacterBundle);
   }
 
@@ -313,6 +319,7 @@ export async function importCharacters(
             traits,
             effects,
             favorites,
+            xpAwards,
           ]) {
             await tx.delete(t).where(eq(t.characterId, characterId));
           }
@@ -354,6 +361,8 @@ export async function importCharacters(
       if (favoriteRows.length) {
         await tx.insert(favorites).values(link(favoriteRows) as NewFavorite[]);
       }
+      const xpAwardRows = b.xpAwards ?? [];
+      if (xpAwardRows.length) await tx.insert(xpAwards).values(link(xpAwardRows) as NewXpAward[]);
 
       // Enchants LAST: their target and their source spell travelled as
       // positions in the arrays just written (see `enchantSchema`), so the fresh

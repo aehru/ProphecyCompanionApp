@@ -36,6 +36,7 @@ import {
   activeFilterCount,
   buildSpellSections,
   compareSpellEntries,
+  hasActiveFilters,
   NO_FILTERS,
   type SpellFilterCriteria,
   type SpellSection,
@@ -75,6 +76,9 @@ const LEVEL_OPTIONS = [
 ];
 
 const NONE_COLLAPSED: ReadonlySet<string> = new Set();
+// Every sphère starts folded, so the catalogue opens as a short list of headings.
+// Favoris is left out: it is the reader's own shortlist and starts open.
+const ALL_SPHERES_COLLAPSED: ReadonlySet<string> = new Set(SPHERES.map((s) => s.key));
 
 /** Section key for the starred rows. Not a `SphereKey`, so it can never clash. */
 const FAVORITES_KEY = 'favorites';
@@ -138,7 +142,7 @@ export default function SpellCatalogList({
   // player actually types or taps, so `useDeferredValue` and the memo below
   // still hit on every unrelated render.
   const [criteria, setCriteria] = useState<SpellFilterCriteria>(NO_FILTERS);
-  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(NONE_COLLAPSED);
+  const [folded, setCollapsed] = useState<ReadonlySet<string>>(ALL_SPHERES_COLLAPSED);
   // The header has scrolled off; the FAB stands in for it.
   const [stuck, setStuck] = useState(false);
   const [filterDialog, setFilterDialog] = useState(false);
@@ -149,6 +153,9 @@ export default function SpellCatalogList({
   // Re-sectioning the catalogue is the expensive half of a keystroke; deferring
   // it keeps the Searchbar and the chips responsive while the list catches up.
   const applied = useDeferredValue(criteria);
+  // While a filter is active nothing is folded: with every sphère folded by
+  // default, a search would otherwise find matches and show none of them.
+  const collapsed = hasActiveFilters(applied) ? NONE_COLLAPSED : folded;
 
   const starred = useMemo(
     () => (favorites ? INDEX.filter((e) => favorites.ids.has(e.preset.id)) : []),

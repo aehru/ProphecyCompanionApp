@@ -4,6 +4,7 @@ import type { Effect } from '@/db/schema';
 
 import {
   activeEffects,
+  damageModifier,
   effectsSum,
   fmtSignedMod,
   globalModifier,
@@ -142,6 +143,18 @@ describe('totalModifier', () => {
 
   it('equals just the wound malus when no effects match', () => {
     expect(totalModifier('force', [], -3)).toBe(-3);
+  });
+});
+
+describe('damageModifier', () => {
+  it('keeps stat and all effects but never the wound malus', () => {
+    const list = [
+      makeEffect({ target: 'force', value: 2 }),
+      makeEffect({ target: 'all', value: -1 }),
+      makeEffect({ target: 'agilite', value: 4 }),
+    ];
+    expect(damageModifier('force', list)).toBe(1);
+    expect(damageModifier('force', [])).toBe(0);
   });
 });
 

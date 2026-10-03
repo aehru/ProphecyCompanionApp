@@ -52,6 +52,7 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
     character,
     state,
     favorites: [{ kind: 'spell', presetId: 'boule-de-feu' }],
+    xpAwards: [],
     skills: [{ name: 'Esquive', attribut: 'physique', value: 3 }],
     armor: [
       {
