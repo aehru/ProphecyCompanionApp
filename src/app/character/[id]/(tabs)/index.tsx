@@ -6,6 +6,7 @@ import { Button, Text } from 'react-native-paper';
 
 import CasteChip from '@/components/caste-chip';
 import ConceptChip from '@/components/concept-chip';
+import FavorsSection from '@/components/favors-section';
 import PortraitHero from '@/components/portrait-hero';
 import StatutChip from '@/components/statut-chip';
 import {
@@ -172,6 +173,11 @@ export default function CharacterDashboardScreen() {
             derive from `caste` + `statut` and both disappear at Statut 0. */}
         <StatutBenefitsSection caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
         <StatutTechniquesSection caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
+        <FavorsSection
+          dragon={char.chosenBy}
+          bond={char.bond}
+          vars={{ tendance: (k) => rec[k] ?? 0, carac: (k) => rec[k] ?? 0 }}
+        />
 
         {/* Points earned and spent, then both lists. Read-only like the rest of
             the dashboard: a row opens its editor as a modal. */}
