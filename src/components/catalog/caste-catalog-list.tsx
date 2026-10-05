@@ -72,7 +72,17 @@ export default function CasteCatalogList<K extends string = CasteKey>({
   );
 }
 
+/**
+ * A rulebook heading inside one section (« Privilèges annexes », « Actions
+ * offensives ») — the one the Privilèges and the manœuvres both print.
+ */
+export function CatalogFamilyHeading({ label }: { label: string }) {
+  const theme = useProphecyTheme();
+  return <Text style={[styles.family, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>;
+}
+
 const styles = StyleSheet.create({
+  family: { fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 4 },
   container: { padding: 16, gap: 16, paddingBottom: 48 },
   empty: { fontStyle: 'italic', fontSize: 13 },
 });
