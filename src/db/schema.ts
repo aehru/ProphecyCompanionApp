@@ -866,7 +866,9 @@ export const gmNotes = sqliteTable('gm_notes', {
 ]);
 
 /** The catalogues a favourite can point into — one per `*-catalog-list`. */
-export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait'] as const;
+// `manoeuvre` has no owned table at all: starring is the only way a character
+// keeps one (the catalogue is reference — see ManoeuvrePreset).
+export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait', 'manoeuvre'] as const;
 export type CatalogKind = (typeof CATALOG_KINDS)[number];
 
 /**
