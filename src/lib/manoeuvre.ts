@@ -100,10 +100,14 @@ export function parseRating(raw: string): ManoeuvreRating | string {
   };
 }
 
+/** The number part — « 15 », « 15 + X » (`gap` '' for the compact « 15+X ») — or ''. */
+const numberPart = (r: ManoeuvreRating, gap = ' ') =>
+  r.value === undefined ? '' : `${r.value}${r.plusX ? `${gap}+${gap}X` : ''}`;
+
 /** Full reading: « Normale (15) », « Selon l'arme », « Opposition, si possible ». */
 export function ratingLabel(r: ManoeuvreRating): string {
   if (r.text !== undefined) return r.text;
-  const value = r.value === undefined ? '' : `${r.value}${r.plusX ? ' + X' : ''}`;
+  const value = numberPart(r);
   if (!r.key) return r.note ? `${value}, ${r.note}` : value;
   if (r.key === 'selon') return `Selon ${r.note}`;
   const label = RATING.get(r.key)!.label;
@@ -114,7 +118,7 @@ export function ratingLabel(r: ManoeuvreRating): string {
 /** Row subtitle form — the number when there is one: « 15 », « 15+X », « Impossible ». */
 export function ratingShort(r: ManoeuvreRating): string {
   if (r.text !== undefined) return r.text;
-  if (r.value !== undefined) return `${r.value}${r.plusX ? '+X' : ''}`;
+  if (r.value !== undefined) return numberPart(r, '');
   return r.key === 'selon' ? `Selon ${r.note}` : RATING.get(r.key!)!.label;
 }
 
@@ -127,10 +131,7 @@ export function manoeuvreSubtitle(stats: ManoeuvrePreset['stats']): string {
 /** A rating back into a cell `parseRating` reads to the same thing — for a variant's editor. */
 export function ratingCell(r: ManoeuvreRating): string {
   if (r.text !== undefined) return r.text;
-  if (!r.key) {
-    const n = `${r.value}${r.plusX ? ' + X' : ''}`;
-    return r.note ? `${n} (${r.note})` : n;
-  }
+  if (!r.key) return r.note ? `${numberPart(r)} (${r.note})` : numberPart(r);
   if (r.key === 'selon') return `selon ${r.note}`;
   const word = RATING.get(r.key)!.label.toLowerCase();
   // Bracketed, the way the rulebook prints « normale (inutile) ».
@@ -144,8 +145,9 @@ export function ratingWarning(raw: string): string | null {
   return typeof r === 'string' ? r : null;
 }
 
+// A refused cell — blank included, `parseRating` refuses that too — is kept as typed.
 const cellRating = (raw: string): ManoeuvreRating => {
-  const r = raw.trim() === '' ? '—' : parseRating(raw);
+  const r = parseRating(raw);
   return typeof r === 'string' ? { text: raw.trim() || '—' } : r;
 };
 
