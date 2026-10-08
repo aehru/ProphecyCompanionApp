@@ -40,6 +40,10 @@ import {
   CARACTERISTIQUES,
   CASTES,
   type CasteKey,
+  MANOEUVRE_CONTEXTS,
+  MANOEUVRE_FAMILIES,
+  type ManoeuvreContext,
+  type ManoeuvreFamily,
   PRIVILEGE_FAMILIES,
   PRIVILEGE_FAMILY_KEYS,
   type PrivilegeFamily,
@@ -57,7 +61,9 @@ import {
   type TraitRarity,
 } from '../src/constants/prophecy';
 import { parseCsvTable } from '../src/lib/csv';
+import { foldQuery } from '../src/lib/text-fold';
 import { parseFormula, parsePrerequisites } from '../src/lib/formula';
+import { type ManoeuvreRating, parseRating } from '../src/lib/manoeuvre';
 import { presetRevision } from '../src/lib/preset-revision';
 import { ARMOR_CATEGORIES } from '../src/data/armor-constants';
 import {
@@ -75,6 +81,7 @@ import type { ArmorPreset } from '../src/data/armor-catalog';
 import type { ShieldPreset } from '../src/data/shield-catalog';
 import type { StatutPreset } from '../src/data/status-catalog';
 import type { FavorPreset } from '../src/data/favor-catalog';
+import type { ManoeuvrePreset } from '../src/data/manoeuvre-catalog';
 import type { PrivilegePreset } from '../src/data/privilege-catalog';
 import type { TraitPreset } from '../src/data/trait-catalog';
 import type { WeaponPreset } from '../src/data/weapon-catalog';
@@ -176,6 +183,16 @@ const FAVOR_COLUMNS = [
   // Editorial provenance, declared and deliberately not read.
   'rulebook',
 ];
+const MANOEUVRE_COLUMNS = [
+  // `id` is context-prefixed by hand (`melee-assommer`, `cac-assommer`), like
+  // the privilèges' caste prefix (see ManoeuvrePreset).
+  'id', 'contexte', 'famille', 'nom',
+  // The four-line block — all four filled, or all four blank on a rule entry.
+  'difficulte', 'esquive', 'parade', 'dommages',
+  'jet', 'effetJeu', 'description',
+  // Editorial provenance, declared and deliberately not read.
+  'rulebook',
+];
 const ARCHETYPE_COLUMNS = [
   'id', 'nom', 'caste', 'concept',
   // Caractéristiques, then attributs — the CSV uses the sheet's short names.
@@ -194,17 +211,18 @@ const ARCHETYPE_COLUMNS = [
 // Authors type what they read in the rulebook; we accept any casing/accents and
 // either the key or the label, then normalize to the canonical value.
 
-const fold = (s: string) =>
-  s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '') // strip combining accents
-    .toLowerCase()
-    .trim();
+// The app's own fold (trimmed), so the build and the app agree on what matches.
+const fold = foldQuery;
 
 /** Build a folded-form → canonical-value lookup from accepted spellings. */
 function matcher(entries: [accepted: string, canonical: string][]) {
   const map = new Map(entries.map(([a, c]) => [fold(a), c]));
   return (input: string): string | null => map.get(fold(input)) ?? null;
+}
+
+/** The common case: a `{ key, label }` list, either spelling accepted. */
+function keyLabelMatcher(list: readonly { key: string; label: string }[]) {
+  return matcher(list.flatMap((e): [string, string][] => [[e.key, e.key], [e.label, e.key]]));
 }
 
 const matchCategory = matcher(WEAPON_CATEGORIES.map((c) => [c, c]));
@@ -213,12 +231,7 @@ const matchHands = matcher([
   ...WEAPON_HANDS.map((h): [string, string] => [h, h]),
   ...WEAPON_HANDS.map((h): [string, string] => [String(HAND_VALUE[h]), h]),
 ]);
-const matchDiscipline = matcher(
-  DISCIPLINES.flatMap((d): [string, string][] => [
-    [d.key, d.key],
-    [d.label, d.key],
-  ]),
-);
+const matchDiscipline = keyLabelMatcher(DISCIPLINES);
 const matchSphere = matcher(
   SPHERES.flatMap((s): [string, string][] => [
     [s.key, s.key],
@@ -236,27 +249,12 @@ const matchUnit = matcher(
     [u.plural, u.key],
   ]),
 );
-const matchTag = matcher(
-  SPELL_TAGS.flatMap((t): [string, string][] => [
-    [t.key, t.key],
-    [t.label, t.key],
-  ]),
-);
+const matchTag = keyLabelMatcher(SPELL_TAGS);
 // Caste keys in rulebook order — the enum every caste column validates against.
 const CASTE_KEYS = CASTES.map((c) => c.key);
-const matchCaste = matcher(
-  CASTES.flatMap((c): [string, string][] => [
-    [c.key, c.key],
-    [c.label, c.key],
-  ]),
-);
+const matchCaste = keyLabelMatcher(CASTES);
 const DRAGON_KEYS = GREAT_DRAGONS.map((d) => d.key);
-const matchDragon = matcher(
-  GREAT_DRAGONS.flatMap((d): [string, string][] => [
-    [d.key, d.key],
-    [d.label, d.key],
-  ]),
-);
+const matchDragon = keyLabelMatcher(GREAT_DRAGONS);
 const matchAttribut = matcher(ATTRIBUTS.map((a): [string, string] => [a.label, a.key]));
 const matchCarac = matcher(
   CARACTERISTIQUES.flatMap((c): [string, string][] => [
@@ -266,12 +264,11 @@ const matchCarac = matcher(
 );
 // Avantage / Désavantage, and the rulebook's availability headings. Plurals are
 // accepted too: a spreadsheet column is as likely to be headed « Désavantages ».
-const matchPrivilegeFamily = matcher(
-  PRIVILEGE_FAMILIES.flatMap((f) => [
-    [f.key, f.key],
-    [f.label, f.key],
-  ] as [string, string][]),
-);
+const matchPrivilegeFamily = keyLabelMatcher(PRIVILEGE_FAMILIES);
+const MANOEUVRE_CONTEXT_KEYS = MANOEUVRE_CONTEXTS.map((c) => c.key);
+const matchManoeuvreContext = keyLabelMatcher(MANOEUVRE_CONTEXTS);
+const MANOEUVRE_FAMILY_KEYS = MANOEUVRE_FAMILIES.map((f) => f.key);
+const matchManoeuvreFamily = keyLabelMatcher(MANOEUVRE_FAMILIES);
 const matchTraitKind = matcher(
   TRAIT_KINDS.flatMap((k): [string, string][] => [
     [k.key, k.key],
@@ -1151,6 +1148,87 @@ function buildFavors(failures: Failure[]): FavorPreset[] {
   return out;
 }
 
+function buildManoeuvres(failures: Failure[]): ManoeuvrePreset[] {
+  const records = readTable('manoeuvres.csv', MANOEUVRE_COLUMNS, failures);
+  const seen = new Set<string>();
+  const out: ManoeuvrePreset[] = [];
+
+  records.forEach((rec, i) => {
+    const errors: RowErrors = [];
+    const id = readSlug(rec, seen, errors);
+    const contexte = readEnum(
+      rec,
+      'contexte',
+      matchManoeuvreContext,
+      MANOEUVRE_CONTEXT_KEYS,
+      errors,
+    ) as ManoeuvreContext;
+    const famille = readEnum(
+      rec,
+      'famille',
+      matchManoeuvreFamily,
+      MANOEUVRE_FAMILY_KEYS,
+      errors,
+    ) as ManoeuvreFamily;
+    const nom = (rec.nom ?? '').trim();
+    if (nom === '') errors.push('nom : requis');
+    const description = (rec.description ?? '').trim();
+    if (description === '') errors.push('description : requise');
+    const roll = (rec.jet ?? '').trim();
+    const inGameEffect = (rec.effetJeu ?? '').trim();
+
+    // All four or none: a half-filled block is a row typed into the wrong columns.
+    const block = ['difficulte', 'esquive', 'parade', 'dommages'] as const;
+    const filled = block.filter((c) => (rec[c] ?? '').trim() !== '');
+    let stats: ManoeuvrePreset['stats'];
+    if (filled.length === block.length) {
+      const rating = (col: string): ManoeuvreRating => {
+        const r = parseRating(rec[col]);
+        if (typeof r === 'string') {
+          errors.push(`${col} : ${r}`);
+          return {};
+        }
+        return r;
+      };
+      stats = {
+        difficulty: rating('difficulte'),
+        dodge: rating('esquive'),
+        parry: rating('parade'),
+        damage: rec.dommages.trim(),
+      };
+    } else if (filled.length > 0) {
+      errors.push(`difficulte / esquive / parade / dommages : les quatre ou aucune (remplies : ${filled.join(', ')})`);
+    }
+
+    const preset: ManoeuvrePreset = {
+      id,
+      contexte,
+      famille,
+      nom,
+      ...(stats && { stats }),
+      ...(roll !== '' && { roll }),
+      ...(inGameEffect !== '' && { inGameEffect }),
+      description,
+    };
+    if (errors.length) {
+      failures.push({ file: 'manoeuvres.csv', record: i + 2, name: nom || id, errors });
+    } else {
+      out.push(preset);
+    }
+  });
+
+  // Context, then heading; within a heading the SPREADSHEET order stands (the
+  // sort is stable) — it is the rulebook's, and « Attaque simple, brutale,
+  // précise » read in that order, not alphabetically.
+  const familyOrder = MANOEUVRE_FAMILY_KEYS as readonly string[];
+  out.sort(
+    (a, b) =>
+      MANOEUVRE_CONTEXT_KEYS.indexOf(a.contexte) - MANOEUVRE_CONTEXT_KEYS.indexOf(b.contexte) ||
+      familyOrder.indexOf(a.famille) - familyOrder.indexOf(b.famille),
+  );
+  return out;
+}
+
 // --- codegen ----------------------------------------------------------------
 
 function render(sourceCsv: string, typeName: string, typeImport: string, constName: string, data: unknown[]) {
@@ -1182,6 +1260,7 @@ export function generateCatalogs(): {
     statuses: number;
     privileges: number;
     favors: number;
+    manoeuvres: number;
   };
 } {
   const failures: Failure[] = [];
@@ -1194,6 +1273,7 @@ export function generateCatalogs(): {
   const statuses = buildStatuses(failures);
   const privileges = buildPrivileges(failures);
   const favors = buildFavors(failures);
+  const manoeuvres = buildManoeuvres(failures);
   return {
     failures,
     counts: {
@@ -1206,6 +1286,7 @@ export function generateCatalogs(): {
       statuses: statuses.length,
       privileges: privileges.length,
       favors: favors.length,
+      manoeuvres: manoeuvres.length,
     },
     files: [
       {
@@ -1241,6 +1322,16 @@ export function generateCatalogs(): {
       {
         file: 'favor-catalog.gen.ts',
         content: render('favors.csv', 'FavorPreset', './favor-catalog', 'FAVOR_CATALOG_DATA', favors),
+      },
+      {
+        file: 'manoeuvre-catalog.gen.ts',
+        content: render(
+          'manoeuvres.csv',
+          'ManoeuvrePreset',
+          './manoeuvre-catalog',
+          'MANOEUVRE_CATALOG_DATA',
+          manoeuvres,
+        ),
       },
       {
         file: 'trait-catalog.gen.ts',
@@ -1319,7 +1410,7 @@ function main() {
   console.log(
     `OK : ${counts.weapons} armes, ${counts.spells} sortilèges, ${counts.armor} armures, ` +
       `${counts.shields} boucliers, ${counts.archetypes} archétypes, ` +
-      `${counts.traits} avantages/désavantages, ${counts.statuses} statuts, ${counts.privileges} privilèges, ${counts.favors} faveurs.`,
+      `${counts.traits} avantages/désavantages, ${counts.statuses} statuts, ${counts.privileges} privilèges, ${counts.favors} faveurs, ${counts.manoeuvres} manœuvres.`,
   );
 }
 
