@@ -1,26 +1,47 @@
+import { useRouter } from 'expo-router';
 import React from 'react';
+import { StyleSheet } from 'react-native';
+import { Button } from 'react-native-paper';
 
 import CasteCatalogList, { CatalogFamilyHeading } from '@/components/catalog/caste-catalog-list';
 import ManoeuvreRow from '@/components/manoeuvre/manoeuvre-row';
+import { dsIcon } from '@/components/ui/icon';
 import { MANOEUVRE_CONTEXTS, MANOEUVRE_FAMILIES } from '@/constants/prophecy';
-import { MANOEUVRE_CATALOG } from '@/data/manoeuvre-catalog';
 import type { Favorites } from '@/hooks/use-favorites';
+import { useManoeuvreCatalog } from '@/hooks/use-manoeuvre-catalog';
+import { createCustomManoeuvre } from '@/repositories/custom-manoeuvres';
+import { detachWrite } from '@/repositories/log';
 
 /**
  * The combat manœuvres — one section per part of the combat chapter, the
  * rulebook's headings inside each, on the shared `<CasteCatalogList>` shell.
  *
- * Nothing to add: a manœuvre is reference. Read from a character, `favorites`
- * puts the star on each row — that is how a player keeps the ones they use.
+ * Nothing is picked INTO a character: read from one, `favorites` puts the star
+ * on each row — that is how a player keeps the ones they use. The device's
+ * « Maison » entries sit among the rulebook's, after them in each heading, and
+ * the header button writes a new one.
  */
 export default function ManoeuvreCatalogList({ favorites }: { favorites?: Favorites }) {
+  const router = useRouter();
+  const catalog = useManoeuvreCatalog();
+  const create = () =>
+    detachWrite(
+      'custom_manoeuvres',
+      createCustomManoeuvre().then((row) => row && router.push(`/manoeuvre/${row.id}`)),
+    );
+
   return (
     <CasteCatalogList
       icon="sword"
       emptyLabel="Manœuvres pas encore saisies."
       sections={MANOEUVRE_CONTEXTS}
+      header={
+        <Button mode="outlined" icon={dsIcon('plus')} style={styles.create} onPress={create}>
+          Nouvelle manœuvre maison
+        </Button>
+      }
       renderCaste={(contexte) => {
-        const own = MANOEUVRE_CATALOG.filter((m) => m.contexte === contexte);
+        const own = catalog.filter((m) => m.contexte === contexte);
         if (own.length === 0) return null;
         return MANOEUVRE_FAMILIES.map((f) => {
           const list = own.filter((m) => m.famille === f.key);
@@ -38,4 +59,8 @@ export default function ManoeuvreCatalogList({ favorites }: { favorites?: Favori
     />
   );
 }
+
+const styles = StyleSheet.create({
+  create: { alignSelf: 'flex-start' },
+});
 

@@ -6,8 +6,8 @@ import { Button, Text } from 'react-native-paper';
 import ManoeuvreRow from '@/components/manoeuvre/manoeuvre-row';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
-import { MANOEUVRE_CATALOG } from '@/data/manoeuvre-catalog';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useManoeuvreCatalog } from '@/hooks/use-manoeuvre-catalog';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 /**
@@ -19,8 +19,10 @@ export default function FavoriteManoeuvres({ characterId }: { characterId: numbe
   const theme = useProphecyTheme();
   const router = useRouter();
   const favorites = useFavorites(characterId, 'manoeuvre');
-  // An id the catalogue no longer carries (a renamed slug) is simply not shown.
-  const list = MANOEUVRE_CATALOG.filter((m) => favorites.ids.has(m.id));
+  const catalog = useManoeuvreCatalog();
+  // An id the catalogue no longer carries (a renamed slug, or a house entry
+  // starred on another device) is simply not shown.
+  const list = catalog.filter((m) => favorites.ids.has(m.id));
 
   return (
     <SectionCard title="Manœuvres" icon="sword">

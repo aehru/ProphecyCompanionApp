@@ -145,6 +145,10 @@ function ThemedRoot() {
                     <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
                     {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
                     <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
+                    <Stack.Screen
+                      name="manoeuvre/[mid]"
+                      options={{ title: 'Manœuvre maison', presentation: 'modal' }}
+                    />
                     {/* No dice on the settings screens: nothing there is played. */}
                     <Stack.Screen
                       name="diagnostics"
