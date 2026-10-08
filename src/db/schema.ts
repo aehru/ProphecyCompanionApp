@@ -7,6 +7,8 @@ import {
   DISCIPLINES,
   GREAT_DRAGONS,
   type GreatDragonKey,
+  type ManoeuvreContext,
+  type ManoeuvreFamily,
   SPHERES,
   TIME_UNITS,
   TRAIT_KINDS,
@@ -911,6 +913,41 @@ export const favorites = sqliteTable(
   ],
 );
 
+/**
+ * Manœuvres a table made up, or adapted from the rulebook with its GM — the
+ * catalogue's « Maison » entries. DEVICE-WIDE, not a character's child: every
+ * character on this device sees them in the catalogue and can star them, so
+ * there is no `character_id` and no cascade.
+ *
+ * The id is a UUID, not an autoincrement: a character's star on one is a
+ * `favorites` row whose `preset_id` is this id, and a uuid keeps that pointer
+ * unambiguous next to the rulebook slugs — and still meaningful if house
+ * manœuvres ever travel between devices.
+ *
+ * The three rating cells are stored AS TYPED and parsed on read with
+ * `lib/manoeuvre` `parseRating`: a cell the grammar refuses is kept and printed
+ * verbatim, the editor only warns. `preset_id` names the rulebook entry a
+ * variant was derived from (NULL = written from scratch); it is provenance, not
+ * a link — nothing follows it.
+ */
+export const customManoeuvres = sqliteTable('custom_manoeuvres', {
+  id: text('id').primaryKey().$defaultFn(() => newUuid()),
+  context: text('context').$type<ManoeuvreContext>().notNull().default('melee'),
+  family: text('family').$type<ManoeuvreFamily>().notNull().default('manoeuvre'),
+  name: text('name').notNull().default(''),
+  difficulty: text('difficulty').notNull().default(''),
+  dodge: text('dodge').notNull().default(''),
+  parry: text('parry').notNull().default(''),
+  damage: text('damage').notNull().default(''),
+  roll: text('roll').notNull().default(''),
+  inGameEffect: text('in_game_effect').notNull().default(''),
+  description: text('description').notNull().default(''),
+  presetId: text('preset_id'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -943,3 +980,5 @@ export type CampaignShare = typeof campaignShares.$inferSelect;
 export type GmNote = typeof gmNotes.$inferSelect;
 export type Favorite = typeof favorites.$inferSelect;
 export type NewFavorite = typeof favorites.$inferInsert;
+export type CustomManoeuvre = typeof customManoeuvres.$inferSelect;
+export type NewCustomManoeuvre = typeof customManoeuvres.$inferInsert;
