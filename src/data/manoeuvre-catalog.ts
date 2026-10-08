@@ -40,6 +40,12 @@ export type ManoeuvrePreset = {
   inGameEffect?: string;
   /** The rulebook paragraph, verbatim — the source of truth, never rewritten. */
   description: string;
+  /**
+   * A « Maison » entry (`custom_manoeuvres`, read through
+   * `customManoeuvrePreset`): editable, badged, and its `id` is a uuid. Never
+   * set by the build.
+   */
+  custom?: true;
 };
 
 export { MANOEUVRE_CATALOG_DATA as MANOEUVRE_CATALOG } from './manoeuvre-catalog.gen';

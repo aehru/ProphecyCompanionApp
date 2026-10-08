@@ -9,11 +9,16 @@
 // value (MANOEUVRE_RATINGS), so « normale » alone still reads 15 — and an
 // explicit « normale (20) » is a typo the build refuses.
 //
+// The same grammar reads the « Maison » manœuvres a table types in the app
+// (`custom_manoeuvres`), where a refused cell is KEPT and printed as typed —
+// the editor warns, it does not block.
+//
 // Pure — no framework imports and no catalogue import, so the generator can
 // load it without loading a file it generates.
 
 import { MANOEUVRE_RATINGS, type ManoeuvreRatingKey } from '@/constants/prophecy';
 import type { ManoeuvrePreset } from '@/data/manoeuvre-catalog';
+import type { CustomManoeuvre, NewCustomManoeuvre } from '@/db/schema';
 import { fold } from '@/lib/text-fold';
 
 export type ManoeuvreRating = {
@@ -25,6 +30,11 @@ export type ManoeuvreRating = {
   plusX?: true;
   /** What qualifies the word: « l'arme » after `selon`, « si possible », « inutile ». */
   note?: string;
+  /**
+   * A « Maison » cell the grammar refused (or left blank), printed as written.
+   * Never produced by the build, which refuses such a cell outright.
+   */
+  text?: string;
 };
 
 const RATING = new Map<string, (typeof MANOEUVRE_RATINGS)[number]>(
@@ -92,6 +102,7 @@ export function parseRating(raw: string): ManoeuvreRating | string {
 
 /** Full reading: « Normale (15) », « Selon l'arme », « Opposition, si possible ». */
 export function ratingLabel(r: ManoeuvreRating): string {
+  if (r.text !== undefined) return r.text;
   const value = r.value === undefined ? '' : `${r.value}${r.plusX ? ' + X' : ''}`;
   if (!r.key) return r.note ? `${value}, ${r.note}` : value;
   if (r.key === 'selon') return `Selon ${r.note}`;
@@ -102,6 +113,7 @@ export function ratingLabel(r: ManoeuvreRating): string {
 
 /** Row subtitle form — the number when there is one: « 15 », « 15+X », « Impossible ». */
 export function ratingShort(r: ManoeuvreRating): string {
+  if (r.text !== undefined) return r.text;
   if (r.value !== undefined) return `${r.value}${r.plusX ? '+X' : ''}`;
   return r.key === 'selon' ? `Selon ${r.note}` : RATING.get(r.key!)!.label;
 }
@@ -110,4 +122,75 @@ export function ratingShort(r: ManoeuvreRating): string {
 export function manoeuvreSubtitle(stats: ManoeuvrePreset['stats']): string {
   if (!stats) return 'Règle';
   return `Diff. ${ratingShort(stats.difficulty)} · Esq. ${ratingShort(stats.dodge)} · Par. ${ratingShort(stats.parry)}`;
+}
+
+/** A rating back into a cell `parseRating` reads to the same thing — for a variant's editor. */
+export function ratingCell(r: ManoeuvreRating): string {
+  if (r.text !== undefined) return r.text;
+  if (!r.key) {
+    const n = `${r.value}${r.plusX ? ' + X' : ''}`;
+    return r.note ? `${n} (${r.note})` : n;
+  }
+  if (r.key === 'selon') return `selon ${r.note}`;
+  const word = RATING.get(r.key)!.label.toLowerCase();
+  // Bracketed, the way the rulebook prints « normale (inutile) ».
+  return r.note ? `${word} (${r.note})` : word;
+}
+
+/** What the editor shows under a rating field: null when the cell reads (or is blank). */
+export function ratingWarning(raw: string): string | null {
+  if (raw.trim() === '') return null;
+  const r = parseRating(raw);
+  return typeof r === 'string' ? r : null;
+}
+
+const cellRating = (raw: string): ManoeuvreRating => {
+  const r = raw.trim() === '' ? '—' : parseRating(raw);
+  return typeof r === 'string' ? { text: raw.trim() || '—' } : r;
+};
+
+/**
+ * A « Maison » row read as a catalogue entry, so the list, the favourites and
+ * the detail render it with no case of their own. The stat block exists as soon
+ * as ONE of its four cells is filled — unlike the rulebook's all-or-nothing,
+ * a table may well settle only the difficulté.
+ */
+export function customManoeuvrePreset(row: CustomManoeuvre): ManoeuvrePreset {
+  const cells = [row.difficulty, row.dodge, row.parry, row.damage];
+  const hasStats = cells.some((c) => c.trim() !== '');
+  return {
+    id: row.id,
+    contexte: row.context,
+    famille: row.family,
+    nom: row.name.trim() || 'Sans nom',
+    ...(hasStats && {
+      stats: {
+        difficulty: cellRating(row.difficulty),
+        dodge: cellRating(row.dodge),
+        parry: cellRating(row.parry),
+        damage: row.damage.trim() || '—',
+      },
+    }),
+    ...(row.roll.trim() && { roll: row.roll.trim() }),
+    ...(row.inGameEffect.trim() && { inGameEffect: row.inGameEffect.trim() }),
+    description: row.description,
+    custom: true,
+  };
+}
+
+/** A rulebook entry as the starting point of a « Maison » variant. */
+export function variantOf(p: ManoeuvrePreset): NewCustomManoeuvre {
+  return {
+    context: p.contexte,
+    family: p.famille,
+    name: p.nom,
+    difficulty: p.stats ? ratingCell(p.stats.difficulty) : '',
+    dodge: p.stats ? ratingCell(p.stats.dodge) : '',
+    parry: p.stats ? ratingCell(p.stats.parry) : '',
+    damage: p.stats?.damage ?? '',
+    roll: p.roll ?? '',
+    inGameEffect: p.inGameEffect ?? '',
+    description: p.description,
+    presetId: p.id,
+  };
 }

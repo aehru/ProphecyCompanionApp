@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseRating, ratingLabel, ratingShort } from './manoeuvre';
+import { MANOEUVRE_CATALOG } from '@/data/manoeuvre-catalog';
+import type { CustomManoeuvre } from '@/db/schema';
+
+import {
+  customManoeuvrePreset,
+  parseRating,
+  ratingCell,
+  ratingLabel,
+  ratingShort,
+  ratingWarning,
+  variantOf,
+} from './manoeuvre';
 
 describe('parseRating', () => {
   it('reads a graded word, with or without its implied value', () => {
@@ -47,5 +58,60 @@ describe('ratingLabel / ratingShort', () => {
     expect(ratingShort({ value: 15, plusX: true })).toBe('15+X');
     expect(ratingLabel({ key: 'selon', note: "l'arme" })).toBe("Selon l'arme");
     expect(ratingShort({ key: 'impossible' })).toBe('Impossible');
+  });
+});
+
+describe('ratingCell', () => {
+  it('writes back every catalogue cell as one parseRating reads the same', () => {
+    for (const m of MANOEUVRE_CATALOG) {
+      if (!m.stats) continue;
+      for (const r of [m.stats.difficulty, m.stats.dodge, m.stats.parry]) {
+        expect(parseRating(ratingCell(r)), `${m.id} « ${ratingCell(r)} »`).toEqual(r);
+      }
+    }
+  });
+});
+
+const row = (patch: Partial<CustomManoeuvre>): CustomManoeuvre => ({
+  id: 'u-1',
+  context: 'melee',
+  family: 'manoeuvre',
+  name: 'Coup de tête',
+  difficulty: '',
+  dodge: '',
+  parry: '',
+  damage: '',
+  roll: '',
+  inGameEffect: '',
+  description: 'Un coup bas.',
+  presetId: null,
+  createdAt: new Date(0),
+  ...patch,
+});
+
+describe('« Maison » manœuvres', () => {
+  it('has no stat block until one cell is filled', () => {
+    expect(customManoeuvrePreset(row({})).stats).toBeUndefined();
+    const p = customManoeuvrePreset(row({ difficulty: '20' }));
+    expect(p.stats?.difficulty).toEqual({ value: 20 });
+    expect(ratingLabel(p.stats!.dodge)).toBe('—');
+    expect(p.custom).toBe(true);
+  });
+
+  it('keeps a cell the grammar refuses, printed as typed', () => {
+    const p = customManoeuvrePreset(row({ dodge: 'très dure' }));
+    expect(ratingLabel(p.stats!.dodge)).toBe('très dure');
+    expect(ratingWarning('très dure')).toMatch(/inconnu/);
+    expect(ratingWarning('normale')).toBeNull();
+    expect(ratingWarning('  ')).toBeNull();
+  });
+
+  it('starts a variant from the rulebook entry it names', () => {
+    const feinter = MANOEUVRE_CATALOG.find((m) => m.id === 'melee-feinter')!;
+    const v = variantOf(feinter);
+    expect(v.presetId).toBe('melee-feinter');
+    const back = customManoeuvrePreset(row({ ...v, presetId: v.presetId ?? null }));
+    expect(back.stats).toEqual(feinter.stats);
+    expect(back.description).toBe(feinter.description);
   });
 });
