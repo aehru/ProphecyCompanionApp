@@ -8,10 +8,9 @@ import ManoeuvreDetail from '@/components/manoeuvre-detail';
 import { dsIcon } from '@/components/ui/icon';
 import { MANOEUVRE_CONTEXTS } from '@/constants/prophecy';
 import type { ManoeuvrePreset } from '@/data/manoeuvre-catalog';
+import { useCreateManoeuvre } from '@/hooks/use-create-manoeuvre';
 import type { Favorites } from '@/hooks/use-favorites';
 import { manoeuvreSubtitle, variantOf } from '@/lib/manoeuvre';
-import { createCustomManoeuvre } from '@/repositories/custom-manoeuvres';
-import { detachWrite } from '@/repositories/log';
 
 const CONTEXT_LABEL = new Map<string, string>(MANOEUVRE_CONTEXTS.map((c) => [c.key, c.label]));
 
@@ -35,16 +34,10 @@ export default function ManoeuvreRow({
   context?: boolean;
 }) {
   const router = useRouter();
+  const create = useCreateManoeuvre();
   const where = context ? CONTEXT_LABEL.get(manoeuvre.contexte) : undefined;
   const badge = manoeuvre.custom ? ['Maison', where].filter(Boolean).join(' · ') : where;
 
-  const edit = (id: string) => router.push(`/manoeuvre/${id}`);
-  const derive = () =>
-    detachWrite(
-      'custom_manoeuvres',
-      createCustomManoeuvre(variantOf(manoeuvre)).then((row) => row && edit(row.id)),
-      { catalogId: manoeuvre.id },
-    );
 
   return (
     <CatalogRow
@@ -60,11 +53,11 @@ export default function ManoeuvreRow({
           mode="outlined"
           icon={dsIcon('edit')}
           style={styles.action}
-          onPress={() => edit(manoeuvre.id)}>
+          onPress={() => router.push(`/manoeuvre/${manoeuvre.id}`)}>
           Modifier
         </Button>
       ) : (
-        <Button mode="outlined" icon={dsIcon('plus')} style={styles.action} onPress={derive}>
+        <Button mode="outlined" icon={dsIcon('plus')} style={styles.action} onPress={() => create(variantOf(manoeuvre))}>
           Créer une variante maison
         </Button>
       )}

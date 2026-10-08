@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
@@ -7,10 +6,9 @@ import CasteCatalogList, { CatalogFamilyHeading } from '@/components/catalog/cas
 import ManoeuvreRow from '@/components/manoeuvre/manoeuvre-row';
 import { dsIcon } from '@/components/ui/icon';
 import { MANOEUVRE_CONTEXTS, MANOEUVRE_FAMILIES } from '@/constants/prophecy';
+import { useCreateManoeuvre } from '@/hooks/use-create-manoeuvre';
 import type { Favorites } from '@/hooks/use-favorites';
 import { useManoeuvreCatalog } from '@/hooks/use-manoeuvre-catalog';
-import { createCustomManoeuvre } from '@/repositories/custom-manoeuvres';
-import { detachWrite } from '@/repositories/log';
 
 /**
  * The combat manœuvres — one section per part of the combat chapter, the
@@ -22,13 +20,8 @@ import { detachWrite } from '@/repositories/log';
  * the header button writes a new one.
  */
 export default function ManoeuvreCatalogList({ favorites }: { favorites?: Favorites }) {
-  const router = useRouter();
   const catalog = useManoeuvreCatalog();
-  const create = () =>
-    detachWrite(
-      'custom_manoeuvres',
-      createCustomManoeuvre().then((row) => row && router.push(`/manoeuvre/${row.id}`)),
-    );
+  const create = useCreateManoeuvre();
 
   return (
     <CasteCatalogList
@@ -36,7 +29,7 @@ export default function ManoeuvreCatalogList({ favorites }: { favorites?: Favori
       emptyLabel="Manœuvres pas encore saisies."
       sections={MANOEUVRE_CONTEXTS}
       header={
-        <Button mode="outlined" icon={dsIcon('plus')} style={styles.create} onPress={create}>
+        <Button mode="outlined" icon={dsIcon('plus')} style={styles.create} onPress={() => create()}>
           Nouvelle manœuvre maison
         </Button>
       }
