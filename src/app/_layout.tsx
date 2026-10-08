@@ -27,11 +27,13 @@ import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
+import { AppDragonProvider, useAppDragon } from '@/hooks/use-app-dragon';
+import { DragonAccents } from '@/theme/dragonsTheme';
 import {
+  navigationTheme,
   ProphecyDarkTheme,
   ProphecyLightTheme,
-  ProphecyNavigationDarkTheme,
-  ProphecyNavigationLightTheme,
+  withDragon,
 } from '@/theme/prophecyTheme';
 
 /** Emits a `route.change` breadcrumb. Null render — it only needs the router. */
@@ -70,8 +72,20 @@ const paperSettings = {
 };
 
 export default function RootLayout() {
+  return (
+    <AppDragonProvider>
+      <ThemedRoot />
+    </AppDragonProvider>
+  );
+}
+
+function ThemedRoot() {
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? ProphecyDarkTheme : ProphecyLightTheme;
+  const { dragon } = useAppDragon();
+  const theme = withDragon(
+    colorScheme === 'dark' ? ProphecyDarkTheme : ProphecyLightTheme,
+    dragon ? DragonAccents[dragon] : null,
+  );
   // Safe above the Stack: expo-router's own root mounts <SafeAreaProvider>.
   const insets = useSafeAreaInsets();
   const [fontsLoaded] = useFonts({
@@ -98,8 +112,7 @@ export default function RootLayout() {
             sheet is already up — the GM's character sheet included. A provider
             could not do that job at all (see lib/dice-roller). */}
         <DiceRollerHost />
-        <ThemeProvider
-          value={colorScheme === 'dark' ? ProphecyNavigationDarkTheme : ProphecyNavigationLightTheme}>
+        <ThemeProvider value={navigationTheme(theme)}>
           <DatabaseGate
             key={attempt}
             fontsLoaded={fontsLoaded}
@@ -132,7 +145,11 @@ export default function RootLayout() {
                     <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
                     {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
                     <Stack.Screen name="campaigns/[id]" options={{ headerShown: false }} />
-                    {/* No dice on the two settings screens: nothing there is played. */}
+                    <Stack.Screen
+                      name="manoeuvre/[mid]"
+                      options={{ title: 'Manœuvre maison', presentation: 'modal' }}
+                    />
+                    {/* No dice on the settings screens: nothing there is played. */}
                     <Stack.Screen
                       name="diagnostics"
                       options={{ title: 'Diagnostic', headerRight: undefined }}
@@ -140,6 +157,10 @@ export default function RootLayout() {
                     <Stack.Screen
                       name="privacy"
                       options={{ title: 'Confidentialité', headerRight: undefined }}
+                    />
+                    <Stack.Screen
+                      name="appearance"
+                      options={{ title: 'Apparence', headerRight: undefined }}
                     />
                     <Stack.Screen
                       name="about"

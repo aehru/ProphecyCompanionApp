@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 
-import CasteCatalogList from '@/components/catalog/caste-catalog-list';
+import CasteCatalogList, { CatalogFamilyHeading } from '@/components/catalog/caste-catalog-list';
 import CatalogRow from '@/components/catalog-row';
 import { PRIVILEGE_FAMILIES } from '@/constants/prophecy';
 import { PRIVILEGE_CATALOG } from '@/data/privilege-catalog';
@@ -41,9 +41,7 @@ export default function PrivilegeCatalogList() {
           if (list.length === 0) return null;
           return (
             <React.Fragment key={key}>
-              <Text style={[styles.family, { color: theme.colors.onSurfaceVariant }]}>
-                {label}
-              </Text>
+              <CatalogFamilyHeading label={label} />
               {list.map((p) => (
                 <CatalogRow
                   key={p.id}
@@ -67,6 +65,5 @@ export default function PrivilegeCatalogList() {
 }
 
 const styles = StyleSheet.create({
-  family: { fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 4 },
   body: { fontSize: 13, lineHeight: 19, paddingBottom: 10 },
 });

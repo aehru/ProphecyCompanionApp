@@ -13,19 +13,25 @@
 //
 // Pure — no framework imports, like the other engines in lib/.
 
-import { CASTES, type CasteKey } from '@/constants/prophecy';
+import { CASTES, type CasteKey, GREAT_DRAGONS, type GreatDragonKey } from '@/constants/prophecy';
 import { fold } from '@/lib/text-fold';
 
-const BY_FOLDED = new Map<string, CasteKey>();
-for (const c of CASTES) {
-  BY_FOLDED.set(fold(c.key), c.key);
-  BY_FOLDED.set(fold(c.label), c.key);
+/** Key or label, accented or not, any case → key. Unknown/blank → null. */
+function looseKey<K extends string>(list: readonly { key: K; label: string }[]) {
+  const byFolded = new Map<string, K>();
+  for (const e of list) {
+    byFolded.set(fold(e.key), e.key);
+    byFolded.set(fold(e.label), e.key);
+  }
+  return (input: unknown): K | null =>
+    typeof input === 'string' ? (byFolded.get(fold(input.trim())) ?? null) : null;
 }
 
 /** Key, label, accented or not, any case → caste key. Unknown/blank → null. */
-export function casteFromInput(input: unknown): CasteKey | null {
-  if (typeof input !== 'string') return null;
-  const q = fold(input.trim());
-  if (q === '') return null;
-  return BY_FOLDED.get(q) ?? null;
-}
+export const casteFromInput = looseKey<CasteKey>(CASTES);
+
+/**
+ * The same leniency for `characters.chosenBy`: « Brorne » or « brorne » → the
+ * dragon key, anything else → null (« non Élu »).
+ */
+export const dragonFromInput = looseKey<GreatDragonKey>(GREAT_DRAGONS);

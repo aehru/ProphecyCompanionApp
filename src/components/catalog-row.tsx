@@ -174,9 +174,9 @@ export default function CatalogRow({
 }
 
 /**
- * The shopping-list toggle. Colour alone carries the state: the DS has one star
- * glyph, and a gold one against a muted one reads at a glance without a second
- * asset — so the label and the `selected` state carry it for a screen reader.
+ * The shopping-list toggle: a filled gold star when starred, a muted outline
+ * otherwise — shape AND colour, so the state survives a colour-blind reader. The
+ * label and the `selected` state carry it for a screen reader.
  */
 function FavoriteStar({
   favorites,
@@ -193,7 +193,7 @@ function FavoriteStar({
     <IconButton
       icon={() => (
         <Icon
-          name="star"
+          name={starred ? 'starFilled' : 'star'}
           size={22}
           color={starred ? theme.colors.primary : theme.colors.onSurfaceVariant}
         />

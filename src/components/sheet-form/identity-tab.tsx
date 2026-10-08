@@ -10,12 +10,14 @@ import type { ChainMap } from '@/components/sheet-form/field-chain';
 import { formStyles } from '@/components/sheet-form/form-styles';
 import SectionCard from '@/components/ui/section-card';
 import SelectField from '@/components/ui/select-field';
-import { CASTES, SANS_CASTE_LABEL, TENDANCES } from '@/constants/prophecy';
+import { CASTES, GREAT_DRAGONS, SANS_CASTE_LABEL, TENDANCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { FormValues } from '@/lib/character-values';
 
 // The empty key IS « Sans Caste » — it round-trips to a NULL column.
 const CASTE_OPTIONS = [{ key: '', label: SANS_CASTE_LABEL }, ...CASTES];
+// Same for the Élu: the empty key is « Aucun », a NULL `chosenBy`.
+const DRAGON_OPTIONS = [{ key: '', label: 'Aucun' }, ...GREAT_DRAGONS];
 
 export default function IdentityTab({
   v,
@@ -113,6 +115,29 @@ export default function IdentityTab({
             onPress={() => onText('darkOrders', v.darkOrders === '1' ? '' : '1')}
           />
         ) : null}
+        {/* Élu: the dragon, then the Lien beside it — hidden at « Aucun », the
+            same rule as the Statut outside a caste. */}
+        <View style={formStyles.row}>
+          <SelectField
+            testID="field-chosen-by"
+            label="Élu de"
+            options={DRAGON_OPTIONS}
+            value={v.chosenBy ?? ''}
+            onChange={(key) => onText('chosenBy', key)}
+            style={styles.caste}
+            inline
+          />
+          {v.chosenBy ? (
+            <NumberField
+              fieldKey="bond"
+              label="Lien"
+              value={v.bond}
+              onChange={setField}
+              maxLength={1}
+              style={styles.statut}
+            />
+          ) : null}
+        </View>
       </SectionCard>
 
       <SectionCard title="TENDANCES">

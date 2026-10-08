@@ -25,15 +25,18 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
  * section with nothing in it are different answers, and only the caller knows
  * which of the two it is.
  */
-export default function CasteCatalogList({
+export default function CasteCatalogList<K extends string = CasteKey>({
   icon,
   emptyLabel,
   renderCaste,
+  sections = CASTES as unknown as readonly { key: K; label: string }[],
 }: {
   icon: IconName;
   /** Shown in a caste's section when `renderCaste` gives nothing back. */
   emptyLabel: string;
-  renderCaste: (caste: CasteKey) => React.ReactNode | null;
+  renderCaste: (caste: K) => React.ReactNode | null;
+  /** The sections, in order — the castes by default; the Faveurs pass the dragons. */
+  sections?: readonly { key: K; label: string }[];
 }) {
   const theme = useProphecyTheme();
   const { isOpen, toggle } = useFolds();
@@ -45,7 +48,7 @@ export default function CasteCatalogList({
         ref={scrollRef}
         onScroll={onScroll}
         contentContainerStyle={[styles.container, contentWidth]}>
-        {CASTES.map((c) => {
+        {sections.map((c) => {
           const open = isOpen(c.key);
           // A folded caste renders nothing, so its rows are not even built.
           const body = open ? renderCaste(c.key) : null;
@@ -69,7 +72,17 @@ export default function CasteCatalogList({
   );
 }
 
+/**
+ * A rulebook heading inside one section (« Privilèges annexes », « Actions
+ * offensives ») — the one the Privilèges and the manœuvres both print.
+ */
+export function CatalogFamilyHeading({ label }: { label: string }) {
+  const theme = useProphecyTheme();
+  return <Text style={[styles.family, { color: theme.colors.onSurfaceVariant }]}>{label}</Text>;
+}
+
 const styles = StyleSheet.create({
+  family: { fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 4 },
   container: { padding: 16, gap: 16, paddingBottom: 48 },
   empty: { fontStyle: 'italic', fontSize: 13 },
 });

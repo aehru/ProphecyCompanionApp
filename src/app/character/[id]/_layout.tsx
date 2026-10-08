@@ -99,6 +99,13 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
+        name="manoeuvre/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Manœuvres de combat',
+        }}
+      />
+      <Stack.Screen
         name="xp"
         options={{
           presentation: 'modal',

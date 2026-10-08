@@ -5,6 +5,10 @@ import {
   CASTES,
   type CasteKey,
   DISCIPLINES,
+  GREAT_DRAGONS,
+  type GreatDragonKey,
+  type ManoeuvreContext,
+  type ManoeuvreFamily,
   SPHERES,
   TIME_UNITS,
   TRAIT_KINDS,
@@ -18,6 +22,10 @@ import { newUuid } from '@/lib/uuid';
 // The caste list lives in `constants/prophecy` (it carries the accented labels);
 // drizzle's text enum wants a non-empty tuple, which `.map` can't prove.
 const CASTE_KEYS = CASTES.map((c) => c.key) as unknown as readonly [CasteKey, ...CasteKey[]];
+const DRAGON_KEYS = GREAT_DRAGONS.map((d) => d.key) as unknown as readonly [
+  GreatDragonKey,
+  ...GreatDragonKey[],
+];
 const TRAIT_KIND_KEYS = TRAIT_KINDS.map((k) => k.key) as unknown as readonly [
   TraitKind,
   ...TraitKind[],
@@ -88,6 +96,14 @@ export const characters = sqliteTable('characters', {
   // privilège of the caste stays open. A boolean and not in NUMERIC_KEYS: it is
   // no stat, and keeping it out of that list keeps it off the campaign wire.
   darkOrders: integer('dark_orders', { mode: 'boolean' }).notNull().default(false),
+
+  // Élu — the Great Dragon who chose this character (NULL = not an Élu), and
+  // the Lien (0–5) between them. Same contract as `statut`: a number, never a
+  // copy — Faveur N is granted at Lien N and its text is looked up by
+  // (dragon, niveau) in the generated catalogue (see lib/favor). Out of
+  // NUMERIC_KEYS on purpose, like `darkOrders`: it stays off the campaign wire.
+  chosenBy: text('chosen_by', { enum: DRAGON_KEYS }),
+  bond: integer('bond').notNull().default(0),
 
   // Tendances — each has a main number + a subnumber (0–10)
   dragon: integer('dragon').notNull().default(0),
@@ -852,7 +868,9 @@ export const gmNotes = sqliteTable('gm_notes', {
 ]);
 
 /** The catalogues a favourite can point into — one per `*-catalog-list`. */
-export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait'] as const;
+// `manoeuvre` has no owned table at all: starring is the only way a character
+// keeps one (the catalogue is reference — see ManoeuvrePreset).
+export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait', 'manoeuvre'] as const;
 export type CatalogKind = (typeof CATALOG_KINDS)[number];
 
 /**
@@ -895,6 +913,41 @@ export const favorites = sqliteTable(
   ],
 );
 
+/**
+ * Manœuvres a table made up, or adapted from the rulebook with its GM — the
+ * catalogue's « Maison » entries. DEVICE-WIDE, not a character's child: every
+ * character on this device sees them in the catalogue and can star them, so
+ * there is no `character_id` and no cascade.
+ *
+ * The id is a UUID, not an autoincrement: a character's star on one is a
+ * `favorites` row whose `preset_id` is this id, and a uuid keeps that pointer
+ * unambiguous next to the rulebook slugs — and still meaningful if house
+ * manœuvres ever travel between devices.
+ *
+ * The three rating cells are stored AS TYPED and parsed on read with
+ * `lib/manoeuvre` `parseRating`: a cell the grammar refuses is kept and printed
+ * verbatim, the editor only warns. `preset_id` names the rulebook entry a
+ * variant was derived from (NULL = written from scratch); it is provenance, not
+ * a link — nothing follows it.
+ */
+export const customManoeuvres = sqliteTable('custom_manoeuvres', {
+  id: text('id').primaryKey().$defaultFn(() => newUuid()),
+  context: text('context').$type<ManoeuvreContext>().notNull().default('melee'),
+  family: text('family').$type<ManoeuvreFamily>().notNull().default('manoeuvre'),
+  name: text('name').notNull().default(''),
+  difficulty: text('difficulty').notNull().default(''),
+  dodge: text('dodge').notNull().default(''),
+  parry: text('parry').notNull().default(''),
+  damage: text('damage').notNull().default(''),
+  roll: text('roll').notNull().default(''),
+  inGameEffect: text('in_game_effect').notNull().default(''),
+  description: text('description').notNull().default(''),
+  presetId: text('preset_id'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -927,3 +980,5 @@ export type CampaignShare = typeof campaignShares.$inferSelect;
 export type GmNote = typeof gmNotes.$inferSelect;
 export type Favorite = typeof favorites.$inferSelect;
 export type NewFavorite = typeof favorites.$inferInsert;
+export type CustomManoeuvre = typeof customManoeuvres.$inferSelect;
+export type NewCustomManoeuvre = typeof customManoeuvres.$inferInsert;

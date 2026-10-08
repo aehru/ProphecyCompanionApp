@@ -10,6 +10,8 @@ import {
     type MD3Theme,
 } from 'react-native-paper';
 
+import type { DragonAccent } from '@/theme/dragonsTheme';
+
 // MD3 surface-tone tokens that react-native-paper's MD3Colors type does not include.
 // Kept in a custom `prophecy` namespace so the theme stays type-safe.
 export type ProphecySurfaces = {
@@ -202,42 +204,69 @@ export const ProphecyDarkTheme: ProphecyTheme = {
   },
 };
 
+/** `#RRGGBB` → `rgba(r,g,b,a)` — the DS hairlines are the primary at low alpha. */
+const tint = (hex: string, a: number) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+};
+
+/**
+ * Recolours a base theme with a Great Dragon's accent (the user's « Apparence »
+ * choice, app-wide). A dragon ships only the four primary roles, so every role
+ * the DS derives FROM the gold — the secondary, the hairlines, the surface tint, the
+ * inverse primary — is re-derived here too, or the old gold would show through
+ * the borders. Backgrounds and tertiary stay parchment & slate.
+ */
+export function withDragon(base: ProphecyTheme, accent: DragonAccent | null): ProphecyTheme {
+  if (!accent) return base;
+  const roles = base.dark ? accent.dark : accent.light;
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      ...roles,
+      // The DS secondary is the same gold, a shade lighter: section icons,
+      // caste/statut chips. Left gold, it reads as a stray accent. Its
+      // container stays — that one is parchment (surface-2), not gold.
+      secondary: roles.primary,
+      onSecondary: roles.onPrimary,
+      outline: tint(roles.primary, base.dark ? 0.32 : 0.3),
+      inversePrimary: (base.dark ? accent.light : accent.dark).primary,
+    },
+    prophecy: {
+      ...base.prophecy,
+      surfaceTint: roles.primary,
+      border: tint(roles.primary, base.dark ? 0.32 : 0.3),
+      borderSoft: tint(roles.primary, 0.14),
+    },
+  };
+}
+
 /**
  * React Navigation themes derived from the same palette, so the navigation
  * chrome (screen backgrounds, headers, tab bar, borders) matches Paper. Header
  * titles use Cinzel (the engraved display face); body/labels use Noto Sans.
  */
+export function navigationTheme(theme: ProphecyTheme): NavigationTheme {
+  const base = theme.dark ? NavigationDarkBaseTheme : NavigationDefaultTheme;
+  return {
+    ...base,
+    dark: theme.dark,
+    colors: {
+      primary: theme.colors.primary,
+      background: theme.colors.background,
+      card: theme.colors.surface,
+      text: theme.colors.onSurface,
+      border: theme.colors.outlineVariant,
+      notification: theme.colors.error,
+    },
+    fonts: navFonts,
+  };
+}
+
 const navFonts: NavigationTheme['fonts'] = {
   regular: { fontFamily: 'NotoSans_400Regular', fontWeight: '400' },
   medium: { fontFamily: 'NotoSans_500Medium', fontWeight: '500' },
   bold: { fontFamily: 'Cinzel_600SemiBold', fontWeight: '600' },
   heavy: { fontFamily: 'Cinzel_600SemiBold', fontWeight: '700' },
-};
-
-export const ProphecyNavigationLightTheme: NavigationTheme = {
-  ...NavigationDefaultTheme,
-  dark: false,
-  colors: {
-    primary: ProphecyLightTheme.colors.primary,
-    background: ProphecyLightTheme.colors.background,
-    card: ProphecyLightTheme.colors.surface,
-    text: ProphecyLightTheme.colors.onSurface,
-    border: ProphecyLightTheme.colors.outlineVariant,
-    notification: ProphecyLightTheme.colors.error,
-  },
-  fonts: navFonts,
-};
-
-export const ProphecyNavigationDarkTheme: NavigationTheme = {
-  ...NavigationDarkBaseTheme,
-  dark: true,
-  colors: {
-    primary: ProphecyDarkTheme.colors.primary,
-    background: ProphecyDarkTheme.colors.background,
-    card: ProphecyDarkTheme.colors.surface,
-    text: ProphecyDarkTheme.colors.onSurface,
-    border: ProphecyDarkTheme.colors.outlineVariant,
-    notification: ProphecyDarkTheme.colors.error,
-  },
-  fonts: navFonts,
 };

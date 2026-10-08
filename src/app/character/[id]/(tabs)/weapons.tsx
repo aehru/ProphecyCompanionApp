@@ -6,6 +6,7 @@ import { Text, TextInput } from 'react-native-paper';
 
 import ArmorCard from '@/components/armor-card';
 import ItemCard from '@/components/item-card';
+import FavoriteManoeuvres from '@/components/manoeuvre/favorite-manoeuvres';
 import MoneySection from '@/components/fiche/money-section';
 import ShieldCard from '@/components/shield-card';
 import AppFab from '@/components/ui/app-fab';
@@ -135,6 +136,9 @@ export default function CharacterWeaponsScreen() {
               ))}
             </Columns>
           )}
+          {/* Under the weapons: what a player does WITH them, starred from the
+              catalogue. One column on purpose — it is a list of rows. */}
+          <FavoriteManoeuvres characterId={numId} />
         </TabPage>
       );
     }

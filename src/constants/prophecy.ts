@@ -54,6 +54,12 @@ export type CasteKey = (typeof CASTES)[number]['key'];
  */
 export const STATUT_MAX = 5;
 
+/**
+ * Highest Lien between an Élu and their Great Dragon. `characters.bond` runs 0
+ * through this; Faveur N is granted at Lien N (see `lib/favor`).
+ */
+export const BOND_MAX = 5;
+
 /** What a NULL caste is called on screen. */
 export const SANS_CASTE_LABEL = 'Sans Caste';
 
@@ -267,6 +273,59 @@ export const PRIVILEGE_FAMILY_KEYS = PRIVILEGE_FAMILIES.map((f) => f.key) as [
   PrivilegeFamily,
   ...PrivilegeFamily[],
 ];
+
+/**
+ * Which part of the combat chapter a manœuvre belongs to — the rulebook's own
+ * sections. « Assommer » and « Attaque simple » appear under both mêlée and
+ * corps à corps with different numbers, which is why a manœuvre is stored per
+ * context (see `ManoeuvrePreset`).
+ */
+export const MANOEUVRE_CONTEXTS = [
+  { key: 'melee', label: 'Mêlée' },
+  { key: 'corps-a-corps', label: 'Corps à corps' },
+  { key: 'monte', label: 'Combat monté' },
+  { key: 'situations', label: 'Situations particulières' },
+  { key: 'critiques', label: 'Coups critiques' },
+] as const;
+
+export type ManoeuvreContext = (typeof MANOEUVRE_CONTEXTS)[number]['key'];
+
+/**
+ * The headings a manœuvre sits under. `regle` holds the entries the rulebook
+ * prints with no stat block (« Le combat au sol », « Dommages des coups »).
+ */
+export const MANOEUVRE_FAMILIES = [
+  { key: 'offensive', label: 'Actions offensives' },
+  { key: 'defensive', label: 'Actions défensives' },
+  { key: 'manoeuvre', label: 'Manœuvres' },
+  // Only reachable once the adversary is seized (« Saisir »).
+  { key: 'empoignade', label: "Manœuvres d'empoignade" },
+  { key: 'regle', label: 'Règles' },
+] as const;
+
+export type ManoeuvreFamily = (typeof MANOEUVRE_FAMILIES)[number]['key'];
+
+/**
+ * The words the rulebook writes in a manœuvre's Difficulté / Esquive / Parade
+ * lines. The four graded ones carry their implied difficulté, so « normale »
+ * alone still reads as 15. `selon` takes the rest of the cell as its object
+ * (« selon l'arme », « selon l'élan », « selon la main »).
+ */
+export const MANOEUVRE_RATINGS = [
+  { key: 'evidente', label: 'Évidente', value: 5 },
+  { key: 'facile', label: 'Facile', value: 10 },
+  { key: 'normale', label: 'Normale', value: 15 },
+  { key: 'difficile', label: 'Difficile', value: 20 },
+  { key: 'impossible', label: 'Impossible' },
+  { key: 'opposition', label: 'Opposition' },
+  { key: 'variable', label: 'Variable' },
+  // « spéciale » on an Esquive line, « spécial » on a Difficulté one.
+  { key: 'special', label: 'Spécial', aliases: ['spéciale'] },
+  { key: 'non-applicable', label: 'Non applicable' },
+  { key: 'selon', label: 'Selon' },
+] as const;
+
+export type ManoeuvreRatingKey = (typeof MANOEUVRE_RATINGS)[number]['key'];
 
 /**
  * The rulebook's five Valeurs of Expérience. At the end of a scénario the GM
