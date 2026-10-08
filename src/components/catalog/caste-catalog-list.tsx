@@ -29,15 +29,12 @@ export default function CasteCatalogList<K extends string = CasteKey>({
   icon,
   emptyLabel,
   renderCaste,
-  header,
   sections = CASTES as unknown as readonly { key: K; label: string }[],
 }: {
   icon: IconName;
   /** Shown in a caste's section when `renderCaste` gives nothing back. */
   emptyLabel: string;
   renderCaste: (caste: K) => React.ReactNode | null;
-  /** Above the first section — the manœuvres put « Nouvelle manœuvre » there. */
-  header?: React.ReactNode;
   /** The sections, in order — the castes by default; the Faveurs pass the dragons. */
   sections?: readonly { key: K; label: string }[];
 }) {
@@ -51,7 +48,6 @@ export default function CasteCatalogList<K extends string = CasteKey>({
         ref={scrollRef}
         onScroll={onScroll}
         contentContainerStyle={[styles.container, contentWidth]}>
-        {header}
         {sections.map((c) => {
           const open = isOpen(c.key);
           // A folded caste renders nothing, so its rows are not even built.
