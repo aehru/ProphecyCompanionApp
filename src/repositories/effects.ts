@@ -1,7 +1,8 @@
-import { and, asc, eq, gt, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, like, sql } from 'drizzle-orm';
 
-import { db, transaction } from '@/db/client';
+import { db, transaction, type Executor } from '@/db/client';
 import { effects, type NewEffect } from '@/db/schema';
+import type { GearKind } from '@/lib/gear-bonus';
 import { logWrite } from '@/repositories/log';
 
 /** Live query for a character's temporary effects (use with useLiveQuery). */
@@ -36,6 +37,11 @@ export async function updateEffect(id: number, data: Partial<NewEffect>) {
 export async function deleteEffect(id: number) {
   await db.delete(effects).where(eq(effects.id, id));
   logWrite('effects', 'delete', { effectId: id });
+}
+
+/** Purge the temporary bonuses on a weapon or shield being deleted: no FK reaches them. */
+export async function deleteGearEffects(kind: GearKind, id: number, x: Executor = db) {
+  await x.delete(effects).where(like(effects.target, `${kind}:${id}:%`));
 }
 
 /**

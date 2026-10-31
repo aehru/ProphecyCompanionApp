@@ -2,6 +2,7 @@ import { asc, eq } from 'drizzle-orm';
 
 import { db, transaction } from '@/db/client';
 import { type NewShield, shields } from '@/db/schema';
+import { deleteGearEffects } from '@/repositories/effects';
 import { deleteEnchantsFor } from '@/repositories/enchants';
 import { logWrite } from '@/repositories/log';
 
@@ -38,6 +39,7 @@ export async function deleteShield(id: number) {
   // cascade through, so it has to share the row's transaction.
   await transaction(async (tx) => {
     await deleteEnchantsFor('shield', id, tx);
+    await deleteGearEffects('shield', id, tx);
     await tx.delete(shields).where(eq(shields.id, id));
   });
   logWrite('shields', 'delete', { shieldId: id });

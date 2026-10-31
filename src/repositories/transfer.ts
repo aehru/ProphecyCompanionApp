@@ -62,8 +62,10 @@ import {
   WEAPON_FIELDS,
   XP_AWARD_FIELDS,
 } from '@/lib/character-transfer';
+import { remapGearTarget } from '@/lib/gear-bonus';
 import { copyMedia } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
+import { syncItemBonus } from '@/repositories/items';
 import { logWrite } from '@/repositories/log';
 
 /**
@@ -231,7 +233,13 @@ export async function exportCharacters(
       }),
       traits: tr.map((r) => pick(r, TRAIT_FIELDS)),
       privileges: (privilegesByChar.get(c.id) ?? []).map((r) => pick(r, PRIVILEGE_FIELDS)),
-      effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
+      // An item's derived row stays home (the importer rebuilds it), and a gear
+      // bonus's target travels as a position, like an enchant's.
+      effects: ef.flatMap((r) => {
+        if (r.itemId != null) return [];
+        const target = remapGearTarget(r.target, (kind, id) => gearIndex[kind].get(id));
+        return target == null ? [] : [{ ...pick(r, EFFECT_FIELDS), target }];
+      }),
       favorites: (favoritesByChar.get(c.id) ?? []).map((r) => pick(r, FAVORITE_FIELDS)),
       xpAwards: (xpAwardsByChar.get(c.id) ?? []).map((r) => pick(r, XP_AWARD_FIELDS)),
     } as CharacterBundle);
@@ -369,7 +377,25 @@ export async function importCharacters(
       if (privilegeRows.length) {
         await tx.insert(privileges).values(link(privilegeRows) as NewPrivilege[]);
       }
-      if (b.effects.length) await tx.insert(effects).values(link(b.effects) as NewEffect[]);
+      // After the gear: a gear bonus's target holds a position, and the ids it
+      // resolves to only exist now.
+      const newIds = async (t: GearTable) =>
+        (
+          await tx
+            .select({ id: t.id })
+            .from(t)
+            .where(eq(t.characterId, characterId))
+            .orderBy(asc(t.id))
+        ).map((r) => r.id);
+      const gearLookup = { weapon: await newIds(weapons), shield: await newIds(shields) };
+      const effectRows = b.effects.flatMap((e) => {
+        const target = remapGearTarget(e.target, (kind, n) => gearLookup[kind][n]);
+        return target == null ? [] : [{ ...e, target }];
+      });
+      if (effectRows.length) await tx.insert(effects).values(link(effectRows) as NewEffect[]);
+      for (const item of await tx.select().from(items).where(eq(items.characterId, characterId))) {
+        await syncItemBonus(item, tx);
+      }
       // No link to resolve: a favourite carries a rulebook slug, which means the
       // same thing on every device.
       const favoriteRows = b.favorites ?? [];
@@ -387,14 +413,6 @@ export async function importCharacters(
       // enchant instead of binding it to whatever sits at that position.
       const enchantRows = b.enchants ?? [];
       if (enchantRows.length) {
-        const newIds = async (t: GearTable) =>
-          (
-            await tx
-              .select({ id: t.id })
-              .from(t)
-              .where(eq(t.characterId, characterId))
-              .orderBy(asc(t.id))
-          ).map((r) => r.id);
         // Only the kinds actually pointed at: an enchanted sword costs one
         // read-back, not four, and a bundle with no linked sortilège costs none.
         const gearIds: Partial<Record<EnchantTarget, number[]>> = {};

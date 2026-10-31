@@ -148,6 +148,9 @@ const shieldSchema = z.object({
   defenseCurrent: int,
   encombrementMalus: int,
   equipped: z.boolean(),
+  // Permanent bonuses. OPTIONAL (not a version bump): older exports have none.
+  hitBonus: int.optional(),
+  damageBonus: int.optional(),
 });
 
 const weaponSchema = z.object({
@@ -170,6 +173,10 @@ const weaponSchema = z.object({
   // such field, and the weapon imports with no skill linked — the same
   // « Compétence non définie » state a hand-made weapon starts in.
   skillName: str.nullable().optional(),
+  // Permanent bonuses. OPTIONAL, same reasoning: older exports have none.
+  hitBonus: int.optional(),
+  damageBonus: int.optional(),
+  initBonus: int.optional(),
 });
 
 const UNIT_KEYS = TIME_UNITS.map((u) => u.key) as [string, ...string[]];
@@ -232,6 +239,10 @@ const itemSchema = z.object({
   description: str,
   quantity: int,
   equipped: z.boolean(),
+  // OPTIONAL (not a version bump): older exports have no item bonus. Its derived
+  // `effects` row does not travel; the importer rebuilds it from these.
+  bonusTarget: str.optional(),
+  bonusValue: int.optional(),
 });
 
 /**
