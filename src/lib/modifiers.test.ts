@@ -24,6 +24,7 @@ import {
 // Build an Effect row with sensible defaults; override what a test cares about.
 function makeEffect(over: Partial<Effect> = {}): Effect {
   return {
+    itemId: null,
     id: 1,
     characterId: 1,
     label: '',
