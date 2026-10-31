@@ -13,6 +13,7 @@ import {
 import { dsIcon } from '@/components/ui/icon';
 import type { Shield } from '@/db/schema';
 import { formatDecimal } from '@/lib/character-values';
+import { fmtSignedMod } from '@/lib/modifiers';
 
 /**
  * The shield fields the detail prints. Optional throughout so a **catalogue
@@ -32,6 +33,7 @@ export type ShieldView = Partial<
     | 'creationTime'
     | 'encombrementMalus'
     | 'special'
+    | 'hitBonus'
   >
 >;
 
@@ -55,6 +57,8 @@ export default function ShieldDetail({
 }) {
   return (
     <View style={styles.detail}>
+      {s.hitBonus ? <DetailRow label="Toucher" value={fmtSignedMod(s.hitBonus)} /> : null}
+
       <FormulaRow
         label="Dégâts"
         raw={s.damage}
