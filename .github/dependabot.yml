@@ -34,7 +34,7 @@ updates:
       prefix: chore(deps)
       prefix-development: chore(deps-dev)
 
-    # The Expo SDK 57 family moves as ONE set, through `expo install --fix` —
+    # The Expo SDK 58 family moves as ONE set, through `expo install --fix` —
     # every version here is pinned by the SDK, not chosen by us. A per-package
     # bump desyncs the set and breaks the native build, so Dependabot never
     # touches it; SDK upgrades stay a deliberate manual step.
