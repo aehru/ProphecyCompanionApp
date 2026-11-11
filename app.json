@@ -64,6 +64,7 @@
         {
           "android": {
             "usesCleartextTraffic": true,
+            "enableMinifyInReleaseBuilds": false,
             "buildArchs": ["arm64-v8a", "armeabi-v7a"]
           }
         }
