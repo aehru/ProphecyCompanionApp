@@ -7,7 +7,7 @@
 // would change every prop identity and re-render every field on each keystroke.
 
 import { useMemo, useRef } from 'react';
-import type { TextInput as RNTextInput, TextInputProps } from 'react-native';
+import type { TextInputInstance, TextInputProps } from 'react-native';
 
 import {
   ATTRIBUTS,
@@ -40,7 +40,7 @@ export const MAGIE_ORDER = [
 ];
 
 export interface ChainProps {
-  inputRef: (el: RNTextInput | null) => void;
+  inputRef: (el: TextInputInstance | null) => void;
   returnKeyType: TextInputProps['returnKeyType'];
   submitBehavior: TextInputProps['submitBehavior'];
   onSubmitEditing: () => void;
@@ -50,7 +50,7 @@ export interface ChainProps {
 export type ChainMap = Record<string, ChainProps>;
 
 export function useFieldChains() {
-  const refs = useRef<Record<string, RNTextInput | null>>({});
+  const refs = useRef<Record<string, TextInputInstance | null>>({});
 
   const chains = useMemo(() => {
     const make = (order: string[]): ChainMap =>
@@ -60,7 +60,7 @@ export function useFieldChains() {
           return [
             key,
             {
-              inputRef: (el: RNTextInput | null) => {
+              inputRef: (el: TextInputInstance | null) => {
                 refs.current[key] = el;
               },
               returnKeyType: (isLast ? 'done' : 'next') as TextInputProps['returnKeyType'],
@@ -80,7 +80,7 @@ export function useFieldChains() {
 
   /** Ref callback for a field the chain doesn't wire itself (Paper inputs). */
   const registerRef = (key: string) => (el: unknown) => {
-    refs.current[key] = el as RNTextInput | null;
+    refs.current[key] = el as TextInputInstance | null;
   };
   const focus = (key: string) => refs.current[key]?.focus();
 

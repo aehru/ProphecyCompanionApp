@@ -17,7 +17,7 @@ import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
   View,
   type StyleProp,
@@ -63,7 +63,7 @@ export default function TabPager({
   headerRight?: React.ReactNode;
 }) {
   const [width, setWidth] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   // Lazy useState rather than useRef(...).current — no ref read during render.
   const [scrollX] = useState(() => new Animated.Value(0));
   // Pages the user has actually reached — mounted from then on.

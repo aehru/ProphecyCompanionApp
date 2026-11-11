@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef } from 'react';
-import { Platform, type NativeScrollEvent, type NativeSyntheticEvent, type View } from 'react-native';
+import { Platform, type NativeScrollEvent, type NativeSyntheticEvent, type ViewInstance } from 'react-native';
 
 /**
  * Puts a collapsing {@link CatalogRow} back at the top of the screen.
@@ -19,7 +19,7 @@ import { Platform, type NativeScrollEvent, type NativeSyntheticEvent, type View 
  */
 export interface CatalogScroll {
   /** Scroll so `row` sits at the top of the viewport. */
-  rowToTop: (row: View | null) => void;
+  rowToTop: (row: ViewInstance | null) => void;
 }
 
 const NO_SCROLL: CatalogScroll = { rowToTop: () => {} };
@@ -89,7 +89,7 @@ export function useCatalogScrollHost() {
     offset.current = e.nativeEvent.contentOffset.y;
   }, []);
 
-  const rowToTop = useCallback((row: View | null) => {
+  const rowToTop = useCallback((row: ViewInstance | null) => {
     // A ScrollView answers `getScrollResponder` with itself; a SectionList
     // answers with the ScrollView it wraps. Either way the native ref hangs off
     // the responder, so one lookup covers both.

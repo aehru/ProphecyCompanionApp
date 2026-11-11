@@ -3,7 +3,7 @@
 // then its specializations and the button that adds one.
 
 import React from 'react';
-import { StyleSheet, TextInput as RNTextInput, View } from 'react-native';
+import { StyleSheet, type TextInputInstance, View } from 'react-native';
 import { Button, IconButton, Menu, Text } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
@@ -50,7 +50,7 @@ export default function SkillRow({
   onSpecRemove: (spec: Skill) => void;
   /** Set on a freshly-added row only — an inline ref on every row would defeat
    *  NumberField's memo. */
-  inputRef?: (el: RNTextInput | null) => void;
+  inputRef?: (el: TextInputInstance | null) => void;
 }) {
   const theme = useProphecyTheme();
   return (

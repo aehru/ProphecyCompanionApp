@@ -30,11 +30,11 @@ import {
   type LayoutChangeEvent,
   Pressable,
   ScrollView,
+  type ScrollViewInstance,
   StyleSheet,
-  type TextLayoutEventData,
+  type TextLayoutEvent,
   useWindowDimensions,
   View,
-  type NativeSyntheticEvent,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
@@ -121,7 +121,7 @@ export default function SubTabs({
   // only ever reports on the full words, and abbreviating is the cheaper fix.
   const scrolls = tabWidth > 0 && widest(true) > room;
 
-  const onTextLayout = (e: NativeSyntheticEvent<TextLayoutEventData>) => {
+  const onTextLayout = (e: TextLayoutEvent) => {
     if (e.nativeEvent.lines.length > 1) setWrapped(true);
   };
 
@@ -146,7 +146,7 @@ export default function SubTabs({
   const measured: TabBox[] | null =
     boxes.length === labels.length && boxes.every((b) => b != null) ? (boxes as TabBox[]) : null;
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
 
   // Where the active tab wants the strip scrolled to, or null while there is
   // nothing to scroll. A NUMBER rather than the box it came from: the boxes

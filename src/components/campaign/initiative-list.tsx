@@ -124,7 +124,7 @@ export default function InitiativeList({
                 </Pressable>
               ))}
             </View>
-          ) : null
+          ) : undefined
         }
       />
       <Menu
