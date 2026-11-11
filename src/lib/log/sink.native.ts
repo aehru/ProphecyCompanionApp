@@ -51,7 +51,7 @@ export function createLogSink(): LogSink {
         // never diverges from what the ring buffer actually holds.
         if (f.exists) f.delete();
         f.create();
-        f.write(text);
+        await f.write(text);
       } catch {
         // disk full / sandbox denied — nothing to do but keep running
       }
