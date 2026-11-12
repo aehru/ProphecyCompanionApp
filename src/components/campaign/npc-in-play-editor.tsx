@@ -91,7 +91,7 @@ function EditorBody({ char }: { char: Character }) {
 
   return (
     <View style={styles.root}>
-      <InitiativeSection {...initiative} wound={woundMalus(stRec)} />
+      <InitiativeSection {...initiative} wound={woundMalus(stRec, effects ?? [])} />
       <HealthSection
         maxOf={(k) => rec[k] ?? 0}
         currentOf={(k) => stRec[k] ?? 0}

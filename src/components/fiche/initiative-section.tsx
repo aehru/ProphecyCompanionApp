@@ -17,6 +17,7 @@ import {
   type DieUsage,
   type DieUse,
 } from '@/lib/action-cumul';
+import { parseInteger } from '@/lib/character-values';
 import { initiativeDiceCount } from '@/lib/dice';
 
 /**
@@ -55,7 +56,7 @@ export default function InitiativeSection({
   usage: DieUsage[];
   /** Wound malus, applied to every die (non-positive). */
   wound: number;
-  onUse: (index: number, use: DieUse | null) => void;
+  onUse: (index: number, use: DieUse | null, at: number) => void;
   onSetDie: (index: number, value: number) => void;
   onSetIcon: (index: number, icon: string) => void;
   onSetBonus: (value: number) => void;
@@ -141,7 +142,7 @@ export default function InitiativeSection({
                         fieldKey={String(i)}
                         label={`Dé ${i + 1}`}
                         value={String(val)}
-                        onChange={(k, t) => onSetDie(Number(k), parseInt(t, 10) || 0)}
+                        onChange={(k, t) => onSetDie(Number(k), parseInteger(t))}
                         style={styles.slotField}
                       />
                       <Pressable
@@ -191,7 +192,7 @@ export default function InitiativeSection({
             current={spending != null ? (usage[spending]?.use ?? null) : null}
             onDismiss={() => setSpending(null)}
             onPick={(use) => {
-              if (spending != null) onUse(spending, use);
+              if (spending != null) onUse(spending, use, (values[spending] ?? 0) + wound);
               setSpending(null);
             }}
           />

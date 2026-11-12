@@ -92,7 +92,7 @@ export function GmSheetBody({
   // roll — initiative, the stat tiles and the skills' TOT column alike, same
   // reading the turn order and the player's own sheet use. Computed before the
   // early return so the grouping memo below can fold it in.
-  const wound = useMemo(() => woundOf(c?.wounds), [c?.wounds]);
+  const wound = useMemo(() => woundOf(c?.wounds, c?.effects), [c?.wounds, c?.effects]);
   // Die marks never cross the wire, so they come from the local rows — filled
   // for the GM's own PNJs, absent for a player's character.
   const dieIconsByUuid = useLocalDieIcons();

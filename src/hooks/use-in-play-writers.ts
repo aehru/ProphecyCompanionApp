@@ -6,7 +6,6 @@ import {
   rollInitiative,
   trimInitiativeSlots,
 } from '@/lib/dice';
-import { woundMalus } from '@/lib/modifiers';
 import { updateActualState } from '@/repositories/actual-state';
 import { detachWrite } from '@/repositories/log';
 
@@ -81,7 +80,8 @@ export function useInPlayWriters({
     usage,
     // Spend a die (or free it with null). `at` is what it is worth right now —
     // the wound malus included — so a later wound can't move it in the order.
-    onUse: (i: number, use: DieUse | null, at = (values[i] ?? 0) + woundMalus(stRec)) =>
+    // The caller passes it: it holds the effects a suspension lives in.
+    onUse: (i: number, use: DieUse | null, at: number) =>
       persistState({ initiativeUsage: markDie(usage, count, i, use, at) }),
     // Editing one die's value leaves the order alone — only a roll re-sorts.
     onSetDie: (i: number, n: number) =>

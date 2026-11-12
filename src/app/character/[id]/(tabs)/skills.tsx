@@ -84,7 +84,7 @@ export default function CharacterSkillsScreen() {
   const effectList = effects ?? [];
   const rec = asNumRecord(char);
   // Wound malus + temporary effects, per linked attribut, for skill totals.
-  const wound = woundMalus(asNumRecord(state));
+  const wound = woundMalus(asNumRecord(state), effectList);
 
   const draft = useSkillsDraft(numId, skillList, editing);
   const pageGroups = useSkillGroups({

@@ -45,8 +45,8 @@ export function useCaracReadings(characterId: number): CaracReadings {
   // re-parses every prérequis formula on every keystroke of the search box.
   return useMemo(() => {
     const rec = asNumRecord(charRows?.[0] ?? {});
-    const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
     const effectList = effects ?? [];
+    const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}), effectList);
     const skillList = skills ?? [];
     return {
       caracValue: (k: string) => rec[k] ?? 0,

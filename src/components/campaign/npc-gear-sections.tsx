@@ -80,8 +80,8 @@ function GearBody({ char }: { char: Character }) {
   const caracValue = (key: string) => rec[key] ?? 0;
   // Same reading as the Fiche: the wound malus hits the attack roll, never the
   // damage — a damage formula's carac folds in only the active effects.
-  const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
   const effectList = effects ?? [];
+  const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}), effectList);
   const caracModifier = (key: string) => damageModifier(key, effectList);
 
   const enchantedKeys = new Set((enchants ?? []).map((e) => `${e.targetType}:${e.targetId}`));

@@ -12,6 +12,7 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { RosterEntry } from '@/lib/campaign-protocol';
 import { DIE_USE_LABEL, type DieUse } from '@/lib/action-cumul';
 import { initiativeOrder, type InitiativeInput, type InitiativeRow } from '@/lib/initiative-order';
+import { effectsOf } from '@/lib/shared-character-view';
 import { markInitiativeDie } from '@/repositories/characters';
 import { detachWrite } from '@/repositories/log';
 
@@ -57,6 +58,7 @@ export default function InitiativeList({
       owner: e.owner,
       wounds: (e.character.wounds ?? {}) as InitiativeInput['wounds'],
       initiative: (e.character.initiative ?? {}) as InitiativeInput['initiative'],
+      effects: effectsOf(e.character.effects),
     }));
     return initiativeOrder(inputs);
   }, [roster]);

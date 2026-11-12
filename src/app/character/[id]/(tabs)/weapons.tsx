@@ -94,8 +94,8 @@ export default function CharacterWeaponsScreen() {
   const stRec = asNumRecord(state);
   // The wound malus hits the attack roll (skillOf), never the damage: a damage
   // formula's carac only folds in the temporary effects, before the multiplier.
-  const wound = woundMalus(stRec);
   const effectList = effects ?? [];
+  const wound = woundMalus(stRec, effectList);
   const skillList = skills ?? [];
   const caracModifier = (caracKey: string) => damageModifier(caracKey, effectList);
 
