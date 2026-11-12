@@ -53,6 +53,19 @@ function makeBundle(over: Partial<CharacterBundle> = {}): CharacterBundle {
     state,
     favorites: [{ kind: 'spell', presetId: 'boule-de-feu' }],
     xpAwards: [],
+    privileges: [
+      {
+        caste: 'combattant',
+        family: 'caste',
+        darkOrders: false,
+        name: 'Riposte',
+        cost: 5,
+        description: 'Contre-attaque.',
+        note: '',
+        presetId: 'combattant-riposte',
+        presetRevision: 'abc',
+      },
+    ],
     skills: [{ name: 'Esquive', attribut: 'physique', value: 3 }],
     armor: [
       {
