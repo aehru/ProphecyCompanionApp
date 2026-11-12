@@ -28,6 +28,7 @@ import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { damageModifier, woundMalus } from '@/lib/modifiers';
+import { withActionCumul } from '@/lib/action-cumul';
 import { weaponRollContext } from '@/lib/roll-context';
 import { weaponSkillReading } from '@/lib/weapon-skill';
 import { armorQuery } from '@/repositories/armor';
@@ -108,7 +109,8 @@ export default function CharacterWeaponsScreen() {
   // says so, and there is no total to roll (see lib/roll-context).
   const rollWeapon = (w: Weapon) => {
     const ctx = weaponRollContext(w.name, skillOf(w));
-    if (ctx) openRoller(ctx);
+    // Past the first attack this turn, the cumul raises the Difficulté.
+    if (ctx) openRoller(withActionCumul(ctx, state?.initiativeUsage, 'atk'));
   };
 
   // One page per category; each scrolls on its own under the pinned money card

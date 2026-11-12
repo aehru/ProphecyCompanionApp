@@ -25,6 +25,7 @@ import { useSkillGroups } from '@/hooks/use-skill-groups';
 import { useSkillsDraft } from '@/hooks/use-skills-draft';
 import { asNumRecord } from '@/lib/character-values';
 import { woundMalus } from '@/lib/modifiers';
+import { isDodgeSkill, withActionCumul } from '@/lib/action-cumul';
 import { skillRollContext } from '@/lib/roll-context';
 import type { SkillScope } from '@/lib/skill-grouping';
 import { actualStateQuery } from '@/repositories/actual-state';
@@ -95,9 +96,16 @@ export default function CharacterSkillsScreen() {
 
   // Tapping a TOT rolls against that skill — see lib/roll-context for why the
   // total and the confirmation number are not the same one.
+  // An Esquive past the first défense this turn carries the cumul.
+  const usage = state?.initiativeUsage;
   const rollSkill = useCallback(
-    (skill: SkillLineData) => openRoller(skillRollContext(skill)),
-    [],
+    (skill: SkillLineData) =>
+      openRoller(
+        isDodgeSkill(skill.name)
+          ? withActionCumul(skillRollContext(skill), usage, 'def')
+          : skillRollContext(skill),
+      ),
+    [usage],
   );
 
   const clearFocus = useCallback(() => setPendingFocus(null), []);

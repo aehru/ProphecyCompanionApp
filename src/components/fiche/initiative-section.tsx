@@ -2,13 +2,21 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text } from 'react-native-paper';
 
+import InitiativeDieChip from '@/components/initiative-die-chip';
 import NumberField from '@/components/number-field';
 import { asDieIcon, DIE_ICONS } from '@/components/ui/die-icons';
 import DsDialog from '@/components/ui/ds-dialog';
 import EditableSection from '@/components/ui/editable-section';
 import Icon, { dsIcon, type IconName } from '@/components/ui/icon';
-import StatChip from '@/components/ui/stat-chip';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import {
+  cumulMalus,
+  DIE_USE_LABEL,
+  DIE_USES,
+  isLostDie,
+  type DieUsage,
+  type DieUse,
+} from '@/lib/action-cumul';
 import { initiativeDiceCount } from '@/lib/dice';
 
 /**
@@ -31,7 +39,9 @@ export default function InitiativeSection({
   bonus,
   values,
   icons,
+  usage,
   wound,
+  onUse,
   onSetDie,
   onSetIcon,
   onSetBonus,
@@ -41,8 +51,11 @@ export default function InitiativeSection({
   bonus: number;
   values: number[];
   icons: string[];
+  /** What each die was spent on this turn, index-aligned with `values`. */
+  usage: DieUsage[];
   /** Wound malus, applied to every die (non-positive). */
   wound: number;
+  onUse: (index: number, use: DieUse | null) => void;
   onSetDie: (index: number, value: number) => void;
   onSetIcon: (index: number, icon: string) => void;
   onSetBonus: (value: number) => void;
@@ -54,6 +67,10 @@ export default function InitiativeSection({
   // Which slot's picker is open; null = closed. Index rather than a boolean so
   // the dialog knows what it is editing.
   const [picking, setPicking] = useState<number | null>(null);
+  // Which die's action picker is open (read mode).
+  const [spending, setSpending] = useState<number | null>(null);
+  const atkCumul = cumulMalus(usage, 'atk');
+  const defCumul = cumulMalus(usage, 'def');
 
   return (
     <EditableSection
@@ -142,24 +159,42 @@ export default function InitiativeSection({
                     </View>
                   );
                 }
-                // Wound malus applies to initiative like any roll. A rolled die
-                // driven to 0 or below is unusable → error border.
-                const unusable = val > 0 && val + wound <= 0;
+                const spent = usage[i] ?? null;
                 return (
-                  <StatChip
+                  <InitiativeDieChip
                     key={i}
-                    label={`Dé ${i + 1}`}
-                    value={String(val)}
-                    modifier={wound}
+                    index={i}
+                    value={val}
+                    wound={wound}
                     icon={icon}
-                    style={
-                      unusable ? { borderColor: theme.colors.error, borderWidth: 1.5 } : undefined
+                    spent={spent}
+                    // An unrolled slot or a lost die has no action to spend.
+                    onPress={
+                      val > 0 && !isLostDie(val, wound, spent) ? () => setSpending(i) : undefined
                     }
                   />
                 );
               })}
             </View>
           )}
+
+          {!editing && (atkCumul > 0 || defCumul > 0) ? (
+            // The « cumul des actions »: the roller already applies it, this
+            // line is what tells the table why the Difficulté went up.
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>
+              {`Prochaine attaque : Diff. +${atkCumul} · Prochaine défense : Diff. +${defCumul}`}
+            </Text>
+          ) : null}
+
+          <DieUseDialog
+            index={spending}
+            current={spending != null ? (usage[spending]?.use ?? null) : null}
+            onDismiss={() => setSpending(null)}
+            onPick={(use) => {
+              if (spending != null) onUse(spending, use);
+              setSpending(null);
+            }}
+          />
 
           <DieIconDialog
             visible={picking != null}
@@ -173,6 +208,53 @@ export default function InitiativeSection({
         </>
       )}
     </EditableSection>
+  );
+}
+
+/**
+ * Spend a die on an action. One tap applies and closes — mid-fight, no
+ * confirm. « Libérer » is the undo, offered only on a spent die.
+ */
+function DieUseDialog({
+  index,
+  current,
+  onDismiss,
+  onPick,
+}: {
+  index: number | null;
+  current: DieUse | null;
+  onDismiss: () => void;
+  onPick: (use: DieUse | null) => void;
+}) {
+  const theme = useProphecyTheme();
+  return (
+    <DsDialog
+      visible={index != null}
+      onDismiss={onDismiss}
+      title={`Dé ${(index ?? 0) + 1} : action`}
+      dismiss={<Button onPress={onDismiss}>Annuler</Button>}
+      actions={
+        current ? (
+          <Button mode="contained" icon={dsIcon('close')} onPress={() => onPick(null)}>
+            Libérer
+          </Button>
+        ) : undefined
+      }>
+      <Text style={{ color: theme.colors.onSurfaceVariant }}>
+        Une attaque et une défense par tour sont gratuites ; chacune de plus
+        augmente la Difficulté de 5.
+      </Text>
+      <View style={styles.uses}>
+        {DIE_USES.map((use) => (
+          <Button
+            key={use}
+            mode={use === current ? 'contained' : 'outlined'}
+            onPress={() => onPick(use)}>
+            {DIE_USE_LABEL[use]}
+          </Button>
+        ))}
+      </View>
+    </DsDialog>
   );
 }
 
@@ -250,4 +332,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   picker: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 4 },
-});
+  uses: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },});
