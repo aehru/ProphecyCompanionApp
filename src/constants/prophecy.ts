@@ -578,8 +578,15 @@ export function timeUnitLabel(key: string, amount?: number | null): string {
  * Targets an effect can apply to: every roll (`all`), one caractéristique, or
  * one attribut. Used to build the target picker and to label an effect's scope.
  */
+/**
+ * Effect target that cancels wound malus points rather than adding to a roll
+ * (lib/modifiers `woundMalus`). Its `value` is the number of points cancelled.
+ */
+export const WOUND_RELIEF_TARGET = 'wounds';
+
 export const EFFECT_TARGETS: { key: string; label: string }[] = [
   { key: 'all', label: 'Tous les jets' },
+  { key: WOUND_RELIEF_TARGET, label: 'Malus de blessures annulés' },
   ...CARACTERISTIQUES.map((c) => ({ key: c.key, label: c.label })),
   ...ATTRIBUTS.map((a) => ({ key: a.key, label: a.label })),
 ];

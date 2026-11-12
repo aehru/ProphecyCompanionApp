@@ -1,5 +1,5 @@
 import { isLostDie, type DieUsage, type DieUse } from '@/lib/action-cumul';
-import { woundMalus } from '@/lib/modifiers';
+import { woundMalus, type ModifierSource } from '@/lib/modifiers';
 
 /**
  * Turn a GM roster into a Prophecy initiative order.
@@ -18,6 +18,8 @@ export type InitiativeInput = {
   /** Projection shape: `{ [woundKey]: { current, max } }`. */
   wounds?: Record<string, { current?: number; max?: number }> | null;
   initiative?: { max?: number; values?: number[]; usage?: DieUsage[] } | null;
+  /** Active effects, for a wound-malus suspension. */
+  effects?: readonly ModifierSource[];
 };
 
 export type InitiativeRow = {
@@ -59,11 +61,13 @@ export type InitiativeRow = {
  */
 export function sharedWoundMalus(
   wounds: InitiativeInput['wounds'],
+  effects: readonly ModifierSource[] = [],
 ): number {
   return woundMalus(
     Object.fromEntries(
       Object.entries(wounds ?? {}).map(([k, pool]) => [`${k}Current`, pool?.current ?? 0]),
     ),
+    effects,
   );
 }
 
@@ -89,7 +93,7 @@ export function initiativeOrder(entries: readonly InitiativeInput[]): {
       unrolled.push(e);
       continue;
     }
-    const malus = sharedWoundMalus(e.wounds);
+    const malus = sharedWoundMalus(e.wounds, e.effects);
     const usage = e.initiative?.usage ?? [];
     values.forEach((raw, dieIndex) => {
       const effective = raw + malus;

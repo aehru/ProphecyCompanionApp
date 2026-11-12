@@ -5,6 +5,8 @@ import type { Effect } from '@/db/schema';
 import {
   activeEffects,
   damageModifier,
+  effectDurationLabel,
+  effectValueLabel,
   effectsSum,
   fmtSignedMod,
   globalModifier,
@@ -14,6 +16,8 @@ import {
   skillTargetName,
   statModifier,
   totalModifier,
+  WOUND_MALUS_MAX,
+  WOUND_RELIEF_TARGET,
   woundMalus,
 } from './modifiers';
 
@@ -53,6 +57,28 @@ describe('woundMalus', () => {
 
   it('ignores levels with no malus (Égratignure, Mort)', () => {
     expect(woundMalus(wounds({ egratignureCurrent: 3, mortCurrent: 1 }))).toBe(0);
+  });
+
+  describe('relief effects', () => {
+    const relief = (value: number, expired = false) =>
+      makeEffect({ target: WOUND_RELIEF_TARGET, value, expired });
+
+    it('cancels part of the malus', () => {
+      expect(woundMalus(wounds({ graveCurrent: 1 }), [relief(2)])).toBe(-1);
+    });
+
+    it('never turns into a bonus', () => {
+      expect(woundMalus(wounds({ legereCurrent: 1 }), [relief(3)])).toBe(0);
+    });
+
+    it('« tous » cancels the deepest level', () => {
+      expect(woundMalus(wounds({ fataleCurrent: 1 }), [relief(WOUND_MALUS_MAX)])).toBe(0);
+    });
+
+    it('ignores expired, negative and ordinary effects', () => {
+      const st = wounds({ graveCurrent: 1 });
+      expect(woundMalus(st, [relief(3, true), relief(-2), makeEffect({ value: 3 })])).toBe(-3);
+    });
   });
 });
 
@@ -207,5 +233,18 @@ describe('fmtSignedMod', () => {
 
   it('renders zero without a sign', () => {
     expect(fmtSignedMod(0)).toBe('0');
+  });
+});
+
+describe('effect display', () => {
+  it('reads a full wound relief as « Tous », anything else signed', () => {
+    expect(effectValueLabel(WOUND_RELIEF_TARGET, WOUND_MALUS_MAX)).toBe('Tous');
+    expect(effectValueLabel(WOUND_RELIEF_TARGET, 2)).toBe('+2');
+    expect(effectValueLabel('all', WOUND_MALUS_MAX)).toBe(`+${WOUND_MALUS_MAX}`);
+  });
+
+  it('prints the remaining duration, or Permanent', () => {
+    expect(effectDurationLabel({ durationUnit: 'permanent', durationRemaining: 0 })).toBe('Permanent');
+    expect(effectDurationLabel({ durationUnit: 'round', durationRemaining: 3 })).toMatch(/^3 /);
   });
 });
