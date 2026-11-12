@@ -347,6 +347,11 @@ merge, character detail sheet, join disclaimer, privacy policy.
 - [ ] **Parade reads as an attack in the roller.** The cumul is applied on its
   own to weapon rolls (attaque) and to Esquive (défense); a parade is a weapon
   roll, so the player raises its Difficulté by hand for now.
+- [ ] **A one-tap « Engagement » button.** Suspending the wound malus is a
+  generic effect today (target « Malus de blessures annulés », ended by hand).
+  The Combattant/Mage/Prodige/Protecteur privilège — every malus, one full turn,
+  once per combat — could become a button on the Blessures section that creates
+  that effect pre-filled. Nothing tracks the « once per combat » on purpose.
 - [ ] **Server: `initiative.usage`.** Mirror the optional field in the relay's
   pydantic `app/schemas.py` (tolerant reader — only needed if it validates nested keys).
 - [x] **Phase 4 — docs.** `docs/campaign-protocol.md` gained a Scope section (the
