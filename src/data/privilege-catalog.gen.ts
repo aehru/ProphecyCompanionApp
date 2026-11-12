@@ -5,6 +5,7 @@ import type { PrivilegePreset } from './privilege-catalog';
 export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   {
     "id": "artisan-apprenti",
+    "revision": "f923b8af2371",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Apprenti",
@@ -15,6 +16,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-autorisation",
+    "revision": "fd021f97328c",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Autorisation",
@@ -25,6 +27,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-charte-d-atelier",
+    "revision": "4e4192a34e53",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Charte d'atelier",
@@ -35,6 +38,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-compagnon-du-voyage",
+    "revision": "c7c843da1a0b",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Compagnon du voyage",
@@ -46,6 +50,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-ecole",
+    "revision": "9ce3b4da57b9",
     "caste": "artisan",
     "famille": "caste",
     "nom": "École",
@@ -56,6 +61,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-elementalisme",
+    "revision": "253386b30efd",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Élémentalisme",
@@ -66,6 +72,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-familier",
+    "revision": "60de011a7655",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Familier",
@@ -76,6 +83,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-faussaire",
+    "revision": "47ad58099715",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Faussaire",
@@ -87,6 +95,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-mecene",
+    "revision": "773608d98dfa",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Mécène",
@@ -100,6 +109,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-notable",
+    "revision": "e54bd9d2d16d",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Notable",
@@ -110,6 +120,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-outils",
+    "revision": "c088cc5f620a",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Outils",
@@ -120,6 +131,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-psychometrie",
+    "revision": "3ce59d7a9cfe",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Psychométrie",
@@ -130,6 +142,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-reparation-de-routine",
+    "revision": "31bc518248f2",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Réparation de routine",
@@ -140,6 +153,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-symbiose",
+    "revision": "ec41ee83cf7e",
     "caste": "artisan",
     "famille": "caste",
     "nom": "Symbiose",
@@ -152,6 +166,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-expertise",
+    "revision": "9e6ed16bbea8",
     "caste": "artisan",
     "famille": "annexe",
     "nom": "Expertise",
@@ -162,6 +177,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-faveur-politique",
+    "revision": "04ba3f65b349",
     "caste": "artisan",
     "famille": "annexe",
     "nom": "Faveur politique",
@@ -172,6 +188,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "artisan-tuteur",
+    "revision": "7962c244c331",
     "caste": "artisan",
     "famille": "annexe",
     "nom": "Tuteur",
@@ -182,6 +199,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-adaptation",
+    "revision": "e927c193f187",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Adaptation",
@@ -192,6 +210,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-anticipation",
+    "revision": "bdaac7ae6be3",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Anticipation",
@@ -202,6 +221,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-argot-combattant",
+    "revision": "0ab74fdede00",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Argot combattant",
@@ -212,6 +232,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-botte-secrete",
+    "revision": "077e73f3d51b",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Botte secrète",
@@ -222,6 +243,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-conviction-superieure",
+    "revision": "5e45ae3f5c81",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Conviction supérieure",
@@ -232,6 +254,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-dissimulation",
+    "revision": "4436f3e23046",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Dissimulation",
@@ -243,6 +266,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-double-attaque",
+    "revision": "0c02983b1a98",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Double attaque",
@@ -253,6 +277,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-engagement",
+    "revision": "1882f1a728c5",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Engagement",
@@ -263,6 +288,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-feinte",
+    "revision": "3924090f52db",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Feinte",
@@ -273,6 +299,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-predateur-nocturne",
+    "revision": "22895dc666af",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Prédateur nocturne",
@@ -284,6 +311,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-recuperation",
+    "revision": "f528c4afa13e",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Récupération",
@@ -294,6 +322,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-riposte",
+    "revision": "18bc38d186db",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Riposte",
@@ -304,6 +333,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-sommeil-leger",
+    "revision": "1c14e38bcdc9",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Sommeil léger",
@@ -314,6 +344,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-vigilance",
+    "revision": "e8bb7aef5e12",
     "caste": "combattant",
     "famille": "caste",
     "nom": "Vigilance",
@@ -324,6 +355,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-allies-mercenaires",
+    "revision": "092757aa8927",
     "caste": "combattant",
     "famille": "annexe",
     "nom": "Alliés mercenaires",
@@ -334,6 +366,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-compagnons-de-bataille",
+    "revision": "47dffe3cd826",
     "caste": "combattant",
     "famille": "annexe",
     "nom": "Compagnons de bataille",
@@ -344,6 +377,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "combattant-maitrise-d-armure",
+    "revision": "635b051accb8",
     "caste": "combattant",
     "famille": "annexe",
     "nom": "Maîtrise d'armure",
@@ -354,6 +388,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-bonne-foi",
+    "revision": "ca8e10e7d1c6",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Bonne foi",
@@ -364,6 +399,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-bonne-fortune",
+    "revision": "f7a24b50942e",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Bonne fortune",
@@ -374,6 +410,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-expertise",
+    "revision": "a1c83ab066b6",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Expertise",
@@ -384,6 +421,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-faveur-politique",
+    "revision": "5e5643ecb2d8",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Faveur politique",
@@ -394,6 +432,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-fournisseur-de-poisons",
+    "revision": "e0c95f7cd47d",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Fournisseur de poisons",
@@ -404,6 +443,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-la-cause",
+    "revision": "33b075ca748d",
     "caste": "commercant",
     "famille": "caste",
     "nom": "La Cause",
@@ -415,6 +455,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-majordome",
+    "revision": "44218e6d84e1",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Majordome",
@@ -427,6 +468,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-notoriete",
+    "revision": "33e454412c32",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Notoriété",
@@ -437,6 +479,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-petit-carnet",
+    "revision": "e876665f66ec",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Petit carnet",
@@ -452,6 +495,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-psychologie",
+    "revision": "1316908e3cc2",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Psychologie",
@@ -462,6 +506,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-reflexes-de-fuite",
+    "revision": "faee39eff1ac",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Réflexes de fuite",
@@ -472,6 +517,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-reseau",
+    "revision": "091b625d47de",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Réseau",
@@ -482,6 +528,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-ressources",
+    "revision": "f67be0728a08",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Ressources",
@@ -492,6 +539,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-rumeurs",
+    "revision": "01e5d156769f",
     "caste": "commercant",
     "famille": "caste",
     "nom": "Rumeurs",
@@ -502,6 +550,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-connaissance-du-monde",
+    "revision": "d8cbc1944f84",
     "caste": "commercant",
     "famille": "annexe",
     "nom": "Connaissance du monde",
@@ -512,6 +561,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-messager",
+    "revision": "a8106bce2e06",
     "caste": "commercant",
     "famille": "annexe",
     "nom": "Messager",
@@ -522,6 +572,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "commercant-relations-d-affaires",
+    "revision": "92a9d0c896f1",
     "caste": "commercant",
     "famille": "annexe",
     "nom": "Relations d'affaires",
@@ -532,6 +583,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-ambassade",
+    "revision": "04dd06a91b62",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Ambassade",
@@ -542,6 +594,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-aplomb",
+    "revision": "ea2384c838a7",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Aplomb",
@@ -552,6 +605,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-aval-draconique",
+    "revision": "a54f050f0b2a",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Aval draconique",
@@ -562,6 +616,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-calligraphie-officielle",
+    "revision": "2f942e7b722d",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Calligraphie officielle",
@@ -572,6 +627,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-demagogie",
+    "revision": "f50cca6458e7",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Démagogie",
@@ -582,6 +638,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-ecrit-technique",
+    "revision": "ebb91e4fefb1",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Écrit technique",
@@ -592,6 +649,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-garant",
+    "revision": "127d7fddfa38",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Garant",
@@ -602,6 +660,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-graphologue",
+    "revision": "45cfcc8fab88",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Graphologue",
@@ -613,6 +672,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-linguistique",
+    "revision": "489efeb32ed3",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Linguistique",
@@ -623,6 +683,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-memoire",
+    "revision": "0c28f706c7f5",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Mémoire",
@@ -633,6 +694,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-notoriete",
+    "revision": "7db265a5333d",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Notoriété",
@@ -643,6 +705,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-reseau-occulte",
+    "revision": "499145434128",
     "caste": "erudit",
     "famille": "caste",
     "nom": "Réseau occulte",
@@ -654,6 +717,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-faveur-politique",
+    "revision": "26b0b7ba6c51",
     "caste": "erudit",
     "famille": "annexe",
     "nom": "Faveur politique",
@@ -664,6 +728,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-messager",
+    "revision": "43932785effe",
     "caste": "erudit",
     "famille": "annexe",
     "nom": "Messager",
@@ -674,6 +739,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "erudit-psychologie",
+    "revision": "f1779b81acfb",
     "caste": "erudit",
     "famille": "annexe",
     "nom": "Psychologie",
@@ -684,6 +750,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-anonymat",
+    "revision": "a53e1833ca9b",
     "caste": "mage",
     "famille": "caste",
     "nom": "Anonymat",
@@ -694,6 +761,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-aura",
+    "revision": "0e069f3da2dc",
     "caste": "mage",
     "famille": "caste",
     "nom": "Aura",
@@ -704,6 +772,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-discretion",
+    "revision": "84c0810b20f1",
     "caste": "mage",
     "famille": "caste",
     "nom": "Discrétion",
@@ -715,6 +784,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-emotions-exacerbees",
+    "revision": "0de893683c4f",
     "caste": "mage",
     "famille": "caste",
     "nom": "Émotions exacerbées",
@@ -726,6 +796,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-empathie-elementaire",
+    "revision": "3f4a3d04c025",
     "caste": "mage",
     "famille": "caste",
     "nom": "Empathie élémentaire",
@@ -736,6 +807,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-esprit-esclave",
+    "revision": "5215d9285a6d",
     "caste": "mage",
     "famille": "caste",
     "nom": "Esprit esclave",
@@ -747,6 +819,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-laboratoire",
+    "revision": "f7bfeec79d12",
     "caste": "mage",
     "famille": "caste",
     "nom": "Laboratoire",
@@ -757,6 +830,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-leurre",
+    "revision": "cbe63ba0739c",
     "caste": "mage",
     "famille": "caste",
     "nom": "Leurre",
@@ -767,6 +841,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-messager",
+    "revision": "4d6fe9fbf5f7",
     "caste": "mage",
     "famille": "caste",
     "nom": "Messager",
@@ -777,6 +852,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-predispositions",
+    "revision": "ce9f561c9e86",
     "caste": "mage",
     "famille": "caste",
     "nom": "Prédispositions",
@@ -787,6 +863,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-prevoyance",
+    "revision": "7b89884b493c",
     "caste": "mage",
     "famille": "caste",
     "nom": "Prévoyance",
@@ -797,6 +874,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-reveur",
+    "revision": "70ec434c88ef",
     "caste": "mage",
     "famille": "caste",
     "nom": "Rêveur",
@@ -808,6 +886,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-sortilege-fetiche",
+    "revision": "6f3c6ab204e5",
     "caste": "mage",
     "famille": "caste",
     "nom": "Sortilège fétiche",
@@ -818,6 +897,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-style",
+    "revision": "dda47dfee822",
     "caste": "mage",
     "famille": "caste",
     "nom": "Style",
@@ -828,6 +908,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-tuteur",
+    "revision": "a637a5ca1e83",
     "caste": "mage",
     "famille": "caste",
     "nom": "Tuteur",
@@ -838,6 +919,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-apprenti",
+    "revision": "ede424c51a3f",
     "caste": "mage",
     "famille": "annexe",
     "nom": "Apprenti",
@@ -848,6 +930,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-engagement",
+    "revision": "d17f033e755d",
     "caste": "mage",
     "famille": "annexe",
     "nom": "Engagement",
@@ -858,6 +941,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "mage-memoire",
+    "revision": "d9e7ff7d3e33",
     "caste": "mage",
     "famille": "annexe",
     "nom": "Mémoire",
@@ -868,6 +952,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-d-ozyr",
+    "revision": "eb458f941caf",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don d'Ozyr",
@@ -878,6 +963,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-brorne",
+    "revision": "cba018736a26",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Brorne",
@@ -888,6 +974,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-heyra",
+    "revision": "ae53944804f3",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Heyra",
@@ -898,6 +985,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-kali",
+    "revision": "9d516da37ac1",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Kali",
@@ -908,6 +996,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-kalimsshar",
+    "revision": "c49338b9e4c1",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Kalimsshar",
@@ -918,6 +1007,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-kezyr",
+    "revision": "34ae70f9e9b7",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Kezyr",
@@ -928,6 +1018,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-khy",
+    "revision": "3e52f7968af5",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Khy",
@@ -938,6 +1029,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-khymera",
+    "revision": "e5917d1f8526",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Khyméra",
@@ -948,6 +1040,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-kroryn",
+    "revision": "b4054ad09f35",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Kroryn",
@@ -958,6 +1051,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-moryagorn",
+    "revision": "4368c69459cf",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Moryagorn",
@@ -968,6 +1062,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-nenya",
+    "revision": "6b58cdda2554",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Nenya",
@@ -978,6 +1073,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-solyr",
+    "revision": "c71bea5c4c25",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Solyr",
@@ -988,6 +1084,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-don-de-szyl",
+    "revision": "93259e31a2e3",
     "caste": "prodige",
     "famille": "caste",
     "nom": "Le don de Szyl",
@@ -998,6 +1095,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-aplomb",
+    "revision": "f1967d456f2c",
     "caste": "prodige",
     "famille": "annexe",
     "nom": "Aplomb",
@@ -1008,6 +1106,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-engagement",
+    "revision": "920fdf957e44",
     "caste": "prodige",
     "famille": "annexe",
     "nom": "Engagement",
@@ -1018,6 +1117,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "prodige-reflexes-de-degagement",
+    "revision": "c1593086ecc0",
     "caste": "prodige",
     "famille": "annexe",
     "nom": "Réflexes de dégagement",
@@ -1028,6 +1128,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-adopte",
+    "revision": "efac6785e73b",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Adopté",
@@ -1038,6 +1139,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-autorite",
+    "revision": "0845bc5afe37",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Autorité",
@@ -1048,6 +1150,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-conviction",
+    "revision": "162a7d295210",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Conviction",
@@ -1059,6 +1162,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-cuirasse",
+    "revision": "55e9d9eaf262",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Cuirasse",
@@ -1069,6 +1173,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-defense",
+    "revision": "2088aae0c4db",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Défense",
@@ -1079,6 +1184,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-influences",
+    "revision": "d53eedd82b95",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Influences",
@@ -1089,6 +1195,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-lucidite",
+    "revision": "2d0b910666ff",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Lucidité",
@@ -1099,6 +1206,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-porte-parole",
+    "revision": "bbebda6f7f42",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Porte-parole",
@@ -1109,6 +1217,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-renseignement",
+    "revision": "4e148fbdd14a",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Renseignement",
@@ -1119,6 +1228,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-requisition",
+    "revision": "308d2be671e9",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Réquisition",
@@ -1129,6 +1239,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-sacrifice",
+    "revision": "47f51a85e014",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Sacrifice",
@@ -1140,6 +1251,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-suspicion",
+    "revision": "60e2545601a2",
     "caste": "protecteur",
     "famille": "caste",
     "nom": "Suspicion",
@@ -1150,6 +1262,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-engagement",
+    "revision": "f9b517817d91",
     "caste": "protecteur",
     "famille": "annexe",
     "nom": "Engagement",
@@ -1160,6 +1273,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-notoriete",
+    "revision": "985fa9982829",
     "caste": "protecteur",
     "famille": "annexe",
     "nom": "Notoriété",
@@ -1170,6 +1284,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "protecteur-signes-de-bataille",
+    "revision": "65db8e7fdcce",
     "caste": "protecteur",
     "famille": "annexe",
     "nom": "Signes de bataille",
@@ -1180,6 +1295,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-archer",
+    "revision": "8897a0bf7fb0",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Archer",
@@ -1190,6 +1306,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-chasseur",
+    "revision": "68ab7d3784dc",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Chasseur",
@@ -1200,6 +1317,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-compagnon-de-shar",
+    "revision": "0cc2c00fdc95",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Compagnon de Shar",
@@ -1211,6 +1329,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-compagnons",
+    "revision": "930273acc02f",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Compagnons",
@@ -1221,6 +1340,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-connaissance-du-monde",
+    "revision": "10c1789c4203",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Connaissance du monde",
@@ -1231,6 +1351,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-fils-de-la-terre",
+    "revision": "a13595543b23",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Fils de la Terre",
@@ -1241,6 +1362,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-garant",
+    "revision": "55db525c3efa",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Garant",
@@ -1251,6 +1373,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-logistique",
+    "revision": "7106ad9b46e8",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Logistique",
@@ -1261,6 +1384,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-maitrise-d-armure",
+    "revision": "cb01339abba0",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Maîtrise d'armure",
@@ -1271,6 +1395,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-pionnier",
+    "revision": "d4fc4a9f208f",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Pionnier",
@@ -1282,6 +1407,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-rancune",
+    "revision": "4158fd9bbdeb",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Rancune",
@@ -1292,6 +1418,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-solitaire",
+    "revision": "41af7c6e14c9",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Solitaire",
@@ -1302,6 +1429,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-souterrain",
+    "revision": "68ee1ea961ea",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Souterrain",
@@ -1313,6 +1441,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-vigilance",
+    "revision": "856e23bb682f",
     "caste": "voyageur",
     "famille": "caste",
     "nom": "Vigilance",
@@ -1323,6 +1452,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-ambassade",
+    "revision": "2dd1ef564093",
     "caste": "voyageur",
     "famille": "annexe",
     "nom": "Ambassade",
@@ -1333,6 +1463,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-familier",
+    "revision": "db59d9e8b606",
     "caste": "voyageur",
     "famille": "annexe",
     "nom": "Familier",
@@ -1343,6 +1474,7 @@ export const PRIVILEGE_CATALOG_DATA: PrivilegePreset[] = [
   },
   {
     "id": "voyageur-linguistique",
+    "revision": "6a761d776143",
     "caste": "voyageur",
     "famille": "annexe",
     "nom": "Linguistique",
