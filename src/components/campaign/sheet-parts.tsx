@@ -7,8 +7,9 @@ import { StyleSheet, View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 
 import { TendanceRing } from '@/components/campaign/stat-tiles';
+import InitiativeDieChip from '@/components/initiative-die-chip';
 import { asDieIcon } from '@/components/ui/die-icons';
-import StatChip from '@/components/ui/stat-chip';
+import type { DieUsage } from '@/lib/action-cumul';
 import {
   EFFECT_TARGET_LABEL,
   RESOURCES,
@@ -123,11 +124,14 @@ export function InitiativeChips({
   max,
   wound,
   icons = [],
+  usage = [],
 }: {
   values: number[];
   max: number;
   wound: number;
   icons?: string[];
+  /** What each die was spent on — greyed and labelled like the Fiche's. */
+  usage?: DieUsage[];
 }) {
   const theme = useProphecyTheme();
   if (values.length === 0) {
@@ -140,17 +144,13 @@ export function InitiativeChips({
   return (
     <View style={styles.grid}>
       {values.map((val, i) => (
-        <StatChip
+        <InitiativeDieChip
           key={i}
-          label={`Dé ${i + 1}`}
-          value={String(val)}
-          modifier={wound}
+          index={i}
+          value={val}
+          wound={wound}
           icon={asDieIcon(icons[i])}
-          style={
-            val > 0 && val + wound <= 0
-              ? { borderColor: theme.colors.error, borderWidth: 1.5 }
-              : undefined
-          }
+          spent={usage[i] ?? null}
         />
       ))}
     </View>

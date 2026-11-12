@@ -22,6 +22,7 @@ import { openRoller } from '@/lib/dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { damageModifier, woundMalus } from '@/lib/modifiers';
+import { withActionCumul } from '@/lib/action-cumul';
 import { spellRollContext, weaponRollContext } from '@/lib/roll-context';
 import { spellTotal } from '@/lib/spell-total';
 import { weaponSkillReading } from '@/lib/weapon-skill';
@@ -97,7 +98,7 @@ function GearBody({ char }: { char: Character }) {
   // makes. A weapon with no compétence linked has no total and stays unrollable.
   const rollWeapon = (w: Weapon) => {
     const ctx = weaponRollContext(w.name, skillOf(w));
-    if (ctx) openRoller(ctx);
+    if (ctx) openRoller(withActionCumul(ctx, stateRows?.[0]?.initiativeUsage, 'atk'));
   };
 
   return (

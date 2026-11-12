@@ -26,6 +26,7 @@ import GlobalModifierRow from '@/components/global-modifier-row';
 
 import { sharedStatRollContext } from '@/lib/campaign-roll';
 import { openRoller } from '@/lib/dice-roller';
+import type { InitiativeInput } from '@/lib/initiative-order';
 import { globalModifier, statModifier } from '@/lib/modifiers';
 import { skillRollContext } from '@/lib/roll-context';
 import { groupSkills } from '@/lib/skill-groups';
@@ -105,7 +106,7 @@ export function GmSheetBody({
   const carac = nums(c.caracteristiques);
   const tend = nums(c.tendances);
   const resources = pools(c.resources);
-  const initiative = (c.initiative ?? {}) as { max?: number; values?: number[] };
+  const initiative = (c.initiative ?? {}) as NonNullable<InitiativeInput['initiative']>;
   // Global sources (wound + 'all' effects) are read once, above the two grids;
   // a tile badges only the effects aimed at that stat, so an attribut +
   // caractéristique roll doesn't show the same malus twice.
@@ -239,6 +240,7 @@ export function GmSheetBody({
               max={initiative.max ?? 0}
               wound={wound}
               icons={dieIcons}
+              usage={initiative.usage}
             />
           </Section>
 
