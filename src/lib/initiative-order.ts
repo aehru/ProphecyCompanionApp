@@ -1,3 +1,4 @@
+import { isLostDie, type DieUsage, type DieUse } from '@/lib/action-cumul';
 import { woundMalus } from '@/lib/modifiers';
 
 /**
@@ -16,7 +17,7 @@ export type InitiativeInput = {
   owner?: string;
   /** Projection shape: `{ [woundKey]: { current, max } }`. */
   wounds?: Record<string, { current?: number; max?: number }> | null;
-  initiative?: { max?: number; values?: number[] } | null;
+  initiative?: { max?: number; values?: number[]; usage?: DieUsage[] } | null;
 };
 
 export type InitiativeRow = {
@@ -40,8 +41,16 @@ export type InitiativeRow = {
   malus: number;
   /** raw + malus — what the die is actually worth, and what we sort on. */
   effective: number;
-  /** Driven to 0 or below: the action is lost. Ranked last, flagged in the UI. */
+  /** Driven to 0 or below while unused: the action is lost. Ranked last. */
   unusable: boolean;
+  /** What the die was spent on this turn; null while it is still to play. */
+  used: DieUse | null;
+  /**
+   * The value the row is RANKED on: `effective` while unused, frozen at the
+   * value it was spent at once used — so a wound taken after acting can't drag
+   * a played die back down the order.
+   */
+  rankValue: number;
 };
 
 /**
@@ -69,6 +78,7 @@ export function sharedWoundMalus(
 export function initiativeOrder(entries: readonly InitiativeInput[]): {
   rows: InitiativeRow[];
   unrolled: InitiativeInput[];
+  currentCount: number | null;
 } {
   const rows: InitiativeRow[] = [];
   const unrolled: InitiativeInput[] = [];
@@ -80,8 +90,10 @@ export function initiativeOrder(entries: readonly InitiativeInput[]): {
       continue;
     }
     const malus = sharedWoundMalus(e.wounds);
+    const usage = e.initiative?.usage ?? [];
     values.forEach((raw, dieIndex) => {
       const effective = raw + malus;
+      const spent = usage[dieIndex] ?? null;
       rows.push({
         charId: e.charId,
         nom: e.nom,
@@ -92,7 +104,9 @@ export function initiativeOrder(entries: readonly InitiativeInput[]): {
         raw,
         malus,
         effective,
-        unusable: effective <= 0,
+        unusable: isLostDie(raw, malus, spent),
+        used: spent?.use ?? null,
+        rankValue: spent ? spent.at : effective,
       });
     });
   }
@@ -100,11 +114,20 @@ export function initiativeOrder(entries: readonly InitiativeInput[]): {
   rows.sort(
     (a, b) =>
       Number(a.unusable) - Number(b.unusable) ||
-      b.effective - a.effective ||
+      b.rankValue - a.rankValue ||
       a.nom.localeCompare(b.nom) ||
       a.dieIndex - b.dieIndex,
   );
   unrolled.sort((a, b) => a.nom.localeCompare(b.nom));
 
-  return { rows, unrolled };
+  return { rows, unrolled, currentCount: currentCount(rows) };
+}
+
+/**
+ * The count the table is at: the highest die nobody has played yet. Null once
+ * every usable die is spent — the turn is over.
+ */
+export function currentCount(rows: readonly InitiativeRow[]): number | null {
+  const next = rows.find((r) => !r.used && !r.unusable);
+  return next ? next.rankValue : null;
 }
