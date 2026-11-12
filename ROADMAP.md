@@ -339,7 +339,16 @@ merge, character detail sheet, join disclaimer, privacy policy.
     and it would widen the wire for people who never asked. A co-GM reading the
     host's PNJs is the one case that wants it — at which point the icon key (an
     enum, never free text) joins the projection and `SHARED_SCHEMA_VERSION` goes
-    to 3. Until then the column is device-local.
+    to 4 (v3 went to `initiative.usage`). Until then the column is device-local.
+- [ ] **The turn number on the wire.** `campaigns.round` (« Nouveau tour ») is
+  GM-local. Sending it to the players would let a player's Fiche show « Tour 3 »
+  and free its spent dice when the GM starts a new turn — the first GM → player
+  frame, since the protocol is one-way today.
+- [ ] **Parade reads as an attack in the roller.** The cumul is applied on its
+  own to weapon rolls (attaque) and to Esquive (défense); a parade is a weapon
+  roll, so the player raises its Difficulté by hand for now.
+- [ ] **Server: `initiative.usage`.** Mirror the optional field in the relay's
+  pydantic `app/schemas.py` (tolerant reader — only needed if it validates nested keys).
 - [x] **Phase 4 — docs.** `docs/campaign-protocol.md` gained a Scope section (the
   relay is optional, the roster is a local-first merge, NPCs are opt-in);
   PRIVACY.md and README describe the serverless table. PRIVACY's permissions
