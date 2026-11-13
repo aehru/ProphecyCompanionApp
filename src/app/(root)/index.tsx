@@ -2,7 +2,7 @@ import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useNavigation, useRouter } from 'expo-router';
 import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
-import { IconButton, Menu, Text } from 'react-native-paper';
+import { IconButton, Text } from 'react-native-paper';
 
 import CharacterListItem from '@/components/character-list-item';
 import CharacterSelectionActions from '@/components/character-selection-actions';
@@ -11,14 +11,15 @@ import ExportIntentDialog from '@/components/export-intent-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import AppFab from '@/components/ui/app-fab';
 import { useCharacterSelection } from '@/hooks/use-character-selection';
+import { recordBackup } from '@/hooks/use-last-backup';
 import { useLayout, useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
-import { type ExportIntent, parseImport } from '@/lib/character-transfer';
-import { pickImportText, shareExport } from '@/lib/character-transfer-io';
+import { type ExportIntent } from '@/lib/character-transfer';
+import { shareExport } from '@/lib/character-transfer-io';
 import { sharedCharacterNames } from '@/repositories/campaigns';
 import { charactersListQuery, deleteCharacters } from '@/repositories/characters';
-import { duplicateCharacters, exportCharacters, importCharacters } from '@/repositories/transfer';
+import { duplicateCharacters, exportCharacters } from '@/repositories/transfer';
 
 // Module-level: an inline arrow is a new component type on every render, which
 // remounts every separator instead of reusing it.
@@ -33,7 +34,6 @@ export default function CharactersListScreen() {
   const navigation = useNavigation();
   const theme = useProphecyTheme();
   const { data, updatedAt } = useLiveQuery(charactersListQuery());
-  const [menuOpen, setMenuOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [askingIntent, setAskingIntent] = useState(false);
   const { columns } = useLayout();
@@ -58,6 +58,7 @@ export default function CharactersListScreen() {
       setBusy(true);
       try {
         await shareExport(await exportCharacters(selectedIds, intent), intent);
+        if (intent === 'backup') await recordBackup();
         clear();
       } catch (e) {
         Alert.alert('Export impossible', e instanceof Error ? e.message : String(e));
@@ -128,37 +129,6 @@ export default function CharactersListScreen() {
     );
   }, [selectedIds, clear]);
 
-  // Pick a JSON export and read it back. `'restore'` is safe as a blanket mode:
-  // the FILE decides per character (`bundleMode`) — a backup carries the uuid and
-  // replaces its own character in place, a shared sheet carries none and lands as
-  // a new one. The alert says which of the two happened.
-  const handleImport = useCallback(async () => {
-    setMenuOpen(false);
-    setBusy(true);
-    try {
-      const raw = await pickImportText();
-      if (raw == null) return; // cancelled
-      const parsed = parseImport(raw);
-      if (!parsed.ok) {
-        Alert.alert('Import impossible', parsed.error);
-        return;
-      }
-      const { ids, restored } = await importCharacters(parsed.data, 'restore');
-      const added = ids.length - restored;
-      const parts: string[] = [];
-      if (restored > 0) {
-        parts.push(`${plural(restored, 'personnage')} restauré${restored > 1 ? 's' : ''}`);
-      }
-      if (added > 0) parts.push(`${plural(added, 'personnage')} ajouté${added > 1 ? 's' : ''}`);
-      const detail = restored > 0 ? '\n\nUne restauration remplace la fiche déjà présente.' : '';
-      Alert.alert('Import réussi', `${parts.join(', ')}.${detail}`);
-    } catch (e) {
-      Alert.alert('Import impossible', e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  }, []);
-
   const selectionCount = selectedIds.length;
   const allSelected = selection.allSelected;
 
@@ -194,66 +164,13 @@ export default function CharactersListScreen() {
       title: 'Personnages',
       headerBackVisible: true,
       headerLeft: undefined,
-      // Overrides the tab navigator's headerRight, so the dice button it puts on
-      // every tab is re-added here. Not in the selection bar above: that one is
-      // contextual and only holds actions on the selected characters.
-      // No campaigns button any more — « Campagnes » is a tab of its own.
-      headerRight: () => (
-        <View style={{ flexDirection: 'row' }}>
-          <DiceRollerButton />
-          <Menu
-            visible={menuOpen}
-            onDismiss={() => setMenuOpen(false)}
-            anchor={
-              <IconButton
-                icon="dots-vertical"
-                disabled={busy}
-                onPress={() => setMenuOpen(true)}
-              />
-            }>
-            <Menu.Item leadingIcon="import" onPress={handleImport} title="Importer…" />
-            <Menu.Item
-              leadingIcon="palette-outline"
-              onPress={() => {
-                setMenuOpen(false);
-                router.push('/appearance' as Href);
-              }}
-              title="Apparence"
-            />
-            <Menu.Item
-              leadingIcon="clipboard-text-clock-outline"
-              onPress={() => {
-                setMenuOpen(false);
-                router.push('/diagnostics' as Href);
-              }}
-              title="Diagnostic"
-            />
-            <Menu.Item
-              leadingIcon="shield-lock-outline"
-              onPress={() => {
-                setMenuOpen(false);
-                router.push('/privacy' as Href);
-              }}
-              title="Confidentialité"
-            />
-            <Menu.Item
-              leadingIcon="information-outline"
-              onPress={() => {
-                setMenuOpen(false);
-                router.push('/about' as Href);
-              }}
-              title="À propos"
-            />
-          </Menu>
-        </View>
-      ),
+      // Import, Apparence, Diagnostic… moved to the « Plus » tab: Personnages
+      // keeps only the dice button the tab navigator puts on every tab.
+      headerRight: () => <DiceRollerButton />,
     });
   }, [
     navigation,
-    router,
-    menuOpen,
     busy,
-    handleImport,
     selection.active,
     selectionCount,
     allSelected,
