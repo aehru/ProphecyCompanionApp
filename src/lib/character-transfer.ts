@@ -26,6 +26,7 @@ import {
   VALEUR_KEYS,
 } from '@/constants/prophecy';
 import { ENCHANT_TARGETS, type EnchantTarget } from '@/db/schema';
+import { dieUsageListSchema } from '@/lib/action-cumul';
 import { casteFromInput, dragonFromInput } from '@/lib/caste';
 
 /** Bumped on any breaking change to the bundle shape. Import rejects mismatches. */
@@ -95,6 +96,8 @@ const stateSchema = z.object({
   // Per-die marks, index-aligned with initiativeValues. OPTIONAL for the same
   // reason as above: exports predating the column import at the default [].
   initiativeDiceIcons: z.array(str).optional(),
+  // Spent dice this turn (lib/action-cumul). OPTIONAL, same reason.
+  initiativeUsage: dieUsageListSchema.optional(),
   conditions: str,
   notes: str,
   // Expérience (total awarded / total spent). OPTIONAL for the same reason as

@@ -30,8 +30,13 @@ describe('reading a projection', () => {
 
   it('reads the wound malus off the boxes, worst level only', () => {
     // Not the sum: a grave wound and a light one together are -3, not -4.
-    expect(woundOf({ legere: { current: 1 }, grave: { current: 1 } })).toBe(-3);
-    expect(woundOf({ legere: { current: 0 } })).toBe(0);
-    expect(woundOf(undefined)).toBe(0);
+    expect(woundOf({ legere: { current: 1 }, grave: { current: 1 } }, [])).toBe(-3);
+    expect(woundOf({ legere: { current: 0 } }, undefined)).toBe(0);
+    expect(woundOf(undefined, undefined)).toBe(0);
+  });
+
+  it('nets out a suspension shipped among the effects', () => {
+    const grave = { grave: { current: 1 } };
+    expect(woundOf(grave, [{ label: 'Engagement', target: 'wounds', value: 2 }])).toBe(-1);
   });
 });

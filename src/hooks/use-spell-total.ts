@@ -46,8 +46,8 @@ export function useSpellTotal(characterId: number): SpellReadings {
   // and re-rendered 300 spells on every keystroke.
   return useMemo(() => {
     const rec = asNumRecord(charRows?.[0] ?? {});
-    const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
     const effectList = effects ?? [];
+    const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}), effectList);
     return {
       totalFor: (spell) => spellTotal(spell, rec, effectList, wound),
       caracValue: (k) => rec[k] ?? 0,

@@ -5,10 +5,10 @@ import { Button, Icon, Text } from 'react-native-paper';
 import EffectDialog from '@/components/effect-dialog';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
-import { PERMANENT_UNIT, TIME_UNIT_LABEL, TIME_UNITS } from '@/constants/prophecy';
+import { TIME_UNITS } from '@/constants/prophecy';
 import type { Effect, Skill } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { effectTargetLabel, fmtSignedMod, isSkillTarget, skillTargetName } from '@/lib/modifiers';
+import { effectDurationLabel, effectTargetLabel, effectValueLabel, isSkillTarget, skillTargetName } from '@/lib/modifiers';
 import { tickUnit } from '@/repositories/effects';
 import { detachWrite } from '@/repositories/log';
 
@@ -123,16 +123,10 @@ function EffectRow({
   const theme = useProphecyTheme();
 
   const targetLabel = effectTargetLabel(e.target);
-  const isPermanent = e.durationUnit === PERMANENT_UNIT;
-  const unitLabel = TIME_UNIT_LABEL[e.durationUnit] ?? e.durationUnit;
   const valueColor = e.value > 0 ? theme.colors.primary : theme.colors.error;
 
   // Duration/state phrase after the target label.
-  const stateText = e.expired
-    ? ' · expiré'
-    : isPermanent
-      ? ' · Permanent'
-      : ` · ${e.durationRemaining} ${unitLabel}`;
+  const stateText = e.expired ? ' · expiré' : ` · ${effectDurationLabel(e)}`;
 
   return (
     <Pressable style={styles.row} onPress={onPress}>
@@ -152,7 +146,7 @@ function EffectRow({
             styles.rowValue,
             { color: e.expired || orphan ? theme.colors.onSurfaceVariant : valueColor },
           ]}>
-          {fmtSignedMod(e.value)}
+          {effectValueLabel(e.target, e.value)}
         </Text>
       ) : null}
       <Icon source="chevron-right" size={20} color={theme.colors.onSurfaceVariant} />

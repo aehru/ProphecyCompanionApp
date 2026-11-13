@@ -10,7 +10,13 @@ import { EFFECT_TARGETS, PERMANENT_UNIT, TIME_UNITS } from '@/constants/prophecy
 import type { Effect, Skill } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
-import { effectTargetLabel, skillTarget } from '@/lib/modifiers';
+import { parseInteger } from '@/lib/character-values';
+import {
+  effectTargetLabel,
+  skillTarget,
+  WOUND_MALUS_MAX,
+  WOUND_RELIEF_TARGET,
+} from '@/lib/modifiers';
 import { createEffect, deleteEffect, updateEffect } from '@/repositories/effects';
 import { detachWrite } from '@/repositories/log';
 
@@ -45,11 +51,6 @@ const draftOf = (e: Effect): Draft => ({
   durationUnit: e.durationUnit === PERMANENT_UNIT ? 'round' : e.durationUnit,
   target: e.target,
 });
-
-function parseSigned(t: string) {
-  const n = parseInt(t, 10);
-  return Number.isNaN(n) ? 0 : n;
-}
 
 /**
  * Create or edit one temporary bonus/malus, as a dialog rather than a screen.
@@ -98,15 +99,19 @@ export default function EffectDialog({
   if (!targetOptions.some((o) => o.key === draft.target)) {
     targetOptions.push({ key: draft.target, label: effectTargetLabel(draft.target) });
   }
+  // A wound relief counts points CANCELLED, not a signed bonus — and « tous »
+  // is just the deepest malus there is, so it stays a plain number.
+  const relief = draft.target === WOUND_RELIEF_TARGET;
+  const reliefAll = relief && parseInteger(draft.value) >= WOUND_MALUS_MAX;
 
   const save = () => {
-    const amount = parseSigned(draft.amount);
+    const amount = parseInteger(draft.amount);
     const timing = draft.permanent
       ? { durationUnit: PERMANENT_UNIT, durationRemaining: 0 }
       : { durationUnit: draft.durationUnit, durationRemaining: amount };
     const data = {
       label: draft.label,
-      value: parseSigned(draft.value),
+      value: parseInteger(draft.value),
       target: draft.target,
       ...timing,
       // A permanent effect never expires, and giving a spent one a fresh
@@ -154,7 +159,18 @@ export default function EffectDialog({
         label="Cible"
         options={targetOptions}
         value={draft.target}
-        onChange={(v) => set('target', v)}
+        // A relief of 0 cancels nothing: picking it starts on « tous », the
+        // Engagement case, rather than on an effect that does nothing.
+        onChange={(v) =>
+          setDraft((d) => ({
+            ...d,
+            target: v,
+            value:
+              v === WOUND_RELIEF_TARGET && parseInteger(d.value) <= 0
+                ? String(WOUND_MALUS_MAX)
+                : d.value,
+          }))
+        }
         searchable
         // inline, like the Unite beside it: a floating Paper Menu does not open
         // inside a dialog's Portal. See SelectField.
@@ -162,15 +178,27 @@ export default function EffectDialog({
         testID="effect-target"
       />
 
-      <View style={styles.fieldRow}>
-        <NumberField
-          fieldKey="value"
-          label="Valeur (+/−)"
-          value={draft.value}
-          onChange={(_, t) => set('value', t)}
-          signed
-          style={styles.valueField}
+      {relief ? (
+        <Checkbox.Item
+          label="Annuler tous les malus de blessures"
+          position="leading"
+          status={reliefAll ? 'checked' : 'unchecked'}
+          onPress={() => set('value', reliefAll ? '1' : String(WOUND_MALUS_MAX))}
+          style={styles.checkbox}
         />
+      ) : null}
+
+      <View style={styles.fieldRow}>
+        {reliefAll ? null : (
+          <NumberField
+            fieldKey="value"
+            label={relief ? 'Points annulés' : 'Valeur (+/−)'}
+            value={draft.value}
+            onChange={(_, t) => set('value', t)}
+            signed={!relief}
+            style={styles.valueField}
+          />
+        )}
         {draft.permanent ? null : (
           <>
             <NumberField
@@ -202,7 +230,7 @@ export default function EffectDialog({
           setDraft((d) => ({
             ...d,
             permanent: !d.permanent,
-            amount: !d.permanent || parseSigned(d.amount) > 0 ? d.amount : '1',
+            amount: !d.permanent || parseInteger(d.amount) > 0 ? d.amount : '1',
           }))
         }
         style={styles.checkbox}

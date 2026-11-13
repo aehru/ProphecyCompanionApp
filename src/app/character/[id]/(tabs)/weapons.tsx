@@ -28,6 +28,7 @@ import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
 import { damageModifier, woundMalus } from '@/lib/modifiers';
+import { withActionCumul } from '@/lib/action-cumul';
 import { weaponRollContext } from '@/lib/roll-context';
 import { weaponSkillReading } from '@/lib/weapon-skill';
 import { armorQuery } from '@/repositories/armor';
@@ -93,8 +94,8 @@ export default function CharacterWeaponsScreen() {
   const stRec = asNumRecord(state);
   // The wound malus hits the attack roll (skillOf), never the damage: a damage
   // formula's carac only folds in the temporary effects, before the multiplier.
-  const wound = woundMalus(stRec);
   const effectList = effects ?? [];
+  const wound = woundMalus(stRec, effectList);
   const skillList = skills ?? [];
   const caracModifier = (caracKey: string) => damageModifier(caracKey, effectList);
 
@@ -108,7 +109,8 @@ export default function CharacterWeaponsScreen() {
   // says so, and there is no total to roll (see lib/roll-context).
   const rollWeapon = (w: Weapon) => {
     const ctx = weaponRollContext(w.name, skillOf(w));
-    if (ctx) openRoller(ctx);
+    // Past the first attack this turn, the cumul raises the Difficulté.
+    if (ctx) openRoller(withActionCumul(ctx, state?.initiativeUsage, 'atk'));
   };
 
   // One page per category; each scrolls on its own under the pinned money card

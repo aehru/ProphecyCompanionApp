@@ -17,6 +17,7 @@ import {
   VALEUR_KEYS,
 } from '@/constants/prophecy';
 import type { ArmorCategory } from '@/data/armor-constants';
+import type { DieUsage } from '@/lib/action-cumul';
 import { newUuid } from '@/lib/uuid';
 
 // The caste list lives in `constants/prophecy` (it carries the accented labels);
@@ -246,6 +247,14 @@ export const actualState = sqliteTable('actual_state', {
   // it is not projected to a GM (see ROADMAP, revisited for the co-GM).
   initiativeDiceIcons: text('initiative_dice_icons', { mode: 'json' })
     .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'`),
+  // What each die was SPENT on this turn (attaque / défense / autre) and the
+  // value it was spent at — index-aligned with `initiativeValues`, null = still
+  // to play. Drives the « cumul des actions » malus and freezes a played die's
+  // place in the GM's order (see lib/action-cumul). Cleared by every roll.
+  initiativeUsage: text('initiative_usage', { mode: 'json' })
+    .$type<DieUsage[]>()
     .notNull()
     .default(sql`'[]'`),
 
@@ -821,6 +830,9 @@ export const campaigns = sqliteTable('campaigns', {
   // reason to leave the device. Turning it on republishes them to the relay —
   // groundwork for a co-GM seeing the same NPCs (docs/campaign-protocol.md §2).
   shareNpcs: integer('share_npcs', { mode: 'boolean' }).notNull().default(false),
+  // The combat turn the table is on — a GM-local counter bumped by « Nouveau
+  // tour ». 0 = no fight started. Not on the wire (yet — see ROADMAP).
+  round: integer('round').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

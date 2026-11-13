@@ -28,6 +28,12 @@ export const parseDecimal = (t: string) => {
   return Number.isFinite(n) ? n : 0;
 };
 
+/** Text → integer, sign kept. Junk / blank → 0, like `parseDecimal`. */
+export const parseInteger = (t: string) => {
+  const n = parseInt(t, 10);
+  return Number.isNaN(n) ? 0 : n;
+};
+
 /**
  * Keystroke filter for numeric inputs: drop anything that can't be typed in the
  * value. `signed` keeps a single leading minus, `decimal` keeps at most one

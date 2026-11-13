@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import { Redirect } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
 import React, { useDeferredValue, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Snackbar, Text, TextInput } from 'react-native-paper';
@@ -10,6 +10,7 @@ import InitiativeList from '@/components/campaign/initiative-list';
 import RosterList from '@/components/campaign/roster-list';
 import { ServerStatusChip } from '@/components/campaign/roster-badges';
 import { useTableRosterCtx } from '@/components/campaign/table-roster-provider';
+import DiceRollerButton from '@/components/dice-roller-button';
 import GmCharacterSheet, { GmSheetBody } from '@/components/gm-character-sheet';
 import AppFab from '@/components/ui/app-fab';
 import TabPager from '@/components/ui/tab-pager';
@@ -23,6 +24,7 @@ import type { RosterEntry } from '@/lib/campaign-protocol';
 import {
   gmNotesQuery,
   leaveTable,
+  nextRound,
   setMember,
   spawnNpc,
   unshareFromServer,
@@ -121,15 +123,21 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
       charUuid,
     });
 
-  // Open a fight in one tap. Re-rolling mid-combat scrambles an order the table
-  // is already playing from and can't be undone, so confirm — but only when
-  // there is something to lose.
+  // « Nouveau tour »: bump the turn and re-roll the PNJ (which also frees their
+  // spent dice). Players roll on their own Fiche, where they apply their own
+  // bonuses. Re-rolling mid-combat scrambles an order the table is already
+  // playing from and can't be undone, so confirm — but only when there is
+  // something to lose.
   const rollNpcInitiative = () => {
     const run = async () => {
       try {
         const n = await rollInitiativeFor(npcs.map((e) => e.charId));
+        const round = await nextRound(campaign.id);
         setToast({
-          text: n > 0 ? `Initiative lancée pour ${n} PNJ.` : 'Aucun PNJ n’a de dés d’initiative.',
+          text:
+            n > 0
+              ? `Tour ${round} : initiative lancée pour ${n} PNJ.`
+              : `Tour ${round} : aucun PNJ n’a de dés d’initiative.`,
         });
       } catch (e) {
         Alert.alert('Initiative impossible', e instanceof Error ? e.message : String(e));
@@ -143,9 +151,9 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
       run();
       return;
     }
-    Alert.alert('Relancer l’initiative ?', 'L’initiative actuelle des PNJ sera remplacée.', [
+    Alert.alert('Nouveau tour ?', 'L’initiative actuelle des PNJ sera relancée.', [
       { text: 'Annuler', style: 'cancel' },
-      { text: 'Relancer', onPress: run },
+      { text: 'Nouveau tour', onPress: run },
     ]);
   };
   // The search box drives `groupSkills` for EVERY roster card, so filtering a
@@ -161,16 +169,24 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
     <View
       testID="compagnie-screen"
       style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* A local table has no server to report on — the chip would just say
-          "hors ligne" forever and read as a fault. */}
-      <View style={styles.statusRow}>
-        {connected ? <ServerStatusChip status={status} /> : null}
-        {connected && serverError ? (
-          <Text variant="bodySmall" style={{ color: theme.colors.error }}>
-            Erreur serveur : {serverError}
-          </Text>
-        ) : null}
-      </View>
+      {/* The server chip lives in the header, beside the roller, so the body
+          keeps its height for the tabs. A local table has no server to report
+          on — the chip would just say "hors ligne" forever and read as a fault. */}
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <View style={styles.headerRight}>
+              {connected ? <ServerStatusChip status={status} iconOnly /> : null}
+              <DiceRollerButton />
+            </View>
+          ),
+        }}
+      />
+      {connected && serverError ? (
+        <Text variant="bodySmall" style={[styles.serverError, { color: theme.colors.error }]}>
+          Erreur serveur : {serverError}
+        </Text>
+      ) : null}
 
       {/* Big screen: roster on the left, the open character on the right, so
           marking a PNJ's wounds never hides the table. */}
@@ -189,6 +205,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
                 // The extra inset clears the roll FAB below.
                 <InitiativeList
                   roster={roster}
+                  round={campaign.round}
                   bottomInset={insets.bottom + 72}
                   onSelect={openEditing}
                   onRemove={removeFromTable}
@@ -230,7 +247,7 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
           {tab === INITIATIVE_TAB ? (
             <AppFab
               icon={dsIcon('dice')}
-              label="Lancer les PNJ"
+              label="Nouveau tour"
               disabled={npcs.length === 0}
               onPress={rollNpcInitiative}
             />
@@ -291,7 +308,8 @@ function Compagnie({ campaign }: { campaign: Campaign }) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  statusRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 12, flexWrap: 'wrap' },
+  headerRight: { flexDirection: 'row', alignItems: 'center' },
+  serverError: { paddingHorizontal: 16, paddingTop: 12 },
   tabs: { marginTop: 12, marginHorizontal: 16 },
   searchWrap: { paddingHorizontal: 16, paddingTop: 12 },
   fill: { flex: 1 },

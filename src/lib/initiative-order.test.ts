@@ -108,6 +108,58 @@ describe('initiativeOrder', () => {
   });
 
   it('handles an empty roster', () => {
-    expect(initiativeOrder([])).toEqual({ rows: [], unrolled: [] });
+    expect(initiativeOrder([])).toEqual({ rows: [], unrolled: [], currentCount: null });
+  });
+});
+
+describe('spent dice', () => {
+  const withUsage = (
+    nom: string,
+    values: number[],
+    usage: NonNullable<InitiativeInput['initiative']>['usage'],
+    wounds?: InitiativeInput['wounds'],
+  ): InitiativeInput => ({ ...entry(nom, values, wounds), initiative: { max: values.length, values, usage } });
+
+  it('keeps a played die where it was played, even after a wound', () => {
+    // Acted on 9, then took a grave wound (-3): the die must not resurface at 6.
+    const { rows, currentCount } = initiativeOrder([
+      withUsage('Garde', [9, 5], [{ use: 'atk', at: 9 }, null], { grave: { current: 1 } }),
+      entry('Aldric', [7]),
+    ]);
+    expect(rows.map((r) => [r.nom, r.rankValue, r.used])).toEqual([
+      ['Garde', 9, 'atk'],
+      ['Aldric', 7, null],
+      ['Garde', 2, null],
+    ]);
+    expect(currentCount).toBe(7);
+  });
+
+  it('a suspended wound malus gives unplayed dice their raw value back', () => {
+    // Played 9 at -3 (spent at 6), then « Engagement » cancels the malus: the
+    // spent die stays at 6, the lost 2 comes back into play at 2.
+    const garde = {
+      ...withUsage('Garde', [9, 2], [{ use: 'atk', at: 6 }, null], { grave: { current: 1 } }),
+      effects: [{ target: 'wounds', value: 5 }],
+    };
+    const { rows } = initiativeOrder([garde]);
+    expect(rows.map((r) => [r.rankValue, r.malus, r.unusable])).toEqual([
+      [6, 0, false],
+      [2, 0, false],
+    ]);
+  });
+
+  it('a spent die is never lost, an unused one driven to 0 is', () => {
+    const { rows } = initiativeOrder([
+      withUsage('Garde', [3, 2], [{ use: 'def', at: 3 }, null], { grave: { current: 1 } }),
+    ]);
+    expect(rows.map((r) => [r.used, r.unusable])).toEqual([
+      ['def', false],
+      [null, true],
+    ]);
+  });
+
+  it('has no current count once every die is spent', () => {
+    const { currentCount } = initiativeOrder([withUsage('Garde', [4], [{ use: 'atk', at: 4 }])]);
+    expect(currentCount).toBeNull();
   });
 });

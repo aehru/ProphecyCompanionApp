@@ -7,7 +7,7 @@ self-hostable relay server ([ProphecyCompanionServer](https://github.com/aehru/P
 in both repos).
 
 - **`PROTOCOL_VERSION = 2`** — hard break from v1 (checked on the hello, §3).
-- **`SHARED_SCHEMA_VERSION = 2`** — the `SharedCharacter` payload shape (§2), unchanged by protocol v2.
+- **`SHARED_SCHEMA_VERSION = 3`** — the `SharedCharacter` payload shape (§2), unchanged by protocol v2. v3 adds the optional `initiative.usage` (what each die was spent on this turn).
 
 ### Scope: the relay is OPTIONAL
 
@@ -59,7 +59,13 @@ would widen the projection for no tactical gain.
 Per-die marks (`actual_state.initiative_dice_icons` — what each die is *for*:
 off hand, sortilège…) are **device-local and never projected**, for the same
 reason. The one case that would want them is a co-GM reading the host's PNJs;
-see ROADMAP, and note it would take `SHARED_SCHEMA_VERSION` to 3.
+see ROADMAP.
+
+`initiative.usage` (v3, optional) is index-aligned with `values`: `null` for a
+die still to play, else `{ use: 'atk' | 'def' | 'other', at }` — what the die
+was spent on and its effective value at that moment. Unlike the marks it IS
+tactical: the GM's order greys a spent die at `at` and reads the « cumul des
+actions » off it. A missing array means every die is unused.
 
 ## 3. Hello & version gate
 
