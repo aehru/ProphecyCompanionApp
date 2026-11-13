@@ -7,6 +7,7 @@ import { Button, Text, TextInput } from 'react-native-paper';
 import { RoleCard, ShareNotice, tableSummary, TableRow } from '@/components/campaign/campaign-home';
 import { QrScannerModal } from '@/components/campaign/qr-scanner';
 import DsDialog from '@/components/ui/ds-dialog';
+import GroupedList from '@/components/ui/grouped-list';
 import { dsIcon } from '@/components/ui/icon';
 import { SectionHeader } from '@/components/ui/section-card';
 import { contentWidth } from '@/hooks/use-layout';
@@ -177,7 +178,6 @@ export default function CampaignsScreen() {
           <View
             testID="campaigns-empty"
             style={[
-              styles.list,
               styles.empty,
               {
                 backgroundColor: theme.prophecy.surfaceContainerLow,
@@ -189,28 +189,17 @@ export default function CampaignsScreen() {
             </Text>
           </View>
         ) : (
-          <View
-            style={[
-              styles.list,
-              {
-                backgroundColor: theme.prophecy.surfaceContainerLow,
-                borderColor: theme.prophecy.border,
-              },
-            ]}>
-            {campaigns.map((c, i) => (
-              <React.Fragment key={c.id}>
-                {i > 0 ? (
-                  <View style={[styles.divider, { backgroundColor: theme.prophecy.borderSoft }]} />
-                ) : null}
-                <TableRow
-                  campaign={c}
-                  summary={summaryOf(c)}
-                  onPress={() => router.push(`/campaigns/${c.id}` as Href)}
-                  onLongPress={() => confirmDelete(c.id, c.role, c.serverUrl != null)}
-                />
-              </React.Fragment>
+          <GroupedList>
+            {campaigns.map((c) => (
+              <TableRow
+                key={c.id}
+                campaign={c}
+                summary={summaryOf(c)}
+                onPress={() => router.push(`/campaigns/${c.id}` as Href)}
+                onLongPress={() => confirmDelete(c.id, c.role, c.serverUrl != null)}
+              />
             ))}
-          </View>
+          </GroupedList>
         )}
 
         {/* The consent notice (GM included) now lives on the privacy page; the
@@ -305,7 +294,5 @@ const styles = StyleSheet.create({
   // side on a phone.
   half: { flex: 1 },
   loading: { padding: 24, alignItems: 'center' },
-  list: { borderRadius: 18, borderWidth: 1, overflow: 'hidden' },
-  divider: { height: 1, marginHorizontal: 16 },
-  empty: { padding: 16 },
+  empty: { padding: 16, borderRadius: 18, borderWidth: 1 },
 });
