@@ -70,13 +70,13 @@ export default function WeaponEditor({
     patch({ initCorpsACorps: parseInteger(t) }),
   );
   const [hitBonus, setHitBonus] = useDebouncedText(String(w.hitBonus), (t) =>
-    patch({ hitBonus: parseSigned(t) }),
+    patch({ hitBonus: parseInteger(t) }),
   );
   const [damageBonus, setDamageBonus] = useDebouncedText(String(w.damageBonus), (t) =>
-    patch({ damageBonus: parseSigned(t) }),
+    patch({ damageBonus: parseInteger(t) }),
   );
   const [initBonus, setInitBonus] = useDebouncedText(String(w.initBonus), (t) =>
-    patch({ initBonus: parseSigned(t) }),
+    patch({ initBonus: parseInteger(t) }),
   );
   // Creation time is the one fractional field (0,5 jour). Its text is kept local
   // instead of read back off the row: `0,` parses to 0 and would render back as

@@ -8,7 +8,7 @@ import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
-import { formatDecimal, parseDecimal } from '@/lib/character-values';
+import { formatDecimal, parseDecimal, parseInteger } from '@/lib/character-values';
 import { parseFormula } from '@/lib/formula';
 import { detachWrite } from '@/repositories/log';
 import { deleteShield, updateShield } from '@/repositories/shields';
@@ -52,10 +52,10 @@ export default function ShieldEditor({
   );
   const [special, setSpecial] = useDebouncedText(s.special, (t) => patch({ special: t }));
   const [hitBonus, setHitBonus] = useDebouncedText(String(s.hitBonus), (t) =>
-    patch({ hitBonus: parseInt(t, 10) || 0 }),
+    patch({ hitBonus: parseInteger(t) }),
   );
   const [damageBonus, setDamageBonus] = useDebouncedText(String(s.damageBonus), (t) =>
-    patch({ damageBonus: parseInt(t, 10) || 0 }),
+    patch({ damageBonus: parseInteger(t) }),
   );
   const [creationTime, setCreationTime] = useState(
     s.creationTime ? formatDecimal(s.creationTime) : '',

@@ -11,6 +11,7 @@ import type { Item, NewItem } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
+import { parseInteger } from '@/lib/character-values';
 import { effectTargetLabel, fmtSignedMod, skillTarget } from '@/lib/modifiers';
 import { deleteItem, updateItem } from '@/repositories/items';
 import { detachWrite } from '@/repositories/log';
@@ -117,7 +118,7 @@ function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) 
 
   const { data: skills } = useLiveQuery(skillsQuery(it.characterId), [it.characterId]);
   const [bonusValue, setBonusValue] = useDebouncedText(String(it.bonusValue), (t) =>
-    patch({ bonusValue: parseInt(t, 10) || 0 }),
+    patch({ bonusValue: parseInteger(t) }),
   );
   // Same list as an effect's Cible; an orphaned skill stays visible, as there.
   const bonusTargets = [
