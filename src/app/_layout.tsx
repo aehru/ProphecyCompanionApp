@@ -29,6 +29,7 @@ import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
 import { AppDragonProvider, useAppDragon } from '@/hooks/use-app-dragon';
+import { KeepAwakeProvider } from '@/hooks/use-keep-awake';
 import { DragonAccents } from '@/theme/dragonsTheme';
 import {
   navigationTheme,
@@ -75,9 +76,11 @@ const paperSettings = {
 export default function RootLayout() {
   return (
     <AppDragonProvider>
-      <WebSafeAreaInsets>
-        <ThemedRoot />
-      </WebSafeAreaInsets>
+      <KeepAwakeProvider>
+        <WebSafeAreaInsets>
+          <ThemedRoot />
+        </WebSafeAreaInsets>
+      </KeepAwakeProvider>
     </AppDragonProvider>
   );
 }
