@@ -778,6 +778,36 @@ export const traits = sqliteTable('traits', {
 });
 
 /**
+ * A character's Privilèges. One row per taken entry, always picked from the
+ * caste's catalogue (`data-src/privileges.csv`).
+ *
+ * `caste` and `darkOrders` are COPIED from the entry rather than looked up: a
+ * character who changes caste (or breaks the oath) keeps what they bought, and
+ * the sheet flags those rows « Hors caste » from the row alone (`lib/privilege`).
+ *
+ * `cost` is the tier paid, out of expérience — never out of the avantages' pool.
+ * Purely descriptive, like `traits`: nothing computes from a privilège.
+ */
+export const privileges = sqliteTable('privileges', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  caste: text('caste', { enum: CASTE_KEYS }).notNull(),
+  /** `caste` | `annexe` (PRIVILEGE_FAMILIES). Plain text, like `traits.rarity`. */
+  family: text('family').notNull().default('caste'),
+  darkOrders: integer('dark_orders', { mode: 'boolean' }).notNull().default(false),
+  name: text('name').notNull().default(''),
+  cost: integer('cost').notNull().default(0),
+  /** The rulebook paragraph, copied from the catalogue. */
+  description: text('description').notNull().default(''),
+  /** The player's précision — « Royaume de Kor » on a Faveur politique. */
+  note: text('note').notNull().default(''),
+  presetId: text('preset_id'),
+  presetRevision: text('preset_revision'),
+});
+
+/**
  * One scénario's Expérience award (N per character). The player picks a Valeur
  * at the START — the row is created then, `endedAt` NULL — and types the GM's
  * five 0–5 scores at the END, which closes it. Choosing before the scores exist
@@ -984,6 +1014,8 @@ export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;
 export type Trait = typeof traits.$inferSelect;
 export type NewTrait = typeof traits.$inferInsert;
+export type Privilege = typeof privileges.$inferSelect;
+export type NewPrivilege = typeof privileges.$inferInsert;
 export type XpAward = typeof xpAwards.$inferSelect;
 export type NewXpAward = typeof xpAwards.$inferInsert;
 export type Campaign = typeof campaigns.$inferSelect;

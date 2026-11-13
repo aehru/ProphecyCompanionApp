@@ -13,6 +13,7 @@ import {
   skills,
   spells,
   favorites,
+  privileges,
   traits,
   weapons,
   xpAwards,
@@ -28,6 +29,7 @@ import {
   type NewSkill,
   type NewSpell,
   type NewFavorite,
+  type NewPrivilege,
   type NewTrait,
   type NewWeapon,
   type NewXpAward,
@@ -55,6 +57,7 @@ import {
   SPELL_FIELDS,
   STATE_FIELDS,
   FAVORITE_FIELDS,
+  PRIVILEGE_FIELDS,
   TRAIT_FIELDS,
   WEAPON_FIELDS,
   XP_AWARD_FIELDS,
@@ -142,7 +145,7 @@ export async function exportCharacters(
   // the order the importer re-inserts in. Bucketing one ordered result set per
   // character preserves it exactly (see `byCharacter`).
   const charIds = rows.map((c) => c.id);
-  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, traitRows, effectRows, favoriteRows, xpAwardRows] =
+  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, traitRows, effectRows, favoriteRows, xpAwardRows, privilegeRows] =
     await Promise.all([
       db.select().from(actualState).where(inArray(actualState.characterId, charIds)),
       db.select().from(skills).where(inArray(skills.characterId, charIds)).orderBy(asc(skills.id)),
@@ -165,6 +168,11 @@ export async function exportCharacters(
         .where(inArray(favorites.characterId, charIds))
         .orderBy(asc(favorites.id)),
       db.select().from(xpAwards).where(inArray(xpAwards.characterId, charIds)).orderBy(asc(xpAwards.id)),
+      db
+        .select()
+        .from(privileges)
+        .where(inArray(privileges.characterId, charIds))
+        .orderBy(asc(privileges.id)),
     ]);
 
   const stateByChar = new Map(stateRows.map((s) => [s.characterId, s]));
@@ -180,6 +188,7 @@ export async function exportCharacters(
   const effectsByChar = byCharacter(effectRows);
   const favoritesByChar = byCharacter(favoriteRows);
   const xpAwardsByChar = byCharacter(xpAwardRows);
+  const privilegesByChar = byCharacter(privilegeRows);
 
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {
@@ -221,6 +230,7 @@ export async function exportCharacters(
         return links ? [{ ...pick(r, ENCHANT_FIELDS), ...links }] : [];
       }),
       traits: tr.map((r) => pick(r, TRAIT_FIELDS)),
+      privileges: (privilegesByChar.get(c.id) ?? []).map((r) => pick(r, PRIVILEGE_FIELDS)),
       effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
       favorites: (favoritesByChar.get(c.id) ?? []).map((r) => pick(r, FAVORITE_FIELDS)),
       xpAwards: (xpAwardsByChar.get(c.id) ?? []).map((r) => pick(r, XP_AWARD_FIELDS)),
@@ -317,6 +327,7 @@ export async function importCharacters(
             spells,
             magicReserves,
             traits,
+            privileges,
             effects,
             favorites,
             xpAwards,
@@ -354,6 +365,10 @@ export async function importCharacters(
       }
       const traitRows = b.traits ?? [];
       if (traitRows.length) await tx.insert(traits).values(link(traitRows) as NewTrait[]);
+      const privilegeRows = b.privileges ?? [];
+      if (privilegeRows.length) {
+        await tx.insert(privileges).values(link(privilegeRows) as NewPrivilege[]);
+      }
       if (b.effects.length) await tx.insert(effects).values(link(b.effects) as NewEffect[]);
       // No link to resolve: a favourite carries a rulebook slug, which means the
       // same thing on every device.

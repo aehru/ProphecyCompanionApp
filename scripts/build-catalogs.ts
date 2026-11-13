@@ -978,6 +978,7 @@ function buildPrivileges(failures: Failure[]): PrivilegePreset[] {
 
     const preset: PrivilegePreset = {
       id,
+      revision: presetRevision({ caste, famille, nom, costs, description, darkOrders }),
       caste,
       famille,
       nom,

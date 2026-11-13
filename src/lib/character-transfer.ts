@@ -15,6 +15,8 @@
 import { z } from 'zod';
 
 import {
+  CASTES,
+  type CasteKey,
   TIME_UNITS,
   MONEY,
   NUMERIC_KEYS,
@@ -308,6 +310,24 @@ const traitSchema = z.object({
 });
 
 /**
+ * Privilèges. OPTIONAL with a `[]` default (not a version bump, like `traits`):
+ * exports made before the table existed carry none. `caste` is strict — the
+ * column is NOT NULL and an unknown caste has nothing to belong to — `family`
+ * is loose like `traits.rarity`.
+ */
+const privilegeSchema = z.object({
+  caste: z.enum(CASTES.map((c) => c.key) as [CasteKey, ...CasteKey[]]),
+  family: str,
+  darkOrders: z.boolean().optional(),
+  name: str,
+  cost: int,
+  description: str,
+  note: str,
+  presetId: str.nullable().optional(),
+  presetRevision: str.nullable().optional(),
+});
+
+/**
  * Starred catalogue entries. OPTIONAL with a `[]` default (not a version bump,
  * like `traits`): exports made before the table existed carry none.
  *
@@ -362,6 +382,7 @@ const characterBundleSchema = z.object({
   magicReserves: z.array(magicReserveSchema).default([]),
   enchants: z.array(enchantSchema).default([]),
   traits: z.array(traitSchema).default([]),
+  privileges: z.array(privilegeSchema).default([]),
   effects: z.array(effectSchema),
   favorites: z.array(favoriteSchema).default([]),
   xpAwards: z.array(xpAwardSchema).default([]),
@@ -449,6 +470,7 @@ export const ENCHANT_FIELDS = [
 ];
 export const MAGIC_RESERVE_FIELDS = Object.keys(magicReserveSchema.shape);
 export const TRAIT_FIELDS = Object.keys(traitSchema.shape);
+export const PRIVILEGE_FIELDS = Object.keys(privilegeSchema.shape);
 export const EFFECT_FIELDS = Object.keys(effectSchema.shape);
 
 export type ImportResult =
