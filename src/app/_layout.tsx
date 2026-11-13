@@ -22,6 +22,7 @@ import DiceRollerButton from '@/components/dice-roller-button';
 import DiceRollerHost from '@/components/dice-roller-host';
 import LogErrorBoundary from '@/components/log-error-boundary';
 import AlertHost from '@/components/ui/alert-host';
+import WebSafeAreaInsets from '@/components/web-safe-area';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
 import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
@@ -74,7 +75,9 @@ const paperSettings = {
 export default function RootLayout() {
   return (
     <AppDragonProvider>
-      <ThemedRoot />
+      <WebSafeAreaInsets>
+        <ThemedRoot />
+      </WebSafeAreaInsets>
     </AppDragonProvider>
   );
 }

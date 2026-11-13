@@ -31,7 +31,7 @@ export async function shareDiagnostics(): Promise<void> {
     // stale temp — ignore
   }
   file.create();
-  file.write(text);
+  await file.write(text);
 
   if (!(await Sharing.isAvailableAsync())) {
     throw new Error("Le partage n'est pas disponible sur cet appareil.");

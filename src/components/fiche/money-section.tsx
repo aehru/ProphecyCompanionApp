@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, type TextInput as RNTextInput } from 'react-native';
+import { StyleSheet, View, type TextInputInstance } from 'react-native';
 
 import NumberField from '@/components/number-field';
 import StatChip from '@/components/ui/stat-chip';
@@ -7,7 +7,7 @@ import { MONEY } from '@/constants/prophecy';
 
 /** Keyboard "next" wiring the caller hands down for each editable field. */
 export type FieldChain = (key: string) => {
-  inputRef: (el: RNTextInput | null) => void;
+  inputRef: (el: TextInputInstance | null) => void;
   returnKeyType: 'done' | 'next';
   submitBehavior: 'blurAndSubmit' | 'submit';
   onSubmitEditing: () => void;
