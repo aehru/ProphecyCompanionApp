@@ -1,10 +1,11 @@
 import { type Href, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Divider, List } from 'react-native-paper';
+import { Divider, List, Switch } from 'react-native-paper';
 
 import SectionCard from '@/components/ui/section-card';
 import { useCharacterImport } from '@/hooks/use-character-import';
+import { useKeepAwakePref } from '@/hooks/use-keep-awake';
 import { useLastBackup } from '@/hooks/use-last-backup';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -26,6 +27,7 @@ export default function MoreScreen() {
   const { busy: importing, runImport } = useCharacterImport();
   const [backingUp, setBackingUp] = useState(false);
   const busy = importing || backingUp;
+  const { keepAwake, setKeepAwake } = useKeepAwakePref();
 
   const handleBackup = async () => {
     setBackingUp(true);
@@ -73,6 +75,21 @@ export default function MoreScreen() {
       <SectionCard title="Affichage" icon="sun">
         <NavGroup>
           <NavRow icon="palette-outline" title="Apparence" onPress={go('/appearance')} />
+          <List.Item
+            title="Garder l'écran allumé"
+            description="Empêche la mise en veille pendant la partie"
+            titleStyle={{ color: theme.colors.onSurface }}
+            descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
+            left={(p) => <List.Icon {...p} icon="cellphone-lock" color={theme.colors.primary} />}
+            right={() => (
+              <Switch
+                value={keepAwake}
+                onValueChange={setKeepAwake}
+                accessibilityLabel="Garder l'écran allumé"
+              />
+            )}
+            onPress={() => setKeepAwake(!keepAwake)}
+          />
         </NavGroup>
       </SectionCard>
 

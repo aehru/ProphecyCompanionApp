@@ -97,7 +97,7 @@ The star follows the spell: learn a sortilège you had starred and it arrives al
 
 ## Backup & transfer
 
-**Long-press a character** in the roster to enter selection mode (taps then toggle rows), and the header turns into four actions: **tout sélectionner**, **dupliquer**, **exporter**, **supprimer**. Export writes the selection to a JSON file through the OS share sheet — save it to Files, send it to another device. The **Plus** tab holds the rest: **Sauvegarder mes personnages** exports the whole roster as a sauvegarde in one tap (its line says how long ago you last did — in red when never, or more than 14 days), and **Importer un fichier** reads one back.
+**Long-press a character** in the roster to enter selection mode (taps then toggle rows), and the header turns into four actions: **tout sélectionner**, **dupliquer**, **exporter**, **supprimer**. Export writes the selection to a JSON file through the OS share sheet — save it to Files, send it to another device. The **Plus** tab holds the rest: **Sauvegarder mes personnages** exports the whole roster as a sauvegarde in one tap (its line says how long ago you last did — in red when never, or more than 14 days), and **Importer un fichier** reads one back. **Garder l'écran allumé** keeps the screen on while the app is open — a device setting, off by default.
 
 Export asks what the file is *for*, and the answer changes what happens on import:
 - **Sauvegarde** — keeps each character's portable id, so re-importing restores *that* character in place instead of doubling it (campaign slot and GM notes still attached). Your favoris travel with it: it is the only backup there is.
