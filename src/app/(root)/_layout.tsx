@@ -8,7 +8,8 @@ import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 
 /**
- * The app's three top-level destinations. Everything a player opens FROM one of
+ * The app's four top-level destinations (« Plus » gathers the app-level ones:
+ * backup, import, apparence, aide). Everything a player opens FROM one of
  * them — a character, a campaign, a catalogue entry — is pushed on the root
  * stack ABOVE this navigator, so its own chrome takes the bar's place rather
  * than stacking a second one under it.
@@ -31,9 +32,9 @@ export default function RootTabsLayout() {
         headerTitleStyle: { fontFamily: 'Cinzel_600SemiBold' },
         // `height` on the JS header is the total, status bar included.
         headerStyle: { height: HEADER_HEIGHT + insets.top },
-        // The dice roller reaches every tab from here. Personnages replaces this
-        // with its own `setOptions` (import menu) and re-adds the button there —
-        // a screen-level headerRight overrides this one wholesale.
+        // The dice roller reaches every tab from here. Personnages swaps in its
+        // selection actions with `setOptions` and re-adds the button when the
+        // selection clears — a screen-level headerRight overrides this wholesale.
         headerRight: () => <DiceRollerButton />,
       }}>
       <Tabs.Screen
@@ -58,6 +59,14 @@ export default function RootTabsLayout() {
           title: 'Campagnes',
           tabBarButtonTestID: 'tab-campagnes',
           tabBarIcon: dsIcon('map'),
+        }}
+      />
+      <Tabs.Screen
+        name="more"
+        options={{
+          title: 'Plus',
+          tabBarButtonTestID: 'tab-plus',
+          tabBarIcon: dsIcon('more'),
         }}
       />
     </Tabs>
