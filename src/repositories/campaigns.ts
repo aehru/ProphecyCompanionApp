@@ -284,6 +284,14 @@ export async function deleteCampaign(id: number): Promise<void> {
  * Live query: which characters belong to one table. GM side that IS the roster
  * (read locally); player side it is the set broadcast to the GM.
  */
+/** Every table's local members (name + kind), for the list's one-line summaries. */
+export function allMembersQuery() {
+  return db
+    .select({ campaignId: campaignShares.campaignId, nom: characters.nom, kind: characters.kind })
+    .from(campaignShares)
+    .innerJoin(characters, eq(characters.id, campaignShares.characterId));
+}
+
 export function membersQuery(campaignId: number) {
   return db.select().from(campaignShares).where(eq(campaignShares.campaignId, campaignId));
 }
