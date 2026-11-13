@@ -47,7 +47,7 @@ during a session: wounds, ressources, initiative, effets, réserve de magie.
 | **Catalogues** | The five rulebook catalogues as pure reference — armes, armures, boucliers, sortilèges, avantages / désavantages — with no character attached. |
 | **Campagnes** | The GM's table — PNJ, La Compagnie, initiative order — local by default, networked if you attach a server. |
 | **Personnages** | Long-press to select characters, then duplicate, export to JSON (sauvegarde or partage) or delete. |
-| **Plus** | One-tap sauvegarde of every character (with how long since the last one), import a file back, catalogue updates, Apparence, Diagnostic (a local, technical-identifiers-only log you can read, share or wipe — nothing is sent automatically), Confidentialité, À propos. |
+| **Plus** | One-tap sauvegarde of every character (with how long since the last one), import a file back, catalogue updates, Apparence, Garder l'écran allumé (stops the phone sleeping at the table), Diagnostic (a local, technical-identifiers-only log you can read, share or wipe — nothing is sent automatically), Confidentialité, À propos. |
 
 **→ Full feature tour: [docs/FEATURES.md](docs/FEATURES.md).**
 
