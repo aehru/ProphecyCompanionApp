@@ -97,7 +97,7 @@ The star follows the spell: learn a sortilège you had starred and it arrives al
 
 ## Backup & transfer
 
-**Long-press a character** in the roster to enter selection mode (taps then toggle rows), and the header turns into four actions: **tout sélectionner**, **dupliquer**, **exporter**, **supprimer**. Export writes the selection to a JSON file through the OS share sheet — save it to Files, send it to another device. **Importer…**, in the roster's **⋮** menu, reads one back.
+**Long-press a character** in the roster to enter selection mode (taps then toggle rows), and the header turns into four actions: **tout sélectionner**, **dupliquer**, **exporter**, **supprimer**. Export writes the selection to a JSON file through the OS share sheet — save it to Files, send it to another device. The **Plus** tab holds the rest: **Sauvegarder mes personnages** exports the whole roster as a sauvegarde in one tap (its line says how long ago you last did — in red when never, or more than 14 days), and **Importer un fichier** reads one back.
 
 Export asks what the file is *for*, and the answer changes what happens on import:
 - **Sauvegarde** — keeps each character's portable id, so re-importing restores *that* character in place instead of doubling it (campaign slot and GM notes still attached). Your favoris travel with it: it is the only backup there is.
@@ -116,6 +116,6 @@ From the **Campagnes** tab:
 
 ## Diagnostic — for the beta, on your terms
 
-Also from the roster's **⋮** menu. During the public beta the app keeps a **local log** of what it does — screens opened, records written, migrations, errors — so a bug report can be acted on. Set how much detail it keeps, read every line as it happens, then **Partager** it (share sheet), **Copier** it, or **Effacer** it.
+From the **Plus** tab. During the public beta the app keeps a **local log** of what it does — screens opened, records written, migrations, errors — so a bug report can be acted on. Set how much detail it keeps, read every line as it happens, then **Partager** it (share sheet), **Copier** it, or **Effacer** it.
 
-Nothing is sent automatically: there's no server, no analytics and no crash upload behind it. The log records **technical identifiers only** — a character is `characterId: 12`, a change is a list of column names — and never your names, biographies, notes, sheet values, join codes or server addresses. It's capped at 1500 entries / 512 KB, purged after 7 days, and stamped with a session id drawn at random each launch that's never stored. **Confidentialité**, in the same menu, explains all of this in the app.
+Nothing is sent automatically: there's no server, no analytics and no crash upload behind it. The log records **technical identifiers only** — a character is `characterId: 12`, a change is a list of column names — and never your names, biographies, notes, sheet values, join codes or server addresses. It's capped at 1500 entries / 512 KB, purged after 7 days, and stamped with a session id drawn at random each launch that's never stored. **Confidentialité**, in the same tab, explains all of this in the app.
