@@ -287,7 +287,12 @@ export async function deleteCampaign(id: number): Promise<void> {
 /** Every table's local members (name + kind), for the list's one-line summaries. */
 export function allMembersQuery() {
   return db
-    .select({ campaignId: campaignShares.campaignId, nom: characters.nom, kind: characters.kind })
+    .select({
+      campaignId: campaignShares.campaignId,
+      characterId: campaignShares.characterId,
+      nom: characters.nom,
+      kind: characters.kind,
+    })
     .from(campaignShares)
     .innerJoin(characters, eq(characters.id, campaignShares.characterId));
 }
