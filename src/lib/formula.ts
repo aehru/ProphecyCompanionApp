@@ -77,7 +77,7 @@ const CARAC_BY_ABBR: Record<string, { key: string; abbr: string }> = Object.from
 
 const DICE_RE = /^(\d+)\s*[dD]\s*(\d+)$/;
 const CARAC_MULT_RE = /^([A-Za-zÀ-ÿ]+)\s*[x×*]\s*(\d+)$/;
-const FLAT_RE = /^\d+$/;
+const FLAT_RE = /^-?\d+$/;
 const CARAC_RE = /^[A-Za-zÀ-ÿ]+$/;
 /** Bare `NR` — checked BEFORE CARAC_RE, which would otherwise match it. */
 const NR_RE = /^NR$/i;
@@ -135,7 +135,9 @@ export function parseFormula(
   if (raw === '') return { ok: true, formula: { terms: [] } };
 
   // Parentheses are cosmetic with only +/× — drop them before splitting.
-  const cleaned = raw.replace(/[()]/g, ' ');
+  // A spaced ` -1` is a negative flat term (a poor weapon's malus, lib/gear-bonus);
+  // an unspaced `1-5` stays the error it was.
+  const cleaned = raw.replace(/[()]/g, ' ').replace(/(^|\s)-\s*(\d+)/g, '$1+ -$2');
   const parts = cleaned.split('+').map((p) => p.trim()).filter((p) => p !== '');
 
   const terms: FormulaTerm[] = [];

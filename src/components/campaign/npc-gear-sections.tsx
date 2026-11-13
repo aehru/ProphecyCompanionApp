@@ -21,6 +21,7 @@ import type { Character, Weapon } from '@/db/schema';
 import { openRoller } from '@/lib/dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
+import { applyShieldBonus, applyWeaponBonus, withHitBonus } from '@/lib/gear-bonus';
 import { damageModifier, woundMalus } from '@/lib/modifiers';
 import { withActionCumul } from '@/lib/action-cumul';
 import { spellRollContext, weaponRollContext } from '@/lib/roll-context';
@@ -91,7 +92,10 @@ function GearBody({ char }: { char: Character }) {
   // One place that knows what a weapon's compétence resolves against — the card
   // reads it and the roll re-reads it, and the two must not drift apart.
   const skillOf = (w: Weapon) =>
-    weaponSkillReading(w.skillName, skillList, rec, effectList, wound);
+    withHitBonus(
+      weaponSkillReading(w.skillName, skillList, rec, effectList, wound),
+      applyWeaponBonus(w, effectList).hitBonus,
+    );
 
   // The GM rolls an NPC's attacks from here — these are their own characters,
   // living in this device's DB, so it is the same roll the player's Inventaire
@@ -109,7 +113,7 @@ function GearBody({ char }: { char: Character }) {
             {weaponList.map((w) => (
               <WeaponCard
                 key={w.id}
-                weapon={w}
+                weapon={applyWeaponBonus(w, effectList)}
                 caracValue={caracValue}
                 caracModifier={caracModifier}
                 skill={skillOf(w)}
@@ -142,7 +146,7 @@ function GearBody({ char }: { char: Character }) {
             {shieldList.map((s) => (
               <ShieldCard
                 key={s.id}
-                shield={s}
+                shield={applyShieldBonus(s, effectList)}
                 caracValue={caracValue}
                 caracModifier={caracModifier}
                 enchanted={isEnchanted('shield', s.id)}

@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, Icon, Text } from 'react-native-paper';
@@ -8,9 +9,12 @@ import SectionCard from '@/components/ui/section-card';
 import { TIME_UNITS } from '@/constants/prophecy';
 import type { Effect, Skill } from '@/db/schema';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { gearTargetOptions } from '@/lib/gear-bonus';
 import { effectDurationLabel, effectTargetLabel, effectValueLabel, isSkillTarget, skillTargetName } from '@/lib/modifiers';
 import { tickUnit } from '@/repositories/effects';
 import { detachWrite } from '@/repositories/log';
+import { shieldsQuery } from '@/repositories/shields';
+import { weaponsQuery } from '@/repositories/weapons';
 
 /** An effect targets a skill that the character no longer owns (renamed/deleted). */
 function isOrphanSkill(target: string, skills: Skill[]): boolean {
@@ -50,6 +54,9 @@ export default function EffectsCard({
   // KEYED on this so each open mounts a fresh draft rather than reusing the
   // previous row's fields.
   const [open, setOpen] = useState<Effect | 'new' | null>(null);
+  const { data: weapons } = useLiveQuery(weaponsQuery(characterId), [characterId]);
+  const { data: shields } = useLiveQuery(shieldsQuery(characterId), [characterId]);
+  const gearTargets = gearTargetOptions(weapons ?? [], shields ?? []);
 
   // Units that still have at least one active effect — the only ones worth
   // offering a "time passes" button for. PERMANENT_UNIT is not in TIME_UNITS,
@@ -72,7 +79,11 @@ export default function EffectsCard({
             key={e.id}
             effect={e}
             orphan={isOrphanSkill(e.target, skills)}
-            onPress={() => setOpen(e)}
+            targetLabel={
+              gearTargets.find((t) => t.key === e.target)?.label ?? effectTargetLabel(e.target)
+            }
+            // An item's bonus is edited on the item; this row only mirrors it.
+            onPress={e.itemId == null ? () => setOpen(e) : undefined}
           />
         ))
       )}
@@ -104,6 +115,7 @@ export default function EffectsCard({
           effect={open === 'new' ? null : open}
           characterId={characterId}
           skills={skills}
+          gearTargets={gearTargets}
           onDismiss={() => setOpen(null)}
         />
       ) : null}
@@ -114,15 +126,16 @@ export default function EffectsCard({
 function EffectRow({
   effect: e,
   orphan,
+  targetLabel,
   onPress,
 }: {
   effect: Effect;
   orphan: boolean;
-  onPress: () => void;
+  targetLabel: string;
+  onPress?: () => void;
 }) {
   const theme = useProphecyTheme();
 
-  const targetLabel = effectTargetLabel(e.target);
   const valueColor = e.value > 0 ? theme.colors.primary : theme.colors.error;
 
   // Duration/state phrase after the target label.
@@ -138,6 +151,7 @@ function EffectRow({
           {targetLabel}
           {stateText}
           {orphan ? ' · compétence supprimée' : ''}
+          {e.itemId != null ? ' · objet équipé' : ''}
         </Text>
       </View>
       {e.value !== 0 ? (
@@ -149,7 +163,9 @@ function EffectRow({
           {effectValueLabel(e.target, e.value)}
         </Text>
       ) : null}
-      <Icon source="chevron-right" size={20} color={theme.colors.onSurfaceVariant} />
+      {onPress ? (
+        <Icon source="chevron-right" size={20} color={theme.colors.onSurfaceVariant} />
+      ) : null}
     </Pressable>
   );
 }

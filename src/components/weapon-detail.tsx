@@ -34,6 +34,7 @@ export type WeaponView = Partial<
     | 'creationDifficulty'
     | 'creationTime'
     | 'special'
+    | 'hitBonus'
   >
 >;
 
@@ -78,6 +79,8 @@ export default function WeaponDetail({
   return (
     <View style={styles.detail}>
       {skill ? <SkillRow skill={skill} /> : null}
+
+      {w.hitBonus ? <DetailRow label="Toucher" value={fmtSignedMod(w.hitBonus)} /> : null}
 
       <FormulaRow
         label="Dégâts"

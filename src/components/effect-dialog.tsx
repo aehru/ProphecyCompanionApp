@@ -72,6 +72,7 @@ export default function EffectDialog({
   effect,
   characterId,
   skills,
+  gearTargets,
   onDismiss,
 }: {
   visible: boolean;
@@ -80,6 +81,8 @@ export default function EffectDialog({
   characterId: number;
   /** The character's own skills, offered as targets alongside the stats. */
   skills: Skill[];
+  /** A temporary bonus on one weapon or shield (see lib/gear-bonus). */
+  gearTargets: { key: string; label: string }[];
   onDismiss: () => void;
 }) {
   const theme = useProphecyTheme();
@@ -95,6 +98,7 @@ export default function EffectDialog({
   const targetOptions = [
     ...EFFECT_TARGETS.map((t) => ({ key: t.key, label: t.label })),
     ...skills.map((s) => ({ key: skillTarget(s.name), label: s.name })),
+    ...gearTargets,
   ];
   if (!targetOptions.some((o) => o.key === draft.target)) {
     targetOptions.push({ key: draft.target, label: effectTargetLabel(draft.target) });

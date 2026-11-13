@@ -1,15 +1,21 @@
+import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 
 import NumberField from '@/components/number-field';
 import Icon, { dsIcon } from '@/components/ui/icon';
+import SelectField from '@/components/ui/select-field';
+import { EFFECT_TARGETS } from '@/constants/prophecy';
 import type { Item, NewItem } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
+import { parseInteger } from '@/lib/character-values';
+import { effectTargetLabel, fmtSignedMod, skillTarget } from '@/lib/modifiers';
 import { deleteItem, updateItem } from '@/repositories/items';
 import { detachWrite } from '@/repositories/log';
+import { skillsQuery } from '@/repositories/skills';
 
 /**
  * One inventory item: a read-only summary that flips to an inline editor via
@@ -86,6 +92,11 @@ function ItemSummary({
             {it.equipped ? (
               <Text style={[styles.itemSub, { color: theme.colors.primary }]}>· Équipé</Text>
             ) : null}
+            {it.bonusValue !== 0 ? (
+              <Text style={[styles.itemSub, { color: theme.colors.onSurfaceVariant }]}>
+                · {fmtSignedMod(it.bonusValue)} {effectTargetLabel(it.bonusTarget)}
+              </Text>
+            ) : null}
           </View>
         </View>
         <IconButton icon={dsIcon('edit')} size={18} onPress={onEdit} />
@@ -104,6 +115,19 @@ function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) 
   const [description, setDescription] = useDebouncedText(it.description, (t) =>
     patch({ description: t }),
   );
+
+  const { data: skills } = useLiveQuery(skillsQuery(it.characterId), [it.characterId]);
+  const [bonusValue, setBonusValue] = useDebouncedText(String(it.bonusValue), (t) =>
+    patch({ bonusValue: parseInteger(t) }),
+  );
+  // Same list as an effect's Cible; an orphaned skill stays visible, as there.
+  const bonusTargets = [
+    ...EFFECT_TARGETS.map((t) => ({ key: t.key, label: t.label })),
+    ...(skills ?? []).map((s) => ({ key: skillTarget(s.name), label: s.name })),
+  ];
+  if (!bonusTargets.some((o) => o.key === it.bonusTarget)) {
+    bonusTargets.push({ key: it.bonusTarget, label: effectTargetLabel(it.bonusTarget) });
+  }
 
   const confirmDelete = () =>
     Alert.alert('Supprimer', 'Supprimer cet objet ?', [
@@ -134,6 +158,23 @@ function ItemEditor({ item: it, onClose }: { item: Item; onClose: () => void }) 
         value={it.quantity ? String(it.quantity) : ''}
         onChange={(_, t) => patch({ quantity: Math.max(0, Number(t) || 0) })}
         style={styles.qtyField}
+      />
+
+      <NumberField
+        fieldKey="bonusValue"
+        label="Bonus si équipé"
+        value={bonusValue}
+        onChange={(_, t) => setBonusValue(t)}
+        signed
+        style={styles.qtyField}
+      />
+      <SelectField
+        label="Cible du bonus"
+        options={bonusTargets}
+        value={it.bonusTarget}
+        onChange={(v) => patch({ bonusTarget: v })}
+        searchable
+        testID="item-bonus-target"
       />
 
       {/* Both actions on one row, in the flow: the close button used to float

@@ -335,6 +335,11 @@ export const items = sqliteTable('items', {
   description: text('description').notNull().default(''),
   quantity: integer('quantity').notNull().default(1),
   equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+  // A bonus the item grants while equipped: an effect target (`'all'`, a stat,
+  // `skill:<name>`) and a signed value, 0 = none. Stored here so it survives
+  // being unequipped; the live `effects` row is derived (see `effects.itemId`).
+  bonusTarget: text('bonus_target').notNull().default('all'),
+  bonusValue: integer('bonus_value').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -388,6 +393,11 @@ export const weapons = sqliteTable('weapons', {
   // `skill:<name>` effect targets; may hold a spécialisation's composite name
   // ("Armes tranchantes (Épée longue)") when the player overrides it.
   skillName: text('skill_name'),
+  // Permanent bonuses (a masterwork blade). Temporary ones are `effects` rows
+  // targeting this weapon — see lib/gear-bonus, which sums the two.
+  hitBonus: integer('hit_bonus').notNull().default(0),
+  damageBonus: integer('damage_bonus').notNull().default(0),
+  initBonus: integer('init_bonus').notNull().default(0),
 });
 
 /**
@@ -570,6 +580,9 @@ export const shields = sqliteTable('shields', {
   defenseCurrent: integer('defense_current').notNull().default(0),
   encombrementMalus: integer('encombrement_malus').notNull().default(0),
   equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+  // Permanent bonuses, as on `weapons`.
+  hitBonus: integer('hit_bonus').notNull().default(0),
+  damageBonus: integer('damage_bonus').notNull().default(0),
 });
 
 /** Which kind of gear an enchant is bound to (see `enchants` below). */
@@ -692,6 +705,10 @@ export const effects = sqliteTable('effects', {
   durationUnit: text('duration_unit').notNull().default('round'),
   durationRemaining: integer('duration_remaining').notNull().default(0),
   expired: integer('expired', { mode: 'boolean' }).notNull().default(false),
+  // Set on the row an equipped item's bonus derives (repositories/items
+  // `syncItemBonus`): every roll reader picks it up as a normal effect, and it
+  // exists only while the item is worn. Never exported — import re-derives it.
+  itemId: integer('item_id').references(() => items.id, { onDelete: 'cascade' }),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),

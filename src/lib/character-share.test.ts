@@ -205,6 +205,15 @@ describe('toSharedCharacter', () => {
     ]);
   });
 
+  it('keeps gear off the wire: no weapon bonus, no item name', () => {
+    const shared = toSharedCharacter(makeCharacter(), makeState(), [], [
+      makeEffect({ target: 'weapon:3:hit', value: 2 }),
+      makeEffect({ label: 'Anneau de Kael', target: 'force', value: 1, itemId: 4 }),
+    ]);
+    expect(shared.effects).toHaveLength(1);
+    expect(shared.effects[0]).toMatchObject({ label: '', target: 'force', value: 1 });
+  });
+
   it('shares only active (non-expired) effects, full detail', () => {
     const shared = toSharedCharacter(makeCharacter(), makeState(), [], [
       makeEffect({ label: 'Bénédiction', target: 'coordination', value: 2, durationRemaining: 3 }),

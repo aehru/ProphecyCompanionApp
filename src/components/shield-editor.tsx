@@ -8,7 +8,7 @@ import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
-import { formatDecimal, parseDecimal } from '@/lib/character-values';
+import { formatDecimal, parseDecimal, parseInteger } from '@/lib/character-values';
 import { parseFormula } from '@/lib/formula';
 import { detachWrite } from '@/repositories/log';
 import { deleteShield, updateShield } from '@/repositories/shields';
@@ -22,6 +22,8 @@ const EDIT_ORDER = [
   'name',
   'damage',
   'prereq',
+  'hitBonus',
+  'damageBonus',
   'creationDifficulty',
   'creationTime',
   'defenseMax',
@@ -49,6 +51,12 @@ export default function ShieldEditor({
     patch({ prerequisites: t }),
   );
   const [special, setSpecial] = useDebouncedText(s.special, (t) => patch({ special: t }));
+  const [hitBonus, setHitBonus] = useDebouncedText(String(s.hitBonus), (t) =>
+    patch({ hitBonus: parseInteger(t) }),
+  );
+  const [damageBonus, setDamageBonus] = useDebouncedText(String(s.damageBonus), (t) =>
+    patch({ damageBonus: parseInteger(t) }),
+  );
   const [creationTime, setCreationTime] = useState(
     s.creationTime ? formatDecimal(s.creationTime) : '',
   );
@@ -106,6 +114,24 @@ export default function ShieldEditor({
       />
 
       <View style={styles.grid}>
+        <NumberField
+          fieldKey="hitBonus"
+          label="Bonus toucher"
+          value={hitBonus}
+          onChange={(_, t) => setHitBonus(t)}
+          signed
+          style={styles.numCol}
+          {...numChain('hitBonus')}
+        />
+        <NumberField
+          fieldKey="damageBonus"
+          label="Bonus dégâts"
+          value={damageBonus}
+          onChange={(_, t) => setDamageBonus(t)}
+          signed
+          style={styles.numCol}
+          {...numChain('damageBonus')}
+        />
         <NumberField
           fieldKey="creationDifficulty"
           label="Difficulté création"

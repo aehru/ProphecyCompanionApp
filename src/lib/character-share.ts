@@ -40,6 +40,7 @@ import type { ActualState, Character, Effect, Skill } from '@/db/schema';
 import { dieUsageListSchema } from '@/lib/action-cumul';
 import { asNumRecord } from '@/lib/character-values';
 import { initiativeDiceCount } from '@/lib/dice';
+import { isGearTarget } from '@/lib/gear-bonus';
 
 /**
  * Bumped on any change to the SharedCharacter shape. v2: skills + effects.
@@ -162,9 +163,12 @@ export function toSharedCharacter(
         specLabel: sk.specLabel ?? null,
       })),
     effects: effectRows
-      .filter((e) => !e.expired)
+      // A gear bonus means nothing without the gear, which stays off the wire.
+      .filter((e) => !e.expired && !isGearTarget(e.target ?? ''))
       .map((e) => ({
-        label: e.label ?? '',
+        // An item's derived row is labelled with the item's name: inventory,
+        // also off the wire. Its value still counts in the GM's totals.
+        label: e.itemId != null ? '' : (e.label ?? ''),
         target: e.target ?? 'all',
         value: e.value ?? 0,
         durationUnit: e.durationUnit ?? 'round',
