@@ -1,17 +1,19 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
-import { Button, IconButton, List, Text, TextInput } from 'react-native-paper';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
+import { Button, Text, TextInput } from 'react-native-paper';
 
+import { RoleCard, ShareNotice, tableSummary, TableRow } from '@/components/campaign/campaign-home';
 import { QrScannerModal } from '@/components/campaign/qr-scanner';
-import AppFab from '@/components/ui/app-fab';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
+import { SectionHeader } from '@/components/ui/section-card';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import {
+  allMembersQuery,
   campaignsListQuery,
   createLocalTable,
   deleteCampaign,
@@ -20,15 +22,11 @@ import {
 
 type DialogKind = 'create' | 'join' | null;
 
-// Module-level, like the character list: an inline arrow is a new component
-// type on every render, which remounts every separator instead of reusing it.
-const RowSeparator = () => <View style={styles.separator} />;
-const keyExtractor = (c: { id: number }) => String(c.id);
-
 export default function CampaignsScreen() {
   const router = useRouter();
   const theme = useProphecyTheme();
   const { data, updatedAt } = useLiveQuery(campaignsListQuery());
+  const { data: membersData } = useLiveQuery(allMembersQuery());
   const [dialog, setDialog] = useState<DialogKind>(null);
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
@@ -111,108 +109,115 @@ export default function CampaignsScreen() {
       ? name.trim().length > 0
       : serverUrl.trim().length > 0 && code.trim().length >= 4;
 
+  const members = membersData ?? [];
+  const summaryOf = (c: (typeof campaigns)[number]) =>
+    tableSummary(
+      c.role,
+      members.filter((m) => m.campaignId === c.id),
+    );
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.actions}>
-        <Button mode="outlined" icon="location-enter" onPress={() => openDialog('join')}>
-          Rejoindre avec un code
-        </Button>
-        {/* Here rather than on the character list: generating a PNJ is GM work,
-            not the way a player creates their character. The PNJ lands in the
-            character list all the same — it is a full character row (kind =
-            'npc'), and any table can then pick it up. */}
-        <Button
-          mode="outlined"
-          icon={dsIcon('dice')}
-          testID="generate-npc"
-          onPress={() => router.push('/npc/generate')}>
-          Générer un PNJ
-        </Button>
-      </View>
+      <ScrollView contentContainerStyle={[styles.content, contentWidth]}>
+        <RoleCard
+          icon="map"
+          title="Je mène la partie"
+          body="PNJ, initiative et fiches de toute la table, hors ligne. Un serveur est facultatif.">
+          <Button
+            mode="contained"
+            icon={dsIcon('plus')}
+            testID="fab-new-table"
+            style={styles.half}
+            compact
+            onPress={() => openDialog('create')}>
+            Nouvelle table
+          </Button>
+          {/* Here rather than on the character list: generating a PNJ is GM
+              work. The PNJ lands in the character list all the same — it is a
+              full character row (kind = 'npc'), and any table can pick it up. */}
+          <Button
+            mode="outlined"
+            testID="generate-npc"
+            style={styles.half}
+            compact
+            onPress={() => router.push('/npc/generate')}>
+            Générer un PNJ
+          </Button>
+        </RoleCard>
 
-      {/* One notice for everyone (GM included). The join dialog repeats a short
-          version, since a QR/deep-link join opens straight onto it. */}
-      <View
-        style={[
-          styles.disclaimer,
-          {
-            backgroundColor: theme.prophecy.surfaceContainerLow,
-            borderColor: theme.colors.outlineVariant,
-          },
-        ]}>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Une table fonctionne hors ligne : vos PNJ, leur initiative et leurs fiches restent sur
-          votre appareil. Connecter un serveur est facultatif — il sert à voir les personnages de
-          vos joueurs. Dans ce cas, lorsqu’un joueur partage un personnage, un extrait (nom, état de
-          combat, caractéristiques) est envoyé au serveur choisi et conservé sous la responsabilité
-          de son hébergeur. Arrêter le partage ou quitter la campagne en demande l’effacement.
-        </Text>
-      </View>
+        <RoleCard
+          icon="character"
+          title="Je joue"
+          body="Rejoignez la table de votre MJ et diffusez un personnage.">
+          <Button
+            mode="contained"
+            testID="join-with-code"
+            style={styles.half}
+            compact
+            onPress={() => openDialog('join')}>
+            Saisir un code
+          </Button>
+          <Button
+            mode="outlined"
+            icon="qrcode-scan"
+            testID="fab-scan-qr"
+            style={styles.half}
+            compact
+            onPress={() => setScanning(true)}>
+            Scanner
+          </Button>
+        </RoleCard>
 
-      {loading ? (
-        <View testID="campaigns-loading" style={styles.loading}>
-          <ActivityIndicator />
-        </View>
-      ) : campaigns.length === 0 ? (
-        <View
-          testID="campaigns-empty"
-          style={[
-            styles.empty,
-            {
-              backgroundColor: theme.prophecy.surfaceContainerLow,
-              borderColor: theme.colors.outlineVariant,
-            },
-          ]}>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface }}>
-            Aucune table
-          </Text>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            Créez une table pour gérer vos PNJ et leur initiative — sans serveur. Joueur ? Rejoignez
-            avec le code du MJ.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={campaigns}
-          contentContainerStyle={[styles.listContent, contentWidth]}
-          ItemSeparatorComponent={RowSeparator}
-          keyExtractor={keyExtractor}
-          renderItem={({ item }) => (
-            // The delete button is a SIBLING of the row, not its `right` slot: a
-            // List.Item with onPress renders a real <button> on web, and the slot
-            // renders inside it — a nested <button> is invalid HTML, which React
-            // rejects and which leaves the inner button's clicks undefined.
-            <View
-              style={[
-                styles.item,
-                styles.itemRow,
-                {
-                  backgroundColor: theme.prophecy.surfaceContainerLow,
-                  borderColor: theme.colors.outlineVariant,
-                },
-              ]}>
-              <List.Item
-                style={styles.itemMain}
-                testID={`campaign-row-${item.id}`}
-                title={item.name}
-                description={`${item.role === 'gm' ? 'MJ' : 'Joueur'} · ${item.code ?? 'hors ligne'}`}
-                titleStyle={{ color: theme.colors.onSurface }}
-                descriptionStyle={{ color: theme.colors.onSurfaceVariant }}
-                left={(p) => (
-                  <List.Icon {...p} icon={item.role === 'gm' ? 'crown' : 'account-group'} />
-                )}
-                onPress={() => router.push(`/campaigns/${item.id}` as Href)}
-              />
-              <IconButton
-                icon="delete-outline"
-                testID={`campaign-delete-${item.id}`}
-                accessibilityLabel={`Supprimer ${item.name}`}
-                onPress={() => confirmDelete(item.id, item.role, item.serverUrl != null)}
-              />
-            </View>
-          )}
-        />
-      )}
+        <SectionHeader title="Mes tables" />
+        {loading ? (
+          <View testID="campaigns-loading" style={styles.loading}>
+            <ActivityIndicator />
+          </View>
+        ) : campaigns.length === 0 ? (
+          <View
+            testID="campaigns-empty"
+            style={[
+              styles.list,
+              styles.empty,
+              {
+                backgroundColor: theme.prophecy.surfaceContainerLow,
+                borderColor: theme.prophecy.border,
+              },
+            ]}>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+              Aucune table pour l’instant.
+            </Text>
+          </View>
+        ) : (
+          <View
+            style={[
+              styles.list,
+              {
+                backgroundColor: theme.prophecy.surfaceContainerLow,
+                borderColor: theme.prophecy.border,
+              },
+            ]}>
+            {campaigns.map((c, i) => (
+              <React.Fragment key={c.id}>
+                {i > 0 ? (
+                  <View style={[styles.divider, { backgroundColor: theme.prophecy.borderSoft }]} />
+                ) : null}
+                <TableRow
+                  campaign={c}
+                  summary={summaryOf(c)}
+                  onPress={() => router.push(`/campaigns/${c.id}` as Href)}
+                  onLongPress={() => confirmDelete(c.id, c.role, c.serverUrl != null)}
+                />
+              </React.Fragment>
+            ))}
+          </View>
+        )}
+
+        {/* The consent notice (GM included) now lives on the privacy page; the
+            join dialog repeats a short version, since a QR/deep-link join opens
+            straight onto it. */}
+        <ShareNotice onRead={() => router.push('/privacy')} />
+      </ScrollView>
 
       <DsDialog
         visible={dialog !== null}
@@ -289,48 +294,18 @@ export default function CampaignsScreen() {
         }}
       />
 
-      <AppFab
-        icon="qrcode-scan"
-        testID="fab-scan-qr"
-        onPress={() => setScanning(true)}
-        offset={72}
-      />
-      <AppFab
-        icon={dsIcon('plus')}
-        label="Créer"
-        testID="fab-new-table"
-        onPress={() => openDialog('create')}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  actions: { flexDirection: 'row', gap: 8, padding: 16, flexWrap: 'wrap' },
-  disclaimer: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  // Clears the stacked FABs (scan sits above "Créer") so the last campaign row
-  // stays tappable.
-  listContent: { paddingHorizontal: 16, paddingBottom: 160 },
-  separator: { height: 8 },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  item: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth },
-  // The row and its delete button sit side by side; the row takes the space so
-  // tapping anywhere but the button still opens the campaign.
-  itemRow: { flexDirection: 'row', alignItems: 'center', paddingRight: 4 },
-  itemMain: { flex: 1, minWidth: 0 },
-  empty: {
-    margin: 16,
-    padding: 24,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    alignItems: 'center',
-    gap: 4,
-  },
+  content: { padding: 16, gap: 16, paddingBottom: 32 },
+  // `compact` on each: Paper's 24dp label margins truncate two buttons side by
+  // side on a phone.
+  half: { flex: 1 },
+  loading: { padding: 24, alignItems: 'center' },
+  list: { borderRadius: 18, borderWidth: 1, overflow: 'hidden' },
+  divider: { height: 1, marginHorizontal: 16 },
+  empty: { padding: 16 },
 });
