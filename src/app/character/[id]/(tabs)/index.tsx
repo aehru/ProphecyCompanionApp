@@ -176,6 +176,7 @@ export default function CharacterDashboardScreen() {
         <StatutTechniquesSection caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
         <PrivilegesSection characterId={numId} caste={char.caste} darkOrders={char.darkOrders} />
         <FavorsSection
+          characterId={numId}
           dragon={char.chosenBy}
           bond={char.bond}
           vars={{ tendance: (k) => rec[k] ?? 0, carac: (k) => rec[k] ?? 0 }}

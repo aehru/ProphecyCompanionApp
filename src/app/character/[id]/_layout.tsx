@@ -120,6 +120,13 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
+        name="favor/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Faveurs',
+        }}
+      />
+      <Stack.Screen
         name="xp"
         options={{
           presentation: 'modal',

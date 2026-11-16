@@ -46,6 +46,7 @@ import m0041 from './0041_wild_lockheed.sql';
 import m0042 from './0042_noisy_kronos.sql';
 import m0043 from './0043_greedy_shard.sql';
 import m0044 from './0044_cute_sue_storm.sql';
+import m0045 from './0045_stiff_maggott.sql';
 
   export default {
     journal,
@@ -94,7 +95,8 @@ m0040,
 m0041,
 m0042,
 m0043,
-m0044
+m0044,
+m0045
     }
   }
   

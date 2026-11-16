@@ -399,11 +399,51 @@ const characterBundleSchema = z.object({
   xpAwards: z.array(xpAwardSchema).default([]),
 });
 
+/**
+ * « Maison » catalogue entries the bundles' stars point at. Device-wide rows,
+ * so they ride ONCE at the envelope level rather than in each bundle, and keep
+ * their uuid `id`: a star's `presetId` is that id, and it must still resolve on
+ * the far side. OPTIONAL with a `[]` default, like `traits` — older files carry
+ * none. Enum-ish columns stay loose strings for the reason `favoriteSchema`
+ * gives: a value a later app knows must not make this one reject the file.
+ */
+const customManoeuvreSchema = z.object({
+  id: str,
+  context: str,
+  family: str,
+  name: str,
+  difficulty: str,
+  dodge: str,
+  parry: str,
+  damage: str,
+  roll: str,
+  inGameEffect: str,
+  description: str,
+  presetId: str.nullable().optional(),
+});
+
+const customFavorSchema = z.object({
+  id: str,
+  dragon: str,
+  level: int,
+  name: str,
+  description: str,
+  inGameEffect: str,
+  roll: str,
+  difficulty: int.nullable(),
+  usages: str,
+  duration: str,
+  durationUnit: str.nullable(),
+  presetId: str.nullable().optional(),
+});
+
 const exportSchema = z.object({
   format: z.literal(EXPORT_FORMAT),
   schemaVersion: z.literal(SCHEMA_VERSION),
   exportedAt: str,
   characters: z.array(characterBundleSchema),
+  customManoeuvres: z.array(customManoeuvreSchema).default([]),
+  customFavors: z.array(customFavorSchema).default([]),
 });
 
 export type CharacterBundle = z.infer<typeof characterBundleSchema>;
@@ -418,6 +458,8 @@ export const ARMOR_FIELDS = Object.keys(armorSchema.shape);
 export const WEAPON_FIELDS = Object.keys(weaponSchema.shape);
 export const SHIELD_FIELDS = Object.keys(shieldSchema.shape);
 export const FAVORITE_FIELDS = Object.keys(favoriteSchema.shape);
+export const CUSTOM_MANOEUVRE_FIELDS = Object.keys(customManoeuvreSchema.shape);
+export const CUSTOM_FAVOR_FIELDS = Object.keys(customFavorSchema.shape);
 export const XP_AWARD_FIELDS = Object.keys(xpAwardSchema.shape);
 /**
  * Export side: an enchant's live row ids → the positions a file carries.
@@ -492,12 +534,17 @@ export type ImportResult =
 export function buildExport(
   characters: CharacterBundle[],
   now: Date = new Date(),
+  house: Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'> = {
+    customManoeuvres: [],
+    customFavors: [],
+  },
 ): ProphecyExport {
   return {
     format: EXPORT_FORMAT,
     schemaVersion: SCHEMA_VERSION,
     exportedAt: now.toISOString(),
     characters,
+    ...house,
   };
 }
 
@@ -581,16 +628,35 @@ export type ExportIntent = 'backup' | 'share';
  * file) is already share-shaped and passes through.
  */
 export function forSharing(exp: ProphecyExport): ProphecyExport {
+  const characters = exp.characters.map((b) => {
+    const { uuid: _uuid, ...character } = b.character as { uuid?: string };
+    // The shopping list goes with the uuid. A sauvegarde is the only backup
+    // there is, so it keeps them; a partage hands someone a character to
+    // play, and what its previous owner was planning to buy is a note to
+    // themselves, not part of the sheet. A `favor` star is the exception: it
+    // is how an Élu HOLDS a « Maison » Faveur, so it IS part of the sheet.
+    const favorites = b.favorites.filter((f) => f.kind === 'favor');
+    return { ...b, character, favorites } as CharacterBundle;
+  });
+  return { ...exp, characters, ...referencedHouse(characters, exp) };
+}
+
+/**
+ * Narrow the envelope's house entries to the ones a remaining star points at —
+ * what is left after `forSharing` dropped the shopping lists. Exported for the
+ * repository, which fetches exactly these and nothing more.
+ */
+export function referencedHouse(
+  characters: readonly CharacterBundle[],
+  house: Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'>,
+): Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'> {
+  const starred = (kind: string) =>
+    new Set(characters.flatMap((b) => b.favorites.filter((f) => f.kind === kind).map((f) => f.presetId)));
+  const manoeuvres = starred('manoeuvre');
+  const favors = starred('favor');
   return {
-    ...exp,
-    characters: exp.characters.map((b) => {
-      const { uuid: _uuid, ...character } = b.character as { uuid?: string };
-      // The shopping list goes with the uuid. A sauvegarde is the only backup
-      // there is, so it keeps them; a partage hands someone a character to
-      // play, and what its previous owner was planning to buy is a note to
-      // themselves, not part of the sheet.
-      return { ...b, character, favorites: [] as CharacterBundle['favorites'] } as CharacterBundle;
-    }),
+    customManoeuvres: house.customManoeuvres.filter((m) => manoeuvres.has(m.id)),
+    customFavors: house.customFavors.filter((f) => favors.has(f.id)),
   };
 }
 

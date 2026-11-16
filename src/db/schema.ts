@@ -929,7 +929,9 @@ export const gmNotes = sqliteTable('gm_notes', {
 /** The catalogues a favourite can point into — one per `*-catalog-list`. */
 // `manoeuvre` has no owned table at all: starring is the only way a character
 // keeps one (the catalogue is reference — see ManoeuvrePreset).
-export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait', 'manoeuvre'] as const;
+// `favor` stars only « Maison » Faveurs: a rulebook one is granted by the Lien
+// alone, while a house one is held by the Élus who opted into it.
+export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait', 'manoeuvre', 'favor'] as const;
 export type CatalogKind = (typeof CATALOG_KINDS)[number];
 
 /**
@@ -1007,6 +1009,35 @@ export const customManoeuvres = sqliteTable('custom_manoeuvres', {
     .$defaultFn(() => new Date()),
 });
 
+/**
+ * Faveurs a GM invented for an Élu — the catalogue's « Maison » entries, same
+ * contract as `custom_manoeuvres`: DEVICE-WIDE (no `character_id`), uuid id. An
+ * entry is held by the Élus who STARRED it (`favorites`, kind `favor`), at its
+ * `level` once their Lien reaches it, NEXT TO the rulebook Faveur of that level.
+ *
+ * `roll` is the caractéristique + attribut/compétence as prose (« Mental +
+ * Volonté »), `difficulty` the number; `duration` is a `lib/formula` stored as
+ * typed — a refused one is printed verbatim. `preset_id` is the `dragon-niveau`
+ * of the rulebook Faveur a variant was copied from (provenance only).
+ */
+export const customFavors = sqliteTable('custom_favors', {
+  id: text('id').primaryKey().$defaultFn(() => newUuid()),
+  dragon: text('dragon').$type<GreatDragonKey>().notNull(),
+  level: integer('level').notNull().default(1),
+  name: text('name').notNull().default(''),
+  description: text('description').notNull().default(''),
+  inGameEffect: text('in_game_effect').notNull().default(''),
+  roll: text('roll').notNull().default(''),
+  difficulty: integer('difficulty'),
+  usages: text('usages').notNull().default(''),
+  duration: text('duration').notNull().default(''),
+  durationUnit: text('duration_unit'),
+  presetId: text('preset_id'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -1043,3 +1074,5 @@ export type Favorite = typeof favorites.$inferSelect;
 export type NewFavorite = typeof favorites.$inferInsert;
 export type CustomManoeuvre = typeof customManoeuvres.$inferSelect;
 export type NewCustomManoeuvre = typeof customManoeuvres.$inferInsert;
+export type CustomFavor = typeof customFavors.$inferSelect;
+export type NewCustomFavor = typeof customFavors.$inferInsert;

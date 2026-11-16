@@ -30,6 +30,7 @@ export default function CasteCatalogList<K extends string = CasteKey>({
   emptyLabel,
   renderCaste,
   sections = CASTES as unknown as readonly { key: K; label: string }[],
+  fabClearance = false,
 }: {
   icon: IconName;
   /** Shown in a caste's section when `renderCaste` gives nothing back. */
@@ -37,6 +38,8 @@ export default function CasteCatalogList<K extends string = CasteKey>({
   renderCaste: (caste: K) => React.ReactNode | null;
   /** The sections, in order — the castes by default; the Faveurs pass the dragons. */
   sections?: readonly { key: K; label: string }[];
+  /** Room under the last section for a FAB the screen floats over the list. */
+  fabClearance?: boolean;
 }) {
   const theme = useProphecyTheme();
   const { isOpen, toggle } = useFolds();
@@ -47,7 +50,7 @@ export default function CasteCatalogList<K extends string = CasteKey>({
       <ScrollView
         ref={scrollRef}
         onScroll={onScroll}
-        contentContainerStyle={[styles.container, contentWidth]}>
+        contentContainerStyle={[styles.container, fabClearance && styles.fabClearance, contentWidth]}>
         {sections.map((c) => {
           const open = isOpen(c.key);
           // A folded caste renders nothing, so its rows are not even built.
@@ -84,5 +87,6 @@ export function CatalogFamilyHeading({ label }: { label: string }) {
 const styles = StyleSheet.create({
   family: { fontSize: 11, letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 4 },
   container: { padding: 16, gap: 16, paddingBottom: 48 },
+  fabClearance: { paddingBottom: 96 },
   empty: { fontStyle: 'italic', fontSize: 13 },
 });
