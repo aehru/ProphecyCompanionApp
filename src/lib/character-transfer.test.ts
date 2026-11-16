@@ -672,6 +672,35 @@ describe('forSharing', () => {
     expect(exp.characters[0].favorites.length).toBeGreaterThan(0);
   });
 
+  it('keeps an Élu’s « Maison » Faveur, and only the house entries still starred', () => {
+    const house = {
+      customManoeuvres: [
+        { id: 'm1', context: 'melee', family: 'manoeuvre', name: 'Coup', difficulty: '', dodge: '',
+          parry: '', damage: '', roll: '', inGameEffect: '', description: 'x', presetId: null },
+      ],
+      customFavors: [
+        { id: 'f1', dragon: 'brorne', level: 2, name: 'Don', description: 'x', inGameEffect: '',
+          roll: '', difficulty: null, usages: '', duration: '', durationUnit: null, presetId: null },
+      ],
+    };
+    const exp = buildExport(
+      [makeBundle({ favorites: [{ kind: 'manoeuvre', presetId: 'm1' }, { kind: 'favor', presetId: 'f1' }] })],
+      undefined,
+      house,
+    );
+    const shared = forSharing(exp);
+    // The gift is part of the sheet; the manœuvre star was a shopping list.
+    expect(shared.characters[0].favorites).toEqual([{ kind: 'favor', presetId: 'f1' }]);
+    expect(shared.customFavors.map((f) => f.id)).toEqual(['f1']);
+    expect(shared.customManoeuvres).toEqual([]);
+    // An older file with no house arrays still parses.
+    const legacy = { ...exp } as Record<string, unknown>;
+    delete legacy.customFavors;
+    delete legacy.customManoeuvres;
+    const r = parseImport(JSON.stringify(legacy));
+    expect(r.ok && r.data.customFavors).toEqual([]);
+  });
+
   it('leaves an already anonymous export alone', () => {
     const exp = buildExport([makeBundle({ favorites: [] })]);
     expect(forSharing(exp)).toEqual(exp);

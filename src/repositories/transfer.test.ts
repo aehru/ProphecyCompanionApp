@@ -45,6 +45,8 @@ const { createSpell } = await import('@/repositories/spells');
 const { createEnchant } = await import('@/repositories/enchants');
 const { createTrait } = await import('@/repositories/traits');
 const { setFavorite } = await import('@/repositories/favorites');
+const { createCustomFavor, updateCustomFavor } = await import('@/repositories/custom-favors');
+const { createCustomManoeuvre } = await import('@/repositories/custom-manoeuvres');
 const { endScenario, startScenario } = await import('@/repositories/xp-awards');
 const { parseImport, serializeExport } = await import('@/lib/character-transfer');
 const { exportCharacters, importCharacters } = await import('@/repositories/transfer');
@@ -347,5 +349,53 @@ describe('export → import round trip', () => {
       )
       .all(ids[0]);
     expect(bound).toEqual([{ name: 'Dague' }]);
+  });
+});
+
+describe('« Maison » entries', () => {
+  const houseNames = () => ({
+    favors: harness.raw.prepare('SELECT id, name FROM custom_favors').all(),
+    manoeuvres: harness.raw.prepare('SELECT id, name FROM custom_manoeuvres').all(),
+  });
+
+  it('travel with the stars that point at them, keeping their uuid', async () => {
+    const c = await createCharacter({ nom: 'Élu', chosenBy: 'brorne', bond: 2 });
+    const gift = await createCustomFavor({ dragon: 'brorne', level: 2, name: 'Don' });
+    const move = await createCustomManoeuvre({ name: 'Coup de tête', description: 'x' });
+    await createCustomFavor({ dragon: 'khy', name: 'Pas étoilé' });
+    await setFavorite(c.id, 'favor', gift.id, true);
+    await setFavorite(c.id, 'manoeuvre', move.id, true);
+
+    const json = serializeExport(await exportCharacters([c.id]));
+    const parsed = parseImport(json);
+    if (!parsed.ok) throw new Error('parse failed');
+    // Only what a star points at leaves the device.
+    expect(parsed.data.customFavors.map((f) => f.name)).toEqual(['Don']);
+
+    harness.close();
+    harness = createTestDb();
+    await importCharacters(parsed.data, 'restore');
+
+    expect(houseNames()).toEqual({
+      favors: [{ id: gift.id, name: 'Don' }],
+      manoeuvres: [{ id: move.id, name: 'Coup de tête' }],
+    });
+    const stars = harness.raw.prepare('SELECT kind, preset_id FROM favorites ORDER BY kind').all();
+    expect(stars).toEqual([
+      { kind: 'favor', preset_id: gift.id },
+      { kind: 'manoeuvre', preset_id: move.id },
+    ]);
+  });
+
+  it('never overwrite the copy this device already holds', async () => {
+    const c = await createCharacter({ nom: 'Élu' });
+    const gift = await createCustomFavor({ dragon: 'brorne', name: 'Don' });
+    await setFavorite(c.id, 'favor', gift.id, true);
+    const exp = await exportCharacters([c.id]);
+
+    await updateCustomFavor(gift.id, { name: 'Don révisé' });
+    await importCharacters(exp, 'copy');
+
+    expect(houseNames().favors).toEqual([{ id: gift.id, name: 'Don révisé' }]);
   });
 });

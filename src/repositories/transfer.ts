@@ -5,6 +5,8 @@ import {
   actualState,
   armor,
   characters,
+  customFavors,
+  customManoeuvres,
   effects,
   enchants,
   items,
@@ -21,6 +23,8 @@ import {
   type NewActualState,
   type NewArmor,
   type NewCharacter,
+  type NewCustomFavor,
+  type NewCustomManoeuvre,
   type NewEffect,
   type NewEnchant,
   type NewItem,
@@ -43,6 +47,8 @@ import {
   EFFECT_FIELDS,
   ENCHANT_FIELDS,
   type ExportIntent,
+  CUSTOM_FAVOR_FIELDS,
+  CUSTOM_MANOEUVRE_FIELDS,
   forSharing,
   type ImportMode,
   ITEM_FIELDS,
@@ -51,6 +57,7 @@ import {
   planImport,
   planMagicReserves,
   type ProphecyExport,
+  referencedHouse,
   resolveEnchantLinks,
   SHIELD_FIELDS,
   SKILL_FIELDS,
@@ -245,8 +252,25 @@ export async function exportCharacters(
     } as CharacterBundle);
   }
 
+  // The « Maison » entries those stars point at — device-wide rows, fetched
+  // once for the whole envelope (see `customManoeuvreSchema`).
+  const starredIds = (kind: string) =>
+    favoriteRows.filter((f) => f.kind === kind).map((f) => f.presetId);
+  const [manoeuvreIds, favorIds] = [starredIds('manoeuvre'), starredIds('favor')];
+  const [houseManoeuvres, houseFavors] = await Promise.all([
+    manoeuvreIds.length
+      ? db.select().from(customManoeuvres).where(inArray(customManoeuvres.id, manoeuvreIds))
+      : [],
+    favorIds.length
+      ? db.select().from(customFavors).where(inArray(customFavors.id, favorIds))
+      : [],
+  ]);
+
   logWrite('characters', 'update', { count: bundles.length, phase: 'export', mode: intent });
-  const exp = buildExport(bundles);
+  const exp = buildExport(bundles, undefined, referencedHouse(bundles, {
+    customManoeuvres: houseManoeuvres.map((r) => pick(r, CUSTOM_MANOEUVRE_FIELDS)),
+    customFavors: houseFavors.map((r) => pick(r, CUSTOM_FAVOR_FIELDS)),
+  } as Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'>));
   return intent === 'share' ? forSharing(exp) : exp;
 }
 
@@ -290,6 +314,23 @@ export async function importCharacters(
         .map((r) => r.uuid)
         .filter((u): u is string => u != null),
     );
+
+    // « Maison » entries first, keeping their uuid so the stars below resolve.
+    // A uuid this device already holds is LEFT AS IS: the entry is device-wide
+    // and may have been edited here since — the local copy wins, no merge.
+    const houseNow = new Date();
+    for (const m of data.customManoeuvres ?? []) {
+      await tx
+        .insert(customManoeuvres)
+        .values({ ...m, createdAt: houseNow } as NewCustomManoeuvre)
+        .onConflictDoNothing();
+    }
+    for (const f of data.customFavors ?? []) {
+      await tx
+        .insert(customFavors)
+        .values({ ...f, createdAt: houseNow } as NewCustomFavor)
+        .onConflictDoNothing();
+    }
 
     for (const b of data.characters) {
       const now = new Date();
@@ -397,7 +438,7 @@ export async function importCharacters(
         await syncItemBonus(item, tx);
       }
       // No link to resolve: a favourite carries a rulebook slug, which means the
-      // same thing on every device.
+      // same thing on every device — or a house entry's uuid, written above.
       const favoriteRows = b.favorites ?? [];
       if (favoriteRows.length) {
         await tx.insert(favorites).values(link(favoriteRows) as NewFavorite[]);
