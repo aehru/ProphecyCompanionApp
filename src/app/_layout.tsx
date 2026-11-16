@@ -155,6 +155,10 @@ function ThemedRoot() {
                       name="manoeuvre/[mid]"
                       options={{ title: 'Manœuvre maison', presentation: 'modal' }}
                     />
+                    <Stack.Screen
+                      name="favor/[fid]"
+                      options={{ title: 'Faveur maison', presentation: 'modal' }}
+                    />
                     {/* No dice on the settings screens: nothing there is played. */}
                     <Stack.Screen
                       name="diagnostics"
