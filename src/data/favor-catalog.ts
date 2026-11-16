@@ -33,6 +33,11 @@ export type FavorPreset = {
   duration?: string;
   /** A `TIME_UNITS` key, present exactly when `duration` is. */
   durationUnit?: string;
+  /** « Maison » entries only (`custom_favors`): the uuid a star points at. */
+  id?: string;
+  custom?: true;
+  /** A house entry's jet as typed (« Mental + Volonté »), in place of `roll`. */
+  customRoll?: { text: string; difficulty?: number };
 };
 
 export { FAVOR_CATALOG_DATA as FAVOR_CATALOG } from './favor-catalog.gen';
