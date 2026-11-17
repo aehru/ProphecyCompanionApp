@@ -150,6 +150,15 @@ function ThemedRoot() {
                       name="character/new"
                       options={{ title: 'Nouveau personnage', presentation: 'modal' }}
                     />
+                    <Stack.Screen
+                      name="character/new-full"
+                      options={{ title: 'Fiche complète', presentation: 'modal' }}
+                    />
+                    {/* The guided wizard draws its own header (step, progress, ✕). */}
+                    <Stack.Screen
+                      name="character/create"
+                      options={{ headerShown: false, presentation: 'modal' }}
+                    />
                     {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
                     <Stack.Screen name="character/[id]" options={{ headerShown: false }} />
                     {/* campaigns/[id] is a nested Stack (Salon / Compagnie) that draws its own headers. */}
