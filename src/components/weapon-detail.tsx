@@ -96,7 +96,7 @@ export default function WeaponDetail({
 
       <DetailRow
         label="Initiative"
-        value={`Mêlée ${fmtSigned(w.initMelee ?? 0)} · CàC ${fmtSigned(w.initCorpsACorps ?? 0)}`}
+        value={`Mêlée ${fmtSignedMod(w.initMelee ?? 0)} · CàC ${fmtSignedMod(w.initCorpsACorps ?? 0)}`}
       />
 
       <DetailRow
@@ -211,7 +211,4 @@ function SkillRow({ skill }: { skill: WeaponSkillReading }) {
   );
 }
 
-export function fmtSigned(n: number) {
-  return n > 0 ? `+${n}` : String(n);
-}
 

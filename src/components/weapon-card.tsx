@@ -9,7 +9,8 @@ import {
   type CaracValue,
 } from '@/components/gear-detail-rows';
 import Icon from '@/components/ui/icon';
-import WeaponDetail, { fmtSigned } from '@/components/weapon-detail';
+import WeaponDetail from '@/components/weapon-detail';
+import { fmtSignedMod } from '@/lib/modifiers';
 import type { Weapon } from '@/db/schema';
 import TotalBadge from '@/components/ui/total-badge';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -108,7 +109,7 @@ function WeaponSummary({
   const dmg = formulaResult(w.damage, { carac: caracValue, caracModifier });
   const subtitle = [
     w.damage.trim() !== '' ? `Dégâts ${dmg ?? w.damage.trim()}` : null,
-    `Init ${fmtSigned(w.initMelee)}/${fmtSigned(w.initCorpsACorps)}`,
+    `Init ${fmtSignedMod(w.initMelee)}/${fmtSignedMod(w.initCorpsACorps)}`,
   ]
     .filter(Boolean)
     .join(' · ');
