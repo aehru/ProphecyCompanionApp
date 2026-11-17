@@ -9,6 +9,7 @@ import { useKeepAwakePref } from '@/hooks/use-keep-awake';
 import { useLastBackup } from '@/hooks/use-last-backup';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { useTips } from '@/hooks/use-tips';
 import { Alert } from '@/lib/alert';
 import { backupAge } from '@/lib/backup-age';
 import { shareExport } from '@/lib/character-transfer-io';
@@ -28,6 +29,7 @@ export default function MoreScreen() {
   const [backingUp, setBackingUp] = useState(false);
   const busy = importing || backingUp;
   const { keepAwake, setKeepAwake } = useKeepAwakePref();
+  const tips = useTips();
 
   const handleBackup = async () => {
     setBackingUp(true);
@@ -95,6 +97,15 @@ export default function MoreScreen() {
 
       <SectionCard title="Aide" icon="compass">
         <NavGroup>
+          <NavRow
+            icon="lightbulb-on-outline"
+            title="Revoir les astuces"
+            description="Réaffiche les conseils de prise en main"
+            onPress={() => {
+              tips.reset();
+              Alert.alert('Astuces', 'Les astuces s’afficheront de nouveau sur chaque écran.');
+            }}
+          />
           <NavRow
             icon="clipboard-text-clock-outline"
             title="Diagnostic"

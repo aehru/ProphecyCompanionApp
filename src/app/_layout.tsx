@@ -30,6 +30,7 @@ import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
 import { AppDragonProvider, useAppDragon } from '@/hooks/use-app-dragon';
 import { KeepAwakeProvider } from '@/hooks/use-keep-awake';
+import { TipsProvider } from '@/hooks/use-tips';
 import { DragonAccents } from '@/theme/dragonsTheme';
 import {
   navigationTheme,
@@ -77,9 +78,11 @@ export default function RootLayout() {
   return (
     <AppDragonProvider>
       <KeepAwakeProvider>
-        <WebSafeAreaInsets>
-          <ThemedRoot />
-        </WebSafeAreaInsets>
+        <TipsProvider>
+          <WebSafeAreaInsets>
+            <ThemedRoot />
+          </WebSafeAreaInsets>
+        </TipsProvider>
       </KeepAwakeProvider>
     </AppDragonProvider>
   );
