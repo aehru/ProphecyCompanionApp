@@ -17,15 +17,16 @@ const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
 export function useCharacterImport() {
   const [busy, setBusy] = useState(false);
 
-  const runImport = useCallback(async () => {
+  /** Resolves true once something was imported (false on cancel / error). */
+  const runImport = useCallback(async (): Promise<boolean> => {
     setBusy(true);
     try {
       const raw = await pickImportText();
-      if (raw == null) return; // cancelled
+      if (raw == null) return false; // cancelled
       const parsed = parseImport(raw);
       if (!parsed.ok) {
         Alert.alert('Import impossible', parsed.error);
-        return;
+        return false;
       }
       const { ids, restored } = await importCharacters(parsed.data, 'restore');
       const added = ids.length - restored;
@@ -36,8 +37,10 @@ export function useCharacterImport() {
       if (added > 0) parts.push(`${plural(added, 'personnage')} ajouté${added > 1 ? 's' : ''}`);
       const detail = restored > 0 ? '\n\nUne restauration remplace la fiche déjà présente.' : '';
       Alert.alert('Import réussi', `${parts.join(', ')}.${detail}`);
+      return true;
     } catch (e) {
       Alert.alert('Import impossible', e instanceof Error ? e.message : String(e));
+      return false;
     } finally {
       setBusy(false);
     }

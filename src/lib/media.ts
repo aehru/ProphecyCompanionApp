@@ -44,6 +44,16 @@ export function mediaUri(relativePath?: string | null): string | null {
  * Returns null if the user cancels or denies the permission.
  */
 export async function pickCharacterMedia(id: number, slot: MediaSlot): Promise<string | null> {
+  const uri = await pickImage(slot);
+  return uri ? storeCharacterMedia(id, slot, uri) : null;
+}
+
+/**
+ * The picker half alone: a cropped image's temporary uri, or null on cancel /
+ * denied permission. For the creation wizard, which has no character id to
+ * store under until « Créer ».
+ */
+export async function pickImage(slot: MediaSlot): Promise<string | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) {
     Alert.alert('Permission requise', "Autorisez l'accès aux photos pour ajouter une image.");
@@ -57,14 +67,16 @@ export async function pickCharacterMedia(id: number, slot: MediaSlot): Promise<s
     quality: 0.8,
   });
   if (result.canceled || !result.assets?.[0]) return null;
+  return result.assets[0].uri;
+}
 
-  const asset = result.assets[0];
-  const ext = (asset.uri.split('.').pop() || 'jpg').split('?')[0].toLowerCase();
+/** Copy a picked image into the character's media folder; returns its relative path. */
+export function storeCharacterMedia(id: number, slot: MediaSlot, uri: string): string {
+  const ext = (uri.split('.').pop() || 'jpg').split('?')[0].toLowerCase();
   const dir = characterDir(id);
   dir.create({ intermediates: true, idempotent: true });
   const dest = new File(dir, `${slot}-${Date.now()}.${ext}`);
-  new File(asset.uri).copy(dest);
-
+  new File(uri).copy(dest);
   return [...MEDIA_ROOT, String(id), dest.name].join('/');
 }
 
