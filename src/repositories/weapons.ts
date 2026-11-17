@@ -2,6 +2,7 @@ import { and, asc, eq, inArray } from 'drizzle-orm';
 
 import { db, transaction } from '@/db/client';
 import { type EquippedHand, type NewWeapon, weapons } from '@/db/schema';
+import { deleteGearEffects } from '@/repositories/effects';
 import { deleteEnchantsFor } from '@/repositories/enchants';
 import { logWrite } from '@/repositories/log';
 
@@ -39,6 +40,7 @@ export async function deleteWeapon(id: number) {
   // cascade through, so it has to share the row's transaction.
   await transaction(async (tx) => {
     await deleteEnchantsFor('weapon', id, tx);
+    await deleteGearEffects('weapon', id, tx);
     await tx.delete(weapons).where(eq(weapons.id, id));
   });
   logWrite('weapons', 'delete', { weaponId: id });

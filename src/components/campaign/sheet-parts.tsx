@@ -7,15 +7,12 @@ import { StyleSheet, View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 
 import { TendanceRing } from '@/components/campaign/stat-tiles';
+import InitiativeDieChip from '@/components/initiative-die-chip';
 import { asDieIcon } from '@/components/ui/die-icons';
-import StatChip from '@/components/ui/stat-chip';
-import {
-  EFFECT_TARGET_LABEL,
-  RESOURCES,
-  TENDANCES,
-  TIME_UNIT_LABEL,
-} from '@/constants/prophecy';
+import type { DieUsage } from '@/lib/action-cumul';
+import { RESOURCES, TENDANCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { effectDurationLabel, effectTargetLabel, effectValueLabel } from '@/lib/modifiers';
 import type { NumRecord, PoolRecord, SharedEffectView } from '@/lib/shared-character-view';
 
 /** Maîtrise / Chance pools, read-only (the editor covers them when editing). */
@@ -83,8 +80,8 @@ export function EffectsList({ effects }: { effects: SharedEffectView[] }) {
     <View style={styles.effectList}>
       {effects.map((e, i) => {
         const v = e.value ?? 0;
-        const target = EFFECT_TARGET_LABEL[e.target ?? 'all'] ?? e.target ?? 'Tous les jets';
-        const unit = TIME_UNIT_LABEL[e.durationUnit ?? 'round'] ?? e.durationUnit ?? '';
+        // Through the shared helper: a skill target reads « Épée », not « skill:Épée ».
+        const target = effectTargetLabel(e.target ?? 'all');
         return (
           <View key={`${e.label}-${i}`} style={styles.effectRow}>
             <Text style={{ flex: 1, color: theme.colors.onSurface }} numberOfLines={1}>
@@ -95,12 +92,12 @@ export function EffectsList({ effects }: { effects: SharedEffectView[] }) {
                 fontFamily: 'Cinzel_600SemiBold',
                 color: v < 0 ? theme.colors.error : theme.colors.primary,
               }}>
-              {v > 0 ? `+${v}` : v}
+              {effectValueLabel(e.target, v)}
             </Text>
             <Text
               variant="bodySmall"
               style={[styles.effectDuration, { color: theme.colors.onSurfaceVariant }]}>
-              {e.durationUnit === 'permanent' ? unit : `${e.durationRemaining ?? 0} ${unit}`}
+              {effectDurationLabel(e)}
             </Text>
           </View>
         );
@@ -123,11 +120,14 @@ export function InitiativeChips({
   max,
   wound,
   icons = [],
+  usage = [],
 }: {
   values: number[];
   max: number;
   wound: number;
   icons?: string[];
+  /** What each die was spent on — greyed and labelled like the Fiche's. */
+  usage?: DieUsage[];
 }) {
   const theme = useProphecyTheme();
   if (values.length === 0) {
@@ -140,17 +140,13 @@ export function InitiativeChips({
   return (
     <View style={styles.grid}>
       {values.map((val, i) => (
-        <StatChip
+        <InitiativeDieChip
           key={i}
-          label={`Dé ${i + 1}`}
-          value={String(val)}
-          modifier={wound}
+          index={i}
+          value={val}
+          wound={wound}
           icon={asDieIcon(icons[i])}
-          style={
-            val > 0 && val + wound <= 0
-              ? { borderColor: theme.colors.error, borderWidth: 1.5 }
-              : undefined
-          }
+          spent={usage[i] ?? null}
         />
       ))}
     </View>

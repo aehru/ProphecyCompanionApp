@@ -92,6 +92,20 @@ export default function CharacterLayout() {
         }}
       />
       <Stack.Screen
+        name="privilege/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Privilèges',
+        }}
+      />
+      <Stack.Screen
+        name="privilege/[pid]"
+        options={{
+          presentation: 'modal',
+          title: 'Détail du privilège',
+        }}
+      />
+      <Stack.Screen
         name="enchant/[eid]"
         options={{
           presentation: 'modal',
@@ -103,6 +117,13 @@ export default function CharacterLayout() {
         options={{
           presentation: 'modal',
           title: 'Manœuvres de combat',
+        }}
+      />
+      <Stack.Screen
+        name="favor/catalog"
+        options={{
+          presentation: 'modal',
+          title: 'Faveurs',
         }}
       />
       <Stack.Screen

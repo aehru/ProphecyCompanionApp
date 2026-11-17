@@ -13,9 +13,8 @@ import { traitCostLabel } from '@/lib/trait-pool';
  * The Privilèges, read outside any character — one section per caste, the
  * rulebook's two headings inside each.
  *
- * Browse only, on the shared `<CasteCatalogList>` shell: a privilège cannot be
- * taken yet (it is paid for out of a budget the sheet does not model), so there
- * is nothing to pick INTO.
+ * Browse only, on the shared `<CasteCatalogList>` shell. A character picks from
+ * their own caste in `character/[id]/privilege/catalog`.
  */
 export default function PrivilegeCatalogList() {
   const theme = useProphecyTheme();

@@ -85,7 +85,7 @@ function StatsBody({ character }: { character: SharedCharacter }) {
   // Wounds and 'all' effects hit every roll, so they are read once above the
   // tiles — a roll adds an attribut to a caractéristique and would show them
   // twice. Each tile badges only the effects aimed at that stat.
-  const global = globalModifier(effects, woundOf(character.wounds));
+  const global = globalModifier(effects, woundOf(character.wounds, character.effects));
   const modOf = (key: string) => statModifier(key, effects);
   // Rolled straight off the projection — the GM does not have to open the sheet
   // to ask for a VOL test, and a player's card rolls the same as a PNJ's: a roll
@@ -150,7 +150,7 @@ function SkillsBody({ character, query }: { character: SharedCharacter; query: s
   const effects = useMemo(() => effectsOf(character.effects), [character.effects]);
   const attr = nums(character.attributs);
   // The wound malus applies to skill rolls too — the TOT column is a roll base.
-  const wound = woundOf(character.wounds);
+  const wound = woundOf(character.wounds, character.effects);
   const groups = useMemo(
     () => groupSkills(skills, attr, attrColors, query, effects, wound),
     [skills, attr, attrColors, query, effects, wound],

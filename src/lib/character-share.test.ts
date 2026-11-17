@@ -29,6 +29,7 @@ function makeState(over: Record<string, unknown> = {}): ActualState {
     conditions: '',
     notes: '',
     initiativeValues: [],
+    initiativeUsage: [],
     dracFer: 0,
     dracBronze: 0,
     dracArgent: 0,
@@ -121,7 +122,7 @@ describe('toSharedCharacter', () => {
       makeCharacter({ initiativeMax: 3 }),
       makeState({ initiativeValues: [12, 7, 4] }),
     );
-    expect(shared.initiative).toEqual({ max: 3, values: [12, 7, 4] });
+    expect(shared.initiative).toEqual({ max: 3, values: [12, 7, 4], usage: [] });
   });
 
   it('ships the EFFECTIVE dice count — temporary dice included, not as a field', () => {
@@ -130,7 +131,7 @@ describe('toSharedCharacter', () => {
       makeState({ initiativeBonusDice: 1, initiativeValues: [9, 5, 2] }),
     );
     // The GM sees three dice, with no way to tell the temporary one apart.
-    expect(shared.initiative).toEqual({ max: 3, values: [9, 5, 2] });
+    expect(shared.initiative).toEqual({ max: 3, values: [9, 5, 2], usage: [] });
     expect(shared.initiative).not.toHaveProperty('bonus');
   });
 
@@ -145,6 +146,15 @@ describe('toSharedCharacter', () => {
   it('passes conditions through', () => {
     const shared = toSharedCharacter(makeCharacter(), makeState({ conditions: 'À terre' }));
     expect(shared.conditions).toBe('À terre');
+  });
+
+  it('ships what each die was spent on, so the GM greys it', () => {
+    const shared = toSharedCharacter(
+      makeCharacter({ initiativeMax: 2 }),
+      makeState({ initiativeValues: [9, 4], initiativeUsage: [{ use: 'atk', at: 9 }, null] }),
+    );
+    expect(shared.initiative.usage).toEqual([{ use: 'atk', at: 9 }, null]);
+    expect(sharedCharacterSchema.safeParse(shared).success).toBe(true);
   });
 
   it('defaults to a well-formed projection for freshly-zeroed rows', () => {
@@ -193,6 +203,15 @@ describe('toSharedCharacter', () => {
         specLabel: 'Curative',
       },
     ]);
+  });
+
+  it('keeps gear off the wire: no weapon bonus, no item name', () => {
+    const shared = toSharedCharacter(makeCharacter(), makeState(), [], [
+      makeEffect({ target: 'weapon:3:hit', value: 2 }),
+      makeEffect({ label: 'Anneau de Kael', target: 'force', value: 1, itemId: 4 }),
+    ]);
+    expect(shared.effects).toHaveLength(1);
+    expect(shared.effects[0]).toMatchObject({ label: '', target: 'force', value: 1 });
   });
 
   it('shares only active (non-expired) effects, full detail', () => {

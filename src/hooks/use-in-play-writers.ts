@@ -1,6 +1,11 @@
 import type { ActualState, Character } from '@/db/schema';
+import { markDie, type DieUse } from '@/lib/action-cumul';
 import { asNumRecord, clamp } from '@/lib/character-values';
-import { initiativeDiceCount, rollInitiativeWithIcons, trimInitiativeSlots } from '@/lib/dice';
+import {
+  initiativeDiceCount,
+  rollInitiative,
+  trimInitiativeSlots,
+} from '@/lib/dice';
 import { updateActualState } from '@/repositories/actual-state';
 import { detachWrite } from '@/repositories/log';
 
@@ -65,12 +70,19 @@ export function useInPlayWriters({
   const count = initiativeDiceCount(max, bonus);
   const values = state?.initiativeValues ?? [];
   const icons = state?.initiativeDiceIcons ?? [];
+  const usage = state?.initiativeUsage ?? [];
 
   const initiative = {
     max,
     bonus,
     values,
     icons,
+    usage,
+    // Spend a die (or free it with null). `at` is what it is worth right now —
+    // the wound malus included — so a later wound can't move it in the order.
+    // The caller passes it: it holds the effects a suspension lives in.
+    onUse: (i: number, use: DieUse | null, at: number) =>
+      persistState({ initiativeUsage: markDie(usage, count, i, use, at) }),
     // Editing one die's value leaves the order alone — only a roll re-sorts.
     onSetDie: (i: number, n: number) =>
       persistState({
@@ -82,19 +94,37 @@ export function useInPlayWriters({
       }),
     // Losing a die also drops its stored roll AND its mark, so granting one back
     // shows an empty slot rather than a stale number under someone else's icon.
+    // Gaining dice once the turn is rolled rolls just those, like natural ones
+    // (see rollInitiative) — the turn's spent dice survive.
     onSetBonus: (n: number) => {
       const next = initiativeDiceCount(max, n);
+      if (next > count && values.some((v) => v > 0)) {
+        const grown = rollInitiative(next, values, icons, usage);
+        persistState({
+          initiativeBonusDice: n,
+          initiativeValues: grown.values,
+          initiativeDiceIcons: grown.icons,
+          initiativeUsage: grown.usage,
+        });
+        return;
+      }
       persistState({
         initiativeBonusDice: n,
         initiativeValues: trimInitiativeSlots(values, next),
         initiativeDiceIcons: trimInitiativeSlots(icons, next),
+        initiativeUsage: trimInitiativeSlots(usage, next),
       });
     },
     // Roll every die in play at once: `count` plain D10, highest-first, each
-    // mark carried along with its own roll.
+    // mark carried along with its own roll. A roll is a new turn, so every die
+    // is unspent again — and the cumul starts over.
     onRoll: () => {
-      const rolled = rollInitiativeWithIcons(count, icons);
-      persistState({ initiativeValues: rolled.values, initiativeDiceIcons: rolled.icons });
+      const rolled = rollInitiative(count, [], icons, []);
+      persistState({
+        initiativeValues: rolled.values,
+        initiativeDiceIcons: rolled.icons,
+        initiativeUsage: rolled.usage,
+      });
     },
   };
 

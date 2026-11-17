@@ -6,7 +6,7 @@
 // manifest, the theme colour, and the service-worker registration that makes the
 // app installable and usable offline at a table with no wifi.
 
-import { ScrollViewStyleReset } from 'expo-router/html';
+import { ScrollViewStyleReset, useServerDocumentContext } from 'expo-router/html';
 import type { PropsWithChildren } from 'react';
 
 // Where the app is served from: '' at a domain root, '/ProphecyCompanionApp' on
@@ -55,8 +55,12 @@ if ('serviceWorker' in navigator) {
 `;
 
 export default function Root({ children }: PropsWithChildren) {
+  // Since SDK 58 the router hands its document nodes over here: `bodyNodes` holds
+  // the bundle's script tags, so leaving it out exports a page that never boots.
+  const { htmlAttributes, bodyAttributes, headNodes, bodyNodes } = useServerDocumentContext();
+
   return (
-    <html lang="fr">
+    <html lang="fr" {...htmlAttributes}>
       <head>
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
@@ -81,8 +85,12 @@ export default function Root({ children }: PropsWithChildren) {
 
         <script dangerouslySetInnerHTML={{ __html: REQUEST_PERSISTENCE }} />
         <script dangerouslySetInnerHTML={{ __html: REGISTER_SW }} />
+        {headNodes}
       </head>
-      <body>{children}</body>
+      <body {...bodyAttributes}>
+        {children}
+        {bodyNodes}
+      </body>
     </html>
   );
 }

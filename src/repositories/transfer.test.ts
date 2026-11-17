@@ -7,8 +7,10 @@
 // enchant's target travels as a POSITION into its sibling array and a reordered
 // export binds it to the wrong sword.
 
+import { eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { effects as effectsTable, weapons as weaponsTable } from '@/db/schema';
 import { createTestDb, type TestDb } from '@/repositories/test-db';
 
 let harness: TestDb;
@@ -36,11 +38,15 @@ vi.mock('@/lib/log', () => ({
 }));
 
 const { createCharacter } = await import('@/repositories/characters');
-const { createWeapon } = await import('@/repositories/weapons');
+const { createWeapon, deleteWeapon } = await import('@/repositories/weapons');
+const { createEffect } = await import('@/repositories/effects');
+const { createItem, updateItem } = await import('@/repositories/items');
 const { createSpell } = await import('@/repositories/spells');
 const { createEnchant } = await import('@/repositories/enchants');
 const { createTrait } = await import('@/repositories/traits');
 const { setFavorite } = await import('@/repositories/favorites');
+const { createCustomFavor, updateCustomFavor } = await import('@/repositories/custom-favors');
+const { createCustomManoeuvre } = await import('@/repositories/custom-manoeuvres');
 const { endScenario, startScenario } = await import('@/repositories/xp-awards');
 const { parseImport, serializeExport } = await import('@/lib/character-transfer');
 const { exportCharacters, importCharacters } = await import('@/repositories/transfer');
@@ -68,6 +74,54 @@ describe('createCharacter', () => {
     // Pools start full — a fresh character isn't created empty.
     expect(state?.maitrise_current).toBe(5);
     expect(state?.chance_current).toBe(2);
+  });
+});
+
+describe('gear bonuses', () => {
+  it('carries a temporary weapon bonus to the same weapon under its new id', async () => {
+    const a = await seedCharacter('Aldric', ['Épée', 'Dague']);
+    const dague = a.weapons[1];
+    await createEffect(a.character.id, { target: `weapon:${dague.id}:hit`, value: 2 });
+    await createEffect(a.character.id, { target: 'weapon:9999:hit', value: 9 });
+
+    const exp = await exportCharacters([a.character.id], 'share');
+    expect(exp.characters[0].effects.map((e) => e.target)).toEqual(['weapon:1:hit']);
+
+    const [newId] = (await importCharacters(exp)).ids;
+    const weapons = await harness.db.select().from(weaponsTable).where(eq(weaponsTable.characterId, newId));
+    const copied = await harness.db.select().from(effectsTable).where(eq(effectsTable.characterId, newId));
+    expect(copied.map((e) => e.target)).toEqual([`weapon:${weapons[1].id}:hit`]);
+    expect(weapons[1].name).toBe('Dague');
+  });
+
+  it('purges a weapon bonus with its weapon', async () => {
+    const a = await seedCharacter('Aldric', ['Épée']);
+    await createEffect(a.character.id, { target: `weapon:${a.weapons[0].id}:damage`, value: 2 });
+    await deleteWeapon(a.weapons[0].id);
+    expect(await harness.db.select().from(effectsTable)).toEqual([]);
+  });
+
+  it('derives an item bonus while equipped, and rebuilds it on import', async () => {
+    const { character } = await seedCharacter('Aldric', []);
+    const item = await createItem(character.id, 'Anneau');
+    await updateItem(item.id, { bonusTarget: 'force', bonusValue: 2 });
+    expect(await harness.db.select().from(effectsTable)).toEqual([]);
+
+    await updateItem(item.id, { equipped: true });
+    const [live] = await harness.db.select().from(effectsTable);
+    expect(live).toMatchObject({ itemId: item.id, target: 'force', value: 2, label: 'Anneau' });
+
+    const exp = await exportCharacters([character.id], 'share');
+    expect(exp.characters[0].effects).toEqual([]);
+    const [newId] = (await importCharacters(exp)).ids;
+    const copied = await harness.db.select().from(effectsTable).where(eq(effectsTable.characterId, newId));
+    expect(copied).toHaveLength(1);
+    expect(copied[0]).toMatchObject({ target: 'force', value: 2 });
+
+    await updateItem(item.id, { equipped: false });
+    expect(
+      await harness.db.select().from(effectsTable).where(eq(effectsTable.characterId, character.id)),
+    ).toEqual([]);
   });
 });
 
@@ -295,5 +349,53 @@ describe('export → import round trip', () => {
       )
       .all(ids[0]);
     expect(bound).toEqual([{ name: 'Dague' }]);
+  });
+});
+
+describe('« Maison » entries', () => {
+  const houseNames = () => ({
+    favors: harness.raw.prepare('SELECT id, name FROM custom_favors').all(),
+    manoeuvres: harness.raw.prepare('SELECT id, name FROM custom_manoeuvres').all(),
+  });
+
+  it('travel with the stars that point at them, keeping their uuid', async () => {
+    const c = await createCharacter({ nom: 'Élu', chosenBy: 'brorne', bond: 2 });
+    const gift = await createCustomFavor({ dragon: 'brorne', level: 2, name: 'Don' });
+    const move = await createCustomManoeuvre({ name: 'Coup de tête', description: 'x' });
+    await createCustomFavor({ dragon: 'khy', name: 'Pas étoilé' });
+    await setFavorite(c.id, 'favor', gift.id, true);
+    await setFavorite(c.id, 'manoeuvre', move.id, true);
+
+    const json = serializeExport(await exportCharacters([c.id]));
+    const parsed = parseImport(json);
+    if (!parsed.ok) throw new Error('parse failed');
+    // Only what a star points at leaves the device.
+    expect(parsed.data.customFavors.map((f) => f.name)).toEqual(['Don']);
+
+    harness.close();
+    harness = createTestDb();
+    await importCharacters(parsed.data, 'restore');
+
+    expect(houseNames()).toEqual({
+      favors: [{ id: gift.id, name: 'Don' }],
+      manoeuvres: [{ id: move.id, name: 'Coup de tête' }],
+    });
+    const stars = harness.raw.prepare('SELECT kind, preset_id FROM favorites ORDER BY kind').all();
+    expect(stars).toEqual([
+      { kind: 'favor', preset_id: gift.id },
+      { kind: 'manoeuvre', preset_id: move.id },
+    ]);
+  });
+
+  it('never overwrite the copy this device already holds', async () => {
+    const c = await createCharacter({ nom: 'Élu' });
+    const gift = await createCustomFavor({ dragon: 'brorne', name: 'Don' });
+    await setFavorite(c.id, 'favor', gift.id, true);
+    const exp = await exportCharacters([c.id]);
+
+    await updateCustomFavor(gift.id, { name: 'Don révisé' });
+    await importCharacters(exp, 'copy');
+
+    expect(houseNames().favors).toEqual([{ id: gift.id, name: 'Don révisé' }]);
   });
 });

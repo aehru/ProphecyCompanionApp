@@ -42,6 +42,6 @@ export function sharedStatRollContext(
     value: values[key] ?? 0,
     kind,
     effects: effectsOf(character.effects),
-    wound: woundOf(character.wounds),
+    wound: woundOf(character.wounds, character.effects),
   });
 }

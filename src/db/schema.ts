@@ -17,6 +17,7 @@ import {
   VALEUR_KEYS,
 } from '@/constants/prophecy';
 import type { ArmorCategory } from '@/data/armor-constants';
+import type { DieUsage } from '@/lib/action-cumul';
 import { newUuid } from '@/lib/uuid';
 
 // The caste list lives in `constants/prophecy` (it carries the accented labels);
@@ -248,6 +249,14 @@ export const actualState = sqliteTable('actual_state', {
     .$type<string[]>()
     .notNull()
     .default(sql`'[]'`),
+  // What each die was SPENT on this turn (attaque / défense / autre) and the
+  // value it was spent at — index-aligned with `initiativeValues`, null = still
+  // to play. Drives the « cumul des actions » malus and freezes a played die's
+  // place in the GM's order (see lib/action-cumul). Cleared by every roll.
+  initiativeUsage: text('initiative_usage', { mode: 'json' })
+    .$type<DieUsage[]>()
+    .notNull()
+    .default(sql`'[]'`),
 
   conditions: text('conditions').notNull().default(''),
   notes: text('notes').notNull().default(''),
@@ -326,6 +335,11 @@ export const items = sqliteTable('items', {
   description: text('description').notNull().default(''),
   quantity: integer('quantity').notNull().default(1),
   equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+  // A bonus the item grants while equipped: an effect target (`'all'`, a stat,
+  // `skill:<name>`) and a signed value, 0 = none. Stored here so it survives
+  // being unequipped; the live `effects` row is derived (see `effects.itemId`).
+  bonusTarget: text('bonus_target').notNull().default('all'),
+  bonusValue: integer('bonus_value').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -379,6 +393,11 @@ export const weapons = sqliteTable('weapons', {
   // `skill:<name>` effect targets; may hold a spécialisation's composite name
   // ("Armes tranchantes (Épée longue)") when the player overrides it.
   skillName: text('skill_name'),
+  // Permanent bonuses (a masterwork blade). Temporary ones are `effects` rows
+  // targeting this weapon — see lib/gear-bonus, which sums the two.
+  hitBonus: integer('hit_bonus').notNull().default(0),
+  damageBonus: integer('damage_bonus').notNull().default(0),
+  initBonus: integer('init_bonus').notNull().default(0),
 });
 
 /**
@@ -561,6 +580,9 @@ export const shields = sqliteTable('shields', {
   defenseCurrent: integer('defense_current').notNull().default(0),
   encombrementMalus: integer('encombrement_malus').notNull().default(0),
   equipped: integer('equipped', { mode: 'boolean' }).notNull().default(false),
+  // Permanent bonuses, as on `weapons`.
+  hitBonus: integer('hit_bonus').notNull().default(0),
+  damageBonus: integer('damage_bonus').notNull().default(0),
 });
 
 /** Which kind of gear an enchant is bound to (see `enchants` below). */
@@ -683,6 +705,10 @@ export const effects = sqliteTable('effects', {
   durationUnit: text('duration_unit').notNull().default('round'),
   durationRemaining: integer('duration_remaining').notNull().default(0),
   expired: integer('expired', { mode: 'boolean' }).notNull().default(false),
+  // Set on the row an equipped item's bonus derives (repositories/items
+  // `syncItemBonus`): every roll reader picks it up as a normal effect, and it
+  // exists only while the item is worn. Never exported — import re-derives it.
+  itemId: integer('item_id').references(() => items.id, { onDelete: 'cascade' }),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -769,6 +795,36 @@ export const traits = sqliteTable('traits', {
 });
 
 /**
+ * A character's Privilèges. One row per taken entry, always picked from the
+ * caste's catalogue (`data-src/privileges.csv`).
+ *
+ * `caste` and `darkOrders` are COPIED from the entry rather than looked up: a
+ * character who changes caste (or breaks the oath) keeps what they bought, and
+ * the sheet flags those rows « Hors caste » from the row alone (`lib/privilege`).
+ *
+ * `cost` is the tier paid, out of expérience — never out of the avantages' pool.
+ * Purely descriptive, like `traits`: nothing computes from a privilège.
+ */
+export const privileges = sqliteTable('privileges', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  characterId: integer('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  caste: text('caste', { enum: CASTE_KEYS }).notNull(),
+  /** `caste` | `annexe` (PRIVILEGE_FAMILIES). Plain text, like `traits.rarity`. */
+  family: text('family').notNull().default('caste'),
+  darkOrders: integer('dark_orders', { mode: 'boolean' }).notNull().default(false),
+  name: text('name').notNull().default(''),
+  cost: integer('cost').notNull().default(0),
+  /** The rulebook paragraph, copied from the catalogue. */
+  description: text('description').notNull().default(''),
+  /** The player's précision — « Royaume de Kor » on a Faveur politique. */
+  note: text('note').notNull().default(''),
+  presetId: text('preset_id'),
+  presetRevision: text('preset_revision'),
+});
+
+/**
  * One scénario's Expérience award (N per character). The player picks a Valeur
  * at the START — the row is created then, `endedAt` NULL — and types the GM's
  * five 0–5 scores at the END, which closes it. Choosing before the scores exist
@@ -821,6 +877,9 @@ export const campaigns = sqliteTable('campaigns', {
   // reason to leave the device. Turning it on republishes them to the relay —
   // groundwork for a co-GM seeing the same NPCs (docs/campaign-protocol.md §2).
   shareNpcs: integer('share_npcs', { mode: 'boolean' }).notNull().default(false),
+  // The combat turn the table is on — a GM-local counter bumped by « Nouveau
+  // tour ». 0 = no fight started. Not on the wire (yet — see ROADMAP).
+  round: integer('round').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -870,7 +929,9 @@ export const gmNotes = sqliteTable('gm_notes', {
 /** The catalogues a favourite can point into — one per `*-catalog-list`. */
 // `manoeuvre` has no owned table at all: starring is the only way a character
 // keeps one (the catalogue is reference — see ManoeuvrePreset).
-export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait', 'manoeuvre'] as const;
+// `favor` stars only « Maison » Faveurs: a rulebook one is granted by the Lien
+// alone, while a house one is held by the Élus who opted into it.
+export const CATALOG_KINDS = ['spell', 'weapon', 'armor', 'shield', 'trait', 'manoeuvre', 'favor'] as const;
 export type CatalogKind = (typeof CATALOG_KINDS)[number];
 
 /**
@@ -948,6 +1009,35 @@ export const customManoeuvres = sqliteTable('custom_manoeuvres', {
     .$defaultFn(() => new Date()),
 });
 
+/**
+ * Faveurs a GM invented for an Élu — the catalogue's « Maison » entries, same
+ * contract as `custom_manoeuvres`: DEVICE-WIDE (no `character_id`), uuid id. An
+ * entry is held by the Élus who STARRED it (`favorites`, kind `favor`), at its
+ * `level` once their Lien reaches it, NEXT TO the rulebook Faveur of that level.
+ *
+ * `roll` is the caractéristique + attribut/compétence as prose (« Mental +
+ * Volonté »), `difficulty` the number; `duration` is a `lib/formula` stored as
+ * typed — a refused one is printed verbatim. `preset_id` is the `dragon-niveau`
+ * of the rulebook Faveur a variant was copied from (provenance only).
+ */
+export const customFavors = sqliteTable('custom_favors', {
+  id: text('id').primaryKey().$defaultFn(() => newUuid()),
+  dragon: text('dragon').$type<GreatDragonKey>().notNull(),
+  level: integer('level').notNull().default(1),
+  name: text('name').notNull().default(''),
+  description: text('description').notNull().default(''),
+  inGameEffect: text('in_game_effect').notNull().default(''),
+  roll: text('roll').notNull().default(''),
+  difficulty: integer('difficulty'),
+  usages: text('usages').notNull().default(''),
+  duration: text('duration').notNull().default(''),
+  durationUnit: text('duration_unit'),
+  presetId: text('preset_id'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type ActualState = typeof actualState.$inferSelect;
@@ -972,6 +1062,8 @@ export type Effect = typeof effects.$inferSelect;
 export type NewEffect = typeof effects.$inferInsert;
 export type Trait = typeof traits.$inferSelect;
 export type NewTrait = typeof traits.$inferInsert;
+export type Privilege = typeof privileges.$inferSelect;
+export type NewPrivilege = typeof privileges.$inferInsert;
 export type XpAward = typeof xpAwards.$inferSelect;
 export type NewXpAward = typeof xpAwards.$inferInsert;
 export type Campaign = typeof campaigns.$inferSelect;
@@ -982,3 +1074,5 @@ export type Favorite = typeof favorites.$inferSelect;
 export type NewFavorite = typeof favorites.$inferInsert;
 export type CustomManoeuvre = typeof customManoeuvres.$inferSelect;
 export type NewCustomManoeuvre = typeof customManoeuvres.$inferInsert;
+export type CustomFavor = typeof customFavors.$inferSelect;
+export type NewCustomFavor = typeof customFavors.$inferInsert;

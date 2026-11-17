@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import type { TextInput as RNTextInput } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 
 /**
  * Keyboard "next" wiring for a form: pressing return jumps to the following
@@ -20,7 +20,7 @@ import type { TextInput as RNTextInput } from 'react-native';
  * outside render. Going through `useCallback` marks them as event handlers.
  */
 export function useFieldChain(order: readonly string[]) {
-  const refs = useRef<Record<string, RNTextInput | null>>({});
+  const refs = useRef<Record<string, TextInputInstance | null>>({});
 
   const focusNext = useCallback(
     (key: string) => {
@@ -31,7 +31,7 @@ export function useFieldChain(order: readonly string[]) {
   );
 
   const setRef = useCallback(
-    (key: string) => (el: RNTextInput | null) => {
+    (key: string) => (el: TextInputInstance | null) => {
       refs.current[key] = el;
     },
     [],
@@ -39,7 +39,7 @@ export function useFieldChain(order: readonly string[]) {
 
   const textChain = useCallback(
     (key: string) => ({
-      // Paper types its ref loosely; the element is an RNTextInput at runtime.
+      // Paper types its ref loosely; the element is a TextInputInstance at runtime.
       ref: setRef(key) as (el: unknown) => void,
       returnKeyType: 'next' as const,
       blurOnSubmit: false,

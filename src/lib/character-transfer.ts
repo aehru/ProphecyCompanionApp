@@ -15,6 +15,8 @@
 import { z } from 'zod';
 
 import {
+  CASTES,
+  type CasteKey,
   TIME_UNITS,
   MONEY,
   NUMERIC_KEYS,
@@ -26,6 +28,7 @@ import {
   VALEUR_KEYS,
 } from '@/constants/prophecy';
 import { ENCHANT_TARGETS, type EnchantTarget } from '@/db/schema';
+import { dieUsageListSchema } from '@/lib/action-cumul';
 import { casteFromInput, dragonFromInput } from '@/lib/caste';
 
 /** Bumped on any breaking change to the bundle shape. Import rejects mismatches. */
@@ -95,6 +98,8 @@ const stateSchema = z.object({
   // Per-die marks, index-aligned with initiativeValues. OPTIONAL for the same
   // reason as above: exports predating the column import at the default [].
   initiativeDiceIcons: z.array(str).optional(),
+  // Spent dice this turn (lib/action-cumul). OPTIONAL, same reason.
+  initiativeUsage: dieUsageListSchema.optional(),
   conditions: str,
   notes: str,
   // Expérience (total awarded / total spent). OPTIONAL for the same reason as
@@ -143,6 +148,9 @@ const shieldSchema = z.object({
   defenseCurrent: int,
   encombrementMalus: int,
   equipped: z.boolean(),
+  // Permanent bonuses. OPTIONAL (not a version bump): older exports have none.
+  hitBonus: int.optional(),
+  damageBonus: int.optional(),
 });
 
 const weaponSchema = z.object({
@@ -165,6 +173,10 @@ const weaponSchema = z.object({
   // such field, and the weapon imports with no skill linked — the same
   // « Compétence non définie » state a hand-made weapon starts in.
   skillName: str.nullable().optional(),
+  // Permanent bonuses. OPTIONAL, same reasoning: older exports have none.
+  hitBonus: int.optional(),
+  damageBonus: int.optional(),
+  initBonus: int.optional(),
 });
 
 const UNIT_KEYS = TIME_UNITS.map((u) => u.key) as [string, ...string[]];
@@ -227,6 +239,10 @@ const itemSchema = z.object({
   description: str,
   quantity: int,
   equipped: z.boolean(),
+  // OPTIONAL (not a version bump): older exports have no item bonus. Its derived
+  // `effects` row does not travel; the importer rebuilds it from these.
+  bonusTarget: str.optional(),
+  bonusValue: int.optional(),
 });
 
 /**
@@ -305,6 +321,24 @@ const traitSchema = z.object({
 });
 
 /**
+ * Privilèges. OPTIONAL with a `[]` default (not a version bump, like `traits`):
+ * exports made before the table existed carry none. `caste` is strict — the
+ * column is NOT NULL and an unknown caste has nothing to belong to — `family`
+ * is loose like `traits.rarity`.
+ */
+const privilegeSchema = z.object({
+  caste: z.enum(CASTES.map((c) => c.key) as [CasteKey, ...CasteKey[]]),
+  family: str,
+  darkOrders: z.boolean().optional(),
+  name: str,
+  cost: int,
+  description: str,
+  note: str,
+  presetId: str.nullable().optional(),
+  presetRevision: str.nullable().optional(),
+});
+
+/**
  * Starred catalogue entries. OPTIONAL with a `[]` default (not a version bump,
  * like `traits`): exports made before the table existed carry none.
  *
@@ -359,9 +393,48 @@ const characterBundleSchema = z.object({
   magicReserves: z.array(magicReserveSchema).default([]),
   enchants: z.array(enchantSchema).default([]),
   traits: z.array(traitSchema).default([]),
+  privileges: z.array(privilegeSchema).default([]),
   effects: z.array(effectSchema),
   favorites: z.array(favoriteSchema).default([]),
   xpAwards: z.array(xpAwardSchema).default([]),
+});
+
+/**
+ * « Maison » catalogue entries the bundles' stars point at. Device-wide rows,
+ * so they ride ONCE at the envelope level rather than in each bundle, and keep
+ * their uuid `id`: a star's `presetId` is that id, and it must still resolve on
+ * the far side. OPTIONAL with a `[]` default, like `traits` — older files carry
+ * none. Enum-ish columns stay loose strings for the reason `favoriteSchema`
+ * gives: a value a later app knows must not make this one reject the file.
+ */
+const customManoeuvreSchema = z.object({
+  id: str,
+  context: str,
+  family: str,
+  name: str,
+  difficulty: str,
+  dodge: str,
+  parry: str,
+  damage: str,
+  roll: str,
+  inGameEffect: str,
+  description: str,
+  presetId: str.nullable().optional(),
+});
+
+const customFavorSchema = z.object({
+  id: str,
+  dragon: str,
+  level: int,
+  name: str,
+  description: str,
+  inGameEffect: str,
+  roll: str,
+  difficulty: int.nullable(),
+  usages: str,
+  duration: str,
+  durationUnit: str.nullable(),
+  presetId: str.nullable().optional(),
 });
 
 const exportSchema = z.object({
@@ -369,6 +442,8 @@ const exportSchema = z.object({
   schemaVersion: z.literal(SCHEMA_VERSION),
   exportedAt: str,
   characters: z.array(characterBundleSchema),
+  customManoeuvres: z.array(customManoeuvreSchema).default([]),
+  customFavors: z.array(customFavorSchema).default([]),
 });
 
 export type CharacterBundle = z.infer<typeof characterBundleSchema>;
@@ -383,6 +458,8 @@ export const ARMOR_FIELDS = Object.keys(armorSchema.shape);
 export const WEAPON_FIELDS = Object.keys(weaponSchema.shape);
 export const SHIELD_FIELDS = Object.keys(shieldSchema.shape);
 export const FAVORITE_FIELDS = Object.keys(favoriteSchema.shape);
+export const CUSTOM_MANOEUVRE_FIELDS = Object.keys(customManoeuvreSchema.shape);
+export const CUSTOM_FAVOR_FIELDS = Object.keys(customFavorSchema.shape);
 export const XP_AWARD_FIELDS = Object.keys(xpAwardSchema.shape);
 /**
  * Export side: an enchant's live row ids → the positions a file carries.
@@ -446,6 +523,7 @@ export const ENCHANT_FIELDS = [
 ];
 export const MAGIC_RESERVE_FIELDS = Object.keys(magicReserveSchema.shape);
 export const TRAIT_FIELDS = Object.keys(traitSchema.shape);
+export const PRIVILEGE_FIELDS = Object.keys(privilegeSchema.shape);
 export const EFFECT_FIELDS = Object.keys(effectSchema.shape);
 
 export type ImportResult =
@@ -456,12 +534,17 @@ export type ImportResult =
 export function buildExport(
   characters: CharacterBundle[],
   now: Date = new Date(),
+  house: Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'> = {
+    customManoeuvres: [],
+    customFavors: [],
+  },
 ): ProphecyExport {
   return {
     format: EXPORT_FORMAT,
     schemaVersion: SCHEMA_VERSION,
     exportedAt: now.toISOString(),
     characters,
+    ...house,
   };
 }
 
@@ -545,16 +628,35 @@ export type ExportIntent = 'backup' | 'share';
  * file) is already share-shaped and passes through.
  */
 export function forSharing(exp: ProphecyExport): ProphecyExport {
+  const characters = exp.characters.map((b) => {
+    const { uuid: _uuid, ...character } = b.character as { uuid?: string };
+    // The shopping list goes with the uuid. A sauvegarde is the only backup
+    // there is, so it keeps them; a partage hands someone a character to
+    // play, and what its previous owner was planning to buy is a note to
+    // themselves, not part of the sheet. A `favor` star is the exception: it
+    // is how an Élu HOLDS a « Maison » Faveur, so it IS part of the sheet.
+    const favorites = b.favorites.filter((f) => f.kind === 'favor');
+    return { ...b, character, favorites } as CharacterBundle;
+  });
+  return { ...exp, characters, ...referencedHouse(characters, exp) };
+}
+
+/**
+ * Narrow the envelope's house entries to the ones a remaining star points at —
+ * what is left after `forSharing` dropped the shopping lists. Exported for the
+ * repository, which fetches exactly these and nothing more.
+ */
+export function referencedHouse(
+  characters: readonly CharacterBundle[],
+  house: Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'>,
+): Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'> {
+  const starred = (kind: string) =>
+    new Set(characters.flatMap((b) => b.favorites.filter((f) => f.kind === kind).map((f) => f.presetId)));
+  const manoeuvres = starred('manoeuvre');
+  const favors = starred('favor');
   return {
-    ...exp,
-    characters: exp.characters.map((b) => {
-      const { uuid: _uuid, ...character } = b.character as { uuid?: string };
-      // The shopping list goes with the uuid. A sauvegarde is the only backup
-      // there is, so it keeps them; a partage hands someone a character to
-      // play, and what its previous owner was planning to buy is a note to
-      // themselves, not part of the sheet.
-      return { ...b, character, favorites: [] as CharacterBundle['favorites'] } as CharacterBundle;
-    }),
+    customManoeuvres: house.customManoeuvres.filter((m) => manoeuvres.has(m.id)),
+    customFavors: house.customFavors.filter((f) => favors.has(f.id)),
   };
 }
 

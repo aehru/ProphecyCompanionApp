@@ -14,6 +14,7 @@ import {
   StatutTechniquesSection,
 } from '@/components/statut-sections';
 import TendancesCircles from '@/components/tendances-circles';
+import PrivilegesSection from '@/components/privileges-section';
 import TraitsSection from '@/components/traits-section';
 import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
@@ -173,7 +174,9 @@ export default function CharacterDashboardScreen() {
             derive from `caste` + `statut` and both disappear at Statut 0. */}
         <StatutBenefitsSection caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
         <StatutTechniquesSection caste={char.caste} statut={char.statut} darkOrders={char.darkOrders} />
+        <PrivilegesSection characterId={numId} caste={char.caste} darkOrders={char.darkOrders} />
         <FavorsSection
+          characterId={numId}
           dragon={char.chosenBy}
           bond={char.bond}
           vars={{ tendance: (k) => rec[k] ?? 0, carac: (k) => rec[k] ?? 0 }}

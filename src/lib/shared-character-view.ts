@@ -55,7 +55,9 @@ export const effectsOf = (v: unknown): SharedEffectView[] =>
  * the same reading the turn order and the player's own sheet use. Takes the raw
  * field so a caller never has to remember it goes through `pools` first.
  */
-export const woundOf = (wounds: unknown): number => sharedWoundMalus(pools(wounds));
+/** The projection's wound malus, net of any suspension among its effects. */
+export const woundOf = (wounds: unknown, effects: unknown): number =>
+  sharedWoundMalus(pools(wounds), effectsOf(effects));
 
 /** The trained skills a projection carries — untrained ones never travel. */
 export const skillsOf = (v: unknown): SharedSkill[] =>

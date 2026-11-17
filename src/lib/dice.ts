@@ -49,38 +49,39 @@ export function trimInitiativeSlots<T>(slots: readonly T[], count: number): T[] 
 }
 
 /**
- * Sort dice highest-first, carrying each die's icon with its value.
+ * The one initiative roll: every EMPTY slot (missing or 0) up to `count` gets a
+ * D10, then all slots sort highest-first.
  *
- * Once a die is marked ("this one is the off hand") the grid may not sort the
- * numbers alone — the icons would end up describing different dice. Sorting
- * PAIRS keeps the mark on its own roll, which also means a die's identity lives
- * on its icon and never on its index: nothing may key off slot position.
+ * - **A full roll** passes no values: every slot is empty, every die is rolled.
+ * - **Dice gained mid-turn** (« Dés supplémentaires » raised after the roll — a
+ *   second weapon drawn, a spell landing) pass the turn's values: only the new
+ *   slots roll, and they join the others exactly like a natural die.
  *
- * `Array.prototype.sort` is stable (ES2019), so equal rolls keep their relative
- * order instead of shuffling the marks on every re-render.
+ * A slot's number, its mark (`icons`) and what it was spent on (`usage`) are
+ * assigned by INDEX before the sort and move TOGETHER through it — sorting the
+ * numbers alone would leave the off-hand icon or an « Attaque » describing a
+ * different die. A die's identity therefore lives on its mark, never on its
+ * index. `Array.prototype.sort` is stable (ES2019), so equal rolls keep their
+ * relative order instead of shuffling the marks.
  */
-export function sortInitiativeSlots(
+export function rollInitiative<U>(
+  count: number,
   values: readonly number[],
   icons: readonly string[],
-): { values: number[]; icons: string[] } {
-  const pairs = values.map((value, i) => ({ value, icon: icons[i] ?? '' }));
-  pairs.sort((a, b) => b.value - a.value);
-  return { values: pairs.map((p) => p.value), icons: pairs.map((p) => p.icon) };
-}
-
-/**
- * Roll `count` D10 and pair them with the slots' existing icons, highest-first.
- *
- * The icons are assigned by INDEX before the sort: slot i keeps the mark it had,
- * gets a fresh roll, and the pair then moves together. That is what makes a
- * re-roll readable — the off-hand die still shows the off-hand icon.
- */
-export function rollInitiativeWithIcons(
-  count: number,
-  icons: readonly string[],
+  usage: readonly (U | null)[],
   rng: Rng = Math.random,
-): { values: number[]; icons: string[] } {
-  return sortInitiativeSlots(rollDice(count, 10, rng), icons);
+): { values: number[]; icons: string[]; usage: (U | null)[] } {
+  const slots = Array.from({ length: Math.max(0, count) }, (_, i) => ({
+    value: (values[i] ?? 0) > 0 ? values[i] : rollDie(10, rng),
+    icon: icons[i] ?? '',
+    use: usage[i] ?? null,
+  }));
+  slots.sort((a, b) => b.value - a.value);
+  return {
+    values: slots.map((s) => s.value),
+    icons: slots.map((s) => s.icon),
+    usage: slots.map((s) => s.use),
+  };
 }
 
 /**

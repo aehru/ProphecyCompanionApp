@@ -21,7 +21,9 @@ import type { Character, Weapon } from '@/db/schema';
 import { openRoller } from '@/lib/dice-roller';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
+import { applyShieldBonus, applyWeaponBonus, withHitBonus } from '@/lib/gear-bonus';
 import { damageModifier, woundMalus } from '@/lib/modifiers';
+import { withActionCumul } from '@/lib/action-cumul';
 import { spellRollContext, weaponRollContext } from '@/lib/roll-context';
 import { spellTotal } from '@/lib/spell-total';
 import { weaponSkillReading } from '@/lib/weapon-skill';
@@ -79,8 +81,8 @@ function GearBody({ char }: { char: Character }) {
   const caracValue = (key: string) => rec[key] ?? 0;
   // Same reading as the Fiche: the wound malus hits the attack roll, never the
   // damage — a damage formula's carac folds in only the active effects.
-  const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}));
   const effectList = effects ?? [];
+  const wound = woundMalus(asNumRecord(stateRows?.[0] ?? {}), effectList);
   const caracModifier = (key: string) => damageModifier(key, effectList);
 
   const enchantedKeys = new Set((enchants ?? []).map((e) => `${e.targetType}:${e.targetId}`));
@@ -90,14 +92,17 @@ function GearBody({ char }: { char: Character }) {
   // One place that knows what a weapon's compétence resolves against — the card
   // reads it and the roll re-reads it, and the two must not drift apart.
   const skillOf = (w: Weapon) =>
-    weaponSkillReading(w.skillName, skillList, rec, effectList, wound);
+    withHitBonus(
+      weaponSkillReading(w.skillName, skillList, rec, effectList, wound),
+      applyWeaponBonus(w, effectList).hitBonus,
+    );
 
   // The GM rolls an NPC's attacks from here — these are their own characters,
   // living in this device's DB, so it is the same roll the player's Inventaire
   // makes. A weapon with no compétence linked has no total and stays unrollable.
   const rollWeapon = (w: Weapon) => {
     const ctx = weaponRollContext(w.name, skillOf(w));
-    if (ctx) openRoller(ctx);
+    if (ctx) openRoller(withActionCumul(ctx, stateRows?.[0]?.initiativeUsage, 'atk'));
   };
 
   return (
@@ -108,7 +113,7 @@ function GearBody({ char }: { char: Character }) {
             {weaponList.map((w) => (
               <WeaponCard
                 key={w.id}
-                weapon={w}
+                weapon={applyWeaponBonus(w, effectList)}
                 caracValue={caracValue}
                 caracModifier={caracModifier}
                 skill={skillOf(w)}
@@ -141,7 +146,7 @@ function GearBody({ char }: { char: Character }) {
             {shieldList.map((s) => (
               <ShieldCard
                 key={s.id}
-                shield={s}
+                shield={applyShieldBonus(s, effectList)}
                 caracValue={caracValue}
                 caracModifier={caracModifier}
                 enchanted={isEnchanted('shield', s.id)}

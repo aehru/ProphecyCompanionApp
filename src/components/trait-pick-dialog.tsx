@@ -46,15 +46,19 @@ export interface TraitPick {
  * A single-price entry that asks nothing never opens this — the picker adds it
  * straight away.
  */
-export default function TraitPickDialog({
+export default function TraitPickDialog<
+  P extends Pick<TraitPreset, 'costs' | 'precisionPrompt'> = TraitPreset,
+>({
   preset,
+  title,
   onDismiss,
   onConfirm,
 }: {
-  /** The entry being picked; null closes the dialog. */
-  preset: TraitPreset | null;
+  /** The entry being picked; null closes the dialog. Also serves the privilèges. */
+  preset: P | null;
+  title: string;
   onDismiss: () => void;
-  onConfirm: (preset: TraitPreset, pick: TraitPick) => void;
+  onConfirm: (preset: P, pick: TraitPick) => void;
 }) {
   const theme = useProphecyTheme();
   // Opens on the lowest price: the cheapest tier is the common pick. The caller
@@ -73,7 +77,7 @@ export default function TraitPickDialog({
     <DsDialog
       visible={preset !== null}
       onDismiss={onDismiss}
-      title={preset?.data.name ?? ''}
+      title={title}
       dismiss={<Button onPress={onDismiss}>Annuler</Button>}
       actions={
         <Button

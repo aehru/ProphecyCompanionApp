@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, type ViewInstance } from 'react-native';
 import { Button, IconButton, Text } from 'react-native-paper';
 
 import { useCatalogScroll } from '@/components/catalog-scroll';
@@ -66,7 +66,7 @@ export default function CatalogRow({
 }) {
   const theme = useProphecyTheme();
   const [expanded, setExpanded] = useState(false);
-  const rowRef = useRef<View>(null);
+  const rowRef = useRef<ViewInstance>(null);
   const { rowToTop } = useCatalogScroll();
 
   const collapse = () => {

@@ -4,9 +4,8 @@ import {
   initiativeDiceCount,
   rollDice,
   rollDie,
-  rollInitiativeWithIcons,
+  rollInitiative,
   rollTendances,
-  sortInitiativeSlots,
   trimInitiativeSlots,
   type Rng,
 } from './dice';
@@ -50,14 +49,14 @@ describe('rollDice', () => {
   });
 });
 
-describe('rollInitiativeWithIcons — the roll itself', () => {
+describe('rollInitiative — the roll itself', () => {
   it('rolls `count` D10 sorted descending', () => {
-    const out = rollInitiativeWithIcons(4, [], seq(0.2, 0.9, 0.0, 0.5)); // faces 3, 10, 1, 6
+    const out = rollInitiative(4, [], [], [], seq(0.2, 0.9, 0.0, 0.5)); // faces 3, 10, 1, 6
     expect(out.values).toEqual([10, 6, 3, 1]);
   });
 
   it('stays within 1..10 and preserves length', () => {
-    const { values } = rollInitiativeWithIcons(6, []);
+    const { values } = rollInitiative(6, [], [], []);
     expect(values).toHaveLength(6);
     for (const v of values) {
       expect(v).toBeGreaterThanOrEqual(1);
@@ -107,44 +106,47 @@ describe('trimInitiativeSlots', () => {
   });
 });
 
-describe('sortInitiativeSlots', () => {
-  it('sorts highest-first, carrying each icon with its own value', () => {
-    const out = sortInitiativeSlots([3, 9, 6], ['sword', 'magic', '']);
-    expect(out.values).toEqual([9, 6, 3]);
-    expect(out.icons).toEqual(['magic', '', 'sword']);
-  });
+describe('rollInitiative', () => {
+  // rng 0.65 → a 7 on a D10.
+  const seven: Rng = () => 0.65;
 
-  it('fills a missing icon with the empty mark', () => {
-    expect(sortInitiativeSlots([4, 7], ['sword']).icons).toEqual(['', 'sword']);
-  });
-
-  it('keeps equal rolls in their existing order (stable sort)', () => {
-    const out = sortInitiativeSlots([5, 5, 5], ['a', 'b', 'c']);
-    expect(out.icons).toEqual(['a', 'b', 'c']);
-  });
-
-  it('returns aligned arrays of the same length', () => {
-    const out = sortInitiativeSlots([2, 8, 1], []);
-    expect(out.icons).toHaveLength(out.values.length);
-  });
-});
-
-describe('rollInitiativeWithIcons', () => {
-  it('assigns icons by slot BEFORE sorting, then moves the pairs', () => {
+  it('a full roll assigns marks by slot BEFORE sorting, then moves them', () => {
     // Slots roll 3, 10, 1 in order; slot 1 (icon 'sword') rolled the 10.
-    const out = rollInitiativeWithIcons(3, ['', 'sword', 'magic'], seq(0.2, 0.9, 0.0));
+    const out = rollInitiative(3, [], ['', 'sword', 'magic'], [], seq(0.2, 0.9, 0.0));
     expect(out.values).toEqual([10, 3, 1]);
     expect(out.icons).toEqual(['sword', '', 'magic']);
   });
 
-  it('rolls `count` dice regardless of how many icons are stored', () => {
-    const out = rollInitiativeWithIcons(4, ['sword']);
+  it('rolls `count` dice regardless of how many marks are stored', () => {
+    const out = rollInitiative(4, [], ['sword'], []);
     expect(out.values).toHaveLength(4);
     expect(out.icons).toHaveLength(4);
+    expect(out.usage).toHaveLength(4);
   });
 
   it('returns nothing for a count of 0', () => {
-    expect(rollInitiativeWithIcons(0, ['sword'])).toEqual({ values: [], icons: [] });
+    expect(rollInitiative(0, [], ['sword'], [])).toEqual({ values: [], icons: [], usage: [] });
+  });
+
+  it('with every slot rolled it only sorts, carrying each mark', () => {
+    const out = rollInitiative(3, [3, 9, 6], ['sword', 'magic', ''], []);
+    expect(out.values).toEqual([9, 6, 3]);
+    expect(out.icons).toEqual(['magic', '', 'sword']);
+  });
+
+  it('keeps equal rolls in their existing order (stable sort)', () => {
+    expect(rollInitiative(3, [5, 5, 5], ['a', 'b', 'c'], []).icons).toEqual(['a', 'b', 'c']);
+  });
+
+  it('rolls only a die gained mid-turn, carrying mark and use', () => {
+    const r = rollInitiative(3, [9, 4], ['sword', ''], [{ use: 'atk' }, null], seven);
+    expect(r.values).toEqual([9, 7, 4]);
+    expect(r.icons).toEqual(['sword', '', '']);
+    expect(r.usage).toEqual([{ use: 'atk' }, null, null]);
+  });
+
+  it('treats a 0 slot as not rolled yet', () => {
+    expect(rollInitiative(2, [5, 0], [], [], seven).values).toEqual([7, 5]);
   });
 });
 

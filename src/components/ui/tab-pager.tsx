@@ -17,7 +17,8 @@ import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  ScrollView,
+  type ScrollViewInstance,
+  Platform,
   StyleSheet,
   View,
   type StyleProp,
@@ -63,7 +64,7 @@ export default function TabPager({
   headerRight?: React.ReactNode;
 }) {
   const [width, setWidth] = useState(0);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   // Lazy useState rather than useRef(...).current — no ref read during render.
   const [scrollX] = useState(() => new Animated.Value(0));
   // Pages the user has actually reached — mounted from then on.
@@ -234,7 +235,7 @@ export default function TabPager({
         onScrollBeginDrag={onDragStart}
         onScrollEndDrag={onDragEnd}>
         {labels.map((label, i) => (
-          <View key={labelKey(label)} style={{ width }}>
+          <View key={labelKey(label)} style={[styles.page, { width }]}>
             {visited.includes(i) ? renderPage(i) : null}
           </View>
         ))}
@@ -246,4 +247,8 @@ export default function TabPager({
 const styles = StyleSheet.create({
   root: { flex: 1 },
   pages: { flex: 1 },
+  // react-native-web wraps each paged child in a COLUMN scroll-snap box, so the
+  // page took its content's height and a page's own FAB floated under a short
+  // list. Native has no such wrapper and stretches the page already.
+  page: Platform.select({ web: { flexGrow: 1 }, default: {} }),
 });

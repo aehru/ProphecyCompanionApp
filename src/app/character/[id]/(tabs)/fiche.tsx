@@ -119,7 +119,7 @@ export default function CharacterFicheScreen() {
   // Wound malus hits every roll, as do the 'all' effects — read once, above the
   // stat grids. A roll is an attribut PLUS a caractéristique, so badging them on
   // both tiles would show the same malus twice; a tile carries only its own.
-  const wound = woundMalus(stRec);
+  const wound = woundMalus(stRec, effectList);
   const global = globalModifier(effectList, wound);
   // Tapping a tile rolls that stat: the value plus everything modifying it
   // (wound + effects, which the tile's own badge deliberately does NOT show in

@@ -3,7 +3,7 @@
 // search overlay renders results. Same list either way, only the scope differs.
 
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, TextInput as RNTextInput, View } from 'react-native';
+import { StyleSheet, type TextInputInstance, View } from 'react-native';
 import { Divider, Text } from 'react-native-paper';
 
 import SkillRow, { type SpecMother } from '@/components/skills/skill-row';
@@ -52,7 +52,7 @@ export default function SkillsEditList({
   const [menuFor, setMenuFor] = useState<number | null>(null);
 
   const focusNewSkill = useCallback(
-    (el: RNTextInput | null) => {
+    (el: TextInputInstance | null) => {
       if (!el) return;
       // Deferred a frame: focusing during the mount commit can be swallowed
       // while the keyboard is re-anchoring from the search field on Android.

@@ -43,6 +43,10 @@ import m0038 from './0038_open_harrier.sql';
 import m0039 from './0039_normal_scarlet_witch.sql';
 import m0040 from './0040_peaceful_frank_castle.sql';
 import m0041 from './0041_wild_lockheed.sql';
+import m0042 from './0042_noisy_kronos.sql';
+import m0043 from './0043_greedy_shard.sql';
+import m0044 from './0044_cute_sue_storm.sql';
+import m0045 from './0045_stiff_maggott.sql';
 
   export default {
     journal,
@@ -88,7 +92,11 @@ m0037,
 m0038,
 m0039,
 m0040,
-m0041
+m0041,
+m0042,
+m0043,
+m0044,
+m0045
     }
   }
   

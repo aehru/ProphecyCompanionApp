@@ -22,12 +22,14 @@ import DiceRollerButton from '@/components/dice-roller-button';
 import DiceRollerHost from '@/components/dice-roller-host';
 import LogErrorBoundary from '@/components/log-error-boundary';
 import AlertHost from '@/components/ui/alert-host';
+import WebSafeAreaInsets from '@/components/web-safe-area';
 import { CampaignLiveProvider } from '@/hooks/use-campaign-live';
 import { HEADER_HEIGHT } from '@/hooks/use-layout';
 import { useRouteBreadcrumbs } from '@/hooks/use-route-breadcrumbs';
 import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
 import { AppDragonProvider, useAppDragon } from '@/hooks/use-app-dragon';
+import { KeepAwakeProvider } from '@/hooks/use-keep-awake';
 import { DragonAccents } from '@/theme/dragonsTheme';
 import {
   navigationTheme,
@@ -74,7 +76,11 @@ const paperSettings = {
 export default function RootLayout() {
   return (
     <AppDragonProvider>
-      <ThemedRoot />
+      <KeepAwakeProvider>
+        <WebSafeAreaInsets>
+          <ThemedRoot />
+        </WebSafeAreaInsets>
+      </KeepAwakeProvider>
     </AppDragonProvider>
   );
 }
@@ -148,6 +154,10 @@ function ThemedRoot() {
                     <Stack.Screen
                       name="manoeuvre/[mid]"
                       options={{ title: 'Manœuvre maison', presentation: 'modal' }}
+                    />
+                    <Stack.Screen
+                      name="favor/[fid]"
+                      options={{ title: 'Faveur maison', presentation: 'modal' }}
                     />
                     {/* No dice on the settings screens: nothing there is played. */}
                     <Stack.Screen

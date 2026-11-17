@@ -115,6 +115,7 @@ export default function TraitCatalogModal() {
         // doc comment).
         key={picking?.id ?? 'none'}
         preset={picking}
+        title={picking?.data.name ?? ''}
         onDismiss={() => setPicking(null)}
         onConfirm={(preset, pick) => {
           setPicking(null);

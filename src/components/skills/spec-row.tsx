@@ -12,6 +12,7 @@ import { dsIcon } from '@/components/ui/icon';
 import type { Skill } from '@/db/schema';
 import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { parseInteger } from '@/lib/character-values';
 import { skillFieldStyles } from '@/components/skills/skill-field-styles';
 
 export default function SpecRow({
@@ -28,7 +29,7 @@ export default function SpecRow({
   const theme = useProphecyTheme();
   const [label, setLabel] = useDebouncedText(spec.specLabel ?? '', (t) => onLabel(spec, t));
   const [value, setValue] = useDebouncedText(String(spec.value), (t) =>
-    onValue(spec, parseInt(t, 10) || 0),
+    onValue(spec, parseInteger(t)),
   );
 
   return (

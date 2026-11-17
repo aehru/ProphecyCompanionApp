@@ -1,4 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 
 import { db, transaction, type Executor } from '@/db/client';
 import { campaigns, campaignShares, characters, gmNotes, type Campaign } from '@/db/schema';
@@ -101,6 +101,17 @@ export async function attachServer(campaignId: number, serverUrl: string): Promi
  * the local DB and have no reason to leave the device). Turning it OFF purges
  * whatever is already up there, best-effort.
  */
+/** « Nouveau tour »: bump the table's combat turn and return the new number. */
+export async function nextRound(campaignId: number): Promise<number> {
+  const [row] = await db
+    .update(campaigns)
+    .set({ round: sql`${campaigns.round} + 1` })
+    .where(eq(campaigns.id, campaignId))
+    .returning({ round: campaigns.round });
+  logWrite('campaigns', 'update', { campaignId, phase: 'next-round' });
+  return row?.round ?? 0;
+}
+
 export async function setShareNpcs(campaignId: number, share: boolean): Promise<void> {
   await db.update(campaigns).set({ shareNpcs: share }).where(eq(campaigns.id, campaignId));
   logWrite('campaigns', 'update', { campaignId, phase: 'share-npcs', ok: share });
@@ -273,6 +284,19 @@ export async function deleteCampaign(id: number): Promise<void> {
  * Live query: which characters belong to one table. GM side that IS the roster
  * (read locally); player side it is the set broadcast to the GM.
  */
+/** Every table's local members (name + kind), for the list's one-line summaries. */
+export function allMembersQuery() {
+  return db
+    .select({
+      campaignId: campaignShares.campaignId,
+      characterId: campaignShares.characterId,
+      nom: characters.nom,
+      kind: characters.kind,
+    })
+    .from(campaignShares)
+    .innerJoin(characters, eq(characters.id, campaignShares.characterId));
+}
+
 export function membersQuery(campaignId: number) {
   return db.select().from(campaignShares).where(eq(campaignShares.campaignId, campaignId));
 }

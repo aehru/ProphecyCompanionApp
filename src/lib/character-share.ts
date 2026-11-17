@@ -37,11 +37,16 @@ import {
   WOUND_LEVELS,
 } from '@/constants/prophecy';
 import type { ActualState, Character, Effect, Skill } from '@/db/schema';
+import { dieUsageListSchema } from '@/lib/action-cumul';
 import { asNumRecord } from '@/lib/character-values';
 import { initiativeDiceCount } from '@/lib/dice';
+import { isGearTarget } from '@/lib/gear-bonus';
 
-/** Bumped on any breaking change to the SharedCharacter shape. v2: skills + effects. */
-export const SHARED_SCHEMA_VERSION = 2;
+/**
+ * Bumped on any change to the SharedCharacter shape. v2: skills + effects.
+ * v3: `initiative.usage` (additive, optional — a v2 player simply has none).
+ */
+export const SHARED_SCHEMA_VERSION = 3;
 
 // Column-key groups, derived from the domain constants so this stays in sync
 // with the schema instead of re-listing columns by hand.
@@ -85,7 +90,13 @@ export const sharedCharacterSchema = z.object({
   tendances: numRecord(TENDANCE_KEYS),
   wounds: cmRecord(WOUND_LEVELS.map((w) => w.key)),
   resources: cmRecord(RESOURCES.map((r) => r.key)),
-  initiative: z.object({ max: int, values: z.array(int) }),
+  initiative: z.object({
+    max: int,
+    values: z.array(int),
+    // What each die was spent on this turn (lib/action-cumul). Optional: a
+    // player on an older build sends none, and the GM reads every die as unused.
+    usage: dieUsageListSchema.optional(),
+  }),
   conditions: z.string(),
   skills: z.array(sharedSkillSchema),
   effects: z.array(sharedEffectSchema),
@@ -139,6 +150,7 @@ export function toSharedCharacter(
       // keeps its shape and meaning ("how many dice this character rolls").
       max: initiativeDiceCount(c.initiativeMax ?? 0, s.initiativeBonusDice ?? 0),
       values: Array.isArray(state.initiativeValues) ? state.initiativeValues : [],
+      usage: Array.isArray(state.initiativeUsage) ? state.initiativeUsage : [],
     },
     conditions: state.conditions ?? '',
     skills: skillRows
@@ -151,9 +163,12 @@ export function toSharedCharacter(
         specLabel: sk.specLabel ?? null,
       })),
     effects: effectRows
-      .filter((e) => !e.expired)
+      // A gear bonus means nothing without the gear, which stays off the wire.
+      .filter((e) => !e.expired && !isGearTarget(e.target ?? ''))
       .map((e) => ({
-        label: e.label ?? '',
+        // An item's derived row is labelled with the item's name: inventory,
+        // also off the wire. Its value still counts in the GM's totals.
+        label: e.itemId != null ? '' : (e.label ?? ''),
         target: e.target ?? 'all',
         value: e.value ?? 0,
         durationUnit: e.durationUnit ?? 'round',

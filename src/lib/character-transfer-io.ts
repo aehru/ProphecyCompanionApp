@@ -35,7 +35,7 @@ export async function shareExport(
     // stale temp — ignore
   }
   file.create();
-  file.write(serializeExport(exp));
+  await file.write(serializeExport(exp));
 
   if (!(await Sharing.isAvailableAsync())) {
     throw new Error("Le partage n'est pas disponible sur cet appareil.");

@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { Chip, Text } from 'react-native-paper';
+import { Chip, Icon, Text } from 'react-native-paper';
 
 import { initials, playerAccent, useAttrColors } from '@/components/campaign/roster-accents';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -16,9 +16,29 @@ const SERVER_STATUS_LABEL: Record<SocketStatus, string> = {
   offline: 'Hors ligne',
 };
 
-/** Server-connection chip (distinct from a player's presence pill). */
-export function ServerStatusChip({ status }: { status: SocketStatus }) {
+/**
+ * Server-connection chip (distinct from a player's presence pill). `iconOnly`
+ * is the header form: the glyph alone, the label kept for screen readers.
+ */
+export function ServerStatusChip({
+  status,
+  iconOnly = false,
+}: {
+  status: SocketStatus;
+  iconOnly?: boolean;
+}) {
   const theme = useProphecyTheme();
+  if (iconOnly) {
+    return (
+      <View accessible accessibilityLabel={SERVER_STATUS_LABEL[status]} style={styles.iconOnly}>
+        <Icon
+          source={status === 'online' ? 'lan-connect' : 'lan-disconnect'}
+          size={20}
+          color={status === 'online' ? theme.colors.primary : theme.colors.onSurfaceVariant}
+        />
+      </View>
+    );
+  }
   return (
     <Chip
       compact
@@ -131,6 +151,7 @@ export function OwnerBadge({ style }: { style?: StyleProp<ViewStyle> }) {
 }
 
 const styles = StyleSheet.create({
+  iconOnly: { paddingHorizontal: 8 },
   pill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
   pillLabel: { fontSize: 10, fontWeight: '700' },
   owner: {

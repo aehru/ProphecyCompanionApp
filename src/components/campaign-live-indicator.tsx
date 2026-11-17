@@ -59,14 +59,18 @@ export default function CampaignLiveIndicator() {
         visible={menuOpen}
         onDismiss={() => setMenuOpen(false)}
         anchor={
-          <Pressable onPress={() => setMenuOpen(true)} accessibilityLabel="Diffusion en direct">
+          <Pressable
+            onPress={() => setMenuOpen(true)}
+            accessibilityLabel="Diffusion en direct"
+            // The disc is small on purpose; the touch target is not.
+            hitSlop={(48 - SIZE) / 2}>
             <Animated.View
               style={[styles.ring, ringStyle, { backgroundColor: theme.colors.primary }]}
             />
             <View style={[styles.btn, { backgroundColor: theme.colors.primary }]}>
               <MaterialCommunityIcons
                 name={status === 'online' ? 'broadcast' : 'broadcast-off'}
-                size={22}
+                size={18}
                 color={theme.colors.onPrimary}
               />
             </View>
@@ -105,7 +109,8 @@ export default function CampaignLiveIndicator() {
   );
 }
 
-const SIZE = 48;
+// Smaller than a FAB: it reports a state, it is not the screen's main action.
+const SIZE = 36;
 const styles = StyleSheet.create({
   wrap: { position: 'absolute', zIndex: 1000, elevation: 8, pointerEvents: 'box-none' },
   ring: { position: 'absolute', width: SIZE, height: SIZE, borderRadius: SIZE / 2 },

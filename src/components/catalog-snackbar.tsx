@@ -3,7 +3,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Snackbar } from 'react-native-paper';
 
 /** The `/character/[id]/<kind>/[rowId]` editors a catalogue picker can land on. */
-export type CatalogKind = 'armor' | 'shield' | 'weapon' | 'spell' | 'trait';
+export type CatalogKind = 'armor' | 'shield' | 'weapon' | 'spell' | 'trait' | 'privilege';
 
 /**
  * What a catalogue picker does after it inserts a row — the same two moves in

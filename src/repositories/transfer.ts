@@ -5,6 +5,8 @@ import {
   actualState,
   armor,
   characters,
+  customFavors,
+  customManoeuvres,
   effects,
   enchants,
   items,
@@ -13,6 +15,7 @@ import {
   skills,
   spells,
   favorites,
+  privileges,
   traits,
   weapons,
   xpAwards,
@@ -20,6 +23,8 @@ import {
   type NewActualState,
   type NewArmor,
   type NewCharacter,
+  type NewCustomFavor,
+  type NewCustomManoeuvre,
   type NewEffect,
   type NewEnchant,
   type NewItem,
@@ -28,6 +33,7 @@ import {
   type NewSkill,
   type NewSpell,
   type NewFavorite,
+  type NewPrivilege,
   type NewTrait,
   type NewWeapon,
   type NewXpAward,
@@ -41,6 +47,8 @@ import {
   EFFECT_FIELDS,
   ENCHANT_FIELDS,
   type ExportIntent,
+  CUSTOM_FAVOR_FIELDS,
+  CUSTOM_MANOEUVRE_FIELDS,
   forSharing,
   type ImportMode,
   ITEM_FIELDS,
@@ -49,18 +57,22 @@ import {
   planImport,
   planMagicReserves,
   type ProphecyExport,
+  referencedHouse,
   resolveEnchantLinks,
   SHIELD_FIELDS,
   SKILL_FIELDS,
   SPELL_FIELDS,
   STATE_FIELDS,
   FAVORITE_FIELDS,
+  PRIVILEGE_FIELDS,
   TRAIT_FIELDS,
   WEAPON_FIELDS,
   XP_AWARD_FIELDS,
 } from '@/lib/character-transfer';
+import { remapGearTarget } from '@/lib/gear-bonus';
 import { copyMedia } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
+import { syncItemBonus } from '@/repositories/items';
 import { logWrite } from '@/repositories/log';
 
 /**
@@ -142,7 +154,7 @@ export async function exportCharacters(
   // the order the importer re-inserts in. Bucketing one ordered result set per
   // character preserves it exactly (see `byCharacter`).
   const charIds = rows.map((c) => c.id);
-  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, traitRows, effectRows, favoriteRows, xpAwardRows] =
+  const [stateRows, skillRows, armorRows, weaponRows, shieldRows, itemRows, spellRows, reserveRows, enchantRows, traitRows, effectRows, favoriteRows, xpAwardRows, privilegeRows] =
     await Promise.all([
       db.select().from(actualState).where(inArray(actualState.characterId, charIds)),
       db.select().from(skills).where(inArray(skills.characterId, charIds)).orderBy(asc(skills.id)),
@@ -165,6 +177,11 @@ export async function exportCharacters(
         .where(inArray(favorites.characterId, charIds))
         .orderBy(asc(favorites.id)),
       db.select().from(xpAwards).where(inArray(xpAwards.characterId, charIds)).orderBy(asc(xpAwards.id)),
+      db
+        .select()
+        .from(privileges)
+        .where(inArray(privileges.characterId, charIds))
+        .orderBy(asc(privileges.id)),
     ]);
 
   const stateByChar = new Map(stateRows.map((s) => [s.characterId, s]));
@@ -180,6 +197,7 @@ export async function exportCharacters(
   const effectsByChar = byCharacter(effectRows);
   const favoritesByChar = byCharacter(favoriteRows);
   const xpAwardsByChar = byCharacter(xpAwardRows);
+  const privilegesByChar = byCharacter(privilegeRows);
 
   const bundles: CharacterBundle[] = [];
   for (const c of rows) {
@@ -221,14 +239,38 @@ export async function exportCharacters(
         return links ? [{ ...pick(r, ENCHANT_FIELDS), ...links }] : [];
       }),
       traits: tr.map((r) => pick(r, TRAIT_FIELDS)),
-      effects: ef.map((r) => pick(r, EFFECT_FIELDS)),
+      privileges: (privilegesByChar.get(c.id) ?? []).map((r) => pick(r, PRIVILEGE_FIELDS)),
+      // An item's derived row stays home (the importer rebuilds it), and a gear
+      // bonus's target travels as a position, like an enchant's.
+      effects: ef.flatMap((r) => {
+        if (r.itemId != null) return [];
+        const target = remapGearTarget(r.target, (kind, id) => gearIndex[kind].get(id));
+        return target == null ? [] : [{ ...pick(r, EFFECT_FIELDS), target }];
+      }),
       favorites: (favoritesByChar.get(c.id) ?? []).map((r) => pick(r, FAVORITE_FIELDS)),
       xpAwards: (xpAwardsByChar.get(c.id) ?? []).map((r) => pick(r, XP_AWARD_FIELDS)),
     } as CharacterBundle);
   }
 
+  // The « Maison » entries those stars point at — device-wide rows, fetched
+  // once for the whole envelope (see `customManoeuvreSchema`).
+  const starredIds = (kind: string) =>
+    favoriteRows.filter((f) => f.kind === kind).map((f) => f.presetId);
+  const [manoeuvreIds, favorIds] = [starredIds('manoeuvre'), starredIds('favor')];
+  const [houseManoeuvres, houseFavors] = await Promise.all([
+    manoeuvreIds.length
+      ? db.select().from(customManoeuvres).where(inArray(customManoeuvres.id, manoeuvreIds))
+      : [],
+    favorIds.length
+      ? db.select().from(customFavors).where(inArray(customFavors.id, favorIds))
+      : [],
+  ]);
+
   logWrite('characters', 'update', { count: bundles.length, phase: 'export', mode: intent });
-  const exp = buildExport(bundles);
+  const exp = buildExport(bundles, undefined, referencedHouse(bundles, {
+    customManoeuvres: houseManoeuvres.map((r) => pick(r, CUSTOM_MANOEUVRE_FIELDS)),
+    customFavors: houseFavors.map((r) => pick(r, CUSTOM_FAVOR_FIELDS)),
+  } as Pick<ProphecyExport, 'customManoeuvres' | 'customFavors'>));
   return intent === 'share' ? forSharing(exp) : exp;
 }
 
@@ -272,6 +314,23 @@ export async function importCharacters(
         .map((r) => r.uuid)
         .filter((u): u is string => u != null),
     );
+
+    // « Maison » entries first, keeping their uuid so the stars below resolve.
+    // A uuid this device already holds is LEFT AS IS: the entry is device-wide
+    // and may have been edited here since — the local copy wins, no merge.
+    const houseNow = new Date();
+    for (const m of data.customManoeuvres ?? []) {
+      await tx
+        .insert(customManoeuvres)
+        .values({ ...m, createdAt: houseNow } as NewCustomManoeuvre)
+        .onConflictDoNothing();
+    }
+    for (const f of data.customFavors ?? []) {
+      await tx
+        .insert(customFavors)
+        .values({ ...f, createdAt: houseNow } as NewCustomFavor)
+        .onConflictDoNothing();
+    }
 
     for (const b of data.characters) {
       const now = new Date();
@@ -317,6 +376,7 @@ export async function importCharacters(
             spells,
             magicReserves,
             traits,
+            privileges,
             effects,
             favorites,
             xpAwards,
@@ -354,9 +414,31 @@ export async function importCharacters(
       }
       const traitRows = b.traits ?? [];
       if (traitRows.length) await tx.insert(traits).values(link(traitRows) as NewTrait[]);
-      if (b.effects.length) await tx.insert(effects).values(link(b.effects) as NewEffect[]);
+      const privilegeRows = b.privileges ?? [];
+      if (privilegeRows.length) {
+        await tx.insert(privileges).values(link(privilegeRows) as NewPrivilege[]);
+      }
+      // After the gear: a gear bonus's target holds a position, and the ids it
+      // resolves to only exist now.
+      const newIds = async (t: GearTable) =>
+        (
+          await tx
+            .select({ id: t.id })
+            .from(t)
+            .where(eq(t.characterId, characterId))
+            .orderBy(asc(t.id))
+        ).map((r) => r.id);
+      const gearLookup = { weapon: await newIds(weapons), shield: await newIds(shields) };
+      const effectRows = b.effects.flatMap((e) => {
+        const target = remapGearTarget(e.target, (kind, n) => gearLookup[kind][n]);
+        return target == null ? [] : [{ ...e, target }];
+      });
+      if (effectRows.length) await tx.insert(effects).values(link(effectRows) as NewEffect[]);
+      for (const item of await tx.select().from(items).where(eq(items.characterId, characterId))) {
+        await syncItemBonus(item, tx);
+      }
       // No link to resolve: a favourite carries a rulebook slug, which means the
-      // same thing on every device.
+      // same thing on every device — or a house entry's uuid, written above.
       const favoriteRows = b.favorites ?? [];
       if (favoriteRows.length) {
         await tx.insert(favorites).values(link(favoriteRows) as NewFavorite[]);
@@ -372,14 +454,6 @@ export async function importCharacters(
       // enchant instead of binding it to whatever sits at that position.
       const enchantRows = b.enchants ?? [];
       if (enchantRows.length) {
-        const newIds = async (t: GearTable) =>
-          (
-            await tx
-              .select({ id: t.id })
-              .from(t)
-              .where(eq(t.characterId, characterId))
-              .orderBy(asc(t.id))
-          ).map((r) => r.id);
         // Only the kinds actually pointed at: an enchanted sword costs one
         // read-back, not four, and a bundle with no linked sortilège costs none.
         const gearIds: Partial<Record<EnchantTarget, number[]>> = {};

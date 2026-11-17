@@ -9,7 +9,7 @@ import { useDebouncedText } from '@/hooks/use-debounced-text';
 import { useFieldChain } from '@/hooks/use-field-chain';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
-import { formatDecimal, parseDecimal } from '@/lib/character-values';
+import { formatDecimal, parseDecimal, parseInteger } from '@/lib/character-values';
 import { parseFormula } from '@/lib/formula';
 import { detachWrite } from '@/repositories/log';
 import { deleteWeapon, updateWeapon } from '@/repositories/weapons';
@@ -27,6 +27,9 @@ const EDIT_ORDER = [
   'rangeMax',
   'initMelee',
   'initCac',
+  'hitBonus',
+  'damageBonus',
+  'initBonus',
   'creationDifficulty',
   'creationTime',
 ] as const;
@@ -61,10 +64,19 @@ export default function WeaponEditor({
     patch({ special: t }),
   );
   const [initMelee, setInitMelee] = useDebouncedText(String(w.initMelee), (t) =>
-    patch({ initMelee: parseSigned(t) }),
+    patch({ initMelee: parseInteger(t) }),
   );
   const [initCac, setInitCac] = useDebouncedText(String(w.initCorpsACorps), (t) =>
-    patch({ initCorpsACorps: parseSigned(t) }),
+    patch({ initCorpsACorps: parseInteger(t) }),
+  );
+  const [hitBonus, setHitBonus] = useDebouncedText(String(w.hitBonus), (t) =>
+    patch({ hitBonus: parseInteger(t) }),
+  );
+  const [damageBonus, setDamageBonus] = useDebouncedText(String(w.damageBonus), (t) =>
+    patch({ damageBonus: parseInteger(t) }),
+  );
+  const [initBonus, setInitBonus] = useDebouncedText(String(w.initBonus), (t) =>
+    patch({ initBonus: parseInteger(t) }),
   );
   // Creation time is the one fractional field (0,5 jour). Its text is kept local
   // instead of read back off the row: `0,` parses to 0 and would render back as
@@ -185,6 +197,33 @@ export default function WeaponEditor({
           {...numChain('initCac')}
         />
         <NumberField
+          fieldKey="hitBonus"
+          label="Bonus toucher"
+          value={hitBonus}
+          onChange={(_, t) => setHitBonus(t)}
+          signed
+          style={styles.numCol}
+          {...numChain('hitBonus')}
+        />
+        <NumberField
+          fieldKey="damageBonus"
+          label="Bonus dégâts"
+          value={damageBonus}
+          onChange={(_, t) => setDamageBonus(t)}
+          signed
+          style={styles.numCol}
+          {...numChain('damageBonus')}
+        />
+        <NumberField
+          fieldKey="initBonus"
+          label="Bonus initiative"
+          value={initBonus}
+          onChange={(_, t) => setInitBonus(t)}
+          signed
+          style={styles.numCol}
+          {...numChain('initBonus')}
+        />
+        <NumberField
           fieldKey="creationDifficulty"
           label="Difficulté création"
           value={w.creationDifficulty ? String(w.creationDifficulty) : ''}
@@ -220,11 +259,6 @@ export default function WeaponEditor({
       </Button>
     </>
   );
-}
-
-function parseSigned(t: string) {
-  const n = parseInt(t, 10);
-  return Number.isNaN(n) ? 0 : n;
 }
 
 /** Validation message for a formula field (null = valid/empty). */

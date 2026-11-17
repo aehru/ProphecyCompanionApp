@@ -25,8 +25,9 @@ tags:
 - assertVisible:
     id: 'campaign-row-1'
 
-- tapOn:
-    id: 'campaign-delete-1'
+# Long press: the row's chevron leaves no room for a trash can.
+- longPressOn:
+    id: 'campaign-row-1'
 # `alert-destructive` / `alert-cancel` are stamped by the alert host, so the
 # selector no longer depends on French copy — which also settles the old snag
 # that a character's confirm button repeats its own title (« Supprimer »).

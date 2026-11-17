@@ -18,6 +18,8 @@ import type { CasteKey, PrivilegeFamily } from '@/constants/prophecy';
 export type PrivilegePreset = {
   /** Stable slug, caste-prefixed so two castes' « Expertise » don't collide. */
   id: string;
+  /** Content fingerprint (lib/preset-revision), stamped on a picked row. */
+  revision: string;
   caste: CasteKey;
   /** Which of the caste page's two headings this one sits under. */
   famille: PrivilegeFamily;

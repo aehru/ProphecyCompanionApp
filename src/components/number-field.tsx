@@ -1,5 +1,12 @@
 import React, { useCallback, useRef } from 'react';
-import { StyleSheet, TextInput, type TextInputProps, View, type ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  type TextInputInstance,
+  type TextInputProps,
+  View,
+  type ViewStyle,
+} from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -11,9 +18,9 @@ import { sanitizeNumericInput } from '@/lib/character-values';
  * back the DOM `<input>`, which only knows `setSelectionRange` — calling
  * `setSelection` there throws.
  */
-function selectAll(el: TextInput | null, length: number) {
+function selectAll(el: TextInputInstance | null, length: number) {
   if (!el) return;
-  const native = el as TextInput & { setSelection?: (start: number, end: number) => void };
+  const native = el as TextInputInstance & { setSelection?: (start: number, end: number) => void };
   if (typeof native.setSelection === 'function') {
     native.setSelection(0, length);
     return;
@@ -48,7 +55,7 @@ const NumberField = React.memo(function NumberField({
   value: string;
   style?: ViewStyle;
   onChange: (key: string, t: string) => void;
-  inputRef?: React.Ref<TextInput>;
+  inputRef?: React.Ref<TextInputInstance>;
   returnKeyType?: TextInputProps['returnKeyType'];
   onSubmitEditing?: () => void;
   submitBehavior?: TextInputProps['submitBehavior'];
@@ -65,12 +72,12 @@ const NumberField = React.memo(function NumberField({
   const theme = useProphecyTheme();
   // Keep our own handle to the native input (to select-all on focus) while still
   // forwarding the caller's inputRef used for keyboard "next" chaining.
-  const innerRef = useRef<TextInput | null>(null);
+  const innerRef = useRef<TextInputInstance | null>(null);
   const setRefs = useCallback(
-    (el: TextInput | null) => {
+    (el: TextInputInstance | null) => {
       innerRef.current = el;
       if (typeof inputRef === 'function') inputRef(el);
-      else if (inputRef) (inputRef as React.MutableRefObject<TextInput | null>).current = el;
+      else if (inputRef) (inputRef as React.MutableRefObject<TextInputInstance | null>).current = el;
     },
     [inputRef],
   );

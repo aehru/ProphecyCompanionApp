@@ -9,11 +9,23 @@
 // A roll's total modifier for a given stat = woundMalus + Σ(effects on that stat
 // or on 'all'). Expired effects are ignored.
 //
+// An effect targeting WOUND_RELIEF_TARGET is not a bonus at all: it cancels up
+// to `value` points of the wound malus (an « Engagement », a potion…), never
+// past 0. See `woundMalus`.
+//
 // A skill roll can ALSO carry an effect targeting that one skill. Skills have no
 // stable key (replaceSkills re-inserts rows, so ids churn), so a skill effect
 // stores its target as `skill:<name>` — see the `skill*` helpers below.
 
-import { EFFECT_TARGET_LABEL, WOUND_LEVELS } from '@/constants/prophecy';
+import {
+  EFFECT_TARGET_LABEL,
+  PERMANENT_UNIT,
+  TIME_UNIT_LABEL,
+  WOUND_LEVELS,
+  WOUND_RELIEF_TARGET,
+} from '@/constants/prophecy';
+
+export { WOUND_RELIEF_TARGET };
 
 /**
  * The only three fields a modifier computation reads off an effect. Structural
@@ -48,11 +60,34 @@ export function skillTargetName(target: string): string {
 }
 
 /**
+ * The deepest wound malus there is (Fatale's 5). A relief this big cancels every
+ * level, which is how « tous les malus » is stored — a plain number, no
+ * sentinel, so the arithmetic below needs no special case.
+ */
+export const WOUND_MALUS_MAX = Math.max(
+  ...WOUND_LEVELS.map((w) => (w.malus == null ? 0 : -Number(w.malus))),
+);
+
+/** Wound malus points cancelled by the active relief effects (non-negative). */
+export function woundRelief(effects: readonly ModifierSource[]): number {
+  let total = 0;
+  for (const e of effects) {
+    if (!e.expired && e.target === WOUND_RELIEF_TARGET) total += Math.max(0, e.value ?? 0);
+  }
+  return total;
+}
+
+/**
  * Biggest active wound malus for a character, as a non-positive number (0 = no
  * malus). A wound level is "active" when it has at least one filled box
- * (`${key}Current` > 0). Returns the most negative malus among active levels.
+ * (`${key}Current` > 0); the worst one counts, then `effects` targeting
+ * WOUND_RELIEF_TARGET cancel points of it, never past 0. Every reader of the
+ * malus passes its effects, so a suspension reaches rolls and initiative alike.
  */
-export function woundMalus(stRec: Record<string, number>): number {
+export function woundMalus(
+  stRec: Record<string, number>,
+  effects: readonly ModifierSource[] = [],
+): number {
   let worst = 0;
   for (const w of WOUND_LEVELS) {
     if (w.malus == null) continue;
@@ -61,7 +96,7 @@ export function woundMalus(stRec: Record<string, number>): number {
     const m = Number(w.malus);
     if (m < worst) worst = m;
   }
-  return worst;
+  return Math.min(0, worst + woundRelief(effects));
 }
 
 /** Effects that currently count toward modifiers (not expired). */
@@ -161,6 +196,24 @@ export function skillModifier(
     if (!e.expired && e.target === target) skillOnly += e.value ?? 0;
   }
   return totalModifier(attribut, effects, wound) + skillOnly;
+}
+
+/**
+ * An effect's value as shown on its row: signed, except a wound relief big
+ * enough to cancel every level, which reads « Tous ».
+ */
+export function effectValueLabel(target: string | undefined, value: number): string {
+  return target === WOUND_RELIEF_TARGET && value >= WOUND_MALUS_MAX ? 'Tous' : fmtSignedMod(value);
+}
+
+/** What is left of an effect: « Permanent », or « 3 Tour ». */
+export function effectDurationLabel(e: {
+  durationUnit?: string;
+  durationRemaining?: number;
+}): string {
+  const unit = e.durationUnit ?? 'round';
+  const label = TIME_UNIT_LABEL[unit] ?? unit;
+  return unit === PERMANENT_UNIT ? label : `${e.durationRemaining ?? 0} ${label}`;
 }
 
 /** Format a signed modifier for display, e.g. 1 → "+1", -5 → "-5". */

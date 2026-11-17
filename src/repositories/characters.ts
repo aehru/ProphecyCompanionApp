@@ -9,7 +9,8 @@ import {
   type NewActualState,
   type NewCharacter,
 } from '@/db/schema';
-import { initiativeDiceCount, rollInitiativeWithIcons } from '@/lib/dice';
+import { markDie, type DieUse } from '@/lib/action-cumul';
+import { initiativeDiceCount, rollInitiative } from '@/lib/dice';
 import { deleteCharacterMedia, deleteMedia, type MediaSlot } from '@/lib/media';
 import { newUuid } from '@/lib/uuid';
 import { updateActualState } from '@/repositories/actual-state';
@@ -113,13 +114,41 @@ export async function rollInitiativeFor(charUuids: readonly string[]): Promise<n
       if (dice <= 0) continue;
       // Marks ride along with their own roll, exactly as on the Fiche — a bulk
       // roll must not shuffle which die is the PNJ's off hand.
-      const { values, icons } = rollInitiativeWithIcons(dice, row.icons ?? []);
-      await updateActualState(row.id, { initiativeValues: values, initiativeDiceIcons: icons }, tx);
+      const { values, icons, usage } = rollInitiative(dice, [], row.icons ?? [], []);
+      // A roll is a new turn: every die unspent again.
+      await updateActualState(
+        row.id,
+        { initiativeValues: values, initiativeDiceIcons: icons, initiativeUsage: usage },
+        tx,
+      );
       rolled++;
     }
   });
   logWrite('actual_state', 'update', { count: rolled, phase: 'roll-initiative' });
   return rolled;
+}
+
+/**
+ * Spend (or free, with `use: null`) one initiative die of a character held on
+ * this device — the GM marking a PNJ's action from the turn order, which holds
+ * a roster entry (uuid) rather than the row the Fiche's writers close over.
+ */
+export async function markInitiativeDie(
+  charUuid: string,
+  index: number,
+  use: DieUse | null,
+  at: number,
+): Promise<void> {
+  const [row] = await db
+    .select({ id: characters.id, values: actualState.initiativeValues, usage: actualState.initiativeUsage })
+    .from(characters)
+    .innerJoin(actualState, eq(actualState.characterId, characters.id))
+    .where(eq(characters.uuid, charUuid))
+    .limit(1);
+  if (!row) return;
+  await updateActualState(row.id, {
+    initiativeUsage: markDie(row.usage, row.values.length, index, use, at),
+  });
 }
 
 export async function getCharacter(id: number, x: Executor = db) {

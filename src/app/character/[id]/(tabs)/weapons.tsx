@@ -27,7 +27,9 @@ import { openRoller } from '@/lib/dice-roller';
 import { useSplitWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { asNumRecord } from '@/lib/character-values';
+import { applyShieldBonus, applyWeaponBonus, withHitBonus } from '@/lib/gear-bonus';
 import { damageModifier, woundMalus } from '@/lib/modifiers';
+import { withActionCumul } from '@/lib/action-cumul';
 import { weaponRollContext } from '@/lib/roll-context';
 import { weaponSkillReading } from '@/lib/weapon-skill';
 import { armorQuery } from '@/repositories/armor';
@@ -93,22 +95,26 @@ export default function CharacterWeaponsScreen() {
   const stRec = asNumRecord(state);
   // The wound malus hits the attack roll (skillOf), never the damage: a damage
   // formula's carac only folds in the temporary effects, before the multiplier.
-  const wound = woundMalus(stRec);
   const effectList = effects ?? [];
+  const wound = woundMalus(stRec, effectList);
   const skillList = skills ?? [];
   const caracModifier = (caracKey: string) => damageModifier(caracKey, effectList);
 
   // One place that knows what a weapon's compétence resolves against — the card
   // reads it and the roll re-reads it, and the two must not drift apart.
   const skillOf = (w: Weapon) =>
-    weaponSkillReading(w.skillName, skillList, rec, effectList, wound);
+    withHitBonus(
+      weaponSkillReading(w.skillName, skillList, rec, effectList, wound),
+      applyWeaponBonus(w, effectList).hitBonus,
+    );
 
   // An attack is its compétence's roll. Nothing happens when the weapon has no
   // compétence linked, or names one that no longer exists — the card already
   // says so, and there is no total to roll (see lib/roll-context).
   const rollWeapon = (w: Weapon) => {
     const ctx = weaponRollContext(w.name, skillOf(w));
-    if (ctx) openRoller(ctx);
+    // Past the first attack this turn, the cumul raises the Difficulté.
+    if (ctx) openRoller(withActionCumul(ctx, state?.initiativeUsage, 'atk'));
   };
 
   // One page per category; each scrolls on its own under the pinned money card
@@ -126,7 +132,7 @@ export default function CharacterWeaponsScreen() {
               {list.map((w) => (
                 <WeaponCard
                   key={w.id}
-                  weapon={w}
+                  weapon={applyWeaponBonus(w, effectList)}
                   caracValue={(k) => rec[k] ?? 0}
                   caracModifier={caracModifier}
                   skill={skillOf(w)}
@@ -176,7 +182,7 @@ export default function CharacterWeaponsScreen() {
               {shieldList.map((s) => (
                 <ShieldCard
                   key={s.id}
-                  shield={s}
+                  shield={applyShieldBonus(s, effectList)}
                   caracValue={(k) => rec[k] ?? 0}
                   caracModifier={caracModifier}
                   enchanted={isEnchanted('shield', s.id)}
