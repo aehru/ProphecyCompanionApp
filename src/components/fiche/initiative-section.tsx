@@ -8,6 +8,7 @@ import { asDieIcon, DIE_ICONS } from '@/components/ui/die-icons';
 import DsDialog from '@/components/ui/ds-dialog';
 import EditableSection from '@/components/ui/editable-section';
 import Icon, { dsIcon, type IconName } from '@/components/ui/icon';
+import TipCard from '@/components/ui/tip-card';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   cumulMalus,
@@ -132,7 +133,10 @@ export default function InitiativeSection({
               Définis l’initiative (max) avec le crayon en haut.
             </Text>
           ) : (
-            <View style={styles.grid}>
+            <>
+              {/* Only once there are dice: the tips are about what a die does. */}
+              {editing ? null : <TipCard screen="initiative" />}
+              <View style={styles.grid}>
               {Array.from({ length: count }, (_, i) => values[i] ?? 0).map((val, i) => {
                 const icon = asDieIcon(icons[i]);
                 if (editing) {
@@ -176,7 +180,8 @@ export default function InitiativeSection({
                   />
                 );
               })}
-            </View>
+              </View>
+            </>
           )}
 
           {!editing && (atkCumul > 0 || defCumul > 0) ? (
