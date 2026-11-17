@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { initiativeDice, woundBoxes } from '@/lib/creation-rules';
+import {
+  ageFromD10,
+  ageMod,
+  attributModifier,
+  attributPool,
+  initiativeDice,
+  woundBoxes,
+} from '@/lib/creation-rules';
 
 // The rulebook gives the wound track as a band table on RÉS + VOL. These cases
 // walk every band boundary, since an off-by-one there is invisible on a sheet
@@ -65,5 +72,41 @@ describe('initiativeDice', () => {
 
   it('clamps above the table instead of inventing a sixth die', () => {
     expect(initiativeDice(10, 10)).toBe(5);
+  });
+});
+
+describe('age', () => {
+  it('maps the D10 to the rulebook bands', () => {
+    expect([1, 2, 3, 4, 7, 8, 9, 10].map(ageFromD10)).toEqual([
+      'enfant',
+      'adolescent',
+      'adolescent',
+      'adulte',
+      'adulte',
+      'ancien',
+      'ancien',
+      'venerable',
+    ]);
+  });
+  it('reads the modificateurs, 0 when none', () => {
+    expect(ageMod('enfant', 'empathie')).toBe(2);
+    expect(ageMod('adolescent', 'perception')).toBe(1);
+    expect(ageMod('venerable', 'coordination')).toBe(-1);
+    expect(ageMod('adulte', 'force')).toBe(0);
+    expect(ageMod(null, 'force')).toBe(0);
+  });
+  it('reads the attribut pool off the age, Adulte by default', () => {
+    expect(attributPool('enfant')).toEqual([4, 4, 4, 3]);
+    expect(attributPool('venerable')).toEqual([6, 6, 4, 3]);
+    expect(attributPool(null)).toEqual([5, 5, 4, 3]);
+  });
+});
+
+describe('attributModifier', () => {
+  it('maps every band of the table, NA at 0', () => {
+    const sums = [0, 1, 2, 3, 5, 6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25];
+    expect(sums.map(attributModifier)).toEqual([
+      null, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5,
+    ]);
   });
 });

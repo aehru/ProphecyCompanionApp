@@ -86,6 +86,9 @@ export const ATTRIBUTS = [
   { key: 'social', label: 'Social' },
 ] as const;
 
+export type CaracKey = (typeof CARACTERISTIQUES)[number]['key'];
+export type AttributKey = (typeof ATTRIBUTS)[number]['key'];
+
 /** Attribut key → display label (skills link to one attribut). */
 export const ATTRIBUT_LABEL: Record<string, string> = Object.fromEntries(
   ATTRIBUTS.map((a) => [a.key, a.label]),
@@ -131,6 +134,22 @@ export const GREAT_DRAGONS = [
 ] as const;
 
 export type GreatDragonKey = (typeof GREAT_DRAGONS)[number]['key'];
+
+/**
+ * Each caste serves one Great Dragon — the pairing the creation wizard draws as
+ * the caste card's accent. Kalimsshar patrons no caste (his are the Ordres
+ * Noirs, a flag on top of a caste).
+ */
+export const CASTE_PATRON: Record<CasteKey, GreatDragonKey> = {
+  artisan: 'kezyr',
+  combattant: 'kroryn',
+  commercant: 'khy',
+  erudit: 'ozyr',
+  mage: 'nenya',
+  prodige: 'heyra',
+  protecteur: 'brorne',
+  voyageur: 'szyl',
+};
 
 /** Great dragon key → display label. */
 export const DRAGON_LABEL: Record<string, string> = Object.fromEntries(
