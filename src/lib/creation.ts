@@ -1,0 +1,179 @@
+// Guided creation — the wizard's pure half: its steps, what blocks « Suivant »,
+// the distribution mechanics and the build that turns choices into sheet
+// values. The rulebook TABLES it reads live in `creation-rules` (shared with
+// the NPC generator); this file only decides how the wizard applies them.
+//
+// The screens hold a plain `FormValues` (the same one the full form edits),
+// and `applyBuild` writes the derived values into it, so a character made
+// either way goes through `fromFormValues` and nothing else.
+
+import {
+  ATTRIBUTS,
+  CARACTERISTIQUES,
+  MAX_PUCES,
+  WOUND_LEVELS,
+  type AttributKey,
+  type CaracKey,
+} from '@/constants/prophecy';
+import { clamp, type FormValues, parseInteger } from '@/lib/character-values';
+import {
+  ATTRIBUT_CARACS,
+  type AgeKey,
+  ageMod,
+  attributModifier,
+  initiativeDice,
+  type WoundBoxes,
+  woundBoxes,
+} from '@/lib/creation-rules';
+
+// The rulebook's creation order (« Concept » and « Augure de naissance » are
+// not modelled yet), with Identité last before the recap: the name is the one
+// required field, and it is easier to give once the character exists.
+export const CREATION_STEPS = [
+  { key: 'age', title: 'L’âge', short: 'Âge' },
+  { key: 'caste', title: 'Votre caste', short: 'Caste' },
+  { key: 'carac', title: 'Caractéristiques', short: 'Caractéristiques' },
+  { key: 'attributs', title: 'Attributs', short: 'Attributs' },
+  { key: 'tendances', title: 'Tendances', short: 'Tendances' },
+  { key: 'identite', title: 'Identité', short: 'Identité' },
+  { key: 'recap', title: 'Récapitulatif', short: 'Récapitulatif' },
+] as const;
+
+/** Only the name is required, and only Identité asks for it. */
+export function canLeaveStep(step: number, v: FormValues): boolean {
+  return CREATION_STEPS[step]?.key !== 'identite' || v.nom.trim() !== '';
+}
+
+/** A stepper tap: the field moved by `delta`, never below 0. */
+export const stepValue = (text: string, delta: number) =>
+  String(clamp(parseInteger(text) + delta, 0));
+
+/**
+ * Tapping puce `index` (0-based) fills up to it; tapping the last filled one
+ * again empties it, so a single puce can be cleared without a minus button.
+ */
+export function tapPuce(text: string, index: number): string {
+  const next = parseInteger(text) === index + 1 ? index : index + 1;
+  return String(clamp(next, 0, MAX_PUCES));
+}
+
+// ── Distribution (one value of a pool per key) ─────────────────────────────
+
+type Assign<K extends string> = Partial<Record<K, number>>;
+
+/** The pool values still to hand out, in pool order. */
+export function remainingValues<K extends string>(
+  pool: readonly number[],
+  assign: Assign<K>,
+): number[] {
+  const left = [...pool];
+  for (const n of Object.values<number | undefined>(assign)) {
+    const i = left.indexOf(n as number);
+    if (i >= 0) left.splice(i, 1);
+  }
+  return left;
+}
+
+/**
+ * Give `value` to `key`. Tapping its current value takes it back. A value none
+ * of which is left is SWAPPED with a key holding it, so moving a 7 around never
+ * needs an « unassign » first.
+ */
+export function assignValue<K extends string>(
+  pool: readonly number[],
+  assign: Assign<K>,
+  key: K,
+  value: number,
+): Assign<K> {
+  const next = { ...assign };
+  if (next[key] === value) {
+    delete next[key];
+    return next;
+  }
+  if (!remainingValues(pool, assign).includes(value)) {
+    const holder = (Object.keys(next) as K[]).find((k) => k !== key && next[k] === value);
+    if (!holder) return assign;
+    if (next[key] == null) delete next[holder];
+    else next[holder] = next[key];
+  }
+  next[key] = value;
+  return next;
+}
+
+// ── The build: every choice the wizard turns into sheet values ─────────────
+
+export type CreationBuild = {
+  age: AgeKey | null;
+  /** Which starting value each caractéristique took; absent = not yet. */
+  assign: Assign<CaracKey>;
+  /**
+   * « Un point — et un seul » moved from one caractéristique to another. A side
+   * is '' while the player has picked only the other one; only a full,
+   * distinct pair moves anything.
+   */
+  transfer: { from: CaracKey | ''; to: CaracKey | '' } | null;
+  /** Which of the age's attribut values each attribut took. */
+  attributs: Assign<AttributKey>;
+};
+
+export const EMPTY_BUILD: CreationBuild = { age: null, assign: {}, transfer: null, attributs: {} };
+
+/** Starting value + age + the one transferred point, never below 0. Null until assigned. */
+export function finalCarac(build: CreationBuild, key: CaracKey): number | null {
+  const base = build.assign[key];
+  if (base == null) return null;
+  const t = build.transfer;
+  const moved =
+    t && t.from && t.to && t.from !== t.to ? (t.to === key ? 1 : 0) - (t.from === key ? 1 : 0) : 0;
+  return Math.max(0, base + ageMod(build.age, key) + moved);
+}
+
+/** The two related caractéristiques' final sum (an unassigned one counts 0). */
+export function attributCaracSum(build: CreationBuild, key: AttributKey): number {
+  return ATTRIBUT_CARACS[key].reduce((sum, c) => sum + (finalCarac(build, c) ?? 0), 0);
+}
+
+/** Distributed value + modificateur, never below 0 (« un Attribut peut avoir 0 »). */
+export function finalAttribut(build: CreationBuild, key: AttributKey): number | null {
+  const base = build.attributs[key];
+  if (base == null) return null;
+  return Math.max(0, base + (attributModifier(attributCaracSum(build, key)) ?? 0));
+}
+
+/** INITIATIVE: dice from COO + PER, once both are handed out. */
+export function buildInitiative(build: CreationBuild): number | null {
+  const coo = finalCarac(build, 'coordination');
+  const per = finalCarac(build, 'perception');
+  return coo == null || per == null ? null : initiativeDice(coo, per);
+}
+
+/** SEUILS DE BLESSURE: wound boxes from RÉS + VOL, once both are handed out. */
+export function buildWounds(build: CreationBuild): WoundBoxes | null {
+  const res = finalCarac(build, 'resistance');
+  const vol = finalCarac(build, 'volonte');
+  return res == null || vol == null ? null : woundBoxes(res, vol);
+}
+
+/**
+ * The form values with everything the build derives written in. Initiative and
+ * wound boxes are only DEFAULTS: a number typed in « Ajuster » wins over them
+ * (any wound field typed keeps the whole track as typed).
+ */
+export function applyBuild(v: FormValues, build: CreationBuild): FormValues {
+  const out = { ...v };
+  for (const c of CARACTERISTIQUES) {
+    const n = finalCarac(build, c.key);
+    if (n != null) out[c.key] = String(n);
+  }
+  for (const a of ATTRIBUTS) {
+    const n = finalAttribut(build, a.key);
+    if (n != null) out[a.key] = String(n);
+  }
+  const init = buildInitiative(build);
+  if (init != null && !v.initiativeMax) out.initiativeMax = String(init);
+  const wounds = buildWounds(build);
+  if (wounds && !WOUND_LEVELS.some((w) => v[`${w.key}Max`])) {
+    for (const [k, n] of Object.entries(wounds)) out[k] = String(n);
+  }
+  return out;
+}
