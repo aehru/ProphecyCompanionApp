@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import WeaponCatalogList from '@/components/catalog/weapon-catalog-list';
 import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
+import TipCard from '@/components/ui/tip-card';
 import { HAND_VALUE, type WeaponPreset } from '@/data/weapon-catalog';
 import { useCaracReadings } from '@/hooks/use-carac-readings';
 import { useCharacterId } from '@/hooks/use-character-id';
@@ -45,6 +46,9 @@ export default function WeaponCatalogModal() {
 
   return (
     <View style={styles.root}>
+      <View style={styles.tip}>
+        <TipCard screen="catalog" />
+      </View>
       <WeaponCatalogList
         readings={readings}
         onAdd={add}
@@ -57,4 +61,5 @@ export default function WeaponCatalogModal() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  tip: { paddingHorizontal: 12, paddingTop: 12 },
 });
