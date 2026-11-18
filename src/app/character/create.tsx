@@ -15,7 +15,14 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
 import { fromFormValues, toFormValues } from '@/lib/character-values';
-import { CREATION_STEPS, EMPTY_BUILD, applyBuild, canLeaveStep } from '@/lib/creation';
+import {
+  CREATION_STEPS,
+  EMPTY_BUILD,
+  applyBuild,
+  canLeaveStep,
+  proposeTendances,
+} from '@/lib/creation';
+import { tendanceStart } from '@/lib/creation-rules';
 import { log } from '@/lib/log';
 import { pickImage, storeCharacterMedia } from '@/lib/media';
 import { createCharacter, setCharacterMedia } from '@/repositories/characters';
@@ -107,9 +114,10 @@ export default function CreateCharacterScreen() {
         {key === 'age' ? (
           <AgeStep
             age={build.age}
-            // The attribut values depend on the age: a new age starts that pool over.
+            // The attribut values and the Maîtrise / Chance points depend on the
+            // age: a new age starts both over.
             onChange={(age) =>
-              setBuild({ ...build, age, attributs: age === build.age ? build.attributs : {} })
+              setBuild(age === build.age ? build : { ...build, age, attributs: {}, resources: {} })
             }
           />
         ) : null}
@@ -125,7 +133,16 @@ export default function CreateCharacterScreen() {
             onPickAvatar={pickAvatar}
           />
         ) : null}
-        {key === 'tendances' ? <TendancesStep v={v} setField={setField} /> : null}
+        {key === 'tendances' ? <TendancesStep
+            v={v}
+            setField={setField}
+            nation={build.nation}
+            age={build.age}
+            onPickNation={(nation) => {
+              setBuild({ ...build, nation });
+              if (nation) setV((prev) => proposeTendances(prev, tendanceStart(nation, build.age)));
+            }}
+          /> : null}
         {key === 'recap' ? <RecapStep v={values} setField={setField} avatarUri={avatarUri} /> : null}
       </KeyboardAwareScrollView>
       <WizardFooter

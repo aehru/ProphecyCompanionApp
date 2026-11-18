@@ -51,8 +51,10 @@ export default function RecapStep({
 
       <SectionCard title="VALEURS DE DÉPART">
         <Text style={muted}>
-          Maîtrise, Chance et réserve de magie reprennent les valeurs par défaut. Vous pourrez les
-          changer sur la fiche.
+          La réserve de magie reprend sa valeur par défaut. Tout reste modifiable sur la fiche.
+        </Text>
+        <Text testID="recap-resources">
+          Maîtrise {parseInteger(v.maitriseMax)} · Chance {parseInteger(v.chanceMax)}
         </Text>
         {wounds ? <Text testID="recap-wounds">Blessures : {wounds} (RÉS + VOL)</Text> : null}
         {initiative > 0 ? (

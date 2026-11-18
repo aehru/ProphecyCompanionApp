@@ -1,4 +1,5 @@
-// Step 3 — the three tendances: value on +/−, puces by tapping the dots.
+// The three tendances: value on +/−, puces by tapping the dots. A nation
+// d'origine proposes the values (TENDANCES DE DÉPART); they stay editable.
 
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -6,10 +7,12 @@ import { IconButton, Text } from 'react-native-paper';
 
 import { TendanceGauge } from '@/components/tendances-circles';
 import { dsIcon } from '@/components/ui/icon';
+import SelectField from '@/components/ui/select-field';
 import { MAX_PUCES, TENDANCE_BY_KEY, TENDANCES, type TendanceKey } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { type FormValues, parseInteger } from '@/lib/character-values';
-import { stepValue, tapPuce } from '@/lib/creation';
+import { freeTendancesLeft, stepValue, tapPuce } from '@/lib/creation';
+import { type AgeKey, ageBand, NATIONS, type NationKey, tendanceStart } from '@/lib/creation-rules';
 
 const TAGLINE: Record<TendanceKey, string> = {
   dragon: 'Honneur, tradition, magie',
@@ -19,12 +22,21 @@ const TAGLINE: Record<TendanceKey, string> = {
 
 const DOTS = Array.from({ length: MAX_PUCES }, (_, i) => i);
 
+const NATION_OPTIONS = [{ key: '', label: 'Non précisée' }, ...NATIONS];
+
 export default function TendancesStep({
   v,
   setField,
+  nation,
+  age,
+  onPickNation,
 }: {
   v: FormValues;
   setField: (key: string, text: string) => void;
+  nation: NationKey | null;
+  age: AgeKey | null;
+  /** Records the nation and writes its proposal into the tendances. */
+  onPickNation: (nation: NationKey | null) => void;
 }) {
   const theme = useProphecyTheme();
   const muted = { color: theme.colors.onSurfaceVariant };
@@ -32,6 +44,15 @@ export default function TendancesStep({
   return (
     <>
       <Text style={muted}>Les trois forces qui tiraillent le personnage.</Text>
+      <SelectField
+        testID="field-nation"
+        label="Nation d’origine"
+        options={NATION_OPTIONS}
+        value={nation ?? ''}
+        onChange={(k) => onPickNation((k || null) as NationKey | null)}
+        inline
+      />
+      {nation ? <FreePointsNote v={v} nation={nation} age={age} /> : null}
       {TENDANCES.map((t) => (
         <TendanceCard key={t.key} tKey={t.key} v={v} setField={setField} />
       ))}
@@ -39,6 +60,26 @@ export default function TendancesStep({
         Total {total} · les puces se règlent en touchant les points
       </Text>
     </>
+  );
+}
+
+/** What the table gave, and the « L » points still to place by hand. */
+function FreePointsNote({ v, nation, age }: { v: FormValues; nation: NationKey; age: AgeKey | null }) {
+  const theme = useProphecyTheme();
+  const left = freeTendancesLeft(v, tendanceStart(nation, age));
+  const band = (ageBand(age)?.label ?? 'Adulte').toLowerCase();
+  const status =
+    left > 0
+      ? `${left} point${left > 1 ? 's' : ''} libre${left > 1 ? 's' : ''} à placer`
+      : left < 0
+        ? `${-left} point${left < -1 ? 's' : ''} au-delà de la table`
+        : 'tous les points sont placés';
+  return (
+    <Text
+      testID="tendances-free"
+      style={{ color: left < 0 ? theme.colors.error : theme.colors.onSurfaceVariant }}>
+      Proposition pour un {band} : {status}.
+    </Text>
   );
 }
 

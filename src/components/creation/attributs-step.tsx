@@ -6,6 +6,7 @@
 import React from 'react';
 import { Text } from 'react-native-paper';
 
+import ResourcesPicker from '@/components/creation/resources-picker';
 import ValuePickRow, { PoolBanner } from '@/components/creation/value-pick-row';
 import SectionCard from '@/components/ui/section-card';
 import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
@@ -70,6 +71,8 @@ export default function AttributsStep({
           );
         })}
       </SectionCard>
+
+      <ResourcesPicker build={build} onChange={onChange} />
 
       {rung ? (
         <Text style={{ color: theme.colors.onSurfaceVariant }}>
