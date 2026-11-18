@@ -1,6 +1,7 @@
 // One row of a distribution step: the name (with a small caption above), a chip
 // per distinct pool value, and the resulting final value. Shared by the
-// caractéristiques (7/6/6/5/5/4/4/3) and the attributs (the age's four values).
+// caractéristiques (7/6/6/5/5/4/4/3), the attributs (the age's four values) and
+// the caste profile (6/6/5/5/4).
 
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -11,7 +12,7 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 export default function ValuePickRow({
   caption,
   label,
-  values,
+  pool,
   mine,
   left,
   final,
@@ -21,8 +22,8 @@ export default function ValuePickRow({
   /** Small line above the name: « FOR −2 », « FOR + RÉS 13 → +1 ». */
   caption: string;
   label: string;
-  /** One chip per distinct value, in display order. */
-  values: readonly number[];
+  /** The whole pool; one chip per distinct value, in pool order. */
+  pool: readonly number[];
   mine: number | undefined;
   /** Still to hand out — a value missing here is held elsewhere (tap swaps it). */
   left: readonly number[];
@@ -32,6 +33,7 @@ export default function ValuePickRow({
 }) {
   const theme = useProphecyTheme();
   const c = theme.colors;
+  const values = [...new Set(pool)];
   return (
     <View style={styles.row} testID={testID}>
       <View style={styles.name}>
@@ -80,12 +82,13 @@ export default function ValuePickRow({
 
 /** The banner on top of a distribution step: what is still to hand out. */
 export function PoolBanner({
-  left,
+  left = [],
   note,
   title,
   error = false,
 }: {
-  left: readonly number[];
+  /** Values still to hand out; unused when `title` replaces the line. */
+  left?: readonly number[];
   note: string;
   /** Overrides the « À répartir » line (a points budget rather than values). */
   title?: string;

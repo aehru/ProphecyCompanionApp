@@ -115,8 +115,8 @@ export function chosenTraits(build: CreationBuild): (TraitChoice & { kind: Trait
 
 /**
  * A new age. The attribut values, the Maîtrise / Chance points, the
- * désavantage quota and the Points de Compétence all depend on it, so a CHANGE starts them over; picking the
- * same age again keeps everything.
+ * désavantage quota and the Points de Compétence all depend on it, so a CHANGE
+ * starts them over; picking the same age again keeps everything.
  */
 export function withAge(build: CreationBuild, age: AgeKey): CreationBuild {
   if (age === build.age) return build;

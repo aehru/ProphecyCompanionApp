@@ -1,4 +1,4 @@
-// Step 4 — the Attributs Majeurs by the rulebook: hand out the age's four values
+// Attributs — the Attributs Majeurs by the rulebook: hand out the age's four values
 // (ATTRIBUTS PAR ÂGE), then each gets the modificateur of its two related
 // caractéristiques (MODIFICATEURS D'ATTRIBUTS). The chosen Statut's requis sits
 // below as a reminder — prose, never checked, same rule as the rest of the app.
@@ -36,7 +36,6 @@ export default function AttributsStep({
 }) {
   const theme = useProphecyTheme();
   const pool = attributPool(build.age);
-  const values = [...new Set(pool)];
   const left = remainingValues(pool, build.attributs);
   const band = ageBand(build.age);
   const rung = statutFor(v.caste, parseInteger(v.statut), v.darkOrders === '1');
@@ -59,7 +58,7 @@ export default function AttributsStep({
               testID={`attribut-${a.key}`}
               caption={`${ABBR[c1]} + ${ABBR[c2]} ${sum}${mod == null ? '' : ` → ${fmtSignedMod(mod)}`}`}
               label={a.label}
-              values={values}
+              pool={pool}
               mine={build.attributs[a.key]}
               left={left}
               final={finalAttribut(build, a.key)}

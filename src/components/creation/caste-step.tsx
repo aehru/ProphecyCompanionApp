@@ -1,4 +1,4 @@
-// Step 1 — the caste (a card per caste, accented by its patron dragon) and the
+// Caste — the caste (a card per caste, accented by its patron dragon) and the
 // Statut the character starts at.
 
 import React from 'react';

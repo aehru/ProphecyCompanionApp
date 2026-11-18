@@ -23,7 +23,6 @@ import { magicField, optionLabel, PROFILE_VALUES, skillProfile } from '@/lib/ski
 
 /** Past this many options a slot is a dropdown rather than a row of chips. */
 const CHIP_LIMIT = 4;
-const VALUES = [...new Set(PROFILE_VALUES)];
 
 export default function ProfileStep({
   skills,
@@ -83,7 +82,7 @@ export default function ProfileStep({
                 label={
                   chosen ? optionLabel(chosen) : options.length === 1 ? optionLabel(options[0]) : '—'
                 }
-                values={VALUES}
+                pool={PROFILE_VALUES}
                 mine={mine?.values[i]}
                 left={left}
                 final={mine?.values[i] ?? null}

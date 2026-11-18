@@ -1,4 +1,4 @@
-// Step 3 — the caractéristiques by the rulebook: hand out 7/6/6/5/5/4/4/3 one
+// Caractéristiques — the caractéristiques by the rulebook: hand out 7/6/6/5/5/4/4/3 one
 // value each, the age modificateurs fold in, then « Adapter son profil » moves
 // one point — and only one — from a caractéristique to another.
 
@@ -18,9 +18,6 @@ import {
 import { assignValue, remainingValues } from '@/lib/distribution';
 import { STARTING_VALUES, ageBand, ageMod } from '@/lib/creation-rules';
 import { fmtSignedMod } from '@/lib/modifiers';
-
-/** One chip per distinct value: 7, 6, 5, 4, 3. */
-const VALUES = [...new Set(STARTING_VALUES)];
 
 const CARAC_OPTIONS = [
   { key: '', label: 'Aucun' },
@@ -60,7 +57,7 @@ export default function CaracStep({
               testID={`carac-${c.key}`}
               caption={mod ? `${c.abbr} ${fmtSignedMod(mod)}` : c.abbr}
               label={c.label}
-              values={VALUES}
+              pool={STARTING_VALUES}
               mine={build.assign[c.key]}
               left={left}
               final={finalCarac(build, c.key)}

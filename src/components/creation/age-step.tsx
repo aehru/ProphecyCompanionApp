@@ -1,4 +1,4 @@
-// Step 1 — L'âge: pick a band, or let a D10 pick it (table L'ÂGE). Each band
+// L'âge: pick a band, or let a D10 pick it (table L'ÂGE). Each band
 // shows its modificateurs, which the Caractéristiques step folds in.
 
 import React, { useState } from 'react';

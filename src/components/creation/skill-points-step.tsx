@@ -28,6 +28,7 @@ import {
   stepSkill,
   stepSpec,
 } from '@/lib/creation-skills';
+import { plural } from '@/lib/plural';
 import { type SkillAccess, skillAccess } from '@/lib/skill-access';
 import { magicField, optionLabel, SKILL_OPTION_IDS, skillProfile } from '@/lib/skill-profiles';
 
@@ -52,9 +53,8 @@ export function SkillPointsBanner({ skills, caste, age }: Omit<Props, 'onChange'
   const total = skillPoints(age, skills.tier);
   return (
     <PoolBanner
-      left={[]}
       error={left < 0}
-      title={left < 0 ? `Budget dépassé de ${-left}` : `${left} point${left > 1 ? 's' : ''} à dépenser`}
+      title={left < 0 ? `Budget dépassé de ${-left}` : `${left} ${plural(left, 'point')} à dépenser`}
       note={`sur ${total} · score maximum ${skillMax(age)} à la création`}
     />
   );

@@ -1,6 +1,6 @@
-// Step 2 — who the character is: nom (the one required field), concept, a
-// portrait, and whether a Great Dragon chose them. Caste and Statut were step 1;
-// the biographie stays on the sheet.
+// Identité — who the character is: nom (the one required field), concept, a
+// portrait, and whether a Great Dragon chose them. Caste and Statut have their
+// own step; the biographie stays on the sheet.
 
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
