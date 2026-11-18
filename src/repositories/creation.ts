@@ -2,11 +2,10 @@ import { TRAIT_BY_ID, traitFromPreset } from '@/data/trait-catalog';
 import type { NewCharacter } from '@/db/schema';
 import type { TraitKind } from '@/constants/prophecy';
 import type { TraitChoice } from '@/lib/creation';
-import type { SkillRowInput } from '@/lib/creation-skills';
 import { log } from '@/lib/log';
 import { storeCharacterMedia } from '@/lib/media';
 import { createCharacter, setCharacterMedia } from '@/repositories/characters';
-import { insertSkills } from '@/repositories/skills';
+import { insertSkills, type NewSkillInput } from '@/repositories/skills';
 import { createTrait } from '@/repositories/traits';
 
 /**
@@ -19,7 +18,7 @@ import { createTrait } from '@/repositories/traits';
 export async function saveCreation(
   data: Partial<NewCharacter>,
   traits: readonly (TraitChoice & { kind: TraitKind })[],
-  skillRows: readonly SkillRowInput[],
+  skillRows: readonly NewSkillInput[],
   avatarUri: string | null,
 ): Promise<number> {
   const { id } = await createCharacter(data);

@@ -12,6 +12,9 @@ export function skillsQuery(characterId: number) {
 
 export type SkillInput = { name: string; attribut: string; value: number };
 
+/** A row to insert as is: a base skill, or a specialization naming its mother. */
+export type NewSkillInput = SkillInput & { parentName?: string; specLabel?: string };
+
 /** Canonical composite name for a specialization ("Herboristerie (Curative)"). */
 export function specName(motherName: string, label: string): string {
   const l = label.trim();
@@ -52,7 +55,7 @@ export async function replaceSkills(characterId: number, rows: SkillInput[]) {
  */
 export async function insertSkills(
   characterId: number,
-  rows: readonly (SkillInput & { parentName?: string; specLabel?: string })[],
+  rows: readonly NewSkillInput[],
 ) {
   if (rows.length === 0) return;
   await db.insert(skills).values(rows.map((r) => ({ characterId, ...r })));

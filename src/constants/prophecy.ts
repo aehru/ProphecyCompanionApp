@@ -524,6 +524,11 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
   { name: 'Séduction', attribut: 'social' },
 ];
 
+const SKILL_ATTRIBUT = new Map(DEFAULT_SKILLS.map((s) => [s.name, s.attribut]));
+
+/** A default compétence's attribut, '' for a name not in DEFAULT_SKILLS. */
+export const skillAttribut = (name: string) => SKILL_ATTRIBUT.get(name) ?? '';
+
 export const WOUND_LEVELS = [
   { key: 'egratignure', label: 'Égratignure', damage: '1-10', malus: null },
   { key: 'legere', label: 'Légère', damage: '11-20', malus: '-1' },

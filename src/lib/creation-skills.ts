@@ -7,7 +7,7 @@
 // name, or `discipline:<key>` / `sphere:<key>` for the magic scores, which are
 // character columns rather than skill rows (`magicField`).
 
-import { DEFAULT_SKILLS } from '@/constants/prophecy';
+import { skillAttribut } from '@/constants/prophecy';
 import type { FormValues } from '@/lib/character-values';
 import { assignValue } from '@/lib/distribution';
 import {
@@ -18,7 +18,8 @@ import {
   skillPoints,
 } from '@/lib/creation-rules';
 import { skillCostFactor } from '@/lib/skill-access';
-import { magicField, PROFILE_VALUES, skillProfile } from '@/lib/skill-profiles';
+import { magicField, PROFILE_VALUES } from '@/lib/skill-profiles';
+import type { NewSkillInput } from '@/repositories/skills';
 
 export type SkillBuild = {
   /** The caste the profile below was filled for — another caste starts it over. */
@@ -156,30 +157,20 @@ export function applySkills(v: FormValues, s: SkillBuild, caste: string): FormVa
   return out;
 }
 
-const ATTRIBUT_OF = new Map(DEFAULT_SKILLS.map((d) => [d.name, d.attribut]));
-
-export type SkillRowInput = {
-  name: string;
-  attribut: string;
-  value: number;
-  parentName?: string;
-  specLabel?: string;
-};
-
 /** The `skills` rows « Démarrer » inserts: each scored compétence, then the spécialisation. */
 export function skillRows(
   s: SkillBuild,
   caste: string,
   specName: (mother: string, label: string) => string,
-): SkillRowInput[] {
-  const rows: SkillRowInput[] = scoredIds(s, caste)
+): NewSkillInput[] {
+  const rows: NewSkillInput[] = scoredIds(s, caste)
     .filter((id) => magicField(id) == null)
-    .map((id) => ({ name: id, attribut: ATTRIBUT_OF.get(id) ?? '', value: skillScore(s, caste, id) }))
+    .map((id) => ({ name: id, attribut: skillAttribut(id), value: skillScore(s, caste, id) }))
     .filter((r) => r.value > 0);
   if (s.spec && s.spec.score > 0) {
     rows.push({
       name: specName(s.spec.parent, s.spec.label),
-      attribut: ATTRIBUT_OF.get(s.spec.parent) ?? '',
+      attribut: skillAttribut(s.spec.parent),
       value: s.spec.score,
       parentName: s.spec.parent,
       specLabel: s.spec.label.trim(),
@@ -187,6 +178,3 @@ export function skillRows(
   }
   return rows;
 }
-
-/** Whether the caste even has a base profile (« Sans Caste » does not). */
-export const hasProfile = (caste: string) => skillProfile(caste) != null;
