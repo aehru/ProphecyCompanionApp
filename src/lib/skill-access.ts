@@ -44,7 +44,12 @@ export const RESERVED_SKILLS: Record<string, readonly CasteKey[]> = {
   'Vie en cité': ['commercant', 'protecteur'],
 };
 
-export const FORBIDDEN_SKILLS: ReadonlySet<string> = new Set(['Armes mécanique']);
+export const FORBIDDEN_SKILLS: ReadonlySet<string> = new Set([
+  'Armes mécanique',
+  'Chirurgie',
+  'Explosifs',
+  'Mécanismes',
+]);
 
 export type SkillAccess = 'reservee' | 'interdite' | null;
 
