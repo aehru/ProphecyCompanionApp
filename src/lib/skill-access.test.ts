@@ -23,6 +23,12 @@ describe('skill access', () => {
     expect(skillAccess('discipline:magieInvocatoire', 'artisan')).toBe('reservee');
   });
 
+  it('reserves the Sphères to mages, Nature to prodiges too', () => {
+    expect(skillAccess('sphere:sphereFeu', 'prodige')).toBe('reservee');
+    expect(skillAccess('sphere:sphereNature', 'prodige')).toBeNull();
+    expect(skillAccess('sphere:sphereFeu', 'mage')).toBeNull();
+  });
+
   it('doubles an interdite for everyone', () => {
     expect(skillAccess('Armes mécanique', 'artisan')).toBe('interdite');
     expect(skillCostFactor('Armes mécanique', 'artisan')).toBe(2);
