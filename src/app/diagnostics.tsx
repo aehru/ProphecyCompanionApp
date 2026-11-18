@@ -14,6 +14,7 @@ import { Alert } from '@/lib/alert';
 import { newIssueUrl, openExternal } from '@/lib/links';
 import { APP_VERSION, log, setLogLevel, SESSION_ID, type LogEntry, type LogLevel } from '@/lib/log';
 import { copyDiagnostics, shareDiagnostics } from '@/lib/log/share';
+import { plural } from '@/lib/plural';
 
 const keyExtractor = (e: LogEntry, i: number) => `${e.t}-${i}`;
 
@@ -92,7 +93,7 @@ export default function DiagnosticsScreen() {
         <SectionCard title="Niveau de détail" icon="filter">
           <LevelSwitcher value={level} onChange={handleLevel} />
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            {entries.length} entrée{entries.length > 1 ? 's' : ''} · {Math.round(bytes / 1024)} Ko ·
+            {entries.length} {plural(entries.length, 'entrée')} · {Math.round(bytes / 1024)} Ko ·
             session {SESSION_ID} · version {APP_VERSION}
           </Text>
         </SectionCard>

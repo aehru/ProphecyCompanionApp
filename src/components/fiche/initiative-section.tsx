@@ -20,6 +20,7 @@ import {
 } from '@/lib/action-cumul';
 import { parseInteger } from '@/lib/character-values';
 import { initiativeDiceCount } from '@/lib/dice';
+import { plural } from '@/lib/plural';
 
 /**
  * INITIATIVE: one slot per die rolled this turn, the extra-dice stepper, and a
@@ -65,7 +66,6 @@ export default function InitiativeSection({
 }) {
   const theme = useProphecyTheme();
   const count = initiativeDiceCount(max, bonus);
-  const plural = Math.abs(bonus) > 1 ? 's' : '';
   // Which slot's picker is open; null = closed. Index rather than a boolean so
   // the dialog knows what it is editing.
   const [picking, setPicking] = useState<number | null>(null);
@@ -123,8 +123,8 @@ export default function InitiativeSection({
             // a forgotten die would otherwise quietly ride along all session.
             <Text style={{ color: theme.colors.onSurfaceVariant }}>
               {bonus > 0
-                ? `+${bonus} dé${plural} supplémentaire${plural}`
-                : `${-bonus} dé${plural} en moins`}
+                ? `+${bonus} ${plural(bonus, 'dé')} ${plural(bonus, 'supplémentaire')}`
+                : `${-bonus} ${plural(bonus, 'dé')} en moins`}
             </Text>
           ) : null}
 

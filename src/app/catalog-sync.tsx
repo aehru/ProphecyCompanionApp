@@ -72,7 +72,7 @@ export default function CatalogSyncScreen() {
       await applySpellSync(entries, accepted);
       Alert.alert(
         'Mise à jour effectuée',
-        `${entries.length} sortilège${entries.length > 1 ? 's' : ''} mis à jour.`,
+        `${entries.length} ${plural(entries.length, 'sortilège')} mis à jour.`,
         [{ text: 'Fermer', onPress: () => router.back() }],
       );
     } catch (e) {
@@ -85,7 +85,7 @@ export default function CatalogSyncScreen() {
   return (
     <ScrollView contentContainerStyle={[styles.content, contentWidth]}>
       <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-        {entries.length} sortilège{entries.length > 1 ? 's' : ''} {plural(entries.length, 'copié')} du
+        {entries.length} {plural(entries.length, 'sortilège')} {plural(entries.length, 'copié')} du
         catalogue {plural(entries.length, 'a', 'ont')} été {plural(entries.length, 'corrigé')} depuis.
         Les sorts que vous avez écrits vous-même ne sont jamais touchés.
       </Text>

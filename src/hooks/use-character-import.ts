@@ -3,10 +3,9 @@ import { useCallback, useState } from 'react';
 import { Alert } from '@/lib/alert';
 import { parseImport } from '@/lib/character-transfer';
 import { pickImportText } from '@/lib/character-transfer-io';
+import { plural } from '@/lib/plural';
 import { importCharacters } from '@/repositories/transfer';
 
-/** « 3 personnages » / « 1 personnage » — French plural, once. */
-const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? 's' : ''}`;
 
 /**
  * Pick a JSON export and read it back. `'restore'` is safe as a blanket mode:
@@ -32,9 +31,9 @@ export function useCharacterImport() {
       const added = ids.length - restored;
       const parts: string[] = [];
       if (restored > 0) {
-        parts.push(`${plural(restored, 'personnage')} restauré${restored > 1 ? 's' : ''}`);
+        parts.push(`${restored} ${plural(restored, 'personnage')} ${plural(restored, 'restauré')}`);
       }
-      if (added > 0) parts.push(`${plural(added, 'personnage')} ajouté${added > 1 ? 's' : ''}`);
+      if (added > 0) parts.push(`${added} ${plural(added, 'personnage')} ${plural(added, 'ajouté')}`);
       const detail = restored > 0 ? '\n\nUne restauration remplace la fiche déjà présente.' : '';
       Alert.alert('Import réussi', `${parts.join(', ')}.${detail}`);
       return true;

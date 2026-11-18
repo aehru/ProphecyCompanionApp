@@ -3,6 +3,7 @@ import { Text } from 'react-native-paper';
 
 import Icon from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { plural } from '@/lib/plural';
 
 /**
  * « 3 sortilèges à mettre à jour » — the way into the catalogue sweep, shown on
@@ -21,13 +22,11 @@ export default function CatalogSyncBanner({
   onPress: () => void;
 }) {
   const theme = useProphecyTheme();
-  const plural = count > 1 ? 's' : '';
-
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`Mettre à jour ${count} sortilège${plural} depuis le catalogue`}
+      accessibilityLabel={`Mettre à jour ${count} ${plural(count, 'sortilège')} depuis le catalogue`}
       style={[
         styles.banner,
         { backgroundColor: theme.colors.surface, borderColor: theme.colors.primary },
@@ -35,11 +34,11 @@ export default function CatalogSyncBanner({
       <Icon name="book" size={20} color={theme.colors.primary} />
       <View style={styles.text}>
         <Text variant="titleSmall">
-          {count} sortilège{plural} à mettre à jour
+          {count} {plural(count, 'sortilège')} à mettre à jour
         </Text>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Le catalogue a changé depuis qu’{count > 1 ? 'ils ont' : 'il a'} été copié
-          {plural} sur une fiche.
+          Le catalogue a changé depuis qu’{plural(count, 'il a', 'ils ont')} été{' '}
+          {plural(count, 'copié')} sur une fiche.
         </Text>
       </View>
       <Icon name="chev" size={20} color={theme.colors.onSurfaceVariant} />

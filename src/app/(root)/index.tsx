@@ -20,6 +20,7 @@ import { useSplitWidth } from "@/hooks/use-layout";
 import { useProphecyTheme } from "@/hooks/use-prophecy-theme";
 import { Alert } from "@/lib/alert";
 import { type ExportIntent } from "@/lib/character-transfer";
+import { plural } from "@/lib/plural";
 import { shareExport } from "@/lib/character-transfer-io";
 import {
   allMembersQuery,
@@ -31,8 +32,6 @@ import {
 } from "@/repositories/characters";
 import { duplicateCharacters, exportCharacters } from "@/repositories/transfer";
 
-/** « 3 personnages » / « 1 personnage » — French plural, once. */
-const plural = (n: number, word: string) => `${n} ${word}${n > 1 ? "s" : ""}`;
 
 export default function CharactersListScreen() {
   const router = useRouter();
@@ -88,7 +87,7 @@ export default function CharactersListScreen() {
   // query refreshes the list; no navigation.
   const handleDuplicateSelection = useCallback(() => {
     const count = selectedIds.length;
-    Alert.alert("Dupliquer", `Dupliquer ${plural(count, "personnage")} ?`, [
+    Alert.alert("Dupliquer", `Dupliquer ${count} ${plural(count, "personnage")} ?`, [
       { text: "Annuler", style: "cancel" },
       {
         text: "Dupliquer",
@@ -121,11 +120,11 @@ export default function CharactersListScreen() {
       // The warning is a courtesy — never block the deletion on it.
     }
     const warning = shared.length
-      ? `\n\nPartagé${shared.length > 1 ? "s" : ""} dans une campagne : ${shared.join(", ")}.`
+      ? `\n\n${plural(shared.length, "Partagé")} dans une campagne : ${shared.join(", ")}.`
       : "";
     Alert.alert(
       "Supprimer",
-      `Supprimer ${plural(count, "personnage")} ? Cette action est définitive.${warning}`,
+      `Supprimer ${count} ${plural(count, "personnage")} ? Cette action est définitive.${warning}`,
       [
         { text: "Annuler", style: "cancel" },
         {
@@ -159,7 +158,7 @@ export default function CharactersListScreen() {
   useLayoutEffect(() => {
     if (selection.active) {
       navigation.setOptions({
-        title: `${selectionCount} sélectionné${selectionCount > 1 ? "s" : ""}`,
+        title: `${selectionCount} ${plural(selectionCount, "sélectionné")}`,
         headerBackVisible: false,
         headerLeft: () => (
           <IconButton
