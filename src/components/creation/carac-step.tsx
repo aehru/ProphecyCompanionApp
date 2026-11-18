@@ -11,7 +11,11 @@ import SectionCard from '@/components/ui/section-card';
 import SelectField from '@/components/ui/select-field';
 import { type CaracKey, CARACTERISTIQUES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
-import { type CreationBuild, assignValue, finalCarac, remainingValues } from '@/lib/creation';
+import {
+  type CreationBuild,
+  finalCarac,
+} from '@/lib/creation';
+import { assignValue, remainingValues } from '@/lib/distribution';
 import { STARTING_VALUES, ageBand, ageMod } from '@/lib/creation-rules';
 import { fmtSignedMod } from '@/lib/modifiers';
 

@@ -14,11 +14,10 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { type FormValues, parseInteger } from '@/lib/character-values';
 import {
   type CreationBuild,
-  assignValue,
   attributCaracSum,
   finalAttribut,
-  remainingValues,
 } from '@/lib/creation';
+import { assignValue, remainingValues } from '@/lib/distribution';
 import { ATTRIBUT_CARACS, ageBand, attributModifier, attributPool } from '@/lib/creation-rules';
 import { fmtSignedMod } from '@/lib/modifiers';
 import { statutFor } from '@/lib/statut';

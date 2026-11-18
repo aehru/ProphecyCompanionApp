@@ -4,7 +4,6 @@ import type { CaracKey } from '@/constants/prophecy';
 import { toFormValues } from '@/lib/character-values';
 import {
   applyBuild,
-  assignValue,
   buildInitiative,
   buildTraitPool,
   chosenTraits,
@@ -18,12 +17,12 @@ import {
   finalResource,
   freeTendancesLeft,
   proposeTendances,
-  remainingValues,
   resourcePointsLeft,
   stepResource,
   stepValue,
   tapPuce,
 } from '@/lib/creation';
+import { assignValue, remainingValues } from '@/lib/distribution';
 import { STARTING_VALUES, tendanceStart } from '@/lib/creation-rules';
 
 const IDENTITE = CREATION_STEPS.findIndex((s) => s.key === 'identite');

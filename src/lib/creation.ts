@@ -20,6 +20,8 @@ import {
   type TraitKind,
 } from '@/constants/prophecy';
 import { clamp, type FormValues, parseInteger } from '@/lib/character-values';
+import { type Assign } from '@/lib/distribution';
+import { applySkills, EMPTY_SKILLS, type SkillBuild } from '@/lib/creation-skills';
 import { traitPool, type TraitPool } from '@/lib/trait-pool';
 import {
   ATTRIBUT_CARACS,
@@ -45,6 +47,8 @@ export const CREATION_STEPS = [
   { key: 'tendances', title: 'Tendances', short: 'Tendances' },
   { key: 'desavantages', title: 'Désavantages', short: 'Désavantages' },
   { key: 'avantages', title: 'Avantages', short: 'Avantages' },
+  { key: 'profil', title: 'Profil de caste', short: 'Profil' },
+  { key: 'competences', title: 'Compétences', short: 'Compétences' },
   { key: 'identite', title: 'Identité', short: 'Identité' },
   { key: 'recap', title: 'Récapitulatif', short: 'Récapitulatif' },
 ] as const;
@@ -65,49 +69,6 @@ export const stepValue = (text: string, delta: number) =>
 export function tapPuce(text: string, index: number): string {
   const next = parseInteger(text) === index + 1 ? index : index + 1;
   return String(clamp(next, 0, MAX_PUCES));
-}
-
-// ── Distribution (one value of a pool per key) ─────────────────────────────
-
-type Assign<K extends string> = Partial<Record<K, number>>;
-
-/** The pool values still to hand out, in pool order. */
-export function remainingValues<K extends string>(
-  pool: readonly number[],
-  assign: Assign<K>,
-): number[] {
-  const left = [...pool];
-  for (const n of Object.values<number | undefined>(assign)) {
-    const i = left.indexOf(n as number);
-    if (i >= 0) left.splice(i, 1);
-  }
-  return left;
-}
-
-/**
- * Give `value` to `key`. Tapping its current value takes it back. A value none
- * of which is left is SWAPPED with a key holding it, so moving a 7 around never
- * needs an « unassign » first.
- */
-export function assignValue<K extends string>(
-  pool: readonly number[],
-  assign: Assign<K>,
-  key: K,
-  value: number,
-): Assign<K> {
-  const next = { ...assign };
-  if (next[key] === value) {
-    delete next[key];
-    return next;
-  }
-  if (!remainingValues(pool, assign).includes(value)) {
-    const holder = (Object.keys(next) as K[]).find((k) => k !== key && next[k] === value);
-    if (!holder) return assign;
-    if (next[key] == null) delete next[holder];
-    else next[holder] = next[key];
-  }
-  next[key] = value;
-  return next;
 }
 
 // ── The build: every choice the wizard turns into sheet values ─────────────
@@ -132,6 +93,8 @@ export type CreationBuild = {
   desavantages: Record<string, TraitChoice>;
   /** The avantages bought, in the order they were taken. */
   avantages: TraitChoice[];
+  /** Base profile, spécialisation and Points de Compétence (lib/creation-skills). */
+  skills: SkillBuild;
 };
 
 /** A catalogue entry taken during creation, inserted as a `traits` row on « Démarrer ». */
@@ -151,13 +114,21 @@ export function chosenTraits(build: CreationBuild): (TraitChoice & { kind: Trait
 }
 
 /**
- * A new age. The attribut values, the Maîtrise / Chance points and the
- * désavantage quota all depend on it, so a CHANGE starts them over; picking the
+ * A new age. The attribut values, the Maîtrise / Chance points, the
+ * désavantage quota and the Points de Compétence all depend on it, so a CHANGE starts them over; picking the
  * same age again keeps everything.
  */
 export function withAge(build: CreationBuild, age: AgeKey): CreationBuild {
   if (age === build.age) return build;
-  return { ...build, age, attributs: {}, resources: {}, desavantages: {} };
+  return {
+    ...build,
+    age,
+    attributs: {},
+    resources: {},
+    desavantages: {},
+    // Points and the score limit move with the age: the raises start over.
+    skills: { ...build.skills, raised: {}, spec: null },
+  };
 }
 
 export const EMPTY_BUILD: CreationBuild = {
@@ -169,6 +140,7 @@ export const EMPTY_BUILD: CreationBuild = {
   nation: null,
   desavantages: {},
   avantages: [],
+  skills: EMPTY_SKILLS,
 };
 
 /**
@@ -280,5 +252,5 @@ export function applyBuild(v: FormValues, build: CreationBuild): FormValues {
   if (wounds && !WOUND_LEVELS.some((w) => v[`${w.key}Max`])) {
     for (const [k, n] of Object.entries(wounds)) out[k] = String(n);
   }
-  return out;
+  return applySkills(out, build.skills, v.caste);
 }
