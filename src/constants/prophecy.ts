@@ -621,6 +621,8 @@ export const RESOURCES = [
   { key: 'chance', label: 'Chance' },
 ] as const;
 
+export type ResourceKey = (typeof RESOURCES)[number]['key'];
+
 /**
  * Money — Drac coins. Stored as separate counts on actual_state (no universal
  * conversion). Keys match the actual_state columns. Ordered high → low value.

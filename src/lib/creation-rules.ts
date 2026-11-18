@@ -11,7 +11,7 @@
  * the other engines in lib/.
  */
 
-import type { AttributKey, CaracKey } from '@/constants/prophecy';
+import type { AttributKey, CaracKey, ResourceKey, TendanceKey } from '@/constants/prophecy';
 
 /**
  * A rulebook band table: `min` is a row's lower bound, inclusive, and a row runs
@@ -101,7 +101,7 @@ export function initiativeDice(coordination: number, perception: number): number
   return bandValue(INITIATIVE_BANDS, pairScore(coordination, perception));
 }
 
-// ── Âge (tables L'ÂGE, MODIFICATEURS D'ÂGE, ATTRIBUTS PAR ÂGE) ─────────────
+// ── Âge (tables L'ÂGE, MODIFICATEURS D'ÂGE, ATTRIBUTS PAR ÂGE, MAÎTRISE ET CHANCE)
 
 type AgeBand = {
   key: string;
@@ -113,6 +113,8 @@ type AgeBand = {
   mods: Partial<Record<CaracKey, number>>;
   /** The four values distributed among the attributs. */
   attributs: readonly number[];
+  /** MAÎTRISE ET CHANCE: points given outright, and points left to distribute. */
+  resources: { fixed: Partial<Record<ResourceKey, number>>; free: number };
 };
 
 /**
@@ -128,6 +130,7 @@ export const AGE_BANDS = [
     d10: [1],
     mods: { force: -2, resistance: -2, perception: 1, empathie: 2, presence: 1 },
     attributs: [4, 4, 4, 3],
+    resources: { fixed: { chance: 4 }, free: 3 },
   },
   {
     key: 'adolescent',
@@ -136,6 +139,7 @@ export const AGE_BANDS = [
     d10: [2, 3],
     mods: { force: -1, resistance: -1, perception: 1, empathie: 1 },
     attributs: [5, 4, 4, 3],
+    resources: { fixed: { chance: 2 }, free: 4 },
   },
   {
     key: 'adulte',
@@ -144,6 +148,7 @@ export const AGE_BANDS = [
     d10: [4, 5, 6, 7],
     mods: {},
     attributs: [5, 5, 4, 3],
+    resources: { fixed: {}, free: 6 },
   },
   {
     key: 'ancien',
@@ -152,6 +157,7 @@ export const AGE_BANDS = [
     d10: [8, 9],
     mods: { force: -1, resistance: -1, intelligence: 1, volonte: 1, perception: -1, presence: 1 },
     attributs: [6, 5, 4, 3],
+    resources: { fixed: { maitrise: 2 }, free: 4 },
   },
   {
     key: 'venerable',
@@ -169,6 +175,7 @@ export const AGE_BANDS = [
       presence: 1,
     },
     attributs: [6, 6, 4, 3],
+    resources: { fixed: { maitrise: 4 }, free: 3 },
   },
 ] as const satisfies readonly AgeBand[];
 
@@ -193,6 +200,11 @@ export function ageMod(age: AgeKey | null, key: CaracKey): number {
 /** The four attribut values to distribute: the age's row, Adulte by default. */
 export function attributPool(age: AgeKey | null): readonly number[] {
   return (ageBand(age) ?? DEFAULT_AGE).attributs;
+}
+
+/** MAÎTRISE ET CHANCE for an age: the age's row, Adulte by default. */
+export function resourceStart(age: AgeKey | null): AgeBand['resources'] {
+  return (ageBand(age) ?? DEFAULT_AGE).resources;
 }
 
 // ── Caractéristiques et Attributs Majeurs ──────────────────────────────────
@@ -227,4 +239,53 @@ const ATTRIBUT_MOD_BANDS: Band<number>[] = [
  */
 export function attributModifier(sum: number): number | null {
   return sum <= 0 ? null : bandValue(ATTRIBUT_MOD_BANDS, sum);
+}
+
+// ── Tendances de départ (nation d'origine × âge) ───────────────────────────
+
+/**
+ * TENDANCES DE DÉPART, one row per nation, the five cells in AGE_BANDS order
+ * (enfant → vénérable), written exactly as the book prints them so the table
+ * can be proofread against the page: TD / TF / TH a tendance, L a free point.
+ * The nation itself is not stored — the sheet has no column for it; it only
+ * proposes the tendances, which stay editable.
+ */
+export const NATIONS = [
+  { key: 'solyr', label: 'Empire de Solyr', start: ['1TH, 1L', '1TD, 1TH, 1L', '2TD, 2TH', '2TD, 2TH, 1L', '2TD, 2TH, 1L'] },
+  { key: 'kar', label: 'Kar', start: ['2TD', '1TD, 2L', '2TD, 2L', '3TD, 2L', '4TD, 1L'] },
+  { key: 'kali', label: 'Kali', start: ['1TF, 1TH', '1TF, 1TH, 1L', '2TF, 2L', '3TF, 2L', '4TF, 1L'] },
+  { key: 'foretMere', label: 'Forêt Mère', start: ['2TD', '2TD, 1TH', '3TD, 1L', '4TD, 1L', '5TD'] },
+  { key: 'royaumeFleurs', label: 'Royaume des Fleurs', start: ['2TD', '2TD, 1TH', '3TD, 1L', '4TD, 1L', '5TD'] },
+  { key: 'nesora', label: 'Empire Nésora', start: ['1TH, 1L', '2TH, 1L', '3TH, 1L', '3TH, 2L', '4TH, 1L'] },
+  { key: 'pomyrie', label: 'Pomyrie', start: ['1TD, 1TH', '2TD, 1L', '2TD, 2L', '3TD, 2L', '3TD, 2L'] },
+  { key: 'kern', label: 'Kern', start: ['2TD', '2TD, 1L', '3TD, 1L', '3TD, 2L', '4TD, 1L'] },
+  { key: 'ysmir', label: 'Ysmir, Terres galyrs', start: ['1TD, 1TH', '1TD, 1TH, 1L', '2TD, 1TH, 1L', '3TD, 1TH, 1L', '4TD, 1TH'] },
+  { key: 'marne', label: 'Principauté de Marne', start: ['1TD, 1TH', '1TD, 2L', '1TD, 1TF, 2L', '2TD, 1TF, 2L', '3TD, 1TF, 1L'] },
+  { key: 'jaspor', label: 'Jaspor', start: ['1TD, 1TH', '1TD, 2L', '1TD, 1TF, 2L', '2TD, 1TF, 2L', '3TD, 1TF, 1L'] },
+  { key: 'zul', label: 'Empire Zûl', start: ['1TD, 1TH', '2TD, 1L', '3TD, 1L', '4TD, 1L', '4TD, 1L'] },
+  { key: 'marchesAlyzees', label: 'Marches Alyzées', start: ['2L', '3L', '4L', '5L', '5L'] },
+  { key: 'griff', label: 'Cité de Griff', start: ['2L', '3L', '4L', '5L', '5L'] },
+] as const;
+
+export type NationKey = (typeof NATIONS)[number]['key'];
+
+export type TendanceStart = { fixed: Record<TendanceKey, number>; free: number };
+
+const TENDANCE_CODES: Record<string, TendanceKey> = { TD: 'dragon', TF: 'fatalite', TH: 'homme' };
+
+/** « 2TD, 1TH, 1L » → the fixed tendances and the free points. */
+export function parseTendanceStart(cell: string): TendanceStart {
+  const out: TendanceStart = { fixed: { dragon: 0, fatalite: 0, homme: 0 }, free: 0 };
+  for (const [, n, code] of cell.matchAll(/(\d+)\s*(TD|TF|TH|L)/g)) {
+    if (code === 'L') out.free += Number(n);
+    else out.fixed[TENDANCE_CODES[code]] += Number(n);
+  }
+  return out;
+}
+
+/** A nation's starting tendances for an age (Adulte while none is chosen). */
+export function tendanceStart(nation: NationKey, age: AgeKey | null): TendanceStart {
+  const row = NATIONS.find((n) => n.key === nation)!;
+  const i = AGE_BANDS.findIndex((b) => b.key === (age ?? DEFAULT_AGE.key));
+  return parseTendanceStart(row.start[i]);
 }

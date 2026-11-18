@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  AGE_BANDS,
+  NATIONS,
+  parseTendanceStart,
+  tendanceStart,
   ageFromD10,
   ageMod,
   attributModifier,
   attributPool,
   initiativeDice,
+  resourceStart,
   woundBoxes,
 } from '@/lib/creation-rules';
 
@@ -99,6 +104,33 @@ describe('age', () => {
     expect(attributPool('enfant')).toEqual([4, 4, 4, 3]);
     expect(attributPool('venerable')).toEqual([6, 6, 4, 3]);
     expect(attributPool(null)).toEqual([5, 5, 4, 3]);
+  });
+  it('reads MAÎTRISE ET CHANCE off the age, Adulte by default', () => {
+    expect(resourceStart('adolescent')).toEqual({ fixed: { chance: 2 }, free: 4 });
+    expect(resourceStart('venerable')).toEqual({ fixed: { maitrise: 4 }, free: 3 });
+    expect(resourceStart(null)).toEqual({ fixed: {}, free: 6 });
+  });
+});
+
+describe('tendances de départ', () => {
+  it('parses a cell as the book prints it', () => {
+    expect(parseTendanceStart('2TD, 1TF, 2L')).toEqual({
+      fixed: { dragon: 2, fatalite: 1, homme: 0 },
+      free: 2,
+    });
+    expect(parseTendanceStart('5TD').free).toBe(0);
+  });
+  it('totals 2 / 3 / 4 / 5 / 5 points per age for every nation (proofreads the table)', () => {
+    for (const nation of NATIONS) {
+      const totals = AGE_BANDS.map((b) => {
+        const s = tendanceStart(nation.key, b.key);
+        return s.free + s.fixed.dragon + s.fixed.fatalite + s.fixed.homme;
+      });
+      expect([nation.key, totals]).toEqual([nation.key, [2, 3, 4, 5, 5]]);
+    }
+  });
+  it('reads the Adulte column while no age is chosen', () => {
+    expect(tendanceStart('kar', null)).toEqual(tendanceStart('kar', 'adulte'));
   });
 });
 
