@@ -6,7 +6,10 @@
 // Keyed by option id (`skill-profiles`): a compétence's app name, or the magic
 // ids. `skill-access.test.ts` fails on a name the app does not know.
 
-import { type CasteKey, DISCIPLINES, SPHERES } from '@/constants/prophecy';
+import type { CasteKey } from '@/constants/prophecy';
+import { ALL_DISCIPLINES, ALL_SPHERES } from '@/lib/skill-profiles';
+
+const NATURE = 'sphere:sphereNature';
 
 export const RESERVED_SKILLS: Record<string, readonly CasteKey[]> = {
   Alchimie: ['artisan', 'erudit'],
@@ -22,7 +25,7 @@ export const RESERVED_SKILLS: Record<string, readonly CasteKey[]> = {
   Conte: ['erudit', 'voyageur'],
   Contrefaçon: ['artisan', 'commercant'],
   Déverrouillage: ['artisan', 'commercant'],
-  ...Object.fromEntries(DISCIPLINES.map((d) => [`discipline:${d.key}`, ['mage'] as const])),
+  ...Object.fromEntries(ALL_DISCIPLINES.map((id) => [id, ['mage'] as const])),
   Dressage: ['artisan', 'prodige', 'voyageur'],
   'Faire les poches': ['commercant', 'voyageur'],
   Géographie: ['commercant', 'erudit', 'voyageur'],
@@ -36,9 +39,7 @@ export const RESERVED_SKILLS: Record<string, readonly CasteKey[]> = {
   Orientation: ['prodige', 'voyageur'],
   Pièges: ['artisan', 'voyageur'],
   // « Sphères » for mages — the Nature one for prodiges too.
-  ...Object.fromEntries(
-    SPHERES.map((s) => [`sphere:${s.key}`, s.key === 'sphereNature' ? ['mage', 'prodige'] : ['mage']]),
-  ),
+  ...Object.fromEntries(ALL_SPHERES.map((id) => [id, id === NATURE ? ['mage', 'prodige'] : ['mage']])),
   Stratégie: ['combattant', 'protecteur'],
   Survie: ['voyageur'],
   'Vie en cité': ['commercant', 'protecteur'],

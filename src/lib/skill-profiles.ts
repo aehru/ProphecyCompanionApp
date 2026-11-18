@@ -25,8 +25,9 @@ import {
 /** The base scores, one per slot. */
 export const PROFILE_VALUES = [6, 6, 5, 5, 4] as const;
 
-const ALL_DISCIPLINES = DISCIPLINES.map((d) => `discipline:${d.key}`);
-const ALL_SPHERES = SPHERES.map((s) => `sphere:${s.key}`);
+/** Every Discipline / Sphère as an option id. */
+export const ALL_DISCIPLINES = DISCIPLINES.map((d) => `discipline:${d.key}`);
+export const ALL_SPHERES = SPHERES.map((s) => `sphere:${s.key}`);
 
 /** « une Compétence d'Armes parmi : … », by the book's own adjectives. */
 const W = {
