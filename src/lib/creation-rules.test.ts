@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   AGE_BANDS,
+  desavantageSlots,
   NATIONS,
   parseTendanceStart,
   tendanceStart,
@@ -109,6 +110,21 @@ describe('age', () => {
     expect(resourceStart('adolescent')).toEqual({ fixed: { chance: 2 }, free: 4 });
     expect(resourceStart('venerable')).toEqual({ fixed: { maitrise: 4 }, free: 3 });
     expect(resourceStart(null)).toEqual({ fixed: {}, free: 6 });
+  });
+});
+
+describe('desavantageSlots', () => {
+  const read = (age: Parameters<typeof desavantageSlots>[0]) =>
+    desavantageSlots(age).map((s) => `${s.required ? '!' : '+'}${s.rarities.join('|')}`);
+  it('lists the obligatoires then the supplémentaires per age', () => {
+    expect(read('enfant')).toEqual(['!enfant', '+enfant|commun']);
+    expect(read('adulte')).toEqual(['!commun', '+commun', '+commun', '+rare']);
+    expect(read('venerable')).toEqual(['!commun', '!ancien', '!ancien', '+commun', '+rare', '+ancien']);
+    expect(read(null)).toEqual(read('adulte'));
+  });
+  it('gives every slot a distinct id', () => {
+    const ids = desavantageSlots('ancien').map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 

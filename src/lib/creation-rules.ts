@@ -11,7 +11,13 @@
  * the other engines in lib/.
  */
 
-import type { AttributKey, CaracKey, ResourceKey, TendanceKey } from '@/constants/prophecy';
+import type {
+  AttributKey,
+  CaracKey,
+  ResourceKey,
+  TendanceKey,
+  TraitRarity,
+} from '@/constants/prophecy';
 
 /**
  * A rulebook band table: `min` is a row's lower bound, inclusive, and a row runs
@@ -239,6 +245,40 @@ const ATTRIBUT_MOD_BANDS: Band<number>[] = [
  */
 export function attributModifier(sum: number): number | null {
   return sum <= 0 ? null : bandValue(ATTRIBUT_MOD_BANDS, sum);
+}
+
+// ── Désavantages (obligatoires et supplémentaires, par âge) ────────────────
+
+/** One désavantage to take: the rarities it may be drawn from (« Enfants » ou « Communs »). */
+export type DesavantageSlot = {
+  id: string;
+  required: boolean;
+  rarities: readonly TraitRarity[];
+};
+
+/**
+ * DÉSAVANTAGES by âge de départ: each inner list is ONE désavantage and the
+ * rarities it may come from. The obligatoires must be taken; the
+ * supplémentaires are the player's choice, each worth its points.
+ */
+const DESAVANTAGE_QUOTAS: Record<AgeKey, { required: TraitRarity[][]; extra: TraitRarity[][] }> = {
+  enfant: { required: [['enfant']], extra: [['enfant', 'commun']] },
+  adolescent: { required: [['commun']], extra: [['commun'], ['commun']] },
+  adulte: { required: [['commun']], extra: [['commun'], ['commun'], ['rare']] },
+  ancien: { required: [['commun'], ['ancien']], extra: [['commun'], ['commun'], ['rare'], ['rare']] },
+  venerable: {
+    required: [['commun'], ['ancien'], ['ancien']],
+    extra: [['commun'], ['rare'], ['ancien']],
+  },
+};
+
+/** The désavantages an age calls for, obligatoires first (Adulte while none is chosen). */
+export function desavantageSlots(age: AgeKey | null): DesavantageSlot[] {
+  const q = DESAVANTAGE_QUOTAS[age ?? (DEFAULT_AGE.key as AgeKey)];
+  return [
+    ...q.required.map((rarities, i) => ({ id: `obligatoire-${i}`, required: true, rarities })),
+    ...q.extra.map((rarities, i) => ({ id: `supplementaire-${i}`, required: false, rarities })),
+  ];
 }
 
 // ── Tendances de départ (nation d'origine × âge) ───────────────────────────
