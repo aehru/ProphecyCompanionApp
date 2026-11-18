@@ -2,15 +2,15 @@
 // experience) spent on raising any compétence — or the spécialisation, at half
 // price — up to the age's limit. Priced on the COÛT DES COMPÉTENCES table.
 // The caste's recommended compétences come first; the rest fold by attribut.
-
-import { Text } from 'react-native-paper';
+//
+// The budget banner is its own export: the wizard pins it above the scroll so
+// the total stays in sight while the list scrolls under it.
 
 import StepperRow from '@/components/creation/stepper-row';
 import { PoolBanner } from '@/components/creation/value-pick-row';
 import SectionCard from '@/components/ui/section-card';
 import SelectField from '@/components/ui/select-field';
 import { ATTRIBUTS, DEFAULT_SKILLS } from '@/constants/prophecy';
-import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   type AgeKey,
   EXPERIENCE_TIERS,
@@ -28,50 +28,59 @@ import {
   stepSkill,
   stepSpec,
 } from '@/lib/creation-skills';
-import { skillAccess } from '@/lib/skill-access';
-import { optionLabel, SKILL_OPTION_IDS, skillProfile } from '@/lib/skill-profiles';
+import { type SkillAccess, skillAccess } from '@/lib/skill-access';
+import { magicField, optionLabel, SKILL_OPTION_IDS, skillProfile } from '@/lib/skill-profiles';
 
 /** Why a row costs double. An interdite also needs « Art interdit » — flagged, not enforced. */
-const ACCESS_NOTE: Record<string, string> = {
+const ACCESS_NOTE: Record<NonNullable<SkillAccess>, string> = {
   reservee: 'réservée ×2',
   interdite: 'interdite ×2 · Art interdit requis',
 };
 
-const TIER_OPTIONS =EXPERIENCE_TIERS.map((t) => ({ key: t.key, label: t.label }));
+const TIER_OPTIONS = EXPERIENCE_TIERS.map((t) => ({ key: t.key, label: t.label }));
 
-export default function SkillPointsStep({
-  skills,
-  caste,
-  age,
-  onChange,
-}: {
+type Props = {
   skills: SkillBuild;
   caste: string;
   age: AgeKey | null;
   onChange: (skills: SkillBuild) => void;
-}) {
-  const theme = useProphecyTheme();
-  const max = skillMax(age);
+};
+
+/** What is left to spend, out of what; over budget reads in the error colour. */
+export function SkillPointsBanner({ skills, caste, age }: Omit<Props, 'onChange'>) {
   const left = skillPointsLeft(skills, caste, age);
+  const total = skillPoints(age, skills.tier);
+  return (
+    <PoolBanner
+      left={[]}
+      error={left < 0}
+      title={left < 0 ? `Budget dépassé de ${-left}` : `${left} point${left > 1 ? 's' : ''} à dépenser`}
+      note={`sur ${total} · score maximum ${skillMax(age)} à la création`}
+    />
+  );
+}
+
+export default function SkillPointsStep({ skills, caste, age, onChange }: Props) {
+  const max = skillMax(age);
   const base = baseScores(skills, caste);
   const recommended = new Set([...(skillProfile(caste)?.recommended ?? []), ...Object.keys(base)]);
+  const others = new Set(SKILL_OPTION_IDS.filter((id) => !recommended.has(id)));
 
   const row = (id: string) => {
     const score = skillScore(skills, caste, id);
     const from = base[id] ?? 0;
-    const next = score < max ? raiseCost(id, caste, score, score + 1) : 0;
+    const access = skillAccess(id, caste);
+    const caption = [
+      access ? ACCESS_NOTE[access] : '',
+      from ? `base ${from}` : '',
+      score < max ? `+1 : ${raiseCost(id, caste, score, score + 1)} pts` : 'maximum',
+    ];
     return (
       <StepperRow
         key={id}
         testID={`skill-${id}`}
         label={optionLabel(id)}
-        caption={[
-          ACCESS_NOTE[skillAccess(id, caste) ?? ''] ?? '',
-          from ? `base ${from}` : '',
-          next ? `+1 : ${next} pts` : 'maximum',
-        ]
-          .filter(Boolean)
-          .join(' · ')}
+        caption={caption.filter(Boolean).join(' · ')}
         value={score}
         canDec={score > from}
         canInc={score < max}
@@ -80,19 +89,11 @@ export default function SkillPointsStep({
     );
   };
 
-  const others = SKILL_OPTION_IDS.filter((id) => !recommended.has(id));
   const spec = skills.spec;
+  const specFrom = specBase(skills, caste);
 
   return (
     <>
-      <PoolBanner
-        left={[]}
-        title={`${left} point${Math.abs(left) > 1 ? 's' : ''} de compétence`}
-        note={`sur ${skillPoints(age, skills.tier)} · score maximum ${max} à la création`}
-      />
-      {left < 0 ? (
-        <Text style={{ color: theme.colors.error }}>Budget dépassé de {-left} points.</Text>
-      ) : null}
       <SelectField
         testID="experience-tier"
         label="Expérience accordée par le MJ"
@@ -107,9 +108,9 @@ export default function SkillPointsStep({
           <StepperRow
             testID="skill-spec"
             label={`${spec.parent} (${spec.label || '…'})`}
-            caption={`départ ${specBase(skills, caste)}`}
+            caption={`départ ${specFrom}`}
             value={spec.score}
-            canDec={spec.score > specBase(skills, caste)}
+            canDec={spec.score > specFrom}
             canInc={spec.score < max}
             onStep={(d) => onChange(stepSpec(skills, caste, age, d))}
           />
@@ -124,13 +125,13 @@ export default function SkillPointsStep({
 
       {ATTRIBUTS.map((a) => (
         <SectionCard key={a.key} title={a.label.toUpperCase()} collapsible defaultExpanded={false}>
-          {DEFAULT_SKILLS.filter((s) => s.attribut === a.key && others.includes(s.name)).map((s) =>
+          {DEFAULT_SKILLS.filter((s) => s.attribut === a.key && others.has(s.name)).map((s) =>
             row(s.name),
           )}
         </SectionCard>
       ))}
       <SectionCard title="MAGIE" collapsible defaultExpanded={false}>
-        {others.filter((id) => id.includes(':')).map(row)}
+        {[...others].filter((id) => magicField(id) != null).map(row)}
       </SectionCard>
     </>
   );

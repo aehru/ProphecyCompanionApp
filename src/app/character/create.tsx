@@ -10,7 +10,7 @@ import CaracStep from '@/components/creation/carac-step';
 import CasteStep from '@/components/creation/caste-step';
 import DesavantagesStep from '@/components/creation/desavantages-step';
 import ProfileStep from '@/components/creation/profile-step';
-import SkillPointsStep from '@/components/creation/skill-points-step';
+import SkillPointsStep, { SkillPointsBanner } from '@/components/creation/skill-points-step';
 import IdentityStep from '@/components/creation/identity-step';
 import RecapStep from '@/components/creation/recap-step';
 import TendancesStep from '@/components/creation/tendances-step';
@@ -112,6 +112,12 @@ export default function CreateCharacterScreen() {
   return (
     <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
       <WizardHeader step={step} onClose={close} />
+      {key === 'competences' ? (
+        // Pinned above the scroll: the budget stays in sight under a long list.
+        <View style={[styles.pinned, contentWidth]}>
+          <SkillPointsBanner skills={build.skills} caste={v.caste} age={build.age} />
+        </View>
+      ) : null}
       <KeyboardAwareScrollView
         key={key}
         contentContainerStyle={[styles.page, contentWidth]}
@@ -167,4 +173,5 @@ export default function CreateCharacterScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   page: { padding: 16, gap: 14 },
+  pinned: { paddingHorizontal: 16, paddingTop: 12, width: '100%' },
 });

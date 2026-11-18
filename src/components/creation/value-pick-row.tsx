@@ -83,11 +83,14 @@ export function PoolBanner({
   left,
   note,
   title,
+  error = false,
 }: {
   left: readonly number[];
   note: string;
   /** Overrides the « À répartir » line (a points budget rather than values). */
   title?: string;
+  /** The pool is overspent: the title reads in the error colour. */
+  error?: boolean;
 }) {
   const theme = useProphecyTheme();
   return (
@@ -96,7 +99,10 @@ export function PoolBanner({
         styles.banner,
         { backgroundColor: theme.colors.secondaryContainer, borderColor: theme.prophecy.border },
       ]}>
-      <Text variant="titleMedium" testID="pool-left">
+      <Text
+        variant="titleMedium"
+        testID="pool-left"
+        style={error ? { color: theme.colors.error } : undefined}>
         {title ??
           (left.length ? `À répartir : ${left.join(' · ')}` : 'Toutes les valeurs sont réparties')}
       </Text>
