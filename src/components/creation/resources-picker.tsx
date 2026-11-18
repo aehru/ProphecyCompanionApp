@@ -1,10 +1,9 @@
 // MAÎTRISE ET CHANCE: the age gives some points outright and leaves the rest to
 // distribute between the two. Shown on the Attributs step.
 
-import { StyleSheet, View } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
-import { dsIcon } from '@/components/ui/icon';
+import StepperRow from '@/components/creation/stepper-row';
 import SectionCard from '@/components/ui/section-card';
 import { RESOURCES } from '@/constants/prophecy';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
@@ -37,39 +36,17 @@ export default function ResourcesPicker({
   return (
     <SectionCard title="MAÎTRISE ET CHANCE" helper={left ? `Reste ${left}` : undefined}>
       <Text style={{ color: theme.colors.onSurfaceVariant }}>{startLine(build)}</Text>
-      {RESOURCES.map((r) => {
-        const given = build.resources[r.key] ?? 0;
-        return (
-          <View key={r.key} style={styles.row} testID={`resource-${r.key}`}>
-            <Text style={styles.label}>{r.label}</Text>
-            <IconButton
-              icon="minus"
-              mode="outlined"
-              size={16}
-              disabled={given <= 0}
-              accessibilityLabel={`${r.label} moins un`}
-              onPress={() => onChange({ ...build, resources: stepResource(build, r.key, -1) })}
-            />
-            <Text variant="titleMedium" style={styles.value}>
-              {finalResource(build, r.key)}
-            </Text>
-            <IconButton
-              icon={dsIcon('plus')}
-              mode="outlined"
-              size={16}
-              disabled={left <= 0}
-              accessibilityLabel={`${r.label} plus un`}
-              onPress={() => onChange({ ...build, resources: stepResource(build, r.key, 1) })}
-            />
-          </View>
-        );
-      })}
+      {RESOURCES.map((r) => (
+        <StepperRow
+          key={r.key}
+          testID={`resource-${r.key}`}
+          label={r.label}
+          value={finalResource(build, r.key)}
+          canDec={(build.resources[r.key] ?? 0) > 0}
+          canInc={left > 0}
+          onStep={(d) => onChange({ ...build, resources: stepResource(build, r.key, d) })}
+        />
+      ))}
     </SectionCard>
   );
 }
-
-const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center' },
-  label: { flex: 1, fontSize: 16 },
-  value: { minWidth: 32, textAlign: 'center' },
-});

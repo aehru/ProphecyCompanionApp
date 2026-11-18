@@ -9,6 +9,8 @@ import AvantagesStep from '@/components/creation/avantages-step';
 import CaracStep from '@/components/creation/carac-step';
 import CasteStep from '@/components/creation/caste-step';
 import DesavantagesStep from '@/components/creation/desavantages-step';
+import ProfileStep from '@/components/creation/profile-step';
+import SkillPointsStep from '@/components/creation/skill-points-step';
 import IdentityStep from '@/components/creation/identity-step';
 import RecapStep from '@/components/creation/recap-step';
 import TendancesStep from '@/components/creation/tendances-step';
@@ -27,8 +29,10 @@ import {
   withAge,
 } from '@/lib/creation';
 import { tendanceStart } from '@/lib/creation-rules';
+import { skillRows } from '@/lib/creation-skills';
 import { pickImage } from '@/lib/media';
 import { saveCreation } from '@/repositories/creation';
+import { specName } from '@/repositories/skills';
 
 /**
  * Guided creation: the rulebook's steps over ONE `FormValues`, the same shape
@@ -49,6 +53,7 @@ export default function CreateCharacterScreen() {
 
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
   const last = step === CREATION_STEPS.length - 1;
+  const setSkills = (skills: typeof build.skills) => setBuild({ ...build, skills });
   const values = applyBuild(v, build);
 
   // Back (hardware, gesture, browser) walks the steps before it leaves.
@@ -75,7 +80,12 @@ export default function CreateCharacterScreen() {
   const create = async () => {
     setBusy(true);
     try {
-      const id = await saveCreation(fromFormValues(values), chosenTraits(build), avatarUri);
+      const id = await saveCreation(
+        fromFormValues(values),
+        chosenTraits(build),
+        skillRows(build.skills, v.caste, specName),
+        avatarUri,
+      );
       allowLeave();
       router.replace(`/character/${id}` as Href);
     } finally {
@@ -136,6 +146,17 @@ export default function CreateCharacterScreen() {
         ) : null}
         {key === 'desavantages' ? <DesavantagesStep build={build} onChange={setBuild} /> : null}
         {key === 'avantages' ? <AvantagesStep build={build} onChange={setBuild} /> : null}
+        {key === 'profil' ? (
+          <ProfileStep skills={build.skills} caste={v.caste} onChange={setSkills} />
+        ) : null}
+        {key === 'competences' ? (
+          <SkillPointsStep
+            skills={build.skills}
+            caste={v.caste}
+            age={build.age}
+            onChange={setSkills}
+          />
+        ) : null}
         {key === 'recap' ? <RecapStep v={values} setField={setField} avatarUri={avatarUri} /> : null}
       </KeyboardAwareScrollView>
       <WizardFooter step={step} busy={busy} onPrev={() => setStep(step - 1)} onNext={next} />

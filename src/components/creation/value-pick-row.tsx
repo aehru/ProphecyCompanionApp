@@ -79,7 +79,16 @@ export default function ValuePickRow({
 }
 
 /** The banner on top of a distribution step: what is still to hand out. */
-export function PoolBanner({ left, note }: { left: readonly number[]; note: string }) {
+export function PoolBanner({
+  left,
+  note,
+  title,
+}: {
+  left: readonly number[];
+  note: string;
+  /** Overrides the « À répartir » line (a points budget rather than values). */
+  title?: string;
+}) {
   const theme = useProphecyTheme();
   return (
     <View
@@ -88,7 +97,8 @@ export function PoolBanner({ left, note }: { left: readonly number[]; note: stri
         { backgroundColor: theme.colors.secondaryContainer, borderColor: theme.prophecy.border },
       ]}>
       <Text variant="titleMedium" testID="pool-left">
-        {left.length ? `À répartir : ${left.join(' · ')}` : 'Toutes les valeurs sont réparties'}
+        {title ??
+          (left.length ? `À répartir : ${left.join(' · ')}` : 'Toutes les valeurs sont réparties')}
       </Text>
       <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>{note}</Text>
     </View>

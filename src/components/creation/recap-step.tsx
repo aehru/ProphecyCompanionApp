@@ -23,7 +23,6 @@ import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { type FormValues, parseInteger } from '@/lib/character-values';
 
 const NEXT_ON_SHEET: { icon: IconName; label: string }[] = [
-  { icon: 'book', label: 'Compétences' },
   { icon: 'sword', label: 'Armes, armures & argent' },
 ];
 
