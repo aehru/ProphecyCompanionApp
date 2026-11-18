@@ -17,6 +17,7 @@ import {
   skillMax,
   skillPoints,
 } from '@/lib/creation-rules';
+import { skillCostFactor } from '@/lib/skill-access';
 import { magicField, PROFILE_VALUES, skillProfile } from '@/lib/skill-profiles';
 
 export type SkillBuild = {
@@ -118,16 +119,20 @@ export function stepSpec(s: SkillBuild, caste: string, age: AgeKey | null, delta
   return { ...s, spec: { ...s.spec, score } };
 }
 
+/** A raise from `from` to `to`, priced on the COÛT table — doubled for a réservée / interdite. */
+export const raiseCost = (id: string, caste: string, from: number, to: number) =>
+  skillCost(from, to) * skillCostFactor(id, caste);
+
 /**
- * Points de Compétence spent: every raise priced on the COÛT table from its
+ * Points de Compétence spent: every raise priced by `raiseCost` from its
  * base, plus the spécialisation's raise at half price (« divisé par deux,
  * arrondi au supérieur » — the spécialisation itself costs nothing to take).
  */
 export function skillPointsSpent(s: SkillBuild, caste: string): number {
   const base = baseScores(s, caste);
   let spent = 0;
-  for (const [id, score] of Object.entries(s.raised)) spent += skillCost(base[id] ?? 0, score);
-  if (s.spec) spent += Math.ceil(skillCost(specBase(s, caste), s.spec.score) / 2);
+  for (const [id, score] of Object.entries(s.raised)) spent += raiseCost(id, caste, base[id] ?? 0, score);
+  if (s.spec) spent += Math.ceil(raiseCost(s.spec.parent, caste, specBase(s, caste), s.spec.score) / 2);
   return spent;
 }
 

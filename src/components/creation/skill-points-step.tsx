@@ -15,12 +15,12 @@ import {
   type AgeKey,
   EXPERIENCE_TIERS,
   type ExperienceTier,
-  skillCost,
   skillMax,
   skillPoints,
 } from '@/lib/creation-rules';
 import {
   baseScores,
+  raiseCost,
   type SkillBuild,
   skillPointsLeft,
   skillScore,
@@ -28,9 +28,16 @@ import {
   stepSkill,
   stepSpec,
 } from '@/lib/creation-skills';
+import { skillAccess } from '@/lib/skill-access';
 import { optionLabel, SKILL_OPTION_IDS, skillProfile } from '@/lib/skill-profiles';
 
-const TIER_OPTIONS = EXPERIENCE_TIERS.map((t) => ({ key: t.key, label: t.label }));
+/** Why a row costs double. An interdite also needs « Art interdit » — flagged, not enforced. */
+const ACCESS_NOTE: Record<string, string> = {
+  reservee: 'réservée ×2',
+  interdite: 'interdite ×2 · Art interdit requis',
+};
+
+const TIER_OPTIONS =EXPERIENCE_TIERS.map((t) => ({ key: t.key, label: t.label }));
 
 export default function SkillPointsStep({
   skills,
@@ -52,13 +59,17 @@ export default function SkillPointsStep({
   const row = (id: string) => {
     const score = skillScore(skills, caste, id);
     const from = base[id] ?? 0;
-    const next = score < max ? skillCost(score, score + 1) : 0;
+    const next = score < max ? raiseCost(id, caste, score, score + 1) : 0;
     return (
       <StepperRow
         key={id}
         testID={`skill-${id}`}
         label={optionLabel(id)}
-        caption={[from ? `base ${from}` : '', next ? `+1 : ${next} pts` : 'maximum']
+        caption={[
+          ACCESS_NOTE[skillAccess(id, caste) ?? ''] ?? '',
+          from ? `base ${from}` : '',
+          next ? `+1 : ${next} pts` : 'maximum',
+        ]
           .filter(Boolean)
           .join(' · ')}
         value={score}

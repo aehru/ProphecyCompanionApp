@@ -60,6 +60,11 @@ describe('free points', () => {
     expect(skillScore(s, 'mage', 'Corps à corps')).toBe(8);
     expect(skillScore(stepSkill(mage(), 'mage', 'adulte', 'Corps à corps', -1), 'mage', 'Corps à corps')).toBe(6);
   });
+  it('doubles a réservée outside its castes', () => {
+    const s = stepSkill(stepSkill(mage(), 'mage', 'adulte', 'Alchimie', 1), 'mage', 'adulte', 'Alchimie', 1);
+    expect(skillPointsSpent(s, 'mage')).toBe(6); // 0 → 2: 3, ×2
+    expect(skillPointsSpent({ ...s, caste: 'erudit' }, 'erudit')).toBe(3);
+  });
   it('spends on the experience tier the GM granted', () => {
     expect(skillPointsLeft({ ...mage(), tier: 'veteran' }, 'mage', 'adulte')).toBe(200);
   });
