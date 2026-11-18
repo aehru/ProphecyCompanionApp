@@ -5,8 +5,10 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import AgeStep from '@/components/creation/age-step';
 import AttributsStep from '@/components/creation/attributs-step';
+import AvantagesStep from '@/components/creation/avantages-step';
 import CaracStep from '@/components/creation/carac-step';
 import CasteStep from '@/components/creation/caste-step';
+import DesavantagesStep from '@/components/creation/desavantages-step';
 import IdentityStep from '@/components/creation/identity-step';
 import RecapStep from '@/components/creation/recap-step';
 import TendancesStep from '@/components/creation/tendances-step';
@@ -20,18 +22,20 @@ import {
   EMPTY_BUILD,
   applyBuild,
   canLeaveStep,
+  chosenTraits,
   proposeTendances,
+  withAge,
 } from '@/lib/creation';
 import { tendanceStart } from '@/lib/creation-rules';
-import { log } from '@/lib/log';
-import { pickImage, storeCharacterMedia } from '@/lib/media';
-import { createCharacter, setCharacterMedia } from '@/repositories/characters';
+import { pickImage } from '@/lib/media';
+import { saveCreation } from '@/repositories/creation';
 
 /**
  * Guided creation: the rulebook's steps over ONE `FormValues`, the same shape
- * the full form edits, plus the caractéristiques `build` (age, distributed
- * values, transferred point) folded into it by `applyBuild`. Nothing touches
- * the database until « Démarrer » on the last step.
+ * the full form edits, plus the `build` (age, distributed values, transferred
+ * point, nation, avantages / désavantages) — its values folded in by
+ * `applyBuild`, its traits inserted as rows. Nothing touches the database until
+ * « Démarrer » on the last step.
  */
 export default function CreateCharacterScreen() {
   const router = useRouter();
@@ -71,17 +75,9 @@ export default function CreateCharacterScreen() {
   const create = async () => {
     setBusy(true);
     try {
-      const created = await createCharacter(fromFormValues(values));
-      if (avatarUri) {
-        // A portrait that fails to copy never costs the character itself.
-        try {
-          await setCharacterMedia(created.id, 'avatar', storeCharacterMedia(created.id, 'avatar', avatarUri));
-        } catch (e) {
-          log.error('creation.avatar', e, { characterId: created.id });
-        }
-      }
+      const id = await saveCreation(fromFormValues(values), chosenTraits(build), avatarUri);
       allowLeave();
-      router.replace(`/character/${created.id}` as Href);
+      router.replace(`/character/${id}` as Href);
     } finally {
       setBusy(false);
     }
@@ -112,14 +108,7 @@ export default function CreateCharacterScreen() {
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}>
         {key === 'age' ? (
-          <AgeStep
-            age={build.age}
-            // The attribut values and the Maîtrise / Chance points depend on the
-            // age: a new age starts both over.
-            onChange={(age) =>
-              setBuild(age === build.age ? build : { ...build, age, attributs: {}, resources: {} })
-            }
-          />
+<AgeStep age={build.age} onChange={(age) => setBuild(withAge(build, age))} />
         ) : null}
         {key === 'caste' ? <CasteStep v={v} setField={setField} /> : null}
         {key === 'carac' ? <CaracStep build={build} onChange={setBuild} /> : null}
@@ -133,7 +122,8 @@ export default function CreateCharacterScreen() {
             onPickAvatar={pickAvatar}
           />
         ) : null}
-        {key === 'tendances' ? <TendancesStep
+        {key === 'tendances' ? (
+          <TendancesStep
             v={v}
             setField={setField}
             nation={build.nation}
@@ -142,15 +132,13 @@ export default function CreateCharacterScreen() {
               setBuild({ ...build, nation });
               if (nation) setV((prev) => proposeTendances(prev, tendanceStart(nation, build.age)));
             }}
-          /> : null}
+          />
+        ) : null}
+        {key === 'desavantages' ? <DesavantagesStep build={build} onChange={setBuild} /> : null}
+        {key === 'avantages' ? <AvantagesStep build={build} onChange={setBuild} /> : null}
         {key === 'recap' ? <RecapStep v={values} setField={setField} avatarUri={avatarUri} /> : null}
       </KeyboardAwareScrollView>
-      <WizardFooter
-        step={step}
-        busy={busy}
-        onPrev={() => setStep(step - 1)}
-        onNext={next}
-      />
+      <WizardFooter step={step} busy={busy} onPrev={() => setStep(step - 1)} onNext={next} />
     </View>
   );
 }

@@ -24,7 +24,6 @@ import { type FormValues, parseInteger } from '@/lib/character-values';
 
 const NEXT_ON_SHEET: { icon: IconName; label: string }[] = [
   { icon: 'book', label: 'Compétences' },
-  { icon: 'star', label: 'Avantages & désavantages' },
   { icon: 'sword', label: 'Armes, armures & argent' },
 ];
 
