@@ -8,14 +8,20 @@ import {
   buildInitiative,
   canLeaveStep,
   CREATION_STEPS,
+  type CreationBuild,
   EMPTY_BUILD,
   finalAttribut,
   finalCarac,
+  finalResource,
+  freeTendancesLeft,
+  proposeTendances,
   remainingValues,
+  resourcePointsLeft,
+  stepResource,
   stepValue,
   tapPuce,
 } from '@/lib/creation';
-import { STARTING_VALUES } from '@/lib/creation-rules';
+import { STARTING_VALUES, tendanceStart } from '@/lib/creation-rules';
 
 const IDENTITE = CREATION_STEPS.findIndex((s) => s.key === 'identite');
 const P = STARTING_VALUES;
@@ -95,6 +101,27 @@ describe('the build', () => {
     expect(buildInitiative({ ...EMPTY_BUILD, assign: { coordination: 7 } })).toBeNull();
     expect(applyBuild(toFormValues(), build).initiativeMax).toBe('3'); // 13
     expect(applyBuild({ ...toFormValues(), initiativeMax: '1' }, build).initiativeMax).toBe('1');
+  });
+  it('adds the age fixed Maîtrise / Chance to the free points handed out', () => {
+    let build: CreationBuild = { ...EMPTY_BUILD, age: 'enfant' }; // 4 Chance, 3 free
+    expect(resourcePointsLeft(build)).toBe(3);
+    build = { ...build, resources: stepResource(build, 'maitrise', 1) };
+    build = { ...build, resources: stepResource(build, 'chance', 1) };
+    build = { ...build, resources: stepResource(build, 'chance', 1) };
+    expect(resourcePointsLeft(build)).toBe(0);
+    expect(stepResource(build, 'maitrise', 1)).toEqual(build.resources); // nothing left
+    expect([finalResource(build, 'maitrise'), finalResource(build, 'chance')]).toEqual([1, 6]);
+    const v = applyBuild(toFormValues(), build);
+    expect([v.maitriseMax, v.chanceMax]).toEqual(['1', '6']);
+    expect(applyBuild(toFormValues(), EMPTY_BUILD).chanceMax).toBe('');
+    expect(applyBuild({ ...toFormValues(), chanceMax: '9' }, build).maitriseMax).toBe('');
+  });
+  it('proposes a nation’s tendances and counts the free points left', () => {
+    const start = tendanceStart('marne', 'adulte'); // 1TD, 1TF, 2L
+    const v = proposeTendances({ ...toFormValues(), dragonSub: '4' }, start);
+    expect([v.dragon, v.fatalite, v.homme, v.dragonSub]).toEqual(['1', '1', '0', '4']);
+    expect(freeTendancesLeft(v, start)).toBe(2);
+    expect(freeTendancesLeft({ ...v, homme: '3' }, start)).toBe(-1);
   });
   it('derives the wound track from RÉS + VOL, unless one was typed', () => {
     const build = { ...EMPTY_BUILD, assign: { resistance: 6, volonte: 5 } }; // 11

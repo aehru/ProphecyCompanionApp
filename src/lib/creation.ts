@@ -11,9 +11,12 @@ import {
   ATTRIBUTS,
   CARACTERISTIQUES,
   MAX_PUCES,
+  RESOURCES,
+  TENDANCES,
   WOUND_LEVELS,
   type AttributKey,
   type CaracKey,
+  type ResourceKey,
 } from '@/constants/prophecy';
 import { clamp, type FormValues, parseInteger } from '@/lib/character-values';
 import {
@@ -22,6 +25,9 @@ import {
   ageMod,
   attributModifier,
   initiativeDice,
+  type NationKey,
+  resourceStart,
+  type TendanceStart,
   type WoundBoxes,
   woundBoxes,
 } from '@/lib/creation-rules';
@@ -114,9 +120,66 @@ export type CreationBuild = {
   transfer: { from: CaracKey | ''; to: CaracKey | '' } | null;
   /** Which of the age's attribut values each attribut took. */
   attributs: Assign<AttributKey>;
+  /** The age's free Maîtrise / Chance points, as handed out (on top of its fixed ones). */
+  resources: Partial<Record<ResourceKey, number>>;
+  /** Nation d'origine — only proposes the tendances (see `proposeTendances`). */
+  nation: NationKey | null;
 };
 
-export const EMPTY_BUILD: CreationBuild = { age: null, assign: {}, transfer: null, attributs: {} };
+export const EMPTY_BUILD: CreationBuild = {
+  age: null,
+  assign: {},
+  transfer: null,
+  attributs: {},
+  resources: {},
+  nation: null,
+};
+
+/**
+ * A nation's starting tendances written into the form — a PROPOSAL: the fields
+ * stay editable, and the puces are left alone (the table says nothing of them).
+ */
+export function proposeTendances(v: FormValues, start: TendanceStart): FormValues {
+  const out = { ...v };
+  for (const t of TENDANCES) out[t.key] = String(start.fixed[t.key]);
+  return out;
+}
+
+/**
+ * The table's free points (« L ») still to place: its total minus the tendances
+ * as they stand. Negative once the player went past the table, which is shown,
+ * never blocked.
+ */
+export function freeTendancesLeft(v: FormValues, start: TendanceStart): number {
+  const total = start.free + TENDANCES.reduce((sum, t) => sum + start.fixed[t.key], 0);
+  return total - TENDANCES.reduce((sum, t) => sum + parseInteger(v[t.key]), 0);
+}
+
+/** The age's free Maîtrise / Chance points not handed out yet. */
+export function resourcePointsLeft(build: CreationBuild): number {
+  const given = RESOURCES.reduce((sum, r) => sum + (build.resources[r.key] ?? 0), 0);
+  return resourceStart(build.age).free - given;
+}
+
+/**
+ * One free point onto (`delta` 1) or off (−1) a resource, kept between 0 and
+ * what is left to hand out.
+ */
+export function stepResource(
+  build: CreationBuild,
+  key: ResourceKey,
+  delta: number,
+): CreationBuild['resources'] {
+  const current = build.resources[key] ?? 0;
+  const max = current + resourcePointsLeft(build);
+  // Not `clamp`: its max of 0 means « uncapped », and 0 left is a real cap here.
+  return { ...build.resources, [key]: Math.max(0, Math.min(max, current + delta)) };
+}
+
+/** The age's fixed points + the free ones handed out. */
+export function finalResource(build: CreationBuild, key: ResourceKey): number {
+  return (resourceStart(build.age).fixed[key] ?? 0) + (build.resources[key] ?? 0);
+}
 
 /** Starting value + age + the one transferred point, never below 0. Null until assigned. */
 export function finalCarac(build: CreationBuild, key: CaracKey): number | null {
@@ -171,6 +234,12 @@ export function applyBuild(v: FormValues, build: CreationBuild): FormValues {
   }
   const init = buildInitiative(build);
   if (init != null && !v.initiativeMax) out.initiativeMax = String(init);
+  // Maîtrise / Chance once an age is chosen or a point handed out — and, like
+  // the rest, only over blank fields.
+  const resourcesTouched = build.age != null || Object.keys(build.resources).length > 0;
+  if (resourcesTouched && !RESOURCES.some((r) => v[`${r.key}Max`])) {
+    for (const r of RESOURCES) out[`${r.key}Max`] = String(finalResource(build, r.key));
+  }
   const wounds = buildWounds(build);
   if (wounds && !WOUND_LEVELS.some((w) => v[`${w.key}Max`])) {
     for (const [k, n] of Object.entries(wounds)) out[k] = String(n);
