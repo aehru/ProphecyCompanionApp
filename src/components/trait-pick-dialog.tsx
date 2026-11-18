@@ -138,6 +138,34 @@ export default function TraitPickDialog<
   );
 }
 
+/**
+ * The whole pick flow around the dialog: an entry with one price and nothing to
+ * précise is taken at once, any other stops on {@link TraitPickDialog} first.
+ * Render `dialog` once; call `pick(preset)` from a row.
+ */
+export function useTraitPick(onPicked: (preset: TraitPreset, pick: TraitPick) => void) {
+  const [picking, setPicking] = useState<TraitPreset | null>(null);
+  const pick = (preset: TraitPreset) => {
+    if (preset.costs.length > 1 || preset.precisionPrompt) setPicking(preset);
+    else onPicked(preset, { cost: preset.costs[0], note: '' });
+  };
+  const dialog = (
+    <TraitPickDialog
+      // Keyed by the entry: it opens on that entry's cheapest tier and an empty
+      // précision, which it can only do by mounting fresh (see its doc comment).
+      key={picking?.id ?? 'none'}
+      preset={picking}
+      title={picking?.data.name ?? ''}
+      onDismiss={() => setPicking(null)}
+      onConfirm={(preset, p) => {
+        setPicking(null);
+        onPicked(preset, p);
+      }}
+    />
+  );
+  return { pick, dialog };
+}
+
 const styles = StyleSheet.create({
   body: { gap: 12 },
   costField: { flexGrow: 0, flexBasis: 140, minWidth: 140 },
