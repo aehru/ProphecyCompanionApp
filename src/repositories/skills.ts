@@ -47,6 +47,19 @@ export async function replaceSkills(characterId: number, rows: SkillInput[]) {
 }
 
 /**
+ * Insert skill rows as given — base skills and specializations alike (the
+ * guided creation's output, see `lib/creation-skills` `skillRows`).
+ */
+export async function insertSkills(
+  characterId: number,
+  rows: readonly (SkillInput & { parentName?: string; specLabel?: string })[],
+) {
+  if (rows.length === 0) return;
+  await db.insert(skills).values(rows.map((r) => ({ characterId, ...r })));
+  logWrite('skills', 'insert', { characterId, count: rows.length });
+}
+
+/**
  * Add a specialization of `mother`, seeded from the mother's current value and
  * sharing its attribut. Starts unlabeled; the editor fills in the short label.
  */

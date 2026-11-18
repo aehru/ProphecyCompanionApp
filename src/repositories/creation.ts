@@ -2,14 +2,16 @@ import { TRAIT_BY_ID, traitFromPreset } from '@/data/trait-catalog';
 import type { NewCharacter } from '@/db/schema';
 import type { TraitKind } from '@/constants/prophecy';
 import type { TraitChoice } from '@/lib/creation';
+import type { SkillRowInput } from '@/lib/creation-skills';
 import { log } from '@/lib/log';
 import { storeCharacterMedia } from '@/lib/media';
 import { createCharacter, setCharacterMedia } from '@/repositories/characters';
+import { insertSkills } from '@/repositories/skills';
 import { createTrait } from '@/repositories/traits';
 
 /**
- * Write out what the guided creation built: the character row, the avantages /
- * désavantages taken, and the portrait. Returns the new character's id.
+ * Write out what the guided creation built: the character row, its compétences,
+ * the avantages / désavantages taken, and the portrait. Returns the new character's id.
  *
  * A trait whose catalogue entry is gone is skipped rather than written blank,
  * and a portrait that fails to copy never costs the character itself.
@@ -17,9 +19,11 @@ import { createTrait } from '@/repositories/traits';
 export async function saveCreation(
   data: Partial<NewCharacter>,
   traits: readonly (TraitChoice & { kind: TraitKind })[],
+  skillRows: readonly SkillRowInput[],
   avatarUri: string | null,
 ): Promise<number> {
   const { id } = await createCharacter(data);
+  await insertSkills(id, skillRows);
   for (const t of traits) {
     const preset = TRAIT_BY_ID.get(t.presetId);
     if (preset) await createTrait(id, { ...traitFromPreset(preset, t), kind: t.kind });
