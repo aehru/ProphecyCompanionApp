@@ -17,8 +17,10 @@ import {
   type AttributKey,
   type CaracKey,
   type ResourceKey,
+  type TraitKind,
 } from '@/constants/prophecy';
 import { clamp, type FormValues, parseInteger } from '@/lib/character-values';
+import { traitPool, type TraitPool } from '@/lib/trait-pool';
 import {
   ATTRIBUT_CARACS,
   type AgeKey,
@@ -41,6 +43,8 @@ export const CREATION_STEPS = [
   { key: 'carac', title: 'Caractéristiques', short: 'Caractéristiques' },
   { key: 'attributs', title: 'Attributs', short: 'Attributs' },
   { key: 'tendances', title: 'Tendances', short: 'Tendances' },
+  { key: 'desavantages', title: 'Désavantages', short: 'Désavantages' },
+  { key: 'avantages', title: 'Avantages', short: 'Avantages' },
   { key: 'identite', title: 'Identité', short: 'Identité' },
   { key: 'recap', title: 'Récapitulatif', short: 'Récapitulatif' },
 ] as const;
@@ -124,7 +128,37 @@ export type CreationBuild = {
   resources: Partial<Record<ResourceKey, number>>;
   /** Nation d'origine — only proposes the tendances (see `proposeTendances`). */
   nation: NationKey | null;
+  /** The désavantage taken in each slot of the age's quota (see `desavantageSlots`). */
+  desavantages: Record<string, TraitChoice>;
+  /** The avantages bought, in the order they were taken. */
+  avantages: TraitChoice[];
 };
+
+/** A catalogue entry taken during creation, inserted as a `traits` row on « Démarrer ». */
+export type TraitChoice = { presetId: string; cost: number; note: string };
+
+/** The avantages pool of the choices so far — the same arithmetic as a sheet's. */
+export function buildTraitPool(build: CreationBuild): TraitPool {
+  return traitPool(chosenTraits(build).map((t) => ({ kind: t.kind, cost: t.cost })));
+}
+
+/** Every avantage / désavantage taken, with its side of the pool — what « Démarrer » inserts. */
+export function chosenTraits(build: CreationBuild): (TraitChoice & { kind: TraitKind })[] {
+  return [
+    ...Object.values(build.desavantages).map((c) => ({ ...c, kind: 'desavantage' as const })),
+    ...build.avantages.map((c) => ({ ...c, kind: 'avantage' as const })),
+  ];
+}
+
+/**
+ * A new age. The attribut values, the Maîtrise / Chance points and the
+ * désavantage quota all depend on it, so a CHANGE starts them over; picking the
+ * same age again keeps everything.
+ */
+export function withAge(build: CreationBuild, age: AgeKey): CreationBuild {
+  if (age === build.age) return build;
+  return { ...build, age, attributs: {}, resources: {}, desavantages: {} };
+}
 
 export const EMPTY_BUILD: CreationBuild = {
   age: null,
@@ -133,6 +167,8 @@ export const EMPTY_BUILD: CreationBuild = {
   attributs: {},
   resources: {},
   nation: null,
+  desavantages: {},
+  avantages: [],
 };
 
 /**

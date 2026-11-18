@@ -6,6 +6,9 @@ import {
   applyBuild,
   assignValue,
   buildInitiative,
+  buildTraitPool,
+  chosenTraits,
+  withAge,
   canLeaveStep,
   CREATION_STEPS,
   type CreationBuild,
@@ -122,6 +125,32 @@ describe('the build', () => {
     expect([v.dragon, v.fatalite, v.homme, v.dragonSub]).toEqual(['1', '1', '0', '4']);
     expect(freeTendancesLeft(v, start)).toBe(2);
     expect(freeTendancesLeft({ ...v, homme: '3' }, start)).toBe(-1);
+  });
+  it('pools the désavantages taken against the avantages bought', () => {
+    const build: CreationBuild = {
+      ...EMPTY_BUILD,
+      desavantages: { 'obligatoire-0': { presetId: 'a', cost: 3, note: '' } },
+      avantages: [{ presetId: 'b', cost: 2, note: '' }],
+    };
+    expect(buildTraitPool(build)).toEqual({ gained: 3, spent: 2, balance: 1 });
+    expect(chosenTraits(build).map((t) => `${t.kind}:${t.presetId}`)).toEqual([
+      'desavantage:a',
+      'avantage:b',
+    ]);
+  });
+  it('starts the age-bound choices over on a new age only', () => {
+    const build: CreationBuild = {
+      ...EMPTY_BUILD,
+      age: 'adulte',
+      attributs: { physique: 5 },
+      resources: { chance: 2 },
+      desavantages: { 'obligatoire-0': { presetId: 'a', cost: 3, note: '' } },
+      avantages: [{ presetId: 'b', cost: 2, note: '' }],
+    };
+    expect(withAge(build, 'adulte')).toBe(build);
+    const older = withAge(build, 'ancien');
+    expect([older.attributs, older.resources, older.desavantages]).toEqual([{}, {}, {}]);
+    expect(older.avantages).toEqual(build.avantages);
   });
   it('derives the wound track from RÉS + VOL, unless one was typed', () => {
     const build = { ...EMPTY_BUILD, assign: { resistance: 6, volonte: 5 } }; // 11
