@@ -10,6 +10,7 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
 import { Alert } from '@/lib/alert';
+import { plural } from '@/lib/plural';
 import { applySpellSync } from '@/repositories/spell-sync';
 
 /**
@@ -142,11 +143,6 @@ export default function CatalogSyncScreen() {
       </Button>
     </ScrollView>
   );
-}
-
-/** Agreement helper — « 3 sortilèges copiés ont été corrigés ». */
-function plural(n: number, one: string, many = `${one}s`) {
-  return n > 1 ? many : one;
 }
 
 const styles = StyleSheet.create({

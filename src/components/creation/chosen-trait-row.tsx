@@ -8,6 +8,7 @@ import { dsIcon } from '@/components/ui/icon';
 import { TRAIT_BY_ID } from '@/data/trait-catalog';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { TraitChoice } from '@/lib/creation';
+import { plural } from '@/lib/plural';
 
 export default function ChosenTraitRow({
   caption,
@@ -37,7 +38,7 @@ export default function ChosenTraitRow({
         {choice ? (
           <Text>
             {preset?.data.name ?? choice.presetId}
-            {choice.note ? ` (${choice.note})` : ''} · {choice.cost} pt{choice.cost > 1 ? 's' : ''}
+            {choice.note ? ` (${choice.note})` : ''} · {choice.cost} {plural(choice.cost, 'pt')}
           </Text>
         ) : null}
       </View>

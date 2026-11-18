@@ -12,7 +12,8 @@ import { MAX_PUCES, TENDANCE_BY_KEY, TENDANCES, type TendanceKey } from '@/const
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { type FormValues, parseInteger } from '@/lib/character-values';
 import { freeTendancesLeft, stepValue, tapPuce } from '@/lib/creation';
-import { type AgeKey, ageBand, NATIONS, type NationKey, tendanceStart } from '@/lib/creation-rules';
+import { type AgeKey, bandOf, NATIONS, type NationKey, tendanceStart } from '@/lib/creation-rules';
+import { plural } from '@/lib/plural';
 
 const TAGLINE: Record<TendanceKey, string> = {
   dragon: 'Honneur, tradition, magie',
@@ -67,12 +68,12 @@ export default function TendancesStep({
 function FreePointsNote({ v, nation, age }: { v: FormValues; nation: NationKey; age: AgeKey | null }) {
   const theme = useProphecyTheme();
   const left = freeTendancesLeft(v, tendanceStart(nation, age));
-  const band = (ageBand(age)?.label ?? 'Adulte').toLowerCase();
+  const band = bandOf(age).label.toLowerCase();
   const status =
     left > 0
-      ? `${left} point${left > 1 ? 's' : ''} libre${left > 1 ? 's' : ''} à placer`
+      ? `${left} ${plural(left, 'point')} ${plural(left, 'libre')} à placer`
       : left < 0
-        ? `${-left} point${left < -1 ? 's' : ''} au-delà de la table`
+        ? `${-left} ${plural(left, 'point')} au-delà de la table`
         : 'tous les points sont placés';
   return (
     <Text

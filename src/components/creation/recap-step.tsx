@@ -1,5 +1,5 @@
-// Step 5 — the character as it will be created, the starting values (with an
-// « Ajuster » into the full form's Combat + Magie fields), and what is left to
+// Récapitulatif — the character as it will be created, the starting values (with
+// an « Ajuster » into the full form's Combat + Magie fields), and what is left to
 // fill from the sheet.
 
 import React, { useState } from 'react';
@@ -21,6 +21,7 @@ import { CARACTERISTIQUES, WOUND_LEVELS } from '@/constants/prophecy';
 import { useCasteAccent } from '@/hooks/use-caste-accent';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { type FormValues, parseInteger } from '@/lib/character-values';
+import { plural } from '@/lib/plural';
 
 const NEXT_ON_SHEET: { icon: IconName; label: string }[] = [
   { icon: 'sword', label: 'Armes, armures & argent' },
@@ -57,7 +58,7 @@ export default function RecapStep({
         {wounds ? <Text testID="recap-wounds">Blessures : {wounds} (RÉS + VOL)</Text> : null}
         {initiative > 0 ? (
           <Text testID="recap-initiative">
-            Initiative : {initiative} action{initiative > 1 ? 's' : ''} par tour (COO + PER)
+            Initiative : {initiative} {plural(initiative, 'action')} par tour (COO + PER)
           </Text>
         ) : null}
         <Button
