@@ -121,6 +121,10 @@ type AgeBand = {
   attributs: readonly number[];
   /** MAÎTRISE ET CHANCE: points given outright, and points left to distribute. */
   resources: { fixed: Partial<Record<ResourceKey, number>>; free: number };
+  /** POINTS DE COMPÉTENCE, one per EXPERIENCE_TIERS entry (normal first). */
+  skillPoints: readonly number[];
+  /** LES LIMITATIONS: highest score a compétence may reach at creation. */
+  skillMax: number;
 };
 
 /**
@@ -137,6 +141,9 @@ export const AGE_BANDS = [
     mods: { force: -2, resistance: -2, perception: 1, empathie: 2, presence: 1 },
     attributs: [4, 4, 4, 3],
     resources: { fixed: { chance: 4 }, free: 3 },
+    // Vétéran printed as 150, not 70 + 90: kept as the book has it.
+    skillPoints: [70, 100, 130, 150],
+    skillMax: 6,
   },
   {
     key: 'adolescent',
@@ -146,6 +153,8 @@ export const AGE_BANDS = [
     mods: { force: -1, resistance: -1, perception: 1, empathie: 1 },
     attributs: [5, 4, 4, 3],
     resources: { fixed: { chance: 2 }, free: 4 },
+    skillPoints: [90, 120, 150, 180],
+    skillMax: 7,
   },
   {
     key: 'adulte',
@@ -155,6 +164,8 @@ export const AGE_BANDS = [
     mods: {},
     attributs: [5, 5, 4, 3],
     resources: { fixed: {}, free: 6 },
+    skillPoints: [110, 140, 170, 200],
+    skillMax: 8,
   },
   {
     key: 'ancien',
@@ -164,6 +175,8 @@ export const AGE_BANDS = [
     mods: { force: -1, resistance: -1, intelligence: 1, volonte: 1, perception: -1, presence: 1 },
     attributs: [6, 5, 4, 3],
     resources: { fixed: { maitrise: 2 }, free: 4 },
+    skillPoints: [130, 160, 190, 220],
+    skillMax: 9,
   },
   {
     key: 'venerable',
@@ -182,6 +195,8 @@ export const AGE_BANDS = [
     },
     attributs: [6, 6, 4, 3],
     resources: { fixed: { maitrise: 4 }, free: 3 },
+    skillPoints: [150, 180, 210, 240],
+    skillMax: 10,
   },
 ] as const satisfies readonly AgeBand[];
 
@@ -206,6 +221,40 @@ export function ageMod(age: AgeKey | null, key: CaracKey): number {
 /** The four attribut values to distribute: the age's row, Adulte by default. */
 export function attributPool(age: AgeKey | null): readonly number[] {
   return (ageBand(age) ?? DEFAULT_AGE).attributs;
+}
+
+/**
+ * The experience a GM may grant a new character (« personnages légèrement
+ * expérimentés », etc.), in the order of `AgeBand.skillPoints`.
+ */
+export const EXPERIENCE_TIERS = [
+  { key: 'normal', label: 'Normal' },
+  { key: 'leger', label: 'Légèrement expérimenté' },
+  { key: 'aguerri', label: 'Aguerri' },
+  { key: 'veteran', label: 'Vétéran' },
+] as const;
+
+export type ExperienceTier = (typeof EXPERIENCE_TIERS)[number]['key'];
+
+/** Points de Compétence for an age and an experience tier (Adulte by default). */
+export function skillPoints(age: AgeKey | null, tier: ExperienceTier): number {
+  const i = EXPERIENCE_TIERS.findIndex((t) => t.key === tier);
+  return (ageBand(age) ?? DEFAULT_AGE).skillPoints[i];
+}
+
+/** The highest score a compétence may have at creation (Adulte by default). */
+export function skillMax(age: AgeKey | null): number {
+  return (ageBand(age) ?? DEFAULT_AGE).skillMax;
+}
+
+/**
+ * COÛT DES COMPÉTENCES: points to take a score from `from` to `to`. The table
+ * is the triangular numbers — reaching n from 0 costs 1 + 2 + … + n — so any
+ * cell is T(to) − T(from). Nothing to pay for a score that does not rise.
+ */
+export function skillCost(from: number, to: number): number {
+  const t = (n: number) => (n * (n + 1)) / 2;
+  return to > from ? t(to) - t(Math.max(0, from)) : 0;
 }
 
 /** MAÎTRISE ET CHANCE for an age: the age's row, Adulte by default. */

@@ -12,6 +12,9 @@ import {
   attributPool,
   initiativeDice,
   resourceStart,
+  skillCost,
+  skillMax,
+  skillPoints,
   woundBoxes,
 } from '@/lib/creation-rules';
 
@@ -110,6 +113,25 @@ describe('age', () => {
     expect(resourceStart('adolescent')).toEqual({ fixed: { chance: 2 }, free: 4 });
     expect(resourceStart('venerable')).toEqual({ fixed: { maitrise: 4 }, free: 3 });
     expect(resourceStart(null)).toEqual({ fixed: {}, free: 6 });
+  });
+});
+
+describe('compétences', () => {
+  it('prices a score as the book table (rows 0, 1, 4, 9)', () => {
+    expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => skillCost(0, n))).toEqual([
+      1, 3, 6, 10, 15, 21, 28, 36, 45, 55,
+    ]);
+    expect([2, 3, 4, 10].map((n) => skillCost(1, n))).toEqual([2, 5, 9, 54]);
+    expect([5, 6, 7, 10].map((n) => skillCost(4, n))).toEqual([5, 11, 18, 45]);
+    expect(skillCost(9, 10)).toBe(10);
+    expect(skillCost(5, 5)).toBe(0);
+    expect(skillCost(6, 4)).toBe(0);
+  });
+  it('reads points and the maximum off the age and experience', () => {
+    expect(skillPoints('adulte', 'normal')).toBe(110);
+    expect(skillPoints('enfant', 'veteran')).toBe(150);
+    expect(skillPoints(null, 'aguerri')).toBe(170);
+    expect([skillMax('enfant'), skillMax('venerable'), skillMax(null)]).toEqual([6, 10, 8]);
   });
 });
 
