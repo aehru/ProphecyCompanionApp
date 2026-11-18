@@ -97,11 +97,17 @@ export default function TabPager({
   // mounted page both say it moved. Re-asserting the offset once the animation's
   // window has passed lands it for certain, and clearing `pending` there means a
   // swallowed scroll can never leave the pager unable to settle at all.
+  //
+  // NOT animated on web. A browser smooth scroll is not reliably cancelled by
+  // the instant re-assert: while the tapped page's mount keeps the thread busy
+  // it stalls, then resumes AFTER the re-assert and stops wherever its frames
+  // ran out — 2138 instead of 2048, the page shown ~90px off. An instant scroll
+  // lands exactly, at the cost of the ink bar jumping instead of gliding.
   useEffect(() => {
     if (width <= 0) return;
     const target = active * width;
     pending.current = target;
-    scrollRef.current?.scrollTo({ x: target, animated: true });
+    scrollRef.current?.scrollTo({ x: target, animated: Platform.OS !== 'web' });
     const id = setTimeout(() => {
       scrollRef.current?.scrollTo({ x: target, animated: false });
       pending.current = null;
