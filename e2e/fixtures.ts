@@ -95,6 +95,8 @@ export async function createCharacter(
   caste?: string,
 ): Promise<string> {
   await page.getByTestId('fab-new-character').click();
+  // The FAB opens the chooser; the full form is the one the fixtures fill.
+  await page.getByTestId('start-full').click();
   await page.getByTestId('field-nom').fill(nom);
   if (caste) {
     // The stack push has to be OVER before the dropdown accepts a press: while
