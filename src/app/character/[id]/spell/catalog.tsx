@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import SpellCatalogList from '@/components/catalog/spell-catalog-list';
 import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
+import TipCard from '@/components/ui/tip-card';
 import { type SpellPreset } from '@/data/spell-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -94,6 +95,9 @@ export default function SpellCatalogModal() {
 
   return (
     <View style={styles.root}>
+      <View style={styles.tip}>
+        <TipCard screen="catalog" />
+      </View>
       <SpellCatalogList
         readings={readings}
         owned={owned}
@@ -108,4 +112,5 @@ export default function SpellCatalogModal() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  tip: { paddingHorizontal: 12, paddingTop: 12 },
 });

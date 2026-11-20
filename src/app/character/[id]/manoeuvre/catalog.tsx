@@ -1,6 +1,8 @@
 import React from 'react';
+import { View } from 'react-native';
 
 import ManoeuvreCatalogList from '@/components/catalog/manoeuvre-catalog-list';
+import TipCard from '@/components/ui/tip-card';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useFavorites } from '@/hooks/use-favorites';
 
@@ -11,5 +13,12 @@ import { useFavorites } from '@/hooks/use-favorites';
  */
 export default function ManoeuvreCatalogModal() {
   const favorites = useFavorites(useCharacterId(), 'manoeuvre');
-  return <ManoeuvreCatalogList favorites={favorites} />;
+  return (
+    <View style={{ flex: 1 }}>
+      <View style={{ paddingHorizontal: 12, paddingTop: 12 }}>
+        <TipCard screen="manoeuvres" />
+      </View>
+      <ManoeuvreCatalogList favorites={favorites} />
+    </View>
+  );
 }

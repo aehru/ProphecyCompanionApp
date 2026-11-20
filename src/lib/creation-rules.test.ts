@@ -1,6 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
-import { initiativeDice, woundBoxes } from '@/lib/creation-rules';
+import {
+  AGE_BANDS,
+  desavantageSlots,
+  NATIONS,
+  parseTendanceStart,
+  tendanceStart,
+  ageFromD10,
+  ageMod,
+  attributModifier,
+  attributPool,
+  initiativeDice,
+  resourceStart,
+  skillCost,
+  skillMax,
+  skillPoints,
+  woundBoxes,
+} from '@/lib/creation-rules';
 
 // The rulebook gives the wound track as a band table on RÉS + VOL. These cases
 // walk every band boundary, since an off-by-one there is invisible on a sheet
@@ -65,5 +81,102 @@ describe('initiativeDice', () => {
 
   it('clamps above the table instead of inventing a sixth die', () => {
     expect(initiativeDice(10, 10)).toBe(5);
+  });
+});
+
+describe('age', () => {
+  it('maps the D10 to the rulebook bands', () => {
+    expect([1, 2, 3, 4, 7, 8, 9, 10].map(ageFromD10)).toEqual([
+      'enfant',
+      'adolescent',
+      'adolescent',
+      'adulte',
+      'adulte',
+      'ancien',
+      'ancien',
+      'venerable',
+    ]);
+  });
+  it('reads the modificateurs, 0 when none', () => {
+    expect(ageMod('enfant', 'empathie')).toBe(2);
+    expect(ageMod('adolescent', 'perception')).toBe(1);
+    expect(ageMod('venerable', 'coordination')).toBe(-1);
+    expect(ageMod('adulte', 'force')).toBe(0);
+    expect(ageMod(null, 'force')).toBe(0);
+  });
+  it('reads the attribut pool off the age, Adulte by default', () => {
+    expect(attributPool('enfant')).toEqual([4, 4, 4, 3]);
+    expect(attributPool('venerable')).toEqual([6, 6, 4, 3]);
+    expect(attributPool(null)).toEqual([5, 5, 4, 3]);
+  });
+  it('reads MAÎTRISE ET CHANCE off the age, Adulte by default', () => {
+    expect(resourceStart('adolescent')).toEqual({ fixed: { chance: 2 }, free: 4 });
+    expect(resourceStart('venerable')).toEqual({ fixed: { maitrise: 4 }, free: 3 });
+    expect(resourceStart(null)).toEqual({ fixed: {}, free: 6 });
+  });
+});
+
+describe('compétences', () => {
+  it('prices a score as the book table (rows 0, 1, 4, 9)', () => {
+    expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => skillCost(0, n))).toEqual([
+      1, 3, 6, 10, 15, 21, 28, 36, 45, 55,
+    ]);
+    expect([2, 3, 4, 10].map((n) => skillCost(1, n))).toEqual([2, 5, 9, 54]);
+    expect([5, 6, 7, 10].map((n) => skillCost(4, n))).toEqual([5, 11, 18, 45]);
+    expect(skillCost(9, 10)).toBe(10);
+    expect(skillCost(5, 5)).toBe(0);
+    expect(skillCost(6, 4)).toBe(0);
+  });
+  it('reads points and the maximum off the age and experience', () => {
+    expect(skillPoints('adulte', 'normal')).toBe(110);
+    expect(skillPoints('enfant', 'veteran')).toBe(150);
+    expect(skillPoints(null, 'aguerri')).toBe(170);
+    expect([skillMax('enfant'), skillMax('venerable'), skillMax(null)]).toEqual([6, 10, 8]);
+  });
+});
+
+describe('desavantageSlots', () => {
+  const read = (age: Parameters<typeof desavantageSlots>[0]) =>
+    desavantageSlots(age).map((s) => `${s.required ? '!' : '+'}${s.rarities.join('|')}`);
+  it('lists the obligatoires then the supplémentaires per age', () => {
+    expect(read('enfant')).toEqual(['!enfant', '+enfant|commun']);
+    expect(read('adulte')).toEqual(['!commun', '+commun', '+commun', '+rare']);
+    expect(read('venerable')).toEqual(['!commun', '!ancien', '!ancien', '+commun', '+rare', '+ancien']);
+    expect(read(null)).toEqual(read('adulte'));
+  });
+  it('gives every slot a distinct id', () => {
+    const ids = desavantageSlots('ancien').map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+describe('tendances de départ', () => {
+  it('parses a cell as the book prints it', () => {
+    expect(parseTendanceStart('2TD, 1TF, 2L')).toEqual({
+      fixed: { dragon: 2, fatalite: 1, homme: 0 },
+      free: 2,
+    });
+    expect(parseTendanceStart('5TD').free).toBe(0);
+  });
+  it('totals 2 / 3 / 4 / 5 / 5 points per age for every nation (proofreads the table)', () => {
+    for (const nation of NATIONS) {
+      const totals = AGE_BANDS.map((b) => {
+        const s = tendanceStart(nation.key, b.key);
+        return s.free + s.fixed.dragon + s.fixed.fatalite + s.fixed.homme;
+      });
+      expect([nation.key, totals]).toEqual([nation.key, [2, 3, 4, 5, 5]]);
+    }
+  });
+  it('reads the Adulte column while no age is chosen', () => {
+    expect(tendanceStart('kar', null)).toEqual(tendanceStart('kar', 'adulte'));
+  });
+});
+
+describe('attributModifier', () => {
+  it('maps every band of the table, NA at 0', () => {
+    const sums = [0, 1, 2, 3, 5, 6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25];
+    expect(sums.map(attributModifier)).toEqual([
+      null, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5,
+    ]);
   });
 });

@@ -8,6 +8,7 @@ import { Icon as PaperIcon, Text } from 'react-native-paper';
 import IdentityChip from '@/components/ui/identity-chip';
 import Icon, { type IconName } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { plural } from '@/lib/plural';
 import type { Campaign } from '@/db/schema';
 
 /** A role card: engraved title, one line of what it is for, two buttons. */
@@ -49,8 +50,6 @@ export function RoleCard({
 
 type Member = { nom: string; kind: 'pc' | 'npc' };
 
-const plural = (n: number, one: string, many: string) => `${n} ${n > 1 ? many : one}`;
-
 /**
  * What a row says under its name. A GM counts the table's local members — the
  * remote players are only known while the roster is connected, so they are not
@@ -63,8 +62,8 @@ export function tableSummary(role: Campaign['role'], members: Member[]): string 
   const pcs = members.filter((m) => m.kind === 'pc').length;
   const npcs = members.length - pcs;
   const parts = [
-    pcs ? plural(pcs, 'personnage', 'personnages') : null,
-    plural(npcs, 'PNJ', 'PNJ'),
+    pcs ? `${pcs} ${plural(pcs, 'personnage')}` : null,
+    `${npcs} PNJ`,
   ].filter(Boolean);
   return parts.join(' · ');
 }

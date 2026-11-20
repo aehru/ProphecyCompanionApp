@@ -3,6 +3,7 @@ import React, { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import SpellCatalogList from '@/components/catalog/spell-catalog-list';
+import TipCard from '@/components/ui/tip-card';
 import { type SpellPreset } from '@/data/spell-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { log } from '@/lib/log';
@@ -55,6 +56,9 @@ export default function EnchantSpellCatalogModal() {
 
   return (
     <View style={styles.root}>
+      <View style={styles.tip}>
+        <TipCard screen="enchant" />
+      </View>
       <SpellCatalogList onAdd={pick} />
     </View>
   );
@@ -62,4 +66,5 @@ export default function EnchantSpellCatalogModal() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  tip: { paddingHorizontal: 12, paddingTop: 12 },
 });

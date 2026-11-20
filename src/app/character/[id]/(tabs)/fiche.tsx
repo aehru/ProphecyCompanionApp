@@ -23,6 +23,7 @@ import { characterFallback } from '@/components/ui/character-gate';
 import Columns from '@/components/ui/columns';
 import { dsIcon } from '@/components/ui/icon';
 import SectionCard from '@/components/ui/section-card';
+import TipCard from '@/components/ui/tip-card';
 import { ATTRIBUTS, CARACTERISTIQUES } from '@/constants/prophecy';
 import type { Character } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
@@ -179,6 +180,7 @@ export default function CharacterFicheScreen() {
   return (
     <View style={styles.root}>
       <KeyboardAwareScrollView contentContainerStyle={[styles.container, splitWidth]} bottomOffset={24}>
+        <TipCard screen="fiche" />
         <Columns>
           <SectionCard
             title="TENDANCES"

@@ -5,6 +5,7 @@ import RollContextBody from '@/components/roll-context-body';
 import RollFreeformBody from '@/components/roll-freeform-body';
 import DsDialog from '@/components/ui/ds-dialog';
 import { dsIcon } from '@/components/ui/icon';
+import TipCard from '@/components/ui/tip-card';
 import { rollDice, rollDie, rollTendances, type TendanceRoll } from '@/lib/dice';
 import {
   DEFAULT_DICE,
@@ -203,6 +204,7 @@ export default function DiceRollerDialog({
           </Button>
         </>
       }>
+      <TipCard screen="roller" />
       {context ? (
         <RollContextBody
           context={context}

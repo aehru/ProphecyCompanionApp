@@ -1,9 +1,6 @@
-import { BottomTabBarHeightContext } from 'expo-router/js-tabs';
-import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { SegmentedButtons, Snackbar } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCallback, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Snackbar } from 'react-native-paper';
 
 import AptitudesTab from '@/components/sheet-form/aptitudes-tab';
 import CombatTab from '@/components/sheet-form/combat-tab';
@@ -11,20 +8,16 @@ import { useFieldChains } from '@/components/sheet-form/field-chain';
 import IdentityTab from '@/components/sheet-form/identity-tab';
 import MagicTab from '@/components/sheet-form/magic-tab';
 import AppFab from '@/components/ui/app-fab';
+import TabPage from '@/components/ui/tab-page';
+import TabPager from '@/components/ui/tab-pager';
 import type { Character, NewCharacter } from '@/db/schema';
-import { contentWidth } from '@/hooks/use-layout';
 import { Alert } from '@/lib/alert';
 import { type FormValues, fromFormValues, toFormValues } from '@/lib/character-values';
 
-// In-page tabs to keep the long sheet from scrolling endlessly. Name stays the
+// Swipeable in-page tabs (<TabPager>) to keep the long sheet from scrolling endlessly. Name stays the
 // only required field, validated globally regardless of the active tab.
 // Skills are edited post-creation in the Compétences tab's edit mode, not here.
-const FORM_TABS = [
-  { key: 'identite', label: 'Identité' },
-  { key: 'aptitudes', label: 'Aptitudes' },
-  { key: 'combat', label: 'Combat' },
-  { key: 'magie', label: 'Magie' },
-] as const;
+const FORM_TABS = ['Identité', 'Aptitudes', 'Combat', 'Magie'];
 
 export default function CharacterForm({
   initial,
@@ -37,13 +30,8 @@ export default function CharacterForm({
   onSubmit: (data: Partial<NewCharacter>) => Promise<void> | void;
   onDelete?: () => Promise<void> | void;
 }) {
-  const insets = useSafeAreaInsets();
-  // Match AppFab: skip the safe-area inset when inside a tab navigator, where
-  // the tab bar already offsets the screen.
-  const inTabBar = React.useContext(BottomTabBarHeightContext) != null;
-  const scrollPadBottom = 96 + (inTabBar ? 0 : insets.bottom);
   const [v, setV] = useState<FormValues>(() => toFormValues(initial));
-  const [tab, setTab] = useState<string>('identite');
+  const [tab, setTab] = useState(0);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [nameError, setNameError] = useState(false);
@@ -61,7 +49,7 @@ export default function CharacterForm({
     if (nameMissing) {
       // Surface the missing required field instead of silently doing nothing.
       setNameError(true);
-      setTab('identite');
+      setTab(0);
       return;
     }
     setBusy(true);
@@ -81,45 +69,30 @@ export default function CharacterForm({
     ]);
   }
 
+  const renderPage = (index: number) => (
+    <TabPage>
+      {index === 0 ? (
+        <IdentityTab
+          v={v}
+          chain={chains.identite}
+          setField={setField}
+          onText={setText}
+          nameError={nameError && nameMissing}
+          registerRef={registerRef}
+          focus={focus}
+          busy={busy}
+          onDelete={onDelete ? confirmDelete : undefined}
+        />
+      ) : null}
+      {index === 1 ? <AptitudesTab v={v} chain={chains.aptitudes} setField={setField} /> : null}
+      {index === 2 ? <CombatTab v={v} chain={chains.combat} setField={setField} /> : null}
+      {index === 3 ? <MagicTab v={v} chain={chains.magie} setField={setField} /> : null}
+    </TabPage>
+  );
+
   return (
     <View style={styles.root}>
-      <View style={styles.tabsBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <SegmentedButtons
-            value={tab}
-            onValueChange={setTab}
-            density="small"
-            buttons={FORM_TABS.map((t) => ({ value: t.key, label: t.label }))}
-          />
-        </ScrollView>
-      </View>
-
-      <KeyboardAwareScrollView
-        contentContainerStyle={[styles.container, { paddingBottom: scrollPadBottom }, contentWidth]}
-        keyboardShouldPersistTaps="handled"
-        bottomOffset={24}>
-        {tab === 'identite' ? (
-          <IdentityTab
-            v={v}
-            chain={chains.identite}
-            setField={setField}
-            onText={setText}
-            nameError={nameError && nameMissing}
-            registerRef={registerRef}
-            focus={focus}
-            busy={busy}
-            onDelete={onDelete ? confirmDelete : undefined}
-          />
-        ) : null}
-
-        {tab === 'aptitudes' ? (
-          <AptitudesTab v={v} chain={chains.aptitudes} setField={setField} />
-        ) : null}
-
-        {tab === 'combat' ? <CombatTab v={v} chain={chains.combat} setField={setField} /> : null}
-
-        {tab === 'magie' ? <MagicTab v={v} chain={chains.magie} setField={setField} /> : null}
-      </KeyboardAwareScrollView>
+      <TabPager labels={FORM_TABS} active={tab} onChange={setTab} renderPage={renderPage} />
 
       <AppFab
         icon="content-save"
@@ -137,6 +110,4 @@ export default function CharacterForm({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  tabsBar: { paddingHorizontal: 16, paddingTop: 12 },
-  container: { padding: 16, gap: 12 },
 });

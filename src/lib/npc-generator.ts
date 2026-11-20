@@ -15,7 +15,7 @@
  * rules and the RNG, so it loads in plain-Node vitest like the other engines.
  */
 
-import { DEFAULT_SKILLS } from '@/constants/prophecy';
+import { skillAttribut } from '@/constants/prophecy';
 import type { ArchetypePreset, ArchetypeStats } from '@/data/archetype-catalog';
 import type { NewCharacter } from '@/db/schema';
 import { initiativeDice, woundBoxes } from '@/lib/creation-rules';
@@ -217,8 +217,7 @@ function rollSkills(
  * build already proved the name is in it), so the option column stays a plain
  * list of names in the spreadsheet.
  */
-const SKILL_ATTRIBUT = new Map(DEFAULT_SKILLS.map((s) => [s.name, s.attribut]));
-const attributOf = (name: string) => SKILL_ATTRIBUT.get(name) ?? '';
+const attributOf = skillAttribut;
 
 /** One PNJ, fully rolled. */
 export function generateNpc(

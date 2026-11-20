@@ -1,6 +1,8 @@
 import type { CasteKey } from '@/constants/prophecy';
 import type { NewTrait } from '@/db/schema';
 
+import { TRAIT_CATALOG_DATA } from './trait-catalog.gen';
+
 /**
  * A pickable avantage / désavantage. `data` is spread into `createTrait` (minus
  * the character link), so its keys mirror the `traits` table columns.
@@ -55,3 +57,26 @@ export type TraitPreset = {
 };
 
 export { TRAIT_CATALOG_DATA as TRAIT_CATALOG } from './trait-catalog.gen';
+
+/** Catalogue entry by id — a pick is remembered by its `presetId`. */
+export const TRAIT_BY_ID: ReadonlyMap<string, TraitPreset> = new Map(
+  TRAIT_CATALOG_DATA.map((p) => [p.id, p]),
+);
+
+/**
+ * The row a pick becomes: the entry's data, the price and précision the player
+ * chose, and the provenance (slug + revision) that lets a later catalogue
+ * correction find it — their absence is what marks an entry as hand-written.
+ */
+export function traitFromPreset(
+  preset: TraitPreset,
+  pick: { cost: number; note: string },
+): Omit<NewTrait, 'characterId' | 'id'> {
+  return {
+    ...preset.data,
+    cost: pick.cost,
+    note: pick.note,
+    presetId: preset.id,
+    presetRevision: preset.revision,
+  };
+}
