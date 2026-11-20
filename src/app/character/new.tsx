@@ -4,7 +4,7 @@ import { Text } from 'react-native-paper';
 
 import Icon, { type IconName } from '@/components/ui/icon';
 import { useCharacterImport } from '@/hooks/use-character-import';
-import { useCreationDraft } from '@/hooks/use-creation-draft';
+import { clearDraft, useCreationDraft } from '@/hooks/use-creation-draft';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
@@ -24,9 +24,16 @@ export default function NewCharacterScreen() {
   const startGuided = () => {
     const go = () => router.replace('/character/create' as Href);
     if (!draft) return go();
-    Alert.alert('Remplacer le brouillon ?', 'La création en cours sera perdue dès la première étape remplie.', [
+    Alert.alert('Remplacer le brouillon ?', 'La création en cours sera perdue.', [
       { text: 'Annuler', style: 'cancel' },
-      { text: 'Recommencer', style: 'destructive', onPress: go },
+      {
+        text: 'Recommencer',
+        style: 'destructive',
+        onPress: () => {
+          void clearDraft();
+          go();
+        },
+      },
     ]);
   };
 

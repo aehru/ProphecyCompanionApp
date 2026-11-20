@@ -17,9 +17,8 @@ export type CreationDraft = { v: FormValues; build: CreationBuild; step: number;
 export function parseDraft(raw: string | null): CreationDraft | null {
   if (!raw) return null;
   try {
-    const d = JSON.parse(raw) as Partial<CreationDraft>;
-    if (!d || typeof d.v !== 'object' || typeof d.build !== 'object' || d.v === null || d.build === null)
-      return null;
+    const d = JSON.parse(raw) as Partial<CreationDraft> | null;
+    if (!isObject(d?.v) || !isObject(d.build)) return null;
     const step = Number.isInteger(d.step) ? (d.step as number) : 0;
     return {
       v: d.v,
@@ -31,6 +30,8 @@ export function parseDraft(raw: string | null): CreationDraft | null {
     return null;
   }
 }
+
+const isObject = (x: unknown): x is object => typeof x === 'object' && x !== null;
 
 /** Nothing worth keeping yet: still on the first step with no age picked. */
 export function isBlankDraft(build: CreationBuild, step: number): boolean {

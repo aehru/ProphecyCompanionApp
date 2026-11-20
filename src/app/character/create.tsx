@@ -68,8 +68,11 @@ export default function CreateCharacterScreen() {
     });
   }, [resume]);
 
+  // Debounced: a typed name would otherwise write the whole draft per key.
   useEffect(() => {
-    if (ready && !isBlankDraft(build, step)) void saveDraft({ v, build, step });
+    if (!ready || isBlankDraft(build, step)) return;
+    const t = setTimeout(() => void saveDraft({ v, build, step }), 400);
+    return () => clearTimeout(t);
   }, [ready, v, build, step]);
 
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
@@ -139,10 +142,11 @@ export default function CreateCharacterScreen() {
     if (uri) setAvatarUri(uri);
   };
 
-  if (!ready) return <View style={[styles.root, { backgroundColor: theme.colors.background }]} />;
+  const rootStyle = [styles.root, { backgroundColor: theme.colors.background }];
+  if (!ready) return <View style={rootStyle} />;
   const key = CREATION_STEPS[step].key;
   return (
-    <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
+    <View style={rootStyle}>
       <WizardHeader step={step} onClose={close} />
       {key === 'competences' ? (
         // Pinned above the scroll: the budget stays in sight under a long list.
