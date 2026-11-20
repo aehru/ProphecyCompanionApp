@@ -1,5 +1,5 @@
-import { type Href, usePreventRemove, useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
@@ -15,6 +15,7 @@ import IdentityStep from '@/components/creation/identity-step';
 import RecapStep from '@/components/creation/recap-step';
 import TendancesStep from '@/components/creation/tendances-step';
 import { WizardFooter, WizardHeader } from '@/components/creation/wizard-chrome';
+import { clearDraft, loadDraft, saveDraft } from '@/hooks/use-creation-draft';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { Alert } from '@/lib/alert';
@@ -28,6 +29,7 @@ import {
   proposeTendances,
   withAge,
 } from '@/lib/creation';
+import { isBlankDraft } from '@/lib/creation-draft';
 import { tendanceStart } from '@/lib/creation-rules';
 import { skillRows } from '@/lib/creation-skills';
 import { pickImage } from '@/lib/media';
@@ -39,7 +41,8 @@ import { specName } from '@/repositories/skills';
  * the full form edits, plus the `build` (age, distributed values, transferred
  * point, nation, avantages / désavantages) — its values folded in by
  * `applyBuild`, its traits inserted as rows. Nothing touches the database until
- * « Démarrer » on the last step.
+ * « Démarrer » on the last step. Meanwhile every change is kept as a draft
+ * (`?draft=1` resumes it), so leaving half-way loses nothing but the portrait.
  */
 export default function CreateCharacterScreen() {
   const router = useRouter();
@@ -50,6 +53,27 @@ export default function CreateCharacterScreen() {
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [nameError, setNameError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const resume = useLocalSearchParams<{ draft?: string }>().draft === '1';
+  const [ready, setReady] = useState(!resume);
+
+  useEffect(() => {
+    if (!resume) return;
+    void loadDraft().then((d) => {
+      if (d) {
+        setV(d.v);
+        setBuild(d.build);
+        setStep(d.step);
+      }
+      setReady(true);
+    });
+  }, [resume]);
+
+  // Debounced: a typed name would otherwise write the whole draft per key.
+  useEffect(() => {
+    if (!ready || isBlankDraft(build, step)) return;
+    const t = setTimeout(() => void saveDraft({ v, build, step }), 400);
+    return () => clearTimeout(t);
+  }, [ready, v, build, step]);
 
   const setField = useCallback((k: string, t: string) => setV((prev) => ({ ...prev, [k]: t })), []);
   const last = step === CREATION_STEPS.length - 1;
@@ -64,17 +88,26 @@ export default function CreateCharacterScreen() {
       router.back();
       return;
     }
-    Alert.alert('Abandonner la création ?', 'Ce qui a été saisi sera perdu.', [
-      { text: 'Continuer', style: 'cancel' },
-      {
-        text: 'Abandonner',
-        style: 'destructive',
-        onPress: () => {
-          allowLeave();
-          router.back();
+    const leave = () => {
+      allowLeave();
+      router.back();
+    };
+    Alert.alert(
+      'Quitter la création ?',
+      'Le brouillon reprend où vous en êtes, depuis « Nouveau personnage ». Le portrait n’est pas conservé.',
+      [
+        { text: 'Continuer', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: () => {
+            void clearDraft();
+            leave();
+          },
         },
-      },
-    ]);
+        { text: 'Garder le brouillon', onPress: leave },
+      ],
+    );
   };
 
   const create = async () => {
@@ -86,6 +119,7 @@ export default function CreateCharacterScreen() {
         skillRows(build.skills, v.caste, specName),
         avatarUri,
       );
+      await clearDraft();
       allowLeave();
       router.replace(`/character/${id}` as Href);
     } finally {
@@ -108,9 +142,11 @@ export default function CreateCharacterScreen() {
     if (uri) setAvatarUri(uri);
   };
 
+  const rootStyle = [styles.root, { backgroundColor: theme.colors.background }];
+  if (!ready) return <View style={rootStyle} />;
   const key = CREATION_STEPS[step].key;
   return (
-    <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
+    <View style={rootStyle}>
       <WizardHeader step={step} onClose={close} />
       {key === 'competences' ? (
         // Pinned above the scroll: the budget stays in sight under a long list.

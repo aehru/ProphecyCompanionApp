@@ -4,8 +4,11 @@ import { Text } from 'react-native-paper';
 
 import Icon, { type IconName } from '@/components/ui/icon';
 import { useCharacterImport } from '@/hooks/use-character-import';
+import { clearDraft, useCreationDraft } from '@/hooks/use-creation-draft';
 import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
+import { Alert } from '@/lib/alert';
+import { CREATION_STEPS } from '@/lib/creation';
 
 /**
  * The roster's « + » lands here: three ways to start a character. Guided is the
@@ -16,6 +19,23 @@ export default function NewCharacterScreen() {
   const router = useRouter();
   const theme = useProphecyTheme();
   const { busy, runImport } = useCharacterImport();
+  const draft = useCreationDraft();
+
+  const startGuided = () => {
+    const go = () => router.replace('/character/create' as Href);
+    if (!draft) return go();
+    Alert.alert('Remplacer le brouillon ?', 'La création en cours sera perdue.', [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: 'Recommencer',
+        style: 'destructive',
+        onPress: () => {
+          void clearDraft();
+          go();
+        },
+      },
+    ]);
+  };
 
   const importFile = async () => {
     if (await runImport()) router.back();
@@ -27,13 +47,23 @@ export default function NewCharacterScreen() {
       <Text style={{ color: theme.colors.onSurfaceVariant }}>
         Choisissez comment commencer. Rien n’est figé : tout reste modifiable sur la fiche.
       </Text>
+      {draft ? (
+        <StartOption
+          icon="compass"
+          title="Reprendre le brouillon"
+          body={`${draft.v.nom?.trim() || 'Sans nom'} — étape « ${CREATION_STEPS[draft.step].short} ».`}
+          recommended
+          testID="start-draft"
+          onPress={() => router.replace('/character/create?draft=1' as Href)}
+        />
+      ) : null}
       <StartOption
         icon="compass"
         title="Création guidée"
         body="Caste, identité, tendances, caractéristiques — une étape à la fois, avec un aperçu du personnage qui se dessine."
-        recommended
+        recommended={!draft}
         testID="start-guided"
-        onPress={() => router.replace('/character/create' as Href)}
+        onPress={startGuided}
       />
       <StartOption
         icon="scroll"
