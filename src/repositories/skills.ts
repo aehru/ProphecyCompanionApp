@@ -12,6 +12,9 @@ export function skillsQuery(characterId: number) {
 
 export type SkillInput = { name: string; attribut: string; value: number };
 
+/** A row to insert as is: a base skill, or a specialization naming its mother. */
+export type NewSkillInput = SkillInput & { parentName?: string; specLabel?: string };
+
 /** Canonical composite name for a specialization ("Herboristerie (Curative)"). */
 export function specName(motherName: string, label: string): string {
   const l = label.trim();
@@ -44,6 +47,19 @@ export async function replaceSkills(characterId: number, rows: SkillInput[]) {
   });
   // Count only — a skill name can be a player-typed specialization label.
   logWrite('skills', 'update', { characterId, count: keep.length, phase: 'replace-base' });
+}
+
+/**
+ * Insert skill rows as given — base skills and specializations alike (the
+ * guided creation's output, see `lib/creation-skills` `skillRows`).
+ */
+export async function insertSkills(
+  characterId: number,
+  rows: readonly NewSkillInput[],
+) {
+  if (rows.length === 0) return;
+  await db.insert(skills).values(rows.map((r) => ({ characterId, ...r })));
+  logWrite('skills', 'insert', { characterId, count: rows.length });
 }
 
 /**

@@ -86,6 +86,9 @@ export const ATTRIBUTS = [
   { key: 'social', label: 'Social' },
 ] as const;
 
+export type CaracKey = (typeof CARACTERISTIQUES)[number]['key'];
+export type AttributKey = (typeof ATTRIBUTS)[number]['key'];
+
 /** Attribut key → display label (skills link to one attribut). */
 export const ATTRIBUT_LABEL: Record<string, string> = Object.fromEntries(
   ATTRIBUTS.map((a) => [a.key, a.label]),
@@ -131,6 +134,22 @@ export const GREAT_DRAGONS = [
 ] as const;
 
 export type GreatDragonKey = (typeof GREAT_DRAGONS)[number]['key'];
+
+/**
+ * Each caste serves one Great Dragon — the pairing the creation wizard draws as
+ * the caste card's accent. Kalimsshar patrons no caste (his are the Ordres
+ * Noirs, a flag on top of a caste).
+ */
+export const CASTE_PATRON: Record<CasteKey, GreatDragonKey> = {
+  artisan: 'kezyr',
+  combattant: 'kroryn',
+  commercant: 'khy',
+  erudit: 'ozyr',
+  mage: 'nenya',
+  prodige: 'heyra',
+  protecteur: 'brorne',
+  voyageur: 'szyl',
+};
 
 /** Great dragon key → display label. */
 export const DRAGON_LABEL: Record<string, string> = Object.fromEntries(
@@ -458,6 +477,7 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
   { name: 'Alchimie', attribut: 'mental' },
   { name: 'Astrologie', attribut: 'mental' },
   { name: 'Cartographie', attribut: 'mental' },
+  { name: 'Chirurgie', attribut: 'mental' },
   { name: 'Estimation', attribut: 'mental' },
   { name: 'Herboristerie', attribut: 'mental' },
   { name: 'Lire et écrire', attribut: 'mental' },
@@ -473,6 +493,8 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
   { name: 'Artisanat élémentaire', attribut: 'manuel' },
   { name: 'Contrefaçon', attribut: 'manuel' },
   { name: 'Discrétion', attribut: 'manuel' },
+  { name: 'Explosifs', attribut: 'manuel' },
+  { name: 'Mécanismes', attribut: 'manuel' },
   { name: 'Pièges', attribut: 'manuel' },
   { name: 'Pister', attribut: 'manuel' },
   { name: 'Sabotage', attribut: 'manuel' },
@@ -501,6 +523,11 @@ export const DEFAULT_SKILLS: { name: string; attribut: string }[] = [
   { name: 'Intimidation', attribut: 'social' },
   { name: 'Séduction', attribut: 'social' },
 ];
+
+const SKILL_ATTRIBUT = new Map(DEFAULT_SKILLS.map((s) => [s.name, s.attribut]));
+
+/** A default compétence's attribut, '' for a name not in DEFAULT_SKILLS. */
+export const skillAttribut = (name: string) => SKILL_ATTRIBUT.get(name) ?? '';
 
 export const WOUND_LEVELS = [
   { key: 'egratignure', label: 'Égratignure', damage: '1-10', malus: null },
@@ -601,6 +628,8 @@ export const RESOURCES = [
   { key: 'maitrise', label: 'Maîtrise' },
   { key: 'chance', label: 'Chance' },
 ] as const;
+
+export type ResourceKey = (typeof RESOURCES)[number]['key'];
 
 /**
  * Money — Drac coins. Stored as separate counts on actual_state (no universal

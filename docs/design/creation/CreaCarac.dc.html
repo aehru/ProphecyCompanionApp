@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Création — Caractéristiques</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&amp;family=Noto+Sans:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#C69C4D}a:hover{color:#E1C37A}
+.scr{width:390px;height:844px;background:#141618;color:#E8E4D6;font-family:'Noto Sans',sans-serif;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.hdr{flex:none;display:flex;flex-direction:column;gap:8px;padding:6px 4px 12px;background:#1E1F22;border-bottom:1px solid rgba(198,156,77,.25)}
+.ib{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;color:#C69C4D;border-radius:22px;padding:0;text-decoration:none}
+.prog{display:flex;gap:4px;padding:0 16px}
+.prog span{flex:1;height:4px;border-radius:2px;background:#3A3C40}
+.prog .d{background:#C69C4D}
+.mut{color:#9A958A;font-size:12px;line-height:1.4}
+.sec{font-family:Cinzel,serif;font-size:11px;letter-spacing:.12em;color:#E1C37A;margin:0}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.st{display:flex;align-items:center;gap:4px;padding:4px 4px 4px 10px;border-radius:12px;background:#1E1F22;border:1px solid #3A3C40}
+.sl{flex:1;display:flex;flex-direction:column}
+.sk{font-size:10px;letter-spacing:.06em;color:#9A958A}
+.sn{font-size:12px}
+.sv{width:26px;text-align:center;font-family:Cinzel,serif;font-weight:600;font-size:18px}
+.s{width:32px;height:32px;border-radius:16px;border:1px solid rgba(198,156,77,.45);background:none;color:#E1C37A;font:600 15px 'Noto Sans',sans-serif;padding:0}
+.ft{flex:none;display:flex;gap:10px;padding:12px 16px 20px;background:#1E1F22;border-top:1px solid rgba(198,156,77,.25)}
+.b{height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:8px;font:600 15px 'Noto Sans',sans-serif;text-decoration:none}
+</style>
+</helmet>
+<div class="scr">
+  <div class="hdr">
+    <div style="display: flex; align-items: center; gap: 4px">
+      <a class="ib" href="CreaDepart.dc.html" aria-label="Quitter la création"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+      <div style="flex: 1; display: flex; flex-direction: column">
+        <span class="mut" style="font-size: 11px">Étape 4 sur 5 · brouillon conservé</span>
+        <span style="font-family: Cinzel, serif; font-weight: 600; font-size: 18px">Caractéristiques</span>
+      </div>
+    </div>
+    <div class="prog" aria-hidden="true"><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span></span></div>
+  </div>
+
+  <div style="flex: 1; overflow: hidden; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: #221F19; border: 1px solid rgba(198,156,77,.35)">
+      <div style="flex: 1; display: flex; flex-direction: column">
+        <span style="font-family: Cinzel, serif; font-weight: 600; font-size: 20px">26 <span class="mut" style="font-family: 'Noto Sans', sans-serif; font-size: 13px">/ 30 points</span></span>
+        <span class="mut">Budget fixé par votre table · facultatif</span>
+      </div>
+      <button style="height: 34px; padding: 0 12px; border-radius: 17px; border: 1px solid rgba(198,156,77,.45); background: none; color: #E1C37A; font: 500 12px 'Noto Sans',sans-serif">Modifier</button>
+    </div>
+
+    <h2 class="sec">CARACTÉRISTIQUES</h2>
+    <div class="g2">
+      <div class="st"><span class="sl"><span class="sk">FOR</span><span class="sn">Force</span></span><button class="s" aria-label="Diminuer Force">−</button><span class="sv">4</span><button class="s" aria-label="Augmenter Force">+</button></div>
+      <div class="st"><span class="sl"><span class="sk">RES</span><span class="sn">Résistance</span></span><button class="s" aria-label="Diminuer Résistance">−</button><span class="sv">5</span><button class="s" aria-label="Augmenter Résistance">+</button></div>
+      <div class="st"><span class="sl"><span class="sk">INT</span><span class="sn">Intelligence</span></span><button class="s" aria-label="Diminuer Intelligence">−</button><span class="sv">2</span><button class="s" aria-label="Augmenter Intelligence">+</button></div>
+      <div class="st"><span class="sl"><span class="sk">VOL</span><span class="sn">Volonté</span></span><button class="s" aria-label="Diminuer Volonté">−</button><span class="sv">3</span><button class="s" aria-label="Augmenter Volonté">+</button></div>
+      <div class="st"><span class="sl"><span class="sk">COO</span><span class="sn">Coordination</span></span><button class="s" aria-label="Diminuer Coordination">−</button><span class="sv">4</span><button class="s" aria-label="Augmenter Coordination">+</button></div>
+      <div class="st"><span class="sl"><span class="sk">PER</span><span class="sn">Perception</span></span><button class="s" aria-label="Diminuer Perception">−</button><span class="sv">3</span><button class="s" aria-label="Augmenter Perception">+</button></div>
+      <div class="st"><span class="sl"><span class="sk">PRE</span><span class="sn">Présence</span></span><button class="s" aria-label="Diminuer Présence">−</button><span class="sv">3</span><button class="s" aria-label="Augmenter Présence">+</button></div>
+      <div class="st"><span class="sl"><span class="sk">EMP</span><span class="sn">Empathie</span></span><button class="s" aria-label="Diminuer Empathie">−</button><span class="sv">2</span><button class="s" aria-label="Augmenter Empathie">+</button></div>
+    </div>
+
+    <h2 class="sec" style="margin-top: 4px">ATTRIBUTS</h2>
+    <div class="g2">
+      <div class="st"><span class="sl"><span class="sn">Physique</span></span><button class="s" aria-label="Diminuer Physique">−</button><span class="sv">4</span><button class="s" aria-label="Augmenter Physique">+</button></div>
+      <div class="st"><span class="sl"><span class="sn">Mental</span></span><button class="s" aria-label="Diminuer Mental">−</button><span class="sv">2</span><button class="s" aria-label="Augmenter Mental">+</button></div>
+      <div class="st"><span class="sl"><span class="sn">Manuel</span></span><button class="s" aria-label="Diminuer Manuel">−</button><span class="sv">3</span><button class="s" aria-label="Augmenter Manuel">+</button></div>
+      <div class="st"><span class="sl"><span class="sn">Social</span></span><button class="s" aria-label="Diminuer Social">−</button><span class="sv">3</span><button class="s" aria-label="Augmenter Social">+</button></div>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: #26282B">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFB59B" stroke-width="1.6" aria-hidden="true" style="flex: none; margin-top: 1px"><path d="M12 3.5 19 6.2v4.6c0 5-3.4 8.1-7 9.7-3.6-1.6-7-4.7-7-9.7V6.2Z"></path></svg>
+      <span class="mut" style="font-size: 12px"><b style="color: #E8E4D6">Apprenti</b> demande : une Compétence d’arme à 6, Physique à 4. Rappel seulement, rien n’est bloqué.</span>
+    </div>
+  </div>
+
+  <div class="ft">
+    <a class="b" href="CreaTendances.dc.html" style="flex: 1; border: 1px solid rgba(198,156,77,.45); color: #E1C37A">Précédent</a>
+    <a class="b" href="CreaRecap.dc.html" style="flex: 2; background: #C69C4D; color: #141618">Suivant : Récapitulatif<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9.5 5.5 16 12l-6.5 6.5"></path></svg></a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

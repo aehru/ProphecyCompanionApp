@@ -16,6 +16,7 @@ import { characterFallback } from '@/components/ui/character-gate';
 import { dsIcon } from '@/components/ui/icon';
 import TabPage from '@/components/ui/tab-page';
 import TabPager from '@/components/ui/tab-pager';
+import TipCard from '@/components/ui/tip-card';
 import { ATTRIBUTS } from '@/constants/prophecy';
 import type { Skill } from '@/db/schema';
 import { useCharacterId } from '@/hooks/use-character-id';
@@ -218,6 +219,9 @@ export default function CharacterSkillsScreen() {
 
   return (
     <View style={styles.root}>
+      <View style={styles.tip}>
+        <TipCard screen="pager" />
+      </View>
       <TabPager
         labels={TABS}
         active={tab}
@@ -275,5 +279,6 @@ export default function CharacterSkillsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  tip: { paddingHorizontal: 12, paddingTop: 12 },
   searchButton: { margin: 0, marginRight: 4, marginBottom: 2 },
 });

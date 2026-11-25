@@ -8,6 +8,7 @@ import { asDieIcon, DIE_ICONS } from '@/components/ui/die-icons';
 import DsDialog from '@/components/ui/ds-dialog';
 import EditableSection from '@/components/ui/editable-section';
 import Icon, { dsIcon, type IconName } from '@/components/ui/icon';
+import TipCard from '@/components/ui/tip-card';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import {
   cumulMalus,
@@ -19,6 +20,7 @@ import {
 } from '@/lib/action-cumul';
 import { parseInteger } from '@/lib/character-values';
 import { initiativeDiceCount } from '@/lib/dice';
+import { plural } from '@/lib/plural';
 
 /**
  * INITIATIVE: one slot per die rolled this turn, the extra-dice stepper, and a
@@ -64,7 +66,6 @@ export default function InitiativeSection({
 }) {
   const theme = useProphecyTheme();
   const count = initiativeDiceCount(max, bonus);
-  const plural = Math.abs(bonus) > 1 ? 's' : '';
   // Which slot's picker is open; null = closed. Index rather than a boolean so
   // the dialog knows what it is editing.
   const [picking, setPicking] = useState<number | null>(null);
@@ -122,8 +123,8 @@ export default function InitiativeSection({
             // a forgotten die would otherwise quietly ride along all session.
             <Text style={{ color: theme.colors.onSurfaceVariant }}>
               {bonus > 0
-                ? `+${bonus} dé${plural} supplémentaire${plural}`
-                : `${-bonus} dé${plural} en moins`}
+                ? `+${bonus} ${plural(bonus, 'dé')} ${plural(bonus, 'supplémentaire')}`
+                : `${-bonus} ${plural(bonus, 'dé')} en moins`}
             </Text>
           ) : null}
 
@@ -132,7 +133,10 @@ export default function InitiativeSection({
               Définis l’initiative (max) avec le crayon en haut.
             </Text>
           ) : (
-            <View style={styles.grid}>
+            <>
+              {/* Only once there are dice: the tips are about what a die does. */}
+              {editing ? null : <TipCard screen="initiative" />}
+              <View style={styles.grid}>
               {Array.from({ length: count }, (_, i) => values[i] ?? 0).map((val, i) => {
                 const icon = asDieIcon(icons[i]);
                 if (editing) {
@@ -176,7 +180,8 @@ export default function InitiativeSection({
                   />
                 );
               })}
-            </View>
+              </View>
+            </>
           )}
 
           {!editing && (atkCumul > 0 || defCumul > 0) ? (

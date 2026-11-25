@@ -30,6 +30,7 @@ import { initDiagnostics } from '@/lib/log';
 import { installCapture } from '@/lib/log/capture';
 import { AppDragonProvider, useAppDragon } from '@/hooks/use-app-dragon';
 import { KeepAwakeProvider } from '@/hooks/use-keep-awake';
+import { TipsProvider } from '@/hooks/use-tips';
 import { DragonAccents } from '@/theme/dragonsTheme';
 import {
   navigationTheme,
@@ -77,9 +78,11 @@ export default function RootLayout() {
   return (
     <AppDragonProvider>
       <KeepAwakeProvider>
-        <WebSafeAreaInsets>
-          <ThemedRoot />
-        </WebSafeAreaInsets>
+        <TipsProvider>
+          <WebSafeAreaInsets>
+            <ThemedRoot />
+          </WebSafeAreaInsets>
+        </TipsProvider>
       </KeepAwakeProvider>
     </AppDragonProvider>
   );
@@ -146,6 +149,15 @@ function ThemedRoot() {
                     <Stack.Screen
                       name="character/new"
                       options={{ title: 'Nouveau personnage', presentation: 'modal' }}
+                    />
+                    <Stack.Screen
+                      name="character/new-full"
+                      options={{ title: 'Fiche complète', presentation: 'modal' }}
+                    />
+                    {/* The guided wizard draws its own header (step, progress, ✕). */}
+                    <Stack.Screen
+                      name="character/create"
+                      options={{ headerShown: false, presentation: 'modal' }}
                     />
                     {/* [id] is a Tabs navigator (Résumé / Compétences) that draws its own header. */}
                     <Stack.Screen name="character/[id]" options={{ headerShown: false }} />

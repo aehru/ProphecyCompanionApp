@@ -1,12 +1,12 @@
 import { useLiveQuery } from 'drizzle-orm/expo-sqlite';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import CatalogSnackbar, { useCatalogSnackbar } from '@/components/catalog-snackbar';
 import TraitCatalogList from '@/components/catalog/trait-catalog-list';
-import TraitPickDialog, { type TraitPick } from '@/components/trait-pick-dialog';
+import { type TraitPick, useTraitPick } from '@/components/trait-pick-dialog';
 import type { TraitKind } from '@/constants/prophecy';
-import type { TraitPreset } from '@/data/trait-catalog';
+import { traitFromPreset, type TraitPreset } from '@/data/trait-catalog';
 import { useCharacterId } from '@/hooks/use-character-id';
 import { useFavorites } from '@/hooks/use-favorites';
 import { log } from '@/lib/log';
@@ -25,7 +25,7 @@ import { createTrait, traitsQuery } from '@/repositories/traits';
  * purpose is doing something the rulebook lets them settle with their GM.
  *
  * An entry the catalogue cannot fully answer for — several prices, or a
- * précision to fill in — stops on {@link TraitPickDialog} first.
+ * précision to fill in — stops on the pick dialog first (`useTraitPick`).
  */
 export default function TraitCatalogModal() {
   const numId = useCharacterId();
@@ -35,8 +35,6 @@ export default function TraitCatalogModal() {
   const favorites = useFavorites(numId, 'trait');
   const added = useCatalogSnackbar(numId, 'trait');
   const { announce, openEditor } = added;
-  // The entry waiting on an answer, if any.
-  const [picking, setPicking] = useState<TraitPreset | null>(null);
 
   /**
    * How many times each preset is already on this character's sheet. A COUNT
@@ -63,20 +61,12 @@ export default function TraitCatalogModal() {
       // Which preset was picked, logged HERE rather than threaded through the
       // repository — see the spell picker for the reasoning.
       log.info('catalog.add', { entity: 'traits', catalogId: preset.id });
-      const row = await createTrait(numId, {
-        ...preset.data,
-        cost: pick.cost,
-        note: pick.note,
-        // Provenance stamped next to the pick: the slug and the revision it was
-        // copied at are what let a later catalogue correction find this row, and
-        // their absence is what marks an entry as the player's own.
-        presetId: preset.id,
-        presetRevision: preset.revision,
-      });
+      const row = await createTrait(numId, traitFromPreset(preset, pick));
       announce(`« ${preset.data.name} » ajouté.`, row.id);
     },
     [numId, announce],
   );
+  const { pick, dialog } = useTraitPick(insert);
 
   // A blank entry has nothing left to read in the catalogue, so it goes
   // straight to its editor — on the side of the pool the player was browsing.
@@ -88,40 +78,17 @@ export default function TraitCatalogModal() {
     [numId, openEditor],
   );
 
-  const add = useCallback(
-    async (preset: TraitPreset) => {
-      if (preset.costs.length > 1 || preset.precisionPrompt) {
-        setPicking(preset);
-        return;
-      }
-      await insert(preset, { cost: preset.costs[0], note: '' });
-    },
-    [insert],
-  );
-
   return (
     <View style={styles.root}>
       <TraitCatalogList
         owned={owned}
         pool={pool}
         caste={charRows?.[0]?.caste}
-        onAdd={add}
+        onAdd={pick}
         onAddCustom={addCustom}
         favorites={favorites}
       />
-      <TraitPickDialog
-        // Keyed by the entry: the dialog opens on that entry's cheapest tier and
-        // an empty précision, which it can only do by mounting fresh (see its
-        // doc comment).
-        key={picking?.id ?? 'none'}
-        preset={picking}
-        title={picking?.data.name ?? ''}
-        onDismiss={() => setPicking(null)}
-        onConfirm={(preset, pick) => {
-          setPicking(null);
-          insert(preset, pick);
-        }}
-      />
+      {dialog}
       <CatalogSnackbar state={added} />
     </View>
   );

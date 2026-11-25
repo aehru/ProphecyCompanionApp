@@ -10,6 +10,7 @@ import { contentWidth } from '@/hooks/use-layout';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useSpellSyncPlan } from '@/hooks/use-spell-sync-plan';
 import { Alert } from '@/lib/alert';
+import { plural } from '@/lib/plural';
 import { applySpellSync } from '@/repositories/spell-sync';
 
 /**
@@ -71,7 +72,7 @@ export default function CatalogSyncScreen() {
       await applySpellSync(entries, accepted);
       Alert.alert(
         'Mise à jour effectuée',
-        `${entries.length} sortilège${entries.length > 1 ? 's' : ''} mis à jour.`,
+        `${entries.length} ${plural(entries.length, 'sortilège')} mis à jour.`,
         [{ text: 'Fermer', onPress: () => router.back() }],
       );
     } catch (e) {
@@ -84,7 +85,7 @@ export default function CatalogSyncScreen() {
   return (
     <ScrollView contentContainerStyle={[styles.content, contentWidth]}>
       <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-        {entries.length} sortilège{entries.length > 1 ? 's' : ''} {plural(entries.length, 'copié')} du
+        {entries.length} {plural(entries.length, 'sortilège')} {plural(entries.length, 'copié')} du
         catalogue {plural(entries.length, 'a', 'ont')} été {plural(entries.length, 'corrigé')} depuis.
         Les sorts que vous avez écrits vous-même ne sont jamais touchés.
       </Text>
@@ -142,11 +143,6 @@ export default function CatalogSyncScreen() {
       </Button>
     </ScrollView>
   );
-}
-
-/** Agreement helper — « 3 sortilèges copiés ont été corrigés ». */
-function plural(n: number, one: string, many = `${one}s`) {
-  return n > 1 ? many : one;
 }
 
 const styles = StyleSheet.create({

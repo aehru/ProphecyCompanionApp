@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import { useCampaignLive } from '@/hooks/use-campaign-live';
 import { USE_NATIVE_DRIVER } from '@/lib/animation';
+import { plural } from '@/lib/plural';
 
 const STATUS_LABEL = {
   online: 'Diffusion en cours',
@@ -83,7 +84,7 @@ export default function CampaignLiveIndicator() {
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             {STATUS_LABEL[status]}
             {sharedCount > 0
-              ? ` · ${sharedCount} personnage${sharedCount > 1 ? 's' : ''}`
+              ? ` · ${sharedCount} ${plural(sharedCount, 'personnage')}`
               : ''}
           </Text>
         </View>

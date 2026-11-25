@@ -16,6 +16,7 @@ import Columns from '@/components/ui/columns';
 import EditableSection from '@/components/ui/editable-section';
 import TabPage from '@/components/ui/tab-page';
 import TabPager from '@/components/ui/tab-pager';
+import TipCard from '@/components/ui/tip-card';
 import WeaponCard from '@/components/weapon-card';
 import { MONEY } from '@/constants/prophecy';
 import type { Weapon } from '@/db/schema';
@@ -245,6 +246,9 @@ export default function CharacterWeaponsScreen() {
             />
           )}
         </EditableSection>
+        <View style={styles.tip}>
+          <TipCard screen="inventory" />
+        </View>
       </View>
 
       <TabPager labels={TABS} active={tab} onChange={setTab} renderPage={renderPage} />
@@ -281,4 +285,5 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   // Matches the pages' own padding, minus the bottom (the strip follows).
   money: { paddingHorizontal: 12, paddingTop: 12, paddingBottom: 4 },
+  tip: { marginTop: 12 },
 });

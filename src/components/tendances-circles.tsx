@@ -38,7 +38,7 @@ export type TendancesTone = 'surface' | 'overlay';
  * a dark disc goes in behind the ring so a white Homme ring still reads on a
  * pale photograph, and the value flips to the light ink.
  */
-function TendanceGauge({
+export function TendanceGauge({
   tKey,
   value,
   sub,

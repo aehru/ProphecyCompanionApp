@@ -10,6 +10,7 @@ import DsDialog from '@/components/ui/ds-dialog';
 import Icon, { type IconName } from '@/components/ui/icon';
 import { useProphecyTheme } from '@/hooks/use-prophecy-theme';
 import type { ExportIntent } from '@/lib/character-transfer';
+import { plural } from '@/lib/plural';
 
 const CHOICES: { intent: ExportIntent; icon: IconName; title: string; body: string }[] = [
   {
@@ -45,7 +46,7 @@ export default function ExportIntentDialog({
     <DsDialog
       visible={visible}
       onDismiss={onDismiss}
-      title={`Exporter ${count} personnage${count > 1 ? 's' : ''}`}
+      title={`Exporter ${count} ${plural(count, 'personnage')}`}
       // The two rows ARE the confirming actions — only the way out belongs here.
       dismiss={<Button onPress={onDismiss}>Annuler</Button>}>
       {CHOICES.map((c) => (
